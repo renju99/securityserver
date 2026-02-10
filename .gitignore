@@ -1,0 +1,60 @@
+
+# System and Tools
+.ssh/
+.cache/
+.npm/
+.config/
+.local/
+.profile
+.sudo_as_admin_successful
+.bash_history
+.bash_logout
+.bashrc
+.lesshst
+.wget-hsts
+.dbshell
+.env
+.DS_Store
+
+# Programming Specific & IDEs
+.kotlin/
+.gradle/
+.antigravity-server/
+.cursor-server/
+.cursor/
+.gemini/
+.icon_processor/
+.android/
+__pycache__/
+node_modules/
+dist/
+build/
+.idea/
+.vscode/
+
+# Large binaries and logs
+*.jks
+*.keystore
+*.tar.gz
+*.zip
+*.log
+*.jar
+*.apk
+*.aab
+*.war
+*.hprof
+*.orig
+*.bak
+*.swp
+*.class
+*.exe
+*.dll
+*.so
+
+# Uploads and temporary files
+vendor-registration/uploads.backup.*
+vendor-registration/uploads.*
+
+# Android SDK
+Android/
+.git/

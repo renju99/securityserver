@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Logs
+*.log
+nginx-logs/
+*.log.*
+
+# Sensitive files
+cloudflared-credentials.json
+*.key
+*.pem
+*.crt
+
+# Environment files
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Uploads (if you don't want to track uploaded files)
+uploads/*.pdf
+uploads/*.jpg
+uploads/*.png
+
+# Data files (if sensitive)
+data/submissions.json
+
+# Temporary files
+*.tmp
+*.temp
+
