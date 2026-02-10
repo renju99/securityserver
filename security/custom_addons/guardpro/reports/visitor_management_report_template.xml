@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Visitor Management PDF Report Template -->
+    <template id="visitor_management_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h2>Visitor Pass / Badge</h2>
+                                <h4 t-field="o.site_id.name"/>
+                            </div>
+                        </div>
+
+                        <!-- Visitor Photo -->
+                        <div class="row mb-3" t-if="o.visitor_photo">
+                            <div class="col-12 text-center">
+                                <img t-att-src="image_data_uri(o.visitor_photo)" 
+                                     style="max-height: 200px; max-width: 200px; border: 2px solid #ccc;"/>
+                            </div>
+                        </div>
+
+                        <!-- Visitor Details -->
+                        <div class="row">
+                            <div class="col-6">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td><strong>Visitor Name:</strong></td>
+                                        <td><span t-field="o.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Visitor Type:</strong></td>
+                                        <td>
+                                            <span t-field="o.visitor_type"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>ID Type:</strong></td>
+                                        <td><span t-field="o.id_type"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>ID Number:</strong></td>
+                                        <td><span t-esc="o.id_number"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Contact:</strong></td>
+                                        <td><span t-esc="o.mobile_number"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Email:</strong></td>
+                                        <td><span t-esc="o.email"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td><strong>Visit Date:</strong></td>
+                                        <td><span t-field="o.visit_date"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Check-in Time:</strong></td>
+                                        <td><span t-field="o.checkin_time"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Check-out Time:</strong></td>
+                                        <td><span t-field="o.checkout_time"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Host:</strong></td>
+                                        <td><span t-esc="o.host_name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Department:</strong></td>
+                                        <td><span t-esc="o.host_department"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Badge Number:</strong></td>
+                                        <td><span t-esc="o.badge_number"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Purpose of Visit -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <strong>Purpose of Visit:</strong>
+                                <p>
+                                    <span t-field="o.visit_purpose"/>
+                                    <span t-if="o.purpose_details">
+                                        <br/><span t-esc="o.purpose_details"/>
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- QR Code -->
+                        <div class="row mt-3" t-if="o.qr_image">
+                            <div class="col-12 text-center">
+                                <strong>Visitor QR Code:</strong><br/>
+                                <img t-att-src="image_data_uri(o.qr_image)" 
+                                     style="max-height: 150px; max-width: 150px;"/>
+                                <p class="text-muted small">Scan to verify visitor</p>
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <strong>Status:</strong>
+                                <t t-if="o.state == 'pre_registered'">
+                                    <span class="badge bg-info">Pre-Registered</span>
+                                </t>
+                                <t t-elif="o.state == 'checked_in'">
+                                    <span class="badge bg-success">Checked In</span>
+                                </t>
+                                <t t-elif="o.state == 'checked_out'">
+                                    <span class="badge bg-secondary">Checked Out</span>
+                                </t>
+                                <t t-elif="o.state == 'denied'">
+                                    <span class="badge bg-danger">Access Denied</span>
+                                </t>
+                                <t t-elif="o.state == 'cancelled'">
+                                    <span class="badge bg-warning">Cancelled</span>
+                                </t>
+                                <t t-elif="o.state == 'expired'">
+                                    <span class="badge bg-dark">Expired</span>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Security Check -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td><strong>Watchlist Check:</strong></td>
+                                        <td>
+                                            <t t-if="o.watchlist_hit">
+                                                <span class="badge bg-danger">FLAGGED</span>
+                                            </t>
+                                            <t t-elif="o.watchlist_checked">
+                                                <span class="badge bg-success">Clear</span>
+                                            </t>
+                                            <t t-else="">
+                                                <span class="badge bg-warning">Not Checked</span>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="o.watchlist_notes">
+                                        <td><strong>Watchlist Notes:</strong></td>
+                                        <td><span t-esc="o.watchlist_notes"/></td>
+                                    </tr>
+                                    <tr t-if="o.notes">
+                                        <td><strong>Notes:</strong></td>
+                                        <td><span t-esc="o.notes"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="row mt-5">
+                            <div class="col-12 text-center text-muted">
+                                <small>
+                                    This visitor pass is property of <span t-field="o.site_id.name"/>
+                                    <br/>
+                                    Please return to security upon exit
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Definition -->
+    <record id="action_report_visitor_management" model="ir.actions.report">
+        <field name="name">Visitor Pass</field>
+        <field name="model">visitor.management</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.visitor_management_report_template</field>
+        <field name="report_file">guardpro.visitor_management_report_template</field>
+        <field name="binding_model_id" ref="model_visitor_management"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Visitor_Pass_%s' % (object.name)</field>
+    </record>
+</odoo>
+

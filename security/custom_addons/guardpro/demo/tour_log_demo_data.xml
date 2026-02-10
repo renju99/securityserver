@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="tour_log_001" model="tour.log">
+            <field name="shift_id" ref="shift_ts_past_1"/>
+            <field name="tour_id" ref="tour_ts_full_patrol"/>
+            <field name="guard_id" ref="guard_john_smith"/>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="start_time">2025-10-08 09:00:00</field>
+            <field name="end_time">2025-10-08 10:30:00</field>
+            <field name="status">completed</field>
+        </record>
+    </data>
+</odoo>

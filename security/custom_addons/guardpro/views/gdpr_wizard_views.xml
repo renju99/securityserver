@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- GDPR Data Export Wizard -->
+    <record id="view_gdpr_data_export_wizard_form" model="ir.ui.view">
+        <field name="name">gdpr.data.export.wizard.form</field>
+        <field name="model">gdpr.data.export.wizard</field>
+        <field name="arch" type="xml">
+            <form string="GDPR Data Export">
+                <group>
+                    <field name="guard_id" options="{'no_create': True}"/>
+                    <field name="export_format" widget="radio"/>
+                </group>
+                
+                <group string="Data to Include">
+                    <field name="include_shifts"/>
+                    <field name="include_attendance"/>
+                    <field name="include_incidents"/>
+                    <field name="include_feedback"/>
+                    <field name="include_location"/>
+                </group>
+                
+                <group invisible="not export_file">
+                    <field name="export_file" filename="export_filename"/>
+                    <field name="export_filename" invisible="1"/>
+                </group>
+                
+                <footer>
+                    <button name="action_export" string="Export Data" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- GDPR Anonymization Wizard -->
+    <record id="view_gdpr_anonymization_wizard_form" model="ir.ui.view">
+        <field name="name">gdpr.anonymization.wizard.form</field>
+        <field name="model">gdpr.anonymization.wizard</field>
+        <field name="arch" type="xml">
+            <form string="GDPR Data Anonymization">
+                <div class="alert alert-danger" role="alert">
+                    <strong>Warning:</strong> This action cannot be undone! Personal data will be permanently anonymized.
+                </div>
+                
+                <group>
+                    <field name="guard_id" options="{'no_create': True}" 
+                           domain="[('status', '=', 'terminated')]"/>
+                </group>
+                
+                <group string="Anonymization Options">
+                    <field name="anonymize_personal_info"/>
+                    <field name="anonymize_contact_info"/>
+                    <field name="delete_location_history"/>
+                </group>
+                
+                <group>
+                    <field name="confirmation"/>
+                </group>
+                
+                <footer>
+                    <button name="action_anonymize" string="Anonymize Data" 
+                            type="object" class="btn-danger" 
+                            confirm="This action cannot be undone. Are you absolutely sure?"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_gdpr_data_export" model="ir.actions.act_window">
+        <field name="name">GDPR Data Export</field>
+        <field name="res_model">gdpr.data.export.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="action_gdpr_anonymization" model="ir.actions.act_window">
+        <field name="name">GDPR Data Anonymization</field>
+        <field name="res_model">gdpr.anonymization.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>
+

@@ -1,0 +1,2384 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Guard Portal Home Page -->
+    <template id="guard_portal_home" name="Guard Portal Home">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">GuardPro Dashboard</t>
+            </t>
+            
+            <!-- Enhanced Navigation Header -->
+            <div class="container mt-3">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-shield me-2"/>GuardPro Dashboard
+                                    </h5>
+                                    <div class="btn-group" role="group">
+                                        <a href="/guardpro/pwa/" class="btn btn-light btn-sm">
+                                            <i class="fa fa-mobile me-1"/>Mobile View
+                                        </a>
+                                        <a href="/my/shifts" class="btn btn-outline-light btn-sm">
+                                            <i class="fa fa-calendar me-1"/>My Shifts
+                                        </a>
+                                        <a href="/my/incidents" class="btn btn-outline-light btn-sm">
+                                            <i class="fa fa-exclamation-triangle me-1"/>Incidents
+                                        </a>
+                                        <a href="/my/tours" class="btn btn-outline-light btn-sm">
+                                            <i class="fa fa-map-signs me-1"/>Tours
+                                        </a>
+                                        <a href="/my/attendance" class="btn btn-outline-light btn-sm">
+                                            <i class="fa fa-clock-o me-1"/>Attendance
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="container mt-3">
+                <!-- Guard Profile Card -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <t t-if="guard_profile.photo">
+                                        <img t-att-src="image_data_uri(guard_profile.photo)" 
+                                             class="rounded-circle me-3" 
+                                             style="width: 64px; height: 64px; object-fit: cover;" 
+                                             alt="Profile"/>
+                                    </t>
+                                    <t t-elif="guard_profile.user_id.image_1920">
+                                        <img t-att-src="image_data_uri(guard_profile.user_id.image_1920)" 
+                                             class="rounded-circle me-3" 
+                                             style="width: 64px; height: 64px; object-fit: cover;" 
+                                             alt="Profile"/>
+                                    </t>
+                                    <t t-else="">
+                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" 
+                                             style="width: 64px; height: 64px;">
+                                            <i class="fa fa-user fa-2x"/>
+                                        </div>
+                                    </t>
+                                    <div>
+                                        <h4 class="mb-1" t-esc="guard_profile.name"/>
+                                        <p class="mb-0 text-muted">
+                                            Badge: <span t-esc="guard_profile.badge_number"/>
+                                            <t t-if="guard_profile.status"> - <span t-esc="guard_profile.status.replace('_', ' ').title()"/></t>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-3">
+                        <div class="card text-white bg-primary">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title mb-0">Active Shifts</h6>
+                                        <h2 class="mb-0" t-esc="guard_active_shifts_count or 0"/>
+                                    </div>
+                                    <i class="fa fa-calendar-check-o fa-3x opacity-50"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card text-white bg-warning">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title mb-0">Pending Incidents</h6>
+                                        <h2 class="mb-0" t-esc="guard_pending_incidents_count or 0"/>
+                                    </div>
+                                    <i class="fa fa-exclamation-triangle fa-3x opacity-50"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card text-white bg-success">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title mb-0">Active Tours</h6>
+                                        <h2 class="mb-0" t-esc="guard_active_tours_count or 0"/>
+                                    </div>
+                                    <i class="fa fa-map-signs fa-3x opacity-50"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Today's Shifts -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-clock-o me-2"/>Today's Shifts
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="today_shifts">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Site</th>
+                                                    <th>Start Time</th>
+                                                    <th>End Time</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="today_shifts" t-as="shift">
+                                                    <tr>
+                                                        <td>
+                                                            <strong t-esc="shift.site_id.name"/>
+                                                            <br/>
+                                                            <small class="text-muted" t-esc="shift.site_id.address"/>
+                                                        </td>
+                                                        <td t-esc="shift._display_start_datetime"/>
+                                                        <td t-esc="shift._display_end_datetime"/>
+                                                        <td>
+                                                            <span t-att-class="'badge bg-' + ('success' if shift.status == 'completed' else 'primary' if shift.status == 'in_progress' else 'warning' if shift.status == 'confirmed' else 'secondary')" 
+                                                                  t-esc="shift.status.replace('_', ' ').title()"/>
+                                                        </td>
+                                                        <td>
+                                                            <div class="btn-group" role="group">
+                                                                <a t-attf-href="/my/shifts/#{shift.id}" class="btn btn-sm btn-primary">
+                                                                    <i class="fa fa-eye" title="View" aria-label="View"/> View
+                                                                </a>
+                                                                <t t-if="shift.status in ['confirmed', 'scheduled'] and not shift.checkin_time">
+                                                                    <a href="#" t-attf-onclick="dashboardCheckin(#{shift.id}); return false;" class="btn btn-sm btn-success">
+                                                                        <i class="fa fa-sign-in"/> Check In
+                                                                    </a>
+                                                                </t>
+                                                                <t t-if="shift.status == 'in_progress' and shift.checkin_time and not shift.checkout_time">
+                                                                    <a href="#" t-attf-onclick="dashboardCheckout(#{shift.id}); return false;" class="btn btn-sm btn-danger">
+                                                                        <i class="fa fa-sign-out"/> Check Out
+                                                                    </a>
+                                                                </t>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="alert alert-info mb-0">
+                                        <i class="fa fa-info-circle me-2"/>No shifts scheduled for today.
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Incidents -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-exclamation-circle me-2"/>Recent Incidents
+                                </h5>
+                                <a href="/my/incidents" class="btn btn-sm btn-outline-primary">
+                                    View All
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="recent_incidents">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Reference</th>
+                                                    <th>Category</th>
+                                                    <th>Date</th>
+                                                    <th>Priority</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="recent_incidents" t-as="incident">
+                                                    <tr>
+                                                        <td>
+                                                            <strong t-esc="incident.name"/>
+                                                        </td>
+                                                        <td t-esc="incident.category_id.name"/>
+                                                        <td t-esc="incident.incident_datetime.strftime('%Y-%m-%d %I:%M %p')"/>
+                                                        <td>
+                                                            <span t-att-class="'badge bg-' + ('danger' if incident.priority == 'critical' else 'warning' if incident.priority == 'high' else 'info' if incident.priority == 'medium' else 'secondary')" 
+                                                                  t-esc="incident.priority.title()"/>
+                                                        </td>
+                                                        <td>
+                                                            <span t-att-class="'badge bg-' + ('success' if incident.status == 'resolved' else 'primary' if incident.status == 'under_review' else 'secondary')" 
+                                                                  t-esc="incident.status.replace('_', ' ').title()"/>
+                                                        </td>
+                                                        <td>
+                                                            <a t-attf-href="/my/incidents/#{incident.id}" class="btn btn-sm btn-primary">
+                                                                <i class="fa fa-eye" title="View" aria-label="View"/> View
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="alert alert-success mb-0">
+                                        <i class="fa fa-check-circle me-2"/>No recent incidents reported.
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Active Tours -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-map-signs me-2"/>Active Tours
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="active_tours">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Tour</th>
+                                                    <th>Started</th>
+                                                    <th>Checkpoints</th>
+                                                    <th>Progress</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="active_tours" t-as="tour">
+                                                    <tr>
+                                                        <td>
+                                                            <strong t-esc="tour.tour_id.name"/>
+                                                        </td>
+                                                        <td t-esc="tour.start_datetime.strftime('%I:%M %p')"/>
+                                                        <td>
+                                                            <span t-esc="tour.completed_checkpoints"/>/<span t-esc="tour.total_checkpoints"/>
+                                                        </td>
+                                                        <td>
+                                                            <div class="progress" style="height: 20px;">
+                                                                <div class="progress-bar" 
+                                                                     role="progressbar" 
+                                                                     t-att-style="'width: ' + str(tour.completion_percentage) + '%'"
+                                                                     t-att-aria-valuenow="tour.completion_percentage" 
+                                                                     aria-valuemin="0" 
+                                                                     aria-valuemax="100">
+                                                                    <span t-esc="int(tour.completion_percentage)"/>%
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <a t-attf-href="/my/tours/#{tour.id}" class="btn btn-sm btn-success">
+                                                                <i class="fa fa-play"/> Continue
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="alert alert-info mb-0">
+                                        <i class="fa fa-info-circle me-2"/>No active tours in progress.
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-bolt me-2"/>Quick Actions
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex flex-wrap gap-2">
+                                    <a href="/guardpro/pwa/" class="btn btn-primary">
+                                        <i class="fa fa-mobile"/> Mobile Dashboard
+                                    </a>
+                                    <a href="/my/shifts" class="btn btn-outline-primary">
+                                        <i class="fa fa-calendar" title="Date" aria-label="Date"/> My Shifts
+                                    </a>
+                                    <a href="/my/incidents/new" class="btn btn-outline-warning">
+                                        <i class="fa fa-plus"/> Report Incident
+                                    </a>
+                                    <a href="/my/tours" class="btn btn-outline-success">
+                                        <i class="fa fa-map-signs" title="Route" aria-label="Route"/> My Tours
+                                    </a>
+                                    <a href="/my/attendance" class="btn btn-outline-info">
+                                        <i class="fa fa-clock-o" title="Time" aria-label="Time"/> Attendance
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Floating Action Button -->
+            <div class="position-fixed" style="bottom: 20px; right: 20px; z-index: 1000;">
+                <div class="btn-group-vertical" role="group">
+                    <a href="/my/incidents/new" class="btn btn-danger btn-lg rounded-circle mb-2" 
+                       style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;"
+                       title="Report Emergency Incident">
+                        <i class="fa fa-plus fa-lg"/>
+                    </a>
+                    <a href="/guardpro/pwa/" class="btn btn-primary btn-lg rounded-circle mb-2" 
+                       style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;"
+                       title="Mobile Dashboard">
+                        <i class="fa fa-mobile fa-lg"/>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- JavaScript for Dashboard Check In/Out -->
+            <script type="text/javascript">
+                async function dashboardCheckin(shiftId) {
+                    if (!confirm('Do you want to check in for this shift?')) return;
+                    
+                    try {
+                        // Get user's location
+                        let latitude = null;
+                        let longitude = null;
+                        
+                        if (navigator.geolocation) {
+                            try {
+                                const position = await new Promise((resolve, reject) => {
+                                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                                        enableHighAccuracy: true,
+                                        timeout: 10000,
+                                        maximumAge: 0
+                                    });
+                                });
+                                latitude = position.coords.latitude;
+                                longitude = position.coords.longitude;
+                            } catch (geoError) {
+                                console.warn('Could not get location:', geoError);
+                            }
+                        }
+                        
+                        // Call check-in API
+                        const response = await fetch('/guardpro/api/shift/checkin', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                jsonrpc: '2.0',
+                                method: 'call',
+                                params: {
+                                    shift_id: shiftId,
+                                    latitude: latitude,
+                                    longitude: longitude
+                                }
+                            })
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.result &amp;&amp; (result.result.success || !result.result.error)) {
+                            alert('Successfully checked in!');
+                            location.reload();
+                        } else {
+                            alert('Check-in failed: ' + (result.result?.error || result.result?.message || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Check-in error:', error);
+                        alert('Check-in failed: ' + error.message);
+                    }
+                }
+                
+                async function dashboardCheckout(shiftId) {
+                    if (!confirm('Do you want to check out from this shift?')) return;
+                    
+                    try {
+                        // Get user's location
+                        let latitude = null;
+                        let longitude = null;
+                        
+                        if (navigator.geolocation) {
+                            try {
+                                const position = await new Promise((resolve, reject) => {
+                                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                                        enableHighAccuracy: true,
+                                        timeout: 10000,
+                                        maximumAge: 0
+                                    });
+                                });
+                                latitude = position.coords.latitude;
+                                longitude = position.coords.longitude;
+                            } catch (geoError) {
+                                console.warn('Could not get location:', geoError);
+                            }
+                        }
+                        
+                        // Call check-out API
+                        const response = await fetch('/guardpro/api/shift/checkout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                jsonrpc: '2.0',
+                                method: 'call',
+                                params: {
+                                    shift_id: shiftId,
+                                    latitude: latitude,
+                                    longitude: longitude
+                                }
+                            })
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.result &amp;&amp; (result.result.success || !result.result.error)) {
+                            alert('Successfully checked out!');
+                            location.reload();
+                        } else {
+                            alert('Check-out failed: ' + (result.result?.error || result.result?.message || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Check-out error:', error);
+                        alert('Check-out failed: ' + error.message);
+                    }
+                }
+            </script>
+        </t>
+    </template>
+    
+    <!-- My Shifts List -->
+    <template id="portal_my_shifts" name="My Shifts">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">My Shifts</t>
+            </t>
+            
+            <!-- Enhanced Navigation Header -->
+            <div class="container mt-3">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-calendar me-2"/>My Shifts
+                                    </h5>
+                                    <div class="btn-group" role="group">
+                                        <a href="/guardpro/mobile" class="btn btn-light btn-sm">
+                                            <i class="fa fa-mobile me-1"/>Mobile
+                                        </a>
+                                        <a href="/my/incidents" class="btn btn-outline-light btn-sm">
+                                            <i class="fa fa-exclamation-triangle me-1"/>Incidents
+                                        </a>
+                                        <a href="/my/tours" class="btn btn-outline-light btn-sm">
+                                            <i class="fa fa-map-signs me-1"/>Tours
+                                        </a>
+                                        <a href="/my/attendance" class="btn btn-outline-light btn-sm">
+                                            <i class="fa fa-clock-o me-1"/>Attendance
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="container mt-3">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-calendar me-2"/>My Shifts Schedule
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="shifts">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Site</th>
+                                                    <th>Start</th>
+                                                    <th>End</th>
+                                                    <th>Duration</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="shifts" t-as="shift">
+                                                    <tr>
+                                                        <td>
+                                                            <strong t-esc="shift.site_id.name"/>
+                                                            <br/>
+                                                            <small class="text-muted" t-esc="shift.site_id.address"/>
+                                                        </td>
+                                                        <td t-esc="shift._display_start_datetime_full"/>
+                                                        <td t-esc="shift._display_end_datetime_full"/>
+                                                        <td t-esc="'%.1f hours' % ((shift.end_datetime - shift.start_datetime).total_seconds() / 3600)"/>
+                                                        <td>
+                                                            <span t-att-class="'badge bg-' + ('success' if shift.status == 'completed' else 'primary' if shift.status == 'in_progress' else 'warning' if shift.status == 'confirmed' else 'secondary')" 
+                                                                  t-esc="shift.status.replace('_', ' ').title()"/>
+                                                        </td>
+                                                        <td>
+                                                            <div class="btn-group" role="group">
+                                                                <a t-attf-href="/my/shifts/#{shift.id}" class="btn btn-sm btn-primary">
+                                                                    <i class="fa fa-eye" title="View" aria-label="View"/> View
+                                                                </a>
+                                                                <t t-if="shift.status in ['confirmed', 'scheduled'] and not shift.checkin_time">
+                                                                    <a href="#" t-attf-onclick="quickCheckin(#{shift.id}); return false;" class="btn btn-sm btn-success">
+                                                                        <i class="fa fa-sign-in"/> Check In
+                                                                    </a>
+                                                                </t>
+                                                                <t t-if="shift.status == 'in_progress' and shift.checkin_time and not shift.checkout_time">
+                                                                    <a href="#" t-attf-onclick="quickCheckout(#{shift.id}); return false;" class="btn btn-sm btn-danger">
+                                                                        <i class="fa fa-sign-out"/> Check Out
+                                                                    </a>
+                                                                </t>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-info-circle me-2"/>No shifts found.
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Back Button -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <a href="/guardpro/mobile" class="btn btn-secondary">
+                            <i class="fa fa-arrow-left me-2"/>Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- JavaScript for Quick Check In/Out -->
+            <script type="text/javascript">
+                async function quickCheckin(shiftId) {
+                    if (!confirm('Do you want to check in for this shift?')) return;
+                    
+                    try {
+                        // Get user's location
+                        let latitude = null;
+                        let longitude = null;
+                        
+                        if (navigator.geolocation) {
+                            try {
+                                const position = await new Promise((resolve, reject) => {
+                                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                                        enableHighAccuracy: true,
+                                        timeout: 10000,
+                                        maximumAge: 0
+                                    });
+                                });
+                                latitude = position.coords.latitude;
+                                longitude = position.coords.longitude;
+                            } catch (geoError) {
+                                console.warn('Could not get location:', geoError);
+                            }
+                        }
+                        
+                        // Call check-in API
+                        const response = await fetch('/guardpro/api/shift/checkin', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                jsonrpc: '2.0',
+                                method: 'call',
+                                params: {
+                                    shift_id: shiftId,
+                                    latitude: latitude,
+                                    longitude: longitude
+                                }
+                            })
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.result &amp;&amp; (result.result.success || !result.result.error)) {
+                            alert('Successfully checked in!');
+                            location.reload();
+                        } else {
+                            alert('Check-in failed: ' + (result.result?.error || result.result?.message || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Check-in error:', error);
+                        alert('Check-in failed: ' + error.message);
+                    }
+                }
+                
+                async function quickCheckout(shiftId) {
+                    if (!confirm('Do you want to check out from this shift?')) return;
+                    
+                    try {
+                        // Get user's location
+                        let latitude = null;
+                        let longitude = null;
+                        
+                        if (navigator.geolocation) {
+                            try {
+                                const position = await new Promise((resolve, reject) => {
+                                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                                        enableHighAccuracy: true,
+                                        timeout: 10000,
+                                        maximumAge: 0
+                                    });
+                                });
+                                latitude = position.coords.latitude;
+                                longitude = position.coords.longitude;
+                            } catch (geoError) {
+                                console.warn('Could not get location:', geoError);
+                            }
+                        }
+                        
+                        // Call check-out API
+                        const response = await fetch('/guardpro/api/shift/checkout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                jsonrpc: '2.0',
+                                method: 'call',
+                                params: {
+                                    shift_id: shiftId,
+                                    latitude: latitude,
+                                    longitude: longitude
+                                }
+                            })
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.result &amp;&amp; (result.result.success || !result.result.error)) {
+                            alert('Successfully checked out!');
+                            location.reload();
+                        } else {
+                            alert('Check-out failed: ' + (result.result?.error || result.result?.message || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Check-out error:', error);
+                        alert('Check-out failed: ' + error.message);
+                    }
+                }
+            </script>
+        </t>
+    </template>
+    
+    <!-- Shift Detail -->
+    <template id="portal_shift_detail" name="Shift Detail">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-4">
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <a href="/my/shifts" class="btn btn-sm btn-secondary">
+                            <i class="fa fa-arrow-left"/> Back to Shifts
+                        </a>
+                    </div>
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Shift Details</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <h6>Site Information</h6>
+                                        <p><strong t-esc="shift.site_id.name"/></p>
+                                        <p class="text-muted" t-esc="shift.site_id.address"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Status</h6>
+                                        <p>
+                                            <span t-att-class="'badge bg-' + ('success' if shift.status == 'completed' else 'primary' if shift.status == 'in_progress' else 'warning' if shift.status == 'confirmed' else 'secondary')" 
+                                                  t-esc="shift.status.replace('_', ' ').title()"/>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <h6>Start Time</h6>
+                                        <p t-esc="shift._display_start_datetime_full"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>End Time</h6>
+                                        <p t-esc="shift._display_end_datetime_full"/>
+                                    </div>
+                                </div>
+                                
+                                <!-- Check In/Out Status -->
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <h6>Check In</h6>
+                                        <p t-if="shift.checkin_time" t-esc="shift._display_checkin_time"/>
+                                        <p t-else="" class="text-muted">Not checked in</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Check Out</h6>
+                                        <p t-if="shift.checkout_time" t-esc="shift._display_checkout_time"/>
+                                        <p t-else="" class="text-muted">Not checked out</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Check In/Out Actions -->
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <div class="d-flex gap-2">
+                                            <t t-if="shift.status in ['confirmed', 'scheduled'] and not shift.checkin_time">
+                                                <button class="btn btn-success" onclick="handleShiftCheckin()" id="btn-shift-checkin">
+                                                    <i class="fa fa-sign-in"/> Check In
+                                                </button>
+                                            </t>
+                                            <t t-if="shift.status == 'in_progress' and shift.checkin_time and not shift.checkout_time">
+                                                <button class="btn btn-danger" onclick="handleShiftCheckout()" id="btn-shift-checkout">
+                                                    <i class="fa fa-sign-out"/> Check Out
+                                                </button>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <t t-if="shift.notes">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h6>Notes</h6>
+                                            <p t-esc="shift.notes"/>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Add JavaScript for Check In/Out functionality -->
+            <script type="text/javascript">
+                async function handleShiftCheckin() {
+                    const btn = document.getElementById('btn-shift-checkin');
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Checking In...';
+                    
+                    try {
+                        // Get user's location
+                        let latitude = null;
+                        let longitude = null;
+                        
+                        if (navigator.geolocation) {
+                            try {
+                                const position = await new Promise((resolve, reject) => {
+                                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                                        enableHighAccuracy: true,
+                                        timeout: 10000,
+                                        maximumAge: 0
+                                    });
+                                });
+                                latitude = position.coords.latitude;
+                                longitude = position.coords.longitude;
+                            } catch (geoError) {
+                                console.warn('Could not get location:', geoError);
+                            }
+                        }
+                        
+                        // Call check-in API
+                        const response = await fetch('/guardpro/api/shift/checkin', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                jsonrpc: '2.0',
+                                method: 'call',
+                                params: {
+                                    shift_id: <t t-esc="shift.id"/>,
+                                    latitude: latitude,
+                                    longitude: longitude
+                                }
+                            })
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.result &amp;&amp; (result.result.success || !result.result.error)) {
+                            alert('Successfully checked in!');
+                            location.reload();
+                        } else {
+                            alert('Check-in failed: ' + (result.result?.error || result.result?.message || 'Unknown error'));
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fa fa-sign-in"></i> Check In';
+                        }
+                    } catch (error) {
+                        console.error('Check-in error:', error);
+                        alert('Check-in failed: ' + error.message);
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa fa-sign-in"></i> Check In';
+                    }
+                }
+                
+                async function handleShiftCheckout() {
+                    const btn = document.getElementById('btn-shift-checkout');
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Checking Out...';
+                    
+                    try {
+                        // Get user's location
+                        let latitude = null;
+                        let longitude = null;
+                        
+                        if (navigator.geolocation) {
+                            try {
+                                const position = await new Promise((resolve, reject) => {
+                                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                                        enableHighAccuracy: true,
+                                        timeout: 10000,
+                                        maximumAge: 0
+                                    });
+                                });
+                                latitude = position.coords.latitude;
+                                longitude = position.coords.longitude;
+                            } catch (geoError) {
+                                console.warn('Could not get location:', geoError);
+                            }
+                        }
+                        
+                        // Call check-out API
+                        const response = await fetch('/guardpro/api/shift/checkout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                jsonrpc: '2.0',
+                                method: 'call',
+                                params: {
+                                    shift_id: <t t-esc="shift.id"/>,
+                                    latitude: latitude,
+                                    longitude: longitude
+                                }
+                            })
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.result &amp;&amp; (result.result.success || !result.result.error)) {
+                            alert('Successfully checked out!');
+                            location.reload();
+                        } else {
+                            alert('Check-out failed: ' + (result.result?.error || result.result?.message || 'Unknown error'));
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fa fa-sign-out"></i> Check Out';
+                        }
+                    } catch (error) {
+                        console.error('Check-out error:', error);
+                        alert('Check-out failed: ' + error.message);
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa fa-sign-out"></i> Check Out';
+                    }
+                }
+            </script>
+        </t>
+    </template>
+    
+    <!-- My Incidents List -->
+    <template id="portal_my_incidents" name="My Incidents">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">My Incident Reports</t>
+            </t>
+            
+            <!-- Enhanced Navigation Header -->
+            <div class="container mt-3">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-warning">
+                            <div class="card-header bg-warning text-dark">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-exclamation-triangle me-2"/>My Incidents
+                                    </h5>
+                                    <div class="btn-group" role="group">
+                                        <a href="/guardpro/mobile" class="btn btn-light btn-sm">
+                                            <i class="fa fa-mobile me-1"/>Mobile
+                                        </a>
+                                        <a href="/my/shifts" class="btn btn-outline-light btn-sm">
+                                            <i class="fa fa-calendar me-1"/>Shifts
+                                        </a>
+                                        <a href="/my/tours" class="btn btn-outline-light btn-sm">
+                                            <i class="fa fa-map-signs me-1"/>Tours
+                                        </a>
+                                        <a href="/my/attendance" class="btn btn-outline-light btn-sm">
+                                            <i class="fa fa-clock-o me-1"/>Attendance
+                                        </a>
+                                        <a href="/my/incidents/new" class="btn btn-danger btn-sm">
+                                            <i class="fa fa-plus me-1"/>Report Incident
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="container mt-3">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-exclamation-circle me-2"/>Incident Reports
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="incidents">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Reference</th>
+                                                    <th>Category</th>
+                                                    <th>Date &amp; Time</th>
+                                                    <th>Priority</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="incidents" t-as="incident">
+                                                    <tr>
+                                                        <td><strong t-esc="incident.name"/></td>
+                                                        <td t-esc="incident.category_id.name"/>
+                                                        <td t-esc="incident.incident_datetime.strftime('%Y-%m-%d %I:%M %p')"/>
+                                                        <td>
+                                                            <span t-att-class="'badge bg-' + ('danger' if incident.priority == 'critical' else 'warning' if incident.priority == 'high' else 'info' if incident.priority == 'medium' else 'secondary')" 
+                                                                  t-esc="incident.priority.title()"/>
+                                                        </td>
+                                                        <td>
+                                                            <span t-att-class="'badge bg-' + ('success' if incident.status == 'resolved' else 'primary' if incident.status == 'under_review' else 'secondary')" 
+                                                                  t-esc="incident.status.replace('_', ' ').title()"/>
+                                                        </td>
+                                                        <td>
+                                                            <a t-attf-href="/my/incidents/#{incident.id}" class="btn btn-sm btn-primary">
+                                                                <i class="fa fa-eye" title="View" aria-label="View"/> View Details
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="alert alert-success">
+                                        <i class="fa fa-check-circle me-2"/>No incident reports found.
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Back Button -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <a href="/guardpro/mobile" class="btn btn-secondary">
+                            <i class="fa fa-arrow-left me-2"/>Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    
+    <!-- Incident Detail -->
+    <template id="portal_incident_detail" name="Incident Detail">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-4">
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <a href="/my/incidents" class="btn btn-sm btn-secondary">
+                            <i class="fa fa-arrow-left"/> Back to Incidents
+                        </a>
+                    </div>
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Incident Report: <span t-esc="incident.name"/></h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <h6>Category</h6>
+                                        <p t-esc="incident.category_id.name"/>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6>Priority</h6>
+                                        <p>
+                                            <span t-att-class="'badge bg-' + ('danger' if incident.priority == 'critical' else 'warning' if incident.priority == 'high' else 'info' if incident.priority == 'medium' else 'secondary')" 
+                                                  t-esc="incident.priority.title()"/>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6>Status</h6>
+                                        <p>
+                                            <span t-att-class="'badge bg-' + ('success' if incident.status == 'resolved' else 'primary' if incident.status == 'under_review' else 'secondary')" 
+                                                  t-esc="incident.status.replace('_', ' ').title()"/>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <h6>Date &amp; Time</h6>
+                                        <p t-esc="incident.incident_datetime.strftime('%Y-%m-%d %I:%M %p')"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Location</h6>
+                                        <p t-esc="incident.location or 'Not specified'"/>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <h6>Description</h6>
+                                        <p t-esc="incident.description or 'No description provided'"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    
+    <!-- My Tours List -->
+    <template id="portal_my_tours" name="My Tours">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">My Tours</t>
+            </t>
+            
+            <!-- Enhanced Navigation Header -->
+            <div class="container mt-3">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-success">
+                            <div class="card-header bg-success text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-map-signs me-2"/>My Tours
+                                    </h5>
+                                    <div class="btn-group" role="group">
+                                        <a href="/guardpro/mobile" class="btn btn-light btn-sm">
+                                            <i class="fa fa-mobile me-1"/>Mobile
+                                        </a>
+                                        <a href="/my/shifts" class="btn btn-outline-light btn-sm">
+                                            <i class="fa fa-calendar me-1"/>Shifts
+                                        </a>
+                                        <a href="/my/incidents" class="btn btn-outline-light btn-sm">
+                                            <i class="fa fa-exclamation-triangle me-1"/>Incidents
+                                        </a>
+                                        <a href="/my/attendance" class="btn btn-outline-light btn-sm">
+                                            <i class="fa fa-clock-o me-1"/>Attendance
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="container mt-3">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-map-signs me-2"/>Security Tours
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="tours">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Tour</th>
+                                                    <th>Started</th>
+                                                    <th>Checkpoints</th>
+                                                    <th>Progress</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="tours" t-as="tour">
+                                                    <tr>
+                                                        <td><strong t-esc="tour.tour_id.name"/></td>
+                                                        <td t-esc="tour.start_datetime.strftime('%Y-%m-%d %I:%M %p') if tour.start_datetime else 'Not started'"/>
+                                                        <td>
+                                                            <span t-esc="tour.completed_checkpoints"/>/<span t-esc="tour.total_checkpoints"/>
+                                                        </td>
+                                                        <td>
+                                                            <div class="progress" style="height: 20px; min-width: 100px;">
+                                                                <div class="progress-bar" 
+                                                                     role="progressbar" 
+                                                                     t-att-style="'width: ' + str(tour.completion_percentage) + '%'"
+                                                                     t-att-aria-valuenow="tour.completion_percentage" 
+                                                                     aria-valuemin="0" 
+                                                                     aria-valuemax="100">
+                                                                    <span t-esc="int(tour.completion_percentage)"/>%
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <span t-att-class="'badge bg-' + ('success' if tour.status == 'completed' else 'primary' if tour.status == 'in_progress' else 'secondary')" 
+                                                                  t-esc="tour.status.replace('_', ' ').title()"/>
+                                                        </td>
+                                                        <td>
+                                                            <a t-attf-href="/my/tours/#{tour.id}" class="btn btn-sm btn-primary">
+                                                                <i class="fa fa-eye" title="View" aria-label="View"/> View Details
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-info-circle me-2"/>No tours found.
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Back Button -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <a href="/guardpro/mobile" class="btn btn-secondary">
+                            <i class="fa fa-arrow-left me-2"/>Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    
+    <!-- Tour Detail -->
+    <template id="portal_tour_detail" name="Tour Detail">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-4">
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <a href="/my/tours" class="btn btn-sm btn-secondary">
+                            <i class="fa fa-arrow-left"/> Back to Tours
+                        </a>
+                    </div>
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Tour: <span t-esc="tour.tour_id.name"/></h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <h6>Status</h6>
+                                        <p>
+                                            <span t-att-class="'badge bg-' + ('success' if tour.status == 'completed' else 'primary' if tour.status == 'in_progress' else 'secondary')" 
+                                                  t-esc="tour.status.replace('_', ' ').title()"/>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6>Completion</h6>
+                                        <p><span t-esc="tour.completed_checkpoints"/>/<span t-esc="tour.total_checkpoints"/> checkpoints (<span t-esc="int(tour.completion_percentage)"/>%)</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6>Started</h6>
+                                        <p t-esc="tour.start_datetime.strftime('%Y-%m-%d %I:%M %p') if tour.start_datetime else 'Not started'"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="progress" style="height: 30px;">
+                                            <div class="progress-bar" 
+                                                 role="progressbar" 
+                                                 t-att-style="'width: ' + str(tour.completion_percentage) + '%'"
+                                                 t-att-aria-valuenow="tour.completion_percentage" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
+                                                <strong><span t-esc="int(tour.completion_percentage)"/>% Complete</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    
+    <!-- My Attendance List -->
+    <template id="portal_my_attendance" name="My Attendance">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">My Attendance</t>
+            </t>
+            
+            <!-- Enhanced Navigation Header -->
+            <div class="container mt-3">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-clock-o me-2"/>My Attendance
+                                    </h5>
+                                    <div class="btn-group" role="group">
+                                        <a href="/guardpro/mobile" class="btn btn-light btn-sm">
+                                            <i class="fa fa-mobile me-1"/>Mobile
+                                        </a>
+                                        <a href="/my/shifts" class="btn btn-outline-light btn-sm">
+                                            <i class="fa fa-calendar me-1"/>Shifts
+                                        </a>
+                                        <a href="/my/incidents" class="btn btn-outline-light btn-sm">
+                                            <i class="fa fa-exclamation-triangle me-1"/>Incidents
+                                        </a>
+                                        <a href="/my/tours" class="btn btn-outline-light btn-sm">
+                                            <i class="fa fa-map-signs me-1"/>Tours
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="container mt-3">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-clock-o me-2"/>Attendance Records
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="attendances">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Check In</th>
+                                                    <th>Check Out</th>
+                                                    <th>Hours Worked</th>
+                                                    <th>Site</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="attendances" t-as="attendance">
+                                                    <tr>
+                                                        <td t-esc="attendance.checkin_time.strftime('%Y-%m-%d') if attendance.checkin_time else '-'"/>
+                                                        <td t-esc="attendance.checkin_time.strftime('%I:%M %p') if attendance.checkin_time else '-'"/>
+                                                        <td t-esc="attendance.checkout_time.strftime('%I:%M %p') if attendance.checkout_time else 'In Progress'"/>
+                                                        <td t-esc="'%.2f hours' % attendance.hours_worked if attendance.hours_worked else '-'"/>
+                                                        <td t-esc="attendance.site_id.name if attendance.site_id else '-'"/>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-info-circle me-2"/>No attendance records found.
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Back Button -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <a href="/guardpro/mobile" class="btn btn-secondary">
+                            <i class="fa fa-arrow-left me-2"/>Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    
+    <!-- Portal Not Guard Page -->
+    <!-- Access Denied Template - For non-guard users trying to access guard portal -->
+    <template id="portal_access_denied" name="Portal - Access Denied">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Access Denied</t>
+            </t>
+            
+            <div class="container mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card border-danger">
+                            <div class="card-body text-center py-5">
+                                <i class="fa fa-ban fa-5x text-danger mb-4"/>
+                                <h2 class="mb-3">Access Denied</h2>
+                                <p class="lead text-muted mb-4" t-esc="error_message or 'You do not have permission to access this page.'"/>
+                                <p class="text-muted">
+                                    The Sentry Portal is exclusively for users with the <strong>Guard</strong> role.
+                                </p>
+                                <p class="text-muted">
+                                    If you are a Supervisor, Manager, or Administrator, please use the backend interface to access GuardPro features.
+                                </p>
+                                <div class="mt-4">
+                                    <a href="/web" class="btn btn-primary me-2">
+                                        <i class="fa fa-tachometer-dashboard"/> Go to Backend
+                                    </a>
+                                    <a href="/my" class="btn btn-secondary">
+                                        <i class="fa fa-home"/> My Portal Home
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_not_guard" name="Portal - Not a Guard">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">GuardPro Access</t>
+            </t>
+            
+            <div class="container mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card border-warning">
+                            <div class="card-body text-center py-5">
+                                <i class="fa fa-shield fa-5x text-warning mb-4"/>
+                                <h2 class="mb-3">Access Restricted</h2>
+                                <p class="lead text-muted mb-4">
+                                    You do not have guard privileges to access the GuardPro portal.
+                                </p>
+                                <p class="text-muted">
+                                    The GuardPro portal is only accessible to users with an active guard profile.
+                                    If you believe you should have access, please contact your system administrator.
+                                </p>
+                                <div class="mt-4">
+                                    <a href="/my" class="btn btn-primary">
+                                        <i class="fa fa-home"/> Return to My Account
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    
+    <!-- New Incident Form -->
+    <template id="portal_new_incident" name="New Incident">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Report New Incident</t>
+            </t>
+            
+            <!-- Enhanced Navigation Header -->
+            <div class="container mt-3">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-danger">
+                            <div class="card-header bg-danger text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-plus me-2"/>Report New Incident
+                                    </h5>
+                                    <div class="btn-group" role="group">
+                                        <a href="/guardpro/mobile" class="btn btn-light btn-sm">
+                                            <i class="fa fa-mobile me-1"/>Mobile
+                                        </a>
+                                        <a href="/my/incidents" class="btn btn-warning btn-sm">
+                                            <i class="fa fa-arrow-left me-1"/>Back to Incidents
+                                        </a>
+                                        <a href="/my/shifts" class="btn btn-outline-light btn-sm">
+                                            <i class="fa fa-calendar me-1"/>Shifts
+                                        </a>
+                                        <a href="/my/tours" class="btn btn-outline-light btn-sm">
+                                            <i class="fa fa-map-signs me-1"/>Tours
+                                        </a>
+                                        <a href="/my/attendance" class="btn btn-outline-light btn-sm">
+                                            <i class="fa fa-clock-o me-1"/>Attendance
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="container mt-3">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-plus me-2"/>Report New Incident
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="error_message">
+                                    <div class="alert alert-danger">
+                                        <i class="fa fa-exclamation-triangle me-2"/>
+                                        <t t-esc="error_message"/>
+                                    </div>
+                                </t>
+                                
+                                <form method="post" action="/my/incidents/create" class="needs-validation" novalidate="">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="incident_datetime" class="form-label">Incident Date &amp; Time *</label>
+                                                <input type="datetime-local" class="form-control" id="incident_datetime" 
+                                                       name="incident_datetime" required=""/>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="category_id" class="form-label">Category *</label>
+                                                <select class="form-select" id="category_id" name="category_id" required="">
+                                                    <option value="">Select Category</option>
+                                                    <t t-foreach="categories" t-as="category">
+                                                        <option t-att-value="category.id" t-esc="category.name"/>
+                                                    </t>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="priority" class="form-label">Priority *</label>
+                                                <select class="form-select" id="priority" name="priority" required="">
+                                                    <option value="low">Low</option>
+                                                    <option value="medium" selected="">Medium</option>
+                                                    <option value="high">High</option>
+                                                    <option value="critical">Critical</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="location" class="form-label">Location</label>
+                                                <input type="text" class="form-control" id="location" name="location" 
+                                                       placeholder="Enter incident location"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label">Description *</label>
+                                        <textarea class="form-control" id="description" name="description" 
+                                                  rows="4" required="" placeholder="Describe the incident in detail..."></textarea>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between">
+                                        <a href="/my/incidents" class="btn btn-secondary">
+                                            <i class="fa fa-arrow-left me-2"/>Cancel
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fa fa-save me-2"/>Submit Incident Report
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    
+    <!-- Extend Portal Home to Add GuardPro Navigation -->
+    <template id="portal_my_home_guardpro" name="Sentry Portal Home" inherit_id="portal.portal_my_home" priority="50">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <!-- GUARD PORTAL: Only show to security guards, NOT residents -->
+            <t t-if="request.env.user.has_group('guardpro.group_guardpro_guard_portal') and not request.env.user.has_group('guardpro.group_guardpro_resident_user')">
+            <!-- Prominent GuardPro Dashboard Card -->
+            <div class="card mb-3 bg-primary text-white">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="text-center">
+                                <i class="fa fa-shield fa-4x mb-2"/>
+                                <h4 class="mb-0">GuardPro</h4>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h3 class="card-title mb-2">
+                                <i class="fa fa-shield me-2"/>Security Dashboard
+                            </h3>
+                            <p class="card-text mb-3">
+                                Access your security guard dashboard to manage shifts, report incidents, track tours, and view attendance records.
+                            </p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="/guardpro/mobile" class="btn btn-success btn-lg">
+                                    <i class="fa fa-mobile me-2"/>Go to Mobile Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Access Cards -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="fa fa-clock fa-3x text-success"/>
+                            </div>
+                            <h5 class="card-title">My Shifts</h5>
+                            <p class="card-text">View and manage your assigned shifts</p>
+                            <a href="/my/shifts" class="btn btn-success">
+                                <i class="fa fa-arrow-right me-1"/>View Shifts
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="fa fa-exclamation-triangle fa-3x text-warning"/>
+                            </div>
+                            <h5 class="card-title">Report Incident</h5>
+                            <p class="card-text">Report security incidents and emergencies</p>
+                            <a href="/my/incidents/new" class="btn btn-warning">
+                                <i class="fa fa-plus me-1"/>Report Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="fa fa-map-signs fa-3x text-primary"/>
+                            </div>
+                            <h5 class="card-title">My Tours</h5>
+                            <p class="card-text">Track security tours and patrols</p>
+                            <a href="/my/tours" class="btn btn-primary">
+                                <i class="fa fa-arrow-right me-1"/>View Tours
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="fa fa-user-check fa-3x text-info"/>
+                            </div>
+                            <h5 class="card-title">My Attendance</h5>
+                            <p class="card-text">View attendance records and time tracking</p>
+                            <a href="/my/attendance" class="btn btn-info">
+                                <i class="fa fa-arrow-right me-1"/>View Attendance
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </t>
+            <!-- END GUARD PORTAL -->
+            
+            <!-- RESIDENT PORTAL: Only show to residents -->
+            <t t-if="request.env.user.has_group('guardpro.group_guardpro_resident_user')">
+            <!-- Resident Portal Dashboard Card -->
+            <div class="card mb-3 bg-success text-white">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="text-center">
+                                <i class="fa fa-home fa-4x mb-2"/>
+                                <h4 class="mb-0">Resident Portal</h4>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h3 class="card-title mb-2">
+                                <i class="fa fa-comments me-2"/>Complaints &amp; Feedback
+                            </h3>
+                            <p class="card-text mb-3">
+                                Submit complaints, provide feedback, and track your issues.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Resident Quick Access Cards -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100 border-danger">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="fa fa-exclamation-circle fa-3x text-danger"/>
+                            </div>
+                            <h5 class="card-title">Submit Complaint</h5>
+                            <p class="card-text">Report issues, concerns, or problems that need attention</p>
+                            <a href="/my/complaint/new" class="btn btn-danger btn-lg">
+                                <i class="fa fa-plus me-1"/>New Complaint
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100 border-primary">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="fa fa-list-alt fa-3x text-primary"/>
+                            </div>
+                            <h5 class="card-title">My Complaints</h5>
+                            <p class="card-text">View and track your submitted complaints</p>
+                            <a href="/my/complaints" class="btn btn-primary btn-lg">
+                                <i class="fa fa-arrow-right me-1"/>View All
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100 border-success">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="fa fa-star fa-3x text-warning"/>
+                            </div>
+                            <h5 class="card-title">Submit Feedback</h5>
+                            <p class="card-text">Share your thoughts about security services and suggest improvements</p>
+                            <a href="/my/resident/feedback/new" class="btn btn-success btn-lg">
+                                <i class="fa fa-plus me-1"/>New Feedback
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100 border-info">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="fa fa-comments fa-3x text-info"/>
+                            </div>
+                            <h5 class="card-title">My Feedback</h5>
+                            <p class="card-text">View your feedback history and management responses</p>
+                            <a href="/my/resident/feedback" class="btn btn-info btn-lg">
+                                <i class="fa fa-arrow-right me-1"/>View History
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </t>
+            <!-- END RESIDENT PORTAL -->
+            
+            <!-- CLIENT/OWNER PORTAL: Only show to building owners/clients -->
+            <t t-if="request.env.user.has_group('guardpro.group_guardpro_client_user')">
+            <!-- Client Portal Dashboard Card -->
+            <div class="card mb-3 bg-primary text-white">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="text-center">
+                                <i class="fa fa-building fa-4x mb-2"/>
+                                <h4 class="mb-0">Owner Portal</h4>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h3 class="card-title mb-2">
+                                <i class="fa fa-shield me-2"/>Security Oversight
+                            </h3>
+                            <p class="card-text mb-3">
+                                Monitor guard activity, view incident reports, check schedules, and review resident feedback.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Client Quick Access Cards -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="fa fa-map-marker fa-3x text-primary"/>
+                            </div>
+                            <h5 class="card-title">Guard Activity</h5>
+                            <p class="card-text">View real-time guard locations and activity tracking</p>
+                            <a href="/my/client/guards" class="btn btn-primary">
+                                <i class="fa fa-arrow-right me-1"/>View Activity
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="fa fa-exclamation-triangle fa-3x text-warning"/>
+                            </div>
+                            <h5 class="card-title">Incident Reports</h5>
+                            <p class="card-text">View all security incident reports and updates</p>
+                            <a href="/my/client/incidents" class="btn btn-warning">
+                                <i class="fa fa-arrow-right me-1"/>View Reports
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="fa fa-calendar fa-3x text-info"/>
+                            </div>
+                            <h5 class="card-title">Guard Schedules</h5>
+                            <p class="card-text">View and manage guard shift schedules</p>
+                            <a href="/my/client/shifts" class="btn btn-info">
+                                <i class="fa fa-arrow-right me-1"/>View Schedules
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="fa fa-file-text fa-3x text-success"/>
+                            </div>
+                            <h5 class="card-title">Resident Complaints</h5>
+                            <p class="card-text">Review complaints and feedback from residents</p>
+                            <a href="/my/client/complaints" class="btn btn-success">
+                                <i class="fa fa-arrow-right me-1"/>View Complaints
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </t>
+            <!-- END CLIENT/OWNER PORTAL -->
+        </xpath>
+    </template>
+    
+    <!-- ================================================================ -->
+    <!-- RESIDENT COMPLAINT PORTAL TEMPLATES                              -->
+    <!-- ================================================================ -->
+    
+    <!-- Complaint List Template -->
+    <template id="portal_my_complaints" name="My Complaints">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">My Complaints</t>
+            </t>
+            
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="alert alert-info" role="alert">
+                            <h4 class="alert-heading">
+                                <i class="fa fa-info-circle"/> Submit &amp; Track Complaints
+                            </h4>
+                            <p>Use this portal to submit complaints, issues, or concerns. Management will review and respond to your submissions.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-12 text-end">
+                        <a href="/my/complaint/new" class="btn btn-primary btn-lg">
+                            <i class="fa fa-plus"/> Submit New Complaint
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <t t-if="not complaints">
+                        <div class="col-12">
+                            <div class="alert alert-warning">
+                                No complaints found. Click "Submit New Complaint" to create one.
+                            </div>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <t t-foreach="complaints" t-as="complaint">
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-header" t-att-class="'bg-danger text-white' if complaint.priority == 'urgent' else 'bg-warning' if complaint.priority == 'high' else ''">
+                                        <h5 class="mb-0">
+                                            <i class="fa fa-ticket"/> 
+                                            <t t-esc="complaint.name"/>
+                                            <span class="badge float-end" t-att-class="'badge-success' if complaint.status == 'resolved' else 'badge-info' if complaint.status in ['in_progress', 'under_review'] else 'badge-secondary'">
+                                                <t t-esc="complaint.status.replace('_', ' ').title()"/>
+                                            </span>
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <strong><t t-esc="complaint.subject"/></strong>
+                                        </h6>
+                                        <p class="card-text">
+                                            <small class="text-muted">
+                                                <i class="fa fa-tag"/> <t t-esc="complaint.category.replace('_', ' ').title()"/><br/>
+                                                <i class="fa fa-clock-o"/> <t t-esc="complaint.submitted_date" t-options="{'widget': 'datetime'}"/>
+                                            </small>
+                                        </p>
+                                        <t t-if="complaint.management_response">
+                                            <div class="alert alert-success">
+                                                <strong><i class="fa fa-reply"/> Management Response:</strong>
+                                                <div t-field="complaint.management_response"/>
+                                            </div>
+                                        </t>
+                                    </div>
+                                    <div class="card-footer">
+                                        <a t-att-href="'/my/complaint/%s' % complaint.id" class="btn btn-primary btn-sm">
+                                            <i class="fa fa-eye"/> View Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                </div>
+                
+                <div t-if="pager" class="o_portal_pager text-center">
+                    <t t-call="portal.pager"/>
+                </div>
+            </div>
+        </t>
+    </template>
+    
+    <!-- Complaint Detail Template -->
+    <template id="portal_complaint_detail" name="Complaint Detail">
+        <t t-call="portal.portal_layout">
+            <t t-set="o_portal_fullwidth_alert" groups="guardpro.group_guardpro_manager">
+                <t t-call="portal.portal_back_in_edit_mode">
+                    <t t-set="backend_url" t-value="'/odoo#model=resident.complaint&amp;id=%s&amp;action=%s&amp;view_type=form' % (complaint.id, complaint.env.ref('guardpro.action_resident_complaint').id)"/>
+                </t>
+            </t>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <h2 class="page-header">
+                            Complaint: <t t-esc="complaint.name"/>
+                            <span class="badge" t-att-class="'badge-success' if complaint.status == 'resolved' else 'badge-danger' if complaint.status == 'draft' else 'badge-info'">
+                                <t t-esc="complaint.status.replace('_', ' ').title()"/>
+                            </span>
+                        </h2>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-lg-8">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h4 class="mb-0"><i class="fa fa-info-circle"/> Complaint Details</h4>
+                            </div>
+                            <div class="card-body">
+                                <h5><t t-esc="complaint.subject"/></h5>
+                                <hr/>
+                                <dl class="row">
+                                    <dt class="col-sm-3">Reference:</dt>
+                                    <dd class="col-sm-9"><t t-esc="complaint.name"/></dd>
+                                    
+                                    <dt class="col-sm-3">Category:</dt>
+                                    <dd class="col-sm-9"><t t-esc="complaint.category.replace('_', ' ').title()"/></dd>
+                                    
+                                    <dt class="col-sm-3">Priority:</dt>
+                                    <dd class="col-sm-9">
+                                        <span class="badge" t-att-class="'badge-danger' if complaint.priority == 'urgent' else 'badge-warning' if complaint.priority == 'high' else 'badge-secondary'">
+                                            <t t-esc="complaint.priority.title()"/>
+                                        </span>
+                                    </dd>
+                                    
+                                    <dt class="col-sm-3">Location:</dt>
+                                    <dd class="col-sm-9">
+                                        <t t-if="complaint.location">
+                                            <t t-esc="complaint.location"/>
+                                        </t>
+                                        <t t-else="">N/A</t>
+                                    </dd>
+                                    
+                                    <dt class="col-sm-3">Submitted:</dt>
+                                    <dd class="col-sm-9">
+                                        <t t-esc="complaint.submitted_date" t-options="{'widget': 'datetime'}"/>
+                                    </dd>
+                                </dl>
+                                
+                                <hr/>
+                                <h6>Description:</h6>
+                                <div t-field="complaint.description"/>
+                                
+                                <t t-if="complaint.attachment_ids">
+                                    <hr/>
+                                    <h6>Attachments:</h6>
+                                    <ul class="list-unstyled">
+                                        <t t-foreach="complaint.attachment_ids" t-as="attachment">
+                                            <li>
+                                                <a t-att-href="'/web/content/%s?download=true' % attachment.id" class="btn btn-sm btn-outline-secondary">
+                                                    <i class="fa fa-download"/> <t t-esc="attachment.name"/>
+                                                </a>
+                                            </li>
+                                        </t>
+                                    </ul>
+                                </t>
+                            </div>
+                        </div>
+                        
+                        <!-- Management Response -->
+                        <t t-if="complaint.management_response">
+                            <div class="card mb-4 border-success">
+                                <div class="card-header bg-success text-white">
+                                    <h4 class="mb-0"><i class="fa fa-reply"/> Management Response</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div t-field="complaint.management_response"/>
+                                </div>
+                            </div>
+                        </t>
+                        
+                        <!-- Resolution -->
+                        <t t-if="complaint.status in ['resolved', 'closed'] and complaint.resolution_notes">
+                            <div class="card mb-4 border-info">
+                                <div class="card-header bg-info text-white">
+                                    <h4 class="mb-0"><i class="fa fa-check-circle"/> Resolution</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div t-field="complaint.resolution_notes"/>
+                                    
+                                    <t t-if="not complaint.satisfaction_rating and complaint.status == 'resolved'">
+                                        <hr/>
+                                        <h6>Rate this resolution:</h6>
+                                        <form method="POST" t-att-action="'/my/complaint/%s/update' % complaint.id">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                            <select name="satisfaction_rating" class="form-select mb-2" required="1">
+                                                <option value="">Select rating...</option>
+                                                <option value="5">5 - Very Satisfied</option>
+                                                <option value="4">4 - Satisfied</option>
+                                                <option value="3">3 - Neutral</option>
+                                                <option value="2">2 - Unsatisfied</option>
+                                                <option value="1">1 - Very Unsatisfied</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-primary btn-sm">
+                                                <i class="fa fa-star"/> Submit Rating
+                                            </button>
+                                        </form>
+                                    </t>
+                                    
+                                    <t t-if="complaint.satisfaction_rating">
+                                        <div class="alert alert-info mt-3">
+                                            <strong>Your Rating:</strong> 
+                                            <t t-esc="complaint.satisfaction_rating"/> / 5
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </t>
+                        
+                        <!-- Add Comment Form -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fa fa-comment"/> Add Follow-up Comment</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" t-att-action="'/my/complaint/%s/update' % complaint.id">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <div class="mb-3">
+                                        <textarea name="comment" class="form-control" rows="4" 
+                                                  placeholder="Add a comment or question about this complaint..."></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fa fa-send"/> Post Comment
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <!-- Status Card -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fa fa-info"/> Status</h6>
+                            </div>
+                            <div class="card-body">
+                                <dl>
+                                    <dt>Current Status:</dt>
+                                    <dd>
+                                        <span class="badge" t-att-class="'badge-success' if complaint.status == 'resolved' else 'badge-info'">
+                                            <t t-esc="complaint.status.replace('_', ' ').title()"/>
+                                        </span>
+                                    </dd>
+                                    
+                                    <t t-if="complaint.assigned_to_id">
+                                        <dt>Assigned To:</dt>
+                                        <dd><t t-esc="complaint.assigned_to_id.name"/></dd>
+                                    </t>
+                                    
+                                    <dt>Priority:</dt>
+                                    <dd>
+                                        <span class="badge" t-att-class="'badge-danger' if complaint.priority == 'urgent' else 'badge-warning' if complaint.priority == 'high' else 'badge-secondary'">
+                                            <t t-esc="complaint.priority.title()"/>
+                                        </span>
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                        
+                        <!-- Timeline Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fa fa-clock-o"/> Timeline</h6>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <i class="fa fa-plus-circle text-muted"/> 
+                                        <small>Created: <t t-esc="complaint.create_date" t-options="{'widget': 'datetime'}"/></small>
+                                    </li>
+                                    <li class="mb-2" t-if="complaint.submitted_date">
+                                        <i class="fa fa-paper-plane text-primary"/> 
+                                        <small>Submitted: <t t-esc="complaint.submitted_date" t-options="{'widget': 'datetime'}"/></small>
+                                    </li>
+                                    <li class="mb-2" t-if="complaint.reviewed_date">
+                                        <i class="fa fa-eye text-info"/> 
+                                        <small>Reviewed: <t t-esc="complaint.reviewed_date" t-options="{'widget': 'datetime'}"/></small>
+                                    </li>
+                                    <li class="mb-2" t-if="complaint.resolved_date">
+                                        <i class="fa fa-check-circle text-success"/> 
+                                        <small>Resolved: <t t-esc="complaint.resolved_date" t-options="{'widget': 'datetime'}"/></small>
+                                    </li>
+                                    <li class="mb-2" t-if="complaint.closed_date">
+                                        <i class="fa fa-times-circle text-muted"/> 
+                                        <small>Closed: <t t-esc="complaint.closed_date" t-options="{'widget': 'datetime'}"/></small>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    
+    <!-- Create Complaint Template -->
+    <template id="portal_create_complaint" name="Submit New Complaint">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-4">
+                <div class="row">
+                    <div class="col-lg-8 offset-lg-2">
+                        <h2 class="mb-4">
+                            <i class="fa fa-exclamation-circle"/> Submit New Complaint
+                        </h2>
+                        
+                        <div class="card">
+                            <div class="card-body">
+                                <form method="POST" action="/my/complaint/new" enctype="multipart/form-data">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    
+                                    <div class="mb-3">
+                                        <label for="subject" class="form-label">Subject *</label>
+                                        <input type="text" class="form-control" id="subject" name="subject" 
+                                               placeholder="Brief description of the issue" required="1"/>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="category" class="form-label">Category *</label>
+                                            <select class="form-select" id="category" name="category" required="1">
+                                                <option value="">Select category...</option>
+                                                <option value="security">Security Issue</option>
+                                                <option value="guard_behavior">Guard Behavior</option>
+                                                <option value="access_control">Access Control</option>
+                                                <option value="noise">Noise Complaint</option>
+                                                <option value="safety">Safety Concern</option>
+                                                <option value="maintenance">Maintenance</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label for="priority" class="form-label">Priority *</label>
+                                            <select class="form-select" id="priority" name="priority" required="1">
+                                                <option value="normal" selected="1">Normal</option>
+                                                <option value="high">High</option>
+                                                <option value="urgent">Urgent</option>
+                                                <option value="low">Low</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="location" class="form-label">Location</label>
+                                        <input type="text" class="form-control" id="location" name="location" 
+                                               placeholder="e.g., Main entrance, Parking lot B"/>
+                                        <small class="text-muted">Where did this issue occur?</small>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label">Detailed Description *</label>
+                                        <textarea class="form-control" id="description" name="description" rows="6" 
+                                                  placeholder="Please provide detailed information about your complaint..." 
+                                                  required="1"></textarea>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="submit_now" name="submit_now" value="1" checked="1"/>
+                                            <label class="form-check-label" for="submit_now">
+                                                Submit immediately (uncheck to save as draft)
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            <i class="fa fa-send"/> Submit Complaint
+                                        </button>
+                                        <a href="/my/complaints" class="btn btn-outline-secondary btn-lg">
+                                            <i class="fa fa-times"/> Cancel
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    
+    <!-- Resident Feedback List Template -->
+    <template id="portal_resident_feedback_list" name="My Feedback">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-4">
+                <h2 class="mb-4">My Feedback Submissions</h2>
+                
+                <div class="row mb-3">
+                    <div class="col-12 text-end">
+                        <a href="/my/resident/feedback/new" class="btn btn-success btn-lg">
+                            <i class="fa fa-plus"/> Submit New Feedback
+                        </a>
+                    </div>
+                </div>
+                
+                <t t-if="not feedbacks">
+                    <div class="alert alert-info">
+                        No feedback submitted yet. Click "Submit New Feedback" to share your thoughts about the security services.
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="list-group">
+                        <t t-foreach="feedbacks" t-as="feedback">
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">
+                                        <t t-esc="feedback.name"/> - 
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fa fa-star"/> <t t-esc="feedback.overall_rating"/> / 5
+                                        </span>
+                                    </h5>
+                                    <small><t t-esc="feedback.feedback_date"/></small>
+                                </div>
+                                <p class="mb-1">
+                                    <t t-if="feedback.guard_id">
+                                        <strong>Regarding:</strong> Guard <t t-esc="feedback.guard_id.name"/><br/>
+                                    </t>
+                                    <t t-else="">
+                                        <strong>Regarding:</strong> General Security Services<br/>
+                                    </t>
+                                    <strong>Type:</strong> <t t-esc="feedback.feedback_type.replace('_', ' ').title()"/>
+                                </p>
+                                <p class="mb-1"><t t-esc="feedback.comments"/></p>
+                                <t t-if="feedback.management_response">
+                                    <div class="alert alert-success mt-2">
+                                        <strong>Management Response:</strong> <t t-esc="feedback.management_response"/>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+    
+    <!-- Create Feedback Template -->
+    <template id="portal_create_feedback" name="Submit Feedback">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-4">
+                <div class="row">
+                    <div class="col-lg-8 offset-lg-2">
+                        <h2 class="mb-4">
+                            <i class="fa fa-star"/> Submit Feedback on Security Services
+                        </h2>
+                        
+                        <div class="alert alert-info">
+                            <i class="fa fa-info-circle"/> Share your feedback about the security services at your community. Your input helps us improve our service quality.
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-body">
+                                <form method="POST" action="/my/resident/feedback/new">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    
+                                    <div class="mb-3">
+                                        <label for="feedback_type" class="form-label">Feedback Type *</label>
+                                        <select class="form-select" id="feedback_type" name="feedback_type" required="1">
+                                            <option value="general" selected="1">General Feedback</option>
+                                            <option value="service_quality">Service Quality</option>
+                                            <option value="suggestion">Suggestion for Improvement</option>
+                                            <option value="compliment">Compliment</option>
+                                            <option value="concern">Concern</option>
+                                        </select>
+                                        <small class="text-muted">What type of feedback are you providing?</small>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="guard_id" class="form-label">Specific Guard (Optional)</label>
+                                        <select class="form-select" id="guard_id" name="guard_id">
+                                            <option value="">General service feedback (no specific guard)</option>
+                                            <t t-foreach="guards" t-as="guard">
+                                                <option t-att-value="guard.id">
+                                                    <t t-esc="guard.name"/> (<t t-esc="guard.badge_number"/>)
+                                                </option>
+                                            </t>
+                                        </select>
+                                        <small class="text-muted">Leave blank for general service feedback, or select a specific guard</small>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Overall Service Rating *</label>
+                                        <div class="rating-stars">
+                                            <t t-foreach="['5', '4', '3', '2', '1']" t-as="rating">
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="overall_rating" 
+                                                           t-att-id="'rating_%s' % rating" t-att-value="rating" required="1"/>
+                                                    <label class="form-check-label" t-att-for="'rating_%s' % rating">
+                                                        <t t-esc="rating"/> <i class="fa fa-star text-warning"/>
+                                                    </label>
+                                                </div>
+                                            </t>
+                                        </div>
+                                        <small class="text-muted">Rate your overall experience with security services</small>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="comments" class="form-label">Your Feedback *</label>
+                                        <textarea class="form-control" id="comments" name="comments" rows="6" 
+                                                  placeholder="Share your thoughts about the security services, safety, professionalism, response time, or any suggestions for improvement..." 
+                                                  required="1"></textarea>
+                                        <small class="text-muted">Examples: "Guards are very professional and courteous", "Response time to incidents is excellent", "Suggest better lighting at the parking area"</small>
+                                    </div>
+                                    
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-success btn-lg">
+                                            <i class="fa fa-send"/> Submit Feedback
+                                        </button>
+                                        <a href="/my/resident/feedback" class="btn btn-outline-secondary btn-lg">
+                                            <i class="fa fa-times"/> Cancel
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>
+

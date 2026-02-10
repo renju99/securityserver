@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Incident Notification Email Template -->
+        <record id="incident_notification_email" model="mail.template">
+            <field name="name">Incident Report Notification</field>
+            <field name="model_id" ref="model_incident_report"/>
+            <field name="subject">New Incident Report: ${object.name} - ${object.title}</field>
+            <field name="email_from">${user.email_formatted}</field>
+            <field name="email_to">${object.site_id.site_email or object.site_id.client_id.email}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: #d32f2f;">Incident Report Notification</h2>
+                    
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; width: 30%;">Incident Number:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Title:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.title}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Severity:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                <span style="padding: 5px 10px; background: 
+                                    % if object.severity == 'critical':
+                                        #d32f2f
+                                    % elif object.severity == 'high':
+                                        #f57c00
+                                    % elif object.severity == 'medium':
+                                        #fbc02d
+                                    % else:
+                                        #388e3c
+                                    % endif
+                                    ; color: white; border-radius: 3px;">
+                                    ${object.severity.upper()}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Category:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.category_id.name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Site:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.site_id.name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Reporting Guard:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.guard_id.name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Date/Time:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${format_datetime(object.incident_datetime, dt_format='medium')}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Location:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.location or 'N/A'}</td>
+                        </tr>
+                    </table>
+                    
+                    <h3>Description:</h3>
+                    <div style="padding: 15px; background: #f5f5f5; border-radius: 5px; margin: 20px 0;">
+                        ${object.description}
+                    </div>
+                    
+                    % if object.immediate_actions:
+                    <h3>Immediate Actions Taken:</h3>
+                    <div style="padding: 15px; background: #f5f5f5; border-radius: 5px; margin: 20px 0;">
+                        ${object.immediate_actions}
+                    </div>
+                    % endif
+                    
+                    <div style="margin-top: 30px; padding: 15px; background: #e3f2fd; border-radius: 5px;">
+                        <p><strong>This is an automated notification from GuardPro.</strong></p>
+                        <p>Please review the incident in the system for full details and take appropriate action.</p>
+                    </div>
+                </div>
+            </field>
+        </record>
+
+        <!-- Shift Reminder Email Template -->
+        <record id="shift_reminder_email" model="mail.template">
+            <field name="name">Shift Reminder</field>
+            <field name="model_id" ref="model_guard_shift"/>
+            <field name="subject">Shift Reminder: ${object.site_id.name} - ${format_datetime(object.start_datetime, dt_format='short')}</field>
+            <field name="email_from">${user.email_formatted}</field>
+            <field name="email_to">${object.guard_id.email}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: #1976d2;">Upcoming Shift Reminder</h2>
+                    
+                    <p>Hello ${object.guard_id.name},</p>
+                    
+                    <p>This is a reminder about your upcoming shift:</p>
+                    
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; width: 30%;">Site:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.site_id.name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Start:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${format_datetime(object.start_datetime, dt_format='medium')}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">End:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${format_datetime(object.end_datetime, dt_format='medium')}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Assignment:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.assignment_type}</td>
+                        </tr>
+                    </table>
+                    
+                    % if object.instructions:
+                    <h3>Special Instructions:</h3>
+                    <div style="padding: 15px; background: #fff3e0; border-radius: 5px; margin: 20px 0;">
+                        ${object.instructions}
+                    </div>
+                    % endif
+                    
+                    <div style="margin-top: 30px;">
+                        <p>Please arrive on time and bring all required equipment.</p>
+                        <p>Thank you!</p>
+                    </div>
+                </div>
+            </field>
+        </record>
+
+        <!-- Daily Activity Report Email Template -->
+        <record id="email_template_dar_to_client" model="mail.template">
+            <field name="name">Daily Activity Report to Client</field>
+            <field name="model_id" ref="model_daily_activity_report"/>
+            <field name="subject">Daily Activity Report - ${object.site_id.name} - ${format_date(object.report_date)}</field>
+            <field name="email_from">${user.email_formatted or object.site_id.client_id.email}</field>
+            <field name="email_to">${object.client_email or object.site_id.client_id.email}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto;">
+                    <h2 style="color: #1976d2; border-bottom: 3px solid #1976d2; padding-bottom: 10px;">
+                        Daily Activity Report (DAR)
+                    </h2>
+                    
+                    <p>Dear ${object.site_id.client_id.name},</p>
+                    
+                    <p>Please find attached the Daily Activity Report for <strong>${object.site_id.name}</strong> covering activities on <strong>${format_date(object.report_date)}</strong>.</p>
+                    
+                    <!-- Summary Statistics -->
+                    <div style="margin: 30px 0; padding: 20px; background: #f5f5f5; border-radius: 8px;">
+                        <h3 style="margin-top: 0; color: #333;">Summary Overview</h3>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="padding: 8px 0; width: 50%;"><strong>Total Incidents:</strong></td>
+                                <td style="padding: 8px 0;">
+                                    <span style="padding: 4px 12px; background: ${object.total_incidents > 0 and '#ff5722' or '#4caf50'}; color: white; border-radius: 12px; font-weight: bold;">
+                                        ${object.total_incidents}
+                                    </span>
+                                    % if object.critical_incidents > 0:
+                                    <span style="margin-left: 10px; padding: 4px 12px; background: #d32f2f; color: white; border-radius: 12px; font-size: 12px;">
+                                        ${object.critical_incidents} Critical
+                                    </span>
+                                    % endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 0;"><strong>Security Tours Completed:</strong></td>
+                                <td style="padding: 8px 0;">
+                                    <span style="padding: 4px 12px; background: #2196f3; color: white; border-radius: 12px; font-weight: bold;">
+                                        ${object.tours_completed}
+                                    </span>
+                                    % if object.tours_missed > 0:
+                                    <span style="margin-left: 10px; padding: 4px 12px; background: #ff9800; color: white; border-radius: 12px; font-size: 12px;">
+                                        ${object.tours_missed} Missed
+                                    </span>
+                                    % endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 0;"><strong>Visitors:</strong></td>
+                                <td style="padding: 8px 0;">
+                                    <span style="padding: 4px 12px; background: #9c27b0; color: white; border-radius: 12px; font-weight: bold;">
+                                        ${object.visitor_count}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 0;"><strong>Guards on Duty:</strong></td>
+                                <td style="padding: 8px 0;">
+                                    <span style="padding: 4px 12px; background: #009688; color: white; border-radius: 12px; font-weight: bold;">
+                                        ${object.guards_on_duty_count}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 0;"><strong>Tasks Completed:</strong></td>
+                                <td style="padding: 8px 0;">
+                                    <span style="padding: 4px 12px; background: #4caf50; color: white; border-radius: 12px; font-weight: bold;">
+                                        ${object.task_completed_count} / ${object.task_count}
+                                    </span>
+                                </td>
+                            </tr>
+                            % if object.package_count > 0:
+                            <tr>
+                                <td style="padding: 8px 0;"><strong>Packages Received:</strong></td>
+                                <td style="padding: 8px 0;">
+                                    <span style="padding: 4px 12px; background: #795548; color: white; border-radius: 12px; font-weight: bold;">
+                                        ${object.package_count}
+                                    </span>
+                                </td>
+                            </tr>
+                            % endif
+                            % if object.lost_found_count > 0:
+                            <tr>
+                                <td style="padding: 8px 0;"><strong>Lost &amp; Found Items:</strong></td>
+                                <td style="padding: 8px 0;">
+                                    <span style="padding: 4px 12px; background: #607d8b; color: white; border-radius: 12px; font-weight: bold;">
+                                        ${object.lost_found_count}
+                                    </span>
+                                </td>
+                            </tr>
+                            % endif
+                        </table>
+                    </div>
+                    
+                    <!-- Weather Conditions -->
+                    % if object.weather_conditions:
+                    <div style="margin: 20px 0; padding: 15px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 4px;">
+                        <strong>Weather Conditions:</strong> ${object.weather_conditions}
+                    </div>
+                    % endif
+                    
+                    <!-- Critical Incidents Alert -->
+                    % if object.critical_incidents > 0:
+                    <div style="margin: 20px 0; padding: 15px; background: #ffebee; border-left: 4px solid #d32f2f; border-radius: 4px;">
+                        <strong style="color: #d32f2f;">⚠ ATTENTION:</strong> This report contains <strong>${object.critical_incidents} critical incident(s)</strong> requiring immediate attention. Please review the attached detailed report.
+                    </div>
+                    % endif
+                    
+                    <!-- Special Notes -->
+                    % if object.special_notes:
+                    <div style="margin: 20px 0;">
+                        <h3 style="color: #333;">Special Notes &amp; Observations</h3>
+                        <div style="padding: 15px; background: #fff9c4; border-left: 4px solid #fbc02d; border-radius: 4px;">
+                            ${object.special_notes}
+                        </div>
+                    </div>
+                    % endif
+                    
+                    <!-- Attachment Notice -->
+                    <div style="margin: 30px 0; padding: 20px; background: #e8f5e9; border-radius: 8px; border: 1px solid #4caf50;">
+                        <h3 style="margin-top: 0; color: #2e7d32;">📎 Detailed Report Attached</h3>
+                        <p style="margin-bottom: 0;">
+                            A comprehensive PDF report with complete details of all activities, incidents, and observations 
+                            is attached to this email for your review and records.
+                        </p>
+                    </div>
+                    
+                    <!-- Review Information -->
+                    % if object.reviewed_by:
+                    <div style="margin: 20px 0; padding: 15px; background: #f5f5f5; border-radius: 4px;">
+                        <table style="width: 100%;">
+                            <tr>
+                                <td style="padding: 5px 0;"><strong>Report Submitted By:</strong></td>
+                                <td style="padding: 5px 0;">${object.submitted_by.name if object.submitted_by else 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 5px 0;"><strong>Reviewed &amp; Approved By:</strong></td>
+                                <td style="padding: 5px 0;">${object.reviewed_by.name}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 5px 0;"><strong>Approval Date:</strong></td>
+                                <td style="padding: 5px 0;">${format_datetime(object.reviewed_date, dt_format='medium') if object.reviewed_date else 'N/A'}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    % endif
+                    
+                    <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
+                        <p style="color: #666; font-size: 14px;">
+                            If you have any questions or concerns regarding this report, please don't hesitate to contact us.
+                        </p>
+                        <p style="color: #666; font-size: 14px; margin-bottom: 0;">
+                            <strong>Thank you for choosing our security services.</strong>
+                        </p>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
+                        <p style="margin: 0; color: #999; font-size: 12px;">
+                            This is an automated message from GuardPro Security Management System<br/>
+                            Report Reference: ${object.name}
+                        </p>
+                    </div>
+                </div>
+            </field>
+        </record>
+    </data>
+</odoo>
+
+

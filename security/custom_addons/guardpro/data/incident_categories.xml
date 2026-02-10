@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Incident Categories -->
+        <record id="incident_cat_security" model="incident.category">
+            <field name="name">Security Breach</field>
+            <field name="code">SEC</field>
+            <field name="sequence">10</field>
+            <field name="color">1</field>
+        </record>
+
+        <record id="incident_cat_theft" model="incident.category">
+            <field name="name">Theft/Burglary</field>
+            <field name="code">THEFT</field>
+            <field name="sequence">20</field>
+            <field name="color">2</field>
+        </record>
+
+        <record id="incident_cat_vandalism" model="incident.category">
+            <field name="name">Vandalism</field>
+            <field name="code">VAND</field>
+            <field name="sequence">30</field>
+            <field name="color">3</field>
+        </record>
+
+        <record id="incident_cat_safety" model="incident.category">
+            <field name="name">Safety Hazard</field>
+            <field name="code">SAFE</field>
+            <field name="sequence">40</field>
+            <field name="color">9</field>
+        </record>
+
+        <record id="incident_cat_medical" model="incident.category">
+            <field name="name">Medical Emergency</field>
+            <field name="code">MED</field>
+            <field name="sequence">50</field>
+            <field name="color">2</field>
+        </record>
+
+        <record id="incident_cat_fire" model="incident.category">
+            <field name="name">Fire/Smoke</field>
+            <field name="code">FIRE</field>
+            <field name="sequence">60</field>
+            <field name="color">1</field>
+        </record>
+
+        <record id="incident_cat_disturbance" model="incident.category">
+            <field name="name">Disturbance/Noise</field>
+            <field name="code">DIST</field>
+            <field name="sequence">70</field>
+            <field name="color">9</field>
+        </record>
+
+        <record id="incident_cat_trespassing" model="incident.category">
+            <field name="name">Trespassing</field>
+            <field name="code">TRESP</field>
+            <field name="sequence">80</field>
+            <field name="color">3</field>
+        </record>
+
+        <record id="incident_cat_vehicle" model="incident.category">
+            <field name="name">Vehicle Incident</field>
+            <field name="code">VEH</field>
+            <field name="sequence">90</field>
+            <field name="color">7</field>
+        </record>
+
+        <record id="incident_cat_weather" model="incident.category">
+            <field name="name">Weather/Natural</field>
+            <field name="code">WEATH</field>
+            <field name="sequence">100</field>
+            <field name="color">10</field>
+        </record>
+
+        <record id="incident_cat_equipment" model="incident.category">
+            <field name="name">Equipment Malfunction</field>
+            <field name="code">EQUIP</field>
+            <field name="sequence">110</field>
+            <field name="color">9</field>
+        </record>
+
+        <record id="incident_cat_suspicious" model="incident.category">
+            <field name="name">Suspicious Activity</field>
+            <field name="code">SUSP</field>
+            <field name="sequence">120</field>
+            <field name="color">9</field>
+        </record>
+
+        <record id="incident_cat_other" model="incident.category">
+            <field name="name">Other</field>
+            <field name="code">OTHER</field>
+            <field name="sequence">999</field>
+            <field name="color">0</field>
+        </record>
+
+        <!-- Incident Tags -->
+        <record id="incident_tag_urgent" model="incident.tag">
+            <field name="name">Urgent</field>
+            <field name="color">1</field>
+        </record>
+
+        <record id="incident_tag_police" model="incident.tag">
+            <field name="name">Police Involved</field>
+            <field name="color">2</field>
+        </record>
+
+        <record id="incident_tag_injury" model="incident.tag">
+            <field name="name">Injury</field>
+            <field name="color">1</field>
+        </record>
+
+        <record id="incident_tag_damage" model="incident.tag">
+            <field name="name">Property Damage</field>
+            <field name="color">9</field>
+        </record>
+
+        <record id="incident_tag_followup" model="incident.tag">
+            <field name="name">Requires Follow-up</field>
+            <field name="color">3</field>
+        </record>
+    </data>
+</odoo>
+
+

@@ -1,0 +1,572 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- ============================================ -->
+        <!-- SOP: Access Control Procedures -->
+        <!-- ============================================ -->
+        
+        <record id="sop_access_control_visitor" model="knowledge.sop">
+            <field name="name">Visitor Access Control and Registration</field>
+            <field name="code">SOP-AC-001</field>
+            <field name="is_sira_compliant" eval="True"/>
+            <field name="sira_category">access_control</field>
+            <field name="risk_level">medium</field>
+            <field name="state">approved</field>
+            <field name="requires_training" eval="True"/>
+            <field name="training_duration">2.0</field>
+            <field name="sequence">10</field>
+            <field name="objective">To ensure all visitors are properly screened, registered, and authorized before granting access to the premises.</field>
+            <field name="scope">Applies to all guard posts with visitor reception duties at building entrances, lobbies, and reception areas.</field>
+            <field name="description"><![CDATA[
+                <h3>Purpose</h3>
+                <p>This SOP establishes standardized procedures for processing visitor access requests, conducting security screening, and maintaining visitor logs in compliance with SIRA requirements.</p>
+                
+                <h3>Responsibilities</h3>
+                <ul>
+                    <li>Security Guard: Execute visitor screening and registration</li>
+                    <li>Supervisor: Monitor compliance and handle escalations</li>
+                    <li>Control Room: Verify visitor credentials when required</li>
+                </ul>
+                
+                <h3>Required Equipment</h3>
+                <ul>
+                    <li>Visitor Management System (computer/tablet)</li>
+                    <li>ID scanner or camera</li>
+                    <li>Visitor badges</li>
+                    <li>Logbook (backup)</li>
+                    <li>Metal detector (if applicable)</li>
+                </ul>
+            ]]></field>
+        </record>
+        
+        <!-- SOP Steps for Access Control -->
+        <record id="sop_step_ac_001_1" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_access_control_visitor"/>
+            <field name="sequence">1</field>
+            <field name="name">Greet Visitor Professionally</field>
+            <field name="is_critical" eval="False"/>
+            <field name="expected_duration">0.5</field>
+            <field name="description"><![CDATA[
+                <ul>
+                    <li>Stand and greet the visitor with "Good [morning/afternoon/evening], welcome to [location name]"</li>
+                    <li>Maintain professional posture and eye contact</li>
+                    <li>Speak clearly in English; use Arabic if visitor prefers</li>
+                    <li>Smile and create positive first impression</li>
+                </ul>
+            ]]></field>
+            <field name="safety_note">Always maintain awareness of surroundings while greeting visitors. Do not turn your back to the entrance.</field>
+        </record>
+        
+        <record id="sop_step_ac_001_2" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_access_control_visitor"/>
+            <field name="sequence">2</field>
+            <field name="name">Request Identification</field>
+            <field name="is_critical" eval="True"/>
+            <field name="expected_duration">1.0</field>
+            <field name="description"><![CDATA[
+                <ul>
+                    <li>Politely request: "May I please see your Emirates ID or passport?"</li>
+                    <li>Accept only original government-issued photo ID (no copies)</li>
+                    <li>Verify photo matches the person presenting ID</li>
+                    <li>Check ID expiration date - reject expired IDs</li>
+                    <li>Look for signs of tampering or forgery</li>
+                </ul>
+                <p><strong>Acceptable IDs:</strong> Emirates ID, Passport, GCC National ID, UAE Driving License</p>
+            ]]></field>
+            <field name="safety_note">Never accept photocopies or digital images of IDs. If ID appears fake or tampered, immediately notify supervisor and politely detain person.</field>
+        </record>
+        
+        <record id="sop_step_ac_001_3" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_access_control_visitor"/>
+            <field name="sequence">3</field>
+            <field name="name">Check Watchlist and Restrictions</field>
+            <field name="is_critical" eval="True"/>
+            <field name="expected_duration">1.0</field>
+            <field name="description"><![CDATA[
+                <ul>
+                    <li>Search visitor name in GuardPro watchlist system</li>
+                    <li>Check for any active bans or restrictions</li>
+                    <li>Verify against previous incident reports</li>
+                    <li>If match found: Follow escalation procedure (do NOT grant access)</li>
+                    <li>If no match: Proceed to next step</li>
+                </ul>
+            ]]></field>
+            <field name="safety_note">CRITICAL: Never inform the visitor they are on a watchlist. Immediately call supervisor using code phrase "Code Blue verification needed."</field>
+        </record>
+        
+        <record id="sop_step_ac_001_4" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_access_control_visitor"/>
+            <field name="sequence">4</field>
+            <field name="name">Verify Purpose and Host</field>
+            <field name="is_critical" eval="True"/>
+            <field name="expected_duration">2.0</field>
+            <field name="description"><![CDATA[
+                <ul>
+                    <li>Ask: "What is the purpose of your visit?"</li>
+                    <li>Ask: "Who are you visiting?" (Get name, unit/office number)</li>
+                    <li>Check if visitor has appointment/pre-registration</li>
+                    <li>Call host to confirm visitor is expected</li>
+                    <li>Wait for host confirmation before proceeding</li>
+                </ul>
+                <p><strong>If host doesn't answer:</strong></p>
+                <ul>
+                    <li>Try alternate contact number</li>
+                    <li>Check with building management</li>
+                    <li>Offer visitor to wait in designated area</li>
+                    <li>Do NOT allow access without confirmation</li>
+                </ul>
+            ]]></field>
+        </record>
+        
+        <record id="sop_step_ac_001_5" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_access_control_visitor"/>
+            <field name="sequence">5</field>
+            <field name="name">Conduct Security Screening</field>
+            <field name="is_critical" eval="True"/>
+            <field name="expected_duration">2.0</field>
+            <field name="description"><![CDATA[
+                <ul>
+                    <li>Ask visitor to place bags/items on X-ray scanner (if available)</li>
+                    <li>Request visitor to walk through metal detector</li>
+                    <li>If alarm sounds: Conduct courteous hand-held metal detector scan</li>
+                    <li>Visually inspect bags - look for prohibited items</li>
+                    <li>If suspicious items found: Politely deny entry and call supervisor</li>
+                </ul>
+                <p><strong>Prohibited Items:</strong> Weapons, explosives, illegal drugs, flammable materials, recording devices (if restricted by site policy)</p>
+            ]]></field>
+            <field name="safety_note">Never physically search a person. Use metal detector only. For pat-down searches, call same-gender supervisor.</field>
+        </record>
+        
+        <record id="sop_step_ac_001_6" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_access_control_visitor"/>
+            <field name="sequence">6</field>
+            <field name="name">Register Visitor in System</field>
+            <field name="is_critical" eval="True"/>
+            <field name="expected_duration">2.0</field>
+            <field name="description"><![CDATA[
+                <ul>
+                    <li>Open GuardPro Visitor Management module</li>
+                    <li>Click "New Visitor Registration"</li>
+                    <li>Scan or manually enter Emirates ID number</li>
+                    <li>Fill in all required fields: Name, ID Number, Contact, Purpose, Host</li>
+                    <li>Take visitor photo using webcam/camera</li>
+                    <li>Generate visitor badge with QR code</li>
+                    <li>Print visitor badge</li>
+                </ul>
+            ]]></field>
+        </record>
+        
+        <record id="sop_step_ac_001_7" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_access_control_visitor"/>
+            <field name="sequence">7</field>
+            <field name="name">Issue Visitor Badge and Grant Access</field>
+            <field name="is_critical" eval="False"/>
+            <field name="expected_duration">1.0</field>
+            <field name="description"><![CDATA[
+                <ul>
+                    <li>Hand visitor badge to guest</li>
+                    <li>Instruct: "Please wear this badge visibly at all times"</li>
+                    <li>Return original ID to visitor</li>
+                    <li>Provide directions to destination</li>
+                    <li>Inform visitor of any restrictions (smoking areas, photography, etc.)</li>
+                    <li>Note entry time in system</li>
+                    <li>Unlock/open access control barrier</li>
+                </ul>
+            ]]></field>
+        </record>
+        
+        <record id="sop_step_ac_001_8" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_access_control_visitor"/>
+            <field name="sequence">8</field>
+            <field name="name">Process Visitor Exit</field>
+            <field name="is_critical" eval="False"/>
+            <field name="expected_duration">1.0</field>
+            <field name="description"><![CDATA[
+                <ul>
+                    <li>When visitor returns, greet and thank them for visiting</li>
+                    <li>Collect visitor badge</li>
+                    <li>Scan badge or manually close visitor record in system</li>
+                    <li>Note exit time</li>
+                    <li>Ask if they need any assistance (taxi, directions, etc.)</li>
+                    <li>Wish them a good day</li>
+                </ul>
+            ]]></field>
+        </record>
+        
+        <!-- SOP Checklist Items -->
+        <record id="sop_checklist_ac_001_1" model="knowledge.sop.checklist">
+            <field name="sop_id" ref="sop_access_control_visitor"/>
+            <field name="sequence">1</field>
+            <field name="name">Visitor Management System is operational</field>
+            <field name="category">preparation</field>
+            <field name="is_mandatory" eval="True"/>
+        </record>
+        
+        <record id="sop_checklist_ac_001_2" model="knowledge.sop.checklist">
+            <field name="sop_id" ref="sop_access_control_visitor"/>
+            <field name="sequence">2</field>
+            <field name="name">Sufficient visitor badges available</field>
+            <field name="category">preparation</field>
+            <field name="is_mandatory" eval="True"/>
+        </record>
+        
+        <record id="sop_checklist_ac_001_3" model="knowledge.sop.checklist">
+            <field name="sop_id" ref="sop_access_control_visitor"/>
+            <field name="sequence">3</field>
+            <field name="name">ID verified and matches visitor</field>
+            <field name="category">execution</field>
+            <field name="is_mandatory" eval="True"/>
+        </record>
+        
+        <record id="sop_checklist_ac_001_4" model="knowledge.sop.checklist">
+            <field name="sop_id" ref="sop_access_control_visitor"/>
+            <field name="sequence">4</field>
+            <field name="name">Watchlist checked</field>
+            <field name="category">safety</field>
+            <field name="is_mandatory" eval="True"/>
+        </record>
+        
+        <record id="sop_checklist_ac_001_5" model="knowledge.sop.checklist">
+            <field name="sop_id" ref="sop_access_control_visitor"/>
+            <field name="sequence">5</field>
+            <field name="name">Host confirmation obtained</field>
+            <field name="category">execution</field>
+            <field name="is_mandatory" eval="True"/>
+        </record>
+        
+        <record id="sop_checklist_ac_001_6" model="knowledge.sop.checklist">
+            <field name="sop_id" ref="sop_access_control_visitor"/>
+            <field name="sequence">6</field>
+            <field name="name">Security screening completed</field>
+            <field name="category">safety</field>
+            <field name="is_mandatory" eval="True"/>
+        </record>
+        
+        <record id="sop_checklist_ac_001_7" model="knowledge.sop.checklist">
+            <field name="sop_id" ref="sop_access_control_visitor"/>
+            <field name="sequence">7</field>
+            <field name="name">Visitor registered in GuardPro system</field>
+            <field name="category">documentation</field>
+            <field name="is_mandatory" eval="True"/>
+        </record>
+        
+        <record id="sop_checklist_ac_001_8" model="knowledge.sop.checklist">
+            <field name="sop_id" ref="sop_access_control_visitor"/>
+            <field name="sequence">8</field>
+            <field name="name">Exit time recorded upon departure</field>
+            <field name="category">completion</field>
+            <field name="is_mandatory" eval="True"/>
+        </record>
+        
+        <!-- ============================================ -->
+        <!-- SOP: Emergency Fire Response -->
+        <!-- ============================================ -->
+        
+        <record id="sop_fire_emergency" model="knowledge.sop">
+            <field name="name">Fire Emergency Response Protocol</field>
+            <field name="code">SOP-FIRE-001</field>
+            <field name="is_sira_compliant" eval="True"/>
+            <field name="sira_category">emergency</field>
+            <field name="risk_level">critical</field>
+            <field name="state">approved</field>
+            <field name="requires_training" eval="True"/>
+            <field name="training_duration">4.0</field>
+            <field name="sequence">20</field>
+            <field name="objective">To ensure safe and effective response to fire emergencies, prioritizing life safety and property protection.</field>
+            <field name="scope">Applies to all security personnel. Mandatory training required annually.</field>
+            <field name="description"><![CDATA[
+                <h3>Purpose</h3>
+                <p>This SOP defines the immediate response actions for fire emergencies in accordance with UAE Civil Defense regulations and SIRA safety standards.</p>
+                
+                <h3>Fire Response Priority</h3>
+                <ol>
+                    <li><strong>LIFE SAFETY</strong> - Protect and evacuate people</li>
+                    <li><strong>ALERT</strong> - Notify emergency services and management</li>
+                    <li><strong>CONTAIN</strong> - Prevent fire spread if safe to do so</li>
+                    <li><strong>EVACUATE</strong> - Complete building evacuation</li>
+                </ol>
+                
+                <div class="alert alert-danger">
+                    <h4>CRITICAL SAFETY RULES</h4>
+                    <ul>
+                        <li>NEVER put yourself in danger to save property</li>
+                        <li>NEVER use elevators during fire emergency</li>
+                        <li>NEVER re-enter building until Civil Defense gives all-clear</li>
+                        <li>ALWAYS prioritize human life over property</li>
+                    </ul>
+                </div>
+            ]]></field>
+        </record>
+        
+        <!-- Fire Response SOP Steps -->
+        <record id="sop_step_fire_001_1" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_fire_emergency"/>
+            <field name="sequence">1</field>
+            <field name="name">DETECT - Identify Fire Emergency</field>
+            <field name="is_critical" eval="True"/>
+            <field name="expected_duration">0.5</field>
+            <field name="description"><![CDATA[
+                <ul>
+                    <li>Fire alarm sounding</li>
+                    <li>Visible smoke or flames</li>
+                    <li>Smell of burning materials</li>
+                    <li>Report from occupants</li>
+                    <li>Fire detection system alert</li>
+                </ul>
+                <p><strong>DO NOT IGNORE</strong> any fire indication. Treat all alarms as real until confirmed otherwise.</p>
+            ]]></field>
+            <field name="safety_note">Never assume fire alarm is false. Every second counts in fire emergency.</field>
+        </record>
+        
+        <record id="sop_step_fire_001_2" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_fire_emergency"/>
+            <field name="sequence">2</field>
+            <field name="name">ALERT - Activate Emergency Response (30 seconds)</field>
+            <field name="is_critical" eval="True"/>
+            <field name="expected_duration">0.5</field>
+            <field name="description"><![CDATA[
+                <h4>IMMEDIATELY CALL 997 (Civil Defense)</h4>
+                <p>Provide clear information:</p>
+                <ul>
+                    <li>"Fire emergency at [exact address]"</li>
+                    <li>Building name and number</li>
+                    <li>Floor and location of fire</li>
+                    <li>Size of fire (small/medium/large)</li>
+                    <li>Any trapped persons</li>
+                    <li>Your name and callback number</li>
+                </ul>
+                <p><strong>THEN notify:</strong></p>
+                <ul>
+                    <li>Control room/security supervisor (radio)</li>
+                    <li>Building management</li>
+                    <li>Press manual fire alarm pull station</li>
+                </ul>
+            ]]></field>
+            <field name="safety_note">ALWAYS call 997 first, even if fire seems small. Do not wait for supervisor approval.</field>
+        </record>
+        
+        <record id="sop_step_fire_001_3" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_fire_emergency"/>
+            <field name="sequence">3</field>
+            <field name="name">ASSIST - Help Immediate Evacuees</field>
+            <field name="is_critical" eval="True"/>
+            <field name="expected_duration">5.0</field>
+            <field name="description"><![CDATA[
+                <ul>
+                    <li>Shout loudly: "FIRE! EVACUATE NOW! USE STAIRS!"</li>
+                    <li>Direct people to nearest emergency exit</li>
+                    <li>Help elderly, disabled, children first</li>
+                    <li>Knock on doors shouting "FIRE! EVACUATE!"</li>
+                    <li>Check restrooms and common areas quickly</li>
+                    <li>Ensure people do NOT use elevators</li>
+                    <li>Tell people to leave belongings and GO</li>
+                </ul>
+            ]]></field>
+            <field name="safety_note">Spend maximum 5 minutes on immediate area evacuation. Do not endanger yourself searching entire building.</field>
+        </record>
+        
+        <record id="sop_step_fire_001_4" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_fire_emergency"/>
+            <field name="sequence">4</field>
+            <field name="name">ASSESS - Evaluate Fire Size and Safety</field>
+            <field name="is_critical" eval="True"/>
+            <field name="expected_duration">1.0</field>
+            <field name="description"><![CDATA[
+                <p><strong>SMALL FIRE (Incipient):</strong></p>
+                <ul>
+                    <li>Contained to small area (wastebasket, small appliance)</li>
+                    <li>No heavy smoke</li>
+                    <li>Exit path clear</li>
+                    <li>Fire extinguisher immediately available</li>
+                    <li>You are trained and confident</li>
+                </ul>
+                <p>→ May attempt to extinguish (see Step 5)</p>
+                
+                <p><strong>LARGE FIRE:</strong></p>
+                <ul>
+                    <li>Spreading rapidly</li>
+                    <li>Heavy smoke/heat</li>
+                    <li>Blocking exits</li>
+                    <li>You are unsure or afraid</li>
+                </ul>
+                <p>→ EVACUATE IMMEDIATELY (skip to Step 6)</p>
+            ]]></field>
+            <field name="safety_note">When in doubt, GET OUT. No property is worth your life.</field>
+        </record>
+        
+        <record id="sop_step_fire_001_5" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_fire_emergency"/>
+            <field name="sequence">5</field>
+            <field name="name">EXTINGUISH - Fight Small Fire (Only if Safe)</field>
+            <field name="is_critical" eval="True"/>
+            <field name="expected_duration">3.0</field>
+            <field name="description"><![CDATA[
+                <h4>PASS Method for Fire Extinguisher:</h4>
+                <ul>
+                    <li><strong>P</strong>ull the pin</li>
+                    <li><strong>A</strong>im nozzle at base of fire (not flames)</li>
+                    <li><strong>S</strong>queeze handle</li>
+                    <li><strong>S</strong>weep side to side at base</li>
+                </ul>
+                
+                <p><strong>Safety Rules:</strong></p>
+                <ul>
+                    <li>Stay LOW (heat and smoke rise)</li>
+                    <li>Keep exit behind you - never let fire get between you and exit</li>
+                    <li>Use correct extinguisher type:
+                        <ul>
+                            <li>RED (Water) - Paper, wood, cloth</li>
+                            <li>BLACK (CO2) - Electrical fires</li>
+                            <li>CREAM (Foam) - Flammable liquids</li>
+                            <li>BLUE (Powder) - General purpose</li>
+                        </ul>
+                    </li>
+                    <li>If fire does NOT go out in 10 seconds - EVACUATE</li>
+                </ul>
+            ]]></field>
+            <field name="safety_note">NEVER use water on electrical or oil fires. If you empty one extinguisher and fire continues, LEAVE IMMEDIATELY.</field>
+        </record>
+        
+        <record id="sop_step_fire_001_6" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_fire_emergency"/>
+            <field name="sequence">6</field>
+            <field name="name">EVACUATE - Exit Building Safely</field>
+            <field name="is_critical" eval="True"/>
+            <field name="expected_duration">5.0</field>
+            <field name="description"><![CDATA[
+                <ul>
+                    <li>Use emergency stairs - NEVER elevators</li>
+                    <li>Close doors behind you (slows fire spread)</li>
+                    <li>Stay low if smoke present</li>
+                    <li>Feel doors before opening (hot = fire on other side, use alternate route)</li>
+                    <li>If caught in smoke: Drop to hands and knees, breathe through cloth</li>
+                    <li>Go to designated assembly point outside</li>
+                    <li>Do NOT re-enter for any reason</li>
+                </ul>
+            ]]></field>
+            <field name="safety_note">If trapped: Go to room with window, close door, seal cracks with wet cloth, signal from window. Call 997 and tell them your exact location.</field>
+        </record>
+        
+        <record id="sop_step_fire_001_7" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_fire_emergency"/>
+            <field name="sequence">7</field>
+            <field name="name">ACCOUNT - Assembly Point Duties</field>
+            <field name="is_critical" eval="True"/>
+            <field name="expected_duration">10.0</field>
+            <field name="description"><![CDATA[
+                <p><strong>At Assembly Point:</strong></p>
+                <ul>
+                    <li>Direct evacuees to safe distance (minimum 50 meters from building)</li>
+                    <li>Take headcount if you have personnel roster</li>
+                    <li>Ask if anyone is missing or still inside</li>
+                    <li>Keep people calm and together</li>
+                    <li>Prevent anyone from re-entering building</li>
+                    <li>Direct Civil Defense to exact fire location upon arrival</li>
+                    <li>Inform Civil Defense of any known trapped persons</li>
+                </ul>
+            ]]></field>
+        </record>
+        
+        <record id="sop_step_fire_001_8" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_fire_emergency"/>
+            <field name="sequence">8</field>
+            <field name="name">REPORT - Post-Emergency Documentation</field>
+            <field name="is_critical" eval="False"/>
+            <field name="expected_duration">30.0</field>
+            <field name="description"><![CDATA[
+                <p>After emergency is controlled:</p>
+                <ul>
+                    <li>Create incident report in GuardPro system</li>
+                    <li>Document timeline of events</li>
+                    <li>List all emergency service units that responded</li>
+                    <li>Note any injuries or property damage</li>
+                    <li>Collect witness statements</li>
+                    <li>Take photos of damage (if safe and authorized)</li>
+                    <li>Notify client/management with preliminary report</li>
+                    <li>Cooperate with Civil Defense investigation</li>
+                </ul>
+            ]]></field>
+        </record>
+        
+        <!-- ============================================ -->
+        <!-- SOP: Patrol and Monitoring -->
+        <!-- ============================================ -->
+        
+        <record id="sop_patrol_procedure" model="knowledge.sop">
+            <field name="name">Security Patrol and Checkpoint Monitoring</field>
+            <field name="code">SOP-PATROL-001</field>
+            <field name="is_sira_compliant" eval="True"/>
+            <field name="sira_category">patrol</field>
+            <field name="risk_level">low</field>
+            <field name="state">approved</field>
+            <field name="requires_training" eval="True"/>
+            <field name="training_duration">3.0</field>
+            <field name="sequence">30</field>
+            <field name="objective">To conduct systematic security patrols ensuring all areas are monitored and irregularities are detected and reported.</field>
+            <field name="scope">All guards assigned to patrol duties at client sites.</field>
+            <field name="description"><![CDATA[
+                <h3>Purpose</h3>
+                <p>Systematic patrols deter criminal activity, identify hazards, and ensure site security. GuardPro's checkpoint scanning system ensures accountability and proof of patrol completion.</p>
+                
+                <h3>Patrol Types</h3>
+                <ul>
+                    <li><strong>Routine Patrol:</strong> Scheduled regular rounds</li>
+                    <li><strong>Random Patrol:</strong> Unpredictable timing to prevent pattern recognition</li>
+                    <li><strong>Response Patrol:</strong> Investigating specific incident or alarm</li>
+                </ul>
+            ]]></field>
+        </record>
+        
+        <!-- ============================================ -->
+        <!-- SOP: Incident Reporting -->
+        <!-- ============================================ -->
+        
+        <record id="sop_incident_reporting" model="knowledge.sop">
+            <field name="name">Incident Reporting and Documentation</field>
+            <field name="code">SOP-INC-001</field>
+            <field name="is_sira_compliant" eval="True"/>
+            <field name="sira_category">reporting</field>
+            <field name="risk_level">medium</field>
+            <field name="state">approved</field>
+            <field name="requires_training" eval="True"/>
+            <field name="training_duration">2.5</field>
+            <field name="sequence">40</field>
+            <field name="objective">To ensure all security incidents are accurately documented, reported promptly, and properly escalated.</field>
+            <field name="scope">All security personnel must report incidents using GuardPro Incident Management module.</field>
+            <field name="description"><![CDATA[
+                <h3>What is an Incident?</h3>
+                <p>Any event that:</p>
+                <ul>
+                    <li>Threatens safety or security</li>
+                    <li>Violates laws, regulations, or site policies</li>
+                    <li>Causes or could cause injury, damage, or loss</li>
+                    <li>Requires documentation for legal or insurance purposes</li>
+                </ul>
+                
+                <h3>Incident Categories</h3>
+                <ul>
+                    <li>Theft / Loss of Property</li>
+                    <li>Assault / Violence</li>
+                    <li>Medical Emergency</li>
+                    <li>Fire / Hazmat</li>
+                    <li>Trespassing / Unauthorized Access</li>
+                    <li>Vandalism / Property Damage</li>
+                    <li>Suspicious Activity</li>
+                    <li>Safety Hazard</li>
+                </ul>
+                
+                <h3>The 5 W's of Incident Reporting</h3>
+                <ul>
+                    <li><strong>WHO:</strong> All persons involved (names, descriptions, contact info)</li>
+                    <li><strong>WHAT:</strong> Exactly what happened (facts only, no opinions)</li>
+                    <li><strong>WHEN:</strong> Precise date and time</li>
+                    <li><strong>WHERE:</strong> Exact location (building, floor, room)</li>
+                    <li><strong>WHY:</strong> Apparent cause or reason (if known)</li>
+                </ul>
+            ]]></field>
+        </record>
+        
+    </data>
+</odoo>
+

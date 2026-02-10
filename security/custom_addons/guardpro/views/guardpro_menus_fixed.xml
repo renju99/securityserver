@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+    <!-- ROOT MENU -->
+    <menuitem id="menu_guardpro_root"
+        name="Sentry"
+        sequence="10"
+        web_icon="guardpro,static/description/icon.png"/>
+
+    <!-- Dashboard -->
+    <menuitem id="menu_guardpro_dashboard"
+        name="Dashboard"
+        parent="menu_guardpro_root"
+        sequence="10"
+        action="action_guardpro_analytics_dashboard_client"
+        web_icon="board,static/description/icon.png"/>
+
+    <menuitem id="menu_guardpro_analytics_dashboard"
+        name="Analytics Dashboard"
+        parent="menu_guardpro_dashboard"
+        action="action_guardpro_analytics_dashboard_client"
+        sequence="10"
+        groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <menuitem id="menu_guards_map"
+        name="Live Guard Map"
+        parent="menu_guardpro_dashboard"
+        action="action_guards_map"
+        sequence="20"
+        groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    </data>
+</odoo>
+
+
+
+

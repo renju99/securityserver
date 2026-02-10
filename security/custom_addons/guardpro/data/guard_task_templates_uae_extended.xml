@@ -1,0 +1,1403 @@
+<?xml version="1.0" ?>
+<odoo>
+    <data noupdate="0">
+        <record id="task_template_loading_dock" model="guard.task.template">
+            <field name="name">Loading Dock Security Check</field>
+            <field name="task_type">patrol</field>
+            <field name="priority">2</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_loading_dock_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_loading_dock"/>
+            <field name="name">Verify all loading bay doors are secure when not in use</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_loading_dock_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_loading_dock"/>
+            <field name="name">Check delivery schedule and expected arrivals</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_loading_dock_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_loading_dock"/>
+            <field name="name">Inspect dock area for unauthorized items or vehicles</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_loading_dock_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_loading_dock"/>
+            <field name="name">Verify dock lighting and safety equipment</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_loading_dock_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_loading_dock"/>
+            <field name="name">Check dock levelers and safety barriers</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_restricted_area" model="guard.task.template">
+            <field name="name">Restricted Area Access Verification</field>
+            <field name="task_type">inspection</field>
+            <field name="priority">3</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_restricted_area_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_restricted_area"/>
+            <field name="name">Verify access control systems for restricted zones</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_restricted_area_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_restricted_area"/>
+            <field name="name">Check authorization logs for recent entries</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_restricted_area_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_restricted_area"/>
+            <field name="name">Inspect restricted area signage visibility</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_restricted_area_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_restricted_area"/>
+            <field name="name">Verify biometric/card readers are functional</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_restricted_area_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_restricted_area"/>
+            <field name="name">Check for unauthorized access attempts</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_restricted_area_item_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_restricted_area"/>
+            <field name="name">Ensure restricted area doors are properly secured</field>
+            <field name="sequence">60</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_building_lockdown" model="guard.task.template">
+            <field name="name">After-Hours Building Lockdown</field>
+            <field name="task_type">patrol</field>
+            <field name="priority">2</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_building_lockdown_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_building_lockdown"/>
+            <field name="name">Lock all main entrance doors</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_building_lockdown_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_building_lockdown"/>
+            <field name="name">Verify all office areas are secured</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_building_lockdown_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_building_lockdown"/>
+            <field name="name">Check all windows are closed and locked</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_building_lockdown_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_building_lockdown"/>
+            <field name="name">Activate night-time alarm systems</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_building_lockdown_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_building_lockdown"/>
+            <field name="name">Verify emergency exits are accessible but alarmed</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_building_lockdown_item_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_building_lockdown"/>
+            <field name="name">Document final walkthrough time</field>
+            <field name="sequence">60</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_roof_access" model="guard.task.template">
+            <field name="name">Roof Access &amp; Perimeter Security</field>
+            <field name="task_type">patrol</field>
+            <field name="priority">2</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_roof_access_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_roof_access"/>
+            <field name="name">Check all roof access doors are locked</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_roof_access_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_roof_access"/>
+            <field name="name">Verify maintenance hatches are secured</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_roof_access_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_roof_access"/>
+            <field name="name">Inspect HVAC equipment for tampering</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_roof_access_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_roof_access"/>
+            <field name="name">Check perimeter lighting directed upwards</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_roof_access_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_roof_access"/>
+            <field name="name">Verify antenna/comms equipment is secure</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_stairwell_patrol" model="guard.task.template">
+            <field name="name">Stairwell &amp; Fire Exit Patrol</field>
+            <field name="task_type">patrol</field>
+            <field name="priority">1</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_stairwell_patrol_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_stairwell_patrol"/>
+            <field name="name">Check for obstructions in all stairwells</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_stairwell_patrol_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_stairwell_patrol"/>
+            <field name="name">Verify fire doors close and latch properly</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_stairwell_patrol_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_stairwell_patrol"/>
+            <field name="name">Inspect emergency exit lighting</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_stairwell_patrol_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_stairwell_patrol"/>
+            <field name="name">Check for unauthorized individuals in stairwells</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_stairwell_patrol_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_stairwell_patrol"/>
+            <field name="name">Verify floor level signage is visible</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_basement_security" model="guard.task.template">
+            <field name="name">Basement &amp; Service Area Check</field>
+            <field name="task_type">patrol</field>
+            <field name="priority">1</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_basement_security_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_basement_security"/>
+            <field name="name">Inspect service elevator vestibules</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_basement_security_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_basement_security"/>
+            <field name="name">Check electrical room door security</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_basement_security_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_basement_security"/>
+            <field name="name">Verify water pump room is locked</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_basement_security_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_basement_security"/>
+            <field name="name">Inspect basement parking for loitering</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_basement_security_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_basement_security"/>
+            <field name="name">Check for water leaks or dampness</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_external_perimeter" model="guard.task.template">
+            <field name="name">External Fence &amp; Boundary Patrol</field>
+            <field name="task_type">patrol</field>
+            <field name="priority">2</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_external_perimeter_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_external_perimeter"/>
+            <field name="name">Inspect perimeter fence for breaches/damage</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_external_perimeter_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_external_perimeter"/>
+            <field name="name">Check boundary wall lighting</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_external_perimeter_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_external_perimeter"/>
+            <field name="name">Verify gate locks and mechanisms</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_external_perimeter_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_external_perimeter"/>
+            <field name="name">Check for debris or items near boundary</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_external_perimeter_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_external_perimeter"/>
+            <field name="name">Monitor external public areas near site</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_vacant_office" model="guard.task.template">
+            <field name="name">Vacant Office Space Inspection</field>
+            <field name="task_type">inspection</field>
+            <field name="priority">1</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_vacant_office_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_vacant_office"/>
+            <field name="name">Verify main door is locked</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_vacant_office_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_vacant_office"/>
+            <field name="name">Check for any lights left on</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_vacant_office_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_vacant_office"/>
+            <field name="name">Inspect for water leaks or odors</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_vacant_office_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_vacant_office"/>
+            <field name="name">Verify no unauthorized items stored</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_vacant_office_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_vacant_office"/>
+            <field name="name">Check window security</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_security_equipment" model="guard.task.template">
+            <field name="name">Security Equipment Daily Check</field>
+            <field name="task_type">equipment_check</field>
+            <field name="priority">2</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_security_equipment_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_security_equipment"/>
+            <field name="name">Test two-way radio communication</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_security_equipment_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_security_equipment"/>
+            <field name="name">Check flashlight batteries and functionality</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_security_equipment_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_security_equipment"/>
+            <field name="name">Verify metal detector operation</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_security_equipment_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_security_equipment"/>
+            <field name="name">Test panic button/duress alarm</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_security_equipment_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_security_equipment"/>
+            <field name="name">Check guard tour wand/scanner</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_security_equipment_item_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_security_equipment"/>
+            <field name="name">Inspect personal protective equipment (PPE)</field>
+            <field name="sequence">60</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_radio_test" model="guard.task.template">
+            <field name="name">Radio Communication System Test</field>
+            <field name="task_type">equipment_check</field>
+            <field name="priority">2</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_radio_test_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_radio_test"/>
+            <field name="name">Test base station communication</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_radio_test_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_radio_test"/>
+            <field name="name">Verify all guard radios are functional</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_radio_test_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_radio_test"/>
+            <field name="name">Check radio battery levels</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_radio_test_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_radio_test"/>
+            <field name="name">Test emergency channels</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_radio_test_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_radio_test"/>
+            <field name="name">Verify radio coverage in all areas</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_alarm_check" model="guard.task.template">
+            <field name="name">Alarm System Functionality Check</field>
+            <field name="task_type">equipment_check</field>
+            <field name="priority">3</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_alarm_check_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_alarm_check"/>
+            <field name="name">Test alarm panel responsiveness</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_alarm_check_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_alarm_check"/>
+            <field name="name">Verify all zones are operational</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_alarm_check_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_alarm_check"/>
+            <field name="name">Check alarm battery backup</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_alarm_check_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_alarm_check"/>
+            <field name="name">Test siren/bell functionality</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_alarm_check_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_alarm_check"/>
+            <field name="name">Verify alarm monitoring connection</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_alarm_check_item_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_alarm_check"/>
+            <field name="name">Document any fault codes</field>
+            <field name="sequence">60</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_generator_check" model="guard.task.template">
+            <field name="name">Emergency Generator Inspection</field>
+            <field name="task_type">equipment_check</field>
+            <field name="priority">2</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_generator_check_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_generator_check"/>
+            <field name="name">Check generator fuel level</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_generator_check_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_generator_check"/>
+            <field name="name">Verify generator battery charge</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_generator_check_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_generator_check"/>
+            <field name="name">Test generator start sequence</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_generator_check_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_generator_check"/>
+            <field name="name">Check for oil or fuel leaks</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_generator_check_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_generator_check"/>
+            <field name="name">Verify automatic transfer switch</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_generator_check_item_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_generator_check"/>
+            <field name="name">Document generator run hours</field>
+            <field name="sequence">60</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_server_room" model="guard.task.template">
+            <field name="name">Server Room Environmental Check</field>
+            <field name="task_type">equipment_check</field>
+            <field name="priority">3</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_server_room_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_server_room"/>
+            <field name="name">Check server room temperature</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_server_room_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_server_room"/>
+            <field name="name">Verify AC units are running</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_server_room_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_server_room"/>
+            <field name="name">Check for any alarm lights on racks</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_server_room_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_server_room"/>
+            <field name="name">Ensure room is clean and dust-free</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_server_room_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_server_room"/>
+            <field name="name">Verify water leak detection system</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_ups_system" model="guard.task.template">
+            <field name="name">UPS System Status Verification</field>
+            <field name="task_type">equipment_check</field>
+            <field name="priority">2</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_ups_system_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_ups_system"/>
+            <field name="name">Check UPS panel for active alarms</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_ups_system_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_ups_system"/>
+            <field name="name">Verify battery load percentage</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_ups_system_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_ups_system"/>
+            <field name="name">Check room ventilation/cooling</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_ups_system_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_ups_system"/>
+            <field name="name">Inspect for battery leakage</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_ups_system_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_ups_system"/>
+            <field name="name">Document load and runtime values</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_workplace_safety" model="guard.task.template">
+            <field name="name">Workplace Safety Inspection</field>
+            <field name="task_type">safety_check</field>
+            <field name="priority">2</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_workplace_safety_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_workplace_safety"/>
+            <field name="name">Check for slip/trip/fall hazards</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_workplace_safety_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_workplace_safety"/>
+            <field name="name">Verify emergency lighting is functional</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_workplace_safety_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_workplace_safety"/>
+            <field name="name">Inspect fire extinguisher accessibility</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_workplace_safety_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_workplace_safety"/>
+            <field name="name">Check first aid kit availability</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_workplace_safety_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_workplace_safety"/>
+            <field name="name">Verify safety signage is visible</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_workplace_safety_item_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_workplace_safety"/>
+            <field name="name">Document any safety concerns</field>
+            <field name="sequence">60</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_hazmat_check" model="guard.task.template">
+            <field name="name">Hazardous Materials Storage Check</field>
+            <field name="task_type">safety_check</field>
+            <field name="priority">3</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_hazmat_check_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_hazmat_check"/>
+            <field name="name">Verify hazmat storage area is secure</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_hazmat_check_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_hazmat_check"/>
+            <field name="name">Check hazmat signage and labeling</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_hazmat_check_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_hazmat_check"/>
+            <field name="name">Inspect spill containment equipment</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_hazmat_check_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_hazmat_check"/>
+            <field name="name">Verify ventilation systems are operational</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_hazmat_check_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_hazmat_check"/>
+            <field name="name">Check MSDS sheets are available</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_hazmat_check_item_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_hazmat_check"/>
+            <field name="name">Document any leaks or spills</field>
+            <field name="sequence">60</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_first_aid" model="guard.task.template">
+            <field name="name">First Aid Kit Inspection</field>
+            <field name="task_type">safety_check</field>
+            <field name="priority">2</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_first_aid_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_first_aid"/>
+            <field name="name">Check first aid kit is fully stocked</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_first_aid_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_first_aid"/>
+            <field name="name">Verify expiration dates on medical supplies</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_first_aid_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_first_aid"/>
+            <field name="name">Ensure AED (if present) is functional</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_first_aid_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_first_aid"/>
+            <field name="name">Check emergency contact numbers are posted</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_first_aid_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_first_aid"/>
+            <field name="name">Verify first aid kit accessibility</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_fire_door" model="guard.task.template">
+            <field name="name">Fire Door &amp; Exit Corridor Audit</field>
+            <field name="task_type">safety_check</field>
+            <field name="priority">3</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_fire_door_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_fire_door"/>
+            <field name="name">Check all fire doors for obstructions</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_fire_door_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_fire_door"/>
+            <field name="name">Verify electromagnetic releases work</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_fire_door_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_fire_door"/>
+            <field name="name">Check corridor lighting levels</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_fire_door_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_fire_door"/>
+            <field name="name">Verify 'FIRE EXIT' signs are lit</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_fire_door_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_fire_door"/>
+            <field name="name">Check for storage of items in corridors</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_hose_reel" model="guard.task.template">
+            <field name="name">Fire Hose Reel &amp; Cabinet Check</field>
+            <field name="task_type">safety_check</field>
+            <field name="priority">2</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_hose_reel_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_hose_reel"/>
+            <field name="name">Ensure hose reel cabinet is accessible</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_hose_reel_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_hose_reel"/>
+            <field name="name">Check glass/latch for damage</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_hose_reel_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_hose_reel"/>
+            <field name="name">Verify hose is properly wound</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_hose_reel_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_hose_reel"/>
+            <field name="name">Check nozzle for blockages</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_hose_reel_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_hose_reel"/>
+            <field name="name">Verify pressure gauge readings</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_waste_mgmt" model="guard.task.template">
+            <field name="name">Waste Management Area Security</field>
+            <field name="task_type">safety_check</field>
+            <field name="priority">1</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_waste_mgmt_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_waste_mgmt"/>
+            <field name="name">Verify trash compactors are secured</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_waste_mgmt_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_waste_mgmt"/>
+            <field name="name">Check for hazardous waste compliance</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_waste_mgmt_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_waste_mgmt"/>
+            <field name="name">Inspect for unauthorized scavenging</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_waste_mgmt_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_waste_mgmt"/>
+            <field name="name">Verify area lighting is functional</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_waste_mgmt_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_waste_mgmt"/>
+            <field name="name">Check for fire hazards in bins</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_smoking_area" model="guard.task.template">
+            <field name="name">Designated Smoking Area Audit</field>
+            <field name="task_type">safety_check</field>
+            <field name="priority">1</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_smoking_area_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_smoking_area"/>
+            <field name="name">Inpsect for improperly discarded cigs</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_smoking_area_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_smoking_area"/>
+            <field name="name">Verify fire bins are emptied</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_smoking_area_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_smoking_area"/>
+            <field name="name">Check for smoking in unauthorized areas</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_smoking_area_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_smoking_area"/>
+            <field name="name">Verify signage is present</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_smoking_area_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_smoking_area"/>
+            <field name="name">Monitor area for social distancing/rules</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_safety_walkthrough" model="guard.task.template">
+            <field name="name">Common Area Safety Walkthrough</field>
+            <field name="task_type">safety_check</field>
+            <field name="priority">1</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_safety_walkthrough_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_safety_walkthrough"/>
+            <field name="name">Check for loose tiles or floor mats</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_safety_walkthrough_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_safety_walkthrough"/>
+            <field name="name">Monitor escalator/elevator operation</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_safety_walkthrough_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_safety_walkthrough"/>
+            <field name="name">Verify lobby furniture is stable</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_safety_walkthrough_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_safety_walkthrough"/>
+            <field name="name">Check for wet floors near entrances</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_safety_walkthrough_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_safety_walkthrough"/>
+            <field name="name">Inspect ceiling tiles for leaks</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_contractor_log" model="guard.task.template">
+            <field name="name">Contractor Entry &amp; Exit Log</field>
+            <field name="task_type">visitor_log</field>
+            <field name="priority">2</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_contractor_log_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_contractor_log"/>
+            <field name="name">Verify contractor authorization and permits</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_contractor_log_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_contractor_log"/>
+            <field name="name">Check contractor ID and company credentials</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_contractor_log_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_contractor_log"/>
+            <field name="name">Issue contractor badge/pass</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_contractor_log_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_contractor_log"/>
+            <field name="name">Log contractor entry time and purpose</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_contractor_log_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_contractor_log"/>
+            <field name="name">Inspect contractor tools and equipment</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_contractor_log_item_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_contractor_log"/>
+            <field name="name">Log contractor exit and badge return</field>
+            <field name="sequence">60</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_vip_protocol" model="guard.task.template">
+            <field name="name">VIP/Dignitary Security Protocol</field>
+            <field name="task_type">visitor_log</field>
+            <field name="priority">3</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_vip_protocol_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_vip_protocol"/>
+            <field name="name">Verify VIP arrival schedule and details</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_vip_protocol_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_vip_protocol"/>
+            <field name="name">Coordinate with advance security team</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_vip_protocol_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_vip_protocol"/>
+            <field name="name">Secure VIP route and parking area</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_vip_protocol_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_vip_protocol"/>
+            <field name="name">Brief all security personnel on protocol</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_vip_protocol_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_vip_protocol"/>
+            <field name="name">Monitor VIP arrival and departure</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_vip_protocol_item_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_vip_protocol"/>
+            <field name="name">Document VIP visit completion</field>
+            <field name="sequence">60</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_delivery_screening" model="guard.task.template">
+            <field name="name">Delivery &amp; Package Screening</field>
+            <field name="task_type">visitor_log</field>
+            <field name="priority">2</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_delivery_screening_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_delivery_screening"/>
+            <field name="name">Verify delivery authorization</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_delivery_screening_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_delivery_screening"/>
+            <field name="name">Inspect package for damage or tampering</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_delivery_screening_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_delivery_screening"/>
+            <field name="name">Screen package through X-ray (if available)</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_delivery_screening_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_delivery_screening"/>
+            <field name="name">Log delivery details in register</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_delivery_screening_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_delivery_screening"/>
+            <field name="name">Verify recipient and obtain signature</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_delivery_screening_item_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_delivery_screening"/>
+            <field name="name">Escort delivery person if required</field>
+            <field name="sequence">60</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_key_audit" model="guard.task.template">
+            <field name="name">Weekly Master Key Audit</field>
+            <field name="task_type">visitor_log</field>
+            <field name="priority">3</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_key_audit_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_key_audit"/>
+            <field name="name">Verify all master keys are in cabinet</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_key_audit_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_key_audit"/>
+            <field name="name">Check sign-out log against inventory</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_key_audit_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_key_audit"/>
+            <field name="name">Verify authorization for signed-out keys</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_key_audit_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_key_audit"/>
+            <field name="name">Inspect keys for physical damage</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_key_audit_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_key_audit"/>
+            <field name="name">Check integrity of key tags/labels</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_lobby_management" model="guard.task.template">
+            <field name="name">Lobby Flow &amp; Crowd Control</field>
+            <field name="task_type">visitor_log</field>
+            <field name="priority">2</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_lobby_management_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_lobby_management"/>
+            <field name="name">Monitor visitor queues</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_lobby_management_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_lobby_management"/>
+            <field name="name">Ensure social distancing if applicable</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_lobby_management_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_lobby_management"/>
+            <field name="name">Verify reception check-in process</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_lobby_management_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_lobby_management"/>
+            <field name="name">Manage elevator access for groups</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_lobby_management_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_lobby_management"/>
+            <field name="name">Monitor for unauthorized photography</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_after_hours_visitor" model="guard.task.template">
+            <field name="name">After-Hours Visitor Verification</field>
+            <field name="task_type">visitor_log</field>
+            <field name="priority">3</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_after_hours_visitor_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_after_hours_visitor"/>
+            <field name="name">Contact host for authorization</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_after_hours_visitor_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_after_hours_visitor"/>
+            <field name="name">Check visitor ID against system</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_after_hours_visitor_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_after_hours_visitor"/>
+            <field name="name">Log visitor and host escort</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_after_hours_visitor_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_after_hours_visitor"/>
+            <field name="name">Verify visitor departure</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_after_hours_visitor_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_after_hours_visitor"/>
+            <field name="name">Note any deviations from protocol</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_incident_scene" model="guard.task.template">
+            <field name="name">Incident Scene Preservation</field>
+            <field name="task_type">incident_followup</field>
+            <field name="priority">3</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_incident_scene_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_incident_scene"/>
+            <field name="name">Secure incident scene perimeter</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_incident_scene_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_incident_scene"/>
+            <field name="name">Prevent unauthorized access to scene</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_incident_scene_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_incident_scene"/>
+            <field name="name">Document scene with photos/video</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_incident_scene_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_incident_scene"/>
+            <field name="name">Preserve physical evidence</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_incident_scene_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_incident_scene"/>
+            <field name="name">Maintain incident log</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_incident_scene_item_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_incident_scene"/>
+            <field name="name">Coordinate with authorities if required</field>
+            <field name="sequence">60</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_medical_emergency" model="guard.task.template">
+            <field name="name">Medical Emergency Response</field>
+            <field name="task_type">incident_followup</field>
+            <field name="priority">3</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_medical_emergency_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_medical_emergency"/>
+            <field name="name">Call emergency services (999/998)</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_medical_emergency_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_medical_emergency"/>
+            <field name="name">Provide first aid if trained</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_medical_emergency_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_medical_emergency"/>
+            <field name="name">Secure area around patient</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_medical_emergency_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_medical_emergency"/>
+            <field name="name">Guide emergency responders to location</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_medical_emergency_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_medical_emergency"/>
+            <field name="name">Document incident details</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_medical_emergency_item_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_medical_emergency"/>
+            <field name="name">Notify management and family if appropriate</field>
+            <field name="sequence">60</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_theft_response" model="guard.task.template">
+            <field name="name">Theft/Loss Incident Response</field>
+            <field name="task_type">incident_followup</field>
+            <field name="priority">3</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_theft_response_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_theft_response"/>
+            <field name="name">Interview reporting person</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_theft_response_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_theft_response"/>
+            <field name="name">Review CCTV footage of area</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_theft_response_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_theft_response"/>
+            <field name="name">Secure potential evidence area</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_theft_response_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_theft_response"/>
+            <field name="name">Notify police if value exceeds limit</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_theft_response_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_theft_response"/>
+            <field name="name">Document items lost and descriptions</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_theft_response_item_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_theft_response"/>
+            <field name="name">Complete formal theft report</field>
+            <field name="sequence">60</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_unauthorized_person" model="guard.task.template">
+            <field name="name">Unauthorized Person Removal</field>
+            <field name="task_type">incident_followup</field>
+            <field name="priority">3</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_unauthorized_person_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_unauthorized_person"/>
+            <field name="name">Intercept unauthorized person</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_unauthorized_person_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_unauthorized_person"/>
+            <field name="name">Request ID and reason for presence</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_unauthorized_person_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_unauthorized_person"/>
+            <field name="name">Inform person they must leave</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_unauthorized_person_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_unauthorized_person"/>
+            <field name="name">Escort person to nearest exit</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_unauthorized_person_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_unauthorized_person"/>
+            <field name="name">Photograph person for record</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_unauthorized_person_item_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_unauthorized_person"/>
+            <field name="name">Log physical description and attitude</field>
+            <field name="sequence">60</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_dar_completion" model="guard.task.template">
+            <field name="name">Daily Activity Report (DAR) Completion</field>
+            <field name="task_type">documentation</field>
+            <field name="priority">2</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_dar_completion_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_dar_completion"/>
+            <field name="name">Document all incidents and observations</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_dar_completion_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_dar_completion"/>
+            <field name="name">Record visitor and contractor entries</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_dar_completion_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_dar_completion"/>
+            <field name="name">Note any equipment malfunctions</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_dar_completion_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_dar_completion"/>
+            <field name="name">Document patrol completion times</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_dar_completion_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_dar_completion"/>
+            <field name="name">Record any safety or security concerns</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_dar_completion_item_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_dar_completion"/>
+            <field name="name">Submit DAR to supervisor</field>
+            <field name="sequence">60</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_incident_documentation" model="guard.task.template">
+            <field name="name">Incident Report Documentation</field>
+            <field name="task_type">documentation</field>
+            <field name="priority">3</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_incident_documentation_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_incident_documentation"/>
+            <field name="name">Record incident date, time, and location</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_incident_documentation_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_incident_documentation"/>
+            <field name="name">Document all persons involved</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_incident_documentation_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_incident_documentation"/>
+            <field name="name">Collect witness statements</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_incident_documentation_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_incident_documentation"/>
+            <field name="name">Attach photo/video evidence</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_incident_documentation_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_incident_documentation"/>
+            <field name="name">Document actions taken</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_incident_documentation_item_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_incident_documentation"/>
+            <field name="name">Submit report within required timeframe</field>
+            <field name="sequence">60</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_key_control" model="guard.task.template">
+            <field name="name">Key Control &amp; Handover Log</field>
+            <field name="task_type">documentation</field>
+            <field name="priority">2</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_key_control_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_key_control"/>
+            <field name="name">Verify all keys are accounted for</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_key_control_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_key_control"/>
+            <field name="name">Log key issuance with authorization</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_key_control_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_key_control"/>
+            <field name="name">Document key return and condition</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_key_control_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_key_control"/>
+            <field name="name">Check key cabinet security</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_key_control_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_key_control"/>
+            <field name="name">Update key register</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_key_control_item_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_key_control"/>
+            <field name="name">Report any missing or damaged keys</field>
+            <field name="sequence">60</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_shift_briefing" model="guard.task.template">
+            <field name="name">Shift Briefing Documentation</field>
+            <field name="task_type">documentation</field>
+            <field name="priority">1</field>
+            <field name="active">True</field>
+        </record>
+        <record id="task_template_shift_briefing_item_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_shift_briefing"/>
+            <field name="name">Record briefing start/end time</field>
+            <field name="sequence">10</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_shift_briefing_item_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_shift_briefing"/>
+            <field name="name">Log attendee list</field>
+            <field name="sequence">20</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_shift_briefing_item_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_shift_briefing"/>
+            <field name="name">Document key points discussed</field>
+            <field name="sequence">30</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_shift_briefing_item_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_shift_briefing"/>
+            <field name="name">Note any special instructionsissued</field>
+            <field name="sequence">40</field>
+            <field name="mandatory">True</field>
+        </record>
+        <record id="task_template_shift_briefing_item_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_shift_briefing"/>
+            <field name="name">Record guard questions/concerns</field>
+            <field name="sequence">50</field>
+            <field name="mandatory">True</field>
+        </record>
+    </data>
+</odoo>

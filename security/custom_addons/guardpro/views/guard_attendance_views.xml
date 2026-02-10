@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_guard_attendance_list" model="ir.ui.view">
+            <field name="name">guard.attendance.list</field>
+            <field name="model">guard.attendance</field>
+            <field name="arch" type="xml">
+                <list string="Guard Attendance">
+                    <field name="guard_id"/>
+                    <field name="site_id"/>
+                    <field name="shift_id"/>
+                    <field name="checkin_time"/>
+                    <field name="checkout_time"/>
+                    <field name="hours_worked" widget="float_time"/>
+                    <field name="net_hours" widget="float_time"/>
+                    <field name="status" widget="badge"
+                           decoration-success="status == 'checked_out'"
+                           decoration-warning="status == 'checked_in'"
+                           decoration-danger="status == 'incomplete'"/>
+                    <field name="approved" widget="boolean_toggle"/>
+                    <field name="is_late" optional="hide"/>
+                    <field name="overtime_hours" widget="float_time" optional="hide"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_guard_attendance_form" model="ir.ui.view">
+            <field name="name">guard.attendance.form</field>
+            <field name="model">guard.attendance</field>
+            <field name="arch" type="xml">
+                <form string="Guard Attendance">
+                    <header>
+                        <button name="action_approve" string="Approve" type="object" 
+                                invisible="approved" groups="guardpro.group_guardpro_supervisor"/>
+                        <button name="action_checkout_now" string="End Shift Now" type="object"
+                                invisible="status != 'checked_in'" class="oe_highlight"/>
+                        <field name="status" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="alert alert-info" role="alert" invisible="not shift_id">
+                            <strong>Shift Information:</strong> This is one of multiple shift start/end records for this shift.
+                        </div>
+                        <group>
+                            <group string="Basic Information">
+                                <field name="guard_id"/>
+                                <field name="site_id"/>
+                                <field name="shift_id" readonly="1"/>
+                            </group>
+                            <group string="Hours Summary">
+                                <field name="hours_worked" widget="float_time"/>
+                                <field name="break_hours" widget="float_time"/>
+                                <field name="net_hours" widget="float_time"/>
+                                <field name="overtime_hours" widget="float_time"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Shift Start Details">
+                                <field name="checkin_time"/>
+                                <field name="checkin_method"/>
+                                <field name="checkin_latitude"/>
+                                <field name="checkin_longitude"/>
+                                <field name="checkin_verified" widget="boolean_toggle"/>
+                                <field name="checkin_device"/>
+                            </group>
+                            <group string="Shift End Details">
+                                <field name="checkout_time"/>
+                                <field name="checkout_method"/>
+                                <field name="checkout_latitude"/>
+                                <field name="checkout_longitude"/>
+                                <field name="checkout_verified" widget="boolean_toggle"/>
+                                <field name="checkout_device"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Status Indicators">
+                                <field name="is_late"/>
+                                <field name="late_minutes" invisible="not is_late"/>
+                                <field name="is_early_checkout"/>
+                            </group>
+                            <group string="Approval">
+                                <field name="approved" widget="boolean_toggle"/>
+                                <field name="approved_by" invisible="not approved"/>
+                                <field name="approval_datetime" invisible="not approved"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Notes">
+                                <group>
+                                    <field name="checkin_notes" widget="text"/>
+                                    <field name="checkout_notes" widget="text"/>
+                                    <field name="supervisor_notes" widget="text"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <!-- Search View for Filters and Group By -->
+        <record id="view_guard_attendance_search" model="ir.ui.view">
+            <field name="name">guard.attendance.search</field>
+            <field name="model">guard.attendance</field>
+            <field name="arch" type="xml">
+                <search string="Guard Attendance">
+                    <field name="guard_id"/>
+                    <field name="site_id"/>
+                    <field name="shift_id"/>
+                    <field name="checkin_time"/>
+                    <field name="checkout_time"/>
+                    <filter string="Shift Started" name="checked_in" domain="[('status', '=', 'checked_in')]"/>
+                    <filter string="Shift Ended" name="checked_out" domain="[('status', '=', 'checked_out')]"/>
+                    <filter string="Incomplete" name="incomplete" domain="[('status', '=', 'incomplete')]"/>
+                    <separator/>
+                    <filter string="Approved" name="approved" domain="[('approved', '=', True)]"/>
+                    <filter string="Pending Approval" name="pending" domain="[('approved', '=', False)]"/>
+                    <filter string="Late Shifts" name="late" domain="[('is_late', '=', True)]"/>
+                    <filter string="With Overtime" name="overtime" domain="[('overtime_hours', '>', 0)]"/>
+                    <separator/>
+                    <filter string="This Month" name="this_month" domain="[('checkin_time', '>=', datetime.datetime.combine(context_today() + relativedelta(day=1), datetime.time(0,0,0)))]"/>
+                    <filter string="This Week" name="this_week" domain="[('checkin_time', '>=', datetime.datetime.combine(context_today() - relativedelta(weeks=1), datetime.time(0,0,0)))]"/>
+                    <filter string="Today" name="today" domain="[('checkin_time', '>=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter string="Guard" name="group_by_guard" context="{'group_by': 'guard_id'}"/>
+                        <filter string="Site" name="group_by_site" context="{'group_by': 'site_id'}"/>
+                        <filter string="Shift" name="group_by_shift" context="{'group_by': 'shift_id'}"/>
+                        <filter string="Status" name="group_by_status" context="{'group_by': 'status'}"/>
+                        <filter string="Shift Start Date" name="group_by_checkin" context="{'group_by': 'checkin_time'}"/>
+                        <filter string="Shift Start Week" name="group_by_checkin_week" context="{'group_by': 'checkin_time:week'}"/>
+                        <filter string="Shift Start Month" name="group_by_checkin_month" context="{'group_by': 'checkin_time:month'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Graph View for Analytics -->
+        <record id="view_guard_attendance_graph" model="ir.ui.view">
+            <field name="name">guard.attendance.graph</field>
+            <field name="model">guard.attendance</field>
+            <field name="arch" type="xml">
+                <graph string="Attendance Analysis" type="bar" sample="1">
+                    <field name="checkin_time" interval="week"/>
+                    <field name="hours_worked" type="measure"/>
+                    <field name="guard_id" type="col"/>
+                </graph>
+            </field>
+        </record>
+
+        <!-- Pivot View for Analytics -->
+        <record id="view_guard_attendance_pivot" model="ir.ui.view">
+            <field name="name">guard.attendance.pivot</field>
+            <field name="model">guard.attendance</field>
+            <field name="arch" type="xml">
+                <pivot string="Attendance Pivot" sample="1">
+                    <field name="guard_id" type="row"/>
+                    <field name="site_id" type="row"/>
+                    <field name="checkin_time" interval="month" type="col"/>
+                    <field name="hours_worked" type="measure"/>
+                    <field name="net_hours" type="measure"/>
+                    <field name="overtime_hours" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+        <record id="action_guard_attendance" model="ir.actions.act_window">
+            <field name="name">Guard Attendance</field>
+            <field name="res_model">guard.attendance</field>
+            <field name="view_mode">list,form,graph,pivot</field>
+        </record>
+    </data>
+</odoo>
+

@@ -1,0 +1,333 @@
+/* ============================================
+   GuardPro Advanced Dashboard Styling
+   ============================================ */
+
+/* Dashboard Header */
+.guardpro_dashboard {
+    .oe_title {
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+        
+        h1 {
+            color: #2c3e50;
+            font-weight: 600;
+            
+            i {
+                color: #007bff;
+            }
+        }
+        
+        .text-muted {
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    }
+}
+
+/* Critical Alert Banner */
+.alert-danger {
+    border-left: 4px solid #dc3545;
+    background-color: #f8d7da;
+    border-color: #f5c2c7;
+    
+    strong {
+        font-weight: 700;
+    }
+    
+    .btn-danger {
+        animation: pulse 2s infinite;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+}
+
+/* Stat Buttons */
+.oe_stat_button {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    margin: 4px;
+    
+    &:hover {
+        background-color: #e9ecef;
+        border-color: #007bff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .o_stat_value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #007bff;
+    }
+    
+    .o_stat_text {
+        font-size: 12px;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    i {
+        font-size: 24px;
+        color: #007bff;
+    }
+}
+
+/* Tab Pages */
+.o_notebook {
+    margin-top: 20px;
+    
+    .nav-tabs {
+        border-bottom: 2px solid #dee2e6;
+        
+        .nav-link {
+            border: none;
+            color: #6c757d;
+            font-weight: 500;
+            padding: 12px 20px;
+            transition: all 0.3s;
+            
+            &:hover {
+                color: #007bff;
+                background-color: #f8f9fa;
+            }
+            
+            &.active {
+                color: #007bff;
+                background-color: transparent;
+                border-bottom: 3px solid #007bff;
+            }
+        }
+    }
+    
+    .tab-content {
+        padding: 20px 0;
+    }
+}
+
+/* Group Boxes */
+.o_group {
+    .o_group_title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #2c3e50;
+        padding: 10px 0;
+        border-bottom: 2px solid #e9ecef;
+        margin-bottom: 15px;
+    }
+    
+    .o_field_widget {
+        margin: 8px 0;
+    }
+}
+
+/* Percentage Widgets */
+.o_field_percentpie {
+    canvas {
+        max-width: 80px;
+        max-height: 80px;
+    }
+    
+    .o_percentpie_value {
+        font-size: 20px;
+        font-weight: 700;
+        
+        &.text-success {
+            color: #28a745 !important;
+        }
+        
+        &.text-warning {
+            color: #ffc107 !important;
+        }
+        
+        &.text-danger {
+            color: #dc3545 !important;
+        }
+    }
+}
+
+/* Progress Bars */
+.o_field_progressbar {
+    .progress {
+        height: 25px;
+        border-radius: 5px;
+        background-color: #e9ecef;
+        
+        .progress-bar {
+            transition: width 1s ease;
+            font-weight: 600;
+            
+            &.bg-success {
+                background-color: #28a745 !important;
+            }
+            
+            &.bg-warning {
+                background-color: #ffc107 !important;
+            }
+            
+            &.bg-danger {
+                background-color: #dc3545 !important;
+            }
+        }
+    }
+}
+
+/* Analytics Cards */
+.card {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+    
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    
+    .card-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #2c3e50;
+        
+        i {
+            color: #007bff;
+        }
+    }
+    
+    .card-text {
+        color: #6c757d;
+        font-size: 14px;
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        transition: all 0.3s;
+        
+        &:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+            transform: scale(1.05);
+        }
+    }
+}
+
+/* Equipment Status Cards */
+.bg-light {
+    background-color: #f8f9fa !important;
+    
+    h3 {
+        font-weight: 700;
+        margin: 10px 0;
+        
+        &.text-success {
+            color: #28a745 !important;
+        }
+        
+        &.text-primary {
+            color: #007bff !important;
+        }
+        
+        &.text-warning {
+            color: #ffc107 !important;
+        }
+    }
+}
+
+/* Field Decorations */
+.text-decoration-warning {
+    color: #ffc107 !important;
+    font-weight: 600;
+}
+
+.text-decoration-danger {
+    color: #dc3545 !important;
+    font-weight: 600;
+}
+
+.text-decoration-success {
+    color: #28a745 !important;
+    font-weight: 600;
+}
+
+/* Info Alerts */
+.alert-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    border-left: 4px solid #17a2b8;
+    color: #0c5460;
+    
+    strong {
+        font-weight: 700;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .oe_stat_button {
+        width: 100%;
+        margin: 8px 0;
+        
+        .o_stat_value {
+            font-size: 24px;
+        }
+    }
+    
+    .card {
+        margin-bottom: 15px;
+    }
+    
+    .col-md-4, .col-md-6 {
+        width: 100%;
+        padding: 0 5px;
+    }
+}
+
+/* Loading State */
+.o_loading {
+    position: relative;
+    
+    &:after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+/* Dashboard Refresh Button */
+.o_dashboard_refresh {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    
+    .btn {
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        
+        &:hover {
+            transform: rotate(180deg);
+            transition: transform 0.5s ease;
+        }
+    }
+}
+

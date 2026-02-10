@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # Backend API
+  api:
+    build: ./backend
+    container_name: attendance_api
+    environment:
+      - PORT=3000
+      - DATABASE_URL=postgres://user:password@db:5432/attendance
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=berkeley_secret_key_2026
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: npm run dev
+    networks:
+      - default
+      - security_odoo-network
+
+  # Frontend PWA
+  web:
+    build: ./frontend
+    container_name: attendance_web
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev
+    environment:
+       - CHOKIDAR_USEPOLLING=true
+       - VITE_GOOGLE_MAPS_API_KEY=${VITE_GOOGLE_MAPS_API_KEY:-}
+    networks:
+      - default
+      - security_odoo-network
+
+  # Database with PostGIS
+  db:
+    image: postgis/postgis:15-3.3
+    container_name: attendance_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: attendance
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - default
+
+  # Redis for Caching
+  redis:
+    image: redis:alpine
+    container_name: attendance_redis
+    networks:
+      - default
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+  security_odoo-network:
+    external: true

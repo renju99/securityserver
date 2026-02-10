@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_shift_assignment_wizard_form" model="ir.ui.view">
+            <field name="name">shift.assignment.wizard.form</field>
+            <field name="model">shift.assignment.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Shift Assignment Wizard">
+                    <group>
+                        <field name="site_id"/>
+                        <field name="guard_ids" widget="many2many_tags"/>
+                    </group>
+                    <group>
+                        <field name="start_date"/>
+                        <field name="end_date"/>
+                    </group>
+                    <group>
+                        <field name="shift_type"/>
+                        <field name="custom_start_time" invisible="shift_type != 'custom'"/>
+                        <field name="custom_end_time" invisible="shift_type != 'custom'"/>
+                        <field name="assignment_type"/>
+                    </group>
+                    <footer>
+                        <button string="Create Shifts" name="action_create_shifts" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_shift_assignment_wizard" model="ir.actions.act_window">
+            <field name="name">Shift Assignment Wizard</field>
+            <field name="res_model">shift.assignment.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+    </data>
+</odoo>
+
+

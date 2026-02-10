@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Course 11: Patrol & Observation Techniques - Slides -->
+        
+        <record id="slide_patrol_m1" model="slide.slide">
+            <field name="name">Module 1: Effective Patrol Methods</field>
+            <field name="channel_id" ref="elearning_course_patrol_techniques"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">1.0</field>
+            <field name="html_content">
+                &lt;h2&gt;Advanced Patrol Techniques and Security Operations&lt;/h2&gt;
+                &lt;p&gt;Effective security patrols form the foundation of proactive security operations, combining systematic coverage with keen observation skills. This comprehensive approach transforms routine patrols into powerful crime prevention and detection activities.&lt;/p&gt;
+
+                &lt;h3&gt;The Strategic Role of Security Patrols&lt;/h3&gt;
+                &lt;p&gt;Security patrols serve multiple critical functions beyond mere presence, creating layered protection through systematic monitoring, rapid response capabilities, and comprehensive documentation.&lt;/p&gt;
+
+                &lt;h4&gt;Core Patrol Objectives&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Crime Prevention&lt;/dt&gt;
+                    &lt;dd&gt;Visible deterrence through unpredictable patterns and immediate response capability&lt;/dd&gt;
+                    &lt;dt&gt;Asset Protection&lt;/dt&gt;
+                    &lt;dd&gt;Physical verification of security systems, equipment integrity, and environmental controls&lt;/dd&gt;
+                    &lt;dt&gt;Risk Identification&lt;/dt&gt;
+                    &lt;dd&gt;Proactive detection of hazards, vulnerabilities, and security weaknesses&lt;/dd&gt;
+                    &lt;dt&gt;Incident Response&lt;/dt&gt;
+                    &lt;dd&gt;Immediate assessment and management of security concerns as they arise&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Operational Benefits&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Early Detection:&lt;/strong&gt; Identify issues before they become major problems&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Pattern Recognition:&lt;/strong&gt; Establish normal activity baselines for anomaly detection&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Relationship Building:&lt;/strong&gt; Regular contact builds trust with property users&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Documentation Trail:&lt;/strong&gt; Comprehensive records support security decisions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Optimization:&lt;/strong&gt; Efficient use of personnel through systematic coverage&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Compliance Verification:&lt;/strong&gt; Ensure adherence to security protocols and procedures&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Comprehensive Patrol Methodology&lt;/h3&gt;
+                &lt;p&gt;Effective patrols require a structured approach that combines systematic coverage with flexible response capabilities, ensuring comprehensive security while maintaining operational efficiency.&lt;/p&gt;
+
+                &lt;h4&gt;Patrol Pattern Strategies&lt;/h4&gt;
+                &lt;h5&gt;Fixed Route Patrols&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Purpose:&lt;/strong&gt; Ensure systematic coverage of critical areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Advantages:&lt;/strong&gt; Comprehensive coverage, predictable response times&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Implementation:&lt;/strong&gt; Documented routes with specific checkpoints&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Variations:&lt;/strong&gt; Include random deviations to maintain unpredictability&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h5&gt;Random Patrols&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Purpose:&lt;/strong&gt; Maximize deterrence through unpredictability&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Advantages:&lt;/strong&gt; Prevents criminals from timing activities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Implementation:&lt;/strong&gt; Use random number generators or dice for route selection&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Documentation:&lt;/strong&gt; Record actual routes taken for accountability&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h5&gt;Zone-Based Patrols&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Purpose:&lt;/strong&gt; Comprehensive coverage through area division&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Advantages:&lt;/strong&gt; Ensures no area is neglected&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Implementation:&lt;/strong&gt; Divide property into zones with specific patrol requirements&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Monitoring:&lt;/strong&gt; Track zone coverage and response times&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h5&gt;Priority-Based Patrols&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Purpose:&lt;/strong&gt; Focus resources on high-risk areas and times&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Advantages:&lt;/strong&gt; Optimized resource allocation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Implementation:&lt;/strong&gt; Risk assessment determines patrol frequency and intensity&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Adaptation:&lt;/strong&gt; Adjust based on incident history and current threats&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Advanced Patrol Execution Techniques&lt;/h3&gt;
+                &lt;p&gt;Professional patrol execution requires specific techniques that maximize effectiveness while ensuring officer safety and comprehensive coverage.&lt;/p&gt;
+
+                &lt;h4&gt;Pre-Patrol Preparation&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Equipment Check:&lt;/strong&gt; Verify radio, flashlight, keys, and emergency supplies&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Route Planning:&lt;/strong&gt; Review maps, access points, and special instructions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Weather Assessment:&lt;/strong&gt; Consider environmental factors affecting patrol effectiveness&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication Check:&lt;/strong&gt; Test radio communication and backup procedures&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Briefing Review:&lt;/strong&gt; Note recent incidents, maintenance issues, or special concerns&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Personal Readiness:&lt;/strong&gt; Ensure physical condition and mental alertness&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Active Patrol Techniques&lt;/h4&gt;
+                &lt;h5&gt;Systematic Area Coverage&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Perimeter Inspection:&lt;/strong&gt; Check fences, gates, and boundary security&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Building Exterior:&lt;/strong&gt; Examine doors, windows, and access points&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Interior Verification:&lt;/strong&gt; Check secured areas and equipment status&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Grounds Coverage:&lt;/strong&gt; Inspect parking areas, landscaping, and remote locations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Utility Systems:&lt;/strong&gt; Verify security of electrical, water, and gas systems&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Equipment:&lt;/strong&gt; Check AEDs, fire extinguishers, and first aid kits&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h5&gt;Dynamic Observation Methods&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;360-Degree Awareness:&lt;/strong&gt; Constant monitoring of surroundings from all angles&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Layered Scanning:&lt;/strong&gt; Near, middle, and far distance observation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Pattern Recognition:&lt;/strong&gt; Identify normal vs. abnormal activity patterns&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Sensory Integration:&lt;/strong&gt; Combine visual, auditory, and olfactory cues&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Contextual Analysis:&lt;/strong&gt; Consider time, location, and environmental factors&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Change Detection:&lt;/strong&gt; Notice deviations from established baselines&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Checkpoint Verification Protocols&lt;/h4&gt;
+                &lt;h5&gt;Physical Security Checks&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Door Security:&lt;/strong&gt; Test locks, check for damage, verify closure&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Window Integrity:&lt;/strong&gt; Inspect seals, locks, and accessibility&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Lighting Systems:&lt;/strong&gt; Verify illumination and bulb functionality&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Alarm Systems:&lt;/strong&gt; Test sensors and communication links&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Camera Coverage:&lt;/strong&gt; Check field of view and recording status&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Exits:&lt;/strong&gt; Ensure clear access and proper signage&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h5&gt;Environmental Controls&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Temperature Monitoring:&lt;/strong&gt; Check for extreme conditions affecting security&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Water Detection:&lt;/strong&gt; Inspect for leaks or flooding&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Unusual Odors:&lt;/strong&gt; Detect gas leaks, chemical spills, or decomposition&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Structural Integrity:&lt;/strong&gt; Look for cracks, damage, or instability&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Hazardous Materials:&lt;/strong&gt; Verify proper storage and containment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Waste Accumulation:&lt;/strong&gt; Check for fire hazards or pest attraction&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Professional Patrol Documentation&lt;/h3&gt;
+                &lt;p&gt;Comprehensive documentation transforms routine patrols into valuable security intelligence, providing accountability, trend analysis, and incident prevention data.&lt;/p&gt;
+
+                &lt;h4&gt;Patrol Log Essentials&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Time Stamps:&lt;/strong&gt; Precise timing of all observations and actions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Location Details:&lt;/strong&gt; Specific areas checked and findings noted&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Security Status:&lt;/strong&gt; Condition of locks, alarms, and equipment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Observations Made:&lt;/strong&gt; People, vehicles, and activities noted&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Actions Taken:&lt;/strong&gt; Responses to findings or incidents&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication Log:&lt;/strong&gt; Radio calls, notifications, and updates&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Digital Documentation Tools&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Mobile Applications:&lt;/strong&gt; Digital patrol logs with GPS tracking&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Photo Documentation:&lt;/strong&gt; Visual records of conditions and incidents&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Audio Recording:&lt;/strong&gt; Voice notes for immediate documentation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Automated Reporting:&lt;/strong&gt; System-generated alerts and status updates&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Integration Systems:&lt;/strong&gt; Connection with security management platforms&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Advanced Patrol Response Strategies&lt;/h3&gt;
+                &lt;p&gt;Professional patrols require sophisticated response strategies that balance immediate action with comprehensive assessment and appropriate escalation.&lt;/p&gt;
+
+                &lt;h4&gt;Incident Assessment Framework&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Immediate Safety Evaluation:&lt;/strong&gt; Assess threats to self, others, and property&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Severity Determination:&lt;/strong&gt; Classify incident urgency and resource requirements&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Response Capability Assessment:&lt;/strong&gt; Evaluate available resources and backup options&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication Strategy:&lt;/strong&gt; Determine notification requirements and methods&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Containment Planning:&lt;/strong&gt; Develop strategies to limit incident spread&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Mobilization:&lt;/strong&gt; Activate appropriate response teams and equipment&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Multi-Threat Response Protocols&lt;/h4&gt;
+                &lt;h5&gt;Security Threats&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Unauthorized Access:&lt;/strong&gt; Secure area, identify individual, determine intent&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Theft in Progress:&lt;/strong&gt; Observe without confrontation, call police, document details&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Suspicious Persons:&lt;/strong&gt; Monitor activity, gather description, report findings&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Property Damage:&lt;/strong&gt; Secure scene, assess extent, notify property owner&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h5&gt;Medical Emergencies&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Medical Assessment:&lt;/strong&gt; Evaluate condition, provide basic first aid&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Activation:&lt;/strong&gt; Call ambulance, provide location and details&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Scene Management:&lt;/strong&gt; Control access, gather medical history&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;CPR/AED Response:&lt;/strong&gt; Provide life support if trained and indicated&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h5&gt;Environmental Incidents&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Fire Detection:&lt;/strong&gt; Activate alarms, evacuate area, call fire department&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Chemical Spills:&lt;/strong&gt; Isolate area, identify substance, notify hazmat team&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Utility Failures:&lt;/strong&gt; Assess impact, implement backup systems, notify maintenance&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Structural Issues:&lt;/strong&gt; Evacuate affected areas, cordon off, consult engineering&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Patrol Officer Safety and Wellness&lt;/h3&gt;
+                &lt;p&gt;Effective patrols require maintaining officer safety and operational readiness through proper preparation, situational awareness, and self-care practices.&lt;/p&gt;
+
+                &lt;h4&gt;Personal Safety Protocols&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Partner System:&lt;/strong&gt; Avoid solo patrols in high-risk areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication Checks:&lt;/strong&gt; Regular radio contact with base station&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Escape Routes:&lt;/strong&gt; Know multiple exit paths from every location&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Personal Alarms:&lt;/strong&gt; Carry and know how to use emergency signaling devices&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Weather Preparedness:&lt;/strong&gt; Appropriate clothing and equipment for conditions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Health Monitoring:&lt;/strong&gt; Recognize signs of fatigue or stress&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Operational Readiness Factors&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Physical Fitness:&lt;/strong&gt; Maintain stamina for extended patrols and emergency response&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Mental Alertness:&lt;/strong&gt; Avoid fatigue through proper rest and shift management&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Equipment Maintenance:&lt;/strong&gt; Ensure all tools and devices are functional&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Knowledge Updates:&lt;/strong&gt; Stay current with site-specific procedures and threats&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Team Coordination:&lt;/strong&gt; Understand overlapping patrol areas and handoff procedures&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Contingency Planning:&lt;/strong&gt; Prepare for equipment failure or personal emergencies&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Practice Exercise:&lt;/strong&gt; Design a comprehensive patrol route for a medium-sized office complex. Include checkpoints, timing considerations, observation techniques, and response protocols for different types of security concerns. Consider how you would adapt the route based on time of day, weather conditions, and recent incident history.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_patrol_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_patrol_techniques"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_patrol_m1_q1" model="slide.question">
+            <field name="question">The primary purpose of security patrols is to:</field>
+            <field name="slide_id" ref="slide_patrol_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_patrol_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_patrol_m1_q1"/>
+            <field name="text_value">Deter crime and detect security breaches</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_patrol_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_patrol_m1_q1"/>
+            <field name="text_value">Get exercise and pass time</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="slide_patrol_m2" model="slide.slide">
+            <field name="name">Module 2: Observation Skills</field>
+            <field name="channel_id" ref="elearning_course_patrol_techniques"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Developing Observation Skills&lt;/h2&gt;
+                &lt;h3&gt;What to Observe:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;People:&lt;/strong&gt; Behavior, appearance, activities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Vehicles:&lt;/strong&gt; Make, model, color, license plates&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Property:&lt;/strong&gt; Condition, location, security&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Environment:&lt;/strong&gt; Lighting, sounds, smells, conditions&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;h3&gt;Recognition of Suspicious Activity:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Person loitering without purpose&lt;/li&gt;
+                    &lt;li&gt;Attempting to hide or avoid detection&lt;/li&gt;
+                    &lt;li&gt;Testing doors, windows, or security systems&lt;/li&gt;
+                    &lt;li&gt;Taking photos or videos of security measures&lt;/li&gt;
+                    &lt;li&gt;Unusual or nervous behavior&lt;/li&gt;
+                    &lt;li&gt;Out of place for time or location&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;h3&gt;Memory Techniques:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Focus on specific details&lt;/li&gt;
+                    &lt;li&gt;Use mental associations&lt;/li&gt;
+                    &lt;li&gt;Repeat information to yourself&lt;/li&gt;
+                    &lt;li&gt;Write notes immediately&lt;/li&gt;
+                    &lt;li&gt;Take photos when appropriate&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_patrol_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_patrol_techniques"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_patrol_m2_q1" model="slide.question">
+            <field name="question">A sign of suspicious activity is:</field>
+            <field name="slide_id" ref="slide_patrol_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_patrol_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_patrol_m2_q1"/>
+            <field name="text_value">Person loitering and testing doors/windows</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_patrol_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_patrol_m2_q1"/>
+            <field name="text_value">Employee entering building in the morning</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="slide_patrol_final" model="slide.slide">
+            <field name="name">Final Assessment: Patrol Techniques</field>
+            <field name="channel_id" ref="elearning_course_patrol_techniques"/>
+            <field name="sequence">30</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.2</field>
+        </record>
+
+        <record id="quiz_patrol_final_q1" model="slide.question">
+            <field name="question">During patrols, you should:</field>
+            <field name="slide_id" ref="slide_patrol_final"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_patrol_final_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_patrol_final_q1"/>
+            <field name="text_value">Vary routes, stay alert, and document all findings</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_patrol_final_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_patrol_final_q1"/>
+            <field name="text_value">Follow same route at same time every day</field>
+            <field name="is_correct">False</field>
+        </record>
+
+    </data>
+</odoo>
+
+
+
+
+
+
+
+
+
+

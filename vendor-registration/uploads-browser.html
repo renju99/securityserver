@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Berkeley Vendor Files</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1::before {
+            content: '🏢';
+            font-size: 32px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 250px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .breadcrumb {
+            padding: 20px 40px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .breadcrumb a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .breadcrumb span {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .folders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 20px;
+        }
+
+        .folder-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .folder-card:hover {
+            border-color: #667eea;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+        }
+
+        .folder-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .folder-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            word-break: break-word;
+        }
+
+        .folder-info {
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .files-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .files-table thead {
+            background: #f8f9fa;
+        }
+
+        .files-table th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .files-table td {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        .files-table tbody tr {
+            transition: background 0.2s;
+        }
+
+        .files-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .file-icon {
+            font-size: 24px;
+            margin-right: 12px;
+            vertical-align: middle;
+        }
+
+        .file-name {
+            font-weight: 500;
+            color: #333;
+            word-break: break-word;
+        }
+
+        .file-size {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .file-date {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .download-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .stats {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .folders-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .files-table {
+                font-size: 12px;
+            }
+
+            .files-table th,
+            .files-table td {
+                padding: 12px 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Berkeley Vendor Files</h1>
+            <div class="controls">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search files and folders...">
+                </div>
+                <button class="btn" onclick="location.href='/dashboard'">📊 Dashboard</button>
+                <button class="btn" onclick="refreshView()">🔄 Refresh</button>
+                <button class="btn" style="background: rgba(255,0,0,0.2)" onclick="logout()">🚪 Logout</button>
+            </div>
+        </div>
+
+        <div class="breadcrumb" id="breadcrumb">
+            <a href="/uploads">Home</a>
+        </div>
+
+        <div class="content">
+            <div id="stats" class="stats" style="display: none;"></div>
+            <div id="content-area">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPath = '';
+        let allItems = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDirectory('');
+            setupSearch();
+        });
+
+        // Setup search functionality
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            let searchTimeout;
+
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    const query = e.target.value.toLowerCase().trim();
+                    if (query) {
+                        filterItems(query);
+                    } else {
+                        displayItems(allItems);
+                    }
+                }, 300);
+            });
+        }
+
+        // Filter items based on search query
+        function filterItems(query) {
+            const filtered = allItems.filter(item => {
+                const name = item.name.toLowerCase();
+                return name.includes(query);
+            });
+            displayItems(filtered);
+        }
+
+        // Configuration
+        const getAuthCredentials = () => localStorage.getItem('vendor_auth');
+
+        // Check authentication immediately
+        if (!getAuthCredentials()) {
+            window.location.href = '/login';
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('vendor_auth');
+            window.location.href = '/login';
+        }
+
+        // Load directory
+        async function loadDirectory(path) {
+            const AUTH_CREDENTIALS = getAuthCredentials();
+            if (!AUTH_CREDENTIALS) {
+                window.location.href = '/login';
+                return;
+            }
+
+            currentPath = path;
+            updateBreadcrumb(path);
+
+            const contentArea = document.getElementById('content-area');
+            contentArea.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading...</p></div>';
+
+            try {
+                const url = path
+                    ? `/api/uploads/list?path=${encodeURIComponent(path)}`
+                    : '/api/uploads/list';
+
+                // Include Basic Auth credentials in request
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Basic ${AUTH_CREDENTIALS}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('vendor_auth');
+                    window.location.href = '/login';
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.error) {
+                    contentArea.innerHTML = `<div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <h3>Error</h3>
+                        <p>${data.error}</p>
+                    </div>`;
+                    return;
+                }
+
+                allItems = data.items || [];
+                displayItems(allItems);
+                updateStats(data.stats);
+            } catch (error) {
+                console.error('Error loading directory:', error);
+                contentArea.innerHTML = `<div class="empty-state">
+                    <div class="empty-state-icon">⚠️</div>
+                    <h3>Error Loading Directory</h3>
+                    <p>${error.message}</p>
+                </div>`;
+            }
+        }
+
+        // Update breadcrumb
+        function updateBreadcrumb(path) {
+            const breadcrumb = document.getElementById('breadcrumb');
+            const parts = path.split('/').filter(p => p);
+
+            let html = '<a href="#" onclick="loadDirectory(\'\'); return false;">Home</a>';
+
+            let currentPath = '';
+            parts.forEach((part, index) => {
+                currentPath += (currentPath ? '/' : '') + part;
+                const isLast = index === parts.length - 1;
+                if (isLast) {
+                    html += ` <span>/</span> <span>${escapeHtml(part)}</span>`;
+                } else {
+                    html += ` <span>/</span> <a href="#" onclick="loadDirectory('${currentPath}'); return false;">${escapeHtml(part)}</a>`;
+                }
+            });
+
+            breadcrumb.innerHTML = html;
+        }
+
+        // Display items
+        function displayItems(items) {
+            const contentArea = document.getElementById('content-area');
+
+            if (items.length === 0) {
+                contentArea.innerHTML = `<div class="empty-state">
+                    <div class="empty-state-icon">📁</div>
+                    <h3>No items found</h3>
+                    <p>This directory is empty or no items match your search.</p>
+                </div>`;
+                return;
+            }
+
+            // Separate folders and files
+            const folders = items.filter(item => item.type === 'folder');
+            const files = items.filter(item => item.type === 'file');
+
+            let html = '';
+
+            // Display folders
+            if (folders.length > 0) {
+                html += '<div class="folders-grid">';
+                folders.forEach(folder => {
+                    const folderPath = currentPath
+                        ? `${currentPath}/${folder.name}`
+                        : folder.name;
+
+                    html += `
+                        <a href="#" class="folder-card" onclick="loadDirectory('${folderPath}'); return false;">
+                            <div class="folder-icon">📁</div>
+                            <div class="folder-name">${escapeHtml(folder.name)}</div>
+                            <div class="folder-info">
+                                <span>${folder.fileCount || 0} files</span>
+                                <span>${formatDate(folder.modified)}</span>
+                            </div>
+                        </a>
+                    `;
+                });
+                html += '</div>';
+            }
+
+            // Display files
+            if (files.length > 0) {
+                if (folders.length > 0) {
+                    html += '<h3 style="margin: 40px 0 20px 0; color: #333;">Files</h3>';
+                }
+                html += '<table class="files-table"><thead><tr>';
+                html += '<th>Name</th><th>Size</th><th>Modified</th><th>Action</th>';
+                html += '</tr></thead><tbody>';
+
+                files.forEach(file => {
+                    const filePath = currentPath
+                        ? `${currentPath}/${file.name}`
+                        : file.name;
+                    const icon = getFileIcon(file.name);
+
+                    html += `
+                        <tr>
+                            <td>
+                                <span class="file-icon">${icon}</span>
+                                <span class="file-name">${escapeHtml(file.name)}</span>
+                            </td>
+                            <td class="file-size">${formatSize(file.size)}</td>
+                            <td class="file-date">${formatDate(file.modified)}</td>
+                            <td>
+                                <button onclick="downloadFile(event, '${escapeJs(filePath)}', '${escapeJs(file.name)}')" class="download-btn">⬇️ Download</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                html += '</tbody></table>';
+            }
+
+            contentArea.innerHTML = html;
+        }
+
+        // New function to download files with Authorization header
+        async function downloadFile(event, filePath, fileName) {
+            const url = `/api/uploads/download?path=${encodeURIComponent(filePath)}`;
+            const downloadBtn = event.currentTarget;
+            const originalText = downloadBtn.innerHTML;
+
+            try {
+                downloadBtn.innerHTML = '⌛ ...';
+                downloadBtn.disabled = true;
+
+                const AUTH_CREDENTIALS = getAuthCredentials();
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Basic ${AUTH_CREDENTIALS}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('vendor_auth');
+                    window.location.href = '/login';
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(downloadUrl);
+                document.body.removeChild(a);
+            } catch (error) {
+                console.error('Download failed:', error);
+                alert('Download failed: ' + error.message);
+            } finally {
+                downloadBtn.innerHTML = originalText;
+                downloadBtn.disabled = false;
+            }
+        }
+
+        // Escape JS strings
+        function escapeJs(text) {
+            return text.replace(/'/g, "\\'").replace(/"/g, '\\"');
+        }
+
+        // Update statistics
+        function updateStats(stats) {
+            const statsDiv = document.getElementById('stats');
+            if (!stats || !stats.total) {
+                statsDiv.style.display = 'none';
+                return;
+            }
+
+            statsDiv.style.display = 'flex';
+            statsDiv.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-label">Total Items</div>
+                    <div class="stat-value">${stats.total}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Folders</div>
+                    <div class="stat-value">${stats.folders || 0}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Files</div>
+                    <div class="stat-value">${stats.files || 0}</div>
+                </div>
+            `;
+        }
+
+        // Get file icon based on extension
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const icons = {
+                'pdf': '📄',
+                'jpg': '🖼️',
+                'jpeg': '🖼️',
+                'png': '🖼️',
+                'gif': '🖼️',
+                'doc': '📝',
+                'docx': '📝',
+                'xls': '📊',
+                'xlsx': '📊',
+                'txt': '📄',
+                'zip': '📦',
+                'rar': '📦',
+            };
+            return icons[ext] || '📄';
+        }
+
+        // Format file size
+        function formatSize(bytes) {
+            if (!bytes) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            if (!dateString) return 'Unknown';
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Refresh view
+        function refreshView() {
+            document.getElementById('searchInput').value = '';
+            loadDirectory(currentPath);
+        }
+    </script>
+</body>
+
+</html>

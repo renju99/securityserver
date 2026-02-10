@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Course 6: Fire Safety & Prevention - Slides -->
+        
+        <!-- Module 1: Fire Safety Basics -->
+        <record id="slide_fire_m1_basics" model="slide.slide">
+            <field name="name">Module 1: Fire Safety Basics</field>
+            <field name="channel_id" ref="elearning_course_fire_safety"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">1.0</field>
+            <field name="html_content">
+                &lt;h2&gt;The Science and Fundamentals of Fire Safety&lt;/h2&gt;
+                &lt;p&gt;Fire safety represents one of the most critical responsibilities for security personnel. Understanding the science of fire, its behavior, and comprehensive prevention strategies is essential for protecting lives and property. This module establishes the foundational knowledge required for effective fire safety management.&lt;/p&gt;
+
+                &lt;h3&gt;The Critical Role of Security in Fire Safety&lt;/h3&gt;
+                &lt;p&gt;Security personnel are uniquely positioned to serve as the first line of defense against fire incidents. As building occupants with extensive site knowledge and round-the-clock presence, guards play a pivotal role in:&lt;/p&gt;
+
+                &lt;h4&gt;Prevention and Detection&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Hazard Identification:&lt;/strong&gt; Regular patrols to spot potential fire risks before they become dangerous&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Early Detection:&lt;/strong&gt; Being the first to notice unusual odors, smoke, or heat&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;System Monitoring:&lt;/strong&gt; Checking fire alarm panels and sprinkler system indicators&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Control:&lt;/strong&gt; Preventing unauthorized access to high-risk areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Behavioral Monitoring:&lt;/strong&gt; Observing for unsafe practices that could lead to fire&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Response and Coordination&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Immediate Action:&lt;/strong&gt; Activating alarms and notifying emergency services&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Evacuation Management:&lt;/strong&gt; Guiding occupants to safety during fire incidents&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Direction:&lt;/strong&gt; Meeting emergency responders at access points&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Information Relay:&lt;/strong&gt; Providing critical building information to firefighters&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Scene Security:&lt;/strong&gt; Protecting the fire scene for investigation&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;The Chemistry and Physics of Fire&lt;/h3&gt;
+                &lt;p&gt;Understanding fire at a scientific level enables security personnel to make informed decisions about prevention, detection, and response. Fire is both a chemical reaction and a physical process that requires specific conditions to occur and spread.&lt;/p&gt;
+
+                &lt;h4&gt;The Fire Tetrahedron&lt;/h4&gt;
+                &lt;p&gt;The modern understanding of fire requires four interconnected elements, known as the fire tetrahedron:&lt;/p&gt;
+
+                &lt;h5&gt;1. Fuel (Combustible Material)&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Solid Fuels:&lt;/strong&gt; Wood, paper, cloth, plastics, rubber&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Liquid Fuels:&lt;/strong&gt; Gasoline, diesel, oils, solvents, alcohols&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Gaseous Fuels:&lt;/strong&gt; Natural gas, propane, hydrogen, methane&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Chemical Properties:&lt;/strong&gt; Flash point, ignition temperature, heat of combustion&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Fuel Load Assessment:&lt;/strong&gt; Quantity and distribution of combustible materials&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h5&gt;2. Oxygen (Oxidizing Agent)&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Atmospheric Oxygen:&lt;/strong&gt; Normal air contains approximately 21% oxygen&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Concentration Limits:&lt;/strong&gt; Fire requires at least 15% oxygen concentration&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Ventilation Effects:&lt;/strong&gt; Air movement can accelerate or suppress fire growth&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Confined Spaces:&lt;/strong&gt; Oxygen depletion in enclosed areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Chemical Oxidizers:&lt;/strong&gt; Substances that provide oxygen (chlorates, peroxides)&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h5&gt;3. Heat (Activation Energy)&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Ignition Sources:&lt;/strong&gt; Open flames, electrical sparks, friction, chemical reactions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Temperature Thresholds:&lt;/strong&gt; Flash point, fire point, auto-ignition temperature&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Heat Transfer Mechanisms:&lt;/strong&gt; Conduction, convection, radiation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Thermal Feedback:&lt;/strong&gt; How fire generates its own heat to sustain combustion&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Heat Release Rate:&lt;/strong&gt; Speed at which fire generates and releases heat energy&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h5&gt;4. Chemical Chain Reaction&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Free Radical Formation:&lt;/strong&gt; Unstable molecules that drive combustion&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Reaction Propagation:&lt;/strong&gt; How fire spreads through available fuel&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Catalytic Effects:&lt;/strong&gt; Substances that accelerate or inhibit reactions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Inhibition Methods:&lt;/strong&gt; Chemical suppression using extinguishing agents&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Reaction Interruption:&lt;/strong&gt; Breaking the chemical chain to extinguish fire&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Fire Behavior and Development Stages&lt;/h4&gt;
+                &lt;p&gt;Fires progress through predictable stages, each with distinct characteristics and hazards:&lt;/p&gt;
+
+                &lt;h5&gt;Stage 1: Incipient Stage (Growth)&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Duration:&lt;/strong&gt; First few minutes after ignition&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Characteristics:&lt;/strong&gt; Small flame, minimal heat, localized burning&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Visibility:&lt;/strong&gt; Often hidden in walls, ceilings, or equipment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Suppression:&lt;/strong&gt; Easily extinguished with minimal resources&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Detection:&lt;/strong&gt; Requires sensitive smoke or heat detectors&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h5&gt;Stage 2: Free-Burning Stage (Developed Fire)&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Duration:&lt;/strong&gt; Minutes to hours depending on fuel and ventilation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Characteristics:&lt;/strong&gt; Full flame development, rapid heat release&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Hazards:&lt;/strong&gt; Toxic smoke, structural weakening, flashover potential&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Suppression:&lt;/strong&gt; Requires coordinated firefighting efforts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Detection:&lt;/strong&gt; Visible flames and smoke, audible alarms&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h5&gt;Stage 3: Smoldering Stage (Decay)&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Duration:&lt;/strong&gt; Hours to days after main fire suppression&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Characteristics:&lt;/strong&gt; Deep-seated burning in insulation or heavy fuels&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Hazards:&lt;/strong&gt; Hidden fires, structural collapse, reignition&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Suppression:&lt;/strong&gt; Requires overhaul and extensive investigation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Detection:&lt;/strong&gt; Thermal imaging, careful inspection, monitoring&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Fire Classification and Suppression Methods&lt;/h3&gt;
+                &lt;p&gt;Different types of fires require specific suppression methods and extinguishing agents. The classification system helps responders select appropriate tools and techniques.&lt;/p&gt;
+
+                &lt;h4&gt;Class A Fires: Ordinary Combustibles&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Fuels Involved&lt;/dt&gt;
+                    &lt;dd&gt;Wood, paper, cloth, plastics, rubber, and other carbon-based materials&lt;/dd&gt;
+                    &lt;dt&gt;Extinguishing Methods&lt;/dt&gt;
+                    &lt;dd&gt;Cooling with water, smothering with foam or dry chemical&lt;/dd&gt;
+                    &lt;dt&gt;Extinguishers&lt;/dt&gt;
+                    &lt;dd&gt;ABC dry chemical, water, foam, CO2 (for small fires)&lt;/dd&gt;
+                    &lt;dt&gt;Special Considerations&lt;/dt&gt;
+                    &lt;dd&gt;Water can cause steam burns; electrical conductivity not a concern&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Class B Fires: Flammable Liquids and Gases&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Fuels Involved&lt;/dt&gt;
+                    &lt;dd&gt;Gasoline, diesel, oils, solvents, paints, propane, natural gas&lt;/dd&gt;
+                    &lt;dt&gt;Extinguishing Methods&lt;/dt&gt;
+                    &lt;dd&gt;Smothering with foam, dry chemical, or CO2; cooling with water fog&lt;/dd&gt;
+                    &lt;dt&gt;Extinguishers&lt;/dt&gt;
+                    &lt;dd&gt;BC dry chemical, CO2, foam, dry powder for metal fires&lt;/dd&gt;
+                    &lt;dt&gt;Special Considerations&lt;/dt&gt;
+                    &lt;dd&gt;Never use water stream on liquid fires; flammable vapors can travel and reignite&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Class C Fires: Electrical Equipment&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Fuels Involved&lt;/dt&gt;
+                    &lt;dd&gt;Motors, transformers, appliances, wiring, circuit boards&lt;/dd&gt;
+                    &lt;dt&gt;Extinguishing Methods&lt;/dt&gt;
+                    &lt;dd&gt;Non-conductive agents to avoid electrical shock and short circuits&lt;/dd&gt;
+                    &lt;dt&gt;Extinguishers&lt;/dt&gt;
+                    &lt;dd&gt;ABC dry chemical, CO2, clean agents (Halon substitutes)&lt;/dd&gt;
+                    &lt;dt&gt;Special Considerations&lt;/dt&gt;
+                    &lt;dd&gt;De-energize equipment first when safe; never use water or conductive agents&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Class D Fires: Combustible Metals&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Fuels Involved&lt;/dt&gt;
+                    &lt;dd&gt;Magnesium, titanium, potassium, sodium, lithium, zirconium&lt;/dd&gt;
+                    &lt;dt&gt;Extinguishing Methods&lt;/dt&gt;
+                    &lt;dd&gt;Specialized dry powder agents that form crust to exclude oxygen&lt;/dd&gt;
+                    &lt;dt&gt;Extinguishers&lt;/dt&gt;
+                    &lt;dd&gt;Class D dry powder specifically formulated for metal fires&lt;/dd&gt;
+                    &lt;dt&gt;Special Considerations&lt;/dt&gt;
+                    &lt;dd&gt;Water and other agents can react violently; requires specialized training&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Class K Fires: Cooking Oils and Fats&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Fuels Involved&lt;/dt&gt;
+                    &lt;dd&gt;Cooking oils, fats, grease in commercial kitchens&lt;/dd&gt;
+                    &lt;dt&gt;Extinguishing Methods&lt;/dt&gt;
+                    &lt;dd&gt;Wet chemical agents that react with oils to form soapy foam&lt;/dd&gt;
+                    &lt;dt&gt;Extinguishers&lt;/dt&gt;
+                    &lt;dd&gt;Wet chemical extinguishers designed for kitchen environments&lt;/dd&gt;
+                    &lt;dt&gt;Special Considerations&lt;/dt&gt;
+                    &lt;dd&gt;High heat retention; can reignite after apparent extinguishment&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h3&gt;Comprehensive Fire Prevention Strategies&lt;/h3&gt;
+                &lt;p&gt;Effective fire prevention requires a multi-layered approach that addresses potential ignition sources, fuel control, and human factors. Security personnel play a crucial role in implementing and monitoring these preventive measures.&lt;/p&gt;
+
+                &lt;h4&gt;Electrical Fire Prevention&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Overload Prevention:&lt;/strong&gt; Regular inspection of electrical panels and circuits&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Cord Management:&lt;/strong&gt; Proper installation and maintenance of extension cords&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Equipment Inspection:&lt;/strong&gt; Regular checks for damaged wiring and connections&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Power Strip Usage:&lt;/strong&gt; Proper rating and ventilation for power distribution&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Lightning Protection:&lt;/strong&gt; Grounding systems and surge protection devices&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Arc Flash Prevention:&lt;/strong&gt; Proper lockout/tagout procedures for electrical work&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Heating and Cooking Safety&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Appliance Maintenance:&lt;/strong&gt; Regular cleaning and inspection of heating equipment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Clearance Requirements:&lt;/strong&gt; Proper spacing around heat sources&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Ventilation Systems:&lt;/strong&gt; Clean ducts and exhaust systems&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Kitchen Safety:&lt;/strong&gt; Proper handling of cooking oils and unattended cooking&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Space Heater Guidelines:&lt;/strong&gt; Approved devices, placement, and supervision&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Furnace Maintenance:&lt;/strong&gt; Annual inspection and cleaning of heating systems&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Flammable Materials Management&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Storage Requirements:&lt;/strong&gt; Approved cabinets and storage rooms for flammables&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Quantity Limits:&lt;/strong&gt; Maximum allowable amounts in different occupancy types&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Labeling Systems:&lt;/strong&gt; Proper identification of hazardous materials&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Separation Distances:&lt;/strong&gt; Safe spacing between incompatible materials&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Waste Disposal:&lt;/strong&gt; Proper handling of flammable waste materials&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Transportation Safety:&lt;/strong&gt; Safe movement of flammable liquids and gases&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Human Factors in Fire Prevention&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Smoking Policies:&lt;/strong&gt; Designated areas and proper disposal procedures&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Hot Work Permits:&lt;/strong&gt; Authorization system for welding and cutting operations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Housekeeping Standards:&lt;/strong&gt; Regular cleaning to prevent fuel accumulation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Arson Prevention:&lt;/strong&gt; Security measures against intentional fire setting&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Training Programs:&lt;/strong&gt; Ongoing education for all building occupants&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Preparedness:&lt;/strong&gt; Regular drills and equipment familiarization&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;The Security Professional's Fire Safety Role&lt;/h3&gt;
+                &lt;p&gt;Security personnel serve as the eyes and ears of fire safety programs, providing continuous monitoring and immediate response capabilities that complement automated systems.&lt;/p&gt;
+
+                &lt;h4&gt;Daily Fire Safety Inspections&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Exit Route Verification:&lt;/strong&gt; Ensuring all fire exits are clear and accessible&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Extinguisher Checks:&lt;/strong&gt; Visual inspection of location, charge, and accessibility&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Alarm System Testing:&lt;/strong&gt; Verification of alarm panels and notification appliances&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Sprinkler System Monitoring:&lt;/strong&gt; Checking for leaks and proper water pressure&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Hazard Identification:&lt;/strong&gt; Reporting blocked exits, damaged equipment, or unsafe conditions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Documentation:&lt;/strong&gt; Recording inspection results and maintenance activities&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Fire Safety Enforcement&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Policy Compliance:&lt;/strong&gt; Monitoring adherence to smoking and safety regulations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Control:&lt;/strong&gt; Preventing entry to restricted areas with fire hazards&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Contractor Oversight:&lt;/strong&gt; Supervising work that involves fire hazards&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Violation Reporting:&lt;/strong&gt; Documenting and escalating safety violations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Educational Role:&lt;/strong&gt; Informing occupants about fire safety procedures&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Coordination:&lt;/strong&gt; Liaising with fire department and building management&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Advanced Fire Safety Competencies&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Risk Assessment Skills:&lt;/strong&gt; Evaluating fire hazards and prioritizing mitigation efforts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;System Knowledge:&lt;/strong&gt; Understanding fire detection, alarm, and suppression systems&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Building Familiarity:&lt;/strong&gt; Knowledge of fire protection features and evacuation routes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Communication:&lt;/strong&gt; Clear and effective information dissemination&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Decision-Making Under Pressure:&lt;/strong&gt; Quick assessment and appropriate action selection&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Post-Incident Analysis:&lt;/strong&gt; Contributing to incident reviews and improvement processes&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Practice Exercise:&lt;/strong&gt; Conduct a mental walkthrough of your assigned facility. Identify five potential fire hazards you would check during your daily rounds and explain how you would address each one. Consider how the fire tetrahedron applies to each hazard.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_fire_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_fire_safety"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_fire_m1_q1" model="slide.question">
+            <field name="question">What are the four elements of the fire tetrahedron?</field>
+            <field name="slide_id" ref="slide_fire_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_fire_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_m1_q1"/>
+            <field name="text_value">Fuel, Oxygen, Heat, Chemical Chain Reaction</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_fire_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_m1_q1"/>
+            <field name="text_value">Fuel, Oxygen, Heat, Water</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_fire_m1_q1_a3" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_m1_q1"/>
+            <field name="text_value">Fuel, Oxygen, Heat, Smoke</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_fire_m1_q2" model="slide.question">
+            <field name="question">Which class of fire involves electrical equipment and requires non-conductive extinguishing agents?</field>
+            <field name="slide_id" ref="slide_fire_m1_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_fire_m1_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_m1_q2"/>
+            <field name="text_value">Class C</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_fire_m1_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_m1_q2"/>
+            <field name="text_value">Class B</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_fire_m1_q2_a3" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_m1_q2"/>
+            <field name="text_value">Class A</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_fire_m1_q3" model="slide.question">
+            <field name="question">During which fire development stage is the fire most easily extinguished?</field>
+            <field name="slide_id" ref="slide_fire_m1_quiz"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="quiz_fire_m1_q3_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_m1_q3"/>
+            <field name="text_value">Incipient Stage (Growth)</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_fire_m1_q3_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_m1_q3"/>
+            <field name="text_value">Free-Burning Stage (Developed Fire)</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_fire_m1_q3_a3" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_m1_q3"/>
+            <field name="text_value">Smoldering Stage (Decay)</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_fire_m1_q4" model="slide.question">
+            <field name="question">What is the primary role of security personnel in fire prevention?</field>
+            <field name="slide_id" ref="slide_fire_m1_quiz"/>
+            <field name="sequence">4</field>
+        </record>
+        <record id="quiz_fire_m1_q4_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_m1_q4"/>
+            <field name="text_value">Continuous monitoring and hazard identification</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_fire_m1_q4_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_m1_q4"/>
+            <field name="text_value">Replacing all fire extinguishers</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_fire_m1_q4_a3" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_m1_q4"/>
+            <field name="text_value">Installing fire alarm systems</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 2: Fire Detection & Alarm Systems -->
+        <record id="slide_fire_m2_detection" model="slide.slide">
+            <field name="name">Module 2: Fire Detection &amp; Alarm Systems</field>
+            <field name="channel_id" ref="elearning_course_fire_safety"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.4</field>
+            <field name="html_content">
+                &lt;h2&gt;Fire Detection Systems&lt;/h2&gt;
+                &lt;p&gt;Understand fire detection equipment and alarm systems.&lt;/p&gt;
+                
+                &lt;h3&gt;Types of Fire Detectors:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Smoke Detectors:&lt;/strong&gt; Detect smoke particles in air&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Heat Detectors:&lt;/strong&gt; Activate at specific temperatures&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Flame Detectors:&lt;/strong&gt; Detect infrared or ultraviolet light from flames&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Manual Pull Stations:&lt;/strong&gt; Human-activated alarm triggers&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;When Fire Alarm Activates:&lt;/h3&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Treat every alarm as real - never assume it's a drill&lt;/li&gt;
+                    &lt;li&gt;Call 911 immediately&lt;/li&gt;
+                    &lt;li&gt;Notify your supervisor&lt;/li&gt;
+                    &lt;li&gt;Investigate if safe to do so&lt;/li&gt;
+                    &lt;li&gt;Initiate evacuation procedures&lt;/li&gt;
+                    &lt;li&gt;Direct people to exits&lt;/li&gt;
+                    &lt;li&gt;Account for all occupants at assembly point&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Fire Panel Monitoring:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Know location of fire alarm control panel&lt;/li&gt;
+                    &lt;li&gt;Understand panel indicators (normal, trouble, alarm)&lt;/li&gt;
+                    &lt;li&gt;Report any system troubles immediately&lt;/li&gt;
+                    &lt;li&gt;Never silence alarms without authorization&lt;/li&gt;
+                    &lt;li&gt;Document all activations and system issues&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_fire_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_fire_safety"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_fire_m2_q1" model="slide.question">
+            <field name="question">When a fire alarm activates, you should:</field>
+            <field name="slide_id" ref="slide_fire_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_fire_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_m2_q1"/>
+            <field name="text_value">Assume it's a false alarm and wait</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_fire_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_m2_q1"/>
+            <field name="text_value">Treat it as real, call 911, and initiate evacuation</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <!-- Module 3: Fire Extinguisher Use -->
+        <record id="slide_fire_m3_extinguisher" model="slide.slide">
+            <field name="name">Module 3: Fire Extinguisher Use</field>
+            <field name="channel_id" ref="elearning_course_fire_safety"/>
+            <field name="sequence">30</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Using Fire Extinguishers&lt;/h2&gt;
+                &lt;p&gt;Learn the PASS method for operating fire extinguishers safely.&lt;/p&gt;
+                
+                &lt;h3&gt;When to Use an Extinguisher:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Fire is SMALL and contained&lt;/li&gt;
+                    &lt;li&gt;You have been trained&lt;/li&gt;
+                    &lt;li&gt;You have the correct extinguisher type&lt;/li&gt;
+                    &lt;li&gt;There is a clear escape route behind you&lt;/li&gt;
+                    &lt;li&gt;Fire department has been called&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;When NOT to Use an Extinguisher:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Fire is spreading rapidly&lt;/li&gt;
+                    &lt;li&gt;Smoke is filling the room&lt;/li&gt;
+                    &lt;li&gt;You don't know what's burning&lt;/li&gt;
+                    &lt;li&gt;Your escape route is blocked&lt;/li&gt;
+                    &lt;li&gt;You feel unsafe or unsure&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;PASS Method:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;P - Pull:&lt;/strong&gt; Pull the pin&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;A - Aim:&lt;/strong&gt; Aim low at the base of the fire&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;S - Squeeze:&lt;/strong&gt; Squeeze the handle&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;S - Sweep:&lt;/strong&gt; Sweep side to side at base of fire&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Safety Tips:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Stand 6-8 feet away from fire&lt;/li&gt;
+                    &lt;li&gt;Keep your back to the exit&lt;/li&gt;
+                    &lt;li&gt;If fire doesn't go out quickly, evacuate&lt;/li&gt;
+                    &lt;li&gt;Never turn your back on a fire&lt;/li&gt;
+                    &lt;li&gt;Watch for re-ignition&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_fire_m3_quiz" model="slide.slide">
+            <field name="name">Module 3: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_fire_safety"/>
+            <field name="sequence">31</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_fire_m3_q1" model="slide.question">
+            <field name="question">What does the PASS method stand for?</field>
+            <field name="slide_id" ref="slide_fire_m3_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_fire_m3_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_m3_q1"/>
+            <field name="text_value">Pull, Aim, Squeeze, Sweep</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_fire_m3_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_m3_q1"/>
+            <field name="text_value">Point, Activate, Spray, Stop</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_fire_m3_q2" model="slide.question">
+            <field name="question">When using a fire extinguisher, you should aim:</field>
+            <field name="slide_id" ref="slide_fire_m3_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_fire_m3_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_m3_q2"/>
+            <field name="text_value">At the top of the flames</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_fire_m3_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_m3_q2"/>
+            <field name="text_value">At the base of the fire</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <!-- Final Assessment -->
+        <record id="slide_fire_final" model="slide.slide">
+            <field name="name">Final Assessment: Fire Safety</field>
+            <field name="channel_id" ref="elearning_course_fire_safety"/>
+            <field name="sequence">40</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.2</field>
+        </record>
+
+        <record id="quiz_fire_final_q1" model="slide.question">
+            <field name="question">The three elements required for fire are:</field>
+            <field name="slide_id" ref="slide_fire_final"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_fire_final_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_final_q1"/>
+            <field name="text_value">Fuel, Oxygen, Heat</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_fire_final_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_final_q1"/>
+            <field name="text_value">Smoke, Flame, Ash</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_fire_final_q2" model="slide.question">
+            <field name="question">You should only use a fire extinguisher if:</field>
+            <field name="slide_id" ref="slide_fire_final"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_fire_final_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_final_q2"/>
+            <field name="text_value">The fire is small, you're trained, and have a clear escape route</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_fire_final_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_fire_final_q2"/>
+            <field name="text_value">The fire is large and spreading</field>
+            <field name="is_correct">False</field>
+        </record>
+
+    </data>
+</odoo>
+
+
+
+
+
+
+
+
+
+

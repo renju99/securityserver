@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Course 8: Conflict Resolution & De-escalation - Slides -->
+        
+        <record id="slide_conflict_m1" model="slide.slide">
+            <field name="name">Module 1: Understanding Conflict</field>
+            <field name="channel_id" ref="elearning_course_conflict_resolution"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">1.0</field>
+            <field name="html_content">
+                &lt;h2&gt;The Psychology and Dynamics of Conflict in Security Environments&lt;/h2&gt;
+                &lt;p&gt;Conflict is an inevitable aspect of human interaction, particularly in security environments where people may be stressed, frustrated, or emotionally charged. Understanding the psychological underpinnings of conflict enables security personnel to recognize early warning signs, predict escalation patterns, and intervene effectively to maintain safety and order.&lt;/p&gt;
+
+                &lt;h3&gt;The Security Professional's Role in Conflict Management&lt;/h3&gt;
+                &lt;p&gt;Security personnel serve as the primary interface between potentially conflicting parties and organizational stability. Unlike law enforcement officers, security guards must balance de-escalation with authority, protection with diplomacy, and intervention with respect for individual rights.&lt;/p&gt;
+
+                &lt;h4&gt;Strategic Positioning in Conflict Resolution&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Preventive Presence:&lt;/strong&gt; Visible security presence that deters potential conflicts before they escalate&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Early Intervention:&lt;/strong&gt; Recognizing and addressing issues before they become confrontational&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Crisis Mediation:&lt;/strong&gt; Serving as neutral third parties in interpersonal disputes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Coordination:&lt;/strong&gt; Connecting parties with appropriate support services&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Documentation and Follow-up:&lt;/strong&gt; Recording incidents and ensuring appropriate resolution&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Policy Enforcement:&lt;/strong&gt; Maintaining organizational rules while respecting individual rights&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Legal and Ethical Considerations&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Use of Force Continuum:&lt;/strong&gt; Understanding progressive intervention levels&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Reasonable Force Standards:&lt;/strong&gt; Balancing safety needs with proportionality&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Civil Rights Protection:&lt;/strong&gt; Respecting individual rights during interventions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Discrimination Awareness:&lt;/strong&gt; Avoiding bias in conflict assessment and resolution&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Professional Boundaries:&lt;/strong&gt; Maintaining appropriate role limitations&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;The Psychology of Conflict: Understanding Human Behavior&lt;/h3&gt;
+                &lt;p&gt;Conflict arises from complex psychological processes involving perception, emotion, cognition, and behavior. Understanding these underlying mechanisms enables security personnel to predict, prevent, and resolve conflicts more effectively.&lt;/p&gt;
+
+                &lt;h4&gt;Cognitive Factors in Conflict Development&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Perception and Interpretation&lt;/dt&gt;
+                    &lt;dd&gt;How individuals perceive and interpret events, often through personal filters and past experiences&lt;/dd&gt;
+                    &lt;dt&gt;Attribution Theory&lt;/dt&gt;
+                    &lt;dd&gt;The tendency to attribute others' behavior to internal characteristics rather than situational factors&lt;/dd&gt;
+                    &lt;dt&gt;Cognitive Biases&lt;/dt&gt;
+                    &lt;dd&gt;Systematic errors in thinking that distort perception and decision-making&lt;/dd&gt;
+                    &lt;dt&gt;Confirmation Bias&lt;/dt&gt;
+                    &lt;dd&gt;Seeking information that confirms existing beliefs while ignoring contradictory evidence&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Emotional Components of Conflict&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Fight or Flight Response:&lt;/strong&gt; Physiological stress reactions that impair rational thinking&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emotional Contagion:&lt;/strong&gt; How emotions spread between individuals and groups&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Frustration-Aggression Hypothesis:&lt;/strong&gt; How blocked goals lead to aggressive behavior&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emotional Intelligence Deficit:&lt;/strong&gt; Inability to recognize and manage one's own emotions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Stress Amplification:&lt;/strong&gt; How chronic stress lowers conflict thresholds&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Trauma Response:&lt;/strong&gt; Past traumatic experiences influencing current behavior&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Social and Environmental Triggers&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Social Identity Theory:&lt;/strong&gt; Conflicts arising from group membership and identity&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Status and Power Dynamics:&lt;/strong&gt; Conflicts related to perceived authority and hierarchy&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Competition:&lt;/strong&gt; Disputes over limited resources or access rights&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication Barriers:&lt;/strong&gt; Language, cultural, or perceptual differences&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Environmental Stressors:&lt;/strong&gt; Crowding, noise, temperature, or discomfort&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Substance Influence:&lt;/strong&gt; Alcohol, drugs, or medication affecting behavior&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Conflict Typology: Understanding Different Forms of Conflict&lt;/h3&gt;
+                &lt;p&gt;Not all conflicts are the same. Different types of conflict require different intervention strategies and resolution approaches. Security personnel must quickly assess the nature of the conflict to determine appropriate responses.&lt;/p&gt;
+
+                &lt;h4&gt;Interpersonal Conflicts&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Personal Disputes&lt;/dt&gt;
+                    &lt;dd&gt;Arguments between individuals over personal matters, relationships, or misunderstandings&lt;/dd&gt;
+                    &lt;dt&gt;Personality Clashes&lt;/dt&gt;
+                    &lt;dd&gt;Fundamental incompatibilities in communication styles, values, or behavioral patterns&lt;/dd&gt;
+                    &lt;dt&gt;Relationship Conflicts&lt;/dt&gt;
+                    &lt;dd&gt;Ongoing disputes based on repeated interactions and accumulated grievances&lt;/dd&gt;
+                    &lt;dt&gt;Boundary Violations&lt;/dt&gt;
+                    &lt;dd&gt;Inappropriate behavior that crosses personal or professional boundaries&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Organizational and Policy Conflicts&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Disputes:&lt;/strong&gt; Conflicts over entry rights, permissions, or facility usage&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Policy Enforcement:&lt;/strong&gt; Resistance to organizational rules, procedures, or restrictions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Service Disputes:&lt;/strong&gt; Conflicts over quality of service, pricing, or contractual obligations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Authority Challenges:&lt;/strong&gt; Disputes over security directives or enforcement actions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Allocation:&lt;/strong&gt; Conflicts over parking spaces, seating, or shared facilities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Procedural Disputes:&lt;/strong&gt; Arguments over how policies are interpreted or applied&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Crisis and Emergency-Related Conflicts&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Panic Behavior&lt;/dt&gt;
+                    &lt;dd&gt;Fear-driven responses during emergencies that can create secondary conflicts&lt;/dd&gt;
+                    &lt;dt&gt;Trauma Responses&lt;/dt&gt;
+                    &lt;dd&gt;Emotional reactions to traumatic events affecting rational behavior&lt;/dd&gt;
+                    &lt;dt&gt;Authority Resistance&lt;/dt&gt;
+                    &lt;dd&gt;Refusal to comply with emergency directives due to fear or confusion&lt;/dd&gt;
+                    &lt;dt&gt;Resource Competition&lt;/dt&gt;
+                    &lt;dd&gt;Crisis situations creating disputes over access to safety or assistance&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h3&gt;The Escalation Continuum: Recognizing Conflict Stages&lt;/h3&gt;
+                &lt;p&gt;Conflicts typically progress through predictable stages of escalation. Early recognition of these stages enables timely intervention and prevents situations from becoming unmanageable.&lt;/p&gt;
+
+                &lt;h4&gt;Stage 1: Latent Conflict (Pre-Conflict)&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Characteristics:&lt;/strong&gt; Underlying tensions, minor disagreements, unspoken resentments&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Indicators:&lt;/strong&gt; Avoidance behavior, strained communications, passive-aggressive actions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Intervention:&lt;/strong&gt; Preventive communication, relationship building, issue clarification&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Security Role:&lt;/strong&gt; Monitor for emerging issues, facilitate communication when appropriate&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Stage 2: Emerging Conflict (Discussion)&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Characteristics:&lt;/strong&gt; Open discussion of differences, emotional expression&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Indicators:&lt;/strong&gt; Raised voices, defensive postures, active debate&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Intervention:&lt;/strong&gt; Active listening, empathy, clarification of positions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Security Role:&lt;/strong&gt; Ensure safety, provide neutral mediation, separate if necessary&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Stage 3: Escalating Conflict (Polarization)&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Characteristics:&lt;/strong&gt; Increased emotional intensity, positional rigidity&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Indicators:&lt;/strong&gt; Personal attacks, threats, physical posturing, property damage&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Intervention:&lt;/strong&gt; De-escalation techniques, physical separation, authority assertion&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Security Role:&lt;/strong&gt; Establish control, remove threats, coordinate with authorities&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Stage 4: Critical Conflict (Crisis)&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Characteristics:&lt;/strong&gt; Loss of control, potential for violence or harm&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Indicators:&lt;/strong&gt; Physical violence, weapons, hostage situations, property destruction&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Intervention:&lt;/strong&gt; Emergency response protocols, law enforcement involvement&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Security Role:&lt;/strong&gt; Evacuation, containment, coordination with emergency services&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Early Warning Signs and Risk Assessment&lt;/h3&gt;
+                &lt;p&gt;Proactive conflict management begins with recognizing the subtle indicators that suggest a situation may escalate. Security personnel must develop keen observational skills to identify these warning signs early.&lt;/p&gt;
+
+                &lt;h4&gt;Verbal Indicators of Escalation&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Volume Increase:&lt;/strong&gt; Speaking louder, shouting, or yelling&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Tempo Acceleration:&lt;/strong&gt; Speaking faster, interrupting others&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Content Degradation:&lt;/strong&gt; Use of profanity, insults, or threats&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication Breakdown:&lt;/strong&gt; Refusal to listen, repeating arguments&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Extremes in Language:&lt;/strong&gt; "Always/never" statements, absolutes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Personal Attacks:&lt;/strong&gt; Focus shifting from issues to character assassination&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Non-Verbal Indicators of Escalation&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Facial Expressions&lt;/dt&gt;
+                    &lt;dd&gt;Furrowed brow, clenched jaw, narrowed eyes, flushed complexion&lt;/dd&gt;
+                    &lt;dt&gt;Body Posture&lt;/dt&gt;
+                    &lt;dd&gt;Squared shoulders, clenched fists, leaning forward aggressively&lt;/dd&gt;
+                    &lt;dt&gt;Personal Space Invasion&lt;/dt&gt;
+                    &lt;dd&gt;Moving closer than culturally appropriate, pointing, gesturing invasively&lt;/dd&gt;
+                    &lt;dt&gt;Physiological Signs&lt;/dt&gt;
+                    &lt;dd&gt;Sweating, trembling, rapid breathing, dilated pupils&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Behavioral Indicators of Escalation&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Aggressive Actions:&lt;/strong&gt; Throwing objects, slamming doors, property damage&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Withdrawal Behaviors:&lt;/strong&gt; Storming away, refusing to communicate&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Help-Seeking Gestures:&lt;/strong&gt; Involving others, seeking allies or weapons&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Compliance Resistance:&lt;/strong&gt; Ignoring requests, challenging authority&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Pattern Changes:&lt;/strong&gt; Sudden behavioral shifts from normal patterns&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Substance Influence:&lt;/strong&gt; Signs of alcohol, drug, or medication effects&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Risk Assessment and Decision-Making Framework&lt;/h3&gt;
+                &lt;p&gt;Effective conflict management requires rapid assessment of risk factors to determine appropriate intervention levels and response strategies.&lt;/p&gt;
+
+                &lt;h4&gt;Individual Risk Factors&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Personal History:&lt;/strong&gt; Previous violent behavior or criminal record&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Current State:&lt;/strong&gt; Intoxication, mental health crisis, or extreme emotional state&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Physical Condition:&lt;/strong&gt; Size, strength, presence of weapons or tools&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Group Dynamics:&lt;/strong&gt; Number of individuals, group cohesion, leadership&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Motivation Level:&lt;/strong&gt; How strongly invested the person is in the conflict&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Exit Options:&lt;/strong&gt; Ability to disengage without losing face or objectives&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Situational Risk Factors&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Location Hazards:&lt;/strong&gt; Confined spaces, escape routes, available weapons&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Bystander Presence:&lt;/strong&gt; Number of observers, potential for secondary conflicts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Time Pressure:&lt;/strong&gt; Urgency of resolution, available response time&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Availability:&lt;/strong&gt; Backup personnel, communication equipment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Legal Constraints:&lt;/strong&gt; Applicable laws, use of force restrictions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Organizational Policies:&lt;/strong&gt; Company rules, incident reporting requirements&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;The Decision-Making Matrix&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Low Risk/Low Threat:&lt;/strong&gt; Verbal de-escalation, mediation, bystander management&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Low Risk/High Threat:&lt;/strong&gt; Increased presence, barrier creation, authority assertion&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;High Risk/Low Threat:&lt;/strong&gt; Containment, separation, professional intervention&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;High Risk/High Threat:&lt;/strong&gt; Emergency protocols, evacuation, law enforcement&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;The Security Professional's Mindset in Conflict Situations&lt;/h3&gt;
+                &lt;p&gt;Successful conflict management requires developing the right mental framework—one that balances authority with empathy, firmness with flexibility, and control with understanding.&lt;/p&gt;
+
+                &lt;h4&gt;Core Mental Attributes for Conflict Resolution&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Situational Awareness:&lt;/strong&gt; Constant monitoring of verbal, non-verbal, and environmental cues&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emotional Regulation:&lt;/strong&gt; Maintaining composure while others may be losing control&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Cognitive Flexibility:&lt;/strong&gt; Adapting strategies based on changing circumstances&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Empathic Understanding:&lt;/strong&gt; Recognizing others' perspectives without losing objectivity&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Authority Presence:&lt;/strong&gt; Projecting confidence and control without aggression&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Strategic Thinking:&lt;/strong&gt; Planning multiple intervention options simultaneously&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Avoiding Common Cognitive Traps&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Personal Bias:&lt;/strong&gt; Allowing personal feelings to influence professional judgment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Authority Pressure:&lt;/strong&gt; Feeling compelled to "win" every confrontation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emotional Contagion:&lt;/strong&gt; Adopting the emotional state of conflicting parties&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Confirmation Bias:&lt;/strong&gt; Seeking information that supports predetermined conclusions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Anchoring Effect:&lt;/strong&gt; Becoming locked into initial assessments despite new information&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Groupthink:&lt;/strong&gt; Accepting peer pressure over independent analysis&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Practice Exercise:&lt;/strong&gt; Observe a public interaction in your workplace or a public setting. Identify potential conflict triggers, early warning signs, and appropriate intervention strategies. Consider how cultural differences might influence the interaction.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_conflict_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_conflict_resolution"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_conflict_m1_q1" model="slide.question">
+            <field name="question">A warning sign of conflict escalation is:</field>
+            <field name="slide_id" ref="slide_conflict_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_conflict_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_conflict_m1_q1"/>
+            <field name="text_value">Raised voice and hostile body language</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_conflict_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_conflict_m1_q1"/>
+            <field name="text_value">Calm discussion and cooperation</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="slide_conflict_m2" model="slide.slide">
+            <field name="name">Module 2: De-escalation Techniques</field>
+            <field name="channel_id" ref="elearning_course_conflict_resolution"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;De-escalation Strategies&lt;/h2&gt;
+                &lt;h3&gt;The 10 De-escalation Principles:&lt;/h3&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Stay Calm:&lt;/strong&gt; Control your emotions and voice&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Listen Actively:&lt;/strong&gt; Let person express concerns&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Show Empathy:&lt;/strong&gt; Acknowledge their feelings&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Respect Personal Space:&lt;/strong&gt; Maintain safe distance&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Use Open Body Language:&lt;/strong&gt; Non-threatening posture&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Speak Slowly &amp; Clearly:&lt;/strong&gt; Keep voice low and calm&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Offer Choices:&lt;/strong&gt; Give person sense of control&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Set Limits:&lt;/strong&gt; Be clear about expectations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Be Patient:&lt;/strong&gt; Allow time for person to calm down&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Know When to Disengage:&lt;/strong&gt; Recognize when to get help&lt;/li&gt;
+                &lt;/ol&gt;
+                &lt;h3&gt;What NOT to Do:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Don't argue or be defensive&lt;/li&gt;
+                    &lt;li&gt;Don't make threats you can't follow through&lt;/li&gt;
+                    &lt;li&gt;Don't touch the person unless necessary for safety&lt;/li&gt;
+                    &lt;li&gt;Don't take it personally&lt;/li&gt;
+                    &lt;li&gt;Don't raise your voice&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_conflict_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_conflict_resolution"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_conflict_m2_q1" model="slide.question">
+            <field name="question">When de-escalating a situation, you should:</field>
+            <field name="slide_id" ref="slide_conflict_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_conflict_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_conflict_m2_q1"/>
+            <field name="text_value">Stay calm, listen actively, and show empathy</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_conflict_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_conflict_m2_q1"/>
+            <field name="text_value">Raise your voice and be forceful</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="slide_conflict_final" model="slide.slide">
+            <field name="name">Final Assessment: Conflict Resolution</field>
+            <field name="channel_id" ref="elearning_course_conflict_resolution"/>
+            <field name="sequence">30</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.2</field>
+        </record>
+
+        <record id="quiz_conflict_final_q1" model="slide.question">
+            <field name="question">The primary goal of de-escalation is to:</field>
+            <field name="slide_id" ref="slide_conflict_final"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_conflict_final_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_conflict_final_q1"/>
+            <field name="text_value">Calm the situation and prevent violence</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_conflict_final_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_conflict_final_q1"/>
+            <field name="text_value">Win the argument</field>
+            <field name="is_correct">False</field>
+        </record>
+
+    </data>
+</odoo>
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- ========================================== -->
+        <!-- Resident Portal Access Email Template      -->
+        <!-- ========================================== -->
+        
+        <record id="email_template_resident_portal_access" model="mail.template">
+            <field name="name">Resident Portal Access Invitation</field>
+            <field name="model_id" ref="model_tenant_resident"/>
+            <field name="subject">Welcome to ${object.site_id.name} - Portal Access</field>
+            <field name="email_from">${(object.site_id.client_id.email or user.email) | safe}</field>
+            <field name="email_to">${object.email}</field>
+            <field name="partner_to">${object.partner_id.id if object.partner_id else ''}</field>
+            <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-family: 'Lucida Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 13px; color: rgb(34, 34, 34);">
+    <p>Dear ${object.name},</p>
+    
+    <p>
+        Welcome to <strong>${object.site_id.name}</strong>! We are pleased to provide you with access to our resident portal.
+    </p>
+    
+    <p>
+        Through the portal, you can:
+    </p>
+    <ul>
+        <li>View real-time guard locations and activity</li>
+        <li>Monitor incident reports and status updates</li>
+        <li>Submit feedback and rate security services</li>
+        <li>View scheduled guard shifts</li>
+        <li>Access important security information</li>
+    </ul>
+    
+    <p style="margin: 20px 0px;">
+        <strong>Your Portal Access Details:</strong><br/>
+        Login Email: <strong>${object.email}</strong><br/>
+        Unit: <strong>${object.unit_number or 'N/A'}</strong>
+        % if object.building:
+        <br/>Building: <strong>${object.building}</strong>
+        % endif
+    </p>
+    
+    <div style="margin: 20px 0px;">
+        % try:
+            % if object.user_id and object.user_id.partner_id.sudo().signup_type:
+        <a href="${object.user_id.partner_id.sudo()._get_signup_url()}" 
+           style="background-color: #875A7B; padding: 10px 20px; text-decoration: none; color: #fff; border-radius: 5px; display: inline-block;">
+            Set Your Password &amp; Access Portal
+        </a>
+            % else:
+        <a href="${get_base_url()}/web/login" 
+           style="background-color: #875A7B; padding: 10px 20px; text-decoration: none; color: #fff; border-radius: 5px; display: inline-block;">
+            Access Portal
+        </a>
+            % endif
+        % except:
+        <a href="${get_base_url()}/web/login" 
+           style="background-color: #875A7B; padding: 10px 20px; text-decoration: none; color: #fff; border-radius: 5px; display: inline-block;">
+            Access Portal
+        </a>
+        % endtry
+    </div>
+    
+    <p>
+        % try:
+            % if object.user_id and object.user_id.partner_id.sudo().signup_type:
+        Click the button above to set your password and access the portal for the first time.
+            % else:
+        If this is your first time logging in, please use the "Reset Password" link on the login page to set your password.
+            % endif
+        % except:
+        If this is your first time logging in, please use the "Reset Password" link on the login page to set your password.
+        % endtry
+    </p>
+    
+    <p>
+        If you have any questions or need assistance, please contact our management team.
+    </p>
+    
+    <p>
+        Best regards,<br/>
+        <strong>${object.site_id.client_id.name}</strong><br/>
+        Security Management Team
+    </p>
+    
+    <hr style="margin: 20px 0px; border: 1px solid #eee;"/>
+    
+    <p style="font-size: 11px; color: #999;">
+        This is an automated message from ${object.site_id.name} Security Portal. 
+        Please do not reply to this email.
+    </p>
+</div>
+            </field>
+            <field name="auto_delete" eval="True"/>
+            <field name="lang">{{ object.partner_id.lang or 'en_US' }}</field>
+        </record>
+        
+        <!-- ========================================== -->
+        <!-- Incident Status Update Email Template      -->
+        <!-- ========================================== -->
+        
+        <record id="email_template_incident_status_update" model="mail.template">
+            <field name="name">Incident Status Update Notification</field>
+            <field name="model_id" ref="model_incident_status_update"/>
+            <field name="subject">Incident Update: ${object.incident_id.name} - ${object.title}</field>
+            <field name="email_from">${(user.email or '') | safe}</field>
+            <field name="partner_to">${object.client_id.id if object.client_id else ''}</field>
+            <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-family: 'Lucida Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 13px; color: rgb(34, 34, 34);">
+    <h2 style="color: #875A7B;">Incident Status Update</h2>
+    
+    <div style="background-color: #f9f9f9; padding: 15px; border-left: 4px solid #875A7B; margin: 20px 0px;">
+        <p style="margin: 0; font-size: 16px;"><strong>${object.title}</strong></p>
+    </div>
+    
+    <p><strong>Incident:</strong> ${object.incident_id.name}</p>
+    <p><strong>Site:</strong> ${object.site_id.name}</p>
+    <p><strong>Update Time:</strong> ${format_datetime(object.update_datetime, dt_format='medium')}</p>
+    <p><strong>Update Type:</strong> ${object.update_type.replace('_', ' ').title()}</p>
+    
+    % if object.new_status:
+    <p>
+        <strong>Status Changed:</strong> 
+        % if object.old_status:
+        ${object.old_status.replace('_', ' ').title()} → 
+        % endif
+        ${object.new_status.replace('_', ' ').title()}
+    </p>
+    % endif
+    
+    <hr style="margin: 20px 0px; border: 1px solid #eee;"/>
+    
+    <h3>Update Details:</h3>
+    <p>${object.description}</p>
+    
+    <hr style="margin: 20px 0px; border: 1px solid #eee;"/>
+    
+    <p>
+        <a href="${get_base_url()}/my/incident/${object.incident_id.id}" 
+           style="background-color: #875A7B; padding: 10px 20px; text-decoration: none; color: #fff; border-radius: 5px; display: inline-block;">
+            View Incident Details
+        </a>
+    </p>
+    
+    <p style="margin-top: 20px; font-size: 11px; color: #999;">
+        This is an automated notification from your security management system.
+        You are receiving this because you requested notifications for incident updates.
+    </p>
+</div>
+            </field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+        
+    </data>
+</odoo>
+

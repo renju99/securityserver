@@ -1,0 +1,670 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- ================================================================
+             UAE STANDARD GUARD TASK TEMPLATES
+             Based on UAE Security Industry Standards and Best Practices
+             ================================================================ -->
+
+        <!-- 1. PERIMETER PATROL TEMPLATE -->
+        <record id="task_template_perimeter_patrol" model="guard.task.template">
+            <field name="name">Perimeter Security Patrol</field>
+            <field name="task_type">patrol</field>
+            <field name="priority">1</field>
+            <field name="active" eval="True"/>
+            <field name="description"><![CDATA[
+                <h3>Perimeter Security Patrol</h3>
+                <p><strong>Purpose:</strong> Conduct comprehensive perimeter security patrol to detect and deter unauthorized access, security breaches, and safety hazards.</p>
+                
+                <h4>Standard Operating Procedure:</h4>
+                <ul>
+                    <li>Walk the entire perimeter of the facility in a systematic manner</li>
+                    <li>Check all access points, gates, and fencing for integrity</li>
+                    <li>Inspect lighting systems and report any malfunctions</li>
+                    <li>Look for signs of tampering, damage, or unauthorized entry attempts</li>
+                    <li>Report any suspicious persons, vehicles, or activities</li>
+                    <li>Ensure all emergency exits are accessible and properly secured</li>
+                    <li>Document findings in the patrol log</li>
+                </ul>
+                
+                <h4>UAE Compliance Notes:</h4>
+                <p>This patrol aligns with UAE Ministry of Interior security standards for facility protection and SIRA (Security Industry Regulatory Agency) requirements for regular security patrols.</p>
+            ]]></field>
+        </record>
+
+        <record id="checklist_perimeter_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_perimeter_patrol"/>
+            <field name="sequence">10</field>
+            <field name="name">Inspect main entrance gate and access control systems</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_perimeter_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_perimeter_patrol"/>
+            <field name="sequence">20</field>
+            <field name="name">Check perimeter fencing for damage or breaches</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_perimeter_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_perimeter_patrol"/>
+            <field name="sequence">30</field>
+            <field name="name">Verify all perimeter lighting is operational</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_perimeter_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_perimeter_patrol"/>
+            <field name="sequence">40</field>
+            <field name="name">Inspect emergency exits for proper closure and accessibility</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_perimeter_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_perimeter_patrol"/>
+            <field name="sequence">50</field>
+            <field name="name">Check for unauthorized vehicles in restricted areas</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_perimeter_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_perimeter_patrol"/>
+            <field name="sequence">60</field>
+            <field name="name">Document any suspicious activity or security concerns</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <!-- 2. ACCESS CONTROL CHECK TEMPLATE -->
+        <record id="task_template_access_control" model="guard.task.template">
+            <field name="name">Access Control System Check</field>
+            <field name="task_type">inspection</field>
+            <field name="priority">2</field>
+            <field name="active" eval="True"/>
+            <field name="description"><![CDATA[
+                <h3>Access Control System Verification</h3>
+                <p><strong>Purpose:</strong> Verify proper functioning of all access control systems and ensure only authorized personnel gain entry to restricted areas.</p>
+                
+                <h4>Key Responsibilities:</h4>
+                <ul>
+                    <li>Test all card readers and biometric scanners</li>
+                    <li>Verify access logs are being recorded properly</li>
+                    <li>Check for any unauthorized access attempts</li>
+                    <li>Ensure visitor management system is operational</li>
+                    <li>Verify emergency override systems are functional</li>
+                    <li>Report any system malfunctions immediately</li>
+                </ul>
+                
+                <h4>UAE Standards:</h4>
+                <p>Complies with UAE data protection laws and SIRA guidelines for access control management in secured facilities.</p>
+            ]]></field>
+        </record>
+
+        <record id="checklist_access_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_access_control"/>
+            <field name="sequence">10</field>
+            <field name="name">Test main entrance card reader functionality</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_access_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_access_control"/>
+            <field name="sequence">20</field>
+            <field name="name">Verify biometric scanner is operational</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_access_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_access_control"/>
+            <field name="sequence">30</field>
+            <field name="name">Review access logs for unauthorized attempts</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_access_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_access_control"/>
+            <field name="sequence">40</field>
+            <field name="name">Check visitor management system functionality</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_access_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_access_control"/>
+            <field name="sequence">50</field>
+            <field name="name">Test emergency override and manual release systems</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <!-- 3. FIRE SAFETY INSPECTION TEMPLATE -->
+        <record id="task_template_fire_safety" model="guard.task.template">
+            <field name="name">Fire Safety Equipment Inspection</field>
+            <field name="task_type">safety_check</field>
+            <field name="priority">3</field>
+            <field name="active" eval="True"/>
+            <field name="description"><![CDATA[
+                <h3>Fire Safety Equipment Inspection</h3>
+                <p><strong>Purpose:</strong> Ensure all fire safety equipment is operational and accessible in compliance with UAE Civil Defense regulations.</p>
+                
+                <h4>Inspection Requirements:</h4>
+                <ul>
+                    <li>Check fire extinguishers for proper pressure and accessibility</li>
+                    <li>Verify fire alarm systems are functional</li>
+                    <li>Inspect emergency lighting and exit signs</li>
+                    <li>Ensure fire exits are unobstructed</li>
+                    <li>Check fire hose reels and sprinkler systems</li>
+                    <li>Verify fire assembly points are clearly marked</li>
+                    <li>Document any deficiencies for immediate action</li>
+                </ul>
+                
+                <h4>UAE Civil Defense Compliance:</h4>
+                <p>This inspection meets UAE Civil Defense requirements for regular fire safety checks in commercial and residential facilities.</p>
+            ]]></field>
+        </record>
+
+        <record id="checklist_fire_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_fire_safety"/>
+            <field name="sequence">10</field>
+            <field name="name">Inspect all fire extinguishers for proper pressure (green zone)</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_fire_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_fire_safety"/>
+            <field name="sequence">20</field>
+            <field name="name">Test fire alarm panel and ensure no fault indicators</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_fire_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_fire_safety"/>
+            <field name="sequence">30</field>
+            <field name="name">Verify emergency lighting is functional</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_fire_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_fire_safety"/>
+            <field name="sequence">40</field>
+            <field name="name">Ensure all fire exits are clear and unobstructed</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_fire_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_fire_safety"/>
+            <field name="sequence">50</field>
+            <field name="name">Check fire hose reels for accessibility and condition</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_fire_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_fire_safety"/>
+            <field name="sequence">60</field>
+            <field name="name">Verify fire assembly point signage is visible</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <!-- 4. VEHICLE INSPECTION TEMPLATE -->
+        <record id="task_template_vehicle_inspection" model="guard.task.template">
+            <field name="name">Vehicle Entry/Exit Inspection</field>
+            <field name="task_type">visitor_log</field>
+            <field name="priority">2</field>
+            <field name="active" eval="True"/>
+            <field name="description"><![CDATA[
+                <h3>Vehicle Entry/Exit Security Inspection</h3>
+                <p><strong>Purpose:</strong> Conduct thorough security screening of vehicles entering and exiting the facility to prevent unauthorized items and ensure safety.</p>
+                
+                <h4>Inspection Protocol:</h4>
+                <ul>
+                    <li>Verify vehicle registration and driver authorization</li>
+                    <li>Check vehicle for prohibited items or contraband</li>
+                    <li>Inspect trunk and cargo areas when required</li>
+                    <li>Use mirrors to check vehicle undercarriage</li>
+                    <li>Log vehicle details in the register</li>
+                    <li>Issue vehicle pass or parking permit</li>
+                    <li>Report suspicious vehicles to supervisor</li>
+                </ul>
+                
+                <h4>Security Standards:</h4>
+                <p>Follows UAE security protocols for facility access control and vehicle screening procedures.</p>
+            ]]></field>
+        </record>
+
+        <record id="checklist_vehicle_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_vehicle_inspection"/>
+            <field name="sequence">10</field>
+            <field name="name">Verify driver's Emirates ID and authorization</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_vehicle_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_vehicle_inspection"/>
+            <field name="sequence">20</field>
+            <field name="name">Check vehicle registration and insurance documents</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_vehicle_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_vehicle_inspection"/>
+            <field name="sequence">30</field>
+            <field name="name">Inspect trunk and cargo area for prohibited items</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_vehicle_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_vehicle_inspection"/>
+            <field name="sequence">40</field>
+            <field name="name">Use inspection mirror to check vehicle undercarriage</field>
+            <field name="mandatory" eval="False"/>
+        </record>
+
+        <record id="checklist_vehicle_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_vehicle_inspection"/>
+            <field name="sequence">50</field>
+            <field name="name">Log vehicle details in entry register</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_vehicle_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_vehicle_inspection"/>
+            <field name="sequence">60</field>
+            <field name="name">Issue vehicle pass or parking permit</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <!-- 5. CCTV SYSTEM CHECK TEMPLATE -->
+        <record id="task_template_cctv_check" model="guard.task.template">
+            <field name="name">CCTV Surveillance System Check</field>
+            <field name="task_type">equipment_check</field>
+            <field name="priority">2</field>
+            <field name="active" eval="True"/>
+            <field name="description"><![CDATA[
+                <h3>CCTV Surveillance System Verification</h3>
+                <p><strong>Purpose:</strong> Ensure all CCTV cameras and recording systems are operational and providing adequate coverage of critical areas.</p>
+                
+                <h4>System Check Procedure:</h4>
+                <ul>
+                    <li>Verify all cameras are powered and recording</li>
+                    <li>Check camera angles and coverage areas</li>
+                    <li>Test PTZ (Pan-Tilt-Zoom) camera controls</li>
+                    <li>Verify recording system storage capacity</li>
+                    <li>Check video quality and clarity</li>
+                    <li>Ensure backup power systems are functional</li>
+                    <li>Report any camera malfunctions or blind spots</li>
+                </ul>
+                
+                <h4>Technical Standards:</h4>
+                <p>Complies with UAE data protection regulations and SIRA requirements for surveillance system maintenance.</p>
+            ]]></field>
+        </record>
+
+        <record id="checklist_cctv_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_cctv_check"/>
+            <field name="sequence">10</field>
+            <field name="name">Verify all cameras are displaying live feed</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_cctv_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_cctv_check"/>
+            <field name="sequence">20</field>
+            <field name="name">Check recording system is active and storing footage</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_cctv_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_cctv_check"/>
+            <field name="sequence">30</field>
+            <field name="name">Test PTZ camera controls and movement</field>
+            <field name="mandatory" eval="False"/>
+        </record>
+
+        <record id="checklist_cctv_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_cctv_check"/>
+            <field name="sequence">40</field>
+            <field name="name">Verify storage capacity is above 20% available</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_cctv_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_cctv_check"/>
+            <field name="sequence">50</field>
+            <field name="name">Check video quality and adjust camera focus if needed</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_cctv_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_cctv_check"/>
+            <field name="sequence">60</field>
+            <field name="name">Test backup power supply (UPS) status</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <!-- 6. SHIFT HANDOVER TEMPLATE -->
+        <record id="task_template_shift_handover" model="guard.task.template">
+            <field name="name">Shift Handover Procedure</field>
+            <field name="task_type">other</field>
+            <field name="priority">3</field>
+            <field name="active" eval="True"/>
+            <field name="description"><![CDATA[
+                <h3>Shift Handover and Briefing</h3>
+                <p><strong>Purpose:</strong> Ensure smooth transition between shifts with complete transfer of information and responsibilities.</p>
+                
+                <h4>Handover Requirements:</h4>
+                <ul>
+                    <li>Review incident log from previous shift</li>
+                    <li>Check all keys and equipment are accounted for</li>
+                    <li>Discuss any ongoing security concerns</li>
+                    <li>Review visitor log and pending deliveries</li>
+                    <li>Verify all post orders are understood</li>
+                    <li>Sign handover register</li>
+                    <li>Report any discrepancies to supervisor</li>
+                </ul>
+                
+                <h4>Professional Standards:</h4>
+                <p>Follows UAE security industry best practices for shift continuity and information management.</p>
+            ]]></field>
+        </record>
+
+        <record id="checklist_handover_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_shift_handover"/>
+            <field name="sequence">10</field>
+            <field name="name">Review and sign the incident log from previous shift</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_handover_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_shift_handover"/>
+            <field name="sequence">20</field>
+            <field name="name">Verify all keys are present and accounted for</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_handover_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_shift_handover"/>
+            <field name="sequence">30</field>
+            <field name="name">Check radio, flashlight, and other equipment functionality</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_handover_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_shift_handover"/>
+            <field name="sequence">40</field>
+            <field name="name">Review visitor log and pending deliveries</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_handover_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_shift_handover"/>
+            <field name="sequence">50</field>
+            <field name="name">Discuss ongoing security concerns with outgoing guard</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_handover_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_shift_handover"/>
+            <field name="sequence">60</field>
+            <field name="name">Sign shift handover register</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <!-- 7. EMERGENCY DRILL TEMPLATE -->
+        <record id="task_template_emergency_drill" model="guard.task.template">
+            <field name="name">Emergency Evacuation Drill</field>
+            <field name="task_type">training</field>
+            <field name="priority">3</field>
+            <field name="active" eval="True"/>
+            <field name="description"><![CDATA[
+                <h3>Emergency Evacuation Drill Coordination</h3>
+                <p><strong>Purpose:</strong> Coordinate and monitor emergency evacuation drills to ensure preparedness and compliance with UAE Civil Defense requirements.</p>
+                
+                <h4>Drill Coordination:</h4>
+                <ul>
+                    <li>Activate alarm system at designated time</li>
+                    <li>Monitor evacuation of all personnel</li>
+                    <li>Guide occupants to assembly points</li>
+                    <li>Conduct headcount at assembly areas</li>
+                    <li>Time the evacuation process</li>
+                    <li>Document drill results and observations</li>
+                    <li>Report any issues to management</li>
+                </ul>
+                
+                <h4>UAE Civil Defense Requirements:</h4>
+                <p>Meets UAE Civil Defense mandatory drill requirements for commercial and residential facilities.</p>
+            ]]></field>
+        </record>
+
+        <record id="checklist_drill_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_emergency_drill"/>
+            <field name="sequence">10</field>
+            <field name="name">Activate fire alarm system at scheduled time</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_drill_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_emergency_drill"/>
+            <field name="sequence">20</field>
+            <field name="name">Monitor evacuation routes for proper flow</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_drill_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_emergency_drill"/>
+            <field name="sequence">30</field>
+            <field name="name">Guide personnel to designated assembly points</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_drill_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_emergency_drill"/>
+            <field name="sequence">40</field>
+            <field name="name">Conduct headcount and verify all personnel evacuated</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_drill_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_emergency_drill"/>
+            <field name="sequence">50</field>
+            <field name="name">Record total evacuation time</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_drill_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_emergency_drill"/>
+            <field name="sequence">60</field>
+            <field name="name">Document drill results and submit report</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <!-- 8. PARKING AREA INSPECTION TEMPLATE -->
+        <record id="task_template_parking_inspection" model="guard.task.template">
+            <field name="name">Parking Area Security Inspection</field>
+            <field name="task_type">patrol</field>
+            <field name="priority">1</field>
+            <field name="active" eval="True"/>
+            <field name="description"><![CDATA[
+                <h3>Parking Area Security Patrol</h3>
+                <p><strong>Purpose:</strong> Monitor parking areas to prevent theft, vandalism, and ensure proper parking compliance.</p>
+                
+                <h4>Inspection Points:</h4>
+                <ul>
+                    <li>Check for unauthorized vehicles</li>
+                    <li>Verify parking permits are displayed</li>
+                    <li>Look for suspicious items or packages</li>
+                    <li>Ensure proper lighting in all areas</li>
+                    <li>Check for vehicle damage or break-ins</li>
+                    <li>Verify emergency vehicle access is clear</li>
+                    <li>Report any violations or concerns</li>
+                </ul>
+            ]]></field>
+        </record>
+
+        <record id="checklist_parking_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_parking_inspection"/>
+            <field name="sequence">10</field>
+            <field name="name">Check for vehicles without valid parking permits</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_parking_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_parking_inspection"/>
+            <field name="sequence">20</field>
+            <field name="name">Inspect for suspicious packages or items near vehicles</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_parking_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_parking_inspection"/>
+            <field name="sequence">30</field>
+            <field name="name">Verify all parking area lighting is functional</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_parking_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_parking_inspection"/>
+            <field name="sequence">40</field>
+            <field name="name">Check for signs of vehicle break-ins or damage</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_parking_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_parking_inspection"/>
+            <field name="sequence">50</field>
+            <field name="name">Ensure emergency vehicle access lanes are clear</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <!-- 9. VISITOR SCREENING TEMPLATE -->
+        <record id="task_template_visitor_screening" model="guard.task.template">
+            <field name="name">Visitor Registration and Screening</field>
+            <field name="task_type">visitor_log</field>
+            <field name="priority">2</field>
+            <field name="active" eval="True"/>
+            <field name="description"><![CDATA[
+                <h3>Visitor Registration and Security Screening</h3>
+                <p><strong>Purpose:</strong> Conduct professional visitor screening and registration in accordance with UAE security protocols.</p>
+                
+                <h4>Screening Procedure:</h4>
+                <ul>
+                    <li>Greet visitor professionally and courteously</li>
+                    <li>Request and verify Emirates ID or passport</li>
+                    <li>Confirm appointment or authorization</li>
+                    <li>Screen belongings if required</li>
+                    <li>Issue visitor badge and explain facility rules</li>
+                    <li>Log visitor details in register</li>
+                    <li>Escort or direct to appropriate location</li>
+                </ul>
+                
+                <h4>Professional Standards:</h4>
+                <p>Follows UAE hospitality and security standards for visitor management.</p>
+            ]]></field>
+        </record>
+
+        <record id="checklist_visitor_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_visitor_screening"/>
+            <field name="sequence">10</field>
+            <field name="name">Greet visitor and request identification (Emirates ID/Passport)</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_visitor_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_visitor_screening"/>
+            <field name="sequence">20</field>
+            <field name="name">Verify visitor appointment and contact host</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_visitor_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_visitor_screening"/>
+            <field name="sequence">30</field>
+            <field name="name">Screen bags and belongings through X-ray or manual inspection</field>
+            <field name="mandatory" eval="False"/>
+        </record>
+
+        <record id="checklist_visitor_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_visitor_screening"/>
+            <field name="sequence">40</field>
+            <field name="name">Issue visitor badge and explain facility rules</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_visitor_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_visitor_screening"/>
+            <field name="sequence">50</field>
+            <field name="name">Log visitor details in visitor management system</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_visitor_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_visitor_screening"/>
+            <field name="sequence">60</field>
+            <field name="name">Provide directions or escort to destination</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <!-- 10. BUILDING INTERIOR PATROL TEMPLATE -->
+        <record id="task_template_interior_patrol" model="guard.task.template">
+            <field name="name">Building Interior Security Patrol</field>
+            <field name="task_type">patrol</field>
+            <field name="priority">1</field>
+            <field name="active" eval="True"/>
+            <field name="description"><![CDATA[
+                <h3>Interior Building Security Patrol</h3>
+                <p><strong>Purpose:</strong> Conduct systematic interior patrol to ensure security, safety, and proper facility conditions.</p>
+                
+                <h4>Patrol Checklist:</h4>
+                <ul>
+                    <li>Check all floors and common areas</li>
+                    <li>Verify doors and windows are properly secured</li>
+                    <li>Look for safety hazards or maintenance issues</li>
+                    <li>Check restrooms and service areas</li>
+                    <li>Ensure emergency equipment is accessible</li>
+                    <li>Monitor for unauthorized persons</li>
+                    <li>Report any anomalies or concerns</li>
+                </ul>
+            ]]></field>
+        </record>
+
+        <record id="checklist_interior_1" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_interior_patrol"/>
+            <field name="sequence">10</field>
+            <field name="name">Patrol all floors systematically from top to bottom</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_interior_2" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_interior_patrol"/>
+            <field name="sequence">20</field>
+            <field name="name">Check all doors and windows for proper closure</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_interior_3" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_interior_patrol"/>
+            <field name="sequence">30</field>
+            <field name="name">Inspect stairwells and emergency exits</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_interior_4" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_interior_patrol"/>
+            <field name="sequence">40</field>
+            <field name="name">Check restrooms and common areas for cleanliness and safety</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+        <record id="checklist_interior_5" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_interior_patrol"/>
+            <field name="sequence">50</field>
+            <field name="name">Verify HVAC systems and utilities are functioning normally</field>
+            <field name="mandatory" eval="False"/>
+        </record>
+
+        <record id="checklist_interior_6" model="guard.task.checklist.template">
+            <field name="template_id" ref="task_template_interior_patrol"/>
+            <field name="sequence">60</field>
+            <field name="name">Document any maintenance issues or safety hazards</field>
+            <field name="mandatory" eval="True"/>
+        </record>
+
+    </data>
+</odoo>

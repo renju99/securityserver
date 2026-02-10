@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Checkpoints for NSHAMA Town Square -->
+        <record id="checkpoint_ts_main_gate" model="checkpoint">
+            <field name="name">Main Gate Entrance</field>
+            <field name="code">TS-CP-001</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="location_description">Main entrance gate - Security booth</field>
+            <field name="latitude">24.9533</field>
+            <field name="longitude">55.1653</field>
+            <field name="floor">Ground</field>
+            <field name="zone">Entrance</field>
+            <field name="scan_type">nfc</field>
+            <field name="nfc_tag_id">NFC-TS-001-MAIN-GATE</field>
+            <field name="nfc_tag_type">NTAG215</field>
+            <field name="status">active</field>
+            <field name="requires_photo" eval="True"/>
+            <field name="requires_note" eval="False"/>
+            <field name="instructions">Check main gate security, verify access control system, inspect guard booth</field>
+        </record>
+
+        <record id="checkpoint_ts_retail_area" model="checkpoint">
+            <field name="name">Retail Area - Central Plaza</field>
+            <field name="code">TS-CP-002</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="location_description">Central retail plaza near fountain</field>
+            <field name="latitude">24.9540</field>
+            <field name="longitude">55.1660</field>
+            <field name="floor">Ground</field>
+            <field name="zone">Retail</field>
+            <field name="scan_type">qr</field>
+            <field name="qr_code">QR-TS-002</field>
+            <field name="status">active</field>
+            <field name="requires_photo" eval="False"/>
+            <field name="requires_note" eval="True"/>
+            <field name="instructions">Check retail area security, verify all shops closed properly (night), check lighting</field>
+        </record>
+
+        <record id="checkpoint_ts_parking_north" model="checkpoint">
+            <field name="name">North Parking Structure</field>
+            <field name="code">TS-CP-003</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="location_description">Multi-level parking - Ground floor entrance</field>
+            <field name="latitude">24.9548</field>
+            <field name="longitude">55.1645</field>
+            <field name="floor">Ground</field>
+            <field name="zone">Parking</field>
+            <field name="scan_type">both</field>
+            <field name="nfc_tag_id">NFC-TS-003-PARKING-N</field>
+            <field name="nfc_tag_type">NTAG215</field>
+            <field name="qr_code">QR-TS-003</field>
+            <field name="status">active</field>
+            <field name="requires_photo" eval="True"/>
+            <field name="requires_note" eval="False"/>
+            <field name="instructions">Inspect parking levels, check emergency exits, verify lighting, look for suspicious vehicles</field>
+        </record>
+
+        <record id="checkpoint_ts_pool_area" model="checkpoint">
+            <field name="name">Community Pool &amp; Recreation</field>
+            <field name="code">TS-CP-004</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="location_description">Main pool area - Recreation center entrance</field>
+            <field name="latitude">24.9525</field>
+            <field name="longitude">55.1668</field>
+            <field name="floor">Ground</field>
+            <field name="zone">Recreation</field>
+            <field name="scan_type">nfc</field>
+            <field name="nfc_tag_id">NFC-TS-004-POOL</field>
+            <field name="nfc_tag_type">NTAG215</field>
+            <field name="status">active</field>
+            <field name="requires_photo" eval="False"/>
+            <field name="requires_note" eval="True"/>
+            <field name="instructions">Check pool area secured, verify gates locked after hours, inspect equipment</field>
+        </record>
+
+        <record id="checkpoint_ts_office_building" model="checkpoint">
+            <field name="name">Office Tower - Lobby</field>
+            <field name="code">TS-CP-005</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="location_description">Main office tower - Ground floor lobby</field>
+            <field name="latitude">24.9520</field>
+            <field name="longitude">55.1655</field>
+            <field name="floor">Ground</field>
+            <field name="zone">Commercial</field>
+            <field name="scan_type">qr</field>
+            <field name="qr_code">QR-TS-005</field>
+            <field name="status">active</field>
+            <field name="requires_photo" eval="False"/>
+            <field name="requires_note" eval="False"/>
+            <field name="instructions">Check lobby security, verify access control, inspect elevator areas</field>
+        </record>
+
+        <record id="checkpoint_ts_playground" model="checkpoint">
+            <field name="name">Children's Playground</field>
+            <field name="code">TS-CP-006</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="location_description">Kids play area near residential block A</field>
+            <field name="latitude">24.9538</field>
+            <field name="longitude">55.1675</field>
+            <field name="floor">Ground</field>
+            <field name="zone">Recreation</field>
+            <field name="scan_type">virtual</field>
+            <field name="gps_tolerance">30.0</field>
+            <field name="status">active</field>
+            <field name="requires_photo" eval="True"/>
+            <field name="requires_note" eval="True"/>
+            <field name="instructions">Inspect playground equipment, check for vandalism, verify area is clear and secure</field>
+        </record>
+
+        <!-- Checkpoints for NSHAMA The Springs -->
+        <record id="checkpoint_sp_main_entrance" model="checkpoint">
+            <field name="name">Community Main Entrance</field>
+            <field name="code">SP-CP-001</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="location_description">Main community entrance checkpoint</field>
+            <field name="latitude">25.0733</field>
+            <field name="longitude">55.1853</field>
+            <field name="floor">Ground</field>
+            <field name="zone">Entrance</field>
+            <field name="scan_type">nfc</field>
+            <field name="nfc_tag_id">NFC-SP-001-MAIN</field>
+            <field name="nfc_tag_type">NTAG215</field>
+            <field name="status">active</field>
+            <field name="requires_photo" eval="True"/>
+            <field name="requires_note" eval="False"/>
+            <field name="instructions">Monitor main gate, check access control, verify visitor log</field>
+        </record>
+
+        <record id="checkpoint_sp_clubhouse" model="checkpoint">
+            <field name="name">Community Clubhouse</field>
+            <field name="code">SP-CP-002</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="location_description">Clubhouse main entrance</field>
+            <field name="latitude">25.0740</field>
+            <field name="longitude">55.1860</field>
+            <field name="floor">Ground</field>
+            <field name="zone">Recreation</field>
+            <field name="scan_type">qr</field>
+            <field name="qr_code">QR-SP-002</field>
+            <field name="status">active</field>
+            <field name="requires_photo" eval="False"/>
+            <field name="requires_note" eval="True"/>
+            <field name="instructions">Check clubhouse security, verify all facilities secured, inspect gym and common areas</field>
+        </record>
+
+        <record id="checkpoint_sp_park" model="checkpoint">
+            <field name="name">Central Park Area</field>
+            <field name="code">SP-CP-003</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="location_description">Central park and walking trails</field>
+            <field name="latitude">25.0728</field>
+            <field name="longitude">55.1845</field>
+            <field name="floor">Ground</field>
+            <field name="zone">Recreation</field>
+            <field name="scan_type">virtual</field>
+            <field name="gps_tolerance">40.0</field>
+            <field name="status">active</field>
+            <field name="requires_photo" eval="True"/>
+            <field name="requires_note" eval="True"/>
+            <field name="instructions">Patrol park area, check for suspicious activity, verify lighting is functional</field>
+        </record>
+
+        <record id="checkpoint_sp_residential_a" model="checkpoint">
+            <field name="name">Residential Block A</field>
+            <field name="code">SP-CP-004</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="location_description">Residential area A - common entrance</field>
+            <field name="latitude">25.0750</field>
+            <field name="longitude">55.1870</field>
+            <field name="floor">Ground</field>
+            <field name="zone">Residential</field>
+            <field name="scan_type">nfc</field>
+            <field name="nfc_tag_id">NFC-SP-004-RES-A</field>
+            <field name="nfc_tag_type">NTAG215</field>
+            <field name="status">active</field>
+            <field name="requires_photo" eval="False"/>
+            <field name="requires_note" eval="False"/>
+            <field name="instructions">Patrol residential area, check for any disturbances, verify perimeter security</field>
+        </record>
+
+        <record id="checkpoint_sp_back_gate" model="checkpoint">
+            <field name="name">Service Entrance - Back Gate</field>
+            <field name="code">SP-CP-005</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="location_description">Service/emergency back entrance</field>
+            <field name="latitude">25.0720</field>
+            <field name="longitude">55.1840</field>
+            <field name="floor">Ground</field>
+            <field name="zone">Service</field>
+            <field name="scan_type">both</field>
+            <field name="nfc_tag_id">NFC-SP-005-BACK</field>
+            <field name="nfc_tag_type">NTAG215</field>
+            <field name="qr_code">QR-SP-005</field>
+            <field name="status">active</field>
+            <field name="requires_photo" eval="True"/>
+            <field name="requires_note" eval="True"/>
+            <field name="instructions">Check service gate security, verify gate is locked, inspect surrounding area</field>
+        </record>
+
+        <!-- Inactive checkpoint (under maintenance) -->
+        <record id="checkpoint_sp_east_parking" model="checkpoint">
+            <field name="name">East Parking Area</field>
+            <field name="code">SP-CP-006</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="location_description">East side visitor parking</field>
+            <field name="latitude">25.0738</field>
+            <field name="longitude">55.1880</field>
+            <field name="floor">Ground</field>
+            <field name="zone">Parking</field>
+            <field name="scan_type">qr</field>
+            <field name="qr_code">QR-SP-006</field>
+            <field name="status">maintenance</field>
+            <field name="requires_photo" eval="False"/>
+            <field name="requires_note" eval="False"/>
+            <field name="instructions">Check parking area, verify proper parking, look for unauthorized vehicles</field>
+            <field name="special_notes">NFC tag requires replacement - temporarily under maintenance</field>
+        </record>
+
+    </data>
+</odoo>
+

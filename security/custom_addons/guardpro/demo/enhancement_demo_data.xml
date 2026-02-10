@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Emergency Procedure Demo Data -->
+        <record id="emergency_procedure_fire" model="emergency.procedure">
+            <field name="name">Fire Emergency Response</field>
+            <field name="emergency_type">fire</field>
+            <field name="sequence">10</field>
+            <field name="description">Follow this procedure in case of fire emergency</field>
+            <field name="auto_notify_authorities" eval="True"/>
+            <field name="notify_phone">999</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <record id="emergency_procedure_medical" model="emergency.procedure">
+            <field name="name">Medical Emergency Response</field>
+            <field name="emergency_type">medical</field>
+            <field name="sequence">20</field>
+            <field name="description">Follow this procedure for medical emergencies</field>
+            <field name="auto_notify_authorities" eval="True"/>
+            <field name="notify_phone">999</field>
+            <field name="active" eval="True"/>
+        </record>
+
+    </data>
+</odoo>

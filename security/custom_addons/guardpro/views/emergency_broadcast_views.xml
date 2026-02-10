@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Emergency Broadcast List View -->
+    <record id="view_emergency_broadcast_list" model="ir.ui.view">
+        <field name="name">emergency.broadcast.list</field>
+        <field name="model">emergency.broadcast</field>
+        <field name="arch" type="xml">
+            <list string="Emergency Broadcasts" default_order="create_date desc">
+                <field name="create_date" string="Date"/>
+                <field name="title"/>
+                <field name="priority" widget="badge" 
+                       decoration-danger="priority == 'urgent'"
+                       decoration-warning="priority == 'high'"
+                       decoration-info="priority == 'normal'"/>
+                <field name="broadcast_type"/>
+                <field name="site_id" optional="hide"/>
+                <field name="total_guards"/>
+                <field name="acknowledged_count"/>
+                <field name="pending_count"/>
+                <field name="acknowledgment_rate" widget="progressbar"/>
+                <field name="state" widget="badge"
+                       decoration-muted="state == 'draft'"
+                       decoration-success="state == 'sent'"
+                       decoration-danger="state == 'expired'"/>
+                <field name="sent_by"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Emergency Broadcast Form View -->
+    <record id="view_emergency_broadcast_form" model="ir.ui.view">
+        <field name="name">emergency.broadcast.form</field>
+        <field name="model">emergency.broadcast</field>
+        <field name="arch" type="xml">
+            <form string="Emergency Broadcast">
+                <header>
+                    <button name="action_send_broadcast" 
+                            string="Send Broadcast" 
+                            type="object" 
+                            class="btn-danger"
+                            invisible="state != 'draft'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="title" placeholder="Emergency Alert Title" required="1"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="priority" widget="radio"/>
+                            <field name="broadcast_type" widget="radio"/>
+                            <field name="site_id" 
+                                   invisible="broadcast_type != 'by_site'"
+                                   required="broadcast_type == 'by_site'"/>
+                        </group>
+                        <group>
+                            <field name="sent_by" readonly="1" invisible="state == 'draft'"/>
+                            <field name="sent_date" readonly="1" invisible="state == 'draft'"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <field name="message" widget="text" nolabel="1" 
+                               placeholder="Enter emergency message here..."
+                               options="{'rows': 6}"/>
+                    </group>
+                    
+                    <group string="Acknowledgment Statistics" invisible="state == 'draft'">
+                        <group>
+                            <field name="total_guards" readonly="1"/>
+                            <field name="acknowledged_count" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="pending_count" readonly="1"/>
+                            <field name="acknowledgment_rate" widget="percentpie" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <notebook invisible="state == 'draft'">
+                        <page string="Acknowledgments" name="acknowledgments">
+                            <field name="acknowledgment_ids" readonly="1">
+                                <list string="Acknowledgments">
+                                    <field name="guard_id"/>
+                                    <field name="user_id"/>
+                                    <field name="is_acknowledged" widget="boolean"/>
+                                    <field name="acknowledged_date"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Emergency Broadcast Search View -->
+    <record id="view_emergency_broadcast_search" model="ir.ui.view">
+        <field name="name">emergency.broadcast.search</field>
+        <field name="model">emergency.broadcast</field>
+        <field name="arch" type="xml">
+            <search string="Emergency Broadcasts">
+                <field name="title"/>
+                <field name="message"/>
+                <field name="site_id"/>
+                <field name="sent_by"/>
+                <filter name="filter_draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="filter_sent" string="Sent" domain="[('state', '=', 'sent')]"/>
+                <filter name="filter_urgent" string="Urgent" domain="[('priority', '=', 'urgent')]"/>
+                <filter name="filter_today" string="Today" 
+                        domain="[('create_date', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_priority" string="Priority" context="{'group_by': 'priority'}"/>
+                    <filter name="group_state" string="State" context="{'group_by': 'state'}"/>
+                    <filter name="group_site" string="Site" context="{'group_by': 'site_id'}"/>
+                    <filter name="group_sent_by" string="Sent By" context="{'group_by': 'sent_by'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Emergency Broadcast Action -->
+    <record id="action_emergency_broadcast" model="ir.actions.act_window">
+        <field name="name">Emergency Broadcasts</field>
+        <field name="res_model">emergency.broadcast</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_filter_sent': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                No emergency broadcasts found
+            </p>
+            <p>
+                Emergency broadcasts allow you to send urgent messages to guards.
+                Use the "Send Emergency Broadcast" action to create a new one.
+            </p>
+        </field>
+    </record>
+
+</odoo>
+

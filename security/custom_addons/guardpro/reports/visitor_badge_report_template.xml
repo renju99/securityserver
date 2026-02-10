@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Visitor Badge Report Action -->
+    <record id="action_report_visitor_badge" model="ir.actions.report">
+        <field name="name">Visitor Badge</field>
+        <field name="model">visitor.management</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.report_visitor_badge_document</field>
+        <field name="report_file">guardpro.report_visitor_badge_document</field>
+        <field name="binding_model_id" ref="model_visitor_management"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="guardpro.paperformat_badge"/>
+    </record>
+
+    <!-- Badge Paper Format (Badge Size: 3.5 x 2.25 inches) -->
+    <record id="paperformat_badge" model="report.paperformat">
+        <field name="name">Visitor Badge</field>
+        <field name="format">custom</field>
+        <field name="page_height">140</field>
+        <field name="page_width">215</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+    </record>
+
+    <!-- Visitor Badge Template -->
+    <template id="report_visitor_badge_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="visitor">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <style>
+                            .visitor-badge {
+                                border: 3px solid #2c3e50;
+                                border-radius: 15px;
+                                padding: 15px;
+                                background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+                                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                                font-family: 'Helvetica', 'Arial', sans-serif;
+                                height: 100%;
+                                position: relative;
+                            }
+                            .badge-header {
+                                text-align: center;
+                                background: #2c3e50;
+                                color: white;
+                                padding: 8px;
+                                border-radius: 8px;
+                                margin-bottom: 10px;
+                            }
+                            .badge-header h3 {
+                                margin: 0;
+                                font-size: 16pt;
+                                font-weight: bold;
+                            }
+                            .badge-type {
+                                background: #3498db;
+                                color: white;
+                                padding: 4px 10px;
+                                border-radius: 15px;
+                                font-size: 10pt;
+                                display: inline-block;
+                                margin-top: 3px;
+                            }
+                            .badge-type.vip {
+                                background: #e74c3c;
+                            }
+                            .badge-type.contractor {
+                                background: #f39c12;
+                            }
+                            .visitor-photo-container {
+                                text-align: center;
+                                margin: 10px 0;
+                            }
+                            .visitor-photo {
+                                width: 100px;
+                                height: 100px;
+                                border-radius: 50%;
+                                border: 3px solid #3498db;
+                                object-fit: cover;
+                            }
+                            .visitor-name {
+                                text-align: center;
+                                font-size: 14pt;
+                                font-weight: bold;
+                                color: #2c3e50;
+                                margin: 8px 0;
+                                text-transform: uppercase;
+                            }
+                            .visitor-company {
+                                text-align: center;
+                                font-size: 10pt;
+                                color: #7f8c8d;
+                                margin-bottom: 8px;
+                            }
+                            .qr-code-container {
+                                text-align: center;
+                                margin: 10px 0;
+                            }
+                            .qr-code {
+                                width: 100px;
+                                height: 100px;
+                            }
+                            .badge-details {
+                                font-size: 9pt;
+                                line-height: 1.4;
+                                margin: 8px 0;
+                            }
+                            .badge-details .detail-row {
+                                display: flex;
+                                margin-bottom: 4px;
+                            }
+                            .badge-details .label {
+                                font-weight: bold;
+                                color: #2c3e50;
+                                min-width: 70px;
+                            }
+                            .badge-details .value {
+                                color: #34495e;
+                                flex: 1;
+                            }
+                            .access-info {
+                                background: #ecf0f1;
+                                padding: 6px;
+                                border-radius: 6px;
+                                margin: 8px 0;
+                                font-size: 9pt;
+                            }
+                            .access-info .access-label {
+                                font-weight: bold;
+                                color: #27ae60;
+                                margin-bottom: 3px;
+                            }
+                            .badge-footer {
+                                text-align: center;
+                                font-size: 7pt;
+                                color: #95a5a6;
+                                margin-top: 10px;
+                                padding-top: 6px;
+                                border-top: 1px solid #bdc3c7;
+                            }
+                            .expiry-warning {
+                                background: #e74c3c;
+                                color: white;
+                                padding: 4px 8px;
+                                border-radius: 4px;
+                                font-size: 8pt;
+                                text-align: center;
+                                margin-top: 5px;
+                                font-weight: bold;
+                            }
+                            .valid-badge {
+                                background: #27ae60;
+                                color: white;
+                                padding: 4px 8px;
+                                border-radius: 4px;
+                                font-size: 8pt;
+                                text-align: center;
+                                margin-top: 5px;
+                                font-weight: bold;
+                            }
+                        </style>
+
+                        <div class="visitor-badge">
+                            <!-- Header -->
+                            <div class="badge-header">
+                                <h3>VISITOR BADGE</h3>
+                                <span t-attf-class="badge-type {{visitor.visitor_type == 'vip' and 'vip' or visitor.visitor_type == 'contractor' and 'contractor' or ''}}">
+                                    <t t-esc="dict(visitor._fields['visitor_type'].selection).get(visitor.visitor_type, 'Visitor').upper()"/>
+                                </span>
+                            </div>
+
+                            <!-- Visitor Photo -->
+                            <div class="visitor-photo-container">
+                                <t t-if="visitor.visitor_photo">
+                                    <img class="visitor-photo" t-att-src="'data:image/png;base64,%s' % visitor.visitor_photo.decode('utf-8')" alt="Visitor Photo"/>
+                                </t>
+                                <t t-else="">
+                                    <div class="visitor-photo" style="background: #ecf0f1; display: flex; align-items: center; justify-content: center; font-size: 40pt; color: #95a5a6;">
+                                        👤
+                                    </div>
+                                </t>
+                            </div>
+
+                            <!-- Visitor Name and Company -->
+                            <div class="visitor-name">
+                                <t t-esc="visitor.name"/>
+                            </div>
+                            <div class="visitor-company" t-if="visitor.company">
+                                <t t-esc="visitor.company"/>
+                            </div>
+
+                            <!-- QR Code -->
+                            <div class="qr-code-container">
+                                <t t-if="visitor.qr_image">
+                                    <img class="qr-code" t-att-src="'data:image/png;base64,%s' % visitor.qr_image.decode('utf-8')" alt="QR Code"/>
+                                </t>
+                                <div style="font-size: 7pt; color: #7f8c8d; margin-top: 3px;">
+                                    <t t-esc="visitor.qr_code[:8]"/>...
+                                </div>
+                            </div>
+
+                            <!-- Badge Details -->
+                            <div class="badge-details">
+                                <div class="detail-row">
+                                    <span class="label">Badge #:</span>
+                                    <span class="value"><t t-esc="visitor.badge_number or 'N/A'"/></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Visiting:</span>
+                                    <span class="value"><t t-esc="visitor.host_name"/></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Site:</span>
+                                    <span class="value"><t t-esc="visitor.site_id.name"/></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Date:</span>
+                                    <span class="value"><t t-esc="visitor.visit_date.strftime('%d/%m/%Y')"/></span>
+                                </div>
+                            </div>
+
+                            <!-- Access Information -->
+                            <div class="access-info">
+                                <div class="access-label">ACCESS AUTHORIZED</div>
+                                <div style="font-size: 8pt;">
+                                    Purpose: <t t-esc="dict(visitor._fields['visit_purpose'].selection).get(visitor.visit_purpose, 'N/A')"/>
+                                </div>
+                                <t t-if="visitor.expected_duration">
+                                    <div style="font-size: 8pt;">
+                                        Duration: <t t-esc="visitor.expected_duration"/> hour(s)
+                                    </div>
+                                </t>
+                            </div>
+
+                            <!-- Valid Status -->
+                            <t t-if="visitor.state == 'checked_in'">
+                                <div class="valid-badge">
+                                    ✓ VALID - CHECKED IN
+                                </div>
+                            </t>
+                            <t t-elif="visitor.state == 'pre_registered'">
+                                <div class="valid-badge">
+                                    ✓ PRE-REGISTERED
+                                </div>
+                            </t>
+                            <t t-elif="visitor.state == 'denied'">
+                                <div class="expiry-warning">
+                                    ✗ ACCESS DENIED
+                                </div>
+                            </t>
+                            <t t-elif="visitor.state == 'expired'">
+                                <div class="expiry-warning">
+                                    ⚠ EXPIRED
+                                </div>
+                            </t>
+
+                            <!-- Footer -->
+                            <div class="badge-footer">
+                                <div>This badge must be worn visibly at all times</div>
+                                <div>Return badge to security upon departure</div>
+                                <t t-if="visitor.checkin_time">
+                                    <div style="margin-top: 3px;">
+                                        Check-in: <t t-esc="context_timestamp(visitor.checkin_time).strftime('%d/%m/%Y %H:%M')"/>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
+

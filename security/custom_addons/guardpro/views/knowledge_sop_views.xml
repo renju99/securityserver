@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- SOP List View -->
+    <record id="view_knowledge_sop_list" model="ir.ui.view">
+        <field name="name">knowledge.sop.list</field>
+        <field name="model">knowledge.sop</field>
+        <field name="arch" type="xml">
+            <list string="Standard Operating Procedures" decoration-info="state == 'draft'" decoration-success="state == 'approved'" decoration-warning="state == 'review'">
+                <field name="sequence" widget="handle"/>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="sira_category" widget="badge"/>
+                <field name="risk_level" widget="badge" decoration-danger="risk_level == 'critical'" decoration-warning="risk_level == 'high'"/>
+                <field name="is_sira_compliant" widget="boolean_toggle"/>
+                <field name="step_count"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'approved'" decoration-warning="state == 'review'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- SOP Form View -->
+    <record id="view_knowledge_sop_form" model="ir.ui.view">
+        <field name="name">knowledge.sop.form</field>
+        <field name="model">knowledge.sop</field>
+        <field name="arch" type="xml">
+            <form string="Standard Operating Procedure">
+                <header>
+                    <button name="%(action_report_sop)d" string="Print SOP (Full)" 
+                            type="action" class="btn-primary" icon="fa-print"/>
+                    <button name="%(action_report_sop_compact)d" string="Print Compact (Field)" 
+                            type="action" class="btn-info" icon="fa-file-pdf-o"/>
+                    <button name="action_submit_review" string="Submit for Review" 
+                            type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_approve" string="Approve" 
+                            type="object" class="btn-success" invisible="state != 'review'" groups="guardpro.group_guardpro_manager"/>
+                    <button name="action_archive_sop" string="Archive" 
+                            type="object" class="btn-warning" invisible="state != 'approved'" groups="guardpro.group_guardpro_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,review,approved"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="SIRA Compliant" bg_color="text-bg-success" invisible="not is_sira_compliant"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-secondary" invisible="state != 'archived'"/>
+                    
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="SOP Name"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="article_id"/>
+                            <field name="sira_category"/>
+                            <field name="risk_level" widget="priority"/>
+                        </group>
+                        <group>
+                            <field name="is_sira_compliant"/>
+                            <field name="requires_training"/>
+                            <field name="training_duration" invisible="not requires_training"/>
+                            <field name="approved_by" readonly="1" invisible="state != 'approved'"/>
+                            <field name="approved_date" readonly="1" invisible="state != 'approved'"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Objective &amp; Scope">
+                            <group>
+                                <field name="objective" placeholder="What does this procedure aim to achieve?"/>
+                                <field name="scope" placeholder="When and where does this procedure apply?"/>
+                            </group>
+                        </page>
+                        
+                        <page string="Description">
+                            <field name="description" widget="html"/>
+                        </page>
+                        
+                        <page string="Procedure Steps">
+                            <field name="step_ids">
+                                <list string="Steps" editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="expected_duration" widget="float_time"/>
+                                    <field name="is_critical" widget="boolean_toggle"/>
+                                </list>
+                            </field>
+                        </page>
+                        
+                        <page string="Checklist">
+                            <field name="checklist_ids">
+                                <list string="Checklist Items" editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="category" widget="badge"/>
+                                    <field name="is_mandatory" widget="boolean_toggle"/>
+                                </list>
+                            </field>
+                        </page>
+                        
+                        <page string="Related Documents">
+                            <field name="related_doc_ids" widget="many2many_tags"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- SOP Kanban View -->
+    <record id="view_knowledge_sop_kanban" model="ir.ui.view">
+        <field name="name">knowledge.sop.kanban</field>
+        <field name="model">knowledge.sop</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="risk_level"/>
+                <field name="is_sira_compliant"/>
+                <field name="step_count"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong><field name="code"/> - <field name="name"/></strong>
+                                </div>
+                                <div class="o_kanban_record_top_right">
+                                    <span t-if="record.is_sira_compliant.raw_value" class="badge text-bg-success">SIRA</span>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div class="mt-1">
+                                    <field name="risk_level" widget="priority"/>
+                                    <span class="ms-2"><i class="fa fa-list-ol" title="Steps" aria-label="Steps"/> <field name="step_count"/> steps</span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- SOP Search View -->
+    <record id="view_knowledge_sop_search" model="ir.ui.view">
+        <field name="name">knowledge.sop.search</field>
+        <field name="model">knowledge.sop</field>
+        <field name="arch" type="xml">
+            <search string="Search SOPs">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="sira_category"/>
+                <filter string="SIRA Compliant" name="sira_compliant" domain="[('is_sira_compliant', '=', True)]"/>
+                <filter string="Requires Training" name="requires_training" domain="[('requires_training', '=', True)]"/>
+                <separator/>
+                <filter string="Draft" name="state_draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Under Review" name="state_review" domain="[('state', '=', 'review')]"/>
+                <filter string="Approved" name="state_approved" domain="[('state', '=', 'approved')]"/>
+                <separator/>
+                <filter string="Critical Risk" name="risk_critical" domain="[('risk_level', '=', 'critical')]"/>
+                <filter string="High Risk" name="risk_high" domain="[('risk_level', '=', 'high')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="SIRA Category" name="group_sira_category" context="{'group_by': 'sira_category'}"/>
+                    <filter string="Risk Level" name="group_risk_level" context="{'group_by': 'risk_level'}"/>
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- SOP Step Form View (Popup) -->
+    <record id="view_knowledge_sop_step_form" model="ir.ui.view">
+        <field name="name">knowledge.sop.step.form</field>
+        <field name="model">knowledge.sop.step</field>
+        <field name="arch" type="xml">
+            <form string="SOP Step">
+                <sheet>
+                    <group>
+                        <field name="sop_id" invisible="1"/>
+                        <field name="sequence"/>
+                        <field name="name"/>
+                        <field name="expected_duration" widget="float_time"/>
+                        <field name="is_critical"/>
+                    </group>
+                    <group string="Instructions">
+                        <field name="description" widget="html" nolabel="1"/>
+                    </group>
+                    <group string="Safety Notes" invisible="not safety_note">
+                        <field name="safety_note" nolabel="1"/>
+                    </group>
+                    <group string="Reference Image" invisible="not image">
+                        <field name="image" widget="image" nolabel="1"/>
+                        <field name="image_filename" invisible="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Guard Role Views -->
+    <record id="view_knowledge_guard_role_list" model="ir.ui.view">
+        <field name="name">knowledge.guard.role.list</field>
+        <field name="model">knowledge.guard.role</field>
+        <field name="arch" type="xml">
+            <list string="Guard Roles">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="sira_level" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_knowledge_guard_role_form" model="ir.ui.view">
+        <field name="name">knowledge.guard.role.form</field>
+        <field name="model">knowledge.guard.role</field>
+        <field name="arch" type="xml">
+            <form string="Guard Role">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                        </group>
+                        <group>
+                            <field name="sira_level"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Description">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_knowledge_sop" model="ir.actions.act_window">
+        <field name="name">Standard Operating Procedures</field>
+        <field name="res_model">knowledge.sop</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{'search_default_state_approved': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Standard Operating Procedure (SOP)
+            </p>
+            <p>
+                SOPs provide detailed, step-by-step instructions for security operations
+                based on UAE and SIRA standards.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_knowledge_guard_role" model="ir.actions.act_window">
+        <field name="name">Guard Roles</field>
+        <field name="res_model">knowledge.guard.role</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Define Guard Roles
+            </p>
+            <p>
+                Create roles based on SIRA grades and job functions.
+            </p>
+        </field>
+    </record>
+
+    <!-- Enhanced Knowledge Article Search View -->
+    <record id="view_knowledge_article_search_enhanced" model="ir.ui.view">
+        <field name="name">knowledge.article.search.enhanced</field>
+        <field name="model">knowledge.article</field>
+        <field name="arch" type="xml">
+            <search string="Search Knowledge Base">
+                <field name="name"/>
+                <field name="article_type"/>
+                <field name="category_id"/>
+                <field name="tag_ids"/>
+                <filter string="Published" name="is_published" domain="[('is_published', '=', True)]"/>
+                <filter string="UAE Standards" name="uae_standard" domain="[('is_uae_standard', '=', True)]"/>
+                <filter string="SIRA Requirements" name="sira_requirement" domain="[('is_sira_requirement', '=', True)]"/>
+                <filter string="Mandatory" name="mandatory" domain="[('compliance_level', '=', 'mandatory')]"/>
+                <filter string="Acknowledgment Required" name="ack_required" domain="[('acknowledgment_required', '=', True)]"/>
+                <separator/>
+                <filter string="SOPs" name="type_sop" domain="[('article_type', '=', 'sop')]"/>
+                <filter string="Policies" name="type_policy" domain="[('article_type', '=', 'policy')]"/>
+                <filter string="Training Materials" name="type_training" domain="[('article_type', '=', 'training')]"/>
+                <filter string="SIRA Certification" name="type_sira" domain="[('article_type', '=', 'sira')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Type" name="group_type" context="{'group_by': 'article_type'}"/>
+                    <filter string="Category" name="group_category" context="{'group_by': 'category_id'}"/>
+                    <filter string="Compliance Level" name="group_compliance" context="{'group_by': 'compliance_level'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+</odoo>
+

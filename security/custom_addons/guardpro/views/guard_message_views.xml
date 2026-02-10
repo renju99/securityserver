@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Guard Message Views -->
+    
+    <!-- Guard Message Tree View -->
+    <record id="view_guard_message_tree" model="ir.ui.view">
+        <field name="name">guard.message.tree</field>
+        <field name="model">guard.message</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list string="Messages" decoration-danger="is_urgent == True" decoration-muted="is_read == True">
+                <field name="created_at" widget="datetime"/>
+                <field name="sender_id"/>
+                <field name="sender_guard_id"/>
+                <field name="receiver_id"/>
+                <field name="conversation_id"/>
+                <field name="channel_id"/>
+                <field name="is_broadcast"/>
+                <field name="message_type"/>
+                <field name="content" widget="text"/>
+                <field name="is_urgent"/>
+                <field name="is_read"/>
+                <field name="read_at"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Guard Message Form View -->
+    <record id="view_guard_message_form" model="ir.ui.view">
+        <field name="name">guard.message.form</field>
+        <field name="model">guard.message</field>
+        <field name="arch" type="xml">
+            <form string="Message">
+                <header>
+                    <button name="mark_as_read" string="Mark as Read" type="object" 
+                            class="oe_highlight" invisible="is_read == True"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="sender_id" readonly="1"/>
+                            <field name="sender_guard_id" readonly="1"/>
+                            <field name="receiver_id" readonly="1"/>
+                            <field name="created_at" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="conversation_id" readonly="1"/>
+                            <field name="channel_id" readonly="1"/>
+                            <field name="is_broadcast" readonly="1"/>
+                            <field name="message_type" readonly="1"/>
+                            <field name="is_urgent" readonly="1"/>
+                            <field name="is_read" readonly="1"/>
+                            <field name="read_at" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="content" widget="text" readonly="1"/>
+                    </group>
+                    <group string="Related Information">
+                        <field name="related_shift_id"/>
+                        <field name="related_incident_id"/>
+                        <field name="related_site_id"/>
+                    </group>
+                    <group string="Media" invisible="message_type == 'text'">
+                        <field name="media_url"/>
+                        <field name="media_duration"/>
+                        <field name="media_size"/>
+                    </group>
+                    <group string="Location" invisible="message_type != 'location'">
+                        <field name="latitude"/>
+                        <field name="longitude"/>
+                        <field name="location_name"/>
+                    </group>
+                    <group string="Broadcast Details" invisible="is_broadcast == False">
+                        <field name="broadcast_type"/>
+                        <field name="broadcast_recipient_ids" widget="many2many_tags"/>
+                    </group>
+                    <group string="Read Receipts" invisible="not read_by_ids">
+                        <field name="read_by_ids" widget="many2many_tags"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Guard Message Search View -->
+    <record id="view_guard_message_search" model="ir.ui.view">
+        <field name="name">guard.message.search</field>
+        <field name="model">guard.message</field>
+        <field name="arch" type="xml">
+            <search string="Messages">
+                <field name="sender_id"/>
+                <field name="receiver_id"/>
+                <field name="conversation_id"/>
+                <field name="channel_id"/>
+                <field name="content"/>
+                <filter string="Unread" name="unread" domain="[('is_read', '=', False)]"/>
+                <filter string="Urgent" name="urgent" domain="[('is_urgent', '=', True)]"/>
+                <filter string="Broadcast" name="broadcast" domain="[('is_broadcast', '=', True)]"/>
+                <filter string="Today" name="today" domain="[('created_at', '>=', datetime.datetime.now().replace(hour=0, minute=0, second=0))]"/>
+                <separator/>
+                <filter string="Text" name="text" domain="[('message_type', '=', 'text')]"/>
+                <filter string="Image" name="image" domain="[('message_type', '=', 'image')]"/>
+                <filter string="Voice" name="voice" domain="[('message_type', '=', 'voice')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Sender" name="group_sender" context="{'group_by': 'sender_id'}"/>
+                    <filter string="Conversation" name="group_conversation" context="{'group_by': 'conversation_id'}"/>
+                    <filter string="Channel" name="group_channel" context="{'group_by': 'channel_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'created_at'}"/>
+                    <filter string="Type" name="group_type" context="{'group_by': 'message_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Guard Message Channel Tree View -->
+    <record id="view_guard_message_channel_tree" model="ir.ui.view">
+        <field name="name">guard.message.channel.tree</field>
+        <field name="model">guard.message.channel</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list string="Channels">
+                <field name="name"/>
+                <field name="channel_type"/>
+                <field name="site_id"/>
+                <field name="message_count"/>
+                <field name="active_member_count"/>
+                <field name="last_message_time" widget="datetime"/>
+                <field name="is_public"/>
+                <field name="is_archived"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Guard Message Channel Form View -->
+    <record id="view_guard_message_channel_form" model="ir.ui.view">
+        <field name="name">guard.message.channel.form</field>
+        <field name="model">guard.message.channel</field>
+        <field name="arch" type="xml">
+            <form string="Channel">
+                <header>
+                    <button name="action_view_messages" string="View Messages" type="object" class="oe_highlight"/>
+                    <button name="action_add_members" string="Add Members" type="object"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_messages" type="object" class="oe_stat_button" icon="fa-comments">
+                            <field name="message_count" widget="statinfo" string="Messages"/>
+                        </button>
+                        <button name="action_add_members" type="object" class="oe_stat_button" icon="fa-users">
+                            <field name="active_member_count" widget="statinfo" string="Members"/>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="channel_type"/>
+                            <field name="is_public"/>
+                            <field name="is_archived"/>
+                            <field name="allow_guards_to_post"/>
+                        </group>
+                        <group>
+                            <field name="site_id"/>
+                            <field name="shift_id"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="description" widget="text"/>
+                    </group>
+                    <group string="Members">
+                        <field name="member_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                    </group>
+                    <group string="Supervisors">
+                        <field name="supervisor_ids" widget="many2many_tags"/>
+                    </group>
+                    <group string="Last Message">
+                        <field name="last_message" readonly="1"/>
+                        <field name="last_message_time" readonly="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Guard Message Channel Kanban View -->
+    <record id="view_guard_message_channel_kanban" model="ir.ui.view">
+        <field name="name">guard.message.channel.kanban</field>
+        <field name="model">guard.message.channel</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="channel_type" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="channel_type"/>
+                <field name="message_count"/>
+                <field name="active_member_count"/>
+                <field name="last_message_time"/>
+                <field name="is_archived"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_card oe_kanban_global_click">
+                            <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="name"/>
+                                        </strong>
+                                    </div>
+                                    <div class="o_kanban_record_top_right">
+                                        <field name="is_archived" widget="boolean_toggle"/>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <i class="fa fa-comments"/> <field name="message_count"/>
+                                        </div>
+                                        <div class="col-6">
+                                            <i class="fa fa-users"/> <field name="active_member_count"/>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <small>
+                                            <field name="last_message_time" widget="datetime"/>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    
+    <!-- Guard Message Channel Search View -->
+    <record id="view_guard_message_channel_search" model="ir.ui.view">
+        <field name="name">guard.message.channel.search</field>
+        <field name="model">guard.message.channel</field>
+        <field name="arch" type="xml">
+            <search string="Channels">
+                <field name="name"/>
+                <field name="site_id"/>
+                <filter string="Public" name="public" domain="[('is_public', '=', True)]"/>
+                <filter string="Archived" name="archived" domain="[('is_archived', '=', True)]"/>
+                <separator/>
+                <filter string="Site Channel" name="site" domain="[('channel_type', '=', 'site')]"/>
+                <filter string="Team Channel" name="team" domain="[('channel_type', '=', 'team')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Type" name="group_type" context="{'group_by': 'channel_type'}"/>
+                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Guard Message Template Tree View -->
+    <record id="view_guard_message_template_tree" model="ir.ui.view">
+        <field name="name">guard.message.template.tree</field>
+        <field name="model">guard.message.template</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list string="Templates">
+                <field name="name"/>
+                <field name="template_type"/>
+                <field name="usage_count"/>
+                <field name="last_used" widget="datetime"/>
+                <field name="is_active"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Guard Message Template Form View -->
+    <record id="view_guard_message_template_form" model="ir.ui.view">
+        <field name="name">guard.message.template.form</field>
+        <field name="model">guard.message.template</field>
+        <field name="arch" type="xml">
+            <form string="Message Template">
+                <header>
+                    <button name="action_use_template" string="Use Template" type="object" class="oe_highlight"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="template_type"/>
+                            <field name="is_active"/>
+                        </group>
+                        <group>
+                            <field name="usage_count" readonly="1"/>
+                            <field name="last_used" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="description" widget="text"/>
+                    </group>
+                    <group string="Template Content">
+                        <field name="subject" placeholder="Message subject (optional)"/>
+                        <field name="content" widget="text" placeholder="Enter template content. Use {{variable}} for placeholders."/>
+                    </group>
+                    <group string="Available Variables" readonly="1">
+                        <field name="available_variables" widget="text"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Guard Message Template Search View -->
+    <record id="view_guard_message_template_search" model="ir.ui.view">
+        <field name="name">guard.message.template.search</field>
+        <field name="model">guard.message.template</field>
+        <field name="arch" type="xml">
+            <search string="Templates">
+                <field name="name"/>
+                <field name="content"/>
+                <filter string="Active" name="active" domain="[('is_active', '=', True)]"/>
+                <separator/>
+                <filter string="Incident" name="incident" domain="[('template_type', '=', 'incident')]"/>
+                <filter string="Shift" name="shift" domain="[('template_type', '=', 'shift')]"/>
+                <filter string="Emergency" name="emergency" domain="[('template_type', '=', 'emergency')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Type" name="group_type" context="{'group_by': 'template_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Guard Conversation Tree View -->
+    <record id="view_guard_conversation_tree" model="ir.ui.view">
+        <field name="name">guard.conversation.tree</field>
+        <field name="model">guard.conversation</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list string="Conversations">
+                <field name="name"/>
+                <field name="conversation_type"/>
+                <field name="guard_id"/>
+                <field name="supervisor_id"/>
+                <field name="guard1_id"/>
+                <field name="guard2_id"/>
+                <field name="unread_count_guard"/>
+                <field name="last_message_time" widget="datetime"/>
+                <field name="is_active"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Guard Conversation Form View -->
+    <record id="view_guard_conversation_form" model="ir.ui.view">
+        <field name="name">guard.conversation.form</field>
+        <field name="model">guard.conversation</field>
+        <field name="arch" type="xml">
+            <form string="Conversation">
+                <header>
+                    <button name="action_new_message" string="New Message" type="object" 
+                            context="{'default_conversation_id': id}" class="oe_highlight"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" readonly="1"/>
+                            <field name="conversation_type"/>
+                            <field name="is_active"/>
+                        </group>
+                        <group>
+                            <field name="unread_count_guard" readonly="1"/>
+                            <field name="unread_count_supervisor" readonly="1"/>
+                            <field name="last_message_time" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Participants" invisible="conversation_type != 'guard_supervisor'">
+                        <field name="guard_id"/>
+                        <field name="supervisor_id"/>
+                    </group>
+                    <group string="Participants" invisible="conversation_type != 'guard_guard'">
+                        <field name="guard1_id"/>
+                        <field name="guard2_id"/>
+                    </group>
+                    <group string="Participants" invisible="conversation_type != 'group'">
+                        <field name="participant_ids" widget="many2many_tags"/>
+                        <field name="supervisor_participant_ids" widget="many2many_tags"/>
+                    </group>
+                    <notebook>
+                        <page string="Messages">
+                            <field name="message_ids" nolabel="1">
+                                <list>
+                                    <field name="created_at" widget="datetime"/>
+                                    <field name="sender_id"/>
+                                    <field name="content" widget="text"/>
+                                    <field name="is_urgent"/>
+                                    <field name="is_read"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Actions -->
+    <record id="action_guard_message" model="ir.actions.act_window">
+        <field name="name">Messages</field>
+        <field name="res_model">guard.message</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No messages yet!
+            </p>
+            <p>
+                Messages allow guards to communicate with supervisors, other guards, and teams.
+            </p>
+        </field>
+    </record>
+    
+    <record id="action_guard_message_channel" model="ir.actions.act_window">
+        <field name="name">Channels</field>
+        <field name="res_model">guard.message.channel</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a channel!
+            </p>
+            <p>
+                Channels allow teams of guards to communicate together.
+            </p>
+        </field>
+    </record>
+    
+    <record id="action_guard_message_template" model="ir.actions.act_window">
+        <field name="name">Message Templates</field>
+        <field name="res_model">guard.message.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a template!
+            </p>
+            <p>
+                Templates help you send common messages quickly.
+            </p>
+        </field>
+    </record>
+    
+    <record id="action_guard_conversation" model="ir.actions.act_window">
+        <field name="name">Conversations</field>
+        <field name="res_model">guard.conversation</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
+    </record>
+    
+</odoo>
+

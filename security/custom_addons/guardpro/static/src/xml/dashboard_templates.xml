@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- Dashboard Template -->
+    <t t-name="guardpro.Dashboard">
+        <div class="o_guardpro_dashboard">
+            <div class="row">
+                <div class="col-md-12">
+                    <h2>GuardPro Dashboard</h2>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>
+
+

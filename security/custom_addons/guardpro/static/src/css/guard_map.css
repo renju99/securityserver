@@ -1,0 +1,399 @@
+/* GuardPro - Guards Location Map Styles */
+
+/* Map Container */
+.guardpro-map-container {
+    position: relative;
+    height: calc(100vh - 120px);
+    width: 100%;
+}
+
+#guard-map {
+    height: 100%;
+    width: 100%;
+}
+
+/* Map Controls Panel */
+.guard-map-controls {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 5;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-width: 320px;
+    max-height: calc(100vh - 180px);
+    overflow-y: auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.guard-map-controls h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Guard Count Badge */
+.guard-count {
+    display: inline-block;
+    background: #3b82f6;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+/* Guards List */
+.guards-list {
+    margin-bottom: 15px;
+}
+
+.guard-item {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid #e5e7eb;
+    background: white;
+}
+
+.guard-item:hover {
+    background: #f9fafb;
+    border-color: #3b82f6;
+    transform: translateX(-2px);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.guard-item:last-child {
+    margin-bottom: 0;
+}
+
+.guard-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.guard-name {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 14px;
+    flex: 1;
+}
+
+.guard-badge {
+    color: #6b7280;
+    font-size: 12px;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.guard-site {
+    color: #9ca3af;
+    font-size: 11px;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.guard-time {
+    color: #6b7280;
+    font-size: 11px;
+    font-style: italic;
+}
+
+/* Status Indicators */
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.status-active {
+    background-color: #10b981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+.status-stale {
+    background-color: #f59e0b;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+}
+
+.status-inactive {
+    background-color: #ef4444;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}
+
+/* Refresh Button */
+.refresh-button {
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.refresh-button:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
+}
+
+.refresh-button:active {
+    transform: translateY(0);
+}
+
+.refresh-button i {
+    transition: transform 0.3s ease;
+}
+
+.refresh-button:hover i {
+    transform: rotate(180deg);
+}
+
+/* Auto-refresh Toggle */
+.auto-refresh-toggle {
+    margin-top: 12px;
+    padding: 10px;
+    background: #f9fafb;
+    border-radius: 6px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.auto-refresh-toggle input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.auto-refresh-toggle label {
+    margin: 0;
+    cursor: pointer;
+    user-select: none;
+    flex: 1;
+    color: #4b5563;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    display: none;
+    z-index: 1000;
+    text-align: center;
+}
+
+.loading-overlay.active {
+    display: block;
+}
+
+.loading-overlay i {
+    font-size: 32px;
+    color: #3b82f6;
+    margin-bottom: 10px;
+}
+
+.loading-overlay p {
+    margin: 0;
+    color: #4b5563;
+    font-size: 14px;
+}
+
+/* Page Header */
+.guardpro-map-header {
+    padding: 20px 30px;
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    color: white;
+    margin: 0;
+    border-bottom: 3px solid #3b82f6;
+}
+
+.guardpro-map-header h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.guardpro-map-header h1 i {
+    color: #3b82f6;
+}
+
+/* Info Window Customization */
+.gm-style .gm-style-iw-c {
+    border-radius: 8px;
+    padding: 0;
+}
+
+.gm-style .gm-style-iw-d {
+    overflow: auto !important;
+}
+
+/* Map Info Window Content */
+.guard-info-window {
+    padding: 15px;
+    min-width: 220px;
+}
+
+.guard-info-window h3 {
+    margin: 0 0 12px 0;
+    font-size: 18px;
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.guard-info-window p {
+    margin: 6px 0;
+    font-size: 13px;
+    color: #4b5563;
+}
+
+.guard-info-window strong {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.guard-info-window .btn {
+    margin-top: 12px;
+    width: 100%;
+    text-align: center;
+    padding: 8px;
+    font-size: 13px;
+}
+
+/* Empty State */
+.guard-list-empty {
+    color: #9ca3af;
+    font-size: 13px;
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+}
+
+/* Scrollbar Styling */
+.guard-map-controls::-webkit-scrollbar {
+    width: 6px;
+}
+
+.guard-map-controls::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 3px;
+}
+
+.guard-map-controls::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+
+.guard-map-controls::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .guard-map-controls {
+        position: static;
+        max-width: 100%;
+        border-radius: 0;
+        max-height: 300px;
+    }
+
+    .guardpro-map-container {
+        height: calc(100vh - 420px);
+    }
+
+    .guardpro-map-header h1 {
+        font-size: 20px;
+    }
+}
+
+/* Animation for markers appearing */
+@keyframes markerDrop {
+    0% {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Pulse animation for active status */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+.status-active {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Legend */
+.map-legend {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    border: 1px solid #e5e7eb;
+}
+
+.map-legend h5 {
+    margin: 0 0 10px 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #4b5563;
+}
+
+.legend-item:last-child {
+    margin-bottom: 0;
+}
+

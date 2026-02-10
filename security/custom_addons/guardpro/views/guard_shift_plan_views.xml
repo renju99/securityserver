@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Guard Shift Plan List View -->
+    <record id="view_guard_shift_plan_list" model="ir.ui.view">
+        <field name="name">guard.shift.plan.list</field>
+        <field name="model">guard.shift.plan</field>
+        <field name="arch" type="xml">
+            <list string="Shift Planning" decoration-info="status=='draft'" 
+                  decoration-success="status=='published'" decoration-muted="status=='cancelled'">
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="site_id"/>
+                <field name="start_datetime"/>
+                <field name="end_datetime"/>
+                <field name="duration" widget="float_time"/>
+                <field name="shift_type"/>
+                <field name="status" widget="badge" 
+                       decoration-info="status=='draft'"
+                       decoration-success="status=='published'"
+                       decoration-muted="status=='cancelled'"/>
+                <field name="attendance_status" widget="badge"
+                       decoration-warning="attendance_status=='pending'"
+                       decoration-success="attendance_status=='completed'"
+                       decoration-danger="attendance_status=='no_show'"
+                       optional="show"/>
+                <field name="attendance_count" optional="show"/>
+                <field name="actual_hours" widget="float_time" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Guard Shift Plan Form View -->
+    <record id="view_guard_shift_plan_form" model="ir.ui.view">
+        <field name="name">guard.shift.plan.form</field>
+        <field name="model">guard.shift.plan</field>
+        <field name="arch" type="xml">
+            <form string="Shift Plan">
+                <header>
+                    <button name="action_publish" string="Publish" type="object" 
+                            class="btn-primary" invisible="status != 'draft'"/>
+                    <button name="action_cancel" string="Cancel" type="object" 
+                            invisible="status in ['cancelled', 'completed']"/>
+                    <button name="action_view_attendance" string="View Attendance" type="object" 
+                            class="btn-primary" invisible="attendance_count == 0"/>
+                    <field name="status" widget="statusbar" 
+                           statusbar_visible="draft,published,completed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_attendance" type="object" 
+                                class="oe_stat_button" icon="fa-clock-o"
+                                invisible="attendance_count == 0">
+                            <field name="attendance_count" widget="statinfo" string="Check-ins"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Cancelled" bg_color="text-bg-danger" 
+                            invisible="status != 'cancelled'"/>
+                    <widget name="web_ribbon" title="Published" bg_color="text-bg-success" 
+                            invisible="status != 'published'"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Assignment">
+                            <field name="employee_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="guard_id" readonly="1"/>
+                            <field name="site_id" options="{'no_create': True}"/>
+                            <field name="post_location"/>
+                        </group>
+                        <group string="Timing">
+                            <field name="start_datetime"/>
+                            <field name="end_datetime"/>
+                            <field name="duration" widget="float_time"/>
+                            <field name="shift_type"/>
+                        </group>
+                    </group>
+                    <group string="Actual Attendance">
+                        <group>
+                            <field name="attendance_status"/>
+                            <field name="actual_hours" widget="float_time"/>
+                        </group>
+                        <group>
+                            <field name="supervisor_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Tours &amp; Tasks">
+                            <field name="tour_ids" widget="many2many_tags"/>
+                        </page>
+                        <page string="Instructions">
+                            <group>
+                                <field name="special_requirements" nolabel="1" 
+                                       placeholder="Special requirements or equipment..."/>
+                            </group>
+                            <field name="instructions" nolabel="1" 
+                                   placeholder="Detailed shift instructions..."/>
+                        </page>
+                        <page string="Template Info" invisible="not template_id">
+                            <group>
+                                <field name="template_id" readonly="1"/>
+                            </group>
+                        </page>
+                        <page string="Notes">
+                            <field name="notes" nolabel="1" placeholder="Additional notes..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Guard Shift Plan Calendar View -->
+    <record id="view_guard_shift_plan_calendar" model="ir.ui.view">
+        <field name="name">guard.shift.plan.calendar</field>
+        <field name="model">guard.shift.plan</field>
+        <field name="arch" type="xml">
+            <calendar string="Shift Calendar" 
+                      date_start="start_datetime" 
+                      date_stop="end_datetime" 
+                      color="employee_id" 
+                      mode="week" 
+                      quick_create="True"
+                      event_open_popup="True">
+                <field name="employee_id"/>
+                <field name="site_id"/>
+                <field name="shift_type"/>
+                <field name="status"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Guard Shift Plan Search View -->
+    <record id="view_guard_shift_plan_search" model="ir.ui.view">
+        <field name="name">guard.shift.plan.search</field>
+        <field name="model">guard.shift.plan</field>
+        <field name="arch" type="xml">
+            <search string="Shift Planning">
+                <field name="employee_id"/>
+                <field name="site_id"/>
+                <field name="start_datetime"/>
+                <separator/>
+                <filter name="my_shifts" string="My Shifts" 
+                        domain="[('employee_id.user_id', '=', uid)]"/>
+                <filter name="draft" string="Draft" 
+                        domain="[('status', '=', 'draft')]"/>
+                <filter name="published" string="Published" 
+                        domain="[('status', '=', 'published')]"/>
+                <separator/>
+                <filter name="today" string="Today" 
+                        domain="[('start_datetime', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))),
+                                 ('start_datetime', '&lt;', datetime.datetime.combine((context_today() + relativedelta(days=1)), datetime.time(0,0,0)))]"/>
+                <filter name="this_week" string="This Week" 
+                        domain="[('start_datetime', '&gt;=', (context_today() - relativedelta(weeks=1)))]"/>
+                <filter name="upcoming" string="Upcoming" 
+                        domain="[('start_datetime', '&gt;=', datetime.datetime.now())]"/>
+                <separator/>
+                <filter name="no_show" string="No Shows" 
+                        domain="[('attendance_status', '=', 'no_show')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_employee" string="Employee" context="{'group_by': 'employee_id'}"/>
+                    <filter name="group_site" string="Site" context="{'group_by': 'site_id'}"/>
+                    <filter name="group_shift_type" string="Shift Type" context="{'group_by': 'shift_type'}"/>
+                    <filter name="group_status" string="Status" context="{'group_by': 'status'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'start_datetime:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Pivot View for Shift Planning -->
+    <record id="view_guard_shift_plan_pivot" model="ir.ui.view">
+        <field name="name">guard.shift.plan.pivot</field>
+        <field name="model">guard.shift.plan</field>
+        <field name="arch" type="xml">
+            <pivot string="Shift Planning Analysis">
+                <field name="employee_id" type="row"/>
+                <field name="site_id" type="col"/>
+                <field name="duration" type="measure"/>
+                <field name="actual_hours" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Graph View for Shift Planning -->
+    <record id="view_guard_shift_plan_graph" model="ir.ui.view">
+        <field name="name">guard.shift.plan.graph</field>
+        <field name="model">guard.shift.plan</field>
+        <field name="arch" type="xml">
+            <graph string="Shift Planning Statistics" type="bar">
+                <field name="employee_id"/>
+                <field name="duration" type="measure"/>
+                <field name="actual_hours" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Action for Guard Shift Planning -->
+    <record id="action_guard_shift_plan" model="ir.actions.act_window">
+        <field name="name">Shift Planning</field>
+        <field name="res_model">guard.shift.plan</field>
+        <field name="view_mode">calendar,list,form,pivot,graph</field>
+        <field name="search_view_id" ref="view_guard_shift_plan_search"/>
+        <field name="context">{
+            'search_default_upcoming': 1
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first shift schedule
+            </p>
+            <p>
+                Plan and schedule shifts for your guards. 
+                Use drag-and-drop calendar for easy scheduling.
+                Actual attendance tracking is done via HR Attendance.
+            </p>
+        </field>
+    </record>
+
+</odoo>
+

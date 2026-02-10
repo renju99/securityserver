@@ -1,0 +1,799 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_analytics_dashboard_pdf" name="GuardPro Analytics Dashboard Report">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <style>
+                        /* Dashboard-like styling for PDF - A4 Optimized */
+                        :root {
+                            --primary-color: #1a73e8;
+                            --success-color: #34a853;
+                            --warning-color: #fbbc04;
+                            --danger-color: #ea4335;
+                            --info-color: #4285f4;
+                            --dark-color: #202124;
+                            --light-color: #f8f9fa;
+                            --border-color: #dadce0;
+                        }
+                        
+                        .dashboard-container {
+                            padding: 0;
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                            background: #ffffff;
+                        }
+                        
+                        /* Enhanced Header with Branding */
+                        .dashboard-header {
+                            background: linear-gradient(135deg, #1a73e8 0%, #4285f4 100%);
+                            color: white;
+                            padding: 15px 20px;
+                            margin: 0 0 15px 0;
+                            border-radius: 0;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                        }
+                        .dashboard-header h1 {
+                            color: white;
+                            margin: 0 0 5px 0;
+                            font-size: 24px;
+                            font-weight: 600;
+                            letter-spacing: -0.5px;
+                        }
+                        .dashboard-header p {
+                            color: rgba(255,255,255,0.9);
+                            margin: 0 0 10px 0;
+                            font-size: 12px;
+                        }
+                        .header-meta {
+                            text-align: center;
+                            margin-top: 10px;
+                            padding-top: 10px;
+                            border-top: 1px solid rgba(255,255,255,0.2);
+                            font-size: 10px;
+                        }
+                        .header-meta-item {
+                            display: inline-block;
+                            padding: 0 12px;
+                            vertical-align: top;
+                        }
+                        .header-meta strong {
+                            opacity: 0.8;
+                        }
+                        
+                        /* Executive Summary Section */
+                        .executive-summary {
+                            background: linear-gradient(to right, #f8f9fa, #ffffff);
+                            border-left: 4px solid #1a73e8;
+                            padding: 15px 20px;
+                            margin: 20px 0;
+                            border-radius: 4px;
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                        }
+                        .executive-summary h2 {
+                            color: #202124;
+                            font-size: 16px;
+                            margin: 0 0 12px 0;
+                            font-weight: 600;
+                        }
+                        .summary-grid {
+                            text-align: center;
+                            margin: 0 -5px;
+                        }
+                        .summary-item {
+                            display: inline-block;
+                            width: 23%;
+                            background: white;
+                            padding: 10px;
+                            margin: 0 5px;
+                            border-radius: 4px;
+                            border: 1px solid #dadce0;
+                            text-align: center;
+                            vertical-align: top;
+                        }
+                        .summary-item-label {
+                            font-size: 10px;
+                            color: #5f6368;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            margin-bottom: 4px;
+                        }
+                        .summary-item-value {
+                            font-size: 20px;
+                            font-weight: 700;
+                            color: #202124;
+                        }
+                        .summary-item-trend {
+                            font-size: 9px;
+                            margin-top: 4px;
+                        }
+                        .trend-up { color: #34a853; }
+                        .trend-down { color: #ea4335; }
+                        .trend-neutral { color: #5f6368; }
+                        
+                        /* KPI Cards - Enhanced Design */
+                        .kpi-grid {
+                            text-align: center;
+                            margin: 0 -4px 20px -4px;
+                        }
+                        .kpi-card {
+                            display: inline-block;
+                            width: 23%;
+                            background: white;
+                            border: 1px solid #dadce0;
+                            border-radius: 8px;
+                            padding: 14px;
+                            margin: 0 4px 8px 4px;
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+                            vertical-align: top;
+                            position: relative;
+                            overflow: hidden;
+                            text-align: left;
+                        }
+                        .kpi-card::before {
+                            content: '';
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            height: 3px;
+                            background: linear-gradient(90deg, #1a73e8, #4285f4);
+                        }
+                        .kpi-card-header {
+                            display: flex;
+                            align-items: center;
+                            margin-bottom: 10px;
+                        }
+                        .kpi-icon {
+                            width: 42px;
+                            height: 42px;
+                            border-radius: 10px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            margin-right: 12px;
+                            font-size: 20px;
+                            font-weight: bold;
+                        }
+                        .kpi-icon.primary { 
+                            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); 
+                            color: #1976d2; 
+                        }
+                        .kpi-icon.success { 
+                            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); 
+                            color: #388e3c; 
+                        }
+                        .kpi-icon.warning { 
+                            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); 
+                            color: #f57c00; 
+                        }
+                        .kpi-icon.info { 
+                            background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%); 
+                            color: #00796b; 
+                        }
+                        .kpi-value {
+                            font-size: 28px;
+                            font-weight: 700;
+                            color: #202124;
+                            margin: 8px 0 4px 0;
+                            line-height: 1;
+                        }
+                        .kpi-label {
+                            color: #5f6368;
+                            font-size: 11px;
+                            margin-bottom: 8px;
+                            font-weight: 500;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                        }
+                        .kpi-variance {
+                            font-size: 10px;
+                            padding: 4px 8px;
+                            border-radius: 12px;
+                            display: inline-block;
+                            font-weight: 600;
+                        }
+                        .kpi-variance.positive { 
+                            background: #e6f4ea; 
+                            color: #1e8e3e; 
+                        }
+                        .kpi-variance.negative { 
+                            background: #fce8e6; 
+                            color: #d93025; 
+                        }
+                        
+                        /* Charts and Tables - Enhanced Design */
+                        .chart-section {
+                            margin: 20px 0;
+                            page-break-inside: avoid;
+                        }
+                        .chart-card {
+                            background: white;
+                            border: 1px solid #dadce0;
+                            border-radius: 8px;
+                            margin-bottom: 18px;
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+                            overflow: hidden;
+                        }
+                        .chart-header {
+                            background: linear-gradient(to right, #f8f9fa, #ffffff);
+                            padding: 12px 16px;
+                            border-bottom: 2px solid #1a73e8;
+                            font-size: 14px;
+                            font-weight: 600;
+                            color: #202124;
+                        }
+                        .chart-header i {
+                            color: #1a73e8;
+                            margin-right: 8px;
+                        }
+                        .chart-body {
+                            padding: 14px;
+                        }
+                        .chart-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            font-size: 11px;
+                        }
+                        .chart-table th {
+                            background: linear-gradient(to bottom, #f8f9fa, #f1f3f4);
+                            padding: 10px 12px;
+                            text-align: left;
+                            border: 1px solid #dadce0;
+                            font-weight: 600;
+                            font-size: 11px;
+                            color: #202124;
+                        }
+                        .chart-table td {
+                            padding: 8px 12px;
+                            border: 1px solid #dadce0;
+                            font-size: 11px;
+                        }
+                        .chart-table tr:nth-child(even) {
+                            background: #fafafa;
+                        }
+                        .chart-table tr:hover {
+                            background: #f1f3f4;
+                        }
+                        
+                        /* Data Tables */
+                        .table-section {
+                            margin: 20px 0;
+                            page-break-inside: avoid;
+                        }
+                        .table-card {
+                            background: white;
+                            border: 1px solid #dadce0;
+                            border-radius: 8px;
+                            margin-bottom: 18px;
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+                            overflow: hidden;
+                        }
+                        .data-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            font-size: 10px;
+                        }
+                        .data-table th {
+                            background: linear-gradient(135deg, #1a73e8 0%, #4285f4 100%);
+                            color: white;
+                            padding: 10px 12px;
+                            text-align: left;
+                            font-weight: 600;
+                            font-size: 11px;
+                            border-right: 1px solid rgba(255,255,255,0.1);
+                        }
+                        .data-table th:last-child {
+                            border-right: none;
+                        }
+                        .data-table td {
+                            padding: 8px 12px;
+                            border-bottom: 1px solid #dadce0;
+                            font-size: 10px;
+                        }
+                        .data-table tr:hover {
+                            background: #f8f9fa;
+                        }
+                        .data-table tr:last-child td {
+                            border-bottom: none;
+                        }
+                        
+                        /* Section Headers */
+                        .section-header {
+                            background: linear-gradient(135deg, #1a73e8 0%, #4285f4 100%);
+                            color: white;
+                            padding: 12px 16px;
+                            margin: 25px 0 15px 0;
+                            border-radius: 6px;
+                            font-size: 15px;
+                            font-weight: 600;
+                            box-shadow: 0 2px 4px rgba(26,115,232,0.2);
+                        }
+                        .section-header i {
+                            margin-right: 10px;
+                            font-size: 16px;
+                        }
+                        
+                        /* Attendance Tables */
+                        .attendance-matrix-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            font-size: 9px;
+                        }
+                        .attendance-matrix-table th {
+                            background: #28a745;
+                            color: white;
+                            padding: 6px 4px;
+                            text-align: center;
+                            font-weight: 600;
+                            font-size: 9px;
+                            border: 1px solid #1e7e34;
+                        }
+                        .attendance-matrix-table td {
+                            padding: 5px 4px;
+                            text-align: center;
+                            border: 1px solid #dee2e6;
+                            font-size: 9px;
+                        }
+                        .attendance-matrix-table .guard-name {
+                            text-align: left;
+                            font-weight: 600;
+                            padding-left: 8px;
+                            background: #f8f9fa;
+                        }
+                        .attendance-matrix-table .present {
+                            background: #d4edda;
+                            color: #155724;
+                            font-weight: bold;
+                        }
+                        .attendance-matrix-table .absent {
+                            background: #f8d7da;
+                            color: #721c24;
+                        }
+                        @media print {
+                            .kpi-grid {
+                                display: block;
+                            }
+                            .kpi-card {
+                                display: inline-block;
+                                width: 48%;
+                                margin: 5px;
+                            }
+                        }
+                    </style>
+                    
+                    <!-- Get filter params from context, options, data or use empty dict -->
+                    <t t-set="filter_params" t-value="{}"/>
+                    
+                    <!-- Priority 1: Try to get from context (most reliable for Odoo reports) -->
+                    <t t-if="context and context.get('filter_params')">
+                        <t t-set="filter_params" t-value="context['filter_params']"/>
+                    </t>
+                    <t t-elif="context and context.get('filters')">
+                        <t t-set="filter_params" t-value="context['filters']"/>
+                    </t>
+                    <!-- Priority 2: Try to get filters from data -->
+                    <t t-elif="data and data.get('filters')">
+                        <t t-set="filter_params" t-value="data['filters']"/>
+                    </t>
+                    <!-- Priority 3: Try to get from options -->
+                    <t t-elif="options and options.get('filters')">
+                        <t t-set="filter_params" t-value="options['filters']"/>
+                    </t>
+                    <t t-elif="options and isinstance(options, dict)">
+                        <t t-set="filter_params" t-value="options"/>
+                    </t>
+                    
+                    <!-- Call method to get report data using model method -->
+                    <t t-set="report_data" t-value="docs[0].get_report_data(filter_params) if docs and len(docs) > 0 else env['guardpro.analytics.dashboard'].get_report_data(filter_params)"/>
+                    
+                    <div class="dashboard-container">
+                    
+                    <!-- Content Wrapper with Padding -->
+                    <div style="padding: 0 15px 15px 15px;">
+                    
+                    <!-- Simple Report Title -->
+                    <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #1a73e8;">
+                        <h1 style="color: #1a73e8; margin: 0 0 8px 0; font-size: 22px; font-weight: 600;">
+                            <i class="fa fa-tachometer"/> GuardPro Analytics Dashboard
+                        </h1>
+                        <div style="color: #5f6368; font-size: 10px; margin-bottom: 8px;">
+                            Comprehensive Security Operations Overview &amp; Performance Metrics
+                        </div>
+                        <div style="color: #5f6368; font-size: 9px;">
+                            <span style="margin: 0 10px;">
+                                <strong>Generated:</strong> <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/>
+                            </span>
+                            <span style="margin: 0 10px;">
+                                <t t-if="report_data and report_data.get('filters')">
+                                    <t t-set="filters" t-value="report_data['filters']"/>
+                                    <strong>Period:</strong> <t t-esc="filters.get('date_from', 'N/A')"/> to <t t-esc="filters.get('date_to', 'N/A')"/>
+                                </t>
+                                <t t-else=""><strong>Period:</strong> Last 30 Days</t>
+                            </span>
+                            <span style="margin: 0 10px;">
+                                <strong>By:</strong> <t t-esc="env.user.name"/>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Executive Summary -->
+                    <t t-set="kpis_list" t-value="report_data.get('kpis', []) if report_data else []"/>
+                    <t t-if="kpis_list and len(kpis_list) >= 4">
+                        <div class="executive-summary">
+                            <h2><i class="fa fa-chart-line"/> Executive Summary</h2>
+                            <div class="summary-grid">
+                                <t t-foreach="kpis_list[:4]" t-as="summary_kpi">
+                                    <div class="summary-item">
+                                        <div class="summary-item-label">
+                                            <t t-esc="summary_kpi.get('name', 'N/A')"/>
+                                        </div>
+                                        <div class="summary-item-value">
+                                            <t t-esc="summary_kpi.get('value', 0) or 0"/>
+                                            <t t-if="summary_kpi.get('suffix')">
+                                                <span style="font-size: 14px; color: #5f6368;">
+                                                    <t t-esc="summary_kpi['suffix']"/>
+                                                </span>
+                                            </t>
+                                        </div>
+                                        <t t-set="current_val" t-value="summary_kpi.get('value', 0) or 0"/>
+                                        <t t-set="prev_val" t-value="summary_kpi.get('previous_value', 0) or 0"/>
+                                        <t t-set="variance" t-value="((current_val - prev_val) / prev_val * 100) if prev_val and prev_val != 0 else 0"/>
+                                        <t t-set="variance_class" t-value="'trend-up' if variance > 0 else ('trend-down' if variance &lt; 0 else 'trend-neutral')"/>
+                                        <t t-set="variance_icon" t-value="'fa-arrow-up' if variance > 0 else ('fa-arrow-down' if variance &lt; 0 else 'fa-minus')"/>
+                                        <div t-attf-class="summary-item-trend {{variance_class}}">
+                                            <i t-attf-class="fa {{variance_icon}}"/>
+                                            <t t-esc="round(abs(variance), 1) if variance is not None else 0"/>% vs last period
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Filter Information -->
+                    <t t-if="report_data and report_data.get('filters')">
+                        <t t-set="filters" t-value="report_data['filters']"/>
+                        <t t-if="filters.get('site_names') or filters.get('guard_ids')">
+                            <div style="background: #f8f9fa; padding: 10px 15px; border-radius: 4px; margin: 15px 0; font-size: 11px; border-left: 3px solid #1a73e8;">
+                                <strong style="color: #202124;">Applied Filters:</strong>
+                                <t t-if="filters.get('site_names')">
+                                    <span style="margin-left: 10px;">
+                                        <i class="fa fa-building"/> <strong>Sites:</strong> <t t-esc="', '.join(filters['site_names'])"/>
+                                    </span>
+                                </t>
+                                <t t-if="filters.get('guard_ids')">
+                                    <span style="margin-left: 10px;">
+                                        <i class="fa fa-user"/> <strong>Guards:</strong> <t t-esc="len(filters['guard_ids'])"/> selected
+                                    </span>
+                                </t>
+                            </div>
+                        </t>
+                    </t>
+
+                        <!-- KPIs Section - Dashboard Style Cards -->
+                        <div class="section-header">
+                            <i class="fa fa-tachometer"/> Key Performance Indicators
+                        </div>
+                        <t t-set="kpis_list" t-value="report_data.get('kpis', []) if report_data else []"/>
+                        <t t-if="kpis_list">
+                            <div class="kpi-grid">
+                                <t t-foreach="kpis_list" t-as="kpi">
+                                    <div class="kpi-card">
+                                        <div class="kpi-card-header">
+                                            <div t-attf-class="kpi-icon {{kpi.get('color', 'primary')}}">
+                                                <i t-attf-class="fa {{kpi.get('icon', 'fa-chart-line')}}"/>
+                                            </div>
+                                        </div>
+                                        <div class="kpi-label">
+                                            <t t-esc="kpi.get('name', 'N/A')"/>
+                                        </div>
+                                        <div class="kpi-value">
+                                            <t t-esc="kpi.get('value', 0) or 0"/>
+                                            <t t-if="kpi.get('suffix')">
+                                                <span style="font-size: 20px; color: #6c757d;">
+                                                    <t t-esc="kpi['suffix']"/>
+                                                </span>
+                                            </t>
+                                        </div>
+                                        <t t-set="current_val" t-value="kpi.get('value', 0) or 0"/>
+                                        <t t-set="prev_val" t-value="kpi.get('previous_value', 0) or 0"/>
+                                        <t t-set="variance" t-value="((current_val - prev_val) / prev_val * 100) if prev_val and prev_val != 0 else 0"/>
+                                        <t t-set="variance_class" t-value="'positive' if variance > 0 else ('negative' if variance &lt; 0 else 'neutral')"/>
+                                        <t t-set="variance_icon" t-value="'fa-arrow-up' if variance > 0 else ('fa-arrow-down' if variance &lt; 0 else 'fa-minus')"/>
+                                        <div t-attf-class="kpi-variance {{variance_class}}">
+                                            <i t-attf-class="fa {{variance_icon}}"/>
+                                            <t t-esc="round(abs(variance), 1) if variance is not None else 0"/>% vs last month
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+
+                        <!-- Charts Section - Dashboard Style -->
+                        <div class="section-header">
+                            <i class="fa fa-chart-bar"/> Data Visualizations &amp; Trends
+                        </div>
+                        <t t-set="charts_list" t-value="report_data.get('charts', []) if report_data else []"/>
+                        <t t-if="charts_list">
+                            <t t-foreach="charts_list" t-as="chart">
+                                <div class="chart-section">
+                                    <div class="chart-card">
+                                        <div class="chart-header">
+                                            <i class="fa fa-bar-chart"/> <t t-esc="chart.get('title', 'Chart')"/>
+                                        </div>
+                                        <div class="chart-body">
+                                            <table class="chart-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 60%;">Item</th>
+                                                        <th style="width: 40%;">Value</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <t t-set="chart_labels" t-value="chart.get('labels', [])"/>
+                                                    <t t-set="chart_datasets" t-value="chart.get('datasets', [])"/>
+                                                    <t t-if="chart_datasets and chart_labels">
+                                                        <t t-set="chart_data" t-value="chart_datasets[0].get('data', [])"/>
+                                                        <t t-foreach="range(len(chart_labels))" t-as="idx">
+                                                            <t t-set="label" t-value="chart_labels[idx]"/>
+                                                            <t t-set="value" t-value="chart_data[idx] if idx &lt; len(chart_data) else 0"/>
+                                                            <tr>
+                                                                <td><strong><t t-esc="label"/></strong></td>
+                                                                <td><t t-esc="value"/></td>
+                                                            </tr>
+                                                        </t>
+                                                    </t>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+                        </t>
+
+                        <!-- Tables Section - Dashboard Style -->
+                        <div class="section-header">
+                            <i class="fa fa-table"/> Detailed Data Tables
+                        </div>
+                        <t t-set="tables_list" t-value="report_data.get('tables', []) if report_data else []"/>
+                        <t t-if="tables_list">
+                            <t t-foreach="tables_list" t-as="table">
+                                <div class="table-section">
+                                    <div class="table-card">
+                                        <div class="chart-header">
+                                            <i class="fa fa-table"/> <t t-esc="table.get('title', 'Table')"/>
+                                        </div>
+                                        <div style="overflow-x: auto;">
+                                            <table class="data-table">
+                                                <thead>
+                                                    <tr>
+                                                        <t t-foreach="table.get('columns', [])" t-as="header">
+                                                            <th><t t-esc="header"/></th>
+                                                        </t>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <t t-if="table.get('rows') and len(table.get('rows', [])) > 0">
+                                                        <t t-foreach="table.get('rows', [])" t-as="row">
+                                                            <tr>
+                                                                <t t-foreach="row" t-as="cell">
+                                                                    <td><t t-esc="cell or ''"/></td>
+                                                                </t>
+                                                            </tr>
+                                                        </t>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <tr>
+                                                            <td t-att-colspan="len(table.get('columns', []))" style="text-align: center; padding: 20px; color: #6c757d;">
+                                                                <i class="fa fa-info-circle"/> No data available
+                                                            </td>
+                                                        </tr>
+                                                    </t>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+                        </t>
+
+                        <!-- Guard Attendance Biometric Report Section -->
+                        <t t-set="attendance_list" t-value="report_data.get('attendance', []) if report_data else []"/>
+                        <t t-if="attendance_list and len(attendance_list) > 0">
+                            <div class="table-section">
+                                <div class="table-card">
+                                    <div class="chart-header" style="background: #28a745; color: white; padding: 6px 12px; font-size: 12px;">
+                                        <i class="fa fa-user-check"/> Guard Attendance Biometric Report
+                                    </div>
+                                    <div style="overflow-x: auto; padding: 8px;">
+                                        <table class="data-table" style="font-size: 8px;">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 8%; padding: 4px 6px; font-size: 9px;">Date</th>
+                                                    <th style="width: 14%; padding: 4px 6px; font-size: 9px;">Guard Name</th>
+                                                    <th style="width: 7%; padding: 4px 6px; font-size: 9px;">Badge</th>
+                                                    <th style="width: 11%; padding: 4px 6px; font-size: 9px;">Site</th>
+                                                    <th style="width: 9%; padding: 4px 6px; font-size: 9px;">In Time</th>
+                                                    <th style="width: 9%; padding: 4px 6px; font-size: 9px;">Out Time</th>
+                                                    <th style="width: 7%; padding: 4px 6px; font-size: 9px;">Hrs</th>
+                                                    <th style="width: 10%; padding: 4px 6px; font-size: 9px;">Status</th>
+                                                    <th style="width: 8%; padding: 4px 6px; font-size: 9px;">Late</th>
+                                                    <th style="width: 17%; padding: 4px 6px; font-size: 9px;">Method</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="attendance_list" t-as="att">
+                                                    <tr>
+                                                        <td style="font-weight: 600; padding: 3px 6px; font-size: 8px;"><t t-esc="att.get('date', 'N/A')"/></td>
+                                                        <td style="padding: 3px 6px; font-size: 8px;"><t t-esc="att.get('guard_name', 'N/A')"/></td>
+                                                        <td style="color: #007bff; padding: 3px 6px; font-size: 8px;"><t t-esc="att.get('badge_number', '-')"/></td>
+                                                        <td style="padding: 3px 6px; font-size: 8px;"><t t-esc="att.get('site_name', 'N/A')"/></td>
+                                                        <td style="color: #28a745; font-weight: 600; padding: 3px 6px; font-size: 8px;">
+                                                            <t t-esc="att.get('checkin_time', 'N/A')"/>
+                                                        </td>
+                                                        <td style="color: #dc3545; padding: 3px 6px; font-size: 8px;">
+                                                            <t t-esc="att.get('checkout_time', '-')"/>
+                                                        </td>
+                                                        <td style="text-align: center; padding: 3px 6px; font-size: 8px;">
+                                                            <t t-esc="att.get('hours_worked', 0)"/>h
+                                                        </td>
+                                                        <td style="padding: 3px 6px; font-size: 8px;">
+                                                            <t t-set="status_val" t-value="att.get('status', 'N/A')"/>
+                                                            <span t-attf-style="color: {{'#28a745' if 'Ended' in status_val else ('#ffc107' if 'Started' in status_val or 'On Break' in status_val else '#dc3545')}};">
+                                                                <t t-esc="status_val"/>
+                                                            </span>
+                                                        </td>
+                                                        <td style="text-align: center; padding: 3px 6px; font-size: 8px;">
+                                                            <span t-attf-style="color: {{'#dc3545' if att.get('is_late') == 'Yes' else '#28a745'}};">
+                                                                <t t-esc="att.get('is_late', 'No')"/>
+                                                                <t t-if="att.get('late_minutes', 0) > 0">
+                                                                    (<t t-esc="att.get('late_minutes')"/>m)
+                                                                </t>
+                                                            </span>
+                                                        </td>
+                                                        <td style="font-size: 7px; padding: 3px 6px;">
+                                                            <t t-esc="att.get('checkin_method', 'N/A')"/>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                        
+                                        <!-- Summary Statistics -->
+                                        <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 3px; font-size: 9px;">
+                                            <div style="display: table; width: 100%;">
+                                                <div style="display: table-row;">
+                                                    <div style="display: table-cell; padding: 3px 10px;">
+                                                        <strong>Total Records:</strong> <t t-esc="len(attendance_list)"/>
+                                                    </div>
+                                                    <div style="display: table-cell; padding: 3px 10px;">
+                                                        <strong>Total Hours:</strong> 
+                                                        <t t-set="total_hours" t-value="sum([att.get('hours_worked', 0) for att in attendance_list])"/>
+                                                        <t t-esc="round(total_hours, 2)"/>h
+                                                    </div>
+                                                    <div style="display: table-cell; padding: 3px 10px;">
+                                                        <strong>Late:</strong> 
+                                                        <t t-set="late_count" t-value="len([att for att in attendance_list if att.get('is_late') == 'Yes'])"/>
+                                                        <t t-esc="late_count"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- Guard Attendance Matrix (Guards vs Dates) -->
+                        <t t-set="attendance_matrix" t-value="report_data.get('attendance_matrix', {}) if report_data else {}"/>
+                        <t t-if="attendance_matrix and attendance_matrix.get('guards') and attendance_matrix.get('dates')">
+                            <div class="table-section">
+                                <div class="table-card">
+                                    <div class="chart-header" style="background: #28a745; color: white;">
+                                        <i class="fa fa-calendar-check"/> Guard Attendance Summary - Guards Present by Date
+                                    </div>
+                                    <div style="padding: 12px;">
+                                        <p style="margin-bottom: 10px; color: #6c757d; font-size: 11px;">
+                                            <strong>Period:</strong> 
+                                            <t t-esc="attendance_matrix.get('date_from', 'N/A')"/> 
+                                            to 
+                                            <t t-esc="attendance_matrix.get('date_to', 'N/A')"/>
+                                        </p>
+                                        
+                                        <div style="overflow-x: auto;">
+                                            <table class="attendance-matrix-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 120px; text-align: left; padding-left: 8px;">Guard Name</th>
+                                                        <t t-foreach="attendance_matrix.get('dates', [])" t-as="date_str">
+                                                            <t t-set="date_obj" t-value="datetime.datetime.strptime(date_str, '%Y-%m-%d').date()"/>
+                                                            <th style="min-width: 30px;">
+                                                                <t t-esc="date_obj.strftime('%d/%m')"/>
+                                                            </th>
+                                                        </t>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <t t-foreach="attendance_matrix.get('guards', [])" t-as="guard">
+                                                        <tr>
+                                                            <td class="guard-name">
+                                                                <t t-esc="guard.get('display', guard.get('name', 'N/A'))"/>
+                                                            </td>
+                                                            <t t-foreach="attendance_matrix.get('dates', [])" t-as="date_str">
+                                                                <t t-set="date_obj" t-value="datetime.datetime.strptime(date_str, '%Y-%m-%d').date()"/>
+                                                                <t t-set="guard_matrix" t-value="attendance_matrix.get('matrix', {}).get(guard.get('id'), {})"/>
+                                                                <t t-set="is_present" t-value="guard_matrix.get(date_obj, False)"/>
+                                                                <td t-attf-class="{{'present' if is_present else 'absent'}}">
+                                                                    <t t-if="is_present">P</t>
+                                                                    <t t-else="">-</t>
+                                                                </td>
+                                                            </t>
+                                                        </tr>
+                                                    </t>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        
+                                        <!-- Legend -->
+                                        <div style="margin-top: 12px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 10px;">
+                                            <strong>Legend:</strong>
+                                            <span style="margin-left: 15px;">
+                                                <span style="background: #d4edda; color: #155724; padding: 2px 8px; border-radius: 3px; font-weight: bold;">P</span> = Present
+                                            </span>
+                                            <span style="margin-left: 15px;">
+                                                <span style="background: #f8d7da; color: #721c24; padding: 2px 8px; border-radius: 3px;">-</span> = Absent
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- Enhanced Footer -->
+                        <div style="margin-top: 30px; padding: 15px 20px; background: linear-gradient(to right, #f8f9fa, #ffffff); border-top: 3px solid #1a73e8; border-radius: 4px;">
+                            <div style="display: table; width: 100%; font-size: 10px; color: #5f6368;">
+                                <div style="display: table-cell; width: 50%; vertical-align: middle;">
+                                    <div style="font-weight: 600; color: #202124; margin-bottom: 4px;">
+                                        <i class="fa fa-shield"/> GuardPro Analytics Dashboard
+                                    </div>
+                                    <div>
+                                        Generated on <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d at %H:%M:%S')"/>
+                                    </div>
+                                    <div style="margin-top: 2px;">
+                                        Report ID: <t t-esc="'GPRO-' + str(datetime.datetime.now().timestamp()).replace('.', '')[:10]"/>
+                                    </div>
+                                </div>
+                                <div style="display: table-cell; width: 50%; text-align: right; vertical-align: middle;">
+                                    <div style="font-weight: 600; color: #202124; margin-bottom: 4px;">
+                                        <i class="fa fa-user"/> Generated by
+                                    </div>
+                                    <div><t t-esc="env.user.name"/></div>
+                                    <div style="margin-top: 2px;">
+                                        <t t-esc="env.user.company_id.name"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #dadce0; text-align: center; font-size: 9px; color: #5f6368;">
+                                <i class="fa fa-info-circle"/> This report contains confidential information. Distribution is restricted to authorized personnel only.
+                            </div>
+                        </div>
+                    </div><!-- End Content Wrapper -->
+                    </div><!-- End Dashboard Container -->
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_analytics_dashboard" model="ir.actions.report">
+        <field name="name">GuardPro Analytics Dashboard</field>
+        <field name="model">guardpro.analytics.dashboard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.report_analytics_dashboard_pdf</field>
+        <field name="print_report_name">'GuardPro Analytics - %s' % (context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H%M'))</field>
+        <field name="binding_model_id" ref="model_guardpro_analytics_dashboard"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+</odoo>
+

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Geofence Alert List View -->
+        <record id="view_geofence_alert_list" model="ir.ui.view">
+            <field name="name">geofence.alert.list</field>
+            <field name="model">geofence.alert</field>
+            <field name="arch" type="xml">
+                <list string="Geofence Alerts" default_order="alert_datetime desc" decoration-danger="status == 'new'" decoration-warning="status == 'acknowledged'">
+                    <field name="alert_datetime"/>
+                    <field name="guard_id"/>
+                    <field name="alert_type"/>
+                    <field name="site_id"/>
+                    <field name="distance_from_site" optional="show"/>
+                    <field name="status"/>
+                    <field name="notification_sent" invisible="1"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Geofence Alert Form View -->
+        <record id="view_geofence_alert_form" model="ir.ui.view">
+            <field name="name">geofence.alert.form</field>
+            <field name="model">geofence.alert</field>
+            <field name="arch" type="xml">
+                <form string="Geofence Alert">
+                    <header>
+                        <button name="action_acknowledge" 
+                                string="Acknowledge" 
+                                type="object" 
+                                class="btn-warning"
+                                invisible="status != 'new'"/>
+                        <button name="action_resolve" 
+                                string="Resolve" 
+                                type="object" 
+                                class="btn-success"
+                                invisible="status in ('resolved', 'false_alarm')"/>
+                        <button name="action_mark_false_alarm" 
+                                string="Mark as False Alarm" 
+                                type="object" 
+                                class="btn-secondary"
+                                invisible="status in ('resolved', 'false_alarm')"/>
+                        <field name="status" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="alert_datetime"/>
+                                <field name="alert_type"/>
+                                <field name="guard_id"/>
+                                <field name="site_id"/>
+                                <field name="shift_id"/>
+                            </group>
+                            <group>
+                                <field name="latitude"/>
+                                <field name="longitude"/>
+                                <field name="distance_from_site"/>
+                                <field name="notification_sent"/>
+                            </group>
+                        </group>
+                        <group invisible="status not in ('acknowledged', 'resolved', 'false_alarm')">
+                            <group>
+                                <field name="acknowledged_by" readonly="1"/>
+                                <field name="acknowledged_date" readonly="1"/>
+                            </group>
+                            <group invisible="status not in ('resolved', 'false_alarm')">
+                                <field name="resolved_by" readonly="1"/>
+                                <field name="resolved_date" readonly="1"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="notes" placeholder="Add notes here..."/>
+                        </group>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <!-- Geofence Alert Search View -->
+        <record id="view_geofence_alert_search" model="ir.ui.view">
+            <field name="name">geofence.alert.search</field>
+            <field name="model">geofence.alert</field>
+            <field name="arch" type="xml">
+                <search string="Search Geofence Alerts">
+                    <field name="guard_id"/>
+                    <field name="site_id"/>
+                    <field name="alert_type"/>
+                    <filter string="New" name="new" domain="[('status', '=', 'new')]"/>
+                    <filter string="Acknowledged" name="acknowledged" domain="[('status', '=', 'acknowledged')]"/>
+                    <filter string="Resolved" name="resolved" domain="[('status', '=', 'resolved')]"/>
+                    <filter string="Today" name="today"
+                            domain="[('alert_datetime', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))),
+                                     ('alert_datetime', '&lt;=', datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]"/>
+                    <filter string="This Week" name="this_week"
+                            domain="[('alert_datetime', '&gt;=', datetime.datetime.combine(context_today() - relativedelta(weeks=1), datetime.time(0,0,0)))]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Guard" name="group_by_guard" context="{'group_by': 'guard_id'}"/>
+                        <filter string="Site" name="group_by_site" context="{'group_by': 'site_id'}"/>
+                        <filter string="Alert Type" name="group_by_type" context="{'group_by': 'alert_type'}"/>
+                        <filter string="Status" name="group_by_status" context="{'group_by': 'status'}"/>
+                        <filter string="Date" name="group_by_date" context="{'group_by': 'alert_datetime:day'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Geofence Alert Action -->
+        <record id="action_geofence_alert" model="ir.actions.act_window">
+            <field name="name">Geofence Alerts</field>
+            <field name="res_model">geofence.alert</field>
+            <field name="view_mode">list,form</field>
+            <field name="context">{'search_default_new': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No geofence alerts found
+                </p>
+                <p>
+                    Geofence alerts are automatically created when guards move outside their assigned site boundaries.
+                </p>
+            </field>
+        </record>
+
+    </data>
+</odoo>
+

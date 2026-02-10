@@ -1,0 +1,1335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- ============================================ -->
+        <!-- CRITICAL PRIORITY EMAIL TEMPLATES (3 items) -->
+        <!-- ============================================ -->
+        
+        <!-- 1. Geofence Violation Alert Email Template -->
+        <record id="email_template_geofence_violation_alert" model="mail.template">
+            <field name="name">Geofence Violation Alert</field>
+            <field name="model_id" ref="model_geofence_alert"/>
+            <field name="subject">🚨 URGENT: Geofence Violation - ${object.guard_id.name or ''} - ${object.site_id.name or ''}</field>
+            <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
+            <field name="email_to">${(object.shift_id.supervisor_id.email if object.shift_id and object.shift_id.supervisor_id else object.site_id.manager_id.email if object.site_id and object.site_id.manager_id else '')|safe}</field>
+            <field name="body_html" type="html">
+
+
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Geofence Violation Alert&lt;/title&gt;
+&lt;/head&gt;
+&lt;body style="margin: 0; padding: 0; font-family: Arial, sans-serif; line-height: 1.6; color: #333;"&gt;
+    &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f4f4f4;"&gt;
+        &lt;tr&gt;
+            &lt;td align="center" style="padding: 20px 0;"&gt;
+                &lt;table cellpadding="0" cellspacing="0" border="0" width="600" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"&gt;
+                    
+                    &lt;!-- Header --&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #d32f2f; color: white; padding: 30px 20px; text-align: center;"&gt;
+                            &lt;h1 style="margin: 0; font-size: 28px; font-weight: bold;"&gt;🚨 GEOFENCE VIOLATION ALERT&lt;/h1&gt;
+                            &lt;p style="margin: 10px 0 0 0; font-size: 14px;"&gt;Immediate Action Required&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    
+                    &lt;!-- Alert Banner --&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 0 30px;"&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%"&gt;
+                                &lt;tr&gt;
+                                    &lt;td style="background-color: #ffebee; border-left: 4px solid #d32f2f; padding: 15px; margin: 20px 0;"&gt;
+                                        &lt;p style="margin: 0; color: #d32f2f; font-weight: bold;"&gt;
+                                            ⚠️ URGENT NOTIFICATION: A geofence violation has been detected for one of your guards.
+                                        &lt;/p&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    
+                    &lt;!-- Content --&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 30px;"&gt;
+                            &lt;p style="margin: 0 0 20px 0;"&gt;&lt;strong&gt;Supervisor,&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p style="margin: 0 0 20px 0;"&gt;This is an automated alert to notify you of a location compliance violation that requires your immediate attention.&lt;/p&gt;
+                            
+                            &lt;!-- Details Table --&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; margin: 20px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 2px solid #ddd; width: 40%;"&gt;Guard Name&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;&lt;strong&gt;${object.guard_id.name or 'N/A'}&lt;/strong&gt;&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 2px solid #ddd;"&gt;Guard Phone&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.guard_id.phone or object.guard_id.user_id.phone or 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 2px solid #ddd;"&gt;Alert Type&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd; color: #d32f2f; font-weight: bold;"&gt;
+                                        ${dict(object._fields['alert_type'].selection).get(object.alert_type, 'N/A')}
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 2px solid #ddd;"&gt;Expected Site&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.site_id.name if object.site_id else 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 2px solid #ddd;"&gt;Alert Time&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${format_datetime(object.alert_datetime, dt_format='medium', tz='UTC') if object.alert_datetime else 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 2px solid #ddd;"&gt;Distance from Site&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;
+                                        &lt;strong style="color: #d32f2f;"&gt;
+                                            % if object.distance_from_site:
+                                                ${'{:.2f}'.format(object.distance_from_site)} km
+                                            % else:
+                                                N/A
+                                            % endif
+                                        &lt;/strong&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 2px solid #ddd;"&gt;Current Location&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;
+                                        % if object.latitude and object.longitude:
+                                            Lat: ${'{:.6f}'.format(object.latitude)}, Lon: ${'{:.6f}'.format(object.longitude)}&lt;br/&gt;
+                                            &lt;a href="https://www.google.com/maps?q=${object.latitude},${object.longitude}" 
+                                               style="color: #0288d1; text-decoration: underline;" target="_blank"&gt;
+                                                📍 View on Google Maps
+                                            &lt;/a&gt;
+                                        % else:
+                                            Location data not available
+                                        % endif
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;!-- Required Actions --&gt;
+                            &lt;h3 style="margin: 30px 0 15px 0; color: #d32f2f;"&gt;Required Actions:&lt;/h3&gt;
+                            &lt;ol style="margin: 0; padding-left: 20px; line-height: 1.8;"&gt;
+                                &lt;li&gt;&lt;strong&gt;Contact the guard immediately&lt;/strong&gt; to verify their location and situation&lt;/li&gt;
+                                &lt;li&gt;&lt;strong&gt;Document the explanation&lt;/strong&gt; for the violation in the system&lt;/li&gt;
+                                &lt;li&gt;&lt;strong&gt;Update alert status&lt;/strong&gt; once the situation is resolved&lt;/li&gt;
+                                &lt;li&gt;&lt;strong&gt;Report to management&lt;/strong&gt; if this is a serious violation or safety concern&lt;/li&gt;
+                            &lt;/ol&gt;
+                            
+                            &lt;!-- Action Button --&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 30px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td align="center"&gt;
+                                        &lt;a href="${object.get_portal_url() if hasattr(object, 'get_portal_url') else '#'}" 
+                                           style="display: inline-block; padding: 14px 40px; background-color: #d32f2f; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px;"&gt;
+                                            View Alert Details
+                                        &lt;/a&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;!-- Important Notice --&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 20px;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td style="background-color: #fff3cd; border-left: 4px solid #ff9800; padding: 15px;"&gt;
+                                        &lt;p style="margin: 0;"&gt;&lt;strong&gt;⚠️ Important:&lt;/strong&gt; This alert was automatically generated based on GPS location data. 
+                                        Please investigate promptly to ensure guard safety and compliance.&lt;/p&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;!-- Contact Info --&gt;
+                            &lt;p style="margin: 30px 0 10px 0;"&gt;&lt;strong&gt;Need Assistance?&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p style="margin: 0;"&gt;Contact Security Operations: 
+                                &lt;a href="tel:${object.company_id.phone or ''}" style="color: #0288d1;"&gt;${object.company_id.phone or 'N/A'}&lt;/a&gt;
+                            &lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    
+                    &lt;!-- Footer --&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
+                            &lt;p style="margin: 0 0 5px 0;"&gt;&lt;strong&gt;GuardPro Security Management System&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p style="margin: 0 0 5px 0;"&gt;Automated Geofence Monitoring Alert&lt;/p&gt;
+                            &lt;p style="margin: 10px 0 0 0; font-size: 10px; color: #999;"&gt;
+                                This is an automated security alert. Please do not reply to this email.&lt;br/&gt;
+                                For support, contact your system administrator.
+                            &lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    
+                &lt;/table&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+            </field>
+        </record>
+        
+        <!-- 2. Emergency Procedure Activation Email Template -->
+        <record id="email_template_emergency_activation" model="mail.template">
+            <field name="name">Emergency Procedure Activation Alert</field>
+            <field name="model_id" ref="model_emergency_procedure"/>
+            <field name="subject">🚨 EMERGENCY ACTIVATED: ${object.emergency_type or 'Emergency'} - ${object.site_id.name or 'Site'}</field>
+            <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
+            <field name="email_to">${(object.site_id.manager_id.email if object.site_id and object.site_id.manager_id else object.site_id.client_id.email if object.site_id and object.site_id.client_id else '')|safe}</field>
+            <field name="body_html" type="html">
+
+
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0;"&gt;
+    &lt;title&gt;Emergency Activation Alert&lt;/title&gt;
+&lt;/head&gt;
+&lt;body style="margin: 0; padding: 0; font-family: Arial, sans-serif; line-height: 1.6; color: #333;"&gt;
+    &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f4f4f4;"&gt;
+        &lt;tr&gt;
+            &lt;td align="center" style="padding: 20px 0;"&gt;
+                &lt;table cellpadding="0" cellspacing="0" border="0" width="600" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"&gt;
+                    
+                    &lt;!-- Header --&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #c62828; color: white; padding: 30px 20px; text-align: center;"&gt;
+                            &lt;h1 style="margin: 0; font-size: 32px; font-weight: bold;"&gt;🚨 EMERGENCY ALERT&lt;/h1&gt;
+                            &lt;p style="margin: 10px 0 0 0; font-size: 18px; font-weight: bold;"&gt;PROCEDURE ACTIVATED&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    
+                    &lt;!-- Critical Alert Banner --&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 0 30px;"&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%"&gt;
+                                &lt;tr&gt;
+                                    &lt;td style="background-color: #ffcdd2; border: 3px solid #c62828; padding: 20px; margin: 20px 0; text-align: center;"&gt;
+                                        &lt;p style="margin: 0; color: #c62828; font-weight: bold; font-size: 18px;"&gt;
+                                            ⚠️ IMMEDIATE RESPONSE REQUIRED
+                                        &lt;/p&gt;
+                                        &lt;p style="margin: 10px 0 0 0; font-size: 14px; color: #666;"&gt;
+                                            Emergency Type: &lt;strong style="color: #c62828;"&gt;${object.emergency_type or 'UNSPECIFIED'}&lt;/strong&gt;
+                                        &lt;/p&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    
+                    &lt;!-- Content --&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 30px;"&gt;
+                            &lt;p style="margin: 0 0 20px 0; font-size: 16px;"&gt;&lt;strong&gt;EMERGENCY NOTIFICATION&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p style="margin: 0 0 20px 0;"&gt;An emergency procedure has been activated at one of your sites. Immediate action is required.&lt;/p&gt;
+                            
+                            &lt;!-- Emergency Details Table --&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; margin: 20px 0; border: 2px solid #c62828;"&gt;
+                                &lt;tr&gt;
+                                    &lt;th colspan="2" style="background-color: #c62828; color: white; padding: 12px; text-align: left; font-size: 16px;"&gt;
+                                        EMERGENCY DETAILS
+                                    &lt;/th&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 1px solid #ddd; width: 40%;"&gt;Emergency Type&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd; font-weight: bold; color: #c62828;"&gt;
+                                        ${object.emergency_type or 'N/A'}
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 1px solid #ddd;"&gt;Site Location&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.site_id.name if object.site_id else 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 1px solid #ddd;"&gt;Site Address&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;
+                                        % if object.site_id:
+                                            ${object.site_id.street or ''} ${object.site_id.street2 or ''}&lt;br/&gt;
+                                            ${object.site_id.city or ''}, ${object.site_id.state_id.name if object.site_id.state_id else ''} ${object.site_id.zip or ''}
+                                        % else:
+                                            N/A
+                                        % endif
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 1px solid #ddd;"&gt;Activation Time&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd; font-weight: bold;"&gt;
+                                        ${format_datetime(object.start_time, dt_format='medium', tz='UTC') if object.start_time else 'N/A'}
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 1px solid #ddd;"&gt;Activated By&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.activated_by_id.name if object.activated_by_id else 'System'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 1px solid #ddd;"&gt;Current Status&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;
+                                        &lt;strong style="color: #c62828; text-transform: uppercase;"&gt;
+                                            ${dict(object._fields['status'].selection).get(object.status, 'ACTIVE') if hasattr(object, '_fields') and 'status' in object._fields else 'ACTIVE'}
+                                        &lt;/strong&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Description&lt;/th&gt;
+                                    &lt;td style="padding: 12px;"&gt;${object.description or 'No additional details available'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;!-- Required Actions --&gt;
+                            &lt;h3 style="margin: 30px 0 15px 0; color: #c62828; font-size: 18px;"&gt;IMMEDIATE REQUIRED ACTIONS:&lt;/h3&gt;
+                            &lt;ol style="margin: 0; padding-left: 20px; line-height: 2; font-size: 15px;"&gt;
+                                &lt;li&gt;&lt;strong&gt;Acknowledge this alert immediately&lt;/strong&gt;&lt;/li&gt;
+                                &lt;li&gt;&lt;strong&gt;Contact emergency services&lt;/strong&gt; if not already done (911 or local emergency number)&lt;/li&gt;
+                                &lt;li&gt;&lt;strong&gt;Verify all personnel&lt;/strong&gt; are following emergency procedures&lt;/li&gt;
+                                &lt;li&gt;&lt;strong&gt;Check assembly points&lt;/strong&gt; and account for all staff&lt;/li&gt;
+                                &lt;li&gt;&lt;strong&gt;Monitor the situation&lt;/strong&gt; and update status in the system&lt;/li&gt;
+                                &lt;li&gt;&lt;strong&gt;Do not re-enter the area&lt;/strong&gt; until all-clear is given&lt;/li&gt;
+                            &lt;/ol&gt;
+                            
+                            &lt;!-- Emergency Contact Box --&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 30px 0; border: 2px solid #c62828; background-color: #ffebee;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td style="padding: 20px;"&gt;
+                                        &lt;h4 style="margin: 0 0 10px 0; color: #c62828;"&gt;EMERGENCY CONTACTS:&lt;/h4&gt;
+                                        &lt;p style="margin: 5px 0;"&gt;
+                                            &lt;strong&gt;Emergency Services:&lt;/strong&gt; 911&lt;br/&gt;
+                                            &lt;strong&gt;Site Manager:&lt;/strong&gt; ${object.site_id.manager_id.phone if object.site_id and object.site_id.manager_id else 'N/A'}&lt;br/&gt;
+                                            &lt;strong&gt;Security Operations:&lt;/strong&gt; ${object.company_id.phone or 'N/A'}&lt;br/&gt;
+                                            &lt;strong&gt;Email:&lt;/strong&gt; &lt;a href="mailto:${object.company_id.email or ''}" style="color: #0288d1;"&gt;${object.company_id.email or 'N/A'}&lt;/a&gt;
+                                        &lt;/p&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;!-- Action Button --&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 30px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td align="center"&gt;
+                                        &lt;a href="${object.get_portal_url() if hasattr(object, 'get_portal_url') else '#'}" 
+                                           style="display: inline-block; padding: 16px 50px; background-color: #c62828; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 18px;"&gt;
+                                            VIEW EMERGENCY DETAILS
+                                        &lt;/a&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;!-- Critical Notice --&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 20px;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td style="background-color: #fff3cd; border-left: 4px solid #ff6f00; padding: 15px;"&gt;
+                                        &lt;p style="margin: 0;"&gt;&lt;strong&gt;⚠️ CRITICAL:&lt;/strong&gt; This is a real emergency alert. Take immediate action as outlined above. 
+                                        Do not ignore this notification. Lives may be at risk.&lt;/p&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    
+                    &lt;!-- Footer --&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
+                            &lt;p style="margin: 0 0 5px 0;"&gt;&lt;strong&gt;GuardPro Emergency Management System&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p style="margin: 0 0 5px 0; color: #c62828; font-weight: bold;"&gt;AUTOMATED EMERGENCY ALERT - IMMEDIATE RESPONSE REQUIRED&lt;/p&gt;
+                            &lt;p style="margin: 10px 0 0 0; font-size: 10px; color: #999;"&gt;
+                                This is an automated emergency notification. Do not reply to this email.&lt;br/&gt;
+                                For immediate assistance, call emergency services or use the contacts above.
+                            &lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    
+                &lt;/table&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+            </field>
+        </record>
+
+        
+        <!-- 3. Shift Swap Request Notification Email Template -->
+        <record id="email_template_shift_swap_request" model="mail.template">
+            <field name="name">Shift Swap Request Notification</field>
+            <field name="model_id" ref="model_shift_swap_request"/>
+            <field name="subject">Shift Swap Request from ${object.requesting_guard_id.name or ''} - ${object.shift_id.site_id.name or ''}</field>
+            <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
+            <field name="email_to">${(object.target_guard_id.user_id.email if object.target_guard_id and object.target_guard_id.user_id else object.target_guard_id.email if object.target_guard_id else '')|safe}</field>
+            <field name="body_html" type="html">
+
+
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Shift Swap Request&lt;/title&gt;
+&lt;/head&gt;
+&lt;body style="margin: 0; padding: 0; font-family: Arial, sans-serif; line-height: 1.6; color: #333;"&gt;
+    &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f4f4f4;"&gt;
+        &lt;tr&gt;
+            &lt;td align="center" style="padding: 20px 0;"&gt;
+                &lt;table cellpadding="0" cellspacing="0" border="0" width="600" style="background-color: #ffffff;"&gt;
+                    
+                    &lt;!-- Header --&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #1976d2; color: white; padding: 30px 20px; text-align: center;"&gt;
+                            &lt;h1 style="margin: 0; font-size: 26px;"&gt;Shift Swap Request&lt;/h1&gt;
+                            &lt;p style="margin: 10px 0 0 0;"&gt;Action Required&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    
+                    &lt;!-- Content --&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 30px;"&gt;
+                            &lt;p style="margin: 0 0 20px 0;"&gt;Hello &lt;strong&gt;${object.target_guard_id.name or 'Guard'},&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p style="margin: 0 0 20px 0;"&gt;${object.requesting_guard_id.name or 'A colleague'} has requested to swap shifts with you. Please review the details below and respond at your earliest convenience.&lt;/p&gt;
+                            
+                            &lt;!-- Shift Details --&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; margin: 20px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;th colspan="2" style="background-color: #1976d2; color: white; padding: 12px; text-align: left;"&gt;
+                                        Shift to be Swapped
+                                    &lt;/th&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; width: 40%;"&gt;Site&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.shift_id.site_id.name if object.shift_id and object.shift_id.site_id else 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Date &amp; Time&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;
+                                        ${format_datetime(object.shift_id.start_datetime, dt_format='medium') if object.shift_id and object.shift_id.start_datetime else 'N/A'} - 
+                                        ${format_datetime(object.shift_id.end_datetime, dt_format='short') if object.shift_id and object.shift_id.end_datetime else 'N/A'}
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Currently Assigned To&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.requesting_guard_id.name or 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Reason for Swap&lt;/th&gt;
+                                    &lt;td style="padding: 12px;"&gt;${object.reason or 'No reason provided'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            % if object.compensation_shift_id:
+                            &lt;!-- Compensation Shift --&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; margin: 20px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;th colspan="2" style="background-color: #4caf50; color: white; padding: 12px; text-align: left;"&gt;
+                                        Compensation Shift Offered
+                                    &lt;/th&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; width: 40%;"&gt;Site&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.compensation_shift_id.site_id.name if object.compensation_shift_id.site_id else 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Date &amp; Time&lt;/th&gt;
+                                    &lt;td style="padding: 12px;"&gt;
+                                        ${format_datetime(object.compensation_shift_id.start_datetime, dt_format='medium') if object.compensation_shift_id.start_datetime else 'N/A'} - 
+                                        ${format_datetime(object.compensation_shift_id.end_datetime, dt_format='short') if object.compensation_shift_id.end_datetime else 'N/A'}
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            % endif
+                            
+                            &lt;!-- Action Required --&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 20px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td style="background-color: #fff3cd; border-left: 4px solid #ff9800; padding: 15px;"&gt;
+                                        &lt;p style="margin: 0;"&gt;&lt;strong&gt;⏰ Please respond within 48 hours&lt;/strong&gt;&lt;/p&gt;
+                                        &lt;p style="margin: 10px 0 0 0;"&gt;Your response is required for this shift swap request. If you accept, it will be forwarded to your supervisor for final approval.&lt;/p&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;!-- Action Buttons --&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 30px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td align="center"&gt;
+                                        &lt;a href="${object.get_portal_url() if hasattr(object, 'get_portal_url') else '#'}" 
+                                           style="display: inline-block; padding: 14px 40px; background-color: #4caf50; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; margin: 0 10px;"&gt;
+                                            Accept Swap
+                                        &lt;/a&gt;
+                                        &lt;a href="${object.get_portal_url() if hasattr(object, 'get_portal_url') else '#'}" 
+                                           style="display: inline-block; padding: 14px 40px; background-color: #f44336; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; margin: 0 10px;"&gt;
+                                            Decline Swap
+                                        &lt;/a&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;!-- Contact Info --&gt;
+                            &lt;p style="margin: 30px 0 10px 0;"&gt;&lt;strong&gt;Questions?&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p style="margin: 0;"&gt;Contact ${object.requesting_guard_id.name or 'the requesting guard'} or your supervisor for more information.&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    
+                    &lt;!-- Footer --&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
+                            &lt;p style="margin: 0;"&gt;GuardPro Shift Management System&lt;/p&gt;
+                            &lt;p style="margin: 5px 0 0 0; font-size: 10px;"&gt;This is an automated notification. Please log in to the system to respond.&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    
+                &lt;/table&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+            </field>
+        </record>
+        
+        
+        <!-- ========================================= -->
+        <!-- HIGH PRIORITY EMAIL TEMPLATES (5 items)  -->
+        <!-- ========================================= -->
+        
+        <!-- 4. Shift Swap Approved Notification -->
+        <record id="email_template_shift_swap_approved" model="mail.template">
+            <field name="name">Shift Swap Approved Notification</field>
+            <field name="model_id" ref="model_shift_swap_request"/>
+            <field name="subject">✅ Shift Swap Approved - ${object.shift_id.site_id.name or 'Site'} - ${format_date(object.swap_date) if object.swap_date else ''}</field>
+            <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
+            <field name="email_to">${(object.requesting_guard_id.user_id.email if object.requesting_guard_id and object.requesting_guard_id.user_id else '')|safe},${(object.target_guard_id.user_id.email if object.target_guard_id and object.target_guard_id.user_id else '')|safe}</field>
+            <field name="body_html" type="html">
+
+
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+&lt;/head&gt;
+&lt;body style="margin: 0; padding: 0; font-family: Arial, sans-serif;"&gt;
+    &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f4f4f4;"&gt;
+        &lt;tr&gt;
+            &lt;td align="center" style="padding: 20px 0;"&gt;
+                &lt;table cellpadding="0" cellspacing="0" border="0" width="600" style="background-color: #ffffff;"&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #4caf50; color: white; padding: 30px 20px; text-align: center;"&gt;
+                            &lt;h1 style="margin: 0;"&gt;✅ Shift Swap Approved&lt;/h1&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 30px;"&gt;
+                            &lt;p&gt;Hello,&lt;/p&gt;
+                            &lt;p&gt;Your shift swap request has been &lt;strong style="color: #4caf50;"&gt;APPROVED&lt;/strong&gt; by your supervisor.&lt;/p&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 20px 0; border-collapse: collapse;"&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; width: 40%;"&gt;Swap Reference&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.name or 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Original Guard&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.requesting_guard_id.name or 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;New Guard&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.target_guard_id.name or 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Shift Date/Time&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;
+                                        ${format_datetime(object.shift_id.start_datetime) if object.shift_id and object.shift_id.start_datetime else 'N/A'}
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Site&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.site_id.name if object.site_id else 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Approved By&lt;/th&gt;
+                                    &lt;td style="padding: 12px;"&gt;${object.supervisor_id.name if object.supervisor_id else 'Supervisor'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 20px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td style="background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px;"&gt;
+                                        &lt;p style="margin: 0;"&gt;&lt;strong&gt;✅ Next Steps:&lt;/strong&gt;&lt;/p&gt;
+                                        &lt;ul style="margin: 10px 0 0 0; padding-left: 20px;"&gt;
+                                            &lt;li&gt;Your calendar has been automatically updated&lt;/li&gt;
+                                            &lt;li&gt;Check the system for your updated shift schedule&lt;/li&gt;
+                                            &lt;li&gt;Be prepared for your new assignment&lt;/li&gt;
+                                        &lt;/ul&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            % if object.supervisor_notes:
+                            &lt;p&gt;&lt;strong&gt;Supervisor Notes:&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p style="background-color: #f5f5f5; padding: 15px; border-radius: 4px;"&gt;${object.supervisor_notes}&lt;/p&gt;
+                            % endif
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
+                            &lt;p style="margin: 0;"&gt;GuardPro Shift Management System&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                &lt;/table&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+            </field>
+        </record>
+
+        <!-- 5. Resident Complaint Submission Acknowledgment -->
+        <record id="email_template_resident_complaint_submitted" model="mail.template">
+            <field name="name">Resident Complaint Submission Acknowledgment</field>
+            <field name="model_id" ref="model_resident_complaint"/>
+            <field name="subject">Complaint Received - Ref: ${object.name or ''} - ${object.site_id.name or ''}</field>
+            <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
+            <field name="email_to">${(object.resident_id.email if object.resident_id else '')|safe}</field>
+            <field name="body_html" type="html">
+
+
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+&lt;/head&gt;
+&lt;body style="margin: 0; padding: 0; font-family: Arial, sans-serif;"&gt;
+    &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f4f4f4;"&gt;
+        &lt;tr&gt;
+            &lt;td align="center" style="padding: 20px 0;"&gt;
+                &lt;table cellpadding="0" cellspacing="0" border="0" width="600" style="background-color: #ffffff;"&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #2196f3; color: white; padding: 30px 20px; text-align: center;"&gt;
+                            &lt;h1 style="margin: 0;"&gt;Complaint Received&lt;/h1&gt;
+                            &lt;p style="margin: 10px 0 0 0;"&gt;We're On It!&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 30px;"&gt;
+                            &lt;p&gt;Dear ${object.resident_id.name or 'Resident'},&lt;/p&gt;
+                            &lt;p&gt;Thank you for bringing this matter to our attention. We have received your complaint and it is being reviewed by our team.&lt;/p&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 20px 0; border: 2px solid #2196f3;"&gt;
+                                &lt;tr&gt;
+                                    &lt;th colspan="2" style="background-color: #2196f3; color: white; padding: 12px; text-align: left;"&gt;
+                                        Complaint Details
+                                    &lt;/th&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; width: 40%;"&gt;Reference Number&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd; font-weight: bold;"&gt;${object.name or 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Subject&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.subject or 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Category&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;
+                                        ${dict(object._fields['category'].selection).get(object.category, 'N/A') if hasattr(object, '_fields') and 'category' in object._fields else 'N/A'}
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Submitted Date&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;
+                                        ${format_datetime(object.submitted_date) if object.submitted_date else format_datetime(object.create_date) if object.create_date else 'N/A'}
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Priority&lt;/th&gt;
+                                    &lt;td style="padding: 12px;"&gt;
+                                        ${dict(object._fields['priority'].selection).get(object.priority, 'Normal') if hasattr(object, '_fields') and 'priority' in object._fields else 'Normal'}
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;h3&gt;What Happens Next?&lt;/h3&gt;
+                            &lt;ol style="line-height: 1.8;"&gt;
+                                &lt;li&gt;Your complaint will be reviewed by our management team&lt;/li&gt;
+                                &lt;li&gt;We will investigate the matter thoroughly&lt;/li&gt;
+                                &lt;li&gt;You will receive updates on the progress&lt;/li&gt;
+                                &lt;li&gt;We aim to resolve this within &lt;strong&gt;5-7 business days&lt;/strong&gt;&lt;/li&gt;
+                            &lt;/ol&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 20px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td style="background-color: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px;"&gt;
+                                        &lt;p style="margin: 0;"&gt;&lt;strong&gt;📞 Track Your Complaint:&lt;/strong&gt;&lt;/p&gt;
+                                        &lt;p style="margin: 10px 0 0 0;"&gt;Use reference number &lt;strong&gt;${object.name or 'N/A'}&lt;/strong&gt; when contacting us.&lt;/p&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 30px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td align="center"&gt;
+                                        &lt;a href="${object.get_portal_url() if hasattr(object, 'get_portal_url') else '#'}" 
+                                           style="display: inline-block; padding: 14px 40px; background-color: #2196f3; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;"&gt;
+                                            Track Status Online
+                                        &lt;/a&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;p&gt;&lt;strong&gt;Contact Information:&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p&gt;
+                                Email: &lt;a href="mailto:${object.company_id.email or ''}" style="color: #2196f3;"&gt;${object.company_id.email or 'support@company.com'}&lt;/a&gt;&lt;br/&gt;
+                                Phone: ${object.company_id.phone or 'N/A'}
+                            &lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
+                            &lt;p style="margin: 0;"&gt;GuardPro Resident Services&lt;/p&gt;
+                            &lt;p style="margin: 5px 0 0 0;"&gt;Thank you for helping us improve our service&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                &lt;/table&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+            </field>
+        </record>
+
+        <!-- 6. Resident Complaint Resolution Notification -->
+        <record id="email_template_resident_complaint_resolved" model="mail.template">
+            <field name="name">Resident Complaint Resolution Notification</field>
+            <field name="model_id" ref="model_resident_complaint"/>
+            <field name="subject">✅ Complaint Resolved - Ref: ${object.name or ''}</field>
+            <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
+            <field name="email_to">${(object.resident_id.email if object.resident_id else '')|safe}</field>
+            <field name="body_html" type="html">
+
+
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+&lt;/head&gt;
+&lt;body style="margin: 0; padding: 0; font-family: Arial, sans-serif;"&gt;
+    &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f4f4f4;"&gt;
+        &lt;tr&gt;
+            &lt;td align="center" style="padding: 20px 0;"&gt;
+                &lt;table cellpadding="0" cellspacing="0" border="0" width="600" style="background-color: #ffffff;"&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #4caf50; color: white; padding: 30px 20px; text-align: center;"&gt;
+                            &lt;h1 style="margin: 0;"&gt;✅ Complaint Resolved&lt;/h1&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 30px;"&gt;
+                            &lt;p&gt;Dear ${object.resident_id.name or 'Resident'},&lt;/p&gt;
+                            &lt;p&gt;We're pleased to inform you that your complaint has been &lt;strong&gt;resolved&lt;/strong&gt;. We appreciate your patience and feedback.&lt;/p&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 20px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; width: 40%;"&gt;Reference Number&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.name or 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Subject&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.subject or 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Resolved Date&lt;/th&gt;
+                                    &lt;td style="padding: 12px;"&gt;${format_date(object.resolved_date) if object.resolved_date else 'Today'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            % if object.management_response:
+                            &lt;h3&gt;Resolution Details:&lt;/h3&gt;
+                            &lt;div style="background-color: #f5f5f5; padding: 20px; border-radius: 4px; border-left: 4px solid #4caf50;"&gt;
+                                ${object.management_response}
+                            &lt;/div&gt;
+                            % endif
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 30px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td style="background-color: #fff9c4; border-left: 4px solid #fbc02d; padding: 20px;"&gt;
+                                        &lt;h4 style="margin: 0 0 10px 0;"&gt;📝 We Value Your Feedback&lt;/h4&gt;
+                                        &lt;p style="margin: 0;"&gt;Please let us know if you're satisfied with the resolution or if you need further assistance.&lt;/p&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 30px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td align="center"&gt;
+                                        &lt;p style="margin: 0 0 15px 0; font-weight: bold;"&gt;Are you satisfied with this resolution?&lt;/p&gt;
+                                        &lt;a href="${object.get_portal_url() if hasattr(object, 'get_portal_url') else '#'}" 
+                                           style="display: inline-block; padding: 12px 30px; background-color: #4caf50; color: white; text-decoration: none; border-radius: 4px; margin: 0 10px;"&gt;
+                                            Yes, Satisfied
+                                        &lt;/a&gt;
+                                        &lt;a href="${object.get_portal_url() if hasattr(object, 'get_portal_url') else '#'}" 
+                                           style="display: inline-block; padding: 12px 30px; background-color: #ff9800; color: white; text-decoration: none; border-radius: 4px; margin: 0 10px;"&gt;
+                                            Need More Help
+                                        &lt;/a&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;p&gt;Thank you for your patience and for helping us improve our services.&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
+                            &lt;p style="margin: 0;"&gt;GuardPro Resident Services&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                &lt;/table&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+            </field>
+        </record>
+
+        <!-- 7. Client Feedback Request -->
+        <record id="email_template_client_feedback_request" model="mail.template">
+            <field name="name">Client Feedback Request</field>
+            <field name="model_id" ref="model_client_site"/>
+            <field name="subject">We Value Your Feedback - ${object.name or 'Site'} Security Services</field>
+            <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
+            <field name="email_to">${(object.manager_id.email if object.manager_id else object.client_id.email if object.client_id else '')|safe}</field>
+            <field name="body_html" type="html">
+
+
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+&lt;/head&gt;
+&lt;body style="margin: 0; padding: 0; font-family: Arial, sans-serif;"&gt;
+    &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f4f4f4;"&gt;
+        &lt;tr&gt;
+            &lt;td align="center" style="padding: 20px 0;"&gt;
+                &lt;table cellpadding="0" cellspacing="0" border="0" width="600" style="background-color: #ffffff;"&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #673ab7; color: white; padding: 30px 20px; text-align: center;"&gt;
+                            &lt;h1 style="margin: 0;"&gt;⭐ Your Feedback Matters&lt;/h1&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 30px;"&gt;
+                            &lt;p&gt;Dear ${object.manager_id.name if object.manager_id else object.client_id.name if object.client_id else 'Valued Client'},&lt;/p&gt;
+                            &lt;p&gt;We hope you're satisfied with our security services at &lt;strong&gt;${object.name or 'your facility'}&lt;/strong&gt;. Your feedback helps us maintain the highest standards of service.&lt;/p&gt;
+                            
+                            &lt;h3&gt;Service Period:&lt;/h3&gt;
+                            &lt;p&gt;We'd like to hear about your experience with our guards and services this month.&lt;/p&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 20px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; width: 40%;"&gt;Site&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.name or 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Location&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;
+                                        ${object.city or ''}, ${object.state_id.name if object.state_id else ''}
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;h3&gt;We'd Love Your Feedback On:&lt;/h3&gt;
+                            &lt;ul style="line-height: 2;"&gt;
+                                &lt;li&gt;Professionalism of our security staff&lt;/li&gt;
+                                &lt;li&gt;Punctuality and reliability&lt;/li&gt;
+                                &lt;li&gt;Communication and reporting&lt;/li&gt;
+                                &lt;li&gt;Overall service quality&lt;/li&gt;
+                                &lt;li&gt;Areas for improvement&lt;/li&gt;
+                            &lt;/ul&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 30px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td align="center"&gt;
+                                        &lt;a href="#" style="display: inline-block; padding: 16px 50px; background-color: #673ab7; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px;"&gt;
+                                            Provide Feedback
+                                        &lt;/a&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 20px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td style="background-color: #f3e5f5; border-left: 4px solid #673ab7; padding: 15px;"&gt;
+                                        &lt;p style="margin: 0;"&gt;⏱️ &lt;strong&gt;Takes only 2-3 minutes&lt;/strong&gt;&lt;/p&gt;
+                                        &lt;p style="margin: 10px 0 0 0;"&gt;Your input helps us serve you better and recognize outstanding performance.&lt;/p&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;p&gt;Thank you for choosing our security services. We look forward to continuing to serve you.&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
+                            &lt;p style="margin: 0;"&gt;GuardPro Security Management&lt;/p&gt;
+                            &lt;p style="margin: 5px 0 0 0;"&gt;Excellence in Security Services&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                &lt;/table&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+            </field>
+        </record>
+
+        <!-- 8. Audit Corrective Action Overdue Alert -->
+        <record id="email_template_audit_corrective_action_overdue" model="mail.template">
+            <field name="name">Audit Corrective Action Overdue Alert</field>
+            <field name="model_id" ref="model_compliance_audit"/>
+            <field name="subject">⚠️ OVERDUE: Corrective Action Required - Audit ${object.name or ''}</field>
+            <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
+            <field name="email_to">${(object.assigned_to_id.email if object.assigned_to_id else object.auditor_id.email if object.auditor_id else '')|safe}</field>
+            <field name="body_html" type="html">
+
+
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+&lt;/head&gt;
+&lt;body style="margin: 0; padding: 0; font-family: Arial, sans-serif;"&gt;
+    &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f4f4f4;"&gt;
+        &lt;tr&gt;
+            &lt;td align="center" style="padding: 20px 0;"&gt;
+                &lt;table cellpadding="0" cellspacing="0" border="0" width="600" style="background-color: #ffffff;"&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #ff5722; color: white; padding: 30px 20px; text-align: center;"&gt;
+                            &lt;h1 style="margin: 0;"&gt;⚠️ OVERDUE CORRECTIVE ACTION&lt;/h1&gt;
+                            &lt;p style="margin: 10px 0 0 0;"&gt;Immediate Attention Required&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 0 30px;"&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%"&gt;
+                                &lt;tr&gt;
+                                    &lt;td style="background-color: #ffccbc; border-left: 4px solid #ff5722; padding: 20px; margin: 20px 0;"&gt;
+                                        &lt;p style="margin: 0; color: #bf360c; font-weight: bold; font-size: 16px;"&gt;
+                                            ⏰ URGENT: A corrective action from a compliance audit is now OVERDUE
+                                        &lt;/p&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 30px;"&gt;
+                            &lt;p&gt;&lt;strong&gt;Attention Required,&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p&gt;This is an escalation notice for an overdue corrective action that requires your immediate attention.&lt;/p&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; margin: 20px 0; border: 2px solid #ff5722;"&gt;
+                                &lt;tr&gt;
+                                    &lt;th colspan="2" style="background-color: #ff5722; color: white; padding: 12px; text-align: left;"&gt;
+                                        Audit Information
+                                    &lt;/th&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; width: 40%;"&gt;Audit Reference&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd; font-weight: bold;"&gt;${object.name or 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Site&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.site_id.name if object.site_id else 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Audit Date&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;
+                                        ${format_date(object.audit_date) if object.audit_date else 'N/A'}
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Auditor&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.auditor_id.name if object.auditor_id else 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Assigned To&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.assigned_to_id.name if object.assigned_to_id else 'Unassigned'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Compliance Score&lt;/th&gt;
+                                    &lt;td style="padding: 12px;"&gt;
+                                        % if hasattr(object, 'compliance_score'):
+                                            ${'{:.1f}'.format(object.compliance_score)}%
+                                        % else:
+                                            N/A
+                                        % endif
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;h3 style="color: #ff5722;"&gt;Required Actions:&lt;/h3&gt;
+                            &lt;ol style="line-height: 2; font-size: 15px;"&gt;
+                                &lt;li&gt;&lt;strong&gt;Review the audit findings immediately&lt;/strong&gt;&lt;/li&gt;
+                                &lt;li&gt;&lt;strong&gt;Complete all pending corrective actions&lt;/strong&gt;&lt;/li&gt;
+                                &lt;li&gt;&lt;strong&gt;Update the system&lt;/strong&gt; with completion status and evidence&lt;/li&gt;
+                                &lt;li&gt;&lt;strong&gt;Notify your manager&lt;/strong&gt; of completion&lt;/li&gt;
+                                &lt;li&gt;&lt;strong&gt;Prevent recurrence&lt;/strong&gt; by implementing controls&lt;/li&gt;
+                            &lt;/ol&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 30px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td align="center"&gt;
+                                        &lt;a href="${object.get_portal_url() if hasattr(object, 'get_portal_url') else '#'}" 
+                                           style="display: inline-block; padding: 16px 50px; background-color: #ff5722; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px;"&gt;
+                                            View Audit &amp; Update Status
+                                        &lt;/a&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 20px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td style="background-color: #fff3e0; border-left: 4px solid #ff9800; padding: 15px;"&gt;
+                                        &lt;p style="margin: 0;"&gt;&lt;strong&gt;⚠️ Important:&lt;/strong&gt;&lt;/p&gt;
+                                        &lt;p style="margin: 10px 0 0 0;"&gt;Failure to complete corrective actions may result in:&lt;/p&gt;
+                                        &lt;ul style="margin: 10px 0 0 0; padding-left: 20px;"&gt;
+                                            &lt;li&gt;Compliance violations&lt;/li&gt;
+                                            &lt;li&gt;Regulatory penalties&lt;/li&gt;
+                                            &lt;li&gt;Safety hazards&lt;/li&gt;
+                                            &lt;li&gt;Client dissatisfaction&lt;/li&gt;
+                                        &lt;/ul&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;p&gt;&lt;strong&gt;Need Assistance?&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p&gt;Contact your manager or the compliance team immediately if you need help completing these actions.&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
+                            &lt;p style="margin: 0;"&gt;&lt;strong&gt;GuardPro Compliance Management&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p style="margin: 5px 0 0 0;"&gt;Automated Compliance Monitoring System&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                &lt;/table&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+            </field>
+        </record>
+
+        
+        <!-- ============================================ -->
+        <!-- MEDIUM PRIORITY EMAIL TEMPLATES (3 items)   -->
+        <!-- ============================================ -->
+        
+        <!-- 9. Client Feedback Response Acknowledgment -->
+        <record id="email_template_client_feedback_response" model="mail.template">
+            <field name="name">Client Feedback Response Acknowledgment</field>
+            <field name="model_id" ref="model_client_feedback"/>
+            <field name="subject">Thank You for Your Feedback - ${object.site_id.name or 'Site'}</field>
+            <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
+            <field name="email_to">${(object.client_id.email if object.client_id else object.resident_id.email if object.resident_id else '')|safe}</field>
+            <field name="body_html" type="html">
+
+
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+&lt;/head&gt;
+&lt;body style="margin: 0; padding: 0; font-family: Arial, sans-serif;"&gt;
+    &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f4f4f4;"&gt;
+        &lt;tr&gt;
+            &lt;td align="center" style="padding: 20px 0;"&gt;
+                &lt;table cellpadding="0" cellspacing="0" border="0" width="600" style="background-color: #ffffff;"&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #9c27b0; color: white; padding: 30px 20px; text-align: center;"&gt;
+                            &lt;h1 style="margin: 0;"&gt;Thank You! 🙏&lt;/h1&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 30px;"&gt;
+                            &lt;p&gt;Dear ${object.client_id.name if object.client_id else object.resident_id.name if object.resident_id else 'Valued Client'},&lt;/p&gt;
+                            &lt;p&gt;Thank you for taking the time to provide feedback about our security services. Your input is invaluable to us.&lt;/p&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 20px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; width: 40%;"&gt;Feedback Reference&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.name or 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Site&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.site_id.name if object.site_id else 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Your Rating&lt;/th&gt;
+                                    &lt;td style="padding: 12px;"&gt;
+                                        &lt;span style="color: #ffc107; font-size: 20px;"&gt;
+                                            ${'⭐' * int(object.overall_rating) if object.overall_rating else ''}
+                                        &lt;/span&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            % if object.management_response:
+                            &lt;h3&gt;Our Response:&lt;/h3&gt;
+                            &lt;div style="background-color: #f5f5f5; padding: 20px; border-radius: 4px; border-left: 4px solid #9c27b0;"&gt;
+                                ${object.management_response}
+                            &lt;/div&gt;
+                            % else:
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 20px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td style="background-color: #f3e5f5; border-left: 4px solid #9c27b0; padding: 15px;"&gt;
+                                        &lt;p style="margin: 0;"&gt;&lt;strong&gt;What's Next:&lt;/strong&gt;&lt;/p&gt;
+                                        &lt;ul style="margin: 10px 0 0 0; padding-left: 20px;"&gt;
+                                            &lt;li&gt;We're reviewing your feedback carefully&lt;/li&gt;
+                                            &lt;li&gt;Any concerns will be addressed promptly&lt;/li&gt;
+                                            &lt;li&gt;We'll share your compliments with our team&lt;/li&gt;
+                                            &lt;li&gt;Your suggestions will be considered for improvements&lt;/li&gt;
+                                        &lt;/ul&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            % endif
+                            
+                            &lt;p&gt;Your continued partnership and trust mean everything to us. We're committed to providing exceptional security services.&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
+                            &lt;p style="margin: 0;"&gt;GuardPro Security Management&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                &lt;/table&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+            </field>
+        </record>
+
+        <!-- 10. Training Course Enrollment Confirmation -->
+        <record id="email_template_training_enrollment" model="mail.template">
+            <field name="name">Training Course Enrollment Confirmation</field>
+            <field name="model_id" ref="model_slide_channel_partner"/>
+            <field name="subject">✅ Enrolled: ${object.channel_id.name or 'Training Course'}</field>
+            <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
+            <field name="email_to">${(object.partner_id.email if object.partner_id else '')|safe}</field>
+            <field name="body_html" type="html">
+
+
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+&lt;/head&gt;
+&lt;body style="margin: 0; padding: 0; font-family: Arial, sans-serif;"&gt;
+    &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f4f4f4;"&gt;
+        &lt;tr&gt;
+            &lt;td align="center" style="padding: 20px 0;"&gt;
+                &lt;table cellpadding="0" cellspacing="0" border="0" width="600" style="background-color: #ffffff;"&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #00bcd4; color: white; padding: 30px 20px; text-align: center;"&gt;
+                            &lt;h1 style="margin: 0;"&gt;📚 Course Enrollment Confirmed&lt;/h1&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 30px;"&gt;
+                            &lt;p&gt;Hello ${object.partner_id.name or 'Guard'},&lt;/p&gt;
+                            &lt;p&gt;You have been successfully enrolled in the following training course. Let's get started on your learning journey!&lt;/p&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 20px 0; border: 2px solid #00bcd4;"&gt;
+                                &lt;tr&gt;
+                                    &lt;th colspan="2" style="background-color: #00bcd4; color: white; padding: 12px; text-align: left;"&gt;
+                                        Course Information
+                                    &lt;/th&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; width: 40%;"&gt;Course Name&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd; font-weight: bold;"&gt;${object.channel_id.name if object.channel_id else 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Description&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;
+                                        ${object.channel_id.description[:200] if object.channel_id and object.channel_id.description else 'Enhance your security skills and knowledge'}
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Duration&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;
+                                        % if object.channel_id and hasattr(object.channel_id, 'slide_ids'):
+                                            ${len(object.channel_id.slide_ids)} lessons
+                                        % else:
+                                            Self-paced
+                                        % endif
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Enrollment Date&lt;/th&gt;
+                                    &lt;td style="padding: 12px;"&gt;${format_date(object.create_date) if object.create_date else 'Today'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;h3&gt;Getting Started:&lt;/h3&gt;
+                            &lt;ol style="line-height: 2;"&gt;
+                                &lt;li&gt;Click the button below to access the course&lt;/li&gt;
+                                &lt;li&gt;Complete lessons at your own pace&lt;/li&gt;
+                                &lt;li&gt;Take quizzes to test your knowledge&lt;/li&gt;
+                                &lt;li&gt;Earn your completion certificate&lt;/li&gt;
+                            &lt;/ol&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 30px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td align="center"&gt;
+                                        &lt;a href="/slides/slide/${object.channel_id.id if object.channel_id else ''}" 
+                                           style="display: inline-block; padding: 16px 50px; background-color: #00bcd4; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px;"&gt;
+                                            Start Learning Now
+                                        &lt;/a&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 20px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td style="background-color: #e0f7fa; border-left: 4px solid #00bcd4; padding: 15px;"&gt;
+                                        &lt;p style="margin: 0;"&gt;&lt;strong&gt;💡 Pro Tip:&lt;/strong&gt;&lt;/p&gt;
+                                        &lt;p style="margin: 10px 0 0 0;"&gt;Set aside 20-30 minutes daily to complete lessons. Consistent learning leads to better retention!&lt;/p&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;p&gt;&lt;strong&gt;Need Help?&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p&gt;Contact your supervisor or the training department if you have any questions about the course.&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
+                            &lt;p style="margin: 0;"&gt;GuardPro Training &amp; Development&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                &lt;/table&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+            </field>
+        </record>
+
+        <!-- 11. Training Course Completion Notification -->
+        <record id="email_template_training_completion" model="mail.template">
+            <field name="name">Training Course Completion Notification</field>
+            <field name="model_id" ref="model_slide_channel_partner"/>
+            <field name="subject">🎓 Congratulations! Course Completed: ${object.channel_id.name or 'Training'}</field>
+            <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
+            <field name="email_to">${(object.partner_id.email if object.partner_id else '')|safe}</field>
+            <field name="body_html" type="html">
+
+
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+&lt;/head&gt;
+&lt;body style="margin: 0; padding: 0; font-family: Arial, sans-serif;"&gt;
+    &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f4f4f4;"&gt;
+        &lt;tr&gt;
+            &lt;td align="center" style="padding: 20px 0;"&gt;
+                &lt;table cellpadding="0" cellspacing="0" border="0" width="600" style="background-color: #ffffff;"&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #4caf50; color: white; padding: 40px 20px; text-align: center;"&gt;
+                            &lt;h1 style="margin: 0; font-size: 32px;"&gt;🎓 Congratulations!&lt;/h1&gt;
+                            &lt;p style="margin: 10px 0 0 0; font-size: 18px;"&gt;You've Completed Your Training&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 30px;"&gt;
+                            &lt;p style="font-size: 16px;"&gt;Excellent work, &lt;strong&gt;${object.partner_id.name or 'Guard'}!&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p&gt;You have successfully completed the training course. Your commitment to professional development is commendable!&lt;/p&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 20px 0; border: 2px solid #4caf50;"&gt;
+                                &lt;tr&gt;
+                                    &lt;th colspan="2" style="background-color: #4caf50; color: white; padding: 12px; text-align: left;"&gt;
+                                        Course Completion Details
+                                    &lt;/th&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; width: 40%;"&gt;Course Name&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd; font-weight: bold;"&gt;${object.channel_id.name if object.channel_id else 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Completion Date&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${format_date(object.completed_at) if hasattr(object, 'completed_at') and object.completed_at else 'Today'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Progress&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;
+                                        &lt;strong style="color: #4caf50;"&gt;100% Complete ✓&lt;/strong&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Certificate Status&lt;/th&gt;
+                                    &lt;td style="padding: 12px;"&gt;
+                                        &lt;strong style="color: #4caf50;"&gt;Ready to Download&lt;/strong&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 30px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td align="center"&gt;
+                                        &lt;p style="margin: 0 0 15px 0; font-size: 16px; font-weight: bold;"&gt;Download Your Certificate&lt;/p&gt;
+                                        &lt;a href="/slides/slide/${object.channel_id.id if object.channel_id else ''}" 
+                                           style="display: inline-block; padding: 16px 50px; background-color: #4caf50; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px;"&gt;
+                                            Get Certificate
+                                        &lt;/a&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 20px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td style="background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 20px;"&gt;
+                                        &lt;p style="margin: 0;"&gt;&lt;strong&gt;✅ What's Updated:&lt;/strong&gt;&lt;/p&gt;
+                                        &lt;ul style="margin: 10px 0 0 0; padding-left: 20px;"&gt;
+                                            &lt;li&gt;Your training record has been updated&lt;/li&gt;
+                                            &lt;li&gt;Your credentials now reflect this completion&lt;/li&gt;
+                                            &lt;li&gt;You may be eligible for new assignments&lt;/li&gt;
+                                        &lt;/ul&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;h3&gt;Continue Your Learning:&lt;/h3&gt;
+                            &lt;p&gt;Keep building your skills! Check out our other training courses to advance your career in security services.&lt;/p&gt;
+                            
+                            &lt;p style="margin-top: 30px;"&gt;Once again, congratulations on your achievement!&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
+                            &lt;p style="margin: 0;"&gt;GuardPro Training &amp; Development&lt;/p&gt;
+                            &lt;p style="margin: 5px 0 0 0;"&gt;Investing in Your Professional Growth&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                &lt;/table&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+            </field>
+        </record>
+
+    </data>
+</odoo>

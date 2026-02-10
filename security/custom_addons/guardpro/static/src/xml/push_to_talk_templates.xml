@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="guardpro.PushToTalkWidget" owl="1">
+        <div class="o_action_manager">
+            <div class="o_action o_view_controller">
+            <div class="push-to-talk-container">
+                <div class="push-to-talk-header">
+                    <h2>Push-to-Talk (Walkie-Talkie)</h2>
+                </div>
+                
+                <!-- Channel Selection -->
+                <div class="channel-selector" t-if="state.channels.length > 0">
+                    <label>Select Channel:</label>
+                    <select class="form-select" t-model="state.currentChannel" 
+                            t-on-change="(ev) => selectChannel(parseInt(ev.target.value))">
+                        <option t-foreach="state.channels" t-as="channel" 
+                                t-key="channel.id" t-att-value="channel.id"
+                                t-att-selected="state.currentChannel?.id === channel.id">
+                            <t t-esc="channel.name"/>
+                            <t t-if="channel.active_members_count > 0">
+                                (<t t-esc="channel.active_members_count"/> active)
+                            </t>
+                        </option>
+                    </select>
+                </div>
+                
+                <!-- Error Display -->
+                <div class="alert alert-danger" t-if="state.error" role="alert">
+                    <t t-esc="state.error"/>
+                </div>
+                
+                <!-- Main Push-to-Talk Interface -->
+                <div class="push-to-talk-main" t-if="state.currentChannel">
+                    <!-- Recording Button -->
+                    <div class="recording-section">
+                        <button class="btn btn-primary btn-lg push-to-talk-button"
+                                t-att-class="{
+                                    'recording': state.isRecording,
+                                    'disabled': state.isPlaying
+                                }"
+                                t-on-mousedown="startRecording"
+                                t-on-mouseup="stopRecording"
+                                t-on-mouseleave="stopRecording"
+                                t-on-touchstart="startRecording"
+                                t-on-touchend="stopRecording"
+                                t-disabled="state.isPlaying">
+                            <i class="fa fa-microphone" t-if="!state.isRecording"/>
+                            <i class="fa fa-stop" t-if="state.isRecording"/>
+                            <span t-if="!state.isRecording">Hold to Talk</span>
+                            <span t-if="state.isRecording">Recording... (<t t-esc="formatDuration(state.recordingDuration)"/>)</span>
+                        </button>
+                        
+                        <div class="recording-info" t-if="state.isRecording">
+                            <p>Max duration: <t t-esc="state.currentChannel.max_duration_seconds"/> seconds</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Messages List -->
+                    <div class="messages-section">
+                        <h3>Recent Messages</h3>
+                        <div class="messages-list">
+                            <div class="message-item" t-foreach="state.messages" t-as="message" t-key="message.id"
+                                 t-att-class="{
+                                     'urgent': message.is_urgent,
+                                     'sent-by-me': message.is_sent_by_me,
+                                     'played': message.is_played
+                                 }">
+                                <div class="message-header">
+                                    <strong><t t-esc="message.sender_name"/></strong>
+                                    <span class="message-time"><t t-esc="formatTime(message.created_at)"/></span>
+                                    <span class="badge badge-warning" t-if="message.is_urgent">Urgent</span>
+                                </div>
+                                <div class="message-body">
+                                    <div class="audio-controls">
+                                        <button class="btn btn-sm btn-outline-primary"
+                                                t-on-click="() => playMessage(message.id)"
+                                                t-disabled="state.isPlaying">
+                                            <i class="fa fa-play"/>
+                                            Play (<t t-esc="formatDuration(message.duration_seconds)"/>)
+                                        </button>
+                                        <span class="badge badge-success" t-if="message.is_played">Played</span>
+                                    </div>
+                                    <div class="message-location" t-if="message.location_latitude and message.location_longitude">
+                                        <i class="fa fa-map-marker"/>
+                                        Location: <t t-esc="message.location_latitude"/>, <t t-esc="message.location_longitude"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="no-messages" t-if="state.messages.length === 0">
+                                <p>No messages yet. Press and hold the button to send a voice message.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- No Channel Selected -->
+                <div class="no-channel-selected" t-if="!state.currentChannel and state.channels.length > 0">
+                    <p>Please select a channel to start using push-to-talk.</p>
+                </div>
+                
+                <!-- No Channels Available -->
+                <div class="no-channels" t-if="state.channels.length === 0">
+                    <p>No channels available. Contact your supervisor to get access.</p>
+                </div>
+            </div>
+        </div>
+        </div>
+    </t>
+</templates>
+
+
+
+
+
+
+
+
+

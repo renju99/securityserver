@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Notification Preference Form View -->
+    <record id="view_notification_preference_form" model="ir.ui.view">
+        <field name="name">notification.preference.form</field>
+        <field name="model">notification.preference</field>
+        <field name="arch" type="xml">
+            <form string="Notification Preferences">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Notification Preferences</h1>
+                        <h2>
+                            <field name="user_id" readonly="1"/>
+                        </h2>
+                    </div>
+                    
+                    <group string="Notification Channels">
+                        <field name="enable_push"/>
+                        <field name="enable_email"/>
+                        <field name="enable_sms"/>
+                    </group>
+                    
+                    <group string="Event Preferences">
+                        <group>
+                            <field name="notify_shift_assigned"/>
+                            <field name="notify_shift_reminder"/>
+                            <field name="notify_shift_changed"/>
+                            <field name="notify_tour_assigned"/>
+                        </group>
+                        <group>
+                            <field name="notify_incident_created"/>
+                            <field name="notify_incident_critical"/>
+                            <field name="notify_emergency"/>
+                            <field name="notify_feedback_received"/>
+                            <field name="notify_training_due"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Quiet Hours">
+                        <group>
+                            <field name="enable_quiet_hours"/>
+                            <field name="quiet_start_time" widget="float_time" 
+                                   invisible="not enable_quiet_hours"/>
+                            <field name="quiet_end_time" widget="float_time" 
+                                   invisible="not enable_quiet_hours"/>
+                        </group>
+                        <group>
+                            <field name="only_critical" 
+                                   invisible="not enable_quiet_hours"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Daily Digest">
+                        <field name="enable_daily_digest"/>
+                        <field name="digest_time" widget="float_time" 
+                               invisible="not enable_daily_digest"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_notification_preference" model="ir.actions.act_window">
+        <field name="name">My Notification Preferences</field>
+        <field name="res_model">notification.preference</field>
+        <field name="view_mode">form</field>
+        <field name="domain">[('user_id', '=', uid)]</field>
+        <field name="context">{'default_user_id': uid}</field>
+        <field name="target">current</field>
+    </record>
+
+</odoo>
+

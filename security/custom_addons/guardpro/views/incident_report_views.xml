@@ -1,0 +1,585 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Incident Report List View -->
+        <record id="view_incident_report_list" model="ir.ui.view">
+            <field name="name">incident.report.list</field>
+            <field name="model">incident.report</field>
+            <field name="arch" type="xml">
+                <list string="Incident Reports" sample="1" decoration-danger="sla_breach">
+                    <field name="name"/>
+                    <field name="title"/>
+                    <field name="guard_id"/>
+                    <field name="site_id"/>
+                    <field name="category_id"/>
+                    <field name="incident_datetime"/>
+                    <field name="severity" widget="badge" 
+                           decoration-danger="severity in ['high', 'critical']"
+                           decoration-warning="severity == 'medium'"
+                           decoration-info="severity == 'low'"/>
+                    <field name="status" widget="badge"
+                           decoration-muted="status == 'draft'"
+                           decoration-info="status == 'submitted'"
+                           decoration-warning="status in ['under_review', 'investigating']"
+                           decoration-success="status in ['resolved', 'closed']"/>
+                    <field name="sla_status" widget="badge" optional="show"
+                           decoration-success="sla_status == 'on_track'"
+                           decoration-info="sla_status == 'warning'"
+                           decoration-warning="sla_status == 'critical'"
+                           decoration-danger="sla_status == 'breached'"/>
+                    <field name="response_time_minutes" widget="float_time" optional="hide"/>
+                    <field name="escalation_level" optional="hide"/>
+                    <field name="sla_breach" column_invisible="1"/>
+                    <field name="priority" widget="priority" optional="hide"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Incident Report Form View -->
+        <record id="view_incident_report_form" model="ir.ui.view">
+            <field name="name">incident.report.form</field>
+            <field name="model">incident.report</field>
+            <field name="arch" type="xml">
+                <form string="Incident Report">
+                    <header>
+                        <button name="action_add_status_update" string="Add Status Update" type="object" 
+                                class="oe_highlight" 
+                                groups="guardpro.group_guardpro_supervisor,guardpro.group_guardpro_manager"/>
+                        <button name="action_submit" string="Submit" type="object" 
+                                invisible="status != 'draft'" class="oe_highlight"/>
+                        <button name="action_review" string="Review" type="object"
+                                invisible="status not in ['submitted']" groups="guardpro.group_guardpro_supervisor"/>
+                        <button name="action_investigate" string="Investigate" type="object"
+                                invisible="status != 'under_review'" groups="guardpro.group_guardpro_supervisor"/>
+                        <button name="action_resolve" string="Resolve" type="object"
+                                invisible="status != 'investigating'" groups="guardpro.group_guardpro_supervisor"/>
+                        <button name="action_close" string="Close" type="object"
+                                invisible="status != 'resolved'" groups="guardpro.group_guardpro_manager"/>
+                        <field name="status" widget="statusbar" statusbar_visible="draft,submitted,under_review,resolved,closed"/>
+                    </header>
+                    <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_status_updates" type="object" 
+                                class="oe_stat_button" icon="fa-history">
+                            <field name="status_update_count" widget="statinfo" string="Updates"/>
+                        </button>
+                        <button name="action_view_investigation" type="object" 
+                                class="oe_stat_button" icon="fa-search"
+                                invisible="not investigation_required and not investigation_id">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="investigation_status" invisible="not investigation_id"/>
+                                    <span invisible="investigation_id">Create</span>
+                                </span>
+                                <span class="o_stat_text">Investigation</span>
+                            </div>
+                        </button>
+                        <button name="action_print_recommended_report" string="Print Report" type="object" 
+                                class="oe_stat_button" icon="fa-file-pdf-o"
+                                title="Print recommended report for this category"
+                                invisible="not category_id"/>
+                        <button name="action_panic" string="PANIC BUTTON" type="object" 
+                                class="oe_stat_button" icon="fa-bell"
+                                style="background-color: red; color: white;"
+                                title="Emergency Alert"/>
+                    </div>
+                        <!-- Hidden computed fields for form behavior -->
+                        <field name="is_medical_incident" invisible="1"/>
+                        <field name="is_fire_incident" invisible="1"/>
+                        <field name="is_security_incident" invisible="1"/>
+                        <field name="is_vehicle_incident" invisible="1"/>
+                        <field name="is_safety_incident" invisible="1"/>
+                        
+                        <div class="oe_title">
+                            <label for="name" string="Incident Number"/>
+                            <h1><field name="name" readonly="1"/></h1>
+                        </div>
+                        
+                        <!-- CATEGORY FIRST - Most Important Field -->
+                        <div class="alert alert-warning" role="alert" style="margin-bottom: 20px; background-color: #fff3cd; border: 2px solid #ffc107;">
+                            <i class="fa fa-flag" title="Important" style="font-size: 18px;"/> <strong>Step 1:</strong> Select an incident category below. The form will automatically adjust to show relevant fields.
+                        </div>
+                        
+                        <div style="background-color: #f8f9fa; padding: 15px; border: 1px solid #dee2e6; border-radius: 5px; margin-bottom: 20px;">
+                            <h4 style="color: #495057; margin-bottom: 10px;"><i class="fa fa-list-alt" title="Category"/> INCIDENT CATEGORY (Select First)</h4>
+                            <field name="category_id" 
+                                   options="{'no_create': True}" 
+                                   placeholder="Select incident category..."
+                                   required="1"
+                                   style="font-size: 16px; padding: 8px; width: 100%;"/>
+                        </div>
+                        
+                        <div class="alert alert-info" role="alert" invisible="category_id" style="margin-top: 10px; background-color: #d1ecf1; border: 1px solid #bee5eb;">
+                            <i class="fa fa-lightbulb-o" title="Tip" style="font-size: 18px;"/> <strong>Form will update automatically</strong> once you select a category above.
+                        </div>
+                        
+                        <group invisible="not category_id">
+                            <group string="Basic Information">
+                                <label for="title"/>
+                                <h2><field name="title" placeholder="Brief incident title..." nolabel="1"/></h2>
+                                <field name="incident_datetime"/>
+                                <field name="guard_id"/>
+                                <field name="site_id"/>
+                                <field name="shift_id"/>
+                            </group>
+                        <group string="Classification">
+                            <field name="severity" widget="badge"/>
+                            <field name="priority" widget="priority"/>
+                            <field name="investigation_required" widget="boolean_toggle"/>
+                            <field name="tag_ids" widget="many2many_tags"/>
+                            <field name="visible_to_client" widget="boolean_toggle" string="Visible to Client Portal"/>
+                        </group>
+                        </group>
+                        <group string="Location" invisible="not category_id">
+                            <field name="location"/>
+                            <field name="latitude"/>
+                            <field name="longitude"/>
+                        </group>
+                        
+                        <notebook invisible="not category_id">
+                            <!-- DESCRIPTION - Always visible -->
+                            <page string="📝 Description" name="description">
+                                <field name="description" widget="html" placeholder="Provide detailed description of the incident..."/>
+                            </page>
+                            
+                            <!-- MEDICAL EMERGENCY SPECIFIC -->
+                            <page string="🚑 Patient Information" name="medical_patient" 
+                                  invisible="not is_medical_incident">
+                                <group>
+                                    <group>
+                                        <field name="persons_involved" widget="text" 
+                                               string="Patient Details"
+                                               placeholder="Patient name, age, gender, contact info..."/>
+                                        <field name="injuries" string="Injuries/Medical Condition"/>
+                                        <field name="injury_details" widget="text" 
+                                               invisible="not injuries"
+                                               placeholder="Describe injuries or medical condition in detail..."/>
+                                    </group>
+                                    <group>
+                                        <field name="medical_required" string="Medical Assistance Required"/>
+                                        <field name="ambulance_called" string="Ambulance Called"/>
+                                        <field name="immediate_actions" widget="text" 
+                                               string="First Aid / Actions Taken"
+                                               placeholder="Describe first aid administered and actions taken..."/>
+                                    </group>
+                                </group>
+                            </page>
+                            
+                            <!-- FIRE INCIDENT SPECIFIC -->
+                            <page string="🔥 Fire/Emergency Response" name="fire_response" 
+                                  invisible="not is_fire_incident">
+                                <group>
+                                    <group string="Emergency Services">
+                                        <field name="fire_department" string="Fire Department Notified"/>
+                                        <field name="ambulance_called" string="Ambulance Called"/>
+                                        <field name="police_notified" string="Police Notified"/>
+                                    </group>
+                                    <group string="Damage Assessment">
+                                        <field name="property_damage" string="Property Damage"/>
+                                        <field name="damage_details" widget="text" 
+                                               invisible="not property_damage"
+                                               placeholder="Describe fire and smoke damage..."/>
+                                        <field name="estimated_cost" invisible="not property_damage"/>
+                                    </group>
+                                </group>
+                                <group>
+                                    <field name="immediate_actions" widget="text" 
+                                           string="Evacuation &amp; Safety Actions"
+                                           placeholder="Describe evacuation procedures, fire extinguisher use, etc..."/>
+                                </group>
+                                <group invisible="not injuries">
+                                    <field name="injuries" string="Injuries Occurred"/>
+                                    <field name="injury_details" widget="text" 
+                                           invisible="not injuries"
+                                           placeholder="Describe any fire-related injuries..."/>
+                                </group>
+                            </page>
+                            
+                            <!-- SECURITY INCIDENT SPECIFIC -->
+                            <page string="🔒 Security Details" name="security_details" 
+                                  invisible="not is_security_incident">
+                                <group>
+                                    <group string="Suspects/Persons Involved">
+                                        <field name="persons_involved" widget="text" 
+                                               string="Suspect Description"
+                                               placeholder="Physical description, clothing, behavior, direction of travel..."/>
+                                        <field name="witnesses" widget="text"
+                                               placeholder="Witness names and contact information..."/>
+                                    </group>
+                                    <group string="Law Enforcement">
+                                        <field name="police_notified" string="Police Notified"/>
+                                        <field name="police_report_number" 
+                                               invisible="not police_notified"
+                                               placeholder="Police report number..."/>
+                                    </group>
+                                </group>
+                                <group string="Property/Items">
+                                    <group>
+                                        <field name="property_damage" string="Property Damage/Theft"/>
+                                        <field name="damage_details" widget="text" 
+                                               invisible="not property_damage"
+                                               string="Items Stolen/Damaged"
+                                               placeholder="List all stolen or damaged items..."/>
+                                        <field name="estimated_cost" 
+                                               invisible="not property_damage"
+                                               string="Estimated Value/Cost"/>
+                                    </group>
+                                    <group>
+                                        <field name="immediate_actions" widget="text" 
+                                               string="Security Actions Taken"
+                                               placeholder="Securing area, evidence preservation, notifications made..."/>
+                                    </group>
+                                </group>
+                            </page>
+                            
+                            <!-- VEHICLE INCIDENT SPECIFIC -->
+                            <page string="🚗 Vehicle Information" name="vehicle_details" 
+                                  invisible="not is_vehicle_incident">
+                                <group>
+                                    <group string="Vehicle/Driver Details">
+                                        <field name="persons_involved" widget="text" 
+                                               string="Vehicle &amp; Driver Information"
+                                               placeholder="Vehicle 1: Make/Model, License Plate, Driver Name, Insurance Info&#10;Vehicle 2: Make/Model, License Plate, Driver Name, Insurance Info"/>
+                                    </group>
+                                    <group string="Damage Assessment">
+                                        <field name="property_damage" string="Vehicle/Property Damage"/>
+                                        <field name="damage_details" widget="text" 
+                                               invisible="not property_damage"
+                                               placeholder="Describe damage to all vehicles and property..."/>
+                                        <field name="estimated_cost" 
+                                               invisible="not property_damage"
+                                               string="Estimated Repair Cost"/>
+                                    </group>
+                                </group>
+                                <group invisible="not injuries">
+                                    <group>
+                                        <field name="injuries" string="Injuries Occurred"/>
+                                        <field name="injury_details" widget="text" 
+                                               invisible="not injuries"
+                                               placeholder="Describe any injuries..."/>
+                                    </group>
+                                    <group>
+                                        <field name="medical_required" string="Medical Assistance Required"/>
+                                        <field name="ambulance_called" string="Ambulance Called"/>
+                                    </group>
+                                </group>
+                                <group>
+                                    <field name="police_notified" string="Police Notified"/>
+                                    <field name="police_report_number" 
+                                           invisible="not police_notified"
+                                           placeholder="Police report number..."/>
+                                    <field name="witnesses" widget="text"
+                                           placeholder="Witness information..."/>
+                                </group>
+                            </page>
+                            
+                            <!-- SAFETY HAZARD SPECIFIC -->
+                            <page string="⚠️ Hazard Assessment" name="safety_hazard" 
+                                  invisible="not is_safety_incident">
+                                <group>
+                                    <group string="Hazard Details">
+                                        <field name="severity" widget="badge" string="Risk Level"/>
+                                        <field name="property_damage" string="Could Cause Property Damage"/>
+                                        <field name="injuries" string="Could Cause Injuries"/>
+                                    </group>
+                                    <group string="Immediate Actions">
+                                        <field name="immediate_actions" widget="text" 
+                                               string="Temporary Safety Measures"
+                                               placeholder="Area cordoned off, warning signs posted, access restricted..."/>
+                                    </group>
+                                </group>
+                                <separator string="Recommended Corrective Actions"/>
+                                <group>
+                                    <field name="requires_followup" string="Requires Follow-up"/>
+                                    <field name="followup_notes" widget="text" 
+                                           string="Corrective Actions Recommended"
+                                           placeholder="Describe long-term solutions needed..."/>
+                                </group>
+                            </page>
+                            
+                            <!-- PEOPLE INVOLVED - Visible for non-specific categories -->
+                            <page string="👥 People Involved" name="people" 
+                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_safety_incident">
+                                <group>
+                                    <field name="persons_involved" widget="text" 
+                                           placeholder="Names and details of people involved..."/>
+                                    <field name="witnesses" widget="text"
+                                           placeholder="Witness names and contact information..."/>
+                                </group>
+                            </page>
+                            
+                            <!-- ACTIONS TAKEN - For general incidents -->
+                            <page string="⚡ Actions Taken" name="actions" 
+                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_safety_incident">
+                                <field name="immediate_actions" widget="text" 
+                                       placeholder="Describe all actions taken in response to this incident..."/>
+                            </page>
+                            
+                            <!-- EMERGENCY SERVICES - For general incidents -->
+                            <page string="🚨 Emergency Services" name="emergency" 
+                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident">
+                                <group>
+                                    <group>
+                                        <field name="police_notified"/>
+                                        <field name="police_report_number" invisible="not police_notified"/>
+                                        <field name="medical_required"/>
+                                        <field name="ambulance_called"/>
+                                    </group>
+                                    <group>
+                                        <field name="fire_department"/>
+                                        <field name="client_notified"/>
+                                        <field name="client_notification_datetime" invisible="not client_notified"/>
+                                    </group>
+                                </group>
+                            </page>
+                            
+                            <!-- INJURIES/DAMAGE - For general incidents -->
+                            <page string="💥 Injuries/Damage" name="injuries_damage" 
+                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_safety_incident">
+                                <group>
+                                    <group>
+                                        <field name="injuries"/>
+                                        <field name="injury_details" widget="text" invisible="not injuries"/>
+                                    </group>
+                                    <group>
+                                        <field name="property_damage"/>
+                                        <field name="damage_details" widget="text" invisible="not property_damage"/>
+                                        <field name="estimated_cost" invisible="not property_damage"/>
+                                    </group>
+                                </group>
+                            </page>
+                            
+                            <!-- MEDIA - Always visible -->
+                            <page string="📷 Photos/Videos" name="media">
+                                <group>
+                                    <field name="photo_ids" widget="many2many_binary"/>
+                                    <field name="video_ids" widget="many2many_binary"/>
+                                </group>
+                            </page>
+                            
+                            <!-- REVIEW - Supervisor only -->
+                            <page string="✅ Review" name="review" groups="guardpro.group_guardpro_supervisor">
+                                <group>
+                                    <field name="reviewed_by"/>
+                                    <field name="review_datetime"/>
+                                    <field name="review_notes" widget="text"/>
+                                </group>
+                            </page>
+                            
+                            <!-- SLA TRACKING -->
+                            <page string="⏱️ SLA &amp; Escalation" name="sla_tracking">
+                                <div class="alert alert-info" role="alert" invisible="sla_policy_id">
+                                    <p><i class="fa fa-info-circle" aria-hidden="true" title="Informational message"/> No SLA policy applies to this incident based on its severity and site.</p>
+                                </div>
+                                
+                                <group invisible="not sla_policy_id">
+                                    <group string="SLA Policy">
+                                        <field name="sla_policy_id" readonly="1"/>
+                                        <field name="sla_status" widget="badge" 
+                                               decoration-success="sla_status == 'on_track'"
+                                               decoration-info="sla_status == 'warning'"
+                                               decoration-warning="sla_status == 'critical'"
+                                               decoration-danger="sla_status == 'breached'"/>
+                                        <field name="sla_breach" invisible="1"/>
+                                    </group>
+                                    <group string="Response Tracking">
+                                        <field name="first_response_datetime" readonly="1"/>
+                                        <field name="responded_by" readonly="1"/>
+                                        <field name="response_time_minutes" widget="float_time" readonly="1"/>
+                                    </group>
+                                </group>
+                                
+                                <group invisible="not sla_policy_id">
+                                    <group string="SLA Deadlines">
+                                        <field name="sla_response_deadline" readonly="1"/>
+                                        <field name="time_to_response_deadline" widget="float_time" readonly="1" 
+                                               invisible="first_response_datetime"/>
+                                        <field name="sla_resolution_deadline" readonly="1"/>
+                                        <field name="time_to_resolution_deadline" widget="float_time" readonly="1" 
+                                               invisible="status in ['resolved', 'closed']"/>
+                                    </group>
+                                    <group string="Performance">
+                                        <field name="response_sla_percentage" widget="progressbar" readonly="1"/>
+                                        <field name="resolution_time_hours" widget="float_time" readonly="1" 
+                                               invisible="status not in ['resolved', 'closed']"/>
+                                        <field name="sla_breach_time" readonly="1" invisible="not sla_breach"/>
+                                    </group>
+                                </group>
+                                
+                                <group string="Escalation" invisible="not sla_policy_id">
+                                    <group>
+                                        <field name="escalated" widget="boolean_toggle" readonly="1"/>
+                                        <field name="escalation_count" readonly="1"/>
+                                        <field name="escalation_level" readonly="1" invisible="escalation_count == 0"/>
+                                    </group>
+                                </group>
+                                
+                                <separator string="Escalation History" invisible="escalation_count == 0"/>
+                                <field name="escalation_log_ids" nolabel="1" readonly="1" invisible="escalation_count == 0">
+                                    <list string="Escalations" create="0" edit="0" delete="0">
+                                        <field name="escalation_datetime"/>
+                                        <field name="escalation_type"/>
+                                        <field name="escalation_level"/>
+                                        <field name="escalated_to_user_ids" widget="many2many_tags"/>
+                                        <field name="status" widget="badge" 
+                                               decoration-success="status == 'resolved'"
+                                               decoration-warning="status == 'acknowledged'"
+                                               decoration-danger="status == 'open'"/>
+                                        <field name="escalation_reason"/>
+                                    </list>
+                                </field>
+                            </page>
+                            
+                            <!-- FOLLOW-UP - Visible for all except safety (has its own) -->
+                            <page string="📋 Follow-up" name="followup" 
+                                  invisible="is_safety_incident">
+                                <group>
+                                    <field name="requires_followup"/>
+                                    <field name="followup_notes" widget="text"/>
+                                    <field name="followup_completed"/>
+                                </group>
+                            </page>
+                            
+                            <!-- STATUS UPDATES - Real-time incident progress -->
+                            <page string="📊 Status Updates" name="status_updates">
+                                <field name="status_update_ids">
+                                    <list string="Status Updates" editable="bottom" 
+                                          decoration-info="update_type == 'progress'" 
+                                          decoration-warning="update_type == 'escalation'"
+                                          decoration-success="update_type == 'resolution'">
+                                        <field name="update_datetime"/>
+                                        <field name="title"/>
+                                        <field name="description"/>
+                                        <field name="update_type" widget="badge"/>
+                                        <field name="old_status" optional="hide"/>
+                                        <field name="new_status" optional="hide"/>
+                                        <field name="updated_by_id"/>
+                                        <field name="visible_to_client" widget="boolean_toggle"/>
+                                        <field name="notify_client" widget="boolean_toggle"/>
+                                        <field name="notification_sent" widget="boolean_toggle" readonly="1"/>
+                                    </list>
+                                </field>
+                                <div class="alert alert-info mt-3" role="alert">
+                                    <p><i class="fa fa-info-circle" aria-hidden="true" title="Status update guidance"/> <strong>Status Updates:</strong> Add real-time updates about incident progress. Updates marked as "Visible to Client" will be shown in the client portal.</p>
+                                    <p>Use the "Add Status Update" button at the top to create new updates, or add them directly here.</p>
+                                </div>
+                            </page>
+                            
+                            <!-- ADDITIONAL NOTES - Always visible -->
+                            <page string="📌 Additional Notes" name="notes">
+                                <field name="notes" widget="text" placeholder="Any additional information or notes..."/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <!-- Incident Report Kanban View -->
+        <record id="view_incident_report_kanban" model="ir.ui.view">
+            <field name="name">incident.report.kanban</field>
+            <field name="model">incident.report</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="status" class="o_kanban_small_column">
+                    <field name="color"/>
+                    <field name="name"/>
+                    <field name="title"/>
+                    <field name="severity"/>
+                    <field name="status"/>
+                    <field name="guard_id"/>
+                    <field name="site_id"/>
+                    <templates>
+                        <t t-name="card" class="row">
+                            <div class="oe_kanban_global_click">
+                                <div class="oe_kanban_content">
+                                    <div class="oe_kanban_card_header">
+                                        <div class="oe_kanban_card_header_title">
+                                            <div class="o_kanban_record_top mb-0">
+                                                <strong><field name="name"/></strong>
+                                            </div>
+                                            <div class="o_kanban_record_title">
+                                                <field name="title"/>
+                                            </div>
+                                        </div>
+                                        <field name="severity" widget="badge"/>
+                                    </div>
+                                    <div class="oe_kanban_card_content">
+                                        <div><field name="guard_id"/></div>
+                                        <div><field name="site_id"/></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <!-- Incident Report Search View -->
+        <record id="view_incident_report_search" model="ir.ui.view">
+            <field name="name">incident.report.search</field>
+            <field name="model">incident.report</field>
+            <field name="arch" type="xml">
+                <search string="Incident Reports">
+                    <field name="name"/>
+                    <field name="title"/>
+                    <field name="guard_id"/>
+                    <field name="site_id"/>
+                    <field name="category_id"/>
+                    <field name="incident_datetime"/>
+                    <separator/>
+                    <filter string="Critical" name="critical" domain="[('severity', '=', 'critical')]"/>
+                    <filter string="High" name="high" domain="[('severity', '=', 'high')]"/>
+                    <filter string="Open" name="open" domain="[('status', 'not in', ['resolved', 'closed'])]"/>
+                    <separator/>
+                    <filter name="filter_incident_date" string="Incident Date" date="incident_datetime"/>
+                    <group expand="0" string="Group By">
+                        <filter name="group_severity" string="Severity" context="{'group_by': 'severity'}"/>
+                        <filter name="group_category" string="Category" context="{'group_by': 'category_id'}"/>
+                        <filter name="group_site" string="Site" context="{'group_by': 'site_id'}"/>
+                        <filter name="group_status" string="Status" context="{'group_by': 'status'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Incident Report Action -->
+        <record id="action_incident_report" model="ir.actions.act_window">
+            <field name="name">Incident Reports</field>
+            <field name="res_model">incident.report</field>
+            <field name="view_mode">kanban,list,form</field>
+            <field name="context">{'search_default_open': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create an incident report
+                </p>
+                <p>
+                    Track and manage security incidents with complete documentation.
+                </p>
+            </field>
+        </record>
+
+        <!-- Incident Category Views -->
+        <record id="view_incident_category_list" model="ir.ui.view">
+            <field name="name">incident.category.list</field>
+            <field name="model">incident.category</field>
+            <field name="arch" type="xml">
+                <list string="Incident Categories" editable="bottom">
+                    <field name="sequence" widget="handle"/>
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="description"/>
+                    <field name="active"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="action_incident_category" model="ir.actions.act_window">
+            <field name="name">Incident Categories</field>
+            <field name="res_model">incident.category</field>
+            <field name="view_mode">list,form</field>
+        </record>
+    </data>
+</odoo>
+

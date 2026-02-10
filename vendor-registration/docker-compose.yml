@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  form-backend:
+    build: .
+    container_name: vendor-form-backend
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - CORS_ORIGIN=*
+      # For nginx-proxy integration (if using jwilder/nginx-proxy):
+      # - VIRTUAL_HOST=supplier.proptechme.com
+      # - VIRTUAL_PORT=3000
+    volumes:
+      # Persist uploads/vendors directory (mounted from host /var/www/attachments)
+      - /var/www/attachments:/app/uploads
+      # Persist submissions data
+      - ./data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - vendor-form-network
+      - security_odoo-network
+
+  # Note: If you have an existing nginx-proxy, you can either:
+  # 1. Use the existing proxy and configure it to route supplier.proptechme.com to form-backend:3000
+  # 2. Or expose the backend on a different port and configure your existing nginx-proxy
+  
+  # Option: Expose backend for external nginx-proxy integration
+  # form-backend port is exposed internally for nginx-proxy to access
+
+networks:
+  vendor-form-network:
+    driver: bridge
+  security_odoo-network:
+    external: true

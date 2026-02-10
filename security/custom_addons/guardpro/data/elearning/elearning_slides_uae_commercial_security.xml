@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- Course 21: UAE Commercial Security Standards - Slides -->
+
+        <!-- Module 1: Mall and Retail Security -->
+        <record id="slide_uae_commercial_m1_mall_security" model="slide.slide">
+            <field name="name">Module 1: Mall and Retail Security Standards</field>
+            <field name="channel_id" ref="elearning_course_uae_commercial_security"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.67</field>
+            <field name="html_content">
+                &lt;h2&gt;Mall and Retail Security Standards in the UAE&lt;/h2&gt;
+                &lt;p&gt;Malls and retail establishments in the UAE present unique security challenges due to high foot traffic, valuable merchandise, and diverse customer demographics. Security personnel must understand specialized protocols for these environments.&lt;/p&gt;
+
+                &lt;h3&gt;Mall Security Challenges&lt;/h3&gt;
+                &lt;p&gt;Modern shopping malls face complex security considerations that differ from traditional retail environments:&lt;/p&gt;
+
+                &lt;h4&gt;High-Risk Areas&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Jewelry Stores:&lt;/strong&gt; High-value items requiring specialized protection&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Electronics Departments:&lt;/strong&gt; Easily concealable, expensive merchandise&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Parking Facilities:&lt;/strong&gt; Isolated areas with vehicle-related security risks&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Food Courts:&lt;/strong&gt; Crowded areas with potential for disturbances&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Service Corridors:&lt;/strong&gt; Back-of-house areas requiring controlled access&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;VIP Areas:&lt;/strong&gt; Exclusive shopping areas needing enhanced security&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Operational Challenges&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Peak Hours Management:&lt;/strong&gt; Handling large crowds during shopping peaks&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Multiple Entry Points:&lt;/strong&gt; Coordinating security across numerous access doors&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Tenant Coordination:&lt;/strong&gt; Working with individual store security requirements&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Event Security:&lt;/strong&gt; Special events and promotions requiring enhanced security&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Evacuation:&lt;/strong&gt; Complex evacuation procedures for large facilities&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Access Control Procedures&lt;/h3&gt;
+                &lt;p&gt;Mall access control requires balancing customer convenience with security requirements:&lt;/p&gt;
+
+                &lt;h4&gt;Public Access Management&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Operating Hours Control:&lt;/strong&gt; Regulate entry during business hours&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Bag and Package Checks:&lt;/strong&gt; Authorized searches of customer belongings&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Prohibited Items Control:&lt;/strong&gt; Prevent entry of dangerous or illegal items&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Access:&lt;/strong&gt; Maintain clear access for emergency services&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Service Access:&lt;/strong&gt; Controlled entry for deliveries and maintenance&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Staff Access Protocols&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Employee Verification:&lt;/strong&gt; ID checks for all store employees&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Service Provider Control:&lt;/strong&gt; Authorized access for cleaners and technicians&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Contractor Management:&lt;/strong&gt; Temporary access for construction and repairs&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Management Access:&lt;/strong&gt; VIP entry for executives and officials&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Retail Loss Prevention&lt;/h3&gt;
+                &lt;p&gt;Preventing retail theft requires a combination of technology, procedures, and personnel vigilance:&lt;/p&gt;
+
+                &lt;h4&gt;Theft Prevention Strategies&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Electronic Article Surveillance (EAS)&lt;/dt&gt;
+                    &lt;dd&gt;Detection systems at exits to identify unpaid merchandise&lt;/dd&gt;
+                    &lt;dt&gt;CCTV Monitoring&lt;/dt&gt;
+                    &lt;dd&gt;Comprehensive camera coverage of sales floors and exits&lt;/dd&gt;
+                    &lt;dt&gt;Plainclothes Security&lt;/dt&gt;
+                    &lt;dd&gt;Undercover officers monitoring suspicious behavior&lt;/dd&gt;
+                    &lt;dt&gt;Customer Service Integration&lt;/dt&gt;
+                    &lt;dd&gt;Staff training in loss prevention awareness&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Theft Response Protocols&lt;/h4&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Detection:&lt;/strong&gt; Identify suspicious behavior through observation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Approach:&lt;/strong&gt; Professional contact with suspected shoplifters&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Verification:&lt;/strong&gt; Confirm theft through CCTV review or witness statements&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Apprehension:&lt;/strong&gt; Temporary detention until police arrive&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Police Handover:&lt;/strong&gt; Transfer custody to law enforcement&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Documentation:&lt;/strong&gt; Complete incident reports for prosecution&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h3&gt;Emergency Response in Malls&lt;/h3&gt;
+                &lt;p&gt;Mall emergencies require specialized response due to the large number of people and complex layout:&lt;/p&gt;
+
+                &lt;h4&gt;Fire Emergency Procedures&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Alarm Activation:&lt;/strong&gt; Immediate notification and evacuation initiation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Zone Isolation:&lt;/strong&gt; Close fire doors and isolate affected areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Crowd Management:&lt;/strong&gt; Direct customers to designated exits&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Coordination:&lt;/strong&gt; Work with mall management and fire services&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication:&lt;/strong&gt; Use public address system for instructions&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Medical Emergencies&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;First Aid Response:&lt;/strong&gt; Immediate assistance at incident location&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Ambulance Coordination:&lt;/strong&gt; Call emergency services and provide location&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Area Security:&lt;/strong&gt; Control access to treatment area&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Witness Management:&lt;/strong&gt; Keep area clear for medical personnel&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Information Relay:&lt;/strong&gt; Provide patient information to medical staff&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Special Event Security&lt;/h3&gt;
+                &lt;p&gt;Mall events and promotions require enhanced security measures:&lt;/p&gt;
+
+                &lt;h4&gt;Event Planning&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Pre-Event Assessment:&lt;/strong&gt; Evaluate security requirements and risks&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Staffing Requirements:&lt;/strong&gt; Additional security personnel for large events&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Control:&lt;/strong&gt; Special entry procedures for event participants&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Planning:&lt;/strong&gt; Specific procedures for event-related incidents&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Vendor Management:&lt;/strong&gt; Security checks for event service providers&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Crowd Management Techniques&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Traffic Flow Control:&lt;/strong&gt; Direct customer movement through designated paths&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Queue Management:&lt;/strong&gt; Organize lines at popular stores or attractions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Bottleneck Prevention:&lt;/strong&gt; Monitor and redirect heavy traffic areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Crowd Control:&lt;/strong&gt; Procedures for sudden large gatherings&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Tenant and Store Security Coordination&lt;/h3&gt;
+                &lt;p&gt;Individual store security must integrate with overall mall security operations:&lt;/p&gt;
+
+                &lt;h4&gt;Store Security Standards&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Opening/Closing Procedures:&lt;/strong&gt; Coordinated with mall security&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Alarm Integration:&lt;/strong&gt; Connected to central security monitoring&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Communication:&lt;/strong&gt; Direct lines to mall security control&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Key Control:&lt;/strong&gt; Secure management of store access keys&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Inter-Store Coordination&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Suspicious Person Reports:&lt;/strong&gt; Share information about potential threats&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Lost Child Procedures:&lt;/strong&gt; Unified response for missing children&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Theft Pattern Sharing:&lt;/strong&gt; Communicate crime trends and prevention&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Response Teams:&lt;/strong&gt; Coordinated action during incidents&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Key Success Factor:&lt;/strong&gt; Mall security requires balancing customer service excellence with uncompromising security standards. Professional, customer-friendly security creates a safe shopping environment that encourages repeat business.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_uae_commercial_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_uae_commercial_security"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <record id="quiz_uae_commercial_m1_q1" model="slide.question">
+            <field name="question">What is a primary security challenge in mall environments?</field>
+            <field name="slide_id" ref="slide_uae_commercial_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_uae_commercial_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_commercial_m1_q1"/>
+            <field name="text_value">High foot traffic and multiple entry points</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_commercial_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_commercial_m1_q1"/>
+            <field name="text_value">Lack of parking spaces</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 2: Office Building and Commercial Complex Security -->
+        <record id="slide_uae_commercial_m2_office_security" model="slide.slide">
+            <field name="name">Module 2: Office Building and Commercial Complex Security</field>
+            <field name="channel_id" ref="elearning_course_uae_commercial_security"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.67</field>
+            <field name="html_content">
+                &lt;h2&gt;Office Building and Commercial Complex Security Standards&lt;/h2&gt;
+                &lt;p&gt;Office buildings and commercial complexes require sophisticated security approaches due to valuable assets, sensitive information, and complex access requirements. Security personnel must balance professional service with comprehensive protection.&lt;/p&gt;
+
+                &lt;h3&gt;Multi-Tenant Facility Challenges&lt;/h3&gt;
+                &lt;p&gt;Commercial buildings with multiple tenants present unique security coordination requirements:&lt;/p&gt;
+
+                &lt;h4&gt;Access Management Complexity&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Tenant-Specific Access:&lt;/strong&gt; Different access rights for various companies&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Visitor Management:&lt;/strong&gt; Controlled entry for clients and service providers&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;After-Hours Access:&lt;/strong&gt; Secure access for cleaning and maintenance crews&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Executive Protection:&lt;/strong&gt; Enhanced security for C-suite and VIP visitors&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Contractor Control:&lt;/strong&gt; Temporary access for construction and repairs&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Operational Coordination&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Tenant Communication:&lt;/strong&gt; Regular updates on security matters&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Procedures:&lt;/strong&gt; Coordinated response across all tenants&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Key Management:&lt;/strong&gt; Secure distribution and tracking of access keys&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Incident Reporting:&lt;/strong&gt; Unified reporting for building-wide incidents&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Corporate Security Standards&lt;/h3&gt;
+                &lt;p&gt;Modern office security integrates technology, procedures, and personnel to create layered protection:&lt;/p&gt;
+
+                &lt;h4&gt;Physical Security Measures&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Perimeter Security&lt;/dt&gt;
+                    &lt;dd&gt;Controlled building access with manned reception and electronic entry systems&lt;/dd&gt;
+                    &lt;dt&gt;Floor-by-Floor Access&lt;/dt&gt;
+                    &lt;dd&gt;Restricted elevator access and floor-specific security protocols&lt;/dd&gt;
+                    &lt;dt&gt;Server Room Protection&lt;/dt&gt;
+                    &lt;dd&gt;Enhanced security for IT infrastructure and data centers&lt;/dd&gt;
+                    &lt;dt&gt;Executive Areas&lt;/dt&gt;
+                    &lt;dd&gt;Specialized protection for boardrooms and executive offices&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Information Security Integration&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Document Security:&lt;/strong&gt; Protection of sensitive documents and confidential information&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;IT Security Support:&lt;/strong&gt; Coordination with cybersecurity measures&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Clean Desk Policy:&lt;/strong&gt; Enforcement of document security procedures&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Visitor Device Control:&lt;/strong&gt; Management of electronic devices in secure areas&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Bank and Financial Institution Security&lt;/h3&gt;
+                &lt;p&gt;Banks and financial institutions require the highest level of security due to regulatory requirements and valuable assets:&lt;/p&gt;
+
+                &lt;h4&gt;Regulatory Compliance&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;SIRA Grade A Requirements:&lt;/strong&gt; Highest security licensing standards&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Central Bank Standards:&lt;/strong&gt; UAE Central Bank security directives&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Anti-Money Laundering:&lt;/strong&gt; Suspicious activity reporting requirements&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Cash Handling Security:&lt;/strong&gt; Protection of cash and negotiable instruments&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Bank-Specific Security Measures&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Vault Security:&lt;/strong&gt; Multi-layered protection for cash reserves&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;ATM Security:&lt;/strong&gt; Protection of automated teller machines&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Night Deposit Security:&lt;/strong&gt; Secure after-hours cash deposits&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Teller Station Security:&lt;/strong&gt; Protection during cash transactions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Customer Safety:&lt;/strong&gt; Protection during bank robberies or threats&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Hotel and Hospitality Security&lt;/h3&gt;
+                &lt;p&gt;Hotels require specialized security approaches due to 24/7 operations and guest privacy considerations:&lt;/p&gt;
+
+                &lt;h4&gt;Guest Security and Privacy&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Room Access Control:&lt;/strong&gt; Key card systems and guest verification&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Privacy Protection:&lt;/strong&gt; Balancing security with guest confidentiality&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Valet Services Security:&lt;/strong&gt; Protection of guest vehicles&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;In-Room Security:&lt;/strong&gt; Emergency response for guest safety&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Operational Security&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Back-of-House Security:&lt;/strong&gt; Protection of kitchen and service areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Loading Dock Control:&lt;/strong&gt; Secure delivery and service access&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Pool and Recreation Areas:&lt;/strong&gt; Safety supervision in public spaces&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Conference Security:&lt;/strong&gt; Protection during business meetings and events&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Parking Facility Security&lt;/h3&gt;
+                &lt;p&gt;Parking facilities connected to commercial buildings require comprehensive security protocols:&lt;/p&gt;
+
+                &lt;h4&gt;Access Control Systems&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Automated Gates:&lt;/strong&gt; Controlled entry and exit with validation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Ticket Systems:&lt;/strong&gt; Verification of parking authorization&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Reserved Parking:&lt;/strong&gt; Protection of designated parking spaces&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Access:&lt;/strong&gt; Clear routes for emergency vehicles&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Patrol and Monitoring&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Regular Patrols:&lt;/strong&gt; Systematic inspection of parking areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;CCTV Coverage:&lt;/strong&gt; Comprehensive camera surveillance&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Lighting Standards:&lt;/strong&gt; Adequate illumination for safety&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Theft Prevention:&lt;/strong&gt; Protection against vehicle break-ins&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Towing Procedures:&lt;/strong&gt; Removal of unauthorized vehicles&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Emergency Response Coordination&lt;/h3&gt;
+                &lt;p&gt;Commercial buildings require sophisticated emergency coordination due to multiple tenants and complex layouts:&lt;/p&gt;
+
+                &lt;h4&gt;Building Evacuation Procedures&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Zone Evacuation:&lt;/strong&gt; Phased evacuation of affected areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Elevator Control:&lt;/strong&gt; Emergency shutdown and stairwell access&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Assembly Areas:&lt;/strong&gt; Designated safe gathering points&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Head Counts:&lt;/strong&gt; Verification of personnel safety&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Re-entry Control:&lt;/strong&gt; Managed return to building&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Multi-Agency Coordination&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Fire Department Liaison:&lt;/strong&gt; Direct coordination with Dubai Civil Defense&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Police Coordination:&lt;/strong&gt; Integration with Dubai Police response&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Medical Services:&lt;/strong&gt; Ambulance access and medical emergency response&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Building Management:&lt;/strong&gt; Coordination with property management&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Tenant Representatives:&lt;/strong&gt; Communication with company safety officers&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Technology Integration&lt;/h3&gt;
+                &lt;p&gt;Modern commercial security relies heavily on integrated technology systems:&lt;/p&gt;
+
+                &lt;h4&gt;Security Systems Integration&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Control Systems:&lt;/strong&gt; Integrated card readers and biometric systems&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;CCTV Networks:&lt;/strong&gt; IP-based surveillance with remote monitoring&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Intrusion Detection:&lt;/strong&gt; Alarm systems integrated with central monitoring&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Communication:&lt;/strong&gt; Public address and mass notification systems&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Mobile Applications:&lt;/strong&gt; Security personnel access to building systems&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Data Security Measures&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Network Security:&lt;/strong&gt; Protection of building management systems&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Information Privacy:&lt;/strong&gt; Protection of tenant and visitor data&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Digital Forensics:&lt;/strong&gt; Preservation of electronic evidence&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Cybersecurity Coordination:&lt;/strong&gt; Integration with IT security measures&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Professional Standard:&lt;/strong&gt; Commercial security requires balancing the highest levels of protection with customer service excellence. Security personnel must be invisible protectors who ensure safety without disrupting business operations.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_uae_commercial_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_uae_commercial_security"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <record id="quiz_uae_commercial_m2_q1" model="slide.question">
+            <field name="question">What is a key challenge in multi-tenant commercial buildings?</field>
+            <field name="slide_id" ref="slide_uae_commercial_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_uae_commercial_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_commercial_m2_q1"/>
+            <field name="text_value">Coordinating different tenant access requirements</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_commercial_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_commercial_m2_q1"/>
+            <field name="text_value">Managing parking spaces</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Final Assessment -->
+        <record id="slide_uae_commercial_final" model="slide.slide">
+            <field name="name">Final Assessment: UAE Commercial Security Standards</field>
+            <field name="channel_id" ref="elearning_course_uae_commercial_security"/>
+            <field name="sequence">70</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.17</field>
+            <field name="html_content">
+                &lt;h2&gt;Final Examination: UAE Commercial Security Standards&lt;/h2&gt;
+                &lt;p&gt;&lt;strong&gt;Assessment Overview:&lt;/strong&gt;&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;30 multiple-choice questions&lt;/li&gt;
+                    &lt;li&gt;Covers mall security, office buildings, and commercial facilities&lt;/li&gt;
+                    &lt;li&gt;85% passing score required&lt;/li&gt;
+                    &lt;li&gt;60 minutes time limit&lt;/li&gt;
+                    &lt;li&gt;Can retake once if needed&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;p&gt;&lt;strong&gt;Key Topics Covered:&lt;/strong&gt;&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Mall and retail security standards&lt;/li&gt;
+                    &lt;li&gt;Office building access control&lt;/li&gt;
+                    &lt;li&gt;Bank and financial institution security&lt;/li&gt;
+                    &lt;li&gt;Hotel and hospitality security protocols&lt;/li&gt;
+                    &lt;li&gt;Emergency response coordination&lt;/li&gt;
+                    &lt;li&gt;Technology integration in commercial security&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;p&gt;Upon passing, you'll receive your UAE Commercial Security Standards certification, demonstrating your expertise in protecting commercial facilities in the UAE!&lt;/p&gt;
+            </field>
+        </record>
+
+    </data>
+</odoo>

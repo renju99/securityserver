@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="guardpro.EmergencyBroadcastPopup">
+        <!-- Show overlay if there are any broadcasts -->
+        <div t-if="state and state.broadcasts and Array.isArray(state.broadcasts) and state.broadcasts.length > 0" class="o_emergency_broadcast_overlay">
+            <!-- Show the first (most recent) broadcast -->
+            <t t-set="broadcast" t-value="state.broadcasts and state.broadcasts.length > 0 ? state.broadcasts[0] : null"/>
+            <div t-if="broadcast" class="o_emergency_broadcast_modal">
+                <!-- Animated Alert Icon -->
+                <div class="o_emergency_icon_container">
+                    <i class="fa fa-exclamation-triangle fa-5x text-danger o_emergency_icon_pulse"/>
+                </div>
+
+                <!-- Alert Header -->
+                <div t-attf-class="o_emergency_header {{getPriorityClass(broadcast.priority)}}">
+                    <h2 class="text-white text-center mb-0">
+                        <i class="fa fa-warning"/> <t t-esc="broadcast.title"/>
+                    </h2>
+                </div>
+
+                <!-- Message Body -->
+                <div class="o_emergency_body">
+                    <div class="alert alert-danger" role="alert">
+                        <strong>🚨 EMERGENCY ALERT</strong>
+                    </div>
+                    <div class="o_emergency_message">
+                        <p style="font-size: 16px; line-height: 1.6; white-space: pre-wrap;">
+                            <t t-esc="broadcast.message"/>
+                        </p>
+                    </div>
+                    <div class="text-muted mt-3">
+                        <small>
+                            <i class="fa fa-clock-o"/> Sent: <t t-esc="formatDate(broadcast.sent_date)"/>
+                        </small>
+                    </div>
+                    
+                    <!-- Show count if multiple broadcasts -->
+                    <div t-if="state.broadcasts.length > 1" class="alert alert-warning mt-3">
+                        <small>
+                            <i class="fa fa-info-circle"/> 
+                            You have <strong><t t-esc="state.broadcasts.length"/> emergency messages</strong> to acknowledge.
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="o_emergency_footer">
+                    <button class="btn btn-danger btn-lg btn-block" 
+                            t-on-click="() => this.onAcknowledge(broadcast)">
+                        <i class="fa fa-check-circle"/> ACKNOWLEDGE AND CLOSE
+                    </button>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>
+

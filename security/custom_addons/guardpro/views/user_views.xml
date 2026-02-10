@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        
+        <!-- Extend User Form to Add Assigned Sites -->
+        <record id="res_users_form_view_guardpro" model="ir.ui.view">
+            <field name="name">res.users.form.guardpro</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form"/>
+            <field name="priority" eval="20"/>
+            <field name="arch" type="xml">
+                <!-- Add Assigned Sites field in Access Rights tab -->
+                <xpath expr="//page[@name='access_rights']" position="inside">
+                    <group string="Guard Pro Site Access">
+                        <div class="alert alert-info mb-3" role="status">
+                            <p><strong>How to Configure User Access:</strong></p>
+                            <ol class="mb-2">
+                                <li>
+                                    <strong>User Type:</strong> 
+                                    <ul>
+                                        <li><strong>Guard Users:</strong> Set to "Portal" (guards access mobile portal)</li>
+                                        <li><strong>All Other Users:</strong> Set to "Internal User" (Client User, Supervisor, Manager, Administrator)</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <strong>Guard Pro Group:</strong> Assign the appropriate group:
+                                    <ul>
+                                        <li><strong>Guard User:</strong> Portal user for guards (mobile portal access only)</li>
+                                        <li><strong>Client User:</strong> Internal user for clients viewing their sites (read-only backend access)</li>
+                                        <li><strong>Supervisor:</strong> Internal user to manage shifts and incidents at assigned sites</li>
+                                        <li><strong>Manager:</strong> Internal user to create and manage all operations at assigned sites</li>
+                                        <li><strong>Administrator:</strong> Internal user with full system access to all sites</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Site Assignment:</strong> Select sites below (leave empty for Administrators to see all sites)</li>
+                                <li>Save the user - they will only see data from their assigned sites</li>
+                            </ol>
+                            <p class="mb-0">
+                                <em><strong>Important:</strong> This is the ONLY place to manage site assignments for all users. Site assignments control what data users can access. Guards are portal users with mobile-only access. Use the "Create Guard User" wizard for simplified guard creation.</em>
+                            </p>
+                        </div>
+                        <field name="site_ids" 
+                               widget="many2many_tags" 
+                               placeholder="Select sites this user can access..."
+                               help="Sites assigned to this user. Leave empty for Administrators (they see all sites). Users only see records (shifts, incidents, checkpoints, tours, etc.) related to their assigned sites."/>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+        
+    </data>
+</odoo>

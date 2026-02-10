@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Shift Report PDF Template -->
+    <template id="shift_report_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h2 class="text-center">
+                                    <strong>SHIFT REPORT</strong>
+                                </h2>
+                                <h4 class="text-center text-muted">
+                                    <span t-field="doc.name"/>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <div class="row mb-3">
+                            <div class="col-12 text-center">
+                                <span class="badge badge-pill" 
+                                      t-att-class="{'badge-success': doc.state == 'completed',
+                                                    'badge-primary': doc.state == 'in_progress',
+                                                    'badge-secondary': doc.state == 'scheduled',
+                                                    'badge-danger': doc.state == 'cancelled'}">
+                                    <t t-esc="doc.state.replace('_', ' ').upper()"/>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Shift Information -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4><strong>Shift Details</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="25%"><strong>Guard:</strong></td>
+                                        <td width="75%"><span t-field="doc.guard_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Site:</strong></td>
+                                        <td><span t-field="doc.site_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Client:</strong></td>
+                                        <td><span t-field="doc.client_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Date:</strong></td>
+                                        <td><span t-field="doc.date" t-options='{"widget": "date"}'/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Shift Type:</strong></td>
+                                        <td><span t-field="doc.shift_type"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Start Time:</strong></td>
+                                        <td><span t-field="doc.start_time" t-options='{"widget": "datetime"}'/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>End Time:</strong></td>
+                                        <td><span t-field="doc.end_time" t-options='{"widget": "datetime"}'/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Duration:</strong></td>
+                                        <td><t t-esc="doc.duration"/> hours</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Actual Check-in/out Times -->
+                        <div class="row mb-3" t-if="doc.actual_start_time or doc.actual_end_time">
+                            <div class="col-12">
+                                <h4><strong>Actual Times</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr t-if="doc.actual_start_time">
+                                        <td width="25%"><strong>Actual Check-in:</strong></td>
+                                        <td width="75%"><span t-field="doc.actual_start_time" t-options='{"widget": "datetime"}'/></td>
+                                    </tr>
+                                    <tr t-if="doc.actual_end_time">
+                                        <td><strong>Actual Check-out:</strong></td>
+                                        <td><span t-field="doc.actual_end_time" t-options='{"widget": "datetime"}'/></td>
+                                    </tr>
+                                    <tr t-if="doc.actual_duration">
+                                        <td><strong>Actual Duration:</strong></td>
+                                        <td><t t-esc="doc.actual_duration"/> hours</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Assigned Tour -->
+                        <div class="row mb-3" t-if="doc.tour_id">
+                            <div class="col-12">
+                                <h4><strong>Assigned Tour</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="25%"><strong>Tour Name:</strong></td>
+                                        <td width="75%"><span t-field="doc.tour_id.name"/></td>
+                                    </tr>
+                                    <tr t-if="doc.tour_id.description">
+                                        <td><strong>Description:</strong></td>
+                                        <td><span t-field="doc.tour_id.description"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Shift Notes -->
+                        <div class="row mb-3" t-if="doc.notes">
+                            <div class="col-12">
+                                <h4><strong>Shift Notes</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.notes"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Incidents During Shift -->
+                        <div class="row mb-3" t-if="doc.incident_ids">
+                            <div class="col-12">
+                                <h4><strong>Incidents Reported</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Incident #</th>
+                                            <th>Title</th>
+                                            <th>Category</th>
+                                            <th>Severity</th>
+                                            <th>Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="doc.incident_ids" t-as="incident">
+                                            <td><span t-field="incident.name"/></td>
+                                            <td><span t-field="incident.title"/></td>
+                                            <td><span t-field="incident.category_id.name"/></td>
+                                            <td>
+                                                <span class="badge" 
+                                                      t-att-class="{'badge-danger': incident.severity in ['high', 'critical'],
+                                                                    'badge-warning': incident.severity == 'medium',
+                                                                    'badge-info': incident.severity == 'low'}">
+                                                    <t t-esc="incident.severity"/>
+                                                </span>
+                                            </td>
+                                            <td><span t-field="incident.incident_datetime" t-options='{"widget": "datetime"}'/></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Tour Logs -->
+                        <div class="row mb-3" t-if="doc.tour_log_ids">
+                            <div class="col-12">
+                                <h4><strong>Tour Logs</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>Status</th>
+                                            <th>Checkpoints</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="doc.tour_log_ids" t-as="log">
+                                            <td><span t-field="log.start_time" t-options='{"widget": "datetime"}'/></td>
+                                            <td>
+                                                <span class="badge" 
+                                                      t-att-class="{'badge-success': log.status == 'completed',
+                                                                    'badge-primary': log.status == 'in_progress',
+                                                                    'badge-warning': log.status == 'incomplete'}">
+                                                    <t t-esc="log.status"/>
+                                                </span>
+                                            </td>
+                                            <td><t t-esc="len(log.scan_ids)"/> scanned</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Footer with signature line -->
+                        <div class="row mt-5">
+                            <div class="col-6">
+                                <p>__________________________<br/>
+                                   Guard Signature
+                                </p>
+                            </div>
+                            <div class="col-6">
+                                <p>__________________________<br/>
+                                   Supervisor Signature
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Action -->
+    <record id="action_report_shift" model="ir.actions.report">
+        <field name="name">Shift Report</field>
+        <field name="model">guard.shift</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.shift_report_pdf_template</field>
+        <field name="report_file">guardpro.shift_report_pdf_template</field>
+        <field name="print_report_name">'Shift_Report_%s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_guard_shift"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>
+

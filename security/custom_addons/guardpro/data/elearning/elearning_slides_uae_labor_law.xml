@@ -1,0 +1,646 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- Course 19: UAE Labor Law for Security Personnel - Slides -->
+
+        <!-- Module 1: UAE Labor Law Fundamentals -->
+        <record id="slide_uae_labor_m1_fundamentals" model="slide.slide">
+            <field name="name">Module 1: UAE Labor Law Fundamentals</field>
+            <field name="channel_id" ref="elearning_course_uae_labor_law"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.67</field>
+            <field name="html_content">
+                &lt;h2&gt;Understanding UAE Federal Labor Law&lt;/h2&gt;
+                &lt;p&gt;The UAE Federal Labor Law (Federal Law No. 33 of 2021) governs employment relationships throughout the UAE. Security personnel must understand their rights, obligations, and the legal framework that governs their working conditions and employment relationships.&lt;/p&gt;
+
+                &lt;h3&gt;The Legal Framework&lt;/h3&gt;
+                &lt;p&gt;UAE labor law establishes the fundamental principles governing employment relationships:&lt;/p&gt;
+
+                &lt;h4&gt;Core Principles&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Contractual Freedom:&lt;/strong&gt; Employment based on mutual agreement between parties&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Worker Protection:&lt;/strong&gt; Safeguards for employee rights and fair treatment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Employer Obligations:&lt;/strong&gt; Responsibilities toward employees and working conditions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Dispute Resolution:&lt;/strong&gt; Mechanisms for addressing employment conflicts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Compliance Requirements:&lt;/strong&gt; Standards for lawful employment practices&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Law Application Scope&lt;/h4&gt;
+                &lt;p&gt;The Federal Labor Law applies to most employment relationships in the UAE, with some exceptions:&lt;/p&gt;
+
+                &lt;h5&gt;Covered Employees&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Private sector employees&lt;/li&gt;
+                    &lt;li&gt;Workers in commercial establishments&lt;/li&gt;
+                    &lt;li&gt;Service industry employees&lt;/li&gt;
+                    &lt;li&gt;Security personnel&lt;/li&gt;
+                    &lt;li&gt;Construction and industrial workers&lt;/li&gt;
+                    &lt;li&gt;Office and administrative staff&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h5&gt;Exempt Categories&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Government employees&lt;/li&gt;
+                    &lt;li&gt;Domestic workers&lt;/li&gt;
+                    &lt;li&gt;Military personnel&lt;/li&gt;
+                    &lt;li&gt;Agricultural workers (some provisions)&lt;/li&gt;
+                    &lt;li&gt;Family business employees&lt;/li&gt;
+                    &lt;li&gt;Company directors and senior management&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Employment Contract Requirements&lt;/h3&gt;
+                &lt;p&gt;The employment contract forms the legal foundation of the working relationship and must meet specific requirements:&lt;/p&gt;
+
+                &lt;h4&gt;Mandatory Contract Elements&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Parties to the Contract&lt;/dt&gt;
+                    &lt;dd&gt;Full names and identification details of employer and employee&lt;/dd&gt;
+                    &lt;dt&gt;Job Description&lt;/dt&gt;
+                    &lt;dd&gt;Clear description of duties, responsibilities, and work location&lt;/dd&gt;
+                    &lt;dt&gt;Compensation Details&lt;/dt&gt;
+                    &lt;dd&gt;Basic salary, allowances, overtime rates, and payment schedule&lt;/dd&gt;
+                    &lt;dt&gt;Working Hours&lt;/dt&gt;
+                    &lt;dd&gt;Daily and weekly working hours, break periods, and shift schedules&lt;/dd&gt;
+                    &lt;dt&gt;Contract Duration&lt;/dt&gt;
+                    &lt;dd&gt;Fixed-term or indefinite period with renewal conditions&lt;/dd&gt;
+                    &lt;dt&gt;Termination Conditions&lt;/dt&gt;
+                    &lt;dd&gt;Notice periods, termination procedures, and severance entitlements&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Contract Language Requirements&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Arabic Language:&lt;/strong&gt; Primary contract language (Arabic)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Translation Option:&lt;/strong&gt; English translation may be provided&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Clear Language:&lt;/strong&gt; Simple, understandable terms without ambiguity&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Employee Acknowledgment:&lt;/strong&gt; Signature confirming understanding&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Legal Compliance:&lt;/strong&gt; Must not violate UAE labor law provisions&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Probationary Period Regulations&lt;/h3&gt;
+                &lt;p&gt;The probationary period allows both parties to assess the employment relationship:&lt;/p&gt;
+
+                &lt;h4&gt;Probationary Period Limits&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Maximum Duration:&lt;/strong&gt; 6 months for regular employment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Extended Probation:&lt;/strong&gt; Up to 12 months for specialized technical roles&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Mutual Assessment:&lt;/strong&gt; Both employer and employee can terminate during probation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Notice Requirements:&lt;/strong&gt; 30 days' notice for termination during probation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Benefits Application:&lt;/strong&gt; Full labor law protections apply during probation&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Probationary Rights&lt;/h4&gt;
+                &lt;p&gt;During probation, employees retain most labor law protections:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Right to fair compensation&lt;/li&gt;
+                    &lt;li&gt;Protection from discrimination&lt;/li&gt;
+                    &lt;li&gt;Safe working conditions&lt;/li&gt;
+                    &lt;li&gt;Grievance procedures&lt;/li&gt;
+                    &lt;li&gt;Contractual entitlements&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Worker Classification&lt;/h3&gt;
+                &lt;p&gt;The law distinguishes between different categories of workers with varying entitlements:&lt;/p&gt;
+
+                &lt;h4&gt;Employee Categories&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Permanent Employees&lt;/dt&gt;
+                    &lt;dd&gt;Indefinite-term contracts with full labor law protections&lt;/dd&gt;
+                    &lt;dt&gt;Fixed-Term Employees&lt;/dt&gt;
+                    &lt;dd&gt;Limited-duration contracts with most protections&lt;/dd&gt;
+                    &lt;dt&gt;Part-Time Employees&lt;/dt&gt;
+                    &lt;dd&gt;Reduced hours with proportional benefits and protections&lt;/dd&gt;
+                    &lt;dt&gt;Casual Workers&lt;/dt&gt;
+                    &lt;dd&gt;Limited protections based on hours worked&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Security Personnel Classification&lt;/h4&gt;
+                &lt;p&gt;Security guards typically fall under regular employee classification with specific considerations:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Shift Work:&lt;/strong&gt; Special provisions for rotating shifts and night work&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Overtime Provisions:&lt;/strong&gt; Enhanced overtime pay for security work&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Rest Requirements:&lt;/strong&gt; Adequate rest between shifts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Health &amp; Safety:&lt;/strong&gt; Specialized safety requirements for security personnel&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Critical Note:&lt;/strong&gt; Understanding your employment status and contract terms is essential for protecting your labor rights and ensuring compliance with UAE labor law.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_uae_labor_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_uae_labor_law"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <record id="quiz_uae_labor_m1_q1" model="slide.question">
+            <field name="question">What is the maximum probationary period for regular employment?</field>
+            <field name="slide_id" ref="slide_uae_labor_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_uae_labor_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_labor_m1_q1"/>
+            <field name="text_value">6 months</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_labor_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_labor_m1_q1"/>
+            <field name="text_value">3 months</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_uae_labor_m1_q2" model="slide.question">
+            <field name="question">Which language must employment contracts be written in?</field>
+            <field name="slide_id" ref="slide_uae_labor_m1_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_uae_labor_m1_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_labor_m1_q2"/>
+            <field name="text_value">Arabic</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_labor_m1_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_labor_m1_q2"/>
+            <field name="text_value">English</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 2: Working Hours and Leave Entitlements -->
+        <record id="slide_uae_labor_m2_hours_leave" model="slide.slide">
+            <field name="name">Module 2: Working Hours and Leave Entitlements</field>
+            <field name="channel_id" ref="elearning_course_uae_labor_law"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.83</field>
+            <field name="html_content">
+                &lt;h2&gt;Working Hours, Overtime, and Leave Entitlements&lt;/h2&gt;
+                &lt;p&gt;UAE labor law establishes clear standards for working hours, overtime compensation, and leave entitlements to ensure worker well-being and fair compensation. Security personnel often work non-standard hours, making understanding these provisions particularly important.&lt;/p&gt;
+
+                &lt;h3&gt;Standard Working Hours&lt;/h3&gt;
+                &lt;p&gt;The law defines maximum working hours to prevent employee exhaustion and ensure work-life balance:&lt;/p&gt;
+
+                &lt;h4&gt;Daily Working Limits&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Maximum Daily Hours:&lt;/strong&gt; 8 hours per day (9 hours for security personnel)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Break Requirements:&lt;/strong&gt; 1 hour break after 5 consecutive hours of work&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Rest Between Shifts:&lt;/strong&gt; Minimum 12 hours rest between work periods&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Weekly Rest:&lt;/strong&gt; One full day off per week (usually Friday)&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Weekly Working Limits&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Standard Week:&lt;/strong&gt; Maximum 48 hours per week&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Security Personnel:&lt;/strong&gt; Maximum 56 hours per week due to shift nature&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Average Calculation:&lt;/strong&gt; Based on 3-month rolling average&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Overtime Triggers:&lt;/strong&gt; Hours worked beyond standard limits&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Overtime Compensation&lt;/h3&gt;
+                &lt;p&gt;Overtime work requires premium pay rates to compensate for additional hours worked:&lt;/p&gt;
+
+                &lt;h4&gt;Overtime Pay Rates&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Normal Overtime (First 2 hours)&lt;/dt&gt;
+                    &lt;dd&gt;125% of basic hourly rate&lt;/dd&gt;
+                    &lt;dt&gt;Extended Overtime (Beyond 2 hours)&lt;/dt&gt;
+                    &lt;dd&gt;150% of basic hourly rate&lt;/dd&gt;
+                    &lt;dt&gt;Public Holiday Overtime&lt;/dt&gt;
+                    &lt;dd&gt;200% of basic hourly rate&lt;/dd&gt;
+                    &lt;dt&gt;Friday Overtime&lt;/dt&gt;
+                    &lt;dd&gt;150% of basic hourly rate&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Overtime Eligibility&lt;/h4&gt;
+                &lt;p&gt;Not all additional hours qualify as overtime. Overtime applies when:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Daily hours exceed 8 (or 9 for security)&lt;/li&gt;
+                    &lt;li&gt;Weekly hours exceed 48 (or 56 for security)&lt;/li&gt;
+                    &lt;li&gt;Work performed on designated rest days&lt;/li&gt;
+                    &lt;li&gt;Work during public holidays&lt;/li&gt;
+                    &lt;li&gt;Call-back work between scheduled shifts&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Security Personnel Overtime Provisions&lt;/h4&gt;
+                &lt;p&gt;Due to the nature of security work, special provisions apply:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Extended Daily Limit:&lt;/strong&gt; 9 hours per day instead of 8&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Extended Weekly Limit:&lt;/strong&gt; 56 hours per week instead of 48&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Shift Work Compensation:&lt;/strong&gt; Additional allowances for night shifts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;On-Call Requirements:&lt;/strong&gt; Compensation for standby duties&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Annual Leave Entitlements&lt;/h3&gt;
+                &lt;p&gt;Annual leave provides essential rest and recuperation for employees:&lt;/p&gt;
+
+                &lt;h4&gt;Basic Annual Leave&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;First Year of Service&lt;/dt&gt;
+                    &lt;dd&gt;30 calendar days (2.5 days per month)&lt;/dd&gt;
+                    &lt;dt&gt;Years 2-5 of Service&lt;/dt&gt;
+                    &lt;dd&gt;36 calendar days (3 days per month)&lt;/dd&gt;
+                    &lt;dt&gt;Beyond 5 Years&lt;/dt&gt;
+                    &lt;dd&gt;42 calendar days (3.5 days per month)&lt;/dd&gt;
+                    &lt;dt&gt;Sick Leave Integration&lt;/dt&gt;
+                    &lt;dd&gt;Up to 15 days of sick leave can be from annual leave&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Leave Scheduling&lt;/h4&gt;
+                &lt;p&gt;Annual leave must be scheduled to minimize disruption to operations:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Employer Discretion:&lt;/strong&gt; Employer determines leave scheduling&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Advance Notice:&lt;/strong&gt; 14 days' notice required for leave requests&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Peak Period Restrictions:&lt;/strong&gt; May limit leave during busy periods&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Carry Forward Limit:&lt;/strong&gt; Maximum 2 years of accumulated leave&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Cash Compensation:&lt;/strong&gt; Unused leave paid out upon termination&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Sick Leave and Medical Leave&lt;/h3&gt;
+                &lt;p&gt;Sick leave ensures employees can attend to health needs without financial penalty:&lt;/p&gt;
+
+                &lt;h4&gt;Sick Leave Provisions&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Paid Sick Leave:&lt;/strong&gt; 90 calendar days per year with full pay&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Medical Certificate:&lt;/strong&gt; Required after 3 consecutive days of absence&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Hospitalization:&lt;/strong&gt; Additional 90 days for serious illness&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Work-Related Illness:&lt;/strong&gt; Full pay for work-related medical conditions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Chronic Conditions:&lt;/strong&gt; Extended leave for long-term health issues&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Sick Leave Procedures&lt;/h4&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Notification:&lt;/strong&gt; Inform employer immediately of illness&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Medical Certificate:&lt;/strong&gt; Obtain certificate from licensed physician&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Submission:&lt;/strong&gt; Provide certificate within 3 days of return&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Documentation:&lt;/strong&gt; Keep records of all medical documentation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Follow-up:&lt;/strong&gt; Comply with any return-to-work requirements&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h3&gt;Maternity and Paternity Leave&lt;/h3&gt;
+                &lt;p&gt;The law provides protections for family responsibilities:&lt;/p&gt;
+
+                &lt;h4&gt;Maternity Leave&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Duration:&lt;/strong&gt; 60 calendar days with full pay&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Extension Option:&lt;/strong&gt; Additional 30 days without pay&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Prenatal Care:&lt;/strong&gt; Paid time for medical appointments&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Job Protection:&lt;/strong&gt; Cannot be terminated during maternity leave&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Health Insurance:&lt;/strong&gt; Continued coverage during leave&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Paternity Leave&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Duration:&lt;/strong&gt; 5 working days with full pay&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Timing:&lt;/strong&gt; Within 30 days of child's birth&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Documentation:&lt;/strong&gt; Birth certificate required&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Job Protection:&lt;/strong&gt; Employment security during leave&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Public Holiday Entitlements&lt;/h3&gt;
+                &lt;p&gt;Employees receive paid time off for official UAE public holidays:&lt;/p&gt;
+
+                &lt;h4&gt;National Holidays&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Eid al-Fitr:&lt;/strong&gt; 3 days (dates vary annually)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Eid al-Adha:&lt;/strong&gt; 4 days (dates vary annually)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;National Day:&lt;/strong&gt; December 2-3 (2 days)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Isra and Mi'raj:&lt;/strong&gt; 1 day&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Prophet's Birthday:&lt;/strong&gt; 1 day&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Ascension of Prophet:&lt;/strong&gt; 1 day&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Holiday Pay Provisions&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Full Pay:&lt;/strong&gt; Regular pay for public holidays&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Service Requirements:&lt;/strong&gt; Must have completed 3 months of service&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Work on Holidays:&lt;/strong&gt; Double pay plus day off in lieu&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Friday Work:&lt;/strong&gt; Additional pay for working weekly day off&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Leave Records and Administration&lt;/h3&gt;
+                &lt;p&gt;Proper leave administration ensures accurate tracking and compliance:&lt;/p&gt;
+
+                &lt;h4&gt;Employer Responsibilities&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Record Keeping:&lt;/strong&gt; Maintain accurate leave records&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Advance Notice:&lt;/strong&gt; Notify employees of leave balances&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Approval Process:&lt;/strong&gt; Fair and consistent leave approval&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Pay Calculation:&lt;/strong&gt; Accurate leave pay computation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Carry Forward Limits:&lt;/strong&gt; Enforce maximum accumulation limits&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Employee Responsibilities&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Advance Planning:&lt;/strong&gt; Request leave in accordance with policy&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Documentation:&lt;/strong&gt; Provide required medical certificates&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Return Compliance:&lt;/strong&gt; Return to work as scheduled&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication:&lt;/strong&gt; Keep employer informed of status&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Key Principle:&lt;/strong&gt; Understanding your entitlements and obligations regarding working hours and leave is essential for maintaining fair employment conditions and protecting your labor rights.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_uae_labor_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_uae_labor_law"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <record id="quiz_uae_labor_m2_q1" model="slide.question">
+            <field name="question">What is the maximum weekly working hours for security personnel?</field>
+            <field name="slide_id" ref="slide_uae_labor_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_uae_labor_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_labor_m2_q1"/>
+            <field name="text_value">56 hours</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_labor_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_labor_m2_q1"/>
+            <field name="text_value">48 hours</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_uae_labor_m2_q2" model="slide.question">
+            <field name="question">How many days of annual leave do employees get after 5 years of service?</field>
+            <field name="slide_id" ref="slide_uae_labor_m2_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_uae_labor_m2_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_labor_m2_q2"/>
+            <field name="text_value">42 days</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_labor_m2_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_labor_m2_q2"/>
+            <field name="text_value">36 days</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 3: Termination and End of Service -->
+        <record id="slide_uae_labor_m3_termination" model="slide.slide">
+            <field name="name">Module 3: Termination and End of Service Benefits</field>
+            <field name="channel_id" ref="elearning_course_uae_labor_law"/>
+            <field name="sequence">30</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.67</field>
+            <field name="html_content">
+                &lt;h2&gt;Termination Procedures and End of Service Benefits&lt;/h2&gt;
+                &lt;p&gt;Understanding termination procedures and end-of-service benefits is crucial for security personnel. The UAE labor law provides specific protections and entitlements when employment relationships end, whether through resignation, termination, or other circumstances.&lt;/p&gt;
+
+                &lt;h3&gt;Termination Categories&lt;/h3&gt;
+                &lt;p&gt;The law recognizes different types of employment termination with varying procedures and entitlements:&lt;/p&gt;
+
+                &lt;h4&gt;Termination by Mutual Agreement&lt;/h4&gt;
+                &lt;p&gt;When both employer and employee agree to end the employment relationship:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Written Agreement:&lt;/strong&gt; Must be documented in writing&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Settlement Terms:&lt;/strong&gt; Agreed upon final payments and benefits&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Gratuity Calculation:&lt;/strong&gt; Based on actual service period&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;No Notice Required:&lt;/strong&gt; Immediate effect upon agreement&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Full Entitlements:&lt;/strong&gt; All accrued benefits must be paid&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Termination by Employer&lt;/h4&gt;
+                &lt;p&gt;When the employer initiates termination for business reasons or performance issues:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Valid Reasons Required:&lt;/strong&gt; Cannot terminate without justifiable cause&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Notice Period:&lt;/strong&gt; 30 days for employees with less than 5 years service&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Extended Notice:&lt;/strong&gt; 60-90 days for employees with 5+ years service&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Severance Pay:&lt;/strong&gt; Gratuity payment based on service length&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Appeal Rights:&lt;/strong&gt; Right to challenge unfair termination&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Termination by Employee (Resignation)&lt;/h4&gt;
+                &lt;p&gt;When the employee chooses to end the employment relationship:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Written Notice:&lt;/strong&gt; 30 days' notice required&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Immediate Resignation:&lt;/strong&gt; Possible with forfeiture of notice pay&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Gratuity Entitlement:&lt;/strong&gt; Full gratuity if notice period served&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Final Settlement:&lt;/strong&gt; All accrued benefits and unused leave&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Exit Interview:&lt;/strong&gt; Optional feedback session&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Notice Period Requirements&lt;/h3&gt;
+                &lt;p&gt;Notice periods provide transition time and protect both parties' interests:&lt;/p&gt;
+
+                &lt;h4&gt;Notice Period Duration&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Employees with &amp;lt; 5 years service&lt;/dt&gt;
+                    &lt;dd&gt;30 calendar days' notice required&lt;/dd&gt;
+                    &lt;dt&gt;Employees with 5-10 years service&lt;/dt&gt;
+                    &lt;dd&gt;60 calendar days' notice required&lt;/dd&gt;
+                    &lt;dt&gt;Employees with &amp;gt; 10 years service&lt;/dt&gt;
+                    &lt;dd&gt;90 calendar days' notice required&lt;/dd&gt;
+                    &lt;dt&gt;Probationary Period&lt;/dt&gt;
+                    &lt;dd&gt;30 days' notice for termination during probation&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Notice Period Obligations&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Continued Employment:&lt;/strong&gt; Employee remains employed during notice period&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Full Pay:&lt;/strong&gt; Regular salary and benefits continue&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Work Requirements:&lt;/strong&gt; Must perform assigned duties&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Garden Leave Option:&lt;/strong&gt; Employer may excuse attendance while paying salary&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Early Release:&lt;/strong&gt; Mutual agreement may shorten notice period&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Gratuity (End of Service Benefit)&lt;/h3&gt;
+                &lt;p&gt;Gratuity is a mandatory end-of-service benefit calculated based on service length and final salary:&lt;/p&gt;
+
+                &lt;h4&gt;Gratuity Calculation Formula&lt;/h4&gt;
+                &lt;p&gt;&lt;strong&gt;Gratuity = (Last Basic Salary × Number of Service Years × 21.75) ÷ 30&lt;/strong&gt;&lt;/p&gt;
+
+                &lt;h4&gt;Service Year Categories&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;First 5 Years:&lt;/strong&gt; 21 days' salary per year&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Years 6-10:&lt;/strong&gt; 30 days' salary per year&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Beyond 10 Years:&lt;/strong&gt; 30 days' salary per year&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Pro-rated Calculation:&lt;/strong&gt; Partial years calculated proportionally&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Gratuity Eligibility&lt;/h4&gt;
+                &lt;p&gt;Gratuity is payable when employment ends after continuous service of:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;One Year or More:&lt;/strong&gt; For termination by employer&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Two Years or More:&lt;/strong&gt; For resignation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Five Years or More:&lt;/strong&gt; For unlimited contracts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Immediate Payment:&lt;/strong&gt; Due within 14 days of termination&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Final Settlement Components&lt;/h3&gt;
+                &lt;p&gt;The final settlement includes all accrued entitlements and benefits:&lt;/p&gt;
+
+                &lt;h4&gt;Mandatory Payments&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Outstanding Salary&lt;/dt&gt;
+                    &lt;dd&gt;Pay for all work performed up to termination date&lt;/dd&gt;
+                    &lt;dt&gt;Unused Annual Leave&lt;/dt&gt;
+                    &lt;dd&gt;Payment for accumulated but unused annual leave&lt;/dd&gt;
+                    &lt;dt&gt;Overtime Pay&lt;/dt&gt;
+                    &lt;dd&gt;Payment for all overtime hours worked&lt;/dd&gt;
+                    &lt;dt&gt;Gratuity Payment&lt;/dt&gt;
+                    &lt;dd&gt;End-of-service benefit based on service length&lt;/dd&gt;
+                    &lt;dt&gt;Notice Pay&lt;/dt&gt;
+                    &lt;dd&gt;Salary for notice period if not worked&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Additional Entitlements&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Airfare Tickets:&lt;/strong&gt; Return flight for expatriate employees&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Savings from Salary:&lt;/strong&gt; Return of any salary deductions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Work Equipment:&lt;/strong&gt; Return of company property&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Experience Certificates:&lt;/strong&gt; Official service letter&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Medical Clearance:&lt;/strong&gt; Final medical examination if required&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Unfair Dismissal Protections&lt;/h3&gt;
+                &lt;p&gt;The law provides strong protections against arbitrary or unfair termination:&lt;/p&gt;
+
+                &lt;h4&gt;Prohibited Termination Reasons&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Discrimination:&lt;/strong&gt; Based on race, religion, gender, or nationality&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Union Activity:&lt;/strong&gt; Participation in lawful union activities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Medical Leave:&lt;/strong&gt; Taking approved sick or maternity leave&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Whistleblowing:&lt;/strong&gt; Reporting illegal activities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Pregnancy Status:&lt;/strong&gt; Pregnancy or related medical conditions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Without Valid Cause:&lt;/strong&gt; Termination without legitimate business reason&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Remedies for Unfair Dismissal&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Reinstatement:&lt;/strong&gt; Return to previous position&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Compensation:&lt;/strong&gt; Payment for lost wages and damages&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Severance Pay:&lt;/strong&gt; Full gratuity and notice pay&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Legal Action:&lt;/strong&gt; Court proceedings for additional remedies&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Dispute Resolution Procedures&lt;/h3&gt;
+                &lt;p&gt;Labor disputes should be resolved through established channels before legal action:&lt;/p&gt;
+
+                &lt;h4&gt;Internal Resolution Steps&lt;/h4&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Direct Discussion:&lt;/strong&gt; Attempt resolution with immediate supervisor&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Formal Grievance:&lt;/strong&gt; Submit written complaint to HR department&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Management Review:&lt;/strong&gt; Escalation to senior management&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Mediation Services:&lt;/strong&gt; Use Ministry of Human Resources mediation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Labor Court Action:&lt;/strong&gt; Formal legal proceedings if needed&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h4&gt;Time Limits for Claims&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Grievance Filing:&lt;/strong&gt; Within 6 months of incident&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Court Action:&lt;/strong&gt; Within 1 year of termination&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Gratuity Claims:&lt;/strong&gt; Within 2 years of termination&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Unfair Dismissal:&lt;/strong&gt; Within 6 months of termination&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Practical Considerations for Security Personnel&lt;/h3&gt;
+                &lt;p&gt;Security guards should consider several practical aspects when employment ends:&lt;/p&gt;
+
+                &lt;h4&gt;Pre-Termination Planning&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Document Everything:&lt;/strong&gt; Keep records of hours, pay, and communications&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Calculate Entitlements:&lt;/strong&gt; Understand your final settlement amount&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Seek Advice:&lt;/strong&gt; Consult with labor experts or unions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Plan Finances:&lt;/strong&gt; Prepare for period between jobs&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Exit Procedures&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Return Equipment:&lt;/strong&gt; Return all company property and uniforms&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Clear Badges/Access:&lt;/strong&gt; Ensure all access credentials are deactivated&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Final Paycheck:&lt;/strong&gt; Confirm receipt of all entitled payments&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Experience Letter:&lt;/strong&gt; Obtain official service certificate&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;References:&lt;/strong&gt; Request professional references if appropriate&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Critical Advice:&lt;/strong&gt; Always seek professional legal or labor advice before signing any termination agreement. Understanding your rights ensures you receive all entitled benefits and protections under UAE labor law.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_uae_labor_m3_quiz" model="slide.slide">
+            <field name="name">Module 3: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_uae_labor_law"/>
+            <field name="sequence">31</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <record id="quiz_uae_labor_m3_q1" model="slide.question">
+            <field name="question">What is the minimum service period required for gratuity payment?</field>
+            <field name="slide_id" ref="slide_uae_labor_m3_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_uae_labor_m3_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_labor_m3_q1"/>
+            <field name="text_value">1 year</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_labor_m3_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_labor_m3_q1"/>
+            <field name="text_value">2 years</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_uae_labor_m3_q2" model="slide.question">
+            <field name="question">What is the notice period for employees with 5-10 years of service?</field>
+            <field name="slide_id" ref="slide_uae_labor_m3_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_uae_labor_m3_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_labor_m3_q2"/>
+            <field name="text_value">60 days</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_labor_m3_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_labor_m3_q2"/>
+            <field name="text_value">30 days</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Final Assessment -->
+        <record id="slide_uae_labor_final" model="slide.slide">
+            <field name="name">Final Assessment: UAE Labor Law for Security Personnel</field>
+            <field name="channel_id" ref="elearning_course_uae_labor_law"/>
+            <field name="sequence">70</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.17</field>
+            <field name="html_content">
+                &lt;h2&gt;Final Examination: UAE Labor Law for Security Personnel&lt;/h2&gt;
+                &lt;p&gt;&lt;strong&gt;Assessment Overview:&lt;/strong&gt;&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;35 multiple-choice questions&lt;/li&gt;
+                    &lt;li&gt;Covers employment contracts, working hours, leave, and termination&lt;/li&gt;
+                    &lt;li&gt;80% passing score required&lt;/li&gt;
+                    &lt;li&gt;75 minutes time limit&lt;/li&gt;
+                    &lt;li&gt;Can retake once if needed&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;p&gt;&lt;strong&gt;Key Topics Covered:&lt;/strong&gt;&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Employment contract requirements and probation&lt;/li&gt;
+                    &lt;li&gt;Working hours, overtime, and shift regulations&lt;/li&gt;
+                    &lt;li&gt;Annual leave, sick leave, and public holidays&lt;/li&gt;
+                    &lt;li&gt;Termination procedures and notice periods&lt;/li&gt;
+                    &lt;li&gt;Gratuity calculations and end-of-service benefits&lt;/li&gt;
+                    &lt;li&gt;Labor dispute resolution and employee rights&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;p&gt;Upon passing, you'll receive your UAE Labor Law certification, demonstrating your comprehensive understanding of employment rights and obligations in the UAE!&lt;/p&gt;
+            </field>
+        </record>
+
+    </data>
+</odoo>

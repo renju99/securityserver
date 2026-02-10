@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Guard Task PDF Report Template -->
+    <template id="guard_task_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h2>Guard Task Assignment</h2>
+                                <h4 t-if="o.site_id" t-field="o.site_id.name"/>
+                            </div>
+                        </div>
+
+                        <!-- Task Information -->
+                        <div class="row mt-3">
+                            <div class="col-6">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><strong>Task ID:</strong></td>
+                                        <td t-field="o.name"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Task Title:</strong></td>
+                                        <td t-field="o.title"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Priority:</strong></td>
+                                        <td>
+                                            <t t-if="o.priority == '0'">
+                                                <span class="badge bg-secondary">Normal</span>
+                                            </t>
+                                            <t t-elif="o.priority == '1'">
+                                                <span class="badge bg-warning">Important</span>
+                                            </t>
+                                            <t t-elif="o.priority == '2'">
+                                                <span class="badge bg-danger">Urgent</span>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><strong>Assigned To:</strong></td>
+                                        <td t-field="o.assigned_to.name"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Due Date:</strong></td>
+                                        <td t-field="o.due_date"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Status:</strong></td>
+                                        <td>
+                                            <t t-if="o.state == 'draft'">
+                                                <span class="badge bg-secondary">Draft</span>
+                                            </t>
+                                            <t t-elif="o.state == 'assigned'">
+                                                <span class="badge bg-info">Assigned</span>
+                                            </t>
+                                            <t t-elif="o.state == 'in_progress'">
+                                                <span class="badge bg-warning">In Progress</span>
+                                            </t>
+                                            <t t-elif="o.state == 'completed'">
+                                                <span class="badge bg-success">Completed</span>
+                                            </t>
+                                            <t t-elif="o.state == 'cancelled'">
+                                                <span class="badge bg-danger">Cancelled</span>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Task Description -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Task Description</h5>
+                                <p t-field="o.description"/>
+                            </div>
+                        </div>
+
+                        <!-- Checklist Items -->
+                        <div class="row mt-3" t-if="o.checklist_ids">
+                            <div class="col-12">
+                                <h5>Task Checklist</h5>
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr class="table-active">
+                                            <th style="width: 50px;">#</th>
+                                            <th>Item</th>
+                                            <th style="width: 100px;">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-set="counter" t-value="1"/>
+                                        <t t-foreach="o.checklist_ids" t-as="item">
+                                            <tr>
+                                                <td t-esc="counter"/>
+                                                <td t-field="item.name"/>
+                                                <td>
+                                                    <t t-if="item.is_completed">
+                                                        <span class="badge bg-success">✓ Done</span>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="badge bg-secondary">☐ Pending</span>
+                                                    </t>
+                                                </td>
+                                            </tr>
+                                            <t t-set="counter" t-value="counter + 1"/>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Location and Time -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Schedule &amp; Location</h5>
+                                <table class="table table-bordered">
+                                    <tr t-if="o.scheduled_start">
+                                        <td width="30%"><strong>Scheduled Start:</strong></td>
+                                        <td t-field="o.scheduled_start"/>
+                                    </tr>
+                                    <tr t-if="o.scheduled_end">
+                                        <td><strong>Scheduled End:</strong></td>
+                                        <td t-field="o.scheduled_end"/>
+                                    </tr>
+                                    <tr t-if="o.actual_start">
+                                        <td><strong>Actual Start:</strong></td>
+                                        <td t-field="o.actual_start"/>
+                                    </tr>
+                                    <tr t-if="o.actual_end">
+                                        <td><strong>Actual End:</strong></td>
+                                        <td t-field="o.actual_end"/>
+                                    </tr>
+                                    <tr t-if="o.location">
+                                        <td><strong>Location:</strong></td>
+                                        <td t-field="o.location"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Completion Notes -->
+                        <div class="row mt-3" t-if="o.completion_notes">
+                            <div class="col-12">
+                                <h5>Completion Notes</h5>
+                                <p t-field="o.completion_notes"/>
+                            </div>
+                        </div>
+
+                        <!-- Attachments -->
+                        <div class="row mt-3" t-if="o.attachment_count &gt; 0">
+                            <div class="col-12">
+                                <p><strong>Attachments:</strong> <span t-field="o.attachment_count"/> file(s) attached</p>
+                            </div>
+                        </div>
+
+                        <!-- Signature Section -->
+                        <div class="row mt-5">
+                            <div class="col-6">
+                                <div class="border-top pt-2">
+                                    <p><strong>Assigned By:</strong></p>
+                                    <p t-if="o.created_by" t-field="o.created_by.name"/>
+                                    <p>Date: <span t-field="o.create_date"/></p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border-top pt-2">
+                                    <p><strong>Guard Acknowledgment:</strong></p>
+                                    <p t-field="o.assigned_to.name"></p>
+                                    <p>Signature: ___________________</p>
+                                    <p>Date: ___________________</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="row mt-5">
+                            <div class="col-12 text-center text-muted">
+                                <small>
+                                    Task Assignment - Please complete all items on the checklist
+                                    <br/>
+                                    Report any issues or delays immediately
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Definition -->
+    <record id="action_report_guard_task" model="ir.actions.report">
+        <field name="name">Task Assignment</field>
+        <field name="model">guard.task</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.guard_task_report_template</field>
+        <field name="report_file">guardpro.guard_task_report_template</field>
+        <field name="binding_model_id" ref="model_guard_task"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Task_%s' % (object.name)</field>
+    </record>
+</odoo>
+

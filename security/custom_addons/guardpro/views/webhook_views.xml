@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Webhook List View -->
+    <record id="view_webhook_list" model="ir.ui.view">
+        <field name="name">guardpro.webhook.list</field>
+        <field name="model">guardpro.webhook</field>
+        <field name="arch" type="xml">
+            <list string="Webhooks" decoration-muted="not active">
+                <field name="name"/>
+                <field name="url"/>
+                <field name="events"/>
+                <field name="total_sent"/>
+                <field name="total_failed"/>
+                <field name="success_rate" widget="progressbar"/>
+                <field name="last_sent"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Webhook Form View -->
+    <record id="view_webhook_form" model="ir.ui.view">
+        <field name="name">guardpro.webhook.form</field>
+        <field name="model">guardpro.webhook</field>
+        <field name="arch" type="xml">
+            <form string="Webhook Configuration">
+                <header>
+                    <button name="action_test_webhook" string="Test Webhook" type="object" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_logs" type="object" class="oe_stat_button" icon="fa-list">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="total_sent"/>/<field name="total_failed"/>
+                                </span>
+                                <span class="o_stat_text">Sent/Failed</span>
+                            </div>
+                        </button>
+                    </div>
+                    
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g., HRMS Integration"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="url"/>
+                            <field name="method"/>
+                            <field name="events"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="timeout"/>
+                            <field name="max_retries"/>
+                            <field name="retry_delay"/>
+                            <field name="success_rate" widget="progressbar"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Authentication">
+                            <group>
+                                <field name="auth_type" widget="radio"/>
+                            </group>
+                            <group invisible="auth_type != 'basic'">
+                                <field name="auth_username"/>
+                                <field name="auth_password" password="True"/>
+                            </group>
+                            <group invisible="auth_type != 'bearer'">
+                                <field name="auth_token" password="True"/>
+                            </group>
+                            <group invisible="auth_type != 'custom'">
+                                <field name="auth_header_name"/>
+                                <field name="auth_header_value" password="True"/>
+                            </group>
+                        </page>
+                        
+                        <page string="Security">
+                            <group>
+                                <field name="enable_signing"/>
+                                <field name="secret_key" password="True" invisible="not enable_signing"/>
+                            </group>
+                            <div class="alert alert-info" role="alert" invisible="not enable_signing">
+                                <i class="fa fa-info-circle" title="Information" aria-label="Information"/> 
+                                Payloads will be signed with HMAC-SHA256. The signature will be sent in the 
+                                <code>X-GuardPro-Signature</code> header.
+                            </div>
+                        </page>
+                        
+                        <page string="Statistics">
+                            <group>
+                                <group>
+                                    <field name="total_sent" readonly="1"/>
+                                    <field name="total_failed" readonly="1"/>
+                                    <field name="last_sent" readonly="1"/>
+                                </group>
+                                <group>
+                                    <field name="last_error" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Webhook Log List View -->
+    <record id="view_webhook_log_list" model="ir.ui.view">
+        <field name="name">guardpro.webhook.log.list</field>
+        <field name="model">guardpro.webhook.log</field>
+        <field name="arch" type="xml">
+            <list string="Webhook Logs" 
+                  decoration-success="success" 
+                  decoration-danger="not success"
+                  create="false"
+                  edit="false">
+                <field name="create_date"/>
+                <field name="webhook_id"/>
+                <field name="event_type"/>
+                <field name="attempt"/>
+                <field name="response_status"/>
+                <field name="success" widget="boolean"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Webhook Log Form View -->
+    <record id="view_webhook_log_form" model="ir.ui.view">
+        <field name="name">guardpro.webhook.log.form</field>
+        <field name="model">guardpro.webhook.log</field>
+        <field name="arch" type="xml">
+            <form string="Webhook Log" create="false" edit="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="webhook_id"/>
+                            <field name="event_type"/>
+                            <field name="create_date"/>
+                            <field name="attempt"/>
+                        </group>
+                        <group>
+                            <field name="success"/>
+                            <field name="response_status"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Payload">
+                            <field name="payload" widget="ace" options="{'mode': 'json'}"/>
+                        </page>
+                        <page string="Response" invisible="not success">
+                            <field name="response_body" widget="text"/>
+                        </page>
+                        <page string="Error" invisible="success">
+                            <field name="error_message" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_webhook" model="ir.actions.act_window">
+        <field name="name">Webhooks</field>
+        <field name="res_model">guardpro.webhook</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a Webhook
+            </p>
+            <p>
+                Webhooks allow you to integrate GuardPro with external systems by sending real-time notifications.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu (now defined in guardpro_menus.xml) -->
+    <!--
+    <menuitem id="menu_webhook" 
+              name="Webhooks" 
+              parent="guardpro.menu_guardpro_configuration" 
+              action="action_webhook" 
+              sequence="50"
+              groups="guardpro.group_guardpro_admin"/>
+    -->
+
+</odoo>

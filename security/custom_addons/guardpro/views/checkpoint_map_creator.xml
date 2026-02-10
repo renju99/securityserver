@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Checkpoint Map Creator Template -->
+        <template id="checkpoint_map_creator_template" name="Checkpoint Map Creator">
+            <t t-set="google_maps_api_key" t-value="google_maps_api_key or request.env['ir.config_parameter'].sudo().get_param('guardpro.google_maps_api_key')"/>
+            <t t-call="web.layout">
+                <t t-set="head">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+                    <meta name="mobile-web-app-capable" content="yes"/>
+                    <meta name="apple-mobile-web-app-capable" content="yes"/>
+                <script src="/guardpro/static/src/js/checkpoint_map_creator_web.js?v=1.3"></script>
+                <script>
+                    // Define callback function after our JS file loads
+                    window.initCheckpointMapCreator = function() {
+                            console.log('Google Maps API loaded, waiting for DOM...');
+                            
+                            // Wait for DOM to be ready before initializing
+                            if (document.readyState === 'loading') {
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    console.log('DOM ready, initializing Checkpoint Map Creator');
+                                    window.checkpointMapCreatorInstance = new CheckpointMapCreator();
+                                });
+                            } else {
+                                console.log('DOM already ready, initializing Checkpoint Map Creator');
+                                window.checkpointMapCreatorInstance = new CheckpointMapCreator();
+                            }
+                        };
+                    </script>
+                    <t t-if="google_maps_api_key">
+                        <script async="async" defer="defer" t-att-src="'https://maps.googleapis.com/maps/api/js?key=%s&amp;libraries=geometry&amp;loading=async&amp;callback=initCheckpointMapCreator' % google_maps_api_key"/>
+                    </t>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap');
+                        
+                        * {
+                            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                        }
+                        
+                        #checkpoint-creator-map {
+                            height: calc(100vh - 120px);
+                            width: 100%;
+                            border-radius: 0;
+                        }
+                        
+                        .map-creator-container {
+                            position: relative;
+                            padding: 0;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        }
+                        
+                        /* Enhanced Control Panel with Glassmorphism */
+                        .creator-controls {
+                            position: absolute;
+                            top: 20px;
+                            right: 20px;
+                            z-index: 5;
+                            background: rgba(255, 255, 255, 0.95);
+                            backdrop-filter: blur(20px);
+                            -webkit-backdrop-filter: blur(20px);
+                            padding: 24px;
+                            border-radius: 16px;
+                            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+                            max-width: 380px;
+                            max-height: calc(100vh - 160px);
+                            overflow-y: auto;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            transition: all 0.3s ease;
+                        }
+                        
+                        .creator-controls::-webkit-scrollbar {
+                            width: 6px;
+                        }
+                        
+                        .creator-controls::-webkit-scrollbar-track {
+                            background: rgba(0,0,0,0.05);
+                            border-radius: 10px;
+                        }
+                        
+                        .creator-controls::-webkit-scrollbar-thumb {
+                            background: rgba(102, 126, 234, 0.5);
+                            border-radius: 10px;
+                        }
+                        
+                        .creator-controls::-webkit-scrollbar-thumb:hover {
+                            background: rgba(102, 126, 234, 0.7);
+                        }
+                        
+                        /* Mobile Optimizations */
+                        @media (max-width: 768px) {
+                            .map-creator-container {
+                                padding: 0;
+                            }
+                            
+                            .creator-controls {
+                                position: fixed;
+                                top: auto;
+                                bottom: 0;
+                                left: 0;
+                                right: 0;
+                                max-width: 100%;
+                                max-height: 65vh;
+                                border-radius: 24px 24px 0 0;
+                                padding: 24px 20px;
+                            }
+                            
+                            #checkpoint-creator-map {
+                                height: calc(100vh - 80px);
+                            }
+                            
+                            .page-header {
+                                padding: 16px !important;
+                            }
+                            
+                            .page-header h1 {
+                                font-size: 20px !important;
+                            }
+                            
+                            .page-header p {
+                                font-size: 13px !important;
+                            }
+                        }
+                        
+                        @media (max-width: 480px) {
+                            .creator-controls {
+                                padding: 20px 16px;
+                            }
+                        }
+                        
+                        .creator-controls h3 {
+                            margin-top: 0;
+                            margin-bottom: 18px;
+                            font-size: 19px;
+                            font-weight: 700;
+                            color: #1e293b;
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                        }
+                        
+                        .creator-controls h3 i {
+                            color: #667eea;
+                            font-size: 18px;
+                        }
+                        
+                        .form-group {
+                            margin-bottom: 16px;
+                        }
+                        
+                        .form-group label {
+                            display: block;
+                            font-size: 13px;
+                            font-weight: 600;
+                            margin-bottom: 6px;
+                            color: #475569;
+                            display: flex;
+                            align-items: center;
+                            gap: 6px;
+                        }
+                        
+                        .form-group label i {
+                            color: #667eea;
+                            font-size: 12px;
+                        }
+                        
+                        .form-group select,
+                        .form-group input {
+                            width: 100%;
+                            padding: 10px 12px;
+                            border: 2px solid rgba(102, 126, 234, 0.2);
+                            border-radius: 8px;
+                            font-size: 14px;
+                            color: #1e293b;
+                            background: white;
+                            transition: all 0.3s ease;
+                        }
+                        
+                        .form-group select:focus,
+                        .form-group input:focus {
+                            outline: none;
+                            border-color: #667eea;
+                            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                        }
+                        
+                        .btn-create,
+                        .btn-secondary,
+                        .btn-danger {
+                            width: 100%;
+                            padding: 12px 16px;
+                            border: none;
+                            border-radius: 10px;
+                            cursor: pointer;
+                            font-size: 14px;
+                            font-weight: 600;
+                            margin-top: 8px;
+                            transition: all 0.3s ease;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
+                        }
+                        
+                        .btn-create {
+                            background: linear-gradient(135deg, #667eea, #764ba2);
+                            color: white;
+                            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+                        }
+                        
+                        .btn-create:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+                        }
+                        
+                        .btn-create:active {
+                            transform: translateY(0);
+                        }
+                        
+                        .btn-secondary {
+                            background: linear-gradient(135deg, #64748b, #475569);
+                            color: white;
+                            box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
+                        }
+                        
+                        .btn-secondary:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 6px 20px rgba(100, 116, 139, 0.4);
+                        }
+                        
+                        .btn-secondary:active {
+                            transform: translateY(0);
+                        }
+                        
+                        .btn-danger {
+                            background: linear-gradient(135deg, #ef4444, #dc2626);
+                            color: white;
+                            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+                        }
+                        
+                        .btn-danger:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+                        }
+                        
+                        .btn-danger:active {
+                            transform: translateY(0);
+                        }
+                        
+                        .info-box {
+                            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+                            padding: 14px;
+                            border-radius: 10px;
+                            margin-bottom: 16px;
+                            border: 1px solid rgba(102, 126, 234, 0.15);
+                        }
+                        
+                        .info-box p {
+                            margin: 5px 0;
+                            font-size: 13px;
+                            color: #475569;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                        }
+                        
+                        .info-box strong {
+                            color: #1e293b;
+                            font-weight: 600;
+                        }
+                        
+                        .info-box span {
+                            font-weight: 600;
+                            color: #667eea;
+                        }
+                        
+                        .help-text {
+                            font-size: 12px;
+                            color: #64748b;
+                            margin-top: 12px;
+                            padding: 12px;
+                            background: linear-gradient(135deg, #fef3c7, #fde68a);
+                            border-radius: 8px;
+                            border-left: 4px solid #f59e0b;
+                            line-height: 1.6;
+                        }
+                        
+                        .help-text strong {
+                            color: #92400e;
+                            display: block;
+                            margin-bottom: 6px;
+                        }
+                        
+                        .page-header {
+                            padding: 24px 28px;
+                            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+                            color: white;
+                            margin: 0;
+                            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+                        }
+                        
+                        .page-header h1 {
+                            margin: 0;
+                            font-size: 28px;
+                            font-weight: 700;
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                        }
+                        
+                        .page-header h1 i {
+                            color: #667eea;
+                            font-size: 26px;
+                        }
+                        
+                        .page-header p {
+                            margin: 8px 0 0 0;
+                            font-size: 15px;
+                            opacity: 0.9;
+                            font-weight: 400;
+                        }
+                        
+                        .legend {
+                            margin-top: 16px;
+                            padding-top: 16px;
+                            border-top: 2px solid rgba(102, 126, 234, 0.15);
+                        }
+                        
+                        .legend-title {
+                            font-size: 13px;
+                            font-weight: 700;
+                            margin-bottom: 10px;
+                            color: #1e293b;
+                            display: flex;
+                            align-items: center;
+                            gap: 6px;
+                        }
+                        
+                        .legend-title i {
+                            color: #667eea;
+                        }
+                        
+                        .legend-item {
+                            display: flex;
+                            align-items: center;
+                            margin-bottom: 8px;
+                            font-size: 12px;
+                            color: #475569;
+                            font-weight: 500;
+                        }
+                        
+                        .legend-color {
+                            width: 14px;
+                            height: 14px;
+                            border-radius: 50%;
+                            margin-right: 10px;
+                            border: 2px solid white;
+                            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+                        }
+                        
+                        .legend-color.new {
+                            background: linear-gradient(135deg, #3b82f6, #2563eb);
+                        }
+                        
+                        .legend-color.saved {
+                            background: linear-gradient(135deg, #10b981, #059669);
+                        }
+                        
+                        .loading-overlay {
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            background: rgba(0,0,0,0.6);
+                            backdrop-filter: blur(4px);
+                            display: none;
+                            align-items: center;
+                            justify-content: center;
+                            z-index: 9999;
+                        }
+                        
+                        .loading-overlay.active {
+                            display: flex;
+                        }
+                        
+                        .loading-content {
+                            background: white;
+                            padding: 40px;
+                            border-radius: 16px;
+                            text-align: center;
+                            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+                        }
+                        
+                        .loading-content i {
+                            color: #667eea;
+                            margin-bottom: 16px;
+                        }
+                        
+                        .loading-content p {
+                            margin: 0;
+                            font-size: 16px;
+                            font-weight: 600;
+                            color: #1e293b;
+                        }
+                        
+                        /* Quick Stats Badge */
+                        .stats-badge {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 4px 10px;
+                            background: rgba(102, 126, 234, 0.15);
+                            border-radius: 12px;
+                            font-size: 12px;
+                            font-weight: 600;
+                            color: #667eea;
+                        }
+                    </style>
+                </t>
+
+                <div class="page-header">
+                    <h1><i class="fa fa-map-marker"></i> Interactive Checkpoint Creator</h1>
+                    <p>Click on the map to place checkpoints at specific locations</p>
+                </div>
+
+                <t t-if="google_maps_api_key">
+                <div class="map-creator-container">
+                    <div class="loading-overlay" id="loading-overlay">
+                        <div class="loading-content">
+                            <i class="fa fa-spinner fa-spin fa-3x"></i>
+                            <p style="margin-top: 15px;">Saving checkpoint...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="creator-controls">
+                        <h3><i class="fa fa-cog"></i> Checkpoint Creator</h3>
+                        
+                        <div class="form-group">
+                            <label for="site-selector">
+                                <i class="fa fa-building"></i> Select Site *
+                            </label>
+                            <select id="site-selector">
+                                <option value="">-- Choose a site --</option>
+                                <t t-foreach="sites" t-as="site">
+                                    <option t-att-value="site.id">
+                                        <t t-esc="site.name"/> (<t t-esc="site.code"/>)
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                        
+                        <div class="info-box" id="checkpoint-info">
+                            <p><strong>Status:</strong> <span id="status-text">Select a site to begin</span></p>
+                            <p><strong>Existing:</strong> <span id="checkpoint-count" class="stats-badge">0</span></p>
+                            <p><strong>New:</strong> <span id="temp-checkpoint-count" class="stats-badge">0</span></p>
+                        </div>
+                        
+                        <div class="help-text">
+                            <strong><i class="fa fa-info-circle"></i> How to Use:</strong>
+                            1. Select a site from the dropdown above<br/>
+                            2. Click anywhere on the map to place a checkpoint<br/>
+                            3. Fill in the checkpoint details in the popup<br/>
+                            4. Drag markers to adjust their position<br/>
+                            5. Click "Save" in the popup to create the checkpoint
+                        </div>
+                        
+                        <div class="legend">
+                            <div class="legend-title"><i class="fa fa-map-marker"></i> Marker Legend</div>
+                            <div class="legend-item">
+                                <div class="legend-color new"></div>
+                                <span>New Checkpoint (Unsaved)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color saved"></div>
+                                <span>Existing Checkpoint</span>
+                            </div>
+                        </div>
+                        
+                        <button class="btn-secondary" onclick="window.checkpointMapCreatorInstance?.clearAllTemp()">
+                            <i class="fa fa-eraser"></i> Clear All New Checkpoints
+                        </button>
+                        
+                        <button class="btn-danger" onclick="window.checkpointMapCreatorInstance?.closeMap()">
+                            <i class="fa fa-times"></i> Close Map
+                        </button>
+                    </div>
+
+                    <div id="checkpoint-creator-map"></div>
+                </div>
+                </t>
+                <t t-else="">
+                    <div class="container mt-5">
+                        <div class="alert alert-warning" role="alert">
+                            <h4 class="alert-heading">
+                                <i class="fa fa-key"></i>
+                                <t t-translate="yes">Google Maps API key required</t>
+                            </h4>
+                            <p t-translate="yes">
+                                Configure your Google Maps JavaScript API key under Settings -> General Settings -> GuardPro -> Google Maps Integration to use the interactive checkpoint creator.
+                            </p>
+                            <p class="mb-0" t-translate="yes">
+                                Each customer must supply their own Google Cloud key to control billing and usage.
+                            </p>
+                        </div>
+                    </div>
+                </t>
+
+            </t>
+        </template>
+
+        <!-- Client Action for Checkpoint Map Creator (OWL Component) -->
+        <record id="action_checkpoint_map_creator_client" model="ir.actions.client">
+            <field name="name">Create Checkpoints on Map</field>
+            <field name="tag">guardpro_checkpoint_map_creator</field>
+            <field name="target">fullscreen</field>
+        </record>
+
+        <!-- URL Action for Checkpoint Map Creator (Web Template) -->
+        <record id="action_checkpoint_map_creator_url" model="ir.actions.act_url">
+            <field name="name">Create Checkpoints on Map</field>
+            <field name="url">/guardpro/checkpoints/map/creator</field>
+            <field name="target">self</field>
+        </record>
+    </data>
+</odoo>
+

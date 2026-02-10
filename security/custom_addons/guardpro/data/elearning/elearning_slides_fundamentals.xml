@@ -1,0 +1,713 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Course 1: GuardPro Fundamentals - Slides -->
+        
+        <!-- Module 1: Introduction to GuardPro -->
+        <record id="slide_fundamentals_m1_intro" model="slide.slide">
+            <field name="name">Module 1: Introduction to GuardPro</field>
+            <field name="channel_id" ref="elearning_course_fundamentals"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">infographic</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.25</field>
+            <field name="description">
+                &lt;h2&gt;Welcome to GuardPro!&lt;/h2&gt;
+                &lt;p&gt;GuardPro is a comprehensive security operations management system built on Odoo 18.&lt;/p&gt;
+                &lt;h3&gt;What You'll Learn:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;What GuardPro is and why it's used&lt;/li&gt;
+                    &lt;li&gt;Key features and capabilities&lt;/li&gt;
+                    &lt;li&gt;How GuardPro benefits your organization&lt;/li&gt;
+                    &lt;li&gt;How it will help you in your role&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <!-- Module 1 Quiz -->
+        <record id="slide_fundamentals_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_fundamentals"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <!-- Module 1 Quiz Questions -->
+        <record id="quiz_m1_q1" model="slide.question">
+            <field name="question">What is GuardPro primarily used for?</field>
+            <field name="slide_id" ref="slide_fundamentals_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_m1_q1"/>
+            <field name="text_value">Financial accounting</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_m1_q1"/>
+            <field name="text_value">Security operations management</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_m1_q1_a3" model="slide.answer">
+            <field name="question_id" ref="quiz_m1_q1"/>
+            <field name="text_value">Customer relationship management</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_m1_q2" model="slide.question">
+            <field name="question">Which platform is GuardPro built on?</field>
+            <field name="slide_id" ref="slide_fundamentals_m1_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_m1_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_m1_q2"/>
+            <field name="text_value">Salesforce</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_m1_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_m1_q2"/>
+            <field name="text_value">Odoo 18</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <record id="quiz_m1_q3" model="slide.question">
+            <field name="question">What are the main benefits of using GuardPro?</field>
+            <field name="slide_id" ref="slide_fundamentals_m1_quiz"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="quiz_m1_q3_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_m1_q3"/>
+            <field name="text_value">Real-time communication and coordination</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_m1_q3_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_m1_q3"/>
+            <field name="text_value">Only basic record keeping</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_m1_q3_a3" model="slide.answer">
+            <field name="question_id" ref="quiz_m1_q3"/>
+            <field name="text_value">Automated incident response and reporting</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_m1_q3_a4" model="slide.answer">
+            <field name="question_id" ref="quiz_m1_q3"/>
+            <field name="text_value">Social media management</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 2 Quiz Questions -->
+        <record id="quiz_m2_q1" model="slide.question">
+            <field name="question">What is the main navigation menu called in GuardPro?</field>
+            <field name="slide_id" ref="slide_fundamentals_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_m2_q1"/>
+            <field name="text_value">App Menu</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_m2_q1"/>
+            <field name="text_value">File Menu</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_m2_q1_a3" model="slide.answer">
+            <field name="question_id" ref="quiz_m2_q1"/>
+            <field name="text_value">Start Menu</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_m2_q2" model="slide.question">
+            <field name="question">What view type shows data in a table format?</field>
+            <field name="slide_id" ref="slide_fundamentals_m2_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_m2_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_m2_q2"/>
+            <field name="text_value">List View</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_m2_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_m2_q2"/>
+            <field name="text_value">Calendar View</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_m2_q3" model="slide.question">
+            <field name="question">Which of these is a best practice for system navigation?</field>
+            <field name="slide_id" ref="slide_fundamentals_m2_quiz"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="quiz_m2_q3_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_m2_q3"/>
+            <field name="text_value">Use keyboard shortcuts like Ctrl+F for search</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_m2_q3_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_m2_q3"/>
+            <field name="text_value">Navigate randomly without learning the menu structure</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_m2_q3_a3" model="slide.answer">
+            <field name="question_id" ref="quiz_m2_q3"/>
+            <field name="text_value">Bookmark frequently used pages</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <record id="quiz_m2_q4" model="slide.question">
+            <field name="question">What should you do when logging into GuardPro?</field>
+            <field name="slide_id" ref="slide_fundamentals_m2_quiz"/>
+            <field name="sequence">4</field>
+        </record>
+        <record id="quiz_m2_q4_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_m2_q4"/>
+            <field name="text_value">Use a strong, unique password</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_m2_q4_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_m2_q4"/>
+            <field name="text_value">Share your password with team members</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_m2_q4_a3" model="slide.answer">
+            <field name="question_id" ref="quiz_m2_q4"/>
+            <field name="text_value">Verify you're using the official GuardPro URL</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <!-- Module 3 Quiz Questions -->
+        <record id="quiz_m3_q1" model="slide.question">
+            <field name="question">Which role has full system access and can configure everything?</field>
+            <field name="slide_id" ref="slide_fundamentals_m3_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_m3_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_m3_q1"/>
+            <field name="text_value">Administrator</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_m3_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_m3_q1"/>
+            <field name="text_value">Security Guard</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_m3_q1_a3" model="slide.answer">
+            <field name="question_id" ref="quiz_m3_q1"/>
+            <field name="text_value">Site Supervisor</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_m3_q2" model="slide.question">
+            <field name="question">What type of access does a Client user have?</field>
+            <field name="slide_id" ref="slide_fundamentals_m3_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_m3_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_m3_q2"/>
+            <field name="text_value">View-only access</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_m3_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_m3_q2"/>
+            <field name="text_value">Full editing access</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 4 Quiz Questions -->
+        <record id="quiz_m4_q1" model="slide.question">
+            <field name="question">What does the dashboard typically show?</field>
+            <field name="slide_id" ref="slide_fundamentals_m4_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_m4_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_m4_q1"/>
+            <field name="text_value">Key metrics and quick actions</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_m4_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_m4_q1"/>
+            <field name="text_value">Only login information</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_m4_q1_a3" model="slide.answer">
+            <field name="question_id" ref="quiz_m4_q1"/>
+            <field name="text_value">System configuration settings</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_m4_q2" model="slide.question">
+            <field name="question">What can you access from the dashboard shortcuts?</field>
+            <field name="slide_id" ref="slide_fundamentals_m4_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_m4_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_m4_q2"/>
+            <field name="text_value">Frequently used functions</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_m4_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_m4_q2"/>
+            <field name="text_value">Only logout function</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 5 Quiz Questions -->
+        <record id="quiz_m5_q1" model="slide.question">
+            <field name="question">What should you do when reporting an incident?</field>
+            <field name="slide_id" ref="slide_fundamentals_m5_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_m5_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_m5_q1"/>
+            <field name="text_value">Provide accurate and complete information</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_m5_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_m5_q1"/>
+            <field name="text_value">Guess at details if unsure</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_m5_q1_a3" model="slide.answer">
+            <field name="question_id" ref="quiz_m5_q1"/>
+            <field name="text_value">Wait until later to report</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_m5_q2" model="slide.question">
+            <field name="question">What information is typically required for a patrol report?</field>
+            <field name="slide_id" ref="slide_fundamentals_m5_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_m5_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_m5_q2"/>
+            <field name="text_value">Time, location, and observations</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_m5_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_m5_q2"/>
+            <field name="text_value">Only your name and badge number</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 6 Quiz Questions -->
+        <record id="quiz_m6_q1" model="slide.question">
+            <field name="question">Where can you find help documentation in GuardPro?</field>
+            <field name="slide_id" ref="slide_fundamentals_m6_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_m6_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_m6_q1"/>
+            <field name="text_value">Help menu and documentation section</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_m6_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_m6_q1"/>
+            <field name="text_value">Only by calling technical support</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_m6_q1_a3" model="slide.answer">
+            <field name="question_id" ref="quiz_m6_q1"/>
+            <field name="text_value">It's not available in the system</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_m6_q2" model="slide.question">
+            <field name="question">What should you do if you encounter a system error?</field>
+            <field name="slide_id" ref="slide_fundamentals_m6_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_m6_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_m6_q2"/>
+            <field name="text_value">Report it through the proper channels</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_m6_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_m6_q2"/>
+            <field name="text_value">Ignore it and continue working</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 2: System Navigation -->
+        <record id="slide_fundamentals_m2_nav" model="slide.slide">
+            <field name="name">Module 2: System Navigation</field>
+            <field name="channel_id" ref="elearning_course_fundamentals"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Navigating GuardPro&lt;/h2&gt;
+                &lt;p&gt;Mastering the GuardPro interface is essential for efficient security operations. This module covers the fundamental navigation skills you'll use daily.&lt;/p&gt;
+
+                &lt;h3&gt;The Login Process&lt;/h3&gt;
+                &lt;p&gt;Access to GuardPro begins with secure authentication. The login screen requires your username and password, which are provided by your system administrator. Always ensure you're using the official GuardPro URL and never share your credentials with others.&lt;/p&gt;
+                &lt;p&gt;&lt;strong&gt;Security Best Practice:&lt;/strong&gt; Use strong passwords with a combination of uppercase letters, lowercase letters, numbers, and special characters. Never write down your password or share it with colleagues.&lt;/p&gt;
+
+                &lt;h3&gt;The Main Application Interface&lt;/h3&gt;
+                &lt;p&gt;Once logged in, you'll see the main GuardPro dashboard. The interface is divided into several key areas:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Top Navigation Bar:&lt;/strong&gt; Contains user menu, notifications, and quick access tools&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Left Sidebar Menu:&lt;/strong&gt; Primary navigation for all GuardPro modules&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Main Content Area:&lt;/strong&gt; Where you'll view and interact with data&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Quick Action Buttons:&lt;/strong&gt; Shortcuts for common tasks&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Understanding View Types&lt;/h3&gt;
+                &lt;p&gt;GuardPro offers multiple ways to view your data, each optimized for different tasks:&lt;/p&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;List View&lt;/dt&gt;
+                    &lt;dd&gt;Displays records in a tabular format. Perfect for scanning multiple items and performing bulk operations.&lt;/dd&gt;
+                    &lt;dt&gt;Form View&lt;/dt&gt;
+                    &lt;dd&gt;Shows detailed information for a single record. Used for creating and editing individual entries.&lt;/dd&gt;
+                    &lt;dt&gt;Kanban View&lt;/dt&gt;
+                    &lt;dd&gt;Visual card-based layout ideal for workflow management and status tracking.&lt;/dd&gt;
+                    &lt;dt&gt;Calendar View&lt;/dt&gt;
+                    &lt;dd&gt;Time-based visualization perfect for scheduling and shift planning.&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h3&gt;Search and Filtering&lt;/h3&gt;
+                &lt;p&gt;Efficient data retrieval is crucial in security operations. GuardPro provides powerful search capabilities:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Quick Search:&lt;/strong&gt; Search across multiple fields simultaneously&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Advanced Filters:&lt;/strong&gt; Create complex queries using multiple criteria&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Saved Filters:&lt;/strong&gt; Store frequently used search parameters&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Group By:&lt;/strong&gt; Organize results by categories like status, priority, or location&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Navigation Best Practices&lt;/h3&gt;
+                &lt;p&gt;&lt;strong&gt;Pro Tips for Efficient Navigation:&lt;/strong&gt;&lt;/p&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Use keyboard shortcuts (Ctrl+F for search, Ctrl+S for save)&lt;/li&gt;
+                    &lt;li&gt;Bookmark frequently accessed pages&lt;/li&gt;
+                    &lt;li&gt;Master the breadcrumb navigation&lt;/li&gt;
+                    &lt;li&gt;Learn to switch between views quickly&lt;/li&gt;
+                    &lt;li&gt;Use the recent items menu for quick access&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;p&gt;&lt;strong&gt;Practice Exercise:&lt;/strong&gt; Navigate to the Shifts module and switch between List and Calendar views. Try searching for shifts assigned to you.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_fundamentals_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_fundamentals"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <!-- Module 3: User Roles -->
+        <record id="slide_fundamentals_m3_roles" model="slide.slide">
+            <field name="name">Module 3: User Roles and Permissions</field>
+            <field name="channel_id" ref="elearning_course_fundamentals"/>
+            <field name="sequence">30</field>
+            <field name="slide_category">infographic</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.25</field>
+            <field name="html_content">
+                &lt;h2&gt;Understanding User Roles&lt;/h2&gt;
+                &lt;p&gt;GuardPro has different user roles with specific permissions.&lt;/p&gt;
+                &lt;h3&gt;Main Roles:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Administrator:&lt;/strong&gt; Full system access&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Security Manager:&lt;/strong&gt; Strategic oversight&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Site Supervisor:&lt;/strong&gt; Daily operations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Security Guard:&lt;/strong&gt; Field operations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Client:&lt;/strong&gt; View-only access&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_fundamentals_m3_quiz" model="slide.slide">
+            <field name="name">Module 3: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_fundamentals"/>
+            <field name="sequence">31</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <!-- Module 4: Dashboard Overview -->
+        <record id="slide_fundamentals_m4_dashboard" model="slide.slide">
+            <field name="name">Module 4: Dashboard Overview</field>
+            <field name="channel_id" ref="elearning_course_fundamentals"/>
+            <field name="sequence">40</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.67</field>
+            <field name="html_content">
+                &lt;h2&gt;The GuardPro Dashboard: Your Security Operations Command Center&lt;/h2&gt;
+                &lt;p&gt;The dashboard is the heart of GuardPro, providing you with real-time visibility into all security operations. It's designed to give you immediate access to critical information and quick actions, ensuring you can respond rapidly to any situation.&lt;/p&gt;
+
+                &lt;h3&gt;Quick Stats Banner&lt;/h3&gt;
+                &lt;p&gt;Located at the top of the dashboard, this banner provides instant visibility into key performance indicators:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Active Guards:&lt;/strong&gt; Number of guards currently on duty&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Open Incidents:&lt;/strong&gt; Incidents requiring attention&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Scheduled Tours:&lt;/strong&gt; Patrol activities due today&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Shift Coverage:&lt;/strong&gt; Percentage of shifts properly staffed&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Response Time:&lt;/strong&gt; Average incident response time&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Today's Operations Panel&lt;/h3&gt;
+                &lt;p&gt;This central panel shows all critical activities happening today, organized by priority and time:&lt;/p&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Shift Schedule&lt;/dt&gt;
+                    &lt;dd&gt;Current and upcoming shifts with guard assignments and contact information&lt;/dd&gt;
+                    &lt;dt&gt;Active Incidents&lt;/dt&gt;
+                    &lt;dd&gt;Real-time incident tracking with status updates and response teams&lt;/dd&gt;
+                    &lt;dt&gt;Tour Status&lt;/dt&gt;
+                    &lt;dd&gt;Patrol progress with check-in times and location tracking&lt;/dd&gt;
+                    &lt;dt&gt;Equipment Status&lt;/dt&gt;
+                    &lt;dd&gt;Maintenance schedules and equipment availability&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h3&gt;Guard Management Section&lt;/h3&gt;
+                &lt;p&gt;Monitor your team's performance and availability:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Guard Status:&lt;/strong&gt; On duty, off duty, on break, or unavailable&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Performance Metrics:&lt;/strong&gt; Response times, completed tours, incident resolution&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Training Status:&lt;/strong&gt; Certification validity and required training&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication Log:&lt;/strong&gt; Recent messages and updates&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Site Coverage Overview&lt;/h3&gt;
+                &lt;p&gt;Visual representation of security coverage across all sites:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Coverage Map:&lt;/strong&gt; Geographic view of guard locations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Zone Status:&lt;/strong&gt; Security zones and their current status&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Alert Zones:&lt;/strong&gt; Areas requiring immediate attention&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Allocation:&lt;/strong&gt; Distribution of security personnel&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Incident Management Hub&lt;/h3&gt;
+                &lt;p&gt;The incident management section provides a comprehensive view of security events:&lt;/p&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Priority Levels&lt;/dt&gt;
+                    &lt;dd&gt;Critical, High, Medium, Low - ensuring proper response prioritization&lt;/dd&gt;
+                    &lt;dt&gt;Response Times&lt;/dt&gt;
+                    &lt;dd&gt;Target and actual response times for different incident types&lt;/dd&gt;
+                    &lt;dt&gt;Escalation Protocols&lt;/dt&gt;
+                    &lt;dd&gt;Automatic escalation based on incident severity and response time&lt;/dd&gt;
+                    &lt;dt&gt;Resolution Tracking&lt;/dt&gt;
+                    &lt;dd&gt;Complete audit trail from incident report to resolution&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h3&gt;Tours &amp; Patrols Management&lt;/h3&gt;
+                &lt;p&gt;Comprehensive patrol management ensures consistent security coverage:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Scheduled Tours:&lt;/strong&gt; Planned patrol routes and schedules&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Check-in Points:&lt;/strong&gt; Required patrol stops with time windows&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;GPS Tracking:&lt;/strong&gt; Real-time location monitoring&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Tour Completion:&lt;/strong&gt; Automated reporting and verification&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Exception Alerts:&lt;/strong&gt; Notifications for missed check-ins or deviations&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Dashboard Customization&lt;/h3&gt;
+                &lt;p&gt;Tailor the dashboard to your specific needs and role:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Rearrange panels based on your priorities&lt;/li&gt;
+                    &lt;li&gt;Set custom alerts and notifications&lt;/li&gt;
+                    &lt;li&gt;Create role-specific dashboard views&lt;/li&gt;
+                    &lt;li&gt;Save multiple dashboard configurations&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Quick Actions and Shortcuts&lt;/h3&gt;
+                &lt;p&gt;The dashboard includes quick access buttons for common tasks:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Report Incident:&lt;/strong&gt; One-click incident reporting&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Clock In/Out:&lt;/strong&gt; Shift time tracking&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Alert:&lt;/strong&gt; Immediate notification system&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Contact Supervisor:&lt;/strong&gt; Direct communication channel&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Interactive Activity:&lt;/strong&gt; Dashboard Scavenger Hunt - Locate and identify each dashboard component, then practice using the quick action buttons.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_fundamentals_m4_quiz" model="slide.slide">
+            <field name="name">Module 4: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_fundamentals"/>
+            <field name="sequence">41</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <!-- Module 5: Basic Operations -->
+        <record id="slide_fundamentals_m5_ops" model="slide.slide">
+            <field name="name">Module 5: Basic Operations</field>
+            <field name="channel_id" ref="elearning_course_fundamentals"/>
+            <field name="sequence">50</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.83</field>
+            <field name="html_content">
+                &lt;h2&gt;Mastering Basic GuardPro Operations&lt;/h2&gt;
+                &lt;p&gt;Effective security operations depend on your ability to quickly and accurately perform essential tasks in GuardPro. This module covers the core operations you'll use daily to manage security activities, incidents, and communications.&lt;/p&gt;
+
+                &lt;h3&gt;Creating New Records&lt;/h3&gt;
+                &lt;p&gt;Most security operations begin with creating accurate records. The process follows a consistent pattern across all modules:&lt;/p&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Navigate to the Module:&lt;/strong&gt; Use the left sidebar menu to access the relevant section&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Click Create Button:&lt;/strong&gt; Located in the top-left of the list view&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Fill Required Fields:&lt;/strong&gt; Marked with red asterisks (*)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Add Details:&lt;/strong&gt; Complete all relevant information&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Save Record:&lt;/strong&gt; Use Ctrl+S or click the Save button&lt;/li&gt;
+                &lt;/ol&gt;
+                &lt;p&gt;&lt;strong&gt;Pro Tip:&lt;/strong&gt; Always verify your entries before saving. Accurate data is crucial for security operations.&lt;/p&gt;
+
+                &lt;h3&gt;Editing and Updating Records&lt;/h3&gt;
+                &lt;p&gt;Security situations change rapidly, so you must be able to update records quickly and accurately:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Open the Record:&lt;/strong&gt; Click on any record in list view or search for it&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Make Changes:&lt;/strong&gt; Edit fields as needed&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Save Changes:&lt;/strong&gt; Use the Save button or Ctrl+S&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Track Changes:&lt;/strong&gt; The system logs all modifications for audit purposes&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Advanced Search and Filtering Techniques&lt;/h3&gt;
+                &lt;p&gt;Finding the right information quickly can be critical in emergency situations:&lt;/p&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Quick Search&lt;/dt&gt;
+                    &lt;dd&gt;Type keywords in the search bar - searches across multiple fields simultaneously&lt;/dd&gt;
+                    &lt;dt&gt;Advanced Filters&lt;/dt&gt;
+                    &lt;dd&gt;Create complex queries using AND/OR logic and multiple criteria&lt;/dd&gt;
+                    &lt;dt&gt;Date Range Filters&lt;/dt&gt;
+                    &lt;dd&gt;Filter by specific time periods: today, this week, last month, custom ranges&lt;/dd&gt;
+                    &lt;dt&gt;Status Filters&lt;/dt&gt;
+                    &lt;dd&gt;Filter by operational status: active, pending, completed, cancelled&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h3&gt;Data Export and Reporting&lt;/h3&gt;
+                &lt;p&gt;Exporting data is essential for reporting, analysis, and record-keeping:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Select Records:&lt;/strong&gt; Choose specific records or use filters to select a subset&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Choose Format:&lt;/strong&gt; Excel (.xlsx), CSV, or PDF formats&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Select Fields:&lt;/strong&gt; Choose which columns to include in the export&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Apply Filters:&lt;/strong&gt; Export only filtered results&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Role-Specific Operations&lt;/h3&gt;
+                &lt;p&gt;Different roles have access to different functions based on their responsibilities:&lt;/p&gt;
+
+                &lt;h4&gt;For Security Guards:&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Clock in/out for shifts&lt;/li&gt;
+                    &lt;li&gt;Report incidents and observations&lt;/li&gt;
+                    &lt;li&gt;Check in for scheduled tours&lt;/li&gt;
+                    &lt;li&gt;Update patrol status&lt;/li&gt;
+                    &lt;li&gt;Access site-specific procedures&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;For Site Supervisors:&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Assign and manage guard shifts&lt;/li&gt;
+                    &lt;li&gt;Review and approve incident reports&lt;/li&gt;
+                    &lt;li&gt;Monitor tour completion&lt;/li&gt;
+                    &lt;li&gt;Generate performance reports&lt;/li&gt;
+                    &lt;li&gt;Communicate with guards&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;For Security Managers:&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Configure system settings&lt;/li&gt;
+                    &lt;li&gt;Manage user accounts and permissions&lt;/li&gt;
+                    &lt;li&gt;Oversee multiple sites&lt;/li&gt;
+                    &lt;li&gt;Generate executive reports&lt;/li&gt;
+                    &lt;li&gt;Handle escalations&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Data Integrity and Security&lt;/h3&gt;
+                &lt;p&gt;Maintaining accurate and secure data is paramount in security operations:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Never Share Credentials:&lt;/strong&gt; Your login is personal and audit-able&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Complete All Fields:&lt;/strong&gt; Partial records can compromise security&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Use Correct Categories:&lt;/strong&gt; Proper classification ensures proper response&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Timely Updates:&lt;/strong&gt; Real-time information saves lives&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Follow Protocols:&lt;/strong&gt; Standardized procedures ensure consistency&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Common Operations Workflows&lt;/h3&gt;
+                &lt;p&gt;&lt;strong&gt;Incident Reporting Workflow:&lt;/strong&gt;&lt;/p&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Observe or receive report of incident&lt;/li&gt;
+                    &lt;li&gt;Assess situation and ensure safety&lt;/li&gt;
+                    &lt;li&gt;Create incident record with all details&lt;/li&gt;
+                    &lt;li&gt;Notify appropriate personnel&lt;/li&gt;
+                    &lt;li&gt;Follow up and update status&lt;/li&gt;
+                    &lt;li&gt;Complete investigation if required&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;p&gt;&lt;strong&gt;Hands-On Practice:&lt;/strong&gt; Complete these practical exercises: 1) Create a new incident report, 2) Search for records using advanced filters, 3) Export a list of recent activities&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_fundamentals_m5_quiz" model="slide.slide">
+            <field name="name">Module 5: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_fundamentals"/>
+            <field name="sequence">51</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <!-- Module 6: Getting Help -->
+        <record id="slide_fundamentals_m6_help" model="slide.slide">
+            <field name="name">Module 6: Getting Help</field>
+            <field name="channel_id" ref="elearning_course_fundamentals"/>
+            <field name="sequence">60</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.17</field>
+            <field name="html_content">
+                &lt;h2&gt;Help and Support Resources&lt;/h2&gt;
+                &lt;p&gt;Know where to get help when you need it.&lt;/p&gt;
+                &lt;h3&gt;Support Levels:&lt;/h3&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Self-Help:&lt;/strong&gt; Documentation, FAQs, tooltips&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Team Help:&lt;/strong&gt; Supervisor, colleagues&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Technical Support:&lt;/strong&gt; Help desk, IT&lt;/li&gt;
+                &lt;/ol&gt;
+                &lt;p&gt;&lt;strong&gt;Remember:&lt;/strong&gt; Try self-help resources first!&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_fundamentals_m6_quiz" model="slide.slide">
+            <field name="name">Module 6: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_fundamentals"/>
+            <field name="sequence">61</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <!-- Final Assessment -->
+        <record id="slide_fundamentals_final" model="slide.slide">
+            <field name="name">Final Assessment</field>
+            <field name="channel_id" ref="elearning_course_fundamentals"/>
+            <field name="sequence">70</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.17</field>
+            <field name="html_content">
+                &lt;h2&gt;Final Examination&lt;/h2&gt;
+                &lt;p&gt;&lt;strong&gt;Requirements:&lt;/strong&gt;&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;20 questions&lt;/li&gt;
+                    &lt;li&gt;80% pass required&lt;/li&gt;
+                    &lt;li&gt;10 minutes time limit&lt;/li&gt;
+                    &lt;li&gt;Can retake if needed&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;p&gt;Upon passing, you'll receive your GuardPro Fundamentals certificate!&lt;/p&gt;
+            </field>
+        </record>
+
+    </data>
+</odoo>
+

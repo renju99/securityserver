@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- SLA Setup Wizard Form View -->
+    <record id="view_sla_setup_wizard_form" model="ir.ui.view">
+        <field name="name">sla.setup.wizard.form</field>
+        <field name="model">sla.setup.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Create SLA from Template">
+                <group>
+                    <group string="Template Selection">
+                        <field name="template_id" 
+                               options="{'no_create': True, 'no_open': True}"/>
+                        <field name="template_kpi_count" invisible="1"/>
+                    </group>
+                    <group string="Template Info">
+                        <div colspan="2" class="alert alert-info" role="alert" 
+                             invisible="not template_id">
+                            <i class="fa fa-info-circle"/> This template includes 
+                            <strong><field name="template_kpi_count" class="oe_inline"/></strong> KPIs
+                        </div>
+                    </group>
+                </group>
+                
+                <group invisible="not template_id">
+                    <field name="template_description" nolabel="1" colspan="2"/>
+                </group>
+                
+                <separator string="SLA Details" invisible="not template_id"/>
+                <group invisible="not template_id">
+                    <group>
+                        <field name="name"/>
+                        <field name="client_id" options="{'no_create': True}"/>
+                        <field name="site_ids" widget="many2many_tags"/>
+                    </group>
+                    <group>
+                        <field name="contract_reference"/>
+                        <field name="start_date"/>
+                        <field name="contract_duration"/>
+                        <field name="end_date"/>
+                    </group>
+                </group>
+                
+                <group invisible="not template_id">
+                    <group>
+                        <field name="penalty_applicable" widget="boolean_toggle"/>
+                        <field name="penalty_notes" invisible="not penalty_applicable" 
+                               placeholder="Describe penalty structure..."/>
+                    </group>
+                    <group>
+                        <field name="customize_kpis" widget="boolean_toggle"/>
+                        <field name="auto_activate" widget="boolean_toggle"/>
+                    </group>
+                </group>
+                
+                <separator string="KPIs to Include" invisible="not template_id or not kpi_preview_ids"/>
+                <field name="kpi_preview_ids" invisible="not template_id or not kpi_preview_ids">
+                    <list editable="bottom" create="0" delete="0">
+                        <field name="include" widget="boolean_toggle"/>
+                        <field name="sequence" widget="handle"/>
+                        <field name="name"/>
+                        <field name="kpi_type"/>
+                        <field name="target_value" readonly="not parent.customize_kpis"/>
+                        <field name="unit"/>
+                        <field name="target_direction"/>
+                        <field name="measurement_period" readonly="not parent.customize_kpis"/>
+                        <field name="weight" readonly="not parent.customize_kpis" optional="hide"/>
+                        <field name="penalty_applicable" widget="boolean_toggle" 
+                               readonly="not parent.customize_kpis" optional="hide"/>
+                        <field name="audit_score_based" widget="boolean_toggle" optional="hide"/>
+                        <field name="linked_audit_type" optional="hide"
+                               invisible="not audit_score_based"/>
+                    </list>
+                </field>
+                
+                <footer>
+                    <button string="Create SLA" type="object" name="action_create_sla"
+                            class="btn-primary" invisible="not template_id"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Quick Add KPI Wizard Form View -->
+    <record id="view_sla_kpi_quick_wizard_form" model="ir.ui.view">
+        <field name="name">sla.kpi.quick.wizard.form</field>
+        <field name="model">sla.kpi.quick.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Quick Add KPI">
+                <group>
+                    <field name="sla_id" invisible="1"/>
+                    <field name="preset_type" widget="radio"/>
+                </group>
+                
+                <separator string="Select Template" invisible="preset_type != 'template'"/>
+                <group invisible="preset_type != 'template'">
+                    <field name="kpi_template_id" 
+                           options="{'no_create': True}"
+                           domain="[]"/>
+                </group>
+                
+                <separator string="Select Quick Preset" invisible="preset_type != 'preset'"/>
+                <group invisible="preset_type != 'preset'">
+                    <field name="kpi_preset" widget="radio"/>
+                </group>
+                
+                <separator string="KPI Configuration" 
+                          invisible="preset_type == 'preset' and not kpi_preset or preset_type == 'template' and not kpi_template_id"/>
+                <group invisible="preset_type == 'preset' and not kpi_preset or preset_type == 'template' and not kpi_template_id">
+                    <group>
+                        <field name="name"/>
+                        <field name="kpi_type"/>
+                        <field name="description" placeholder="How is this KPI measured?"/>
+                    </group>
+                    <group>
+                        <label for="target_value"/>
+                        <div class="o_row">
+                            <field name="target_value"/>
+                            <field name="unit" class="oe_inline ms-2"/>
+                        </div>
+                        <field name="target_direction"/>
+                        <field name="measurement_period"/>
+                    </group>
+                </group>
+                
+                <group string="Thresholds" 
+                       invisible="preset_type == 'preset' and not kpi_preset or preset_type == 'template' and not kpi_template_id">
+                    <group>
+                        <field name="warning_threshold"/>
+                        <field name="critical_threshold"/>
+                    </group>
+                    <group>
+                        <field name="weight"/>
+                    </group>
+                </group>
+                
+                <group string="Penalties" 
+                       invisible="preset_type == 'preset' and not kpi_preset or preset_type == 'template' and not kpi_template_id">
+                    <group>
+                        <field name="penalty_applicable" widget="boolean_toggle"/>
+                        <field name="penalty_amount" invisible="not penalty_applicable"/>
+                        <field name="currency_id" invisible="1"/>
+                    </group>
+                </group>
+                
+                <group string="Audit Integration" 
+                       invisible="preset_type == 'preset' and not kpi_preset or preset_type == 'template' and not kpi_template_id">
+                    <group>
+                        <field name="audit_score_based" widget="boolean_toggle"/>
+                        <field name="linked_audit_type" invisible="not audit_score_based"
+                               required="audit_score_based"/>
+                    </group>
+                    <group>
+                        <div class="alert alert-info" role="alert" invisible="not audit_score_based">
+                            <i class="fa fa-info-circle"/> This KPI will be automatically 
+                            calculated from compliance audit scores
+                        </div>
+                    </group>
+                </group>
+                
+                <footer>
+                    <button string="Add KPI" type="object" name="action_add_kpi"
+                            class="btn-primary" 
+                            invisible="preset_type == 'preset' and not kpi_preset or preset_type == 'template' and not kpi_template_id"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action to open SLA Setup Wizard -->
+    <record id="action_sla_setup_wizard" model="ir.actions.act_window">
+        <field name="name">Create SLA from Template</field>
+        <field name="res_model">sla.setup.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_sla_definition"/>
+        <field name="binding_view_types">form,list</field>
+    </record>
+
+</odoo>
+
+
+
+
+
+

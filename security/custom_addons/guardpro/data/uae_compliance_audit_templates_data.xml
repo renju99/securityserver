@@ -1,0 +1,1149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- SIRA Security Personnel Compliance Audit Template -->
+        <record id="audit_template_sira_personnel" model="compliance.audit.template">
+            <field name="name">SIRA Security Personnel Compliance Audit</field>
+            <field name="description">Audit checklist for verifying security guard licensing and training as per SIRA (Dubai) regulations.</field>
+            <field name="audit_type">regulatory</field>
+            <field name="frequency">quarterly</field>
+            <field name="passing_score">100.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_sira_personnel_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_sira_personnel"/>
+            <field name="sequence">10</field>
+            <field name="description">Guard has valid SIRA Permit/Card</field>
+            <field name="category">Licensing</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+            <field name="regulation_reference">SIRA-REG-2023</field>
+        </record>
+        
+        <record id="item_sira_personnel_2" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_sira_personnel"/>
+            <field name="sequence">20</field>
+            <field name="description">Guard has completed 40 hours of basic training</field>
+            <field name="category">Training</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+            <field name="regulation_reference">SIRA-REG-2023</field>
+        </record>
+        
+        <record id="item_sira_personnel_3" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_sira_personnel"/>
+            <field name="sequence">30</field>
+            <field name="description">Guard has passed SIRA examinations</field>
+            <field name="category">Training</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+            <field name="regulation_reference">SIRA-REG-2023</field>
+        </record>
+        
+        <record id="item_sira_personnel_4" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_sira_personnel"/>
+            <field name="sequence">40</field>
+            <field name="description">Guard has valid Medical Fitness Certificate</field>
+            <field name="category">Licensing</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+            <field name="regulation_reference">SIRA-REG-2023</field>
+        </record>
+        
+        <record id="item_sira_personnel_5" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_sira_personnel"/>
+            <field name="sequence">50</field>
+            <field name="description">Guard is registered in SIRA system</field>
+            <field name="category">Licensing</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+            <field name="regulation_reference">SIRA-REG-2023</field>
+        </record>
+        
+        <record id="item_sira_personnel_6" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_sira_personnel"/>
+            <field name="sequence">60</field>
+            <field name="description">Guard has clean disciplinary record</field>
+            <field name="category">Compliance</field>
+            <field name="critical">False</field>
+            <field name="max_score">20</field>
+        </record>
+
+        <!-- UAE Security Guard Uniform & Appearance Audit Template -->
+        <record id="audit_template_uae_uniform" model="compliance.audit.template">
+            <field name="name">UAE Security Guard Uniform &amp; Appearance Audit</field>
+            <field name="description">Audit checklist for verifying security guard uniform and grooming standards as per UAE regulations (SIRA/ASSD).</field>
+            <field name="audit_type">quality</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">90.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_uniform_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_uniform"/>
+            <field name="sequence">10</field>
+            <field name="description">Uniform is in approved color (Black/Navy/Grey)</field>
+            <field name="category">Uniform</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+            <field name="regulation_reference">SIRA-STD-UNIFORM-2023</field>
+        </record>
+        
+        <record id="item_uae_uniform_2" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_uniform"/>
+            <field name="sequence">20</field>
+            <field name="description">SIRA Badge visible on left chest/shoulder</field>
+            <field name="category">Uniform</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+            <field name="regulation_reference">SIRA-STD-UNIFORM-2023</field>
+        </record>
+        
+        <record id="item_uae_uniform_3" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_uniform"/>
+            <field name="sequence">30</field>
+            <field name="description">Name tag clearly visible with guard/company name</field>
+            <field name="category">Uniform</field>
+            <field name="critical">True</field>
+            <field name="max_score">10</field>
+        </record>
+        
+        <record id="item_uae_uniform_4" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_uniform"/>
+            <field name="sequence">40</field>
+            <field name="description">Company logo properly positioned</field>
+            <field name="category">Uniform</field>
+            <field name="critical">False</field>
+            <field name="max_score">10</field>
+        </record>
+        
+        <record id="item_uae_uniform_5" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_uniform"/>
+            <field name="sequence">50</field>
+            <field name="description">Uniform is clean and pressed</field>
+            <field name="category">Grooming</field>
+            <field name="critical">False</field>
+            <field name="max_score">10</field>
+        </record>
+        
+        <record id="item_uae_uniform_6" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_uniform"/>
+            <field name="sequence">60</field>
+            <field name="description">Black safety shoes polished and in good condition</field>
+            <field name="category">Uniform</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="item_uae_uniform_7" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_uniform"/>
+            <field name="sequence">70</field>
+            <field name="description">Personal grooming (hair, nails, facial hair) standards met</field>
+            <field name="category">Grooming</field>
+            <field name="critical">False</field>
+            <field name="max_score">10</field>
+        </record>
+        
+        <record id="item_uae_uniform_8" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_uniform"/>
+            <field name="sequence">80</field>
+            <field name="description">Equipment (flashlight, radio) carried in approved pouches</field>
+            <field name="category">Equipment</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+
+        <!-- UAE Emergency Response Readiness Audit Template -->
+        <record id="audit_template_uae_emergency" model="compliance.audit.template">
+            <field name="name">UAE Emergency Response Readiness Audit</field>
+            <field name="description">Audit checklist for verifying security guard readiness for emergency situations as per UAE protocols.</field>
+            <field name="audit_type">safety</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">100.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_emergency_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_emergency"/>
+            <field name="sequence">10</field>
+            <field name="description">Guard knows emergency numbers (999, 998, 997)</field>
+            <field name="category">Knowledge</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+        
+        <record id="item_uae_emergency_2" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_emergency"/>
+            <field name="sequence">20</field>
+            <field name="description">Guard knows nearest Fire Alarm Call Point location</field>
+            <field name="category">Fire Safety</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="item_uae_emergency_3" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_emergency"/>
+            <field name="sequence">30</field>
+            <field name="description">Guard knows PASS method for fire extinguishers</field>
+            <field name="category">Fire Safety</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="item_uae_emergency_4" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_emergency"/>
+            <field name="sequence">40</field>
+            <field name="description">Guard knows location of first aid kits</field>
+            <field name="category">Medical</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="item_uae_emergency_5" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_emergency"/>
+            <field name="sequence">50</field>
+            <field name="description">Guard knows site evacuation route and assembly point</field>
+            <field name="category">Evacuation</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="item_uae_emergency_6" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_emergency"/>
+            <field name="sequence">60</field>
+            <field name="description">Guard understands "Run, Hide, Fight" protocol</field>
+            <field name="category">Security</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+
+        <!-- CCTV & Control Room Operations Compliance Audit (SIRA) Template -->
+        <record id="audit_template_sira_cctv" model="compliance.audit.template">
+            <field name="name">CCTV &amp; Control Room Operations Compliance Audit (SIRA)</field>
+            <field name="description">Audit checklist for verifying CCTV operations and control room standards as per SIRA regulations.</field>
+            <field name="audit_type">security</field>
+            <field name="frequency">quarterly</field>
+            <field name="passing_score">95.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_sira_cctv_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_sira_cctv"/>
+            <field name="sequence">10</field>
+            <field name="description">CRO has valid SIRA Control Room Operator permit</field>
+            <field name="category">Licensing</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+        
+        <record id="item_sira_cctv_2" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_sira_cctv"/>
+            <field name="sequence">20</field>
+            <field name="description">CCTV recording is continuous (24/7)</field>
+            <field name="category">Operations</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+        
+        <record id="item_sira_cctv_3" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_sira_cctv"/>
+            <field name="sequence">30</field>
+            <field name="description">Retention period meets SIRA standards (minimum 31 days)</field>
+            <field name="category">Operations</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+        
+        <record id="item_sira_cctv_4" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_sira_cctv"/>
+            <field name="sequence">40</field>
+            <field name="description">All cameras are functional and properly positioned</field>
+            <field name="category">Equipment</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="item_sira_cctv_5" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_sira_cctv"/>
+            <field name="sequence">50</field>
+            <field name="description">Control room access is restricted to authorized personnel</field>
+            <field name="category">Security</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="item_sira_cctv_6" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_sira_cctv"/>
+            <field name="sequence">60</field>
+            <field name="description">System time is synchronized with UAE standard time</field>
+            <field name="category">Operations</field>
+            <field name="critical">False</field>
+            <field name="max_score">10</field>
+        </record>
+
+        <!-- UAE Labor Law & Guard Welfare Compliance Audit Template -->
+        <record id="audit_template_uae_labor" model="compliance.audit.template">
+            <field name="name">UAE Labor Law &amp; Guard Welfare Compliance Audit</field>
+            <field name="description">Audit checklist for verifying compliance with UAE Labor Law and guard welfare standards.</field>
+            <field name="audit_type">operational</field>
+            <field name="frequency">semiannual</field>
+            <field name="passing_score">100.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_labor_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_labor"/>
+            <field name="sequence">10</field>
+            <field name="description">Guard has written employment contract in Arabic</field>
+            <field name="category">Welfare</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+            <field name="regulation_reference">UAE Federal Labor Law</field>
+        </record>
+        
+        <record id="item_uae_labor_2" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_labor"/>
+            <field name="sequence">20</field>
+            <field name="description">Working hours comply with UAE Labor Law (max 8h/day, 48h/week)</field>
+            <field name="category">Operations</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+            <field name="regulation_reference">UAE Federal Labor Law</field>
+        </record>
+        
+        <record id="item_uae_labor_3" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_labor"/>
+            <field name="sequence">30</field>
+            <field name="description">Overtime is properly recorded and compensated</field>
+            <field name="category">Operations</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="item_uae_labor_4" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_labor"/>
+            <field name="sequence">40</field>
+            <field name="description">Guard has valid medical insurance card</field>
+            <field name="category">Welfare</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="item_uae_labor_5" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_labor"/>
+            <field name="sequence">50</field>
+            <field name="description">Passport is in guard's possession (not held by employer)</field>
+            <field name="category">Welfare</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+            <field name="regulation_reference">UAE Ministry of Interior Directive</field>
+        </record>
+        
+        <record id="item_uae_labor_6" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_labor"/>
+            <field name="sequence">60</field>
+            <field name="description">Salary paid via WPS (Wage Protection System) by 10th of month</field>
+            <field name="category">Finance</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+            <field name="regulation_reference">MOHRE WPS Regulation</field>
+        </record>
+
+        <!-- 1. UAE Summer & Heat Stress Protocol Audit -->
+        <record id="audit_template_uae_heat_stress" model="compliance.audit.template">
+            <field name="name">UAE Summer &amp; Heat Stress Protocol Audit</field>
+            <field name="description">Mandatory audit for summer months to ensure compliance with UAE heat stress and midday break regulations.</field>
+            <field name="audit_type">safety</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">100.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_heat_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_heat_stress"/>
+            <field name="sequence">10</field>
+            <field name="description">Midday break (12:30 PM - 3:00 PM) strictly observed for outdoor posts</field>
+            <field name="category">Regulatory</field>
+            <field name="critical">True</field>
+            <field name="max_score">25</field>
+            <field name="regulation_reference">MOHRE Midday Break Decree</field>
+        </record>
+        
+        <record id="item_uae_heat_2" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_heat_stress"/>
+            <field name="sequence">20</field>
+            <field name="description">Cool drinking water available for all guards at all times</field>
+            <field name="category">Welfare</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="item_uae_heat_3" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_heat_stress"/>
+            <field name="sequence">30</field>
+            <field name="description">Shaded rest areas provided for guards during breaks</field>
+            <field name="category">Facilities</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="item_uae_heat_4" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_heat_stress"/>
+            <field name="sequence">40</field>
+            <field name="description">Guards trained in recognizing signs of heat exhaustion/stroke</field>
+            <field name="category">Training</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="item_uae_heat_5" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_heat_stress"/>
+            <field name="sequence">50</field>
+            <field name="description">Electrolyte supplements/salts available in first aid kits</field>
+            <field name="category">Medical</field>
+            <field name="critical">False</field>
+            <field name="max_score">10</field>
+        </record>
+
+        <!-- 2. Gatehouse & Vehicle Screening Audit -->
+        <record id="audit_template_uae_gatehouse" model="compliance.audit.template">
+            <field name="name">Gatehouse &amp; Vehicle Screening Audit</field>
+            <field name="description">Audit for access control points and vehicle entry/exit procedures.</field>
+            <field name="audit_type">security</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">90.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_gate_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_gatehouse"/>
+            <field name="sequence">10</field>
+            <field name="description">All vehicles log entry/exit time and plate number</field>
+            <field name="category">Documentation</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+        
+        <record id="item_uae_gate_2" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_gatehouse"/>
+            <field name="sequence">20</field>
+            <field name="description">Under-vehicle search mirrors used correctly</field>
+            <field name="category">Security</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="item_uae_gate_3" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_gatehouse"/>
+            <field name="sequence">30</field>
+            <field name="description">Driver's ID (Emirates ID/Driving License) checked and recorded</field>
+            <field name="category">Access Control</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+        
+        <record id="item_uae_gate_4" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_gatehouse"/>
+            <field name="sequence">40</field>
+            <field name="description">Barriers and gates functioning correctly</field>
+            <field name="category">Maintenance</field>
+            <field name="critical">False</field>
+            <field name="max_score">15</field>
+        </record>
+
+        <!-- 3. Key Control & Asset Protection Audit -->
+        <record id="audit_template_uae_key_control" model="compliance.audit.template">
+            <field name="name">Key Control &amp; Asset Protection Audit</field>
+            <field name="description">Audit for master keys, restricted areas, and high-value asset protection.</field>
+            <field name="audit_type">security</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">100.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_key_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_key_control"/>
+            <field name="sequence">10</field>
+            <field name="description">Key register is up-to-date and accurate</field>
+            <field name="category">Documentation</field>
+            <field name="critical">True</field>
+            <field name="max_score">25</field>
+        </record>
+        
+        <record id="item_uae_key_2" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_key_control"/>
+            <field name="sequence">20</field>
+            <field name="description">All master keys are secured in a locked cabinet</field>
+            <field name="category">Security</field>
+            <field name="critical">True</field>
+            <field name="max_score">25</field>
+        </record>
+        
+        <record id="item_uae_key_3" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_key_control"/>
+            <field name="sequence">30</field>
+            <field name="description">Keys issued only to authorized personnel with signature</field>
+            <field name="category">Operations</field>
+            <field name="critical">True</field>
+            <field name="max_score">25</field>
+        </record>
+
+        <!-- 4. Security Documentation & Logbook Audit -->
+        <record id="audit_template_uae_logbook" model="compliance.audit.template">
+            <field name="name">Security Documentation &amp; Logbook Audit</field>
+            <field name="description">Audit for the quality, accuracy, and completeness of security logs and reports.</field>
+            <field name="audit_type">quality</field>
+            <field name="frequency">weekly</field>
+            <field name="passing_score">85.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_log_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_logbook"/>
+            <field name="sequence">10</field>
+            <field name="description">Daily Activity Reports (DAR) completed for every shift</field>
+            <field name="category">Quality</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+        
+        <record id="item_uae_log_2" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_logbook"/>
+            <field name="sequence">20</field>
+            <field name="description">Entries are legible, chronological, and in English</field>
+            <field name="category">Quality</field>
+            <field name="critical">False</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="item_uae_log_3" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_logbook"/>
+            <field name="sequence">30</field>
+            <field name="description">Incident reports are detailed with photos and evidence</field>
+            <field name="category">Quality</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+
+        <!-- 5. Night Shift & Perimeter Patrol Audit -->
+        <record id="audit_template_uae_night_shift" model="compliance.audit.template">
+            <field name="name">Night Shift &amp; Perimeter Patrol Audit</field>
+            <field name="description">Audit specifically for night shift performance and perimeter integrity.</field>
+            <field name="audit_type">operational</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">95.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_night_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_night_shift"/>
+            <field name="sequence">10</field>
+            <field name="description">Guards remain alert and awake throughout shift</field>
+            <field name="category">Performance</field>
+            <field name="critical">True</field>
+            <field name="max_score">30</field>
+        </record>
+        
+        <record id="item_uae_night_2" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_night_shift"/>
+            <field name="sequence">20</field>
+            <field name="description">Hourly perimeter patrols verified via NFC/QR scanners</field>
+            <field name="category">Operations</field>
+            <field name="critical">True</field>
+            <field name="max_score">25</field>
+        </record>
+        
+        <record id="item_uae_night_3" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_night_shift"/>
+            <field name="sequence">30</field>
+            <field name="description">Flashlights are operational and used during patrols</field>
+            <field name="category">Equipment</field>
+            <field name="critical">False</field>
+            <field name="max_score">15</field>
+        </record>
+
+        <!-- 6. Residential Site Security Compliance -->
+        <record id="audit_template_uae_residential" model="compliance.audit.template">
+            <field name="name">Residential Site Security Compliance</field>
+            <field name="description">Audit for residential towers, villas, and gated communities.</field>
+            <field name="audit_type">security</field>
+            <field name="frequency">quarterly</field>
+            <field name="passing_score">90.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_res_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_residential"/>
+            <field name="sequence">10</field>
+            <field name="description">Resident move-in/move-out permits verified</field>
+            <field name="category">Operations</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+        
+        <record id="item_uae_res_2" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_residential"/>
+            <field name="sequence">20</field>
+            <field name="description">Swimming pool and gym security rules enforced</field>
+            <field name="category">Safety</field>
+            <field name="critical">False</field>
+            <field name="max_score">15</field>
+        </record>
+
+        <!-- 7. Retail & Shopping Mall Security Audit -->
+        <record id="audit_template_uae_retail" model="compliance.audit.template">
+            <field name="name">Retail &amp; Shopping Mall Security Audit</field>
+            <field name="description">Audit for mall environments, including crowd control and anti-shoplifting.</field>
+            <field name="audit_type">security</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">90.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_retail_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_retail"/>
+            <field name="sequence">10</field>
+            <field name="description">High-visibility patrols maintained in crowded areas</field>
+            <field name="category">Operations</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+
+        <!-- 8. Hotel & Hospitality Security Audit -->
+        <record id="audit_template_uae_hotel" model="compliance.audit.template">
+            <field name="name">Hotel &amp; Hospitality Security Audit</field>
+            <field name="description">Audit for hotel security standards, DTCM compliance, and guest safety.</field>
+            <field name="audit_type">quality</field>
+            <field name="frequency">quarterly</field>
+            <field name="passing_score">95.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_hotel_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_hotel"/>
+            <field name="sequence">10</field>
+            <field name="description">Guest privacy and confidentiality maintained</field>
+            <field name="category">Quality</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+
+        <!-- 9. Communication & Radio Discipline Audit -->
+        <record id="audit_template_uae_radio" model="compliance.audit.template">
+            <field name="name">Communication &amp; Radio Discipline Audit</field>
+            <field name="description">Audit for radio usage, code words, and reporting discipline.</field>
+            <field name="audit_type">quality</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">80.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_radio_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_radio"/>
+            <field name="sequence">10</field>
+            <field name="description">Standard radio codes and terminology used correctly</field>
+            <field name="category">Operations</field>
+            <field name="critical">False</field>
+            <field name="max_score">20</field>
+        </record>
+
+        <!-- 10. First Aid & Medical Station Audit -->
+        <record id="audit_template_uae_first_aid" model="compliance.audit.template">
+            <field name="name">First Aid &amp; Medical Station Audit</field>
+            <field name="description">Audit for first aid kit readiness and medical emergency preparedness.</field>
+            <field name="audit_type">safety</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">100.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_medical_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_first_aid"/>
+            <field name="sequence">10</field>
+            <field name="description">First aid kits are fully stocked and no items are expired</field>
+            <field name="category">Medical</field>
+            <field name="critical">True</field>
+            <field name="max_score">30</field>
+        </record>
+
+        <!-- 11. Fire Prevention & Life Safety Audit -->
+        <record id="audit_template_uae_fire_prev" model="compliance.audit.template">
+            <field name="name">Fire Prevention &amp; Life Safety Audit</field>
+            <field name="description">Comprehensive audit for fire safety systems and prevention measures.</field>
+            <field name="audit_type">safety</field>
+            <field name="frequency">quarterly</field>
+            <field name="passing_score">100.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_fire_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_fire_prev"/>
+            <field name="sequence">10</field>
+            <field name="description">All fire extinguishers are in place and inspected monthly</field>
+            <field name="category">Fire Safety</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+
+        <!-- 12. Lost & Found Procedure Audit -->
+        <record id="audit_template_uae_lost_found" model="compliance.audit.template">
+            <field name="name">Lost &amp; Found Procedure Audit</field>
+            <field name="description">Audit for lost and found inventory and handover protocols.</field>
+            <field name="audit_type">operational</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">90.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_lost_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_lost_found"/>
+            <field name="sequence">10</field>
+            <field name="description">All items are correctly tagged and logged with photos</field>
+            <field name="category">Documentation</field>
+            <field name="critical">True</field>
+            <field name="max_score">25</field>
+        </record>
+
+        <!-- 13. Visitor & Contractor Access Audit -->
+        <record id="audit_template_uae_visitors" model="compliance.audit.template">
+            <field name="name">Visitor &amp; Contractor Access Audit</field>
+            <field name="description">Audit for verifying visitor and contractor identification and site rules.</field>
+            <field name="audit_type">security</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">90.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_visitor_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_visitors"/>
+            <field name="sequence">10</field>
+            <field name="description">Visitors issued temporary badges and recorded in system</field>
+            <field name="category">Access Control</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+
+        <!-- 14. Guard Post & Duty Handover Audit -->
+        <record id="audit_template_uae_handover" model="compliance.audit.template">
+            <field name="name">Guard Post &amp; Duty Handover Audit</field>
+            <field name="description">Audit for the completeness of shift handovers and post briefings.</field>
+            <field name="audit_type">operational</field>
+            <field name="frequency">weekly</field>
+            <field name="passing_score">85.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_handover_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_handover"/>
+            <field name="sequence">10</field>
+            <field name="description">Handover log signed by both outgoing and incoming guards</field>
+            <field name="category">Operations</field>
+            <field name="critical">True</field>
+            <field name="max_score">25</field>
+        </record>
+
+        <!-- 15. Site Hygiene & Sanitation Audit -->
+        <record id="audit_template_uae_hygiene" model="compliance.audit.template">
+            <field name="name">Site Hygiene &amp; Sanitation Audit</field>
+            <field name="description">Audit for guard accommodation (if on-site) and guard post cleanliness.</field>
+            <field name="audit_type">quality</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">80.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_hygiene_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_hygiene"/>
+            <field name="sequence">10</field>
+            <field name="description">Guard post is clean and free of personal items/food</field>
+            <field name="category">Quality</field>
+            <field name="critical">False</field>
+            <field name="max_score">20</field>
+        </record>
+
+        <!-- 16. Event & Crowd Management Audit -->
+        <record id="audit_template_uae_events" model="compliance.audit.template">
+            <field name="name">Event &amp; Crowd Management Audit</field>
+            <field name="description">Audit for temporary events, festivals, and large crowd scenarios.</field>
+            <field name="audit_type">security</field>
+            <field name="frequency">adhoc</field>
+            <field name="passing_score">95.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_event_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_events"/>
+            <field name="sequence">10</field>
+            <field name="description">Crowd control barriers in place as per site plan</field>
+            <field name="category">Operations</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+
+        <!-- 17. School & Educational Institution Security Audit -->
+        <record id="audit_template_uae_school" model="compliance.audit.template">
+            <field name="name">School &amp; Educational Institution Security Audit</field>
+            <field name="description">Specific audit for schools and universities covering student safety and KHDA/ADEK requirements.</field>
+            <field name="audit_type">security</field>
+            <field name="frequency">quarterly</field>
+            <field name="passing_score">95.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_school_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_school"/>
+            <field name="sequence">10</field>
+            <field name="description">Student pickup/drop-off areas are properly supervised</field>
+            <field name="category">Operations</field>
+            <field name="critical">True</field>
+            <field name="max_score">25</field>
+        </record>
+
+        <!-- 18. Hospital & Healthcare Facility Security Audit -->
+        <record id="audit_template_uae_healthcare" model="compliance.audit.template">
+            <field name="name">Hospital &amp; Healthcare Facility Security Audit</field>
+            <field name="description">Audit for medical facilities focusing on patient safety and DHA/DOH regulations.</field>
+            <field name="audit_type">security</field>
+            <field name="frequency">quarterly</field>
+            <field name="passing_score">95.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_health_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_healthcare"/>
+            <field name="sequence">10</field>
+            <field name="description">Emergency room and ambulance access kept clear 24/7</field>
+            <field name="category">Safety</field>
+            <field name="critical">True</field>
+            <field name="max_score">25</field>
+        </record>
+
+        <!-- 19. Industrial & Construction Site Security Audit -->
+        <record id="audit_template_uae_industrial" model="compliance.audit.template">
+            <field name="name">Industrial &amp; Construction Site Security Audit</field>
+            <field name="description">Audit for heavy industry and construction sites covering PPE and material control.</field>
+            <field name="audit_type">safety</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">90.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_ind_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_industrial"/>
+            <field name="sequence">10</field>
+            <field name="description">All personnel on site wearing mandatory PPE (Helmet, Vest, Shoes)</field>
+            <field name="category">Safety</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+
+        <!-- 20. VIP & Close Protection Service Audit -->
+        <record id="audit_template_uae_vip" model="compliance.audit.template">
+            <field name="name">VIP &amp; Close Protection Service Audit</field>
+            <field name="description">Audit for executive protection and high-profile security details.</field>
+            <field name="audit_type">quality</field>
+            <field name="frequency">adhoc</field>
+            <field name="passing_score">100.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_vip_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_vip"/>
+            <field name="sequence">10</field>
+            <field name="description">Close protection officer has valid SIRA CPO permit</field>
+            <field name="category">Licensing</field>
+            <field name="critical">True</field>
+            <field name="max_score">30</field>
+        </record>
+
+        <!-- 21. Cash-in-Transit (CIT) Operational Compliance -->
+        <record id="audit_template_uae_cit" model="compliance.audit.template">
+            <field name="name">Cash-in-Transit (CIT) Operational Compliance</field>
+            <field name="description">Audit for CIT operations based on SIRA CIT regulations.</field>
+            <field name="audit_type">regulatory</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">100.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_cit_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_cit"/>
+            <field name="sequence">10</field>
+            <field name="description">CIT armored vehicle is SIRA-approved and GPS-tracked</field>
+            <field name="category">Regulatory</field>
+            <field name="critical">True</field>
+            <field name="max_score">25</field>
+        </record>
+
+        <!-- 22. Security Guard Equipment & Gear Inspection -->
+        <record id="audit_template_uae_gear" model="compliance.audit.template">
+            <field name="name">Security Guard Equipment &amp; Gear Inspection</field>
+            <field name="description">Detailed inspection of individual guard equipment readiness.</field>
+            <field name="audit_type">equipment</field>
+            <field name="frequency">weekly</field>
+            <field name="passing_score">95.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_gear_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_gear"/>
+            <field name="sequence">10</field>
+            <field name="description">Radio, Flashlight, Baton, and Handcuffs (if authorized) in good condition</field>
+            <field name="category">Equipment</field>
+            <field name="critical">True</field>
+            <field name="max_score">30</field>
+        </record>
+
+        <!-- 23. CCTV Control Room Health & Safety Audit -->
+        <record id="audit_template_uae_cctv_hs" model="compliance.audit.template">
+            <field name="name">CCTV Control Room Health &amp; Safety Audit</field>
+            <field name="description">Audit focusing on the working environment and safety of control room operators.</field>
+            <field name="audit_type">safety</field>
+            <field name="frequency">semiannual</field>
+            <field name="passing_score">85.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_cctv_hs_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_cctv_hs"/>
+            <field name="sequence">10</field>
+            <field name="description">Ergonomic seating and proper workstation lighting provided</field>
+            <field name="category">Welfare</field>
+            <field name="critical">False</field>
+            <field name="max_score">20</field>
+        </record>
+
+        <!-- 24. Alarm Response & Patrol Efficiency Audit -->
+        <record id="audit_template_uae_patrol_eff" model="compliance.audit.template">
+            <field name="name">Alarm Response &amp; Patrol Efficiency Audit</field>
+            <field name="description">Audit for measuring response times and patrol coverage efficiency.</field>
+            <field name="audit_type">operational</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">90.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_pat_eff_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_patrol_eff"/>
+            <field name="sequence">10</field>
+            <field name="description">Average response time to alarms is within SLA limits</field>
+            <field name="category">Operations</field>
+            <field name="critical">True</field>
+            <field name="max_score">30</field>
+        </record>
+
+        <!-- 25. Mobile Patrol Vehicle Safety & Equipment Audit -->
+        <record id="audit_template_uae_vehicle" model="compliance.audit.template">
+            <field name="name">Mobile Patrol Vehicle Safety &amp; Equipment Audit</field>
+            <field name="description">Audit for patrol vehicles, including safety equipment and branding.</field>
+            <field name="audit_type">equipment</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">95.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_veh_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_vehicle"/>
+            <field name="sequence">10</field>
+            <field name="description">Vehicle has mandatory fire extinguisher and first aid kit</field>
+            <field name="category">Safety</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+
+        <!-- 26. Security Guard Fitness & Readiness Evaluation -->
+        <record id="audit_template_uae_fitness" model="compliance.audit.template">
+            <field name="name">Security Guard Fitness &amp; Readiness Evaluation</field>
+            <field name="description">Internal audit for physical fitness and mental readiness of guards.</field>
+            <field name="audit_type">quality</field>
+            <field name="frequency">semiannual</field>
+            <field name="passing_score">80.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_fit_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_fitness"/>
+            <field name="sequence">10</field>
+            <field name="description">Guard meets internal physical fitness requirements</field>
+            <field name="category">Performance</field>
+            <field name="critical">False</field>
+            <field name="max_score">20</field>
+        </record>
+
+        <!-- 27. Data Center & Critical Infrastructure Security Audit -->
+        <record id="audit_template_uae_datacenter" model="compliance.audit.template">
+            <field name="name">Data Center &amp; Critical Infrastructure Security Audit</field>
+            <field name="description">High-security audit for data centers and essential infrastructure sites.</field>
+            <field name="audit_type">security</field>
+            <field name="frequency">quarterly</field>
+            <field name="passing_score">100.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_dc_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_datacenter"/>
+            <field name="sequence">10</field>
+            <field name="description">Dual-factor authentication used for all server room entries</field>
+            <field name="category">Access Control</field>
+            <field name="critical">True</field>
+            <field name="max_score">30</field>
+        </record>
+
+        <!-- 28. Parking Management & Traffic Control Audit -->
+        <record id="audit_template_uae_parking" model="compliance.audit.template">
+            <field name="name">Parking Management &amp; Traffic Control Audit</field>
+            <field name="description">Audit for parking security, illegal parking enforcement, and traffic flow.</field>
+            <field name="audit_type">operational</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">85.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_park_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_parking"/>
+            <field name="sequence">10</field>
+            <field name="description">Illegal parking in disabled or fire access zones reported/fined</field>
+            <field name="category">Enforcement</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+
+        <!-- 29. Loading Bay & Logistics Security Audit -->
+        <record id="audit_template_uae_loadingbay" model="compliance.audit.template">
+            <field name="name">Loading Bay &amp; Logistics Security Audit</field>
+            <field name="description">Audit for warehouse loading bays and goods-in/out security.</field>
+            <field name="audit_type">security</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">90.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_load_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_loadingbay"/>
+            <field name="sequence">10</field>
+            <field name="description">Seal numbers on incoming/outgoing trucks verified and logged</field>
+            <field name="category">Documentation</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+
+        <!-- 30. Loss Prevention & Internal Theft Audit -->
+        <record id="audit_template_uae_lossprevention" model="compliance.audit.template">
+            <field name="name">Loss Prevention &amp; Internal Theft Audit</field>
+            <field name="description">Audit for minimizing retail shrinkage and preventing internal theft.</field>
+            <field name="audit_type">quality</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">90.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_lp_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_lossprevention"/>
+            <field name="sequence">10</field>
+            <field name="description">Staff lockers and bags checked during exit (if authorized by policy)</field>
+            <field name="category">Security</field>
+            <field name="critical">True</field>
+            <field name="max_score">20</field>
+        </record>
+
+        <!-- 31. Security Systems Maintenance & Testing Audit -->
+        <record id="audit_template_uae_sys_maint" model="compliance.audit.template">
+            <field name="name">Security Systems Maintenance &amp; Testing Audit</field>
+            <field name="description">Audit for ensuring all electronic security systems are tested regularly.</field>
+            <field name="audit_type">security</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">100.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_sys_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_sys_maint"/>
+            <field name="sequence">10</field>
+            <field name="description">Weekly testing of panic buttons and silent alarms recorded</field>
+            <field name="category">Maintenance</field>
+            <field name="critical">True</field>
+            <field name="max_score">25</field>
+        </record>
+
+        <!-- 32. Emergency Drill Performance Evaluation -->
+        <record id="audit_template_uae_drill_eval" model="compliance.audit.template">
+            <field name="name">Emergency Drill Performance Evaluation</field>
+            <field name="description">Audit for evaluating guard and occupant performance during emergency drills.</field>
+            <field name="audit_type">safety</field>
+            <field name="frequency">semiannual</field>
+            <field name="passing_score">95.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_drill_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_drill_eval"/>
+            <field name="sequence">10</field>
+            <field name="description">Total evacuation time is within target limits</field>
+            <field name="category">Performance</field>
+            <field name="critical">True</field>
+            <field name="max_score">30</field>
+        </record>
+
+        <!-- 33. Security Guard Welfare Accommodation Audit -->
+        <record id="audit_template_uae_accommodation" model="compliance.audit.template">
+            <field name="name">Security Guard Welfare Accommodation Audit</field>
+            <field name="description">Audit for off-site guard accommodation as per UAE labor camp standards.</field>
+            <field name="audit_type">operational</field>
+            <field name="frequency">semiannual</field>
+            <field name="passing_score">100.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_acc_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_accommodation"/>
+            <field name="sequence">10</field>
+            <field name="description">Accommodation meets MOHRE standards for space, ventilation, and hygiene</field>
+            <field name="category">Regulatory</field>
+            <field name="critical">True</field>
+            <field name="max_score">40</field>
+            <field name="regulation_reference">MOHRE Labor Accommodation Standards</field>
+        </record>
+
+        <!-- 34. Client Portal & Reporting Compliance -->
+        <record id="audit_template_uae_reporting" model="compliance.audit.template">
+            <field name="name">Client Portal &amp; Reporting Compliance</field>
+            <field name="description">Audit for ensuring clients receive timely and accurate reports via portal.</field>
+            <field name="audit_type">quality</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">90.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_rep_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_reporting"/>
+            <field name="sequence">10</field>
+            <field name="description">All incident reports shared with client within 2 hours of occurrence</field>
+            <field name="category">Quality</field>
+            <field name="critical">True</field>
+            <field name="max_score">30</field>
+        </record>
+
+        <!-- 35. Site Security Risk Assessment Compliance -->
+        <record id="audit_template_uae_risk_asmt" model="compliance.audit.template">
+            <field name="name">Site Security Risk Assessment Compliance</field>
+            <field name="description">Audit for ensuring annual security risk assessments are conducted and updated.</field>
+            <field name="audit_type">regulatory</field>
+            <field name="frequency">annual</field>
+            <field name="passing_score">100.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="item_uae_risk_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_uae_risk_asmt"/>
+            <field name="sequence">10</field>
+            <field name="description">Formal Security Risk Assessment (SRA) updated in the last 12 months</field>
+            <field name="category">Regulatory</field>
+            <field name="critical">True</field>
+            <field name="max_score">50</field>
+        </record>
+
+    </data>
+</odoo>
+

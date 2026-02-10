@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Drug Test List View -->
+    <record id="view_guard_drug_test_list" model="ir.ui.view">
+        <field name="name">guard.drug.test.list</field>
+        <field name="model">guard.drug.test</field>
+        <field name="arch" type="xml">
+            <list string="Drug/Alcohol Tests" default_order="test_date desc">
+                <field name="reference_number"/>
+                <field name="guard_name"/>
+                <field name="test_type"/>
+                <field name="test_category"/>
+                <field name="test_date"/>
+                <field name="testing_facility"/>
+                <field name="status" widget="badge" 
+                       decoration-success="status == 'negative'" 
+                       decoration-warning="status in ['scheduled', 'pending']"
+                       decoration-danger="status == 'positive'"/>
+                <field name="action_taken"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Drug Test Form View -->
+    <record id="view_guard_drug_test_form" model="ir.ui.view">
+        <field name="name">guard.drug.test.form</field>
+        <field name="model">guard.drug.test</field>
+        <field name="arch" type="xml">
+            <form string="Drug/Alcohol Test">
+                <header>
+                    <button name="action_mark_negative" string="Mark as Negative (Pass)" type="object" class="oe_highlight" 
+                            invisible="status in ['negative', 'cancelled']"/>
+                    <button name="action_mark_positive" string="Mark as Positive (Fail)" type="object" 
+                            invisible="status in ['positive', 'cancelled']" confirm="Mark this test as positive (fail)?"/>
+                    <button name="action_schedule_retest" string="Schedule Retest" type="object" 
+                            invisible="status != 'dilute'"/>
+                    <field name="status" widget="statusbar" statusbar_visible="scheduled,sample_collected,pending,negative"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_attachments" type="object" class="oe_stat_button" icon="fa-paperclip">
+                            <field name="attachment_count" widget="statinfo" string="Documents"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Negative (Pass)" bg_color="text-bg-success" invisible="status != 'negative'"/>
+                    <widget name="web_ribbon" title="Positive (Fail)" bg_color="text-bg-danger" invisible="status != 'positive'"/>
+                    <widget name="web_ribbon" title="Refused" bg_color="text-bg-danger" invisible="status != 'refused'"/>
+                    
+                    <group>
+                        <group>
+                            <field name="reference_number" readonly="1"/>
+                            <field name="guard_id" options="{'no_create': True}"/>
+                            <field name="test_type"/>
+                            <field name="test_category"/>
+                            <field name="collection_method"/>
+                        </group>
+                        <group>
+                            <field name="test_date"/>
+                            <field name="result_date"/>
+                            <field name="testing_facility"/>
+                            <field name="lab_name"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Test Details" name="details">
+                            <group>
+                                <group>
+                                    <field name="substances_tested" placeholder="List of substances tested..."/>
+                                    <field name="positive_substances" placeholder="Substances that tested positive..." 
+                                           invisible="status != 'positive'"/>
+                                    <field name="bac_level" invisible="test_category != 'alcohol'"/>
+                                </group>
+                                <group>
+                                    <field name="collector_name"/>
+                                    <field name="witness_name"/>
+                                    <field name="chain_of_custody_maintained" widget="boolean_toggle"/>
+                                </group>
+                            </group>
+                        </page>
+                        
+                        <page string="MRO Review" name="mro">
+                            <group>
+                                <group>
+                                    <field name="mro_name"/>
+                                    <field name="mro_review_date"/>
+                                </group>
+                                <group>
+                                    <field name="mro_notes" placeholder="Medical Review Officer notes..."/>
+                                </group>
+                            </group>
+                        </page>
+                        
+                        <page string="Actions" name="actions">
+                            <group>
+                                <group>
+                                    <field name="action_taken"/>
+                                    <field name="cost" widget="monetary"/>
+                                    <field name="currency_id" invisible="1"/>
+                                </group>
+                                <group>
+                                    <field name="action_notes" placeholder="Details of actions taken..."/>
+                                </group>
+                            </group>
+                        </page>
+                        
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Additional notes..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Drug Test Search View -->
+    <record id="view_guard_drug_test_search" model="ir.ui.view">
+        <field name="name">guard.drug.test.search</field>
+        <field name="model">guard.drug.test</field>
+        <field name="arch" type="xml">
+            <search string="Drug/Alcohol Tests">
+                <field name="guard_id"/>
+                <field name="reference_number"/>
+                <field name="testing_facility"/>
+                <filter string="Scheduled" name="filter_scheduled" domain="[('status', '=', 'scheduled')]"/>
+                <filter string="Pending Results" name="filter_pending" domain="[('status', '=', 'pending')]"/>
+                <filter string="Negative (Pass)" name="filter_negative" domain="[('status', '=', 'negative')]"/>
+                <filter string="Positive (Fail)" name="filter_positive" domain="[('status', '=', 'positive')]"/>
+                <separator/>
+                <filter string="Random Tests" name="filter_random" domain="[('test_type', '=', 'random')]"/>
+                <filter string="Post-Incident" name="filter_incident" domain="[('test_type', '=', 'post_incident')]"/>
+                <separator/>
+                <filter string="This Month" name="filter_month"
+                        domain="[('test_date', '&gt;=', context_today() + relativedelta(day=1))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Guard" name="group_guard" context="{'group_by': 'guard_id'}"/>
+                    <filter string="Test Type" name="group_type" context="{'group_by': 'test_type'}"/>
+                    <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
+                    <filter string="Test Month" name="group_month" context="{'group_by': 'test_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Drug Test Action -->
+    <record id="action_guard_drug_test" model="ir.actions.act_window">
+        <field name="name">Drug/Alcohol Tests</field>
+        <field name="res_model">guard.drug.test</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a test record
+            </p>
+            <p>
+                Track drug and alcohol testing for guards.
+            </p>
+        </field>
+    </record>
+
+</odoo>
+

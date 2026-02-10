@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Background Check List View -->
+    <record id="view_guard_background_check_list" model="ir.ui.view">
+        <field name="name">guard.background.check.list</field>
+        <field name="model">guard.background.check</field>
+        <field name="arch" type="xml">
+            <list string="Background Checks" default_order="check_date desc">
+                <field name="reference_number"/>
+                <field name="guard_name"/>
+                <field name="check_type"/>
+                <field name="check_date"/>
+                <field name="expiry_date"/>
+                <field name="provider_name"/>
+                <field name="status" widget="badge" 
+                       decoration-success="status == 'clear'" 
+                       decoration-warning="status in ['pending', 'in_progress']"
+                       decoration-danger="status in ['failed', 'flagged']"/>
+                <field name="approved" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Background Check Form View -->
+    <record id="view_guard_background_check_form" model="ir.ui.view">
+        <field name="name">guard.background.check.form</field>
+        <field name="model">guard.background.check</field>
+        <field name="arch" type="xml">
+            <form string="Background Check">
+                <header>
+                    <button name="action_approve" string="Approve" type="object" class="oe_highlight" 
+                            invisible="status in ['clear', 'failed']"/>
+                    <button name="action_flag" string="Flag for Review" type="object" 
+                            invisible="status in ['flagged', 'failed']"/>
+                    <button name="action_fail" string="Mark as Failed" type="object" 
+                            invisible="status == 'failed'" confirm="Mark this background check as failed?"/>
+                    <field name="status" widget="statusbar" statusbar_visible="pending,in_progress,clear"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_attachments" type="object" class="oe_stat_button" icon="fa-paperclip">
+                            <field name="attachment_count" widget="statinfo" string="Documents"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Clear" bg_color="text-bg-success" invisible="status != 'clear'"/>
+                    <widget name="web_ribbon" title="Failed" bg_color="text-bg-danger" invisible="status != 'failed'"/>
+                    <widget name="web_ribbon" title="Flagged" bg_color="text-bg-warning" invisible="status != 'flagged'"/>
+                    
+                    <group>
+                        <group>
+                            <field name="reference_number" readonly="1"/>
+                            <field name="guard_id" options="{'no_create': True}"/>
+                            <field name="check_type"/>
+                            <field name="check_date"/>
+                            <field name="expiry_date"/>
+                        </group>
+                        <group>
+                            <field name="provider_name"/>
+                            <field name="provider_contact"/>
+                            <field name="approved" widget="boolean_toggle"/>
+                            <field name="cost" widget="monetary"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Results" name="results">
+                            <group>
+                                <field name="result" placeholder="Summary of check results..."/>
+                                <field name="flags" placeholder="Any flags or issues identified..."/>
+                            </group>
+                        </page>
+                        
+                        <page string="Review" name="review">
+                            <group>
+                                <group>
+                                    <field name="reviewed_by_id" readonly="1"/>
+                                    <field name="review_date" readonly="1"/>
+                                </group>
+                                <group>
+                                    <field name="review_notes" placeholder="Review notes..."/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Background Check Search View -->
+    <record id="view_guard_background_check_search" model="ir.ui.view">
+        <field name="name">guard.background.check.search</field>
+        <field name="model">guard.background.check</field>
+        <field name="arch" type="xml">
+            <search string="Background Checks">
+                <field name="guard_id"/>
+                <field name="reference_number"/>
+                <field name="provider_name"/>
+                <filter string="Pending" name="filter_pending" domain="[('status', '=', 'pending')]"/>
+                <filter string="Clear" name="filter_clear" domain="[('status', '=', 'clear')]"/>
+                <filter string="Flagged" name="filter_flagged" domain="[('status', '=', 'flagged')]"/>
+                <filter string="Approved" name="filter_approved" domain="[('approved', '=', True)]"/>
+                <separator/>
+                <filter string="Expiring in 30 Days" name="filter_expiring" domain="[('expiry_date', '&lt;=', (context_today() + relativedelta(days=30))), ('expiry_date', '&gt;=', context_today())]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Guard" name="group_guard" context="{'group_by': 'guard_id'}"/>
+                    <filter string="Check Type" name="group_type" context="{'group_by': 'check_type'}"/>
+                    <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
+                    <filter string="Provider" name="group_provider" context="{'group_by': 'provider_name'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Background Check Action -->
+    <record id="action_guard_background_check" model="ir.actions.act_window">
+        <field name="name">Background Checks</field>
+        <field name="res_model">guard.background.check</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a background check record
+            </p>
+            <p>
+                Track background checks, employment verification, and screening for guards.
+            </p>
+        </field>
+    </record>
+
+</odoo>
+

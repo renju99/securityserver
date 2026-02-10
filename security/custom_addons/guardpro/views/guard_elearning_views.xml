@@ -1,0 +1,680 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ========================================== -->
+    <!-- Guard Training Courses (eLearning) Views -->
+    <!-- ========================================== -->
+    
+    <!-- ========================================== -->
+    <!-- Slide Channel (Course) Views Extensions  -->
+    <!-- ========================================== -->
+    
+    <!-- Extend slide.channel kanban view -->
+    <record id="view_slide_channel_kanban_guard" model="ir.ui.view">
+        <field name="name">slide.channel.kanban.guard</field>
+        <field name="model">slide.channel</field>
+        <field name="inherit_id" ref="website_slides.slide_channel_view_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="is_guard_training"/>
+                <field name="training_category"/>
+                <field name="is_mandatory_for_guards"/>
+                <field name="enrolled_guards_count"/>
+                <field name="completed_guards_count"/>
+            </xpath>
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <div class="mb-2 ms-1" t-if="record.is_guard_training.raw_value or record.is_mandatory_for_guards.raw_value">
+                    <span t-if="record.is_guard_training.raw_value" class="badge bg-primary me-1">Guard Training</span>
+                    <span t-if="record.is_mandatory_for_guards.raw_value" class="badge bg-danger">Mandatory</span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- Extend slide.channel form view -->
+    <record id="view_slide_channel_form_guard" model="ir.ui.view">
+        <field name="name">slide.channel.form.guard</field>
+        <field name="model">slide.channel</field>
+        <field name="inherit_id" ref="website_slides.view_slide_channel_form"/>
+        <field name="arch" type="xml">
+            <!-- Add Guard Training Tab -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Guard Training" name="guard_training">
+                    <group>
+                        <group string="Training Configuration">
+                            <field name="is_guard_training"/>
+                            <field name="training_category" invisible="not is_guard_training"/>
+                            <field name="is_mandatory_for_guards" invisible="not is_guard_training"/>
+                            <field name="certification_validity_months" invisible="not is_guard_training"/>
+                            <field name="minimum_passing_score" invisible="not is_guard_training"/>
+                        </group>
+                        <group string="Statistics" invisible="not is_guard_training">
+                            <field name="enrolled_guards_count"/>
+                            <field name="completed_guards_count"/>
+                            <field name="certification_expiring_count"/>
+                        </group>
+                    </group>
+                    <group invisible="not is_guard_training">
+                        <group string="Site Requirements">
+                            <field name="required_for_sites" widget="many2many_tags"/>
+                        </group>
+                        <group string="Actions">
+                            <button name="action_view_enrolled_guards"
+                                    type="object"
+                                    string="View Enrolled Guards"
+                                    class="btn-primary"
+                                    icon="fa-users"/>
+                            <button name="action_enroll_all_guards"
+                                    type="object"
+                                    string="Enroll All Guards"
+                                    class="btn-success"
+                                    icon="fa-user-plus"
+                                    confirm="Enroll all active guards in this course?"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- Extend slide.channel list view -->
+    <record id="view_slide_channel_list_guard" model="ir.ui.view">
+        <field name="name">slide.channel.list.guard</field>
+        <field name="model">slide.channel</field>
+        <field name="inherit_id" ref="website_slides.slide_channel_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="is_guard_training" widget="boolean"/>
+                <field name="training_category" optional="show"/>
+                <field name="is_mandatory_for_guards" widget="boolean" optional="show"/>
+                <field name="enrolled_guards_count" optional="show" string="Enrolled"/>
+                <field name="completed_guards_count" optional="show" string="Completed"/>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- Extend slide.channel.partner (enrollment) form view -->
+    <record id="view_slide_channel_partner_form_guard" model="ir.ui.view">
+        <field name="name">slide.channel.partner.form.guard</field>
+        <field name="model">slide.channel.partner</field>
+        <field name="arch" type="xml">
+            <form string="Enrollment Details">
+                <header>
+                    <button name="action_renew_certification"
+                            type="object"
+                            string="Renew Certification"
+                            class="btn-warning"
+                            invisible="certification_status not in ['expired', 'expiring']"/>
+                </header>
+                <sheet>
+                    <!-- Smart Buttons -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_all_quiz_responses"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-list-alt"
+                                invisible="not quiz_response_ids">
+                            <field name="quiz_response_count" widget="statinfo" string="Quiz Attempts"/>
+                        </button>
+                    </div>
+                    
+                    <field name="quiz_response_ids" invisible="1"/>
+                    <field name="quiz_response_count" invisible="1"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="partner_id" readonly="1"/>
+                        </h1>
+                        <h3>
+                            <field name="channel_id" readonly="1"/>
+                        </h3>
+                    </div>
+                    <group>
+                        <group string="Member Information">
+                            <field name="guard_id"/>
+                            <field name="member_status"/>
+                            <field name="completion" widget="progressbar"/>
+                        </group>
+                        <group string="Performance">
+                            <field name="final_score" widget="percentage"/>
+                            <field name="passed_course" invisible="1"/>
+                            <field name="pass_status_text" string="Result" widget="badge" 
+                                   decoration-success="passed_course == True" 
+                                   decoration-danger="passed_course == False"/>
+                            <field name="certification_status" widget="badge"
+                                   decoration-success="certification_status == 'valid'"
+                                   decoration-warning="certification_status == 'expiring'"
+                                   decoration-danger="certification_status == 'expired'"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Dates">
+                            <field name="certification_issued_date"/>
+                            <field name="certification_expiry_date"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Quiz Responses" name="quiz_responses">
+                            <field name="quiz_response_ids" mode="list">
+                                <list string="Quizzes" create="0" delete="0">
+                                    <field name="slide_id" string="Quiz Name"/>
+                                    <field name="quiz_summary" string="Result (Correct/Total)"/>
+                                    <field name="quiz_status" string="Status" widget="badge" 
+                                           decoration-success="quiz_status == 'passed'" 
+                                           decoration-danger="quiz_status == 'failed'"/>
+                                    <field name="write_date" string="Attempt Date"/>
+                                </list>
+                                <form string="Quiz Attempt Details">
+                                    <header>
+                                        <field name="completed" invisible="1"/>
+                                        <div class="alert alert-success mt-2 mb-2" role="alert" invisible="not completed">
+                                            <strong>Passed!</strong> This guard has successfully completed this assessment.
+                                        </div>
+                                        <div class="alert alert-danger mt-2 mb-2" role="alert" invisible="completed">
+                                            <strong>Failed.</strong> This assessment was not passed.
+                                        </div>
+                                    </header>
+                                    <sheet>
+                                        <div class="oe_title">
+                                            <h1>
+                                                <field name="slide_id" readonly="1" options="{'no_open': True}"/>
+                                            </h1>
+                                        </div>
+                                        <group>
+                                            <group string="Results Summary">
+                                                <field name="quiz_summary" readonly="1"/>
+                                                <field name="quiz_score" widget="percentage" readonly="1"/>
+                                                <field name="write_date" string="Attempted On" readonly="1"/>
+                                            </group>
+                                            <group string="Status">
+                                                <field name="completed" string="Passed" widget="boolean_toggle" readonly="1"/>
+                                                <field name="total_count" invisible="1"/>
+                                            </group>
+                                        </group>
+                                        
+                                        <separator string="Individual Question Responses" invisible="total_count == 0"/>
+                                        <field name="quiz_line_ids" readonly="1" invisible="total_count == 0">
+                                            <list decoration-success="is_correct" decoration-danger="not is_correct">
+                                                <field name="question_text" string="Question"/>
+                                                <field name="answer_ids" widget="many2many_tags" string="Selected Answer"/>
+                                                <field name="status" string="Result" widget="badge" 
+                                                       decoration-success="status == 'correct'" 
+                                                       decoration-danger="status == 'incorrect'"/>
+                                                <field name="score" invisible="1"/>
+                                            </list>
+                                        </field>
+                                        
+                                        <div class="alert alert-info mt-3" role="alert" invisible="total_count > 0">
+                                            Detailed question responses are not available for this attempt (legacy or manual completion).
+                                        </div>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Extend slide.channel.partner list view -->
+    <record id="view_slide_channel_partner_list_guard" model="ir.ui.view">
+        <field name="name">slide.channel.partner.list.guard</field>
+        <field name="model">slide.channel.partner</field>
+        <field name="inherit_id" ref="website_slides.slide_channel_partner_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="guard_id" optional="show"/>
+            </xpath>
+            <xpath expr="//field[@name='completion']" position="after">
+                <field name="final_score" widget="percentage" optional="show"/>
+                <field name="passed_course" invisible="1"/>
+                <field name="pass_status_text" string="Result" widget="badge" optional="show"
+                       decoration-success="passed_course == True" 
+                       decoration-danger="passed_course == False"/>
+                <field name="certification_status" widget="badge" optional="show"
+                       decoration-success="certification_status == 'valid'"
+                       decoration-warning="certification_status == 'expiring'"
+                       decoration-danger="certification_status == 'expired'"/>
+                <field name="certification_expiry_date" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- ========================= -->
+    <!-- Actions and Menu Items   -->
+    <!-- ========================= -->
+    
+    <!-- Action: Guard eLearning Courses -->
+    <record id="action_guard_elearning_courses" model="ir.actions.act_window">
+        <field name="name">Guard eLearning Courses</field>
+        <field name="res_model">slide.channel</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('is_guard_training', '=', True)]</field>
+        <field name="context">{'default_is_guard_training': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Guard Training Course
+            </p>
+            <p>
+                Guard training courses use Odoo's eLearning platform to deliver
+                comprehensive training programs with quizzes, certifications, and progress tracking.
+            </p>
+        </field>
+    </record>
+    
+    <!-- Action: Guard eLearning Enrollments -->
+    <record id="action_guard_elearning_enrollments" model="ir.actions.act_window">
+        <field name="name">Guard eLearning Enrollments</field>
+        <field name="res_model">slide.channel.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('guard_id', '!=', False)]</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No guard enrollments found
+            </p>
+            <p>
+                Enroll guards in training courses to track their progress and certifications.
+            </p>
+        </field>
+    </record>
+    
+    <!-- Action: Expiring Certifications -->
+    <record id="action_expiring_certifications" model="ir.actions.act_window">
+        <field name="name">Expiring Certifications</field>
+        <field name="res_model">slide.channel.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('guard_id', '!=', False), ('certification_status', 'in', ['expiring', 'expired'])]</field>
+        <field name="context">{}</field>
+    </record>
+    
+    <!-- Action: Mandatory Training Status -->
+    <record id="action_mandatory_training_status" model="ir.actions.act_window">
+        <field name="name">Mandatory Training Status</field>
+        <field name="res_model">guard.profile</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+    </record>
+    
+    <!-- ======================================== -->
+    <!-- Guard Profile Training Tab Enhancement -->
+    <!-- ======================================== -->
+    
+    <!-- Extend Guard Profile Form View with Training Tab -->
+    <record id="view_guard_profile_form_training" model="ir.ui.view">
+        <field name="name">guard.profile.form.training</field>
+        <field name="model">guard.profile</field>
+        <field name="inherit_id" ref="guardpro.view_guard_profile_form"/>
+        <field name="arch" type="xml">
+            <!-- Add eLearning Training Tab -->
+            <xpath expr="//notebook" position="inside">
+                <page string="eLearning Training" name="elearning_training">
+                    <group>
+                        <group string="Training Status">
+                            <field name="training_progress_percentage" widget="percentage"/>
+                            <field name="mandatory_training_completed" widget="boolean"/>
+                        </group>
+                        <group string="Quick Actions">
+                            <button name="action_view_available_courses"
+                                    type="object"
+                                    string="Browse Courses"
+                                    class="btn-primary"
+                                    icon="fa-search"/>
+                            <button name="action_enroll_mandatory_courses"
+                                    type="object"
+                                    string="Enroll in Mandatory Courses"
+                                    class="btn-success"
+                                    icon="fa-user-plus"
+                                    confirm="Enroll in all mandatory courses?"/>
+                        </group>
+                    </group>
+                    
+                    <separator string="Course Enrollments"/>
+                    <field name="training_enrollment_ids" nolabel="1">
+                        <list string="Training Enrollments" 
+                              decoration-success="member_status == 'completed'"
+                              decoration-warning="certification_status == 'expiring'"
+                              decoration-danger="certification_status == 'expired'">
+                            <field name="channel_id"/>
+                            <field name="member_status" widget="badge"/>
+                            <field name="completion" widget="progressbar"/>
+                            <field name="certification_status" widget="badge"
+                                   decoration-success="certification_status == 'valid'"
+                                   decoration-warning="certification_status == 'expiring'"
+                                   decoration-danger="certification_status == 'expired'"/>
+                            <field name="certification_expiry_date"/>
+                            <field name="final_score" widget="percentage"/>
+                            <field name="passed_course" invisible="1"/>
+                            <field name="pass_status_text" string="Result" widget="badge" 
+                                   decoration-success="passed_course == True" 
+                                   decoration-danger="passed_course == False"/>
+                            <button name="action_renew_certification"
+                                    type="object"
+                                    string="Renew"
+                                    icon="fa-refresh"
+                                    invisible="certification_status not in ['expired', 'expiring']"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- Note: Menus are now defined in guardpro_menus.xml for better organization -->
+    
+    <!-- ========================================== -->
+    <!-- Portal Views for Guard eLearning          -->
+    <!-- ========================================== -->
+    
+    <!-- Portal: My Training Dashboard -->
+    <template id="portal_my_training" name="My Training">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">My Training</t>
+            </t>
+            
+            <div class="container mt-3">
+                <!-- Training Progress Card -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-graduation-cap me-2"/>Training Progress
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="text-center">
+                                            <h3 t-esc="guard_profile.completed_training_count"/>
+                                            <p class="text-muted">Completed Courses</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-center">
+                                            <h3 t-esc="guard_profile.active_training_count"/>
+                                            <p class="text-muted">Active Courses</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-center">
+                                            <h3>
+                                                <span t-esc="round(guard_profile.training_progress_percentage, 1)"/>%
+                                            </h3>
+                                            <p class="text-muted">Overall Progress</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="progress mt-3" style="height: 25px;">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         t-att-style="'width: ' + str(guard_profile.training_progress_percentage) + '%'"
+                                         t-att-aria-valuenow="guard_profile.training_progress_percentage"
+                                         aria-valuemin="0" aria-valuemax="100">
+                                        <span t-esc="round(guard_profile.training_progress_percentage, 1)"/>%
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3" t-if="not guard_profile.mandatory_training_completed">
+                                    <div class="alert alert-warning">
+                                        <i class="fa fa-exclamation-triangle me-2"/>
+                                        You have not completed all mandatory training courses.
+                                        <a href="#mandatory-courses" class="alert-link">View mandatory courses</a>
+                                    </div>
+                                </div>
+                                <div class="mt-3" t-else="">
+                                    <div class="alert alert-success">
+                                        <i class="fa fa-check-circle me-2"/>
+                                        All mandatory training completed!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Certification Alerts -->
+                <div class="row mb-4" t-if="guard_profile.expiring_certifications_count > 0 or guard_profile.expired_certifications_count > 0">
+                    <div class="col-12">
+                        <div class="alert alert-warning" t-if="guard_profile.expiring_certifications_count > 0">
+                            <i class="fa fa-clock-o me-2"/>
+                            <strong>Warning:</strong> You have <t t-esc="guard_profile.expiring_certifications_count"/> certification(s) expiring soon.
+                        </div>
+                        <div class="alert alert-danger" t-if="guard_profile.expired_certifications_count > 0">
+                            <i class="fa fa-times-circle me-2"/>
+                            <strong>Attention:</strong> You have <t t-esc="guard_profile.expired_certifications_count"/> expired certification(s) that need renewal.
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mandatory Courses Section -->
+                <div class="row mb-4" id="mandatory-courses">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-star text-danger me-2"/>Mandatory Training Courses
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="mandatory_courses">
+                                    <div class="list-group">
+                                        <t t-foreach="mandatory_courses" t-as="course">
+                                            <div class="list-group-item">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <h6 class="mb-1" t-esc="course.name"/>
+                                                        <small class="text-muted">
+                                                            <i class="fa fa-clock-o me-1"/><t t-esc="course.total_time"/> hours
+                                                        </small>
+                                                    </div>
+                                                    <div>
+                                                        <t t-set="enrollment" t-value="course.channel_partner_ids.filtered(lambda e: e.partner_id == request.env.user.partner_id)"/>
+                                                        <t t-if="enrollment and enrollment.member_status == 'completed'">
+                                                            <span class="badge bg-success">
+                                                                <i class="fa fa-check me-1"/>Completed
+                                                            </span>
+                                                        </t>
+                                                        <t t-elif="enrollment">
+                                                            <div class="progress" style="width: 150px; height: 25px;">
+                                                                <div class="progress-bar" role="progressbar" 
+                                                                     t-att-style="'width: ' + str(enrollment.completion) + '%'"
+                                                                     t-att-aria-valuenow="enrollment.completion">
+                                                                    <t t-esc="enrollment.completion"/>%
+                                                                </div>
+                                                            </div>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <a t-attf-href="/slides/{{ slug(course) }}" class="btn btn-primary btn-sm">
+                                                                <i class="fa fa-play me-1"/>Start Course
+                                                            </a>
+                                                        </t>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <p class="text-muted mb-0">No mandatory courses at this time.</p>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- My Active Courses -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-book me-2"/>My Active Courses
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="active_enrollments">
+                                    <div class="row">
+                                        <t t-foreach="active_enrollments" t-as="enrollment">
+                                            <div class="col-md-6 mb-3">
+                                                <div class="card border-primary">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title" t-esc="enrollment.channel_id.name"/>
+                                                        <p class="card-text text-muted small" t-esc="enrollment.channel_id.description[:100] + '...'"/>
+                                                        
+                                                        <div class="progress mb-2" style="height: 20px;">
+                                                            <div class="progress-bar" role="progressbar" 
+                                                                 t-att-style="'width: ' + str(enrollment.completion) + '%'"
+                                                                 t-att-aria-valuenow="enrollment.completion">
+                                                                <t t-esc="enrollment.completion"/>%
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <small class="text-muted">
+                                                                <i class="fa fa-check me-1"/><t t-esc="enrollment.completed_slides_count"/> slides completed
+                                                            </small>
+                                                            <a t-attf-href="/slides/{{ slug(enrollment.channel_id) }}" class="btn btn-primary btn-sm">
+                                                                Continue <i class="fa fa-arrow-right ms-1"/>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <p class="text-muted mb-0">You are not currently enrolled in any courses.</p>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Completed Courses & Certifications -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-certificate me-2"/>My Certifications
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="completed_enrollments">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Course</th>
+                                                    <th>Completed</th>
+                                                    <th>Score</th>
+                                                    <th>Certificate Valid Until</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="completed_enrollments" t-as="enrollment">
+                                                    <tr>
+                                                        <td t-esc="enrollment.channel_id.name"/>
+                                                        <td t-esc="enrollment.certification_issued_date"/>
+                                                        <td>
+                                                            <span t-esc="round(enrollment.final_score, 1)"/>%
+                                                        </td>
+                                                        <td>
+                                                            <t t-if="enrollment.certification_expiry_date">
+                                                                <t t-esc="enrollment.certification_expiry_date"/>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <span class="badge bg-success">Lifetime</span>
+                                                            </t>
+                                                        </td>
+                                                        <td>
+                                                            <t t-if="enrollment.certification_status == 'valid'">
+                                                                <span class="badge bg-success">
+                                                                    <i class="fa fa-check me-1"/>Valid
+                                                                </span>
+                                                            </t>
+                                                            <t t-elif="enrollment.certification_status == 'expiring'">
+                                                                <span class="badge bg-warning">
+                                                                    <i class="fa fa-clock-o me-1"/>Expiring Soon
+                                                                </span>
+                                                            </t>
+                                                            <t t-elif="enrollment.certification_status == 'expired'">
+                                                                <span class="badge bg-danger">
+                                                                    <i class="fa fa-times me-1"/>Expired
+                                                                </span>
+                                                            </t>
+                                                        </td>
+                                                        <td>
+                                                            <a t-attf-href="/slides/{{ slug(enrollment.channel_id) }}" 
+                                                               class="btn btn-sm btn-outline-primary" title="View Course">
+                                                                <i class="fa fa-eye"/>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <p class="text-muted mb-0">You have not completed any courses yet.</p>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Available Courses -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-search me-2"/>Browse Available Courses
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="available_courses">
+                                    <div class="row">
+                                        <t t-foreach="available_courses" t-as="course">
+                                            <div class="col-md-4 mb-3">
+                                                <div class="card h-100">
+                                                    <div class="card-body">
+                                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                                            <h6 class="card-title" t-esc="course.name"/>
+                                                            <span t-if="course.is_mandatory_for_guards" class="badge bg-danger">Required</span>
+                                                        </div>
+                                                        <p class="card-text text-muted small" t-esc="course.description_short or course.description[:100] + '...'"/>
+                                                        <div class="mb-2">
+                                                            <small class="text-muted">
+                                                                <i class="fa fa-clock-o me-1"/><t t-esc="course.total_time"/> hours
+                                                            </small>
+                                                        </div>
+                                                        <a t-attf-href="/slides/{{ slug(course) }}" class="btn btn-primary btn-sm w-100">
+                                                            <i class="fa fa-play me-1"/>View Course
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <p class="text-muted mb-0">No courses available at this time.</p>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>

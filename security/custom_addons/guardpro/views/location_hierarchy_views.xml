@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Building Views -->
+    <record id="site_building_tree_view" model="ir.ui.view">
+        <field name="name">site.building.tree</field>
+        <field name="model">site.building</field>
+        <field name="arch" type="xml">
+            <list string="Buildings" decoration-muted="status != 'active'" decoration-bf="status == 'maintenance'">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="site_id"/>
+                <field name="building_type"/>
+                <field name="total_floors"/>
+                <field name="total_floors_count"/>
+                <field name="total_checkpoints"/>
+                <field name="status"/>
+                <field name="active" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="site_building_form_view" model="ir.ui.view">
+        <field name="name">site.building.form</field>
+        <field name="model">site.building</field>
+        <field name="arch" type="xml">
+            <form string="Building">
+                <header>
+                    <field name="status" widget="statusbar" statusbar_visible="active,inactive"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Building Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="site_id"/>
+                            <field name="building_type"/>
+                            <field name="status"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="total_floors"/>
+                            <field name="basement_floors"/>
+                            <field name="ground_floors"/>
+                            <field name="total_floors_count" readonly="1"/>
+                            <field name="total_checkpoints" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Location Details">
+                        <field name="street_address"/>
+                        <field name="latitude"/>
+                        <field name="longitude"/>
+                    </group>
+                    <field name="description" placeholder="Description of the building..."/>
+                    <notebook>
+                        <page string="Floors">
+                            <field name="floor_ids">
+                                <list string="Floors" editable="bottom">
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="floor_number"/>
+                                    <field name="floor_type"/>
+                                    <field name="total_areas"/>
+                                    <field name="total_checkpoints"/>
+                                    <field name="status"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Checkpoints">
+                            <field name="checkpoint_ids" readonly="1">
+                                <list string="Checkpoints">
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="scan_type"/>
+                                    <field name="status"/>
+                                    <field name="last_scan_time"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Tours">
+                            <field name="tour_ids" readonly="1">
+                                <list string="Tours">
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="status"/>
+                                    <field name="total_checkpoints"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Floor Views -->
+    <record id="building_floor_tree_view" model="ir.ui.view">
+        <field name="name">building.floor.tree</field>
+        <field name="model">building.floor</field>
+        <field name="arch" type="xml">
+            <list string="Floors" decoration-muted="status != 'active'" decoration-bf="status == 'maintenance'">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="building_id"/>
+                <field name="site_id"/>
+                <field name="floor_number"/>
+                <field name="floor_type"/>
+                <field name="total_areas"/>
+                <field name="total_checkpoints"/>
+                <field name="status"/>
+                <field name="active" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="building_floor_form_view" model="ir.ui.view">
+        <field name="name">building.floor.form</field>
+        <field name="model">building.floor</field>
+        <field name="arch" type="xml">
+            <form string="Floor">
+                <header>
+                    <field name="status" widget="statusbar" statusbar_visible="active,inactive"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Floor Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="building_id"/>
+                            <field name="site_id" readonly="1"/>
+                            <field name="floor_number"/>
+                            <field name="floor_type" readonly="1"/>
+                            <field name="status"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="total_areas" readonly="1"/>
+                            <field name="total_checkpoints" readonly="1"/>
+                        </group>
+                    </group>
+                    <field name="description" placeholder="Description of the floor..."/>
+                    <notebook>
+                        <page string="Areas/Rooms">
+                            <field name="area_ids">
+                                <list string="Areas/Rooms" editable="bottom">
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="area_type"/>
+                                    <field name="area_size"/>
+                                    <field name="access_level"/>
+                                    <field name="total_checkpoints"/>
+                                    <field name="status"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Checkpoints">
+                            <field name="checkpoint_ids" readonly="1">
+                                <list string="Checkpoints">
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="scan_type"/>
+                                    <field name="status"/>
+                                    <field name="last_scan_time"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Area Views -->
+    <record id="floor_area_tree_view" model="ir.ui.view">
+        <field name="name">floor.area.tree</field>
+        <field name="model">floor.area</field>
+        <field name="arch" type="xml">
+            <list string="Areas/Rooms" decoration-muted="status != 'active'" decoration-bf="status == 'maintenance'">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="floor_id"/>
+                <field name="building_id"/>
+                <field name="site_id"/>
+                <field name="area_type"/>
+                <field name="area_size"/>
+                <field name="access_level"/>
+                <field name="total_checkpoints"/>
+                <field name="status"/>
+                <field name="active" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="floor_area_form_view" model="ir.ui.view">
+        <field name="name">floor.area.form</field>
+        <field name="model">floor.area</field>
+        <field name="arch" type="xml">
+            <form string="Area/Room">
+                <header>
+                    <field name="status" widget="statusbar" statusbar_visible="active,inactive"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Area/Room Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="floor_id"/>
+                            <field name="building_id" readonly="1"/>
+                            <field name="site_id" readonly="1"/>
+                            <field name="area_type"/>
+                            <field name="access_level"/>
+                            <field name="status"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="area_size"/>
+                            <field name="total_checkpoints" readonly="1"/>
+                        </group>
+                    </group>
+                    <field name="description" placeholder="Description of the area/room..."/>
+                    <notebook>
+                        <page string="Checkpoints">
+                            <field name="checkpoint_ids" readonly="1">
+                                <list string="Checkpoints">
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="scan_type"/>
+                                    <field name="status"/>
+                                    <field name="last_scan_time"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action Windows -->
+    <record id="action_site_buildings" model="ir.actions.act_window">
+        <field name="name">Buildings</field>
+        <field name="res_model">site.building</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'default_active': True}</field>
+    </record>
+
+    <record id="action_building_floors" model="ir.actions.act_window">
+        <field name="name">Floors</field>
+        <field name="res_model">building.floor</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'default_active': True}</field>
+    </record>
+
+    <record id="action_floor_areas" model="ir.actions.act_window">
+        <field name="name">Areas/Rooms</field>
+        <field name="res_model">floor.area</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'default_active': True}</field>
+    </record>
+</odoo>

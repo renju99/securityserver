@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- ================================ -->
+    <!-- Guard Training Courses -->
+    <!-- ================================ -->
+        
+        <!-- Course 1: Basic Security Guard Training -->
+        <record id="course_basic_security" model="slide.channel">
+            <field name="name">Basic Security Guard Training</field>
+            <field name="description">
+                <![CDATA[
+                <h2>Course Overview</h2>
+                <p>This comprehensive course covers all fundamental aspects of security guard operations.</p>
+                <h3>Learning Objectives:</h3>
+                <ul>
+                    <li>Understand the role and responsibilities of a security guard</li>
+                    <li>Learn patrol procedures and techniques</li>
+                    <li>Master incident reporting and documentation</li>
+                    <li>Develop professional communication skills</li>
+                </ul>
+                ]]>
+            </field>
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">basic</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">80</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+        </record>
+        
+        <!-- Course 2: Emergency Response Training -->
+        <record id="course_emergency_response" model="slide.channel">
+            <field name="name">Emergency Response &amp; Crisis Management</field>
+            <field name="description">
+                <![CDATA[
+                <h2>Emergency Response Training</h2>
+                <p>Learn to handle emergencies and crisis situations effectively.</p>
+                <h3>Topics Covered:</h3>
+                <ul>
+                    <li>Fire safety and evacuation procedures</li>
+                    <li>First aid and medical emergencies</li>
+                    <li>Natural disaster response</li>
+                    <li>Bomb threat procedures</li>
+                    <li>Active shooter response</li>
+                </ul>
+                ]]>
+            </field>
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">emergency</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">85</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+        </record>
+        
+        <!-- Course 3: Advanced Security Operations -->
+        <record id="course_advanced_security" model="slide.channel">
+            <field name="name">Advanced Security Operations</field>
+            <field name="description">
+                <![CDATA[
+                <h2>Advanced Training for Experienced Guards</h2>
+                <p>Take your security skills to the next level with advanced techniques and strategies.</p>
+                <h3>Advanced Topics:</h3>
+                <ul>
+                    <li>Threat assessment and risk analysis</li>
+                    <li>Surveillance and counter-surveillance</li>
+                    <li>Access control systems</li>
+                    <li>Executive protection</li>
+                    <li>Conflict de-escalation techniques</li>
+                </ul>
+                ]]>
+            </field>
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">advanced</field>
+            <field name="is_mandatory_for_guards" eval="False"/>
+            <field name="certification_validity_months">24</field>
+            <field name="minimum_passing_score">85</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+        </record>
+        
+        <!-- Course 4: Health & Safety Compliance -->
+        <record id="course_health_safety" model="slide.channel">
+            <field name="name">Health &amp; Safety Compliance</field>
+            <field name="description">
+                <![CDATA[
+                <h2>Workplace Health & Safety</h2>
+                <p>Essential training for maintaining a safe working environment.</p>
+                <h3>Topics:</h3>
+                <ul>
+                    <li>OSHA regulations and compliance</li>
+                    <li>Hazard identification and control</li>
+                    <li>Personal protective equipment (PPE)</li>
+                    <li>Incident investigation</li>
+                    <li>Emergency preparedness</li>
+                </ul>
+                ]]>
+            </field>
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">safety</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">80</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+        </record>
+        
+        <!-- Course 5: Customer Service for Security -->
+        <record id="course_customer_service" model="slide.channel">
+            <field name="name">Customer Service Excellence for Security Professionals</field>
+            <field name="description">
+                <![CDATA[
+                <h2>Professional Customer Service Skills</h2>
+                <p>Learn to provide exceptional service while maintaining security.</p>
+                <h3>Skills Covered:</h3>
+                <ul>
+                    <li>Professional communication</li>
+                    <li>Conflict resolution</li>
+                    <li>Cultural sensitivity</li>
+                    <li>Building rapport with clients</li>
+                    <li>Handling difficult situations</li>
+                </ul>
+                ]]>
+            </field>
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">customer_service</field>
+            <field name="is_mandatory_for_guards" eval="False"/>
+            <field name="certification_validity_months">24</field>
+            <field name="minimum_passing_score">75</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+        </record>
+        
+        <!-- Course 6: Legal & Compliance -->
+        <record id="course_legal_compliance" model="slide.channel">
+            <field name="name">Legal &amp; Compliance for Security Guards</field>
+            <field name="description">
+                <![CDATA[
+                <h2>Legal Framework for Security Operations</h2>
+                <p>Understand your legal rights, responsibilities, and limitations.</p>
+                <h3>Topics:</h3>
+                <ul>
+                    <li>Use of force continuum</li>
+                    <li>Arrest and detention procedures</li>
+                    <li>Search and seizure laws</li>
+                    <li>Privacy and confidentiality</li>
+                    <li>Documentation and evidence handling</li>
+                </ul>
+                ]]>
+            </field>
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">legal</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">90</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+        </record>
+        
+        <!-- Course 7: Technology & Equipment -->
+        <record id="course_technology" model="slide.channel">
+            <field name="name">Security Technology &amp; Equipment</field>
+            <field name="description">
+                <![CDATA[
+                <h2>Modern Security Technology</h2>
+                <p>Master the technology and equipment used in modern security operations.</p>
+                <h3>Topics:</h3>
+                <ul>
+                    <li>CCTV systems and monitoring</li>
+                    <li>Access control systems</li>
+                    <li>Alarm systems</li>
+                    <li>Radio communications</li>
+                    <li>Mobile security apps</li>
+                    <li>GPS and tracking systems</li>
+                </ul>
+                ]]>
+            </field>
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">technical</field>
+            <field name="is_mandatory_for_guards" eval="False"/>
+            <field name="certification_validity_months">18</field>
+            <field name="minimum_passing_score">80</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+        </record>
+        
+        <!-- ================================ -->
+        <!-- Sample Lessons/Slides -->
+        <!-- ================================ -->
+        
+        <!-- Basic Security Course - Introduction Slide -->
+        <record id="slide_basic_intro" model="slide.slide">
+            <field name="name">Introduction to Security Guard Profession</field>
+            <field name="channel_id" ref="course_basic_security"/>
+            <field name="slide_category">article</field>
+            <field name="sequence">1</field>
+            <field name="is_published" eval="True"/>
+            <field name="is_guard_specific" eval="True"/>
+            <field name="description">
+                <![CDATA[
+                <h2>Welcome to Security Guard Training</h2>
+                <p>In this lesson, you will learn about:</p>
+                <ul>
+                    <li>The history and evolution of private security</li>
+                    <li>Professional standards and ethics</li>
+                    <li>Career opportunities in security</li>
+                    <li>Essential qualities of a good security guard</li>
+                </ul>
+                <h3>Professional Code of Conduct</h3>
+                <p>As a security guard, you are expected to:</p>
+                <ol>
+                    <li>Maintain integrity and honesty at all times</li>
+                    <li>Respect the rights and dignity of all individuals</li>
+                    <li>Perform duties with diligence and professionalism</li>
+                    <li>Maintain confidentiality of sensitive information</li>
+                </ol>
+                ]]>
+            </field>
+        </record>
+        
+        <!-- Basic Security Course - Patrol Procedures -->
+        <record id="slide_patrol_procedures" model="slide.slide">
+            <field name="name">Patrol Procedures and Techniques</field>
+            <field name="channel_id" ref="course_basic_security"/>
+            <field name="slide_category">article</field>
+            <field name="sequence">2</field>
+            <field name="is_published" eval="True"/>
+            <field name="is_guard_specific" eval="True"/>
+            <field name="description">
+                <![CDATA[
+                <h2>Effective Patrol Techniques</h2>
+                <p>Patrolling is one of the most important duties of a security guard.</p>
+                <h3>Types of Patrols:</h3>
+                <ul>
+                    <li><strong>Foot Patrol:</strong> Walking inspection of assigned areas</li>
+                    <li><strong>Vehicle Patrol:</strong> Mobile inspection using vehicles</li>
+                    <li><strong>Random Patrol:</strong> Varying routes and times</li>
+                    <li><strong>Fixed Point:</strong> Stationary observation</li>
+                </ul>
+                <h3>Patrol Best Practices:</h3>
+                <ol>
+                    <li>Vary your route and timing to be unpredictable</li>
+                    <li>Use all your senses - look, listen, and observe</li>
+                    <li>Check doors, windows, and access points</li>
+                    <li>Document any irregularities immediately</li>
+                    <li>Report suspicious activities or persons</li>
+                </ol>
+                ]]>
+            </field>
+        </record>
+        
+        <!-- Emergency Response Course - Fire Safety -->
+        <record id="slide_fire_safety" model="slide.slide">
+            <field name="name">Fire Safety and Prevention</field>
+            <field name="channel_id" ref="course_emergency_response"/>
+            <field name="slide_category">article</field>
+            <field name="sequence">1</field>
+            <field name="is_published" eval="True"/>
+            <field name="is_guard_specific" eval="True"/>
+            <field name="description">
+                <![CDATA[
+                <h2>Fire Safety Fundamentals</h2>
+                <p>Fire is one of the most dangerous emergencies you may face.</p>
+                <h3>Fire Triangle:</h3>
+                <ul>
+                    <li>Fuel - Combustible materials</li>
+                    <li>Oxygen - Air supply</li>
+                    <li>Heat - Ignition source</li>
+                </ul>
+                <h3>Classes of Fire:</h3>
+                <ul>
+                    <li><strong>Class A:</strong> Ordinary combustibles (wood, paper)</li>
+                    <li><strong>Class B:</strong> Flammable liquids</li>
+                    <li><strong>Class C:</strong> Electrical fires</li>
+                    <li><strong>Class D:</strong> Combustible metals</li>
+                    <li><strong>Class K:</strong> Kitchen fires (oils and fats)</li>
+                </ul>
+                <h3>RACE Protocol:</h3>
+                <ol>
+                    <li><strong>R</strong>escue - Remove people from danger</li>
+                    <li><strong>A</strong>larm - Activate fire alarm</li>
+                    <li><strong>C</strong>onfine - Close doors to contain fire</li>
+                    <li><strong>E</strong>xtinguish or Evacuate</li>
+                </ol>
+                ]]>
+            </field>
+        </record>
+        
+        <!-- Sample Quiz for Basic Security -->
+        <record id="quiz_basic_security_final" model="slide.slide">
+            <field name="name">Basic Security Final Exam</field>
+            <field name="channel_id" ref="course_basic_security"/>
+            <field name="slide_category">quiz</field>
+            <field name="sequence">99</field>
+            <field name="is_published" eval="True"/>
+            <field name="is_guard_specific" eval="True"/>
+            <field name="description">Test your knowledge of basic security procedures</field>
+        </record>
+        
+        <!-- Sample Quiz Questions -->
+        <record id="quiz_question_1" model="slide.question">
+            <field name="question">What is the primary responsibility of a security guard?</field>
+            <field name="slide_id" ref="quiz_basic_security_final"/>
+            <field name="sequence">1</field>
+            <field name="answer_ids" eval="[(0, 0, {
+                'text_value': 'To protect life and property',
+                'is_correct': True,
+                'sequence': 1
+            }), (0, 0, {
+                'text_value': 'To arrest criminals',
+                'is_correct': False,
+                'sequence': 2
+            }), (0, 0, {
+                'text_value': 'To provide customer service only',
+                'is_correct': False,
+                'sequence': 3
+            }), (0, 0, {
+                'text_value': 'To manage the facility',
+                'is_correct': False,
+                'sequence': 4
+            })]"/>
+        </record>
+        
+        <record id="quiz_question_2" model="slide.question">
+            <field name="question">Which patrol technique involves varying routes and times?</field>
+            <field name="slide_id" ref="quiz_basic_security_final"/>
+            <field name="sequence">2</field>
+            <field name="answer_ids" eval="[(0, 0, {
+                'text_value': 'Random Patrol',
+                'is_correct': True,
+                'sequence': 1
+            }), (0, 0, {
+                'text_value': 'Fixed Point',
+                'is_correct': False,
+                'sequence': 2
+            }), (0, 0, {
+                'text_value': 'Linear Patrol',
+                'is_correct': False,
+                'sequence': 3
+            }), (0, 0, {
+                'text_value': 'Circular Patrol',
+                'is_correct': False,
+                'sequence': 4
+            })]"/>
+        </record>
+        
+</odoo>
+

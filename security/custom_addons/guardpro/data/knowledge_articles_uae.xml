@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Knowledge Base Articles - UAE/SIRA Standards -->
+        
+        <!-- Article 1: SIRA Certification Overview -->
+        <record id="article_sira_certification_overview" model="knowledge.article">
+            <field name="name">SIRA Certification Requirements - Complete Guide</field>
+            <field name="article_type">sira</field>
+            <field name="category_id" ref="knowledge_category_sira_requirements"/>
+            <field name="summary">Comprehensive guide to Security Industry Regulatory Agency (SIRA) certification requirements for security guards operating in Dubai, UAE.</field>
+            <field name="content">&lt;h1&gt;SIRA Certification Requirements&lt;/h1&gt;
+
+&lt;h2&gt;What is SIRA?&lt;/h2&gt;
+&lt;p&gt;The Security Industry Regulatory Agency (SIRA) is the regulatory body responsible for licensing and regulating the private security industry in Dubai. Established under Law No. (6) of 2019, SIRA ensures that all security personnel meet professional standards.&lt;/p&gt;
+
+&lt;h2&gt;SIRA Grade Levels&lt;/h2&gt;
+
+&lt;h3&gt;Grade 1 - Security Guard&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Eligibility:&lt;/strong&gt; High school certificate or equivalent&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Training:&lt;/strong&gt; Minimum 100 hours of security training&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Duties:&lt;/strong&gt; Basic security operations, access control, patrol&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Validity:&lt;/strong&gt; 1 year (renewable)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Grade 2 - Senior Security Guard&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Eligibility:&lt;/strong&gt; Grade 1 + 2 years experience&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Training:&lt;/strong&gt; Advanced security operations (80 hours)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Duties:&lt;/strong&gt; Complex security tasks, specialized operations&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Validity:&lt;/strong&gt; 1 year (renewable)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Grade 3 - Security Supervisor&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Eligibility:&lt;/strong&gt; Grade 2 + 3 years experience OR Bachelor's degree + 1 year&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Training:&lt;/strong&gt; Supervision and management (60 hours)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Duties:&lt;/strong&gt; Team supervision, shift management, operations coordination&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Validity:&lt;/strong&gt; 1 year (renewable)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Grade 4 - Security Manager&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Eligibility:&lt;/strong&gt; Bachelor's degree + 5 years experience&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Training:&lt;/strong&gt; Strategic security management (40 hours)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Duties:&lt;/strong&gt; Overall security operations management, client relations, strategic planning&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Validity:&lt;/strong&gt; 1 year (renewable)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Mandatory Training Modules&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;UAE Laws and Regulations&lt;/li&gt;
+&lt;li&gt;Security Fundamentals&lt;/li&gt;
+&lt;li&gt;Access Control Systems&lt;/li&gt;
+&lt;li&gt;Emergency Response&lt;/li&gt;
+&lt;li&gt;First Aid and Safety&lt;/li&gt;
+&lt;li&gt;Customer Service&lt;/li&gt;
+&lt;li&gt;Report Writing&lt;/li&gt;
+&lt;li&gt;CCTV Operations&lt;/li&gt;
+&lt;li&gt;Fire Safety and Prevention&lt;/li&gt;
+&lt;li&gt;Professional Ethics&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2&gt;License Renewal Requirements&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Annual renewal before expiry date&lt;/li&gt;
+&lt;li&gt;Valid Emirates ID&lt;/li&gt;
+&lt;li&gt;Medical fitness certificate&lt;/li&gt;
+&lt;li&gt;No criminal record&lt;/li&gt;
+&lt;li&gt;Refresher training (minimum 20 hours annually)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Professional Conduct Standards&lt;/h2&gt;
+&lt;p&gt;All SIRA-certified guards must:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Wear uniform and display SIRA ID card at all times&lt;/li&gt;
+&lt;li&gt;Maintain professional appearance and behavior&lt;/li&gt;
+&lt;li&gt;Report incidents accurately and promptly&lt;/li&gt;
+&lt;li&gt;Maintain confidentiality&lt;/li&gt;
+&lt;li&gt;Comply with client site regulations&lt;/li&gt;
+&lt;li&gt;Undergo continuous professional development&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Contact Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;SIRA Headquarters:&lt;/strong&gt;&lt;br/&gt;
+Security Industry Regulatory Agency&lt;br/&gt;
+Dubai Police Headquarters&lt;br/&gt;
+Tel: 800-7472 (800-SIRA)&lt;br/&gt;
+Website: www.sira.ae&lt;/p&gt;</field>
+            <field name="is_uae_standard" eval="True"/>
+            <field name="is_sira_requirement" eval="True"/>
+            <field name="sira_reference">SIRA-REG-2019-001</field>
+            <field name="compliance_level">mandatory</field>
+            <field name="applicable_roles" eval="[(6, 0, [ref('guard_role_sira_grade1'), ref('guard_role_sira_grade2'), ref('guard_role_sira_grade3'), ref('guard_role_sira_grade4')])]"/>
+            <field name="is_published" eval="True"/>
+            <field name="access_level">all</field>
+            <field name="acknowledgment_required" eval="True"/>
+        </record>
+        
+        <!-- Article 2: UAE Security Laws -->
+        <record id="article_uae_security_laws" model="knowledge.article">
+            <field name="name">UAE Security Laws and Regulations for Guards</field>
+            <field name="article_type">regulation</field>
+            <field name="category_id" ref="knowledge_category_uae_law"/>
+            <field name="summary">Overview of UAE federal and local laws governing private security operations and guard conduct.</field>
+            <field name="content">&lt;h1&gt;UAE Security Laws and Regulations&lt;/h1&gt;
+
+&lt;h2&gt;Federal Laws&lt;/h2&gt;
+
+&lt;h3&gt;Federal Law No. 3 of 1987 (Penal Code)&lt;/h3&gt;
+&lt;p&gt;Security guards must understand basic criminal law including:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Definition of crimes and offenses&lt;/li&gt;
+&lt;li&gt;Citizen's arrest rights and limitations&lt;/li&gt;
+&lt;li&gt;Self-defense and use of reasonable force&lt;/li&gt;
+&lt;li&gt;Detention and search limitations&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Federal Decree-Law No. 45 of 2021 (Data Protection Law)&lt;/h3&gt;
+&lt;p&gt;Guards handling personal data must comply with:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Confidentiality of personal information&lt;/li&gt;
+&lt;li&gt;Proper handling of visitor data&lt;/li&gt;
+&lt;li&gt;CCTV and surveillance privacy requirements&lt;/li&gt;
+&lt;li&gt;Data retention and disposal procedures&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Dubai Local Laws&lt;/h2&gt;
+
+&lt;h3&gt;Law No. 6 of 2019 (SIRA Establishment)&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Mandatory SIRA licensing for all security personnel&lt;/li&gt;
+&lt;li&gt;Prohibition of unlicensed security work&lt;/li&gt;
+&lt;li&gt;Penalties for violations&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Guard Rights and Responsibilities&lt;/h2&gt;
+
+&lt;h3&gt;Legal Authority&lt;/h3&gt;
+&lt;p&gt;Security guards have authority to:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Request identification from visitors&lt;/li&gt;
+&lt;li&gt;Deny entry to unauthorized persons&lt;/li&gt;
+&lt;li&gt;Observe and report suspicious activities&lt;/li&gt;
+&lt;li&gt;Detain suspects until police arrive (in specific circumstances)&lt;/li&gt;
+&lt;li&gt;Use reasonable force in self-defense&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Legal Limitations&lt;/h3&gt;
+&lt;p&gt;Security guards CANNOT:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Make arrests (except citizen's arrest in specific cases)&lt;/li&gt;
+&lt;li&gt;Conduct searches without consent&lt;/li&gt;
+&lt;li&gt;Use excessive force&lt;/li&gt;
+&lt;li&gt;Carry weapons without proper license&lt;/li&gt;
+&lt;li&gt;Impersonate police officers&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Labor Law Compliance&lt;/h2&gt;
+&lt;p&gt;Under Federal Decree-Law No. 33 of 2021:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Maximum 8 hours work per day (or 48 hours per week)&lt;/li&gt;
+&lt;li&gt;Overtime compensation for extra hours&lt;/li&gt;
+&lt;li&gt;Annual leave entitlements&lt;/li&gt;
+&lt;li&gt;Health and safety protections&lt;/li&gt;
+&lt;li&gt;End of service benefits&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Reporting Obligations&lt;/h2&gt;
+&lt;p&gt;Guards must immediately report to police:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Criminal activities or suspected crimes&lt;/li&gt;
+&lt;li&gt;Security threats or terrorism-related activities&lt;/li&gt;
+&lt;li&gt;Major accidents or injuries&lt;/li&gt;
+&lt;li&gt;Fire or life safety emergencies&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Penalties for Violations&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Working without SIRA license: AED 5,000 - 50,000 fine&lt;/li&gt;
+&lt;li&gt;Professional misconduct: License suspension or revocation&lt;/li&gt;
+&lt;li&gt;Criminal violations: As per UAE Penal Code&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="is_uae_standard" eval="True"/>
+            <field name="compliance_level">mandatory</field>
+            <field name="applicable_roles" eval="[(6, 0, [ref('guard_role_sira_grade1'), ref('guard_role_sira_grade2'), ref('guard_role_sira_grade3'), ref('guard_role_sira_grade4')])]"/>
+            <field name="is_published" eval="True"/>
+            <field name="access_level">all</field>
+            <field name="acknowledgment_required" eval="True"/>
+        </record>
+        
+        <!-- Article 3: Professional Conduct &amp; Ethics -->
+        <record id="article_professional_conduct" model="knowledge.article">
+            <field name="name">Professional Conduct and Ethics for Security Guards</field>
+            <field name="article_type">policy</field>
+            <field name="category_id" ref="knowledge_category_workplace_conduct"/>
+            <field name="summary">Code of conduct and professional ethics standards for security personnel in UAE.</field>
+            <field name="content">&lt;h1&gt;Professional Conduct and Ethics&lt;/h1&gt;
+
+&lt;h2&gt;Core Values&lt;/h2&gt;
+
+&lt;h3&gt;Integrity&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Always act honestly and truthfully&lt;/li&gt;
+&lt;li&gt;Report incidents accurately without exaggeration&lt;/li&gt;
+&lt;li&gt;Refuse bribes or inappropriate gifts&lt;/li&gt;
+&lt;li&gt;Maintain accurate logs and documentation&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Professionalism&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Maintain professional appearance at all times&lt;/li&gt;
+&lt;li&gt;Wear clean, pressed uniform with proper identification&lt;/li&gt;
+&lt;li&gt;Practice good personal hygiene&lt;/li&gt;
+&lt;li&gt;Be punctual and reliable&lt;/li&gt;
+&lt;li&gt;Follow chain of command&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Respect&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Treat everyone with dignity and respect&lt;/li&gt;
+&lt;li&gt;Avoid discrimination based on nationality, religion, or gender&lt;/li&gt;
+&lt;li&gt;Be courteous and helpful to visitors&lt;/li&gt;
+&lt;li&gt;Respect cultural sensitivities in UAE&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Communication Standards&lt;/h2&gt;
+
+&lt;h3&gt;Professional Communication&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Speak clearly and politely&lt;/li&gt;
+&lt;li&gt;Use appropriate language (no profanity)&lt;/li&gt;
+&lt;li&gt;Listen actively and attentively&lt;/li&gt;
+&lt;li&gt;Ask clarifying questions when unsure&lt;/li&gt;
+&lt;li&gt;Provide clear, concise information&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Radio Communication Protocol&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Identify yourself before speaking&lt;/li&gt;
+&lt;li&gt;Keep messages brief and relevant&lt;/li&gt;
+&lt;li&gt;Use proper radio codes if applicable&lt;/li&gt;
+&lt;li&gt;Wait for acknowledgment&lt;/li&gt;
+&lt;li&gt;Never use radio for personal conversations&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Confidentiality&lt;/h2&gt;
+&lt;p&gt;Guards must maintain strict confidentiality regarding:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Client business information&lt;/li&gt;
+&lt;li&gt;Security procedures and vulnerabilities&lt;/li&gt;
+&lt;li&gt;Visitor and employee personal data&lt;/li&gt;
+&lt;li&gt;Incident details (share only with authorized personnel)&lt;/li&gt;
+&lt;li&gt;Access codes, passwords, and security systems&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Prohibited Conduct&lt;/h2&gt;
+&lt;p&gt;The following behaviors are strictly prohibited:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Sleeping on duty&lt;/li&gt;
+&lt;li&gt;Using mobile phones for personal use during duty&lt;/li&gt;
+&lt;li&gt;Leaving post without authorization&lt;/li&gt;
+&lt;li&gt;Consuming alcohol or drugs&lt;/li&gt;
+&lt;li&gt;Smoking in non-designated areas&lt;/li&gt;
+&lt;li&gt;Engaging in personal business during duty&lt;/li&gt;
+&lt;li&gt;Unauthorized visitors to guard post&lt;/li&gt;
+&lt;li&gt;Taking unauthorized breaks&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Customer Service Excellence&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Greet visitors warmly and professionally&lt;/li&gt;
+&lt;li&gt;Be helpful and provide accurate information&lt;/li&gt;
+&lt;li&gt;Maintain positive attitude&lt;/li&gt;
+&lt;li&gt;Handle complaints professionally&lt;/li&gt;
+&lt;li&gt;Go extra mile to assist when appropriate&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Cultural Sensitivity in UAE&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Respect Islamic customs and practices&lt;/li&gt;
+&lt;li&gt;Be sensitive during prayer times&lt;/li&gt;
+&lt;li&gt;Dress modestly and professionally&lt;/li&gt;
+&lt;li&gt;Understand and respect local traditions&lt;/li&gt;
+&lt;li&gt;Be aware of national holidays and observances&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Conflict Resolution&lt;/h2&gt;
+&lt;p&gt;When dealing with conflicts:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Remain calm and professional&lt;/li&gt;
+&lt;li&gt;Listen to all parties&lt;/li&gt;
+&lt;li&gt;Avoid taking sides&lt;/li&gt;
+&lt;li&gt;Seek peaceful resolution&lt;/li&gt;
+&lt;li&gt;Escalate to supervisor if needed&lt;/li&gt;
+&lt;li&gt;Document the incident&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="compliance_level">mandatory</field>
+            <field name="applicable_roles" eval="[(6, 0, [ref('guard_role_sira_grade1'), ref('guard_role_sira_grade2'), ref('guard_role_sira_grade3'), ref('guard_role_sira_grade4')])]"/>
+            <field name="is_published" eval="True"/>
+            <field name="access_level">all</field>
+            <field name="acknowledgment_required" eval="True"/>
+        </record>
+        
+        <!-- Article 4: Emergency Numbers &amp; Contacts -->
+        <record id="article_emergency_contacts" model="knowledge.article">
+            <field name="name">UAE Emergency Contact Numbers - Quick Reference</field>
+            <field name="article_type">guide</field>
+            <field name="category_id" ref="knowledge_category_emergency"/>
+            <field name="summary">Essential emergency contact numbers for security guards in UAE.</field>
+            <field name="content">&lt;h1&gt;UAE Emergency Contact Numbers&lt;/h1&gt;
+
+&lt;h2&gt;Primary Emergency Services&lt;/h2&gt;
+&lt;table border="1" style="width:100%; border-collapse:collapse;"&gt;
+&lt;tr style="background-color:#f0f0f0;"&gt;
+&lt;th style="padding:8px; text-align:left;"&gt;Service&lt;/th&gt;
+&lt;th style="padding:8px; text-align:left;"&gt;Number&lt;/th&gt;
+&lt;th style="padding:8px; text-align:left;"&gt;When to Call&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding:8px;"&gt;&lt;strong&gt;Police Emergency&lt;/strong&gt;&lt;/td&gt;
+&lt;td style="padding:8px;"&gt;&lt;strong&gt;999&lt;/strong&gt;&lt;/td&gt;
+&lt;td style="padding:8px;"&gt;Crimes, security threats, serious incidents&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding:8px;"&gt;&lt;strong&gt;Ambulance&lt;/strong&gt;&lt;/td&gt;
+&lt;td style="padding:8px;"&gt;&lt;strong&gt;998&lt;/strong&gt;&lt;/td&gt;
+&lt;td style="padding:8px;"&gt;Medical emergencies, injuries, illness&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding:8px;"&gt;&lt;strong&gt;Fire &amp; Civil Defense&lt;/strong&gt;&lt;/td&gt;
+&lt;td style="padding:8px;"&gt;&lt;strong&gt;997&lt;/strong&gt;&lt;/td&gt;
+&lt;td style="padding:8px;"&gt;Fire, hazmat, rescue operations&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding:8px;"&gt;&lt;strong&gt;All Emergencies (Unified)&lt;/strong&gt;&lt;/td&gt;
+&lt;td style="padding:8px;"&gt;&lt;strong&gt;112&lt;/strong&gt;&lt;/td&gt;
+&lt;td style="padding:8px;"&gt;Any emergency (international standard)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;h2&gt;Secondary Services&lt;/h2&gt;
+&lt;table border="1" style="width:100%; border-collapse:collapse;"&gt;
+&lt;tr style="background-color:#f0f0f0;"&gt;
+&lt;th style="padding:8px; text-align:left;"&gt;Service&lt;/th&gt;
+&lt;th style="padding:8px; text-align:left;"&gt;Number&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding:8px;"&gt;Dubai Police Non-Emergency&lt;/td&gt;
+&lt;td style="padding:8px;"&gt;901&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding:8px;"&gt;Traffic Accidents&lt;/td&gt;
+&lt;td style="padding:8px;"&gt;999 or 901&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding:8px;"&gt;Dubai Municipality&lt;/td&gt;
+&lt;td style="padding:8px;"&gt;800-900&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding:8px;"&gt;DEWA (Electricity &amp; Water)&lt;/td&gt;
+&lt;td style="padding:8px;"&gt;991&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="padding:8px;"&gt;SIRA Hotline&lt;/td&gt;
+&lt;td style="padding:8px;"&gt;800-7472&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;h2&gt;Calling Emergency Services - Best Practices&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Stay Calm:&lt;/strong&gt; Speak clearly and slowly&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Location:&lt;/strong&gt; Provide exact address with landmarks&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Nature:&lt;/strong&gt; Describe the emergency clearly&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Details:&lt;/strong&gt; Number of people involved, injuries, etc.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Follow Instructions:&lt;/strong&gt; Listen to dispatcher guidance&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Stay Available:&lt;/strong&gt; Keep line open or be available for callback&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2&gt;Information to Provide&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Your name and position&lt;/li&gt;
+&lt;li&gt;Exact location (building name, street, area)&lt;/li&gt;
+&lt;li&gt;Nearest major landmark&lt;/li&gt;
+&lt;li&gt;Type of emergency&lt;/li&gt;
+&lt;li&gt;Number of people affected&lt;/li&gt;
+&lt;li&gt;Current status/ongoing threats&lt;/li&gt;
+&lt;li&gt;Your callback number&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;After Making the Call&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Note call time and reference number if provided&lt;/li&gt;
+&lt;li&gt;Assign someone to guide emergency services to location&lt;/li&gt;
+&lt;li&gt;Notify your supervisor immediately&lt;/li&gt;
+&lt;li&gt;Begin incident documentation&lt;/li&gt;
+&lt;li&gt;Secure the scene&lt;/li&gt;
+&lt;li&gt;Provide first aid if trained and safe to do so&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="is_uae_standard" eval="True"/>
+            <field name="compliance_level">mandatory</field>
+            <field name="applicable_roles" eval="[(6, 0, [ref('guard_role_sira_grade1'), ref('guard_role_sira_grade2'), ref('guard_role_sira_grade3'), ref('guard_role_sira_grade4')])]"/>
+            <field name="is_published" eval="True"/>
+            <field name="access_level">all</field>
+        </record>
+        
+        <!-- Article 5: Report Writing Guide -->
+        <record id="article_report_writing" model="knowledge.article">
+            <field name="name">Professional Report Writing for Security Guards</field>
+            <field name="article_type">training</field>
+            <field name="category_id" ref="knowledge_category_incident"/>
+            <field name="summary">Comprehensive guide to writing clear, accurate, and professional security reports.</field>
+            <field name="content">&lt;h1&gt;Professional Report Writing&lt;/h1&gt;
+
+&lt;h2&gt;Importance of Report Writing&lt;/h2&gt;
+&lt;p&gt;Security reports serve as:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Legal documentation for incidents&lt;/li&gt;
+&lt;li&gt;Evidence in investigations&lt;/li&gt;
+&lt;li&gt;Communication tool with clients&lt;/li&gt;
+&lt;li&gt;Record of activities and observations&lt;/li&gt;
+&lt;li&gt;Basis for trend analysis and improvements&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;The 5 W's and 1 H&lt;/h2&gt;
+&lt;p&gt;Every report must answer:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;WHO:&lt;/strong&gt; Who was involved? (names, descriptions)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;WHAT:&lt;/strong&gt; What happened? (specific details)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;WHEN:&lt;/strong&gt; When did it occur? (date, time)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;WHERE:&lt;/strong&gt; Where did it happen? (exact location)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;WHY:&lt;/strong&gt; Why did it happen? (if known)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;HOW:&lt;/strong&gt; How did it occur? (sequence of events)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Report Writing Principles&lt;/h2&gt;
+
+&lt;h3&gt;Be Accurate&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Report only facts you directly observed&lt;/li&gt;
+&lt;li&gt;Use exact times, dates, and locations&lt;/li&gt;
+&lt;li&gt;Quote witnesses exactly (use quotation marks)&lt;/li&gt;
+&lt;li&gt;Distinguish between facts and opinions&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Be Clear&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Use simple, straightforward language&lt;/li&gt;
+&lt;li&gt;Avoid jargon and slang&lt;/li&gt;
+&lt;li&gt;Write in short sentences&lt;/li&gt;
+&lt;li&gt;Use bullet points for clarity&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Be Complete&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Include all relevant information&lt;/li&gt;
+&lt;li&gt;Document your actions taken&lt;/li&gt;
+&lt;li&gt;List all notifications made&lt;/li&gt;
+&lt;li&gt;Attach supporting documents/photos&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Be Objective&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Avoid personal opinions or bias&lt;/li&gt;
+&lt;li&gt;Don't exaggerate or minimize&lt;/li&gt;
+&lt;li&gt;Use neutral language&lt;/li&gt;
+&lt;li&gt;Report facts, not assumptions&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Report Structure&lt;/h2&gt;
+
+&lt;h3&gt;Header Information&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Report number/reference&lt;/li&gt;
+&lt;li&gt;Date and time of incident&lt;/li&gt;
+&lt;li&gt;Location&lt;/li&gt;
+&lt;li&gt;Guard name and ID&lt;/li&gt;
+&lt;li&gt;Report type&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Incident Summary&lt;/h3&gt;
+&lt;p&gt;Brief overview (2-3 sentences) of what occurred.&lt;/p&gt;
+
+&lt;h3&gt;Detailed Description&lt;/h3&gt;
+&lt;p&gt;Chronological account of events including:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;How you became aware of the incident&lt;/li&gt;
+&lt;li&gt;What you observed upon arrival&lt;/li&gt;
+&lt;li&gt;Actions you took&lt;/li&gt;
+&lt;li&gt;Statements from involved parties&lt;/li&gt;
+&lt;li&gt;Outcome/resolution&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Actions Taken&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Emergency services contacted&lt;/li&gt;
+&lt;li&gt;Notifications made (supervisor, client, etc.)&lt;/li&gt;
+&lt;li&gt;First aid provided&lt;/li&gt;
+&lt;li&gt;Evidence collected&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Witness Information&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Names and contact details&lt;/li&gt;
+&lt;li&gt;Brief statements&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Common Mistakes to Avoid&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Using abbreviations without explanation&lt;/li&gt;
+&lt;li&gt;Poor spelling and grammar&lt;/li&gt;
+&lt;li&gt;Missing critical details&lt;/li&gt;
+&lt;li&gt;Including assumptions as facts&lt;/li&gt;
+&lt;li&gt;Delaying report submission&lt;/li&gt;
+&lt;li&gt;Illegible handwriting&lt;/li&gt;
+&lt;li&gt;Using offensive language&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Timeline for Submission&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Critical incidents:&lt;/strong&gt; Within 1 hour&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Major incidents:&lt;/strong&gt; Within 2 hours&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Minor incidents:&lt;/strong&gt; End of shift&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Daily activity reports:&lt;/strong&gt; End of shift&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="is_sira_requirement" eval="True"/>
+            <field name="compliance_level">mandatory</field>
+            <field name="applicable_roles" eval="[(6, 0, [ref('guard_role_sira_grade1'), ref('guard_role_sira_grade2'), ref('guard_role_sira_grade3'), ref('guard_role_sira_grade4')])]"/>
+            <field name="is_published" eval="True"/>
+            <field name="access_level">all</field>
+            <field name="acknowledgment_required" eval="True"/>
+        </record>
+        
+    </data>
+</odoo>
+

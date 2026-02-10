@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Shift Template Generate Wizard Form View -->
+    <record id="view_shift_template_generate_wizard_form" model="ir.ui.view">
+        <field name="name">shift.template.generate.wizard.form</field>
+        <field name="model">shift.template.generate.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generate Shifts from Template">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="template_id" readonly="1"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        <i class="fa fa-info-circle" title="Information" aria-label="Information"/> 
+                        Shifts will be generated for all guards assigned to template "<field name="template_id" readonly="1"/>" 
+                        based on the recurrence pattern. Select the date range to generate shifts from.
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="action_generate_shifts" 
+                            string="Generate Shifts" 
+                            type="object" 
+                            class="btn-primary"/>
+                    <button string="Cancel" 
+                            class="btn-secondary" 
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Shift Template Generate Wizard Action -->
+    <record id="action_shift_template_generate_wizard" model="ir.actions.act_window">
+        <field name="name">Generate Shifts</field>
+        <field name="res_model">shift.template.generate.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
+

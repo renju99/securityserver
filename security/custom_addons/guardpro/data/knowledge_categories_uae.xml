@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Knowledge Base Categories for UAE/SIRA Standards -->
+        
+        <!-- Main Categories -->
+        <record id="knowledge_category_sira" model="knowledge.category">
+            <field name="name">SIRA Certification &amp; Compliance</field>
+            <field name="color">1</field>
+        </record>
+        
+        <record id="knowledge_category_uae_law" model="knowledge.category">
+            <field name="name">UAE Security Laws &amp; Regulations</field>
+            <field name="color">2</field>
+        </record>
+        
+        <record id="knowledge_category_emergency" model="knowledge.category">
+            <field name="name">Emergency Response Procedures</field>
+            <field name="color">3</field>
+        </record>
+        
+        <record id="knowledge_category_access_control" model="knowledge.category">
+            <field name="name">Access Control &amp; Visitor Management</field>
+            <field name="color">4</field>
+        </record>
+        
+        <record id="knowledge_category_patrol" model="knowledge.category">
+            <field name="name">Patrol &amp; Monitoring Procedures</field>
+            <field name="color">5</field>
+        </record>
+        
+        <record id="knowledge_category_incident" model="knowledge.category">
+            <field name="name">Incident Management &amp; Reporting</field>
+            <field name="color">6</field>
+        </record>
+        
+        <record id="knowledge_category_fire_safety" model="knowledge.category">
+            <field name="name">Fire &amp; Life Safety</field>
+            <field name="color">7</field>
+        </record>
+        
+        <record id="knowledge_category_customer_service" model="knowledge.category">
+            <field name="name">Customer Service &amp; Communication</field>
+            <field name="color">8</field>
+        </record>
+        
+        <record id="knowledge_category_health_safety" model="knowledge.category">
+            <field name="name">Health, Safety &amp; Environment (HSE)</field>
+            <field name="color">9</field>
+        </record>
+        
+        <record id="knowledge_category_equipment" model="knowledge.category">
+            <field name="name">Equipment Operation &amp; Maintenance</field>
+            <field name="color">10</field>
+        </record>
+        
+        <!-- Sub-categories under SIRA -->
+        <record id="knowledge_category_sira_requirements" model="knowledge.category">
+            <field name="name">SIRA Certification Requirements</field>
+            <field name="parent_id" ref="knowledge_category_sira"/>
+            <field name="color">1</field>
+        </record>
+        
+        <record id="knowledge_category_sira_training" model="knowledge.category">
+            <field name="name">SIRA Training Standards</field>
+            <field name="parent_id" ref="knowledge_category_sira"/>
+            <field name="color">1</field>
+        </record>
+        
+        <record id="knowledge_category_sira_compliance" model="knowledge.category">
+            <field name="name">SIRA Compliance Guidelines</field>
+            <field name="parent_id" ref="knowledge_category_sira"/>
+            <field name="color">1</field>
+        </record>
+        
+        <!-- Sub-categories under UAE Law -->
+        <record id="knowledge_category_uae_labor" model="knowledge.category">
+            <field name="name">UAE Labor Law for Security Personnel</field>
+            <field name="parent_id" ref="knowledge_category_uae_law"/>
+            <field name="color">2</field>
+        </record>
+        
+        <record id="knowledge_category_uae_privacy" model="knowledge.category">
+            <field name="name">Data Privacy &amp; Protection Laws</field>
+            <field name="parent_id" ref="knowledge_category_uae_law"/>
+            <field name="color">2</field>
+        </record>
+        
+        <record id="knowledge_category_uae_civil_defense" model="knowledge.category">
+            <field name="name">Civil Defense Regulations</field>
+            <field name="parent_id" ref="knowledge_category_uae_law"/>
+            <field name="color">2</field>
+        </record>
+        
+        <!-- Sub-categories under Emergency Response -->
+        <record id="knowledge_category_emergency_medical" model="knowledge.category">
+            <field name="name">Medical Emergencies &amp; First Aid</field>
+            <field name="parent_id" ref="knowledge_category_emergency"/>
+            <field name="color">3</field>
+        </record>
+        
+        <record id="knowledge_category_emergency_fire" model="knowledge.category">
+            <field name="name">Fire Emergency Response</field>
+            <field name="parent_id" ref="knowledge_category_emergency"/>
+            <field name="color">3</field>
+        </record>
+        
+        <record id="knowledge_category_emergency_evacuation" model="knowledge.category">
+            <field name="name">Evacuation Procedures</field>
+            <field name="parent_id" ref="knowledge_category_emergency"/>
+            <field name="color">3</field>
+        </record>
+        
+        <record id="knowledge_category_emergency_crisis" model="knowledge.category">
+            <field name="name">Crisis Management &amp; Business Continuity</field>
+            <field name="parent_id" ref="knowledge_category_emergency"/>
+            <field name="color">3</field>
+        </record>
+        
+        <!-- Sub-categories under Patrol &amp; Monitoring -->
+        <record id="knowledge_category_patrol_foot" model="knowledge.category">
+            <field name="name">Foot Patrol Procedures</field>
+            <field name="parent_id" ref="knowledge_category_patrol"/>
+            <field name="color">5</field>
+        </record>
+        
+        <record id="knowledge_category_patrol_mobile" model="knowledge.category">
+            <field name="name">Mobile/Vehicle Patrol</field>
+            <field name="parent_id" ref="knowledge_category_patrol"/>
+            <field name="color">5</field>
+        </record>
+        
+        <record id="knowledge_category_patrol_cctv" model="knowledge.category">
+            <field name="name">CCTV Monitoring &amp; Control Room</field>
+            <field name="parent_id" ref="knowledge_category_patrol"/>
+            <field name="color">5</field>
+        </record>
+        
+        <!-- Additional Categories -->
+        <record id="knowledge_category_conflict" model="knowledge.category">
+            <field name="name">Conflict Resolution &amp; De-escalation</field>
+            <field name="color">11</field>
+        </record>
+        
+        <record id="knowledge_category_vip_protection" model="knowledge.category">
+            <field name="name">VIP &amp; Executive Protection</field>
+            <field name="color">12</field>
+        </record>
+        
+        <record id="knowledge_category_event_security" model="knowledge.category">
+            <field name="name">Event &amp; Crowd Management</field>
+            <field name="color">13</field>
+        </record>
+        
+        <record id="knowledge_category_retail_security" model="knowledge.category">
+            <field name="name">Retail &amp; Loss Prevention</field>
+            <field name="color">14</field>
+        </record>
+        
+        <record id="knowledge_category_workplace_conduct" model="knowledge.category">
+            <field name="name">Professional Conduct &amp; Ethics</field>
+            <field name="color">15</field>
+        </record>
+        
+    </data>
+</odoo>
+

@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Security Guard Performance Audit Template -->
+        <record id="audit_template_guard_performance" model="compliance.audit.template">
+            <field name="name">Security Guard Performance Audit</field>
+            <field name="description">Comprehensive audit checklist for security guard performance and compliance</field>
+            <field name="audit_type">guard</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">80.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="audit_template_item_guard_perf_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_guard_performance"/>
+            <field name="sequence">10</field>
+            <field name="description">Guard arrives on time for shift</field>
+            <field name="category">punctuality</field>
+            <field name="critical">True</field>
+            <field name="max_score">10</field>
+        </record>
+        
+        <record id="audit_template_item_guard_perf_2" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_guard_performance"/>
+            <field name="sequence">20</field>
+            <field name="description">Guard is in proper uniform</field>
+            <field name="category">appearance</field>
+            <field name="critical">True</field>
+            <field name="max_score">10</field>
+        </record>
+        
+        <record id="audit_template_item_guard_perf_3" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_guard_performance"/>
+            <field name="sequence">30</field>
+            <field name="description">Guard has all required equipment (radio, flashlight, etc.)</field>
+            <field name="category">equipment</field>
+            <field name="critical">True</field>
+            <field name="max_score">10</field>
+        </record>
+        
+        <record id="audit_template_item_guard_perf_4" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_guard_performance"/>
+            <field name="sequence">40</field>
+            <field name="description">Guard completes patrol routes as scheduled</field>
+            <field name="category">patrol</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="audit_template_item_guard_perf_5" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_guard_performance"/>
+            <field name="sequence">50</field>
+            <field name="description">Guard maintains accurate logs and reports</field>
+            <field name="category">documentation</field>
+            <field name="critical">False</field>
+            <field name="max_score">10</field>
+        </record>
+        
+        <record id="audit_template_item_guard_perf_6" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_guard_performance"/>
+            <field name="sequence">60</field>
+            <field name="description">Guard demonstrates professional conduct</field>
+            <field name="category">professionalism</field>
+            <field name="critical">False</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="audit_template_item_guard_perf_7" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_guard_performance"/>
+            <field name="sequence">70</field>
+            <field name="description">Guard responds appropriately to incidents</field>
+            <field name="category">incident_response</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="audit_template_item_guard_perf_8" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_guard_performance"/>
+            <field name="sequence">80</field>
+            <field name="description">Guard follows site-specific protocols</field>
+            <field name="category">compliance</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <!-- Site Security Compliance Audit Template -->
+        <record id="audit_template_site_security" model="compliance.audit.template">
+            <field name="name">Site Security Compliance Audit</field>
+            <field name="description">Security compliance audit for client sites</field>
+            <field name="audit_type">security</field>
+            <field name="frequency">quarterly</field>
+            <field name="passing_score">85.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="audit_template_item_site_sec_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_site_security"/>
+            <field name="sequence">10</field>
+            <field name="description">All access points are properly secured</field>
+            <field name="category">access_control</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="audit_template_item_site_sec_2" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_site_security"/>
+            <field name="sequence">20</field>
+            <field name="description">CCTV cameras are operational</field>
+            <field name="category">surveillance</field>
+            <field name="critical">True</field>
+            <field name="max_score">10</field>
+        </record>
+        
+        <record id="audit_template_item_site_sec_3" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_site_security"/>
+            <field name="sequence">30</field>
+            <field name="description">Alarm systems are tested and functional</field>
+            <field name="category">alarm_systems</field>
+            <field name="critical">True</field>
+            <field name="max_score">10</field>
+        </record>
+        
+        <record id="audit_template_item_site_sec_4" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_site_security"/>
+            <field name="sequence">40</field>
+            <field name="description">Emergency exits are unobstructed and marked</field>
+            <field name="category">fire_safety</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="audit_template_item_site_sec_5" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_site_security"/>
+            <field name="sequence">50</field>
+            <field name="description">Fire extinguishers are accessible and inspected</field>
+            <field name="category">fire_safety</field>
+            <field name="critical">True</field>
+            <field name="max_score">10</field>
+        </record>
+        
+        <record id="audit_template_item_site_sec_6" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_site_security"/>
+            <field name="sequence">60</field>
+            <field name="description">Visitor management procedures are followed</field>
+            <field name="category">visitor_management</field>
+            <field name="critical">False</field>
+            <field name="max_score">10</field>
+        </record>
+        
+        <record id="audit_template_item_site_sec_7" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_site_security"/>
+            <field name="sequence">70</field>
+            <field name="description">Security documentation is current and organized</field>
+            <field name="category">documentation</field>
+            <field name="critical">False</field>
+            <field name="max_score">10</field>
+        </record>
+        
+        <record id="audit_template_item_site_sec_8" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_site_security"/>
+            <field name="sequence">80</field>
+            <field name="description">Emergency procedures are posted and up-to-date</field>
+            <field name="category">emergency_preparedness</field>
+            <field name="critical">True</field>
+            <field name="max_score">10</field>
+        </record>
+        
+        <record id="audit_template_item_site_sec_9" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_site_security"/>
+            <field name="sequence">90</field>
+            <field name="description">Key control system is properly maintained</field>
+            <field name="category">key_management</field>
+            <field name="critical">False</field>
+            <field name="max_score">10</field>
+        </record>
+        
+        <!-- Equipment Safety Audit Template -->
+        <record id="audit_template_equipment_safety" model="compliance.audit.template">
+            <field name="name">Equipment Safety &amp; Maintenance Audit</field>
+            <field name="description">Safety and maintenance audit for security equipment</field>
+            <field name="audit_type">safety</field>
+            <field name="frequency">monthly</field>
+            <field name="passing_score">90.0</field>
+            <field name="active">True</field>
+        </record>
+        
+        <record id="audit_template_item_equip_1" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_equipment_safety"/>
+            <field name="sequence">10</field>
+            <field name="description">All radios are charged and functional</field>
+            <field name="category">communication</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="audit_template_item_equip_2" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_equipment_safety"/>
+            <field name="sequence">20</field>
+            <field name="description">Flashlights and emergency lighting operational</field>
+            <field name="category">lighting</field>
+            <field name="critical">True</field>
+            <field name="max_score">10</field>
+        </record>
+        
+        <record id="audit_template_item_equip_3" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_equipment_safety"/>
+            <field name="sequence">30</field>
+            <field name="description">First aid kits are stocked and accessible</field>
+            <field name="category">first_aid</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="audit_template_item_equip_4" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_equipment_safety"/>
+            <field name="sequence">40</field>
+            <field name="description">Guard patrol devices (NFC/QR scanners) working</field>
+            <field name="category">patrol_equipment</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="audit_template_item_equip_5" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_equipment_safety"/>
+            <field name="sequence">50</field>
+            <field name="description">Emergency panic buttons are tested</field>
+            <field name="category">emergency</field>
+            <field name="critical">True</field>
+            <field name="max_score">15</field>
+        </record>
+        
+        <record id="audit_template_item_equip_6" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_equipment_safety"/>
+            <field name="sequence">60</field>
+            <field name="description">Vehicle fleet (if applicable) inspected</field>
+            <field name="category">vehicles</field>
+            <field name="critical">False</field>
+            <field name="max_score">10</field>
+        </record>
+        
+        <record id="audit_template_item_equip_7" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_equipment_safety"/>
+            <field name="sequence">70</field>
+            <field name="description">Equipment maintenance logs are up-to-date</field>
+            <field name="category">maintenance</field>
+            <field name="critical">False</field>
+            <field name="max_score">10</field>
+        </record>
+        
+        <record id="audit_template_item_equip_8" model="compliance.audit.template.item">
+            <field name="template_id" ref="audit_template_equipment_safety"/>
+            <field name="sequence">80</field>
+            <field name="description">PPE (Personal Protective Equipment) available</field>
+            <field name="category">safety_equipment</field>
+            <field name="critical">True</field>
+            <field name="max_score">10</field>
+        </record>
+        
+    </data>
+</odoo>
+

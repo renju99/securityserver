@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="action_lost_found_inventory_report" model="ir.actions.report">
+        <field name="name">Lost &amp; Found Inventory</field>
+        <field name="model">lost.found.item</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.report_lost_found_inventory_document</field>
+        <field name="report_file">guardpro.report_lost_found_inventory_document</field>
+        <field name="binding_model_id" ref="model_lost_found_item"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_us"/>
+    </record>
+    
+    <template id="report_lost_found_inventory_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h1 style="color: #795548;">LOST &amp; FOUND INVENTORY</h1>
+                        <table class="table table-sm table-bordered">
+                            <tr>
+                                <th style="width: 30%; background-color: #f5f5f5;">Item Reference</th>
+                                <td><strong><t t-esc="o.name or 'N/A'"/></strong></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Item Description</th>
+                                <td><t t-esc="o.description or 'N/A'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Category</th>
+                                <td><t t-esc="dict(o._fields['item_category'].selection).get(o.item_category, 'N/A') if o.item_category else 'N/A'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Found Date</th>
+                                <td><t t-esc="format_date(o.found_date) if o.found_date else 'N/A'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Found Location</th>
+                                <td><t t-esc="o.location_found or 'N/A'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Status</th>
+                                <td>
+                                    <span t-att-style="'padding: 5px 15px; border-radius: 4px; font-weight: bold; color: white; background-color: %s;' % ('#4caf50' if o.state == 'claimed' else '#ff9800')"
+                                          t-esc="dict(o._fields['state'].selection).get(o.state, 'N/A') if o.state else 'N/A'"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Hold Until</th>
+                                <td><t t-esc="format_date(o.holding_expiry_date) if o.holding_expiry_date else 'N/A'"/></td>
+                            </tr>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    
+</odoo>
+

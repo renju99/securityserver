@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Key Management PDF Report Template -->
+    <template id="key_management_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h2>Key Issuance Receipt</h2>
+                                <h4 t-field="o.key_id.site_id.name"/>
+                            </div>
+                        </div>
+
+                        <!-- Transaction Type -->
+                        <div class="row mb-3">
+                            <div class="col-12 text-center">
+                                <h4>
+                                    <t t-if="o.transaction_type == 'issue'">
+                                        <span class="badge bg-warning">KEY ISSUED</span>
+                                    </t>
+                                    <t t-elif="o.transaction_type == 'return'">
+                                        <span class="badge bg-success">KEY RETURNED</span>
+                                    </t>
+                                    <t t-elif="o.transaction_type == 'transfer'">
+                                        <span class="badge bg-info">KEY TRANSFERRED</span>
+                                    </t>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <!-- Key Details -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Key Information</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Key Identifier:</strong></td>
+                                        <td t-field="o.key_id.name"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Key Type:</strong></td>
+                                        <td><span t-field="o.key_id.key_type"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Location/Room:</strong></td>
+                                        <td t-field="o.key_id.location"/>
+                                    </tr>
+                                    <tr t-if="o.key_id.key_number">
+                                        <td><strong>Key Number:</strong></td>
+                                        <td t-field="o.key_id.key_number"/>
+                                    </tr>
+                                    <tr t-if="o.key_id.key_tag_color">
+                                        <td><strong>Tag Color:</strong></td>
+                                        <td t-field="o.key_id.key_tag_color"/>
+                                    </tr>
+                                    <tr t-if="o.key_id.description">
+                                        <td><strong>Description:</strong></td>
+                                        <td t-field="o.key_id.description"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Borrower Information (for issue/transfer) -->
+                        <div class="row mt-3" t-if="o.transaction_type in ['issue', 'transfer']">
+                            <div class="col-12">
+                                <h5>Borrower Information</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Name:</strong></td>
+                                        <td t-field="o.borrower_name"/>
+                                    </tr>
+                                    <tr t-if="o.borrower_id_type">
+                                        <td><strong>ID Type:</strong></td>
+                                        <td><span t-field="o.borrower_id_type"/></td>
+                                    </tr>
+                                    <tr t-if="o.borrower_id_number">
+                                        <td><strong>ID Number:</strong></td>
+                                        <td t-field="o.borrower_id_number"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Contact Number:</strong></td>
+                                        <td t-field="o.borrower_phone"/>
+                                    </tr>
+                                    <tr t-if="o.borrower_email">
+                                        <td><strong>Email:</strong></td>
+                                        <td t-field="o.borrower_email"/>
+                                    </tr>
+                                    <tr t-if="o.borrower_unit">
+                                        <td><strong>Unit/Department:</strong></td>
+                                        <td t-field="o.borrower_unit"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Transaction Details -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Transaction Details</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Transaction Date:</strong></td>
+                                        <td t-field="o.transaction_date"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Issued/Processed By:</strong></td>
+                                        <td t-field="o.processed_by.name"/>
+                                    </tr>
+                                    <tr t-if="o.expected_return_date">
+                                        <td><strong>Expected Return Date:</strong></td>
+                                        <td t-field="o.expected_return_date"/>
+                                    </tr>
+                                    <tr t-if="o.actual_return_date">
+                                        <td><strong>Actual Return Date:</strong></td>
+                                        <td t-field="o.actual_return_date"/>
+                                    </tr>
+                                    <tr t-if="o.purpose">
+                                        <td><strong>Purpose:</strong></td>
+                                        <td t-field="o.purpose"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Return Details (if returned) -->
+                        <div class="row mt-3" t-if="o.transaction_type == 'return'">
+                            <div class="col-12">
+                                <h5>Return Information</h5>
+                                <table class="table table-bordered">
+                                    <tr t-if="o.return_condition">
+                                        <td width="30%"><strong>Return Condition:</strong></td>
+                                        <td><span t-field="o.return_condition"/></td>
+                                    </tr>
+                                    <tr t-if="o.return_notes">
+                                        <td><strong>Return Notes:</strong></td>
+                                        <td t-field="o.return_notes"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="row mt-3" t-if="o.notes">
+                            <div class="col-12">
+                                <strong>Additional Notes:</strong>
+                                <p t-field="o.notes"/>
+                            </div>
+                        </div>
+
+                        <!-- Important Notice -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="alert alert-warning">
+                                    <strong>Important:</strong>
+                                    <ul>
+                                        <li>Keys must be returned by the expected return date</li>
+                                        <li>Report lost or damaged keys immediately to security</li>
+                                        <li>Keys are not transferable - return to security if no longer needed</li>
+                                        <li>Unauthorized duplication of keys is prohibited</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Signature Section -->
+                        <div class="row mt-5">
+                            <div class="col-6">
+                                <div class="border-top pt-2">
+                                    <p><strong>Issued By (Security):</strong></p>
+                                    <p t-field="o.processed_by.name"></p>
+                                    <p>Date: <span t-field="o.transaction_date"/></p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border-top pt-2">
+                                    <p><strong>Received By:</strong></p>
+                                    <p t-if="o.borrower_name" t-field="o.borrower_name"/>
+                                    <p>Signature: ___________________</p>
+                                    <p>Date: <span t-field="o.transaction_date"/></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="row mt-5">
+                            <div class="col-12 text-center text-muted">
+                                <small>
+                                    Key Management by <span t-field="o.key_id.site_id.name"/> Security
+                                    <br/>
+                                    Please keep this receipt for your records
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Definition -->
+    <record id="action_report_key_management" model="ir.actions.report">
+        <field name="name">Key Issuance Receipt</field>
+        <field name="model">key.transaction</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.key_management_report_template</field>
+        <field name="report_file">guardpro.key_management_report_template</field>
+        <field name="binding_model_id" ref="model_key_transaction"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Key_Receipt_%s_%s' % (object.key_id.name, object.transaction_date)</field>
+    </record>
+</odoo>
+

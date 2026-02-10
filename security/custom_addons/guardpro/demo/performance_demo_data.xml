@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Demo: Performance Reviews -->
+        <record id="demo_performance_review_1" model="guard.performance.review">
+            <field name="name">PERF-00001</field>
+            <field name="guard_id" ref="guard_john_smith"/>
+            <field name="review_period">monthly</field>
+            <field name="period_start" eval="(DateTime.now() - relativedelta(months=1, day=1)).strftime('%Y-%m-%d')"/>
+            <field name="period_end" eval="(DateTime.now() - relativedelta(months=1, day=31)).strftime('%Y-%m-%d')"/>
+            <field name="review_date" eval="(DateTime.now() - relativedelta(days=5)).strftime('%Y-%m-%d')"/>
+            <field name="state">approved</field>
+            <field name="reviewer_id" ref="base.user_admin"/>
+            <field name="approver_id" ref="base.user_admin"/>
+            <field name="strengths">Excellent punctuality record. Always arrives on time for shifts. Completes all assigned tours with attention to detail. Very responsive to incidents.</field>
+            <field name="areas_for_improvement">Could improve documentation quality in incident reports. Consider adding more detailed notes during tours.</field>
+            <field name="goals">Maintain excellent punctuality. Improve incident report documentation. Complete advanced security training.</field>
+            <field name="recommendation">continue</field>
+            <field name="guard_acknowledged" eval="True"/>
+        </record>
+
+        <record id="demo_performance_review_2" model="guard.performance.review">
+            <field name="name">PERF-00002</field>
+            <field name="guard_id" ref="guard_sarah_johnson"/>
+            <field name="review_period">monthly</field>
+            <field name="period_start" eval="(DateTime.now() - relativedelta(months=1, day=1)).strftime('%Y-%m-%d')"/>
+            <field name="period_end" eval="(DateTime.now() - relativedelta(months=1, day=31)).strftime('%Y-%m-%d')"/>
+            <field name="review_date" eval="(DateTime.now() - relativedelta(days=3)).strftime('%Y-%m-%d')"/>
+            <field name="state">completed</field>
+            <field name="reviewer_id" ref="base.user_admin"/>
+            <field name="strengths">Outstanding client feedback. Excellent communication skills. Very professional demeanor. Handles difficult situations well.</field>
+            <field name="areas_for_improvement">Occasional late arrivals (5-10 minutes). Could improve tour completion rate.</field>
+            <field name="goals">Improve punctuality. Complete 100% of assigned tours. Maintain high client satisfaction.</field>
+            <field name="recommendation">additional_training</field>
+        </record>
+
+        <record id="demo_performance_review_3" model="guard.performance.review">
+            <field name="name">PERF-00003</field>
+            <field name="guard_id" ref="guard_michael_brown"/>
+            <field name="review_period">monthly</field>
+            <field name="period_start" eval="(DateTime.now() - relativedelta(day=1)).strftime('%Y-%m-%d')"/>
+            <field name="period_end" eval="DateTime.now().strftime('%Y-%m-%d')"/>
+            <field name="review_date" eval="DateTime.now().strftime('%Y-%m-%d')"/>
+            <field name="state">in_progress</field>
+            <field name="reviewer_id" ref="base.user_admin"/>
+        </record>
+
+        <!-- Demo: Performance Metrics for Review 1 -->
+        <record id="demo_metric_punctuality_1" model="guard.performance.metric">
+            <field name="guard_id" ref="guard_john_smith"/>
+            <field name="criteria_id" ref="performance_criteria_punctuality"/>
+            <field name="period_start" eval="(DateTime.now() - relativedelta(months=1, day=1)).strftime('%Y-%m-%d')"/>
+            <field name="period_end" eval="(DateTime.now() - relativedelta(months=1, day=31)).strftime('%Y-%m-%d')"/>
+            <field name="score">95.0</field>
+            <field name="calculation_details">Attended 20/20 shifts on time. No late arrivals.</field>
+        </record>
+
+        <record id="demo_metric_tour_completion_1" model="guard.performance.metric">
+            <field name="guard_id" ref="guard_john_smith"/>
+            <field name="criteria_id" ref="performance_criteria_tour_completion"/>
+            <field name="period_start" eval="(DateTime.now() - relativedelta(months=1, day=1)).strftime('%Y-%m-%d')"/>
+            <field name="period_end" eval="(DateTime.now() - relativedelta(months=1, day=31)).strftime('%Y-%m-%d')"/>
+            <field name="score">100.0</field>
+            <field name="calculation_details">Completed 40/40 assigned tours.</field>
+        </record>
+
+        <record id="demo_metric_incident_response_1" model="guard.performance.metric">
+            <field name="guard_id" ref="guard_john_smith"/>
+            <field name="criteria_id" ref="performance_criteria_incident_response"/>
+            <field name="period_start" eval="(DateTime.now() - relativedelta(months=1, day=1)).strftime('%Y-%m-%d')"/>
+            <field name="period_end" eval="(DateTime.now() - relativedelta(months=1, day=31)).strftime('%Y-%m-%d')"/>
+            <field name="score">88.0</field>
+            <field name="calculation_details">Reported 5 incidents with good detail and timely submission.</field>
+        </record>
+
+        <record id="demo_metric_client_satisfaction_1" model="guard.performance.metric">
+            <field name="guard_id" ref="guard_john_smith"/>
+            <field name="criteria_id" ref="performance_criteria_client_satisfaction"/>
+            <field name="period_start" eval="(DateTime.now() - relativedelta(months=1, day=1)).strftime('%Y-%m-%d')"/>
+            <field name="period_end" eval="(DateTime.now() - relativedelta(months=1, day=31)).strftime('%Y-%m-%d')"/>
+            <field name="score">92.0</field>
+            <field name="calculation_details">Average client rating: 4.6/5.0 based on 3 feedback responses.</field>
+        </record>
+
+        <record id="demo_metric_shift_adherence_1" model="guard.performance.metric">
+            <field name="guard_id" ref="guard_john_smith"/>
+            <field name="criteria_id" ref="performance_criteria_shift_adherence"/>
+            <field name="period_start" eval="(DateTime.now() - relativedelta(months=1, day=1)).strftime('%Y-%m-%d')"/>
+            <field name="period_end" eval="(DateTime.now() - relativedelta(months=1, day=31)).strftime('%Y-%m-%d')"/>
+            <field name="score">100.0</field>
+            <field name="calculation_details">Attended 20/20 scheduled shifts.</field>
+        </record>
+
+        <!-- Demo: Performance Metrics for Review 2 -->
+        <record id="demo_metric_punctuality_2" model="guard.performance.metric">
+            <field name="guard_id" ref="guard_sarah_johnson"/>
+            <field name="criteria_id" ref="performance_criteria_punctuality"/>
+            <field name="period_start" eval="(DateTime.now() - relativedelta(months=1, day=1)).strftime('%Y-%m-%d')"/>
+            <field name="period_end" eval="(DateTime.now() - relativedelta(months=1, day=31)).strftime('%Y-%m-%d')"/>
+            <field name="score">82.0</field>
+            <field name="calculation_details">Attended 22/22 shifts. 3 late arrivals (5-10 minutes).</field>
+        </record>
+
+        <record id="demo_metric_tour_completion_2" model="guard.performance.metric">
+            <field name="guard_id" ref="guard_sarah_johnson"/>
+            <field name="criteria_id" ref="performance_criteria_tour_completion"/>
+            <field name="period_start" eval="(DateTime.now() - relativedelta(months=1, day=1)).strftime('%Y-%m-%d')"/>
+            <field name="period_end" eval="(DateTime.now() - relativedelta(months=1, day=31)).strftime('%Y-%m-%d')"/>
+            <field name="score">90.0</field>
+            <field name="calculation_details">Completed 36/40 assigned tours.</field>
+        </record>
+
+        <record id="demo_metric_incident_response_2" model="guard.performance.metric">
+            <field name="guard_id" ref="guard_sarah_johnson"/>
+            <field name="criteria_id" ref="performance_criteria_incident_response"/>
+            <field name="period_start" eval="(DateTime.now() - relativedelta(months=1, day=1)).strftime('%Y-%m-%d')"/>
+            <field name="period_end" eval="(DateTime.now() - relativedelta(months=1, day=31)).strftime('%Y-%m-%d')"/>
+            <field name="score">94.0</field>
+            <field name="calculation_details">Reported 4 incidents with excellent detail and photos.</field>
+        </record>
+
+        <record id="demo_metric_client_satisfaction_2" model="guard.performance.metric">
+            <field name="guard_id" ref="guard_sarah_johnson"/>
+            <field name="criteria_id" ref="performance_criteria_client_satisfaction"/>
+            <field name="period_start" eval="(DateTime.now() - relativedelta(months=1, day=1)).strftime('%Y-%m-%d')"/>
+            <field name="period_end" eval="(DateTime.now() - relativedelta(months=1, day=31)).strftime('%Y-%m-%d')"/>
+            <field name="score">98.0</field>
+            <field name="calculation_details">Average client rating: 4.9/5.0 based on 5 feedback responses.</field>
+        </record>
+
+        <record id="demo_metric_shift_adherence_2" model="guard.performance.metric">
+            <field name="guard_id" ref="guard_sarah_johnson"/>
+            <field name="criteria_id" ref="performance_criteria_shift_adherence"/>
+            <field name="period_start" eval="(DateTime.now() - relativedelta(months=1, day=1)).strftime('%Y-%m-%d')"/>
+            <field name="period_end" eval="(DateTime.now() - relativedelta(months=1, day=31)).strftime('%Y-%m-%d')"/>
+            <field name="score">100.0</field>
+            <field name="calculation_details">Attended 22/22 scheduled shifts.</field>
+        </record>
+
+        <!-- Demo: Performance Badges -->
+        <record id="demo_badge_punctuality_1" model="guard.performance.badge">
+            <field name="name">Perfect Punctuality - March 2025</field>
+            <field name="badge_type">punctuality</field>
+            <field name="guard_id" ref="guard_john_smith"/>
+            <field name="earned_date" eval="(DateTime.now() - relativedelta(months=1)).strftime('%Y-%m-%d')"/>
+            <field name="description">Perfect on-time record for the month</field>
+            <field name="icon">fa-clock-o</field>
+            <field name="color">#4CAF50</field>
+            <field name="criteria_met">100% on-time arrivals for all shifts in March 2025</field>
+        </record>
+
+        <record id="demo_badge_tour_master_1" model="guard.performance.badge">
+            <field name="name">Tour Master - March 2025</field>
+            <field name="badge_type">tour_master</field>
+            <field name="guard_id" ref="guard_john_smith"/>
+            <field name="earned_date" eval="(DateTime.now() - relativedelta(months=1)).strftime('%Y-%m-%d')"/>
+            <field name="description">100% tour completion rate</field>
+            <field name="icon">fa-map-marker</field>
+            <field name="color">#2196F3</field>
+            <field name="criteria_met">Completed all 40 assigned tours in March 2025</field>
+        </record>
+
+        <record id="demo_badge_client_favorite_2" model="guard.performance.badge">
+            <field name="name">Client Favorite - Q1 2025</field>
+            <field name="badge_type">client_favorite</field>
+            <field name="guard_id" ref="guard_sarah_johnson"/>
+            <field name="earned_date" eval="(DateTime.now() - relativedelta(months=1)).strftime('%Y-%m-%d')"/>
+            <field name="description">Outstanding client satisfaction</field>
+            <field name="icon">fa-thumbs-up</field>
+            <field name="color">#FF9800</field>
+            <field name="criteria_met">Average rating of 4.9/5.0 over Q1 2025</field>
+        </record>
+
+    </data>
+</odoo>
+

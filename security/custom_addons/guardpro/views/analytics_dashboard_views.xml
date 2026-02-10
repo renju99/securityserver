@@ -1,0 +1,722 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================ -->
+    <!-- ADVANCED OPERATIONS DASHBOARD                -->
+    <!-- ============================================ -->
+    
+    <!-- Enhanced Dashboard KPI View -->
+    <record id="view_guardpro_dashboard_form" model="ir.ui.view">
+        <field name="name">guardpro.dashboard.form</field>
+        <field name="model">guardpro.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="GuardPro Operations Dashboard" create="false" edit="false" delete="false">
+                <header>
+                    <button name="action_refresh_dashboard" 
+                            string="Refresh Dashboard" 
+                            type="object" 
+                            class="btn-primary"
+                            icon="fa-sync"
+                            help="Click to refresh all dashboard data"/>
+                </header>
+                <sheet>
+                    <!-- Dashboard Header -->
+                    <div class="oe_title mb-3">
+                        <h1 class="d-flex align-items-center">
+                            <i class="fa fa-dashboard me-2" title="Dashboard"></i>
+                            <field name="name" readonly="1" class="mb-0"/>
+                        </h1>
+                        <p class="text-muted">Real-time Security Operations Overview</p>
+                    </div>
+                    
+                    <!-- Critical Alerts Banner -->
+                    <div class="alert alert-danger" role="alert" invisible="critical_incidents == 0">
+                        <i class="fa fa-exclamation-triangle me-2" title="Warning"></i>
+                        <strong>CRITICAL ALERT:</strong>
+                        <field name="critical_incidents"/> critical incident(s) require immediate attention!
+                        <button name="action_view_critical_incidents" type="object" class="btn btn-sm btn-danger ms-2" string="View Now"/>
+                    </div>
+                    
+                    <!-- Quick Action Buttons -->
+                    <div class="oe_button_box" name="button_box">
+                        <!-- Guards -->
+                        <button name="action_view_guards_on_duty" type="object" 
+                                class="oe_stat_button" icon="fa-user-shield">
+                            <div class="o_stat_info">
+                                <field name="guards_on_duty" class="o_stat_value"/>
+                                <span class="o_stat_text">On Duty Now</span>
+                            </div>
+                        </button>
+                        
+                        <button name="action_view_available_guards" type="object" 
+                                class="oe_stat_button" icon="fa-users">
+                            <div class="o_stat_info">
+                                <field name="guards_available" class="o_stat_value"/>
+                                <span class="o_stat_text">Available</span>
+                            </div>
+                        </button>
+                        
+                        <!-- Shifts -->
+                        <button name="action_view_active_shifts" type="object" 
+                                class="oe_stat_button" icon="fa-calendar-check">
+                            <div class="o_stat_info">
+                                <field name="active_shifts_today" class="o_stat_value"/>
+                                <span class="o_stat_text">Active Shifts</span>
+                            </div>
+                        </button>
+                        
+                        <button name="action_view_upcoming_shifts" type="object" 
+                                class="oe_stat_button" icon="fa-clock">
+                            <div class="o_stat_info">
+                                <field name="upcoming_shifts" class="o_stat_value"/>
+                                <span class="o_stat_text">Upcoming</span>
+                            </div>
+                        </button>
+                        
+                        <!-- Incidents -->
+                        <button name="action_view_open_incidents" type="object" 
+                                class="oe_stat_button" icon="fa-exclamation-circle"
+                                invisible="open_incidents == 0">
+                            <div class="o_stat_info">
+                                <field name="open_incidents" class="o_stat_value" decoration-danger="open_incidents &gt; 0"/>
+                                <span class="o_stat_text">Open Incidents</span>
+                            </div>
+                        </button>
+                        
+                        <button name="action_view_todays_incidents" type="object" 
+                                class="oe_stat_button" icon="fa-file-text">
+                            <div class="o_stat_info">
+                                <field name="total_incidents_today" class="o_stat_value"/>
+                                <span class="o_stat_text">Today's Incidents</span>
+                            </div>
+                        </button>
+                        
+                        <!-- Tours -->
+                        <button name="action_view_tours_in_progress" type="object" 
+                                class="oe_stat_button" icon="fa-map-signs">
+                            <div class="o_stat_info">
+                                <field name="tours_in_progress" class="o_stat_value"/>
+                                <span class="o_stat_text">Tours Active</span>
+                            </div>
+                        </button>
+                        
+                        <button name="action_view_equipment" type="object" 
+                                class="oe_stat_button" icon="fa-toolbox">
+                            <div class="o_stat_info">
+                                <field name="equipment_assigned" class="o_stat_value"/>
+                                <span class="o_stat_text">Equipment Out</span>
+                            </div>
+                        </button>
+                    </div>
+                    
+                    <!-- Main Dashboard Content -->
+                    <notebook>
+                        <!-- Today's Operations -->
+                        <page string="Today's Operations" name="today">
+                            <group>
+                                <group string="🔴 Live Status" name="live_status">
+                                    <field name="guards_on_duty" string="Guards On Duty"/>
+                                    <field name="active_shifts_today" string="Active Shifts"/>
+                                    <field name="tours_in_progress" string="Tours In Progress"/>
+                                    <field name="sites_covered_today" string="Sites Covered"/>
+                                </group>
+                                
+                                <group string="📊 Today's Metrics" name="today_metrics">
+                                    <field name="total_shifts_today" string="Total Shifts Scheduled"/>
+                                    <field name="tours_scheduled_today" string="Tours Scheduled"/>
+                                    <field name="checkpoints_scanned_today" string="Checkpoints Scanned"/>
+                                    <field name="total_hours_today" string="Total Hours Worked" widget="float_time"/>
+                                </group>
+                            </group>
+                            
+                            <group>
+                                <group string="✅ Performance Today" name="performance_today">
+                                    <field name="today_attendance_rate" widget="percentpie" string="Attendance Rate"/>
+                                    <field name="today_tour_completion" widget="percentpie" string="Tour Completion"/>
+                                    <field name="sites_coverage_rate" widget="percentpie" string="Site Coverage"/>
+                                </group>
+                                
+                                <group string="⚠️ Alerts &amp; Issues" name="alerts">
+                                    <field name="missed_shifts" string="Missed Shifts" decoration-warning="missed_shifts &gt; 0"/>
+                                    <field name="total_incidents_today" string="Incidents Reported"/>
+                                    <field name="high_priority_incidents" string="High Priority" decoration-danger="high_priority_incidents &gt; 0"/>
+                                    <field name="sites_needing_coverage" string="Sites Uncovered" decoration-warning="sites_needing_coverage &gt; 0"/>
+                                </group>
+                            </group>
+                        </page>
+                        
+                        <!-- Guard Management -->
+                        <page string="Guard Management" name="guards">
+                            <group>
+                                <group string="Guard Status" name="guard_status">
+                                    <field name="total_guards" string="Total Guards"/>
+                                    <field name="active_guards" string="Active Guards"/>
+                                    <field name="guards_on_duty" string="Currently On Duty"/>
+                                    <field name="guards_available" string="Available for Assignment"/>
+                                </group>
+                                
+                                <group string="Attendance &amp; Hours" name="attendance">
+                                    <field name="today_attendance_rate" widget="percentpie" string="Today"/>
+                                    <field name="week_attendance_rate" widget="percentpie" string="This Week"/>
+                                    <field name="month_attendance_rate" widget="percentpie" string="This Month"/>
+                                </group>
+                            </group>
+                            
+                            <group>
+                                <group string="Hours Worked" name="hours">
+                                    <field name="total_hours_today" string="Today" widget="float_time"/>
+                                    <field name="total_hours_week" string="This Week" widget="float_time"/>
+                                    <field name="total_hours_month" string="This Month" widget="float_time"/>
+                                </group>
+                                
+                                <group string="Billable Hours" name="billable">
+                                    <field name="total_billable_hours_today" string="Today" widget="float_time"/>
+                                    <field name="total_billable_hours_week" string="This Week" widget="float_time"/>
+                                    <field name="total_billable_hours_month" string="This Month" widget="float_time"/>
+                                </group>
+                            </group>
+                        </page>
+                        
+                        <!-- Site Coverage -->
+                        <page string="Site Coverage" name="sites">
+                            <group>
+                                <group string="Site Metrics" name="site_metrics">
+                                    <field name="total_sites" string="Total Sites"/>
+                                    <field name="sites_covered_today" string="Covered Today"/>
+                                    <field name="sites_needing_coverage" string="Needing Coverage" decoration-warning="sites_needing_coverage &gt; 0"/>
+                                    <field name="sites_coverage_rate" widget="progressbar" string="Coverage Rate"/>
+                                </group>
+                                
+                                <group string="Shift Statistics" name="shift_stats">
+                                    <field name="total_shifts_today" string="Total Shifts Today"/>
+                                    <field name="active_shifts_today" string="Active Shifts"/>
+                                    <field name="upcoming_shifts" string="Upcoming Shifts"/>
+                                    <field name="missed_shifts" string="Missed/Cancelled" decoration-warning="missed_shifts &gt; 0"/>
+                                </group>
+                            </group>
+                        </page>
+                        
+                        <!-- Incident Management -->
+                        <page string="Incident Management" name="incidents">
+                            <group>
+                                <group string="Current Incidents" name="current_incidents">
+                                    <field name="open_incidents" string="Open Incidents" decoration-warning="open_incidents &gt; 0"/>
+                                    <field name="critical_incidents" string="Critical" decoration-danger="critical_incidents &gt; 0"/>
+                                    <field name="high_priority_incidents" string="High Priority" decoration-warning="high_priority_incidents &gt; 0"/>
+                                    <field name="avg_incident_response_time" string="Avg Response Time (min)" widget="float"/>
+                                </group>
+                                
+                                <group string="Incident Trends" name="incident_trends">
+                                    <field name="total_incidents_today" string="Today"/>
+                                    <field name="incidents_this_week" string="This Week"/>
+                                    <field name="incidents_this_month" string="This Month"/>
+                                </group>
+                            </group>
+                            
+                            <div class="alert alert-info mt-3" role="status" invisible="avg_incident_response_time == 0">
+                                <strong>Response Performance:</strong>
+                                Average incident response time is <field name="avg_incident_response_time" readonly="1"/> minutes.
+                            </div>
+                        </page>
+                        
+                        <!-- Tours &amp; Patrols -->
+                        <page string="Tours &amp; Patrols" name="tours">
+                            <group>
+                                <group string="Today's Tours" name="today_tours">
+                                    <field name="tours_scheduled_today" string="Scheduled"/>
+                                    <field name="tours_in_progress" string="In Progress"/>
+                                    <field name="tours_completed_today" string="Completed"/>
+                                    <field name="today_tour_completion" widget="progressbar" string="Completion Rate"/>
+                                </group>
+                                
+                                <group string="Checkpoint Activity" name="checkpoints">
+                                    <field name="checkpoints_scanned_today" string="Scanned Today"/>
+                                    <field name="checkpoints_scanned_week" string="Scanned This Week"/>
+                                    <field name="week_tour_completion" widget="progressbar" string="Week Completion Rate"/>
+                                </group>
+                            </group>
+                        </page>
+                        
+                        <!-- Equipment -->
+                        <page string="Equipment" name="equipment">
+                            <group>
+                                <group string="Equipment Status" name="equipment_status">
+                                    <field name="total_equipment" string="Total Equipment"/>
+                                    <field name="equipment_assigned" string="Assigned/In Use"/>
+                                    <field name="equipment_available" string="Available"/>
+                                </group>
+                                
+                                <group string="Maintenance &amp; Issues" name="equipment_issues">
+                                    <field name="equipment_maintenance" string="Under Maintenance" decoration-warning="equipment_maintenance &gt; 0"/>
+                                    <field name="equipment_damaged" string="Damaged/Retired" decoration-danger="equipment_damaged &gt; 0"/>
+                                </group>
+                            </group>
+                            
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h3 class="text-success"><field name="equipment_available" readonly="1"/></h3>
+                                            <p class="mb-0">Available</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h3 class="text-primary"><field name="equipment_assigned" readonly="1"/></h3>
+                                            <p class="mb-0">Assigned</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h3 class="text-warning"><field name="equipment_maintenance" readonly="1"/></h3>
+                                            <p class="mb-0">Maintenance</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </page>
+                        
+                        <!-- Analytics Link -->
+                        <page string="Advanced Analytics" name="analytics">
+                            <div class="container mt-4">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title"><i class="fa fa-chart-line me-2" title="Chart"></i>Guard Productivity</h5>
+                                                <p class="card-text">Analyze guard performance, attendance, and productivity metrics.</p>
+                                                <button name="action_view_guard_productivity" type="object" class="btn btn-primary" string="View Report"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title"><i class="fa fa-map-marker-alt me-2" title="Location"></i>Site Performance</h5>
+                                                <p class="card-text">Monitor site coverage, incidents, and patrol completion.</p>
+                                                <button name="action_view_site_performance" type="object" class="btn btn-primary" string="View Report"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title"><i class="fa fa-exclamation-triangle me-2" title="Alert"></i>Incident Trends</h5>
+                                                <p class="card-text">Track incident patterns, response times, and resolutions.</p>
+                                                <button name="action_view_incident_trends" type="object" class="btn btn-primary" string="View Report"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title"><i class="fa fa-toolbox me-2" title="Tools"></i>Equipment Utilization</h5>
+                                                <p class="card-text">Monitor equipment usage, maintenance, and utilization rates.</p>
+                                                <button name="action_view_equipment_utilization" type="object" class="btn btn-primary" string="View Report"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Dashboard Action -->
+    <record id="action_guardpro_dashboard" model="ir.actions.act_window">
+        <field name="name">Command Center Dashboard</field>
+        <field name="res_model">guardpro.dashboard</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'create': False, 'edit': False, 'delete': False}</field>
+    </record>
+    
+    
+    <!-- ============================================ -->
+    <!-- GUARD PRODUCTIVITY ANALYTICS                 -->
+    <!-- ============================================ -->
+    
+    <!-- Tree View -->
+    <record id="view_guard_productivity_tree" model="ir.ui.view">
+        <field name="name">guardpro.productivity.report.tree</field>
+        <field name="model">guardpro.productivity.report</field>
+        <field name="arch" type="xml">
+            <list string="Guard Productivity" create="false" edit="false" delete="false">
+                <field name="guard_id"/>
+                <field name="date"/>
+                <field name="shifts_completed"/>
+                <field name="shifts_missed"/>
+                <field name="attendance_rate" widget="percentage"/>
+                <field name="hours_worked" sum="Total Hours"/>
+                <field name="incidents_reported" sum="Total Incidents"/>
+                <field name="checkpoints_scanned" sum="Total Scans"/>
+                <field name="tours_completed" sum="Total Tours"/>
+                <field name="performance_score" widget="progressbar" 
+                       decoration-success="performance_score &gt;= 80"
+                       decoration-warning="performance_score &gt;= 60 and performance_score &lt; 80"
+                       decoration-danger="performance_score &lt; 60"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Graph View -->
+    <record id="view_guard_productivity_graph" model="ir.ui.view">
+        <field name="name">guardpro.productivity.report.graph</field>
+        <field name="model">guardpro.productivity.report</field>
+        <field name="arch" type="xml">
+            <graph string="Guard Productivity Trends" type="line">
+                <field name="date" interval="week"/>
+                <field name="performance_score" type="measure"/>
+            </graph>
+        </field>
+    </record>
+    
+    <!-- Pivot View -->
+    <record id="view_guard_productivity_pivot" model="ir.ui.view">
+        <field name="name">guardpro.productivity.report.pivot</field>
+        <field name="model">guardpro.productivity.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Guard Productivity Analysis">
+                <field name="guard_id" type="row"/>
+                <field name="month" type="col"/>
+                <field name="shifts_completed" type="measure"/>
+                <field name="hours_worked" type="measure"/>
+                <field name="performance_score" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    
+    <!-- Search View -->
+    <record id="view_guard_productivity_search" model="ir.ui.view">
+        <field name="name">guardpro.productivity.report.search</field>
+        <field name="model">guardpro.productivity.report</field>
+        <field name="arch" type="xml">
+            <search string="Guard Productivity">
+                <field name="guard_id"/>
+                <field name="date"/>
+                <filter string="Last 30 Days" name="last_30_days"
+                        domain="[('date', '&gt;=', context_today() + relativedelta(days=-30))]"/>
+                <filter string="This Month" name="this_month"
+                        domain="[('date', '&gt;=', context_today() + relativedelta(day=1))]"/>
+                <filter name="filter_date" date="date"/>
+                <separator/>
+                <filter string="High Performers" name="high_performers"
+                        domain="[('performance_score', '&gt;=', 80)]"/>
+                <filter string="Low Performers" name="low_performers"
+                        domain="[('performance_score', '&lt;', 60)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Guard" name="group_guard" context="{'group_by': 'guard_id'}"/>
+                    <filter string="Month" name="group_month" context="{'group_by': 'month'}"/>
+                    <filter string="Year" name="group_year" context="{'group_by': 'year'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Action -->
+    <record id="action_guard_productivity_report" model="ir.actions.act_window">
+        <field name="name">Guard Productivity</field>
+        <field name="res_model">guardpro.productivity.report</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="context">{'search_default_last_30_days': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Guard productivity analytics
+            </p>
+            <p>
+                Analyze guard performance, attendance, and productivity metrics.
+            </p>
+        </field>
+    </record>
+    
+    
+    <!-- ============================================ -->
+    <!-- SITE PERFORMANCE ANALYTICS                   -->
+    <!-- ============================================ -->
+    
+    <!-- Tree View -->
+    <record id="view_site_performance_tree" model="ir.ui.view">
+        <field name="name">guardpro.site.performance.report.tree</field>
+        <field name="model">guardpro.site.performance.report</field>
+        <field name="arch" type="xml">
+            <list string="Site Performance" create="false" edit="false" delete="false">
+                <field name="site_id"/>
+                <field name="client_id"/>
+                <field name="date"/>
+                <field name="coverage_rate" widget="percentage"/>
+                <field name="total_guard_hours" sum="Total Hours"/>
+                <field name="total_incidents" sum="Total Incidents"/>
+                <field name="critical_incidents" sum="Critical" 
+                       decoration-danger="critical_incidents &gt; 0"/>
+                <field name="tour_completion_rate" widget="percentage"/>
+                <field name="unique_guards"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Graph View -->
+    <record id="view_site_performance_graph" model="ir.ui.view">
+        <field name="name">guardpro.site.performance.report.graph</field>
+        <field name="model">guardpro.site.performance.report</field>
+        <field name="arch" type="xml">
+            <graph string="Site Coverage Trends" type="bar" stacked="True">
+                <field name="date" interval="week"/>
+                <field name="coverage_rate" type="measure"/>
+            </graph>
+        </field>
+    </record>
+    
+    <!-- Pivot View -->
+    <record id="view_site_performance_pivot" model="ir.ui.view">
+        <field name="name">guardpro.site.performance.report.pivot</field>
+        <field name="model">guardpro.site.performance.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Site Performance Analysis">
+                <field name="site_id" type="row"/>
+                <field name="month" type="col"/>
+                <field name="total_incidents" type="measure"/>
+                <field name="coverage_rate" type="measure"/>
+                <field name="total_guard_hours" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    
+    <!-- Search View -->
+    <record id="view_site_performance_search" model="ir.ui.view">
+        <field name="name">guardpro.site.performance.report.search</field>
+        <field name="model">guardpro.site.performance.report</field>
+        <field name="arch" type="xml">
+            <search string="Site Performance">
+                <field name="site_id"/>
+                <field name="client_id"/>
+                <field name="date"/>
+                <filter string="Last 30 Days" name="last_30_days"
+                        domain="[('date', '&gt;=', context_today() + relativedelta(days=-30))]"/>
+                <filter string="This Month" name="this_month"
+                        domain="[('date', '&gt;=', context_today() + relativedelta(day=1))]"/>
+                <filter name="filter_date" date="date"/>
+                <separator/>
+                <filter string="Low Coverage" name="low_coverage"
+                        domain="[('coverage_rate', '&lt;', 80)]"/>
+                <filter string="High Incidents" name="high_incidents"
+                        domain="[('total_incidents', '&gt;', 5)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
+                    <filter string="Month" name="group_month" context="{'group_by': 'month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Action -->
+    <record id="action_site_performance_report" model="ir.actions.act_window">
+        <field name="name">Site Performance</field>
+        <field name="res_model">guardpro.site.performance.report</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="context">{'search_default_last_30_days': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Site performance analytics
+            </p>
+            <p>
+                Monitor site coverage, incidents, and patrol completion metrics.
+            </p>
+        </field>
+    </record>
+    
+    
+    <!-- ============================================ -->
+    <!-- INCIDENT TREND ANALYTICS                     -->
+    <!-- ============================================ -->
+    
+    <!-- Tree View -->
+    <record id="view_incident_trend_tree" model="ir.ui.view">
+        <field name="name">guardpro.incident.trend.report.tree</field>
+        <field name="model">guardpro.incident.trend.report</field>
+        <field name="arch" type="xml">
+            <list string="Incident Trends" create="false" edit="false" delete="false">
+                <field name="date"/>
+                <field name="category_id"/>
+                <field name="severity" 
+                       decoration-danger="severity == 'critical'"
+                       decoration-warning="severity == 'high'"/>
+                <field name="site_id"/>
+                <field name="incident_count" sum="Total"/>
+                <field name="avg_response_time"/>
+                <field name="avg_resolution_time"/>
+                <field name="open_count"/>
+                <field name="closed_count"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Graph View -->
+    <record id="view_incident_trend_graph" model="ir.ui.view">
+        <field name="name">guardpro.incident.trend.report.graph</field>
+        <field name="model">guardpro.incident.trend.report</field>
+        <field name="arch" type="xml">
+            <graph string="Incident Trends" type="line">
+                <field name="date" interval="week"/>
+                <field name="severity"/>
+                <field name="incident_count" type="measure"/>
+            </graph>
+        </field>
+    </record>
+    
+    <!-- Pivot View -->
+    <record id="view_incident_trend_pivot" model="ir.ui.view">
+        <field name="name">guardpro.incident.trend.report.pivot</field>
+        <field name="model">guardpro.incident.trend.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Incident Analysis">
+                <field name="category_id" type="row"/>
+                <field name="severity" type="col"/>
+                <field name="incident_count" type="measure"/>
+                <field name="avg_response_time" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    
+    <!-- Search View -->
+    <record id="view_incident_trend_search" model="ir.ui.view">
+        <field name="name">guardpro.incident.trend.report.search</field>
+        <field name="model">guardpro.incident.trend.report</field>
+        <field name="arch" type="xml">
+            <search string="Incident Trends">
+                <field name="category_id"/>
+                <field name="severity"/>
+                <field name="site_id"/>
+                <filter string="Last 30 Days" name="last_30_days"
+                        domain="[('date', '&gt;=', context_today() + relativedelta(days=-30))]"/>
+                <filter string="This Month" name="this_month"
+                        domain="[('date', '&gt;=', context_today() + relativedelta(day=1))]"/>
+                <filter name="filter_date" date="date"/>
+                <separator/>
+                <filter string="Critical" name="critical"
+                        domain="[('severity', '=', 'critical')]"/>
+                <filter string="High Priority" name="high"
+                        domain="[('severity', '=', 'high')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Category" name="group_category" context="{'group_by': 'category_id'}"/>
+                    <filter string="Severity" name="group_severity" context="{'group_by': 'severity'}"/>
+                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Month" name="group_month" context="{'group_by': 'month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Action -->
+    <record id="action_incident_trend_report" model="ir.actions.act_window">
+        <field name="name">Incident Trends</field>
+        <field name="res_model">guardpro.incident.trend.report</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="context">{'search_default_last_30_days': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Incident trend analytics
+            </p>
+            <p>
+                Track incident patterns, response times, and resolution metrics.
+            </p>
+        </field>
+    </record>
+    
+    
+    <!-- ============================================ -->
+    <!-- EQUIPMENT UTILIZATION ANALYTICS              -->
+    <!-- ============================================ -->
+    
+    <!-- Tree View -->
+    <record id="view_equipment_utilization_tree" model="ir.ui.view">
+        <field name="name">guardpro.equipment.utilization.report.tree</field>
+        <field name="model">guardpro.equipment.utilization.report</field>
+        <field name="arch" type="xml">
+            <list string="Equipment Utilization" create="false" edit="false" delete="false">
+                <field name="equipment_id"/>
+                <field name="equipment_category"/>
+                <field name="equipment_status"/>
+                <field name="total_assignments"/>
+                <field name="days_in_use"/>
+                <field name="utilization_rate" widget="percentage"/>
+                <field name="maintenance_count"/>
+                <field name="last_maintenance"/>
+                <field name="avg_maintenance_cost"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Graph View -->
+    <record id="view_equipment_utilization_graph" model="ir.ui.view">
+        <field name="name">guardpro.equipment.utilization.report.graph</field>
+        <field name="model">guardpro.equipment.utilization.report</field>
+        <field name="arch" type="xml">
+            <graph string="Equipment Utilization" type="bar">
+                <field name="equipment_category"/>
+                <field name="utilization_rate" type="measure"/>
+            </graph>
+        </field>
+    </record>
+    
+    <!-- Pivot View -->
+    <record id="view_equipment_utilization_pivot" model="ir.ui.view">
+        <field name="name">guardpro.equipment.utilization.report.pivot</field>
+        <field name="model">guardpro.equipment.utilization.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Equipment Analysis">
+                <field name="equipment_category" type="row"/>
+                <field name="equipment_status" type="col"/>
+                <field name="utilization_rate" type="measure"/>
+                <field name="avg_maintenance_cost" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    
+    <!-- Search View -->
+    <record id="view_equipment_utilization_search" model="ir.ui.view">
+        <field name="name">guardpro.equipment.utilization.report.search</field>
+        <field name="model">guardpro.equipment.utilization.report</field>
+        <field name="arch" type="xml">
+            <search string="Equipment Utilization">
+                <field name="equipment_id"/>
+                <field name="equipment_category"/>
+                <field name="equipment_status"/>
+                <filter string="Low Utilization" name="low_util"
+                        domain="[('utilization_rate', '&lt;', 50)]"/>
+                <filter string="High Maintenance" name="high_maint"
+                        domain="[('maintenance_count', '&gt;', 5)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Category" name="group_category" context="{'group_by': 'equipment_category'}"/>
+                    <filter string="Status" name="group_status" context="{'group_by': 'equipment_status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Action -->
+    <record id="action_equipment_utilization_report" model="ir.actions.act_window">
+        <field name="name">Equipment Utilization</field>
+        <field name="res_model">guardpro.equipment.utilization.report</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Equipment utilization analytics
+            </p>
+            <p>
+                Monitor equipment usage, maintenance, and utilization rates.
+            </p>
+        </field>
+    </record>
+
+</odoo>
+

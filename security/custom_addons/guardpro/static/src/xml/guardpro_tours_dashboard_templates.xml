@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="guardpro.ToursDashboardClient">
+        <div class="o_guardpro_tours_dashboard_view">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fa fa-route me-2"/>
+                        Tours Dashboard
+                    </h2>
+                    <p class="text-muted mb-0">Guard tour analytics and performance tracking</p>
+                </div>
+                <div>
+                    <button class="btn btn-success me-2" t-on-click="() => this.exportPDF()" t-att-disabled="state.loading">
+                        <i class="fa fa-file-pdf-o me-1"/>
+                        Export PDF
+                    </button>
+                    <button class="btn btn-primary" t-on-click="onRefresh" t-att-disabled="state.loading">
+                        <i class="fa fa-refresh me-1" t-att-class="{'fa-spin': state.loading}"/>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filters Panel -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="fa fa-filter me-2"/>
+                        Filters
+                    </h6>
+                    <button t-if="this.hasActiveFilters()" class="btn btn-sm btn-link text-danger p-0" 
+                            t-on-click="() => this.clearFilters()">
+                        <i class="fa fa-times me-1"/>
+                        Clear All
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <!-- Period Quick Filters -->
+                        <div class="col-md-12">
+                            <label class="form-label small text-muted mb-2">
+                                <i class="fa fa-calendar me-1"/>
+                                Quick Period Select
+                            </label>
+                            <div class="btn-group" role="group">
+                                <button type="button" 
+                                        t-att-class="state.filters.period == 'today' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline-primary'"
+                                        t-on-click="() => this.onFilterChange('period', 'today')">
+                                    Today
+                                </button>
+                                <button type="button" 
+                                        t-att-class="state.filters.period == 'yesterday' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline-primary'"
+                                        t-on-click="() => this.onFilterChange('period', 'yesterday')">
+                                    Yesterday
+                                </button>
+                                <button type="button" 
+                                        t-att-class="state.filters.period == 'last_7_days' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline-primary'"
+                                        t-on-click="() => this.onFilterChange('period', 'last_7_days')">
+                                    Last 7 Days
+                                </button>
+                                <button type="button" 
+                                        t-att-class="state.filters.period == 'this_week' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline-primary'"
+                                        t-on-click="() => this.onFilterChange('period', 'this_week')">
+                                    This Week
+                                </button>
+                                <button type="button" 
+                                        t-att-class="state.filters.period == 'this_month' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline-primary'"
+                                        t-on-click="() => this.onFilterChange('period', 'this_month')">
+                                    This Month
+                                </button>
+                                <button type="button" 
+                                        t-att-class="state.filters.period == 'last_30_days' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline-primary'"
+                                        t-on-click="() => this.onFilterChange('period', 'last_30_days')">
+                                    Last 30 Days
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Custom Date Range -->
+                        <div class="col-md-12">
+                            <label class="form-label small text-muted mb-2">
+                                <i class="fa fa-calendar-check-o me-1"/>
+                                Custom Date Range
+                            </label>
+                            <div class="row g-2">
+                                <div class="col-md-5">
+                                    <input type="date" 
+                                           class="form-control form-control-sm" 
+                                           t-att-value="state.filters.date_from"
+                                           t-on-change="(ev) => this.onDateRangeChange(ev.target.value, state.filters.date_to)"/>
+                                </div>
+                                <div class="col-md-1 text-center align-self-center">
+                                    <i class="fa fa-arrow-right text-muted"/>
+                                </div>
+                                <div class="col-md-5">
+                                    <input type="date" 
+                                           class="form-control form-control-sm" 
+                                           t-att-value="state.filters.date_to"
+                                           t-on-change="(ev) => this.onDateRangeChange(state.filters.date_from, ev.target.value)"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Site Filter -->
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted mb-2">
+                                <i class="fa fa-map-marker me-1"/>
+                                Sites
+                            </label>
+                            <select class="form-select form-select-sm" 
+                                    multiple="multiple"
+                                    size="5"
+                                    t-on-change="(ev) => this.onMultiSelectChange('site_ids', Array.from(ev.target.selectedOptions).map(opt => opt.value))">
+                                <option value="">All Sites</option>
+                                <t t-if="state.filterOptions.sites and state.filterOptions.sites.length > 0">
+                                    <t t-foreach="state.filterOptions.sites" t-as="site" t-key="site.id">
+                                        <option t-att-value="site.id" 
+                                                t-att-selected="state.filters.site_ids.includes(site.id)">
+                                            <t t-if="site.code">
+                                                <t t-esc="site.code"/> - <t t-esc="site.name"/>
+                                            </t>
+                                            <t t-else="">
+                                                <t t-esc="site.name"/>
+                                            </t>
+                                        </option>
+                                    </t>
+                                </t>
+                            </select>
+                            <small class="text-muted">Hold Ctrl/Cmd for multiple</small>
+                        </div>
+
+                        <!-- Guard Filter -->
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted mb-2">
+                                <i class="fa fa-user-shield me-1"/>
+                                Guards
+                            </label>
+                            <select class="form-select form-select-sm" 
+                                    multiple="multiple"
+                                    size="5"
+                                    t-on-change="(ev) => this.onMultiSelectChange('guard_ids', Array.from(ev.target.selectedOptions).map(opt => opt.value))">
+                                <option value="">All Guards</option>
+                                <t t-if="state.filterOptions.guards and state.filterOptions.guards.length > 0">
+                                    <t t-foreach="state.filterOptions.guards" t-as="guard" t-key="guard.id">
+                                        <option t-att-value="guard.id" 
+                                                t-att-selected="state.filters.guard_ids.includes(guard.id)">
+                                            <t t-if="guard.badge_number">
+                                                <t t-esc="guard.badge_number"/> - <t t-esc="guard.name"/>
+                                            </t>
+                                            <t t-else="">
+                                                <t t-esc="guard.name"/>
+                                            </t>
+                                        </option>
+                                    </t>
+                                </t>
+                            </select>
+                            <small class="text-muted">Hold Ctrl/Cmd for multiple</small>
+                        </div>
+
+                        <!-- Active Filters Summary -->
+                        <t t-if="this.hasActiveFilters()">
+                            <div class="col-md-12">
+                                <div class="alert alert-info mb-0 py-2">
+                                    <i class="fa fa-info-circle me-2"/>
+                                    <strong>Active Filters:</strong>
+                                    <span class="ms-2">
+                                        <t t-if="state.filters.site_ids.length > 0">
+                                            <span class="badge bg-primary me-1">
+                                                <t t-esc="state.filters.site_ids.length"/> Site(s)
+                                            </span>
+                                        </t>
+                                        <t t-if="state.filters.guard_ids.length > 0">
+                                            <span class="badge bg-success me-1">
+                                                <t t-esc="state.filters.guard_ids.length"/> Guard(s)
+                                            </span>
+                                        </t>
+                                        <span class="badge bg-secondary me-1">
+                                            <t t-esc="state.filters.date_from"/> to <t t-esc="state.filters.date_to"/>
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div t-if="state.loading" class="text-center py-5">
+                <i class="fa fa-spinner fa-spin fa-3x text-primary"/>
+                <p class="mt-3 text-muted">Loading tours data...</p>
+            </div>
+
+            <!-- Error -->
+            <div t-if="state.error and !state.loading" class="alert alert-danger">
+                <i class="fa fa-exclamation-triangle me-2"/>
+                <t t-esc="state.error"/>
+            </div>
+
+            <!-- Dashboard Content -->
+            <div t-if="!state.loading and !state.error">
+                <!-- KPIs -->
+                <div class="row g-3 mb-4">
+                    <t t-foreach="state.kpis" t-as="kpi" t-key="kpi_index">
+                        <div class="col-lg-3 col-md-4 col-sm-6">
+                            <div class="card shadow-sm h-100" t-att-class="kpi.action ? 'cursor-pointer' : ''"
+                                 t-on-click="() => kpi.action ? this.onKPIClick(kpi.action) : undefined">
+                                <div class="card-body d-flex align-items-center">
+                                    <div t-attf-class="rounded-circle p-3 me-3 bg-{{kpi.color}}-subtle">
+                                        <i t-attf-class="fa {{kpi.icon}} fa-2x text-{{kpi.color}}"/>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="text-muted small mb-1">
+                                            <t t-esc="kpi.name"/>
+                                        </div>
+                                        <div class="h3 mb-1 fw-bold">
+                                            <t t-esc="kpi.value"/>
+                                            <t t-if="kpi.suffix">
+                                                <span class="h5 text-muted ms-1">
+                                                    <t t-esc="kpi.suffix"/>
+                                                </span>
+                                            </t>
+                                        </div>
+                                        <div class="small" t-att-class="getVarianceClass(kpi.value, kpi.previous_value)">
+                                            <t t-set="variance" t-value="getVariance(kpi.value, kpi.previous_value)"/>
+                                            <i t-att-class="'fa ' + getVarianceIcon(kpi.value, kpi.previous_value) + ' me-1'"/>
+                                            <t t-esc="Math.abs(variance)"/>% vs last month
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- Charts -->
+                <div class="row g-3 mb-4">
+                    <t t-foreach="state.charts" t-as="chart" t-key="chart_index">
+                        <div class="col-lg-6">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-bar-chart me-2 text-primary"/>
+                                        <t t-esc="chart.title"/>
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div style="position: relative; height: 300px;">
+                                        <canvas t-attf-id="tour_chart_{{chart_index}}"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- Tables -->
+                <div class="row g-3">
+                    <t t-foreach="state.tables" t-as="table" t-key="table_index">
+                        <div class="col-12">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">
+                                        <i class="fa fa-table me-2 text-primary"/>
+                                        <t t-esc="table.title"/>
+                                    </h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-sm mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <t t-foreach="table.columns" t-as="column" t-key="column_index">
+                                                        <th><t t-esc="column"/></th>
+                                                    </t>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-if="table.rows and table.rows.length > 0">
+                                                    <t t-foreach="table.rows" t-as="row" t-key="row_index">
+                                                        <tr>
+                                                            <t t-foreach="row" t-as="cell" t-key="cell_index">
+                                                                <td class="text-nowrap"><t t-esc="cell"/></td>
+                                                            </t>
+                                                        </tr>
+                                                    </t>
+                                                </t>
+                                                <t t-else="">
+                                                    <tr>
+                                                        <td t-att-colspan="table.columns.length" class="text-center text-muted py-4">
+                                                            <i class="fa fa-info-circle me-2"/>
+                                                            No data available
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

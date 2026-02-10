@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Client Feedback List View -->
+    <record id="view_client_feedback_list" model="ir.ui.view">
+        <field name="name">client.feedback.list</field>
+        <field name="model">client.feedback</field>
+        <field name="arch" type="xml">
+            <list string="Client Feedback" 
+                  decoration-success="feedback_type == 'compliment'" 
+                  decoration-danger="feedback_type == 'complaint'"
+                  decoration-warning="status == 'new'">
+                <field name="name"/>
+                <field name="feedback_date"/>
+                <field name="client_id"/>
+                <field name="guard_id"/>
+                <field name="site_id"/>
+                <field name="feedback_type" widget="badge"/>
+                <field name="overall_rating" widget="badge"/>
+                <field name="status" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Client Feedback Form View -->
+    <record id="view_client_feedback_form" model="ir.ui.view">
+        <field name="name">client.feedback.form</field>
+        <field name="model">client.feedback</field>
+        <field name="arch" type="xml">
+            <form string="Client Feedback">
+                <header>
+                    <button name="action_respond" string="Mark as Responded" type="object" 
+                            class="btn-primary" invisible="status in ('responded', 'closed')"
+                            groups="guardpro.group_guardpro_manager"/>
+                    <button name="action_share_with_guard" string="Share with Guard" type="object" 
+                            invisible="shared_with_guard or feedback_type != 'compliment'"
+                            groups="guardpro.group_guardpro_supervisor"/>
+                    <button name="action_close" string="Close" type="object" 
+                            invisible="status == 'closed'"
+                            groups="guardpro.group_guardpro_manager"/>
+                    <field name="status" widget="statusbar" 
+                           statusbar_visible="new,reviewed,responded,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="client_id" options="{'no_create': True}"/>
+                            <field name="site_id" options="{'no_create': True}"/>
+                            <field name="guard_id" options="{'no_create': True}"/>
+                            <field name="shift_id" options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="feedback_date"/>
+                            <field name="feedback_type"/>
+                            <field name="shared_with_guard" groups="guardpro.group_guardpro_supervisor"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Ratings">
+                        <group>
+                            <field name="overall_rating" widget="radio"/>
+                        </group>
+                        <group>
+                            <field name="professionalism_rating" widget="priority"/>
+                            <field name="punctuality_rating" widget="priority"/>
+                            <field name="communication_rating" widget="priority"/>
+                            <field name="appearance_rating" widget="priority"/>
+                            <field name="responsiveness_rating" widget="priority"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Feedback">
+                        <field name="comments" nolabel="1" placeholder="Detailed feedback and comments..."/>
+                        <field name="suggestions" placeholder="Suggestions for improvement..."/>
+                    </group>
+                    
+                    <group string="Client Preferences">
+                        <field name="request_same_guard"/>
+                        <field name="request_different_guard"/>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Action &amp; Follow-up" groups="guardpro.group_guardpro_manager">
+                            <group>
+                                <group>
+                                    <field name="follow_up_required"/>
+                                    <field name="follow_up_notes" invisible="not follow_up_required"/>
+                                </group>
+                                <group>
+                                    <field name="action_taken"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Management Response" groups="guardpro.group_guardpro_manager">
+                            <group>
+                                <field name="management_response" nolabel="1" 
+                                       placeholder="Enter your response to the client..."/>
+                                <field name="response_date"/>
+                                <field name="responded_by_id"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Client Feedback Kanban View -->
+    <record id="view_client_feedback_kanban" model="ir.ui.view">
+        <field name="name">client.feedback.kanban</field>
+        <field name="model">client.feedback</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="guard_id"/>
+                <field name="overall_rating"/>
+                <field name="feedback_type"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong><field name="name"/></strong>
+                                    <div><field name="guard_id"/></div>
+                                </div>
+                                <div class="o_kanban_record_top_right">
+                                    <field name="overall_rating" widget="badge"/>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <field name="feedback_type" widget="badge"/>
+                                <div class="mt-1">
+                                    <field name="client_id"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_client_feedback" model="ir.actions.act_window">
+        <field name="name">Client Feedback</field>
+        <field name="res_model">client.feedback</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Client Feedback Yet
+            </p>
+            <p>
+                Client feedback will appear here when clients rate guards and provide comments.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu (now defined in guardpro_menus.xml) -->
+    <!--
+    <menuitem id="menu_client_feedback" 
+              name="Client Feedback" 
+              parent="guardpro.menu_guardpro_root" 
+              action="action_client_feedback" 
+              sequence="65"/>
+    -->
+
+</odoo>

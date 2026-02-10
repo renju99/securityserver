@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Security Tours for NSHAMA Town Square -->
+        <record id="tour_ts_full_patrol" model="security.tour">
+            <field name="name">Town Square - Full Patrol</field>
+            <field name="code">TOUR-TS-001</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="description">Complete patrol of all Town Square facilities including retail, residential, and recreational areas</field>
+            <field name="status">active</field>
+            <field name="checkpoint_ids" eval="[(6, 0, [ref('checkpoint_ts_main_gate'), ref('checkpoint_ts_retail_area'), ref('checkpoint_ts_parking_north'), ref('checkpoint_ts_pool_area'), ref('checkpoint_ts_office_building'), ref('checkpoint_ts_playground')])]"/>
+            <field name="estimated_duration">2.0</field>
+            <field name="frequency">every_4_hours</field>
+            <field name="requires_supervisor" eval="False"/>
+            <field name="requires_photos" eval="True"/>
+            <field name="requires_notes" eval="True"/>
+            <field name="instructions">&lt;h3&gt;Full Patrol Instructions&lt;/h3&gt;
+&lt;p&gt;This is a comprehensive patrol covering all major areas of Town Square community.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Start at Main Gate and verify access control&lt;/li&gt;
+  &lt;li&gt;Proceed to Retail Area - check all shop fronts&lt;/li&gt;
+  &lt;li&gt;Inspect North Parking Structure (all levels)&lt;/li&gt;
+  &lt;li&gt;Check Pool and Recreation facilities&lt;/li&gt;
+  &lt;li&gt;Verify Office Tower lobby security&lt;/li&gt;
+  &lt;li&gt;End at Children's Playground area&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Report any suspicious activity immediately!&lt;/strong&gt;&lt;/p&gt;</field>
+            <field name="special_requirements">High-visibility vest required. Radio contact with control room at each checkpoint.</field>
+        </record>
+
+        <record id="tour_ts_evening_check" model="security.tour">
+            <field name="name">Town Square - Evening Security Check</field>
+            <field name="code">TOUR-TS-002</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="description">Evening security check focusing on retail closure and common area security</field>
+            <field name="status">active</field>
+            <field name="checkpoint_ids" eval="[(6, 0, [ref('checkpoint_ts_main_gate'), ref('checkpoint_ts_retail_area'), ref('checkpoint_ts_office_building')])]"/>
+            <field name="estimated_duration">1.0</field>
+            <field name="frequency">daily</field>
+            <field name="requires_supervisor" eval="False"/>
+            <field name="requires_photos" eval="True"/>
+            <field name="requires_notes" eval="False"/>
+            <field name="instructions">&lt;h3&gt;Evening Check Instructions&lt;/h3&gt;
+&lt;p&gt;Focus on ensuring all retail and commercial areas are properly secured for the night.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Verify all shops are closed and secured&lt;/li&gt;
+  &lt;li&gt;Check lighting in common areas&lt;/li&gt;
+  &lt;li&gt;Ensure office building access is restricted&lt;/li&gt;
+  &lt;li&gt;Document any issues or concerns&lt;/li&gt;
+&lt;/ul&gt;</field>
+        </record>
+
+        <record id="tour_ts_parking_patrol" model="security.tour">
+            <field name="name">Town Square - Parking Area Patrol</field>
+            <field name="code">TOUR-TS-003</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="description">Dedicated parking structure patrol for vehicle security</field>
+            <field name="status">active</field>
+            <field name="checkpoint_ids" eval="[(6, 0, [ref('checkpoint_ts_parking_north')])]"/>
+            <field name="estimated_duration">0.5</field>
+            <field name="frequency">every_2_hours</field>
+            <field name="requires_supervisor" eval="False"/>
+            <field name="requires_photos" eval="False"/>
+            <field name="requires_notes" eval="True"/>
+            <field name="instructions">&lt;h3&gt;Parking Patrol Instructions&lt;/h3&gt;
+&lt;p&gt;Inspect all parking levels for security concerns.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Check for suspicious vehicles or activity&lt;/li&gt;
+  &lt;li&gt;Verify emergency exits are clear&lt;/li&gt;
+  &lt;li&gt;Ensure proper lighting on all levels&lt;/li&gt;
+  &lt;li&gt;Report any damage or maintenance issues&lt;/li&gt;
+&lt;/ul&gt;</field>
+        </record>
+
+        <!-- Security Tours for NSHAMA The Springs -->
+        <record id="tour_sp_perimeter_check" model="security.tour">
+            <field name="name">Springs - Perimeter Security Check</field>
+            <field name="code">TOUR-SP-001</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="description">Complete perimeter check of The Springs community boundaries</field>
+            <field name="status">active</field>
+            <field name="checkpoint_ids" eval="[(6, 0, [ref('checkpoint_sp_main_entrance'), ref('checkpoint_sp_back_gate'), ref('checkpoint_sp_residential_a')])]"/>
+            <field name="estimated_duration">1.5</field>
+            <field name="frequency">every_4_hours</field>
+            <field name="requires_supervisor" eval="False"/>
+            <field name="requires_photos" eval="True"/>
+            <field name="requires_notes" eval="True"/>
+            <field name="instructions">&lt;h3&gt;Perimeter Check Instructions&lt;/h3&gt;
+&lt;p&gt;Comprehensive check of community perimeter and access points.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Verify main entrance security&lt;/li&gt;
+  &lt;li&gt;Check service gate is properly secured&lt;/li&gt;
+  &lt;li&gt;Inspect residential areas for any concerns&lt;/li&gt;
+  &lt;li&gt;Verify perimeter fence integrity&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="special_requirements">Flashlight required for night patrols. Report any perimeter breaches immediately.</field>
+        </record>
+
+        <record id="tour_sp_facilities_check" model="security.tour">
+            <field name="name">Springs - Facilities &amp; Recreation Check</field>
+            <field name="code">TOUR-SP-002</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="description">Check of community facilities including clubhouse and recreation areas</field>
+            <field name="status">active</field>
+            <field name="checkpoint_ids" eval="[(6, 0, [ref('checkpoint_sp_clubhouse'), ref('checkpoint_sp_park')])]"/>
+            <field name="estimated_duration">1.0</field>
+            <field name="frequency">every_2_hours</field>
+            <field name="requires_supervisor" eval="False"/>
+            <field name="requires_photos" eval="False"/>
+            <field name="requires_notes" eval="True"/>
+            <field name="instructions">&lt;h3&gt;Facilities Check Instructions&lt;/h3&gt;
+&lt;p&gt;Regular check of community amenities and recreational facilities.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Verify clubhouse security&lt;/li&gt;
+  &lt;li&gt;Check gym and common areas&lt;/li&gt;
+  &lt;li&gt;Patrol park and walking trails&lt;/li&gt;
+  &lt;li&gt;Ensure proper lighting&lt;/li&gt;
+&lt;/ul&gt;</field>
+        </record>
+
+        <record id="tour_sp_night_patrol" model="security.tour">
+            <field name="name">Springs - Night Patrol</field>
+            <field name="code">TOUR-SP-003</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="description">Comprehensive night patrol of The Springs community</field>
+            <field name="status">active</field>
+            <field name="checkpoint_ids" eval="[(6, 0, [ref('checkpoint_sp_main_entrance'), ref('checkpoint_sp_clubhouse'), ref('checkpoint_sp_park'), ref('checkpoint_sp_residential_a'), ref('checkpoint_sp_back_gate')])]"/>
+            <field name="estimated_duration">2.0</field>
+            <field name="frequency">hourly</field>
+            <field name="requires_supervisor" eval="False"/>
+            <field name="requires_photos" eval="True"/>
+            <field name="requires_notes" eval="True"/>
+            <field name="instructions">&lt;h3&gt;Night Patrol Instructions&lt;/h3&gt;
+&lt;p&gt;Comprehensive night security patrol of entire community.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Extra vigilance for suspicious activity&lt;/li&gt;
+  &lt;li&gt;Check all lighting is functional&lt;/li&gt;
+  &lt;li&gt;Verify all access points secured&lt;/li&gt;
+  &lt;li&gt;Monitor for any disturbances&lt;/li&gt;
+  &lt;li&gt;Maintain radio contact with control&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="special_requirements">High-visibility vest, flashlight, and radio required. Emergency contact numbers must be readily available.</field>
+        </record>
+
+        <!-- Draft tour (not yet activated) -->
+        <record id="tour_sp_emergency_response" model="security.tour">
+            <field name="name">Springs - Emergency Response Route</field>
+            <field name="code">TOUR-SP-004</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="description">Emergency response route for rapid deployment to all critical areas</field>
+            <field name="status">draft</field>
+            <field name="checkpoint_ids" eval="[(6, 0, [ref('checkpoint_sp_main_entrance'), ref('checkpoint_sp_clubhouse'), ref('checkpoint_sp_residential_a')])]"/>
+            <field name="estimated_duration">0.5</field>
+            <field name="frequency">custom</field>
+            <field name="requires_supervisor" eval="True"/>
+            <field name="requires_photos" eval="True"/>
+            <field name="requires_notes" eval="True"/>
+            <field name="instructions">&lt;h3&gt;Emergency Response Instructions&lt;/h3&gt;
+&lt;p&gt;Rapid response route for emergency situations - TO BE ACTIVATED DURING EMERGENCIES ONLY.&lt;/p&gt;</field>
+            <field name="special_requirements">Emergency equipment required. Supervisor approval mandatory.</field>
+        </record>
+
+    </data>
+</odoo>
+

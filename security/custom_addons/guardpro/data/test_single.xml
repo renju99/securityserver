@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="1"><record id="email_template_shift_swap_request" model="mail.template">
+            <field name="name">Shift Swap Request Notification</field>
+            <field name="model_id" ref="model_shift_swap_request"/>
+            <field name="subject">Shift Swap Request from ${object.requesting_guard_id.name or ''} - ${object.shift_id.site_id.name or ''}</field>
+            <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
+            <field name="email_to">${(object.target_guard_id.user_id.email if object.target_guard_id and object.target_guard_id.user_id else object.target_guard_id.email if object.target_guard_id else '')|safe}</field>
+            <field name="body_html" type="html">
+
+
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Shift Swap Request&lt;/title&gt;
+&lt;/head&gt;
+&lt;body style="margin: 0; padding: 0; font-family: Arial, sans-serif; line-height: 1.6; color: #333;"&gt;
+    &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f4f4f4;"&gt;
+        &lt;tr&gt;
+            &lt;td align="center" style="padding: 20px 0;"&gt;
+                &lt;table cellpadding="0" cellspacing="0" border="0" width="600" style="background-color: #ffffff;"&gt;
+                    
+                    &lt;!-- Header --&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #1976d2; color: white; padding: 30px 20px; text-align: center;"&gt;
+                            &lt;h1 style="margin: 0; font-size: 26px;"&gt;Shift Swap Request&lt;/h1&gt;
+                            &lt;p style="margin: 10px 0 0 0;"&gt;Action Required&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    
+                    &lt;!-- Content --&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 30px;"&gt;
+                            &lt;p style="margin: 0 0 20px 0;"&gt;Hello &lt;strong&gt;${object.target_guard_id.name or 'Guard'},&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p style="margin: 0 0 20px 0;"&gt;${object.requesting_guard_id.name or 'A colleague'} has requested to swap shifts with you. Please review the details below and respond at your earliest convenience.&lt;/p&gt;
+                            
+                            &lt;!-- Shift Details --&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; margin: 20px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;th colspan="2" style="background-color: #1976d2; color: white; padding: 12px; text-align: left;"&gt;
+                                        Shift to be Swapped
+                                    &lt;/th&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; width: 40%;"&gt;Site&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.shift_id.site_id.name if object.shift_id and object.shift_id.site_id else 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Date &amp; Time&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;
+                                        ${format_datetime(object.shift_id.start_datetime, dt_format='medium') if object.shift_id and object.shift_id.start_datetime else 'N/A'} - 
+                                        ${format_datetime(object.shift_id.end_datetime, dt_format='short') if object.shift_id and object.shift_id.end_datetime else 'N/A'}
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Currently Assigned To&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.requesting_guard_id.name or 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Reason for Swap&lt;/th&gt;
+                                    &lt;td style="padding: 12px;"&gt;${object.reason or 'No reason provided'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            % if object.compensation_shift_id:
+                            &lt;!-- Compensation Shift --&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; margin: 20px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;th colspan="2" style="background-color: #4caf50; color: white; padding: 12px; text-align: left;"&gt;
+                                        Compensation Shift Offered
+                                    &lt;/th&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; width: 40%;"&gt;Site&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.compensation_shift_id.site_id.name if object.compensation_shift_id.site_id else 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Date &amp; Time&lt;/th&gt;
+                                    &lt;td style="padding: 12px;"&gt;
+                                        ${format_datetime(object.compensation_shift_id.start_datetime, dt_format='medium') if object.compensation_shift_id.start_datetime else 'N/A'} - 
+                                        ${format_datetime(object.compensation_shift_id.end_datetime, dt_format='short') if object.compensation_shift_id.end_datetime else 'N/A'}
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            % endif
+                            
+                            &lt;!-- Action Required --&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 20px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td style="background-color: #fff3cd; border-left: 4px solid #ff9800; padding: 15px;"&gt;
+                                        &lt;p style="margin: 0;"&gt;&lt;strong&gt;⏰ Please respond within 48 hours&lt;/strong&gt;&lt;/p&gt;
+                                        &lt;p style="margin: 10px 0 0 0;"&gt;Your response is required for this shift swap request. If you accept, it will be forwarded to your supervisor for final approval.&lt;/p&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;!-- Action Buttons --&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 30px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td align="center"&gt;
+                                        &lt;a href="${object.get_portal_url() if hasattr(object, 'get_portal_url') else '#'}" 
+                                           style="display: inline-block; padding: 14px 40px; background-color: #4caf50; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; margin: 0 10px;"&gt;
+                                            Accept Swap
+                                        &lt;/a&gt;
+                                        &lt;a href="${object.get_portal_url() if hasattr(object, 'get_portal_url') else '#'}" 
+                                           style="display: inline-block; padding: 14px 40px; background-color: #f44336; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; margin: 0 10px;"&gt;
+                                            Decline Swap
+                                        &lt;/a&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;!-- Contact Info --&gt;
+                            &lt;p style="margin: 30px 0 10px 0;"&gt;&lt;strong&gt;Questions?&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p style="margin: 0;"&gt;Contact ${object.requesting_guard_id.name or 'the requesting guard'} or your supervisor for more information.&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    
+                    &lt;!-- Footer --&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
+                            &lt;p style="margin: 0;"&gt;GuardPro Shift Management System&lt;/p&gt;
+                            &lt;p style="margin: 5px 0 0 0; font-size: 10px;"&gt;This is an automated notification. Please log in to the system to respond.&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    
+                &lt;/table&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+            </field>
+        </record>
+        
+        
+        </data>
+</odoo>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Simple Guard Tasks -->
+        <record id="task_daily_patrol_1" model="guard.task">
+            <field name="name">Morning Perimeter Patrol</field>
+            <field name="description">Conduct thorough perimeter patrol</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="task_type">patrol</field>
+            <field name="assigned_to" ref="guard_john_smith"/>
+            <field name="due_date" eval="(datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d 10:00:00')"/>
+        </record>
+
+        <record id="task_access_check" model="guard.task">
+            <field name="name">Access Control System Check</field>
+            <field name="description">Verify access control devices</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="task_type">access_control</field>
+            <field name="assigned_to" ref="guard_michael_brown"/>
+            <field name="due_date" eval="(datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d 14:00:00')"/>
+        </record>
+
+        <record id="task_safety_inspection" model="guard.task">
+            <field name="name">Safety Equipment Inspection</field>
+            <field name="description">Inspect safety equipment</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="task_type">safety_inspection</field>
+            <field name="assigned_to" ref="guard_sarah_johnson"/>
+            <field name="due_date" eval="(datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d 09:00:00')"/>
+        </record>
+
+    </data>
+</odoo>

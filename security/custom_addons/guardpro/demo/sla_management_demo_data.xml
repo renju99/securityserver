@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="sla_001" model="sla.definition">
+            <field name="name">Incident Response Time SLA</field>
+            <field name="client_id" ref="client_nshama"/>
+            <field name="start_date">2025-01-01</field>
+            <field name="end_date">2025-12-31</field>
+            <field name="notes">Maximum 15 minutes response time for all incidents</field>
+        </record>
+
+        <record id="sla_002" model="sla.definition">
+            <field name="name">Patrol Completion Rate SLA</field>
+            <field name="client_id" ref="client_nshama"/>
+            <field name="start_date">2025-01-01</field>
+            <field name="end_date">2025-12-31</field>
+            <field name="notes">Minimum 95% completion rate for scheduled patrols</field>
+        </record>
+    </data>
+</odoo>

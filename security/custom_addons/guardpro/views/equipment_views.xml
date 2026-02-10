@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_equipment_list" model="ir.ui.view">
+            <field name="name">guardpro.equipment.list</field>
+            <field name="model">guardpro.equipment</field>
+            <field name="arch" type="xml">
+                <list string="Equipment">
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="category"/>
+                    <field name="assigned_to" optional="show"/>
+                    <field name="assigned_site" optional="hide"/>
+                    <field name="status" widget="badge"/>
+                    <field name="condition" optional="hide"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_equipment_form" model="ir.ui.view">
+            <field name="name">guardpro.equipment.form</field>
+            <field name="model">guardpro.equipment</field>
+            <field name="arch" type="xml">
+                <form string="Equipment">
+                    <header>
+                        <button name="action_maintenance" string="Send to Maintenance" type="object" 
+                                invisible="status != 'available'"/>
+                        <button name="action_complete_maintenance" string="Complete Maintenance" type="object" 
+                                invisible="status != 'maintenance'" groups="guardpro.group_guardpro_supervisor"/>
+                        <field name="status" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <field name="photo" widget="image" class="oe_avatar"/>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="code"/>
+                                <field name="serial_number"/>
+                                <field name="category"/>
+                            </group>
+                            <group>
+                                <field name="manufacturer"/>
+                                <field name="model"/>
+                                <field name="condition"/>
+                                <field name="barcode"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Assignment">
+                                <field name="assigned_to"/>
+                                <field name="assigned_site"/>
+                                <field name="assignment_date"/>
+                            </group>
+                            <group string="Purchase">
+                                <field name="purchase_date"/>
+                                <field name="purchase_cost"/>
+                                <field name="supplier"/>
+                                <field name="warranty_expiry"/>
+                            </group>
+                        </group>
+                        <group string="Maintenance">
+                            <field name="last_maintenance"/>
+                            <field name="next_maintenance"/>
+                            <field name="maintenance_interval"/>
+                            <field name="maintenance_notes" widget="text"/>
+                        </group>
+                        <notebook>
+                            <page string="Description">
+                                <field name="description" widget="text"/>
+                            </page>
+                            <page string="Notes">
+                                <field name="notes" widget="text"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_equipment" model="ir.actions.act_window">
+            <field name="name">Equipment</field>
+            <field name="res_model">guardpro.equipment</field>
+            <field name="view_mode">list,form</field>
+        </record>
+    </data>
+</odoo>
+

@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Package Management PDF Report Template -->
+    <template id="package_management_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h2>Package Receipt</h2>
+                                <h4 t-field="o.site_id.name"/>
+                            </div>
+                        </div>
+
+                        <!-- Package ID and Status -->
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <h4>Package ID: <span t-field="o.name"/></h4>
+                            </div>
+                            <div class="col-6 text-end">
+                                <h5>
+                                    Status: 
+                                    <t t-if="o.state == 'received'">
+                                        <span class="badge bg-info">Received</span>
+                                    </t>
+                                    <t t-elif="o.state == 'notified'">
+                                        <span class="badge bg-warning">Notified</span>
+                                    </t>
+                                    <t t-elif="o.state == 'collected'">
+                                        <span class="badge bg-success">Collected</span>
+                                    </t>
+                                    <t t-elif="o.state == 'returned'">
+                                        <span class="badge bg-danger">Returned</span>
+                                    </t>
+                                    <t t-elif="o.state == 'lost'">
+                                        <span class="badge bg-secondary">Lost</span>
+                                    </t>
+                                    <t t-elif="o.state == 'damaged'">
+                                        <span class="badge bg-dark">Damaged</span>
+                                    </t>
+                                    <t t-elif="o.state == 'unclaimed'">
+                                        <span class="badge bg-warning">Unclaimed</span>
+                                    </t>
+                                </h5>
+                            </div>
+                        </div>
+
+                        <!-- Package Details -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Package Information</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Package Type:</strong></td>
+                                        <td><span t-field="o.package_type"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Tracking Number:</strong></td>
+                                        <td><span t-field="o.tracking_number"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Courier/Delivery:</strong></td>
+                                        <td><span t-field="o.courier"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Size:</strong></td>
+                                        <td><span t-field="o.size"/></td>
+                                    </tr>
+                                    <tr t-if="o.weight">
+                                        <td><strong>Weight:</strong></td>
+                                        <td><span t-field="o.weight"/> kg</td>
+                                    </tr>
+                                    <tr t-if="o.dimensions">
+                                        <td><strong>Dimensions:</strong></td>
+                                        <td><span t-field="o.dimensions"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Recipient Information -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Recipient Information</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Recipient Name:</strong></td>
+                                        <td><span t-field="o.recipient_name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Unit Number:</strong></td>
+                                        <td><span t-field="o.unit_number"/></td>
+                                    </tr>
+                                    <tr t-if="o.building">
+                                        <td><strong>Building:</strong></td>
+                                        <td><span t-field="o.building"/></td>
+                                    </tr>
+                                    <tr t-if="o.floor">
+                                        <td><strong>Floor:</strong></td>
+                                        <td><span t-field="o.floor"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Contact Number:</strong></td>
+                                        <td><span t-field="o.recipient_phone"/></td>
+                                    </tr>
+                                    <tr t-if="o.recipient_email">
+                                        <td><strong>Email:</strong></td>
+                                        <td><span t-field="o.recipient_email"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Delivery Information -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Delivery Timeline</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Received Date:</strong></td>
+                                        <td><span t-field="o.received_date"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Received By (Guard):</strong></td>
+                                        <td><span t-field="o.received_by.name"/></td>
+                                    </tr>
+                                    <tr t-if="o.notification_sent_date">
+                                        <td><strong>Notification Sent:</strong></td>
+                                        <td><span t-field="o.notification_sent_date"/></td>
+                                    </tr>
+                                    <tr t-if="o.pickup_date">
+                                        <td><strong>Collection Date:</strong></td>
+                                        <td><span t-field="o.pickup_date"/></td>
+                                    </tr>
+                                    <tr t-if="o.handed_over_by">
+                                        <td><strong>Handed Over By (Guard):</strong></td>
+                                        <td><span t-field="o.handed_over_by.name"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Storage Location -->
+                        <div class="row mt-3" t-if="o.storage_location">
+                            <div class="col-12">
+                                <strong>Storage Location:</strong>
+                                <p t-field="o.storage_location"/>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="row mt-3" t-if="o.notes">
+                            <div class="col-12">
+                                <strong>Notes:</strong>
+                                <p t-field="o.notes"/>
+                            </div>
+                        </div>
+
+                        <!-- Signature Section -->
+                        <div class="row mt-5">
+                            <div class="col-6">
+                                <div class="border-top pt-2">
+                                    <p><strong>Received By (Guard):</strong></p>
+                                    <p t-field="o.received_by.name"></p>
+                                    <p>Date: <span t-field="o.received_date"/></p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border-top pt-2">
+                                    <p><strong>Collected:</strong></p>
+                                    <p t-if="o.handed_over_by">Handed By: <span t-field="o.handed_over_by.name"/></p>
+                                    <p t-if="o.pickup_date">Date: <span t-field="o.pickup_date"/></p>
+                                    <p t-if="o.id_verified">ID Verified: Yes (<span t-field="o.id_type"/>)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="row mt-5">
+                            <div class="col-12 text-center text-muted">
+                                <small>
+                                    Package managed by <span t-field="o.site_id.name"/> Security
+                                    <br/>
+                                    Please contact security for any queries
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Definition -->
+    <record id="action_report_package_management" model="ir.actions.report">
+        <field name="name">Package Receipt</field>
+        <field name="model">package.management</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.package_management_report_template</field>
+        <field name="report_file">guardpro.package_management_report_template</field>
+        <field name="binding_model_id" ref="model_package_management"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Package_Receipt_%s' % (object.name)</field>
+    </record>
+</odoo>
+

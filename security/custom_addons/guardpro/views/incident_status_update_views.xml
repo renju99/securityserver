@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- ========================================== -->
+    <!-- Incident Status Update Views               -->
+    <!-- ========================================== -->
+    
+    <!-- List View -->
+    <record id="incident_status_update_view_list" model="ir.ui.view">
+        <field name="name">incident.status.update.view.list</field>
+        <field name="model">incident.status.update</field>
+        <field name="arch" type="xml">
+            <list string="Incident Status Updates" default_order="update_datetime desc">
+                <field name="update_datetime"/>
+                <field name="incident_id"/>
+                <field name="title"/>
+                <field name="update_type"/>
+                <field name="updated_by_id"/>
+                <field name="visible_to_client" widget="boolean_toggle"/>
+                <field name="notify_client" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Form View -->
+    <record id="incident_status_update_view_form" model="ir.ui.view">
+        <field name="name">incident.status.update.view.form</field>
+        <field name="model">incident.status.update</field>
+        <field name="arch" type="xml">
+            <form string="Incident Status Update">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="incident_id" options="{'no_create': True}"/>
+                            <field name="title"/>
+                            <field name="update_type"/>
+                            <field name="update_datetime"/>
+                        </group>
+                        <group>
+                            <field name="site_id" readonly="1"/>
+                            <field name="severity" readonly="1"/>
+                            <field name="updated_by_id" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <group invisible="update_type != 'status_change'">
+                        <group>
+                            <field name="old_status"/>
+                        </group>
+                        <group>
+                            <field name="new_status"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Update Description">
+                        <field name="description" nolabel="1" placeholder="Provide detailed status update..."/>
+                    </group>
+                    
+                    <group string="Visibility &amp; Notifications">
+                        <group>
+                            <field name="visible_to_client" widget="boolean_toggle"/>
+                            <field name="visible_to_residents" widget="boolean_toggle"/>
+                        </group>
+                        <group>
+                            <field name="notify_client" widget="boolean_toggle"/>
+                            <field name="notification_sent" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Search View -->
+    <record id="incident_status_update_view_search" model="ir.ui.view">
+        <field name="name">incident.status.update.view.search</field>
+        <field name="model">incident.status.update</field>
+        <field name="arch" type="xml">
+            <search string="Incident Status Updates">
+                <field name="title"/>
+                <field name="incident_id"/>
+                <field name="site_id"/>
+                <filter name="visible_to_client" string="Visible to Client" domain="[('visible_to_client', '=', True)]"/>
+                <filter name="critical" string="Critical Incidents" domain="[('severity', '=', 'critical')]"/>
+                <filter name="today" string="Today" domain="[('update_datetime', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_incident" string="Incident" context="{'group_by': 'incident_id'}"/>
+                    <filter name="group_by_type" string="Update Type" context="{'group_by': 'update_type'}"/>
+                    <filter name="group_by_site" string="Site" context="{'group_by': 'site_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Action -->
+    <record id="incident_status_update_action" model="ir.actions.act_window">
+        <field name="name">Incident Status Updates</field>
+        <field name="res_model">incident.status.update</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_today': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No status updates yet
+            </p>
+            <p>
+                Status updates provide real-time information to clients about incident progress.
+            </p>
+        </field>
+    </record>
+    
+</odoo>
+

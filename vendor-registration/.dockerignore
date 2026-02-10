@@ -1,0 +1,48 @@
+# Exclude uploads and backup folders (using volume mounts instead)
+uploads/
+uploads.backup.*
+uploads-browser.html.backup
+
+# Exclude node_modules (will be installed in container)
+node_modules/
+
+# Exclude data directory (using volume mount)
+data/
+
+# Exclude git files
+.git/
+.gitignore
+
+# Exclude documentation
+*.md
+README.md
+QUICKSTART.md
+DEPLOYMENT.md
+
+# Exclude deployment scripts (not needed in container)
+deploy.sh
+migrate_files.sh
+
+# Exclude Docker files (not needed in build context)
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# Exclude nginx configs (not needed in container)
+nginx*.conf
+nginx*.example
+
+# Exclude PDFs and other test files
+*.pdf
+
+# Exclude cloudflare config
+cloudflared-config.yml
+
+# Exclude any temporary files
+*.log
+*.tmp
+*.swp
+*~
+
+
+

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GuardPro Icon Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .icon { display: inline-block; margin: 10px; }
+        canvas { border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>GuardPro Mobile App Icons</h1>
+    <p>This page generates the required icons for the PWA manifest.</p>
+    
+    <div class="icon">
+        <h3>192x192 Icon</h3>
+        <canvas id="icon192" width="192" height="192"></canvas>
+    </div>
+    
+    <div class="icon">
+        <h3>512x512 Icon</h3>
+        <canvas id="icon512" width="512" height="512"></canvas>
+    </div>
+    
+    <script>
+        function createIcon(canvasId, size) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            
+            // Background
+            ctx.fillStyle = '#ECF0F1';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Shield
+            ctx.fillStyle = '#2C3E50';
+            ctx.beginPath();
+            ctx.moveTo(size * 0.5, size * 0.15);
+            ctx.lineTo(size * 0.625, size * 0.25);
+            ctx.lineTo(size * 0.625, size * 0.4);
+            ctx.quadraticCurveTo(size * 0.625, size * 0.5, size * 0.5, size * 0.6);
+            ctx.quadraticCurveTo(size * 0.375, size * 0.5, size * 0.375, size * 0.4);
+            ctx.lineTo(size * 0.375, size * 0.25);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Checkmark
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = size * 0.02;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            ctx.moveTo(size * 0.43, size * 0.4);
+            ctx.lineTo(size * 0.47, size * 0.44);
+            ctx.lineTo(size * 0.55, size * 0.36);
+            ctx.stroke();
+            
+            // Guard Badge
+            ctx.fillStyle = '#3498DB';
+            ctx.beginPath();
+            ctx.arc(size * 0.5, size * 0.75, size * 0.08, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Guard Letter
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${size * 0.05}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('G', size * 0.5, size * 0.75);
+        }
+        
+        // Generate icons
+        createIcon('icon192', 192);
+        createIcon('icon512', 512);
+        
+        // Download function
+        function downloadIcon(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        // Add download buttons
+        document.getElementById('icon192').parentNode.innerHTML += 
+            '<br><button onclick="downloadIcon(\'icon192\', \'icon-192x192.png\')">Download 192x192</button>';
+        document.getElementById('icon512').parentNode.innerHTML += 
+            '<br><button onclick="downloadIcon(\'icon512\', \'icon-512x512.png\')">Download 512x512</button>';
+    </script>
+</body>
+</html>

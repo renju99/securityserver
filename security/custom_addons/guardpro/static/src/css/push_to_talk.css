@@ -1,0 +1,254 @@
+/* Push-to-Talk (Walkie-Talkie) Styles */
+
+.push-to-talk-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.push-to-talk-header {
+    margin-bottom: 20px;
+}
+
+.push-to-talk-header h2 {
+    color: #333;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.channel-selector {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.channel-selector label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.channel-selector select {
+    min-width: 300px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.push-to-talk-main {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.recording-section {
+    text-align: center;
+    padding: 30px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    border: 2px solid #e0e0e0;
+}
+
+.push-to-talk-button {
+    min-width: 200px;
+    min-height: 80px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.push-to-talk-button:not(.disabled):hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.push-to-talk-button:not(.disabled):active {
+    transform: scale(0.95);
+}
+
+.push-to-talk-button.recording {
+    background-color: #dc3545 !important;
+    color: white;
+    animation: pulse 1.5s infinite;
+}
+
+.push-to-talk-button.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+    }
+}
+
+.recording-info {
+    margin-top: 15px;
+    color: #666;
+    font-size: 14px;
+}
+
+.messages-section {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.messages-section h3 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 18px;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+}
+
+.messages-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.message-item {
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.message-item:hover {
+    background-color: #e9ecef;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.message-item.urgent {
+    border-left: 4px solid #ffc107;
+    background-color: #fff3cd;
+}
+
+.message-item.sent-by-me {
+    background-color: #d1ecf1;
+    border-left: 4px solid #17a2b8;
+}
+
+.message-item.played {
+    opacity: 0.7;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.message-header strong {
+    color: #333;
+    font-size: 16px;
+}
+
+.message-time {
+    color: #666;
+    font-size: 12px;
+}
+
+.message-body {
+    margin-top: 10px;
+}
+
+.audio-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.audio-controls button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.message-location {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #666;
+}
+
+.message-location i {
+    margin-right: 5px;
+}
+
+.no-messages,
+.no-channel-selected,
+.no-channels {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed #ddd;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .push-to-talk-container {
+        padding: 10px;
+    }
+    
+    .push-to-talk-button {
+        min-width: 150px;
+        min-height: 60px;
+        font-size: 16px;
+    }
+    
+    .channel-selector select {
+        min-width: 100%;
+    }
+    
+    .messages-section {
+        max-height: 400px;
+    }
+    
+    .message-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .push-to-talk-button {
+        min-height: 100px;
+        font-size: 20px;
+    }
+    
+    .push-to-talk-button:active {
+        transform: scale(0.9);
+    }
+}
+
+
+
+
+
+
+
+
+

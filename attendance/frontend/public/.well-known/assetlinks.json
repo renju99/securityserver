@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.berkeleyuae.attendance",
+            "sha256_cert_fingerprints": [
+                "EE:53:F1:F3:7A:0A:B5:2B:19:B9:4E:AE:82:3A:AE:50:C9:50:76:71:0D:5E:85:6D:1D:E6:6E:7C:E0:14:24:48"
+            ]
+        }
+    }
+]

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="audit_001" model="compliance.audit">
+            <field name="audit_type">safety</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="audit_date">2025-10-15</field>
+            <field name="auditor_id" ref="base.user_admin"/>
+        </record>
+
+        <record id="audit_002" model="compliance.audit">
+            <field name="audit_type">security</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="audit_date">2025-10-10</field>
+            <field name="auditor_id" ref="base.user_admin"/>
+        </record>
+    </data>
+</odoo>

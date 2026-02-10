@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Emergency Broadcast Wizard Form View -->
+    <record id="view_emergency_broadcast_wizard_form" model="ir.ui.view">
+        <field name="name">emergency.broadcast.wizard.form</field>
+        <field name="model">emergency.broadcast.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Send Emergency Broadcast">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <span style="color: #dc3545; font-weight: bold;">
+                                🚨 Send Emergency Broadcast
+                            </span>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Message Details">
+                            <field name="title" placeholder="e.g., EMERGENCY ALERT"/>
+                            <field name="priority" widget="radio"/>
+                        </group>
+
+                        <group string="Target Recipients">
+                            <field name="broadcast_type" widget="radio"/>
+                            <field name="site_id" 
+                                   invisible="broadcast_type != 'by_site'"
+                                   required="broadcast_type == 'by_site'"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="guard_count" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <field name="message" widget="text" nolabel="1" 
+                               placeholder="Enter your emergency message here..."
+                               options="{'rows': 6}"/>
+                    </group>
+
+                    <div class="alert alert-danger" role="alert" style="margin-top: 20px;">
+                        <strong>⚠️ Warning:</strong> This will send an emergency notification to 
+                        <strong><field name="guard_count" readonly="1" nolabel="1" class="oe_inline"/> guards</strong>. 
+                        The message will pop up on their screens and stay until acknowledged.
+                    </div>
+                </sheet>
+
+                <footer>
+                    <button name="action_send_broadcast" 
+                            type="object" 
+                            string="Send Emergency Broadcast" 
+                            class="btn-danger"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Emergency Broadcast Wizard Action -->
+    <record id="action_emergency_broadcast_wizard" model="ir.actions.act_window">
+        <field name="name">Send Emergency Broadcast</field>
+        <field name="res_model">emergency.broadcast.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>
+

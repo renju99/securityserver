@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Resident Complaint PDF Report Template -->
+    <template id="resident_complaint_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h2>Resident Complaint Report</h2>
+                                <h4 t-field="o.site_id.name"/>
+                            </div>
+                        </div>
+
+                        <!-- Complaint Reference -->
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <h4>Complaint ID: <span t-field="o.name"/></h4>
+                            </div>
+                            <div class="col-6 text-end">
+                                <h5>
+                                    Status: 
+                                    <t t-if="o.state == 'draft'">
+                                        <span class="badge bg-secondary">Draft</span>
+                                    </t>
+                                    <t t-elif="o.state == 'submitted'">
+                                        <span class="badge bg-info">Submitted</span>
+                                    </t>
+                                    <t t-elif="o.state == 'acknowledged'">
+                                        <span class="badge bg-warning">Acknowledged</span>
+                                    </t>
+                                    <t t-elif="o.state == 'in_progress'">
+                                        <span class="badge bg-primary">In Progress</span>
+                                    </t>
+                                    <t t-elif="o.state == 'resolved'">
+                                        <span class="badge bg-success">Resolved</span>
+                                    </t>
+                                    <t t-elif="o.state == 'closed'">
+                                        <span class="badge bg-dark">Closed</span>
+                                    </t>
+                                </h5>
+                            </div>
+                        </div>
+
+                        <!-- Complainant Information -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Complainant Information</h5>
+                                <table class="table table-bordered">
+                                    <tr t-if="o.complainant_id">
+                                        <td width="30%"><strong>Resident Name:</strong></td>
+                                        <td t-field="o.complainant_id.name"/>
+                                    </tr>
+                                    <tr t-if="o.unit_number">
+                                        <td><strong>Unit Number:</strong></td>
+                                        <td t-field="o.unit_number"/>
+                                    </tr>
+                                    <tr t-if="o.contact_number">
+                                        <td><strong>Contact Number:</strong></td>
+                                        <td t-field="o.contact_number"/>
+                                    </tr>
+                                    <tr t-if="o.email">
+                                        <td><strong>Email:</strong></td>
+                                        <td t-field="o.email"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Complaint Date:</strong></td>
+                                        <td t-field="o.complaint_date"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Complaint Details -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Complaint Details</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Category:</strong></td>
+                                        <td><span t-field="o.category"/></td>
+                                    </tr>
+                                    <tr t-if="o.priority">
+                                        <td><strong>Priority:</strong></td>
+                                        <td>
+                                            <t t-if="o.priority == 'low'">
+                                                <span class="badge bg-info">Low</span>
+                                            </t>
+                                            <t t-elif="o.priority == 'medium'">
+                                                <span class="badge bg-warning">Medium</span>
+                                            </t>
+                                            <t t-elif="o.priority == 'high'">
+                                                <span class="badge bg-danger">High</span>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="o.subject">
+                                        <td><strong>Subject:</strong></td>
+                                        <td t-field="o.subject"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Complaint Description -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Complaint Description</h5>
+                                <p t-field="o.description"/>
+                            </div>
+                        </div>
+
+                        <!-- Incident Details -->
+                        <div class="row mt-3" t-if="o.incident_date or o.incident_location">
+                            <div class="col-12">
+                                <h5>Incident Details</h5>
+                                <table class="table table-bordered">
+                                    <tr t-if="o.incident_date">
+                                        <td width="30%"><strong>Incident Date:</strong></td>
+                                        <td t-field="o.incident_date"/>
+                                    </tr>
+                                    <tr t-if="o.incident_location">
+                                        <td><strong>Incident Location:</strong></td>
+                                        <td t-field="o.incident_location"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Resolution -->
+                        <div class="row mt-3" t-if="o.state in ['resolved', 'closed']">
+                            <div class="col-12">
+                                <h5>Resolution</h5>
+                                <table class="table table-bordered">
+                                    <tr t-if="o.assigned_to">
+                                        <td width="30%"><strong>Handled By:</strong></td>
+                                        <td t-field="o.assigned_to.name"/>
+                                    </tr>
+                                    <tr t-if="o.resolution_date">
+                                        <td><strong>Resolution Date:</strong></td>
+                                        <td t-field="o.resolution_date"/>
+                                    </tr>
+                                    <tr t-if="o.resolution">
+                                        <td><strong>Resolution Details:</strong></td>
+                                        <td t-field="o.resolution"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Action Taken -->
+                        <div class="row mt-3" t-if="o.action_taken">
+                            <div class="col-12">
+                                <strong>Action Taken:</strong>
+                                <p t-field="o.action_taken"/>
+                            </div>
+                        </div>
+
+                        <!-- Follow-up Notes -->
+                        <div class="row mt-3" t-if="o.notes">
+                            <div class="col-12">
+                                <strong>Additional Notes:</strong>
+                                <p t-field="o.notes"/>
+                            </div>
+                        </div>
+
+                        <!-- Signature Section -->
+                        <div class="row mt-5">
+                            <div class="col-6">
+                                <div class="border-top pt-2">
+                                    <p><strong>Submitted By:</strong></p>
+                                    <p t-if="o.complainant_id" t-field="o.complainant_id.name"/>
+                                    <p>Date: <span t-field="o.complaint_date"/></p>
+                                </div>
+                            </div>
+                            <div class="col-6" t-if="o.state in ['resolved', 'closed']">
+                                <div class="border-top pt-2">
+                                    <p><strong>Resolved By:</strong></p>
+                                    <p t-if="o.assigned_to" t-field="o.assigned_to.name"/>
+                                    <p t-if="o.resolution_date">Date: <span t-field="o.resolution_date"/></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="row mt-5">
+                            <div class="col-12 text-center text-muted">
+                                <small>
+                                    Resident Complaint - Confidential
+                                    <br/>
+                                    Your feedback helps us improve our services
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Definition -->
+    <record id="action_report_resident_complaint" model="ir.actions.report">
+        <field name="name">Complaint Report</field>
+        <field name="model">resident.complaint</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.resident_complaint_report_template</field>
+        <field name="report_file">guardpro.resident_complaint_report_template</field>
+        <field name="binding_model_id" ref="model_resident_complaint"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Complaint_%s' % (object.name)</field>
+    </record>
+</odoo>
+

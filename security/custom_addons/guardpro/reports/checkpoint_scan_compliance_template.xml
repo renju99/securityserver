@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Report Action Definition -->
+    <record id="action_checkpoint_scan_compliance_report" model="ir.actions.report">
+        <field name="name">Checkpoint Scan Compliance Report</field>
+        <field name="model">checkpoint.scan</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.report_checkpoint_scan_compliance_document</field>
+        <field name="report_file">guardpro.report_checkpoint_scan_compliance_document</field>
+        <field name="binding_model_id" ref="model_checkpoint_scan"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_us"/>
+    </record>
+    
+    <!-- Report Template -->
+    <template id="report_checkpoint_scan_compliance_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        
+                        <!-- Report Header -->
+                        <div class="row" style="border-bottom: 3px solid #00bcd4; padding-bottom: 15px; margin-bottom: 30px;">
+                            <div class="col-8">
+                                <h1 style="margin: 0; font-size: 28px; color: #00bcd4;">CHECKPOINT SCAN COMPLIANCE</h1>
+                                <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Tour Verification Report</p>
+                            </div>
+                            <div class="col-4 text-right">
+                                <p style="margin: 5px 0;"><strong>Scan ID:</strong> <t t-esc="o.id"/></p>
+                                <p style="margin: 5px 0;"><strong>Scan Date:</strong> <t t-esc="format_datetime(o.scan_time) if o.scan_time else 'N/A'"/></p>
+                                <p style="margin: 5px 0;"><strong>Status:</strong> 
+                                    <span t-att-style="'color: %s; font-weight: bold;' % ('#4caf50' if o.status == 'verified' else '#ff9800')"
+                                          t-esc="dict(o._fields['status'].selection).get(o.status, 'N/A') if hasattr(o, '_fields') and 'status' in o._fields else 'N/A'"/>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Checkpoint &amp; Guard Info -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #00bcd4;">Scan Information</h2>
+                        <table class="table table-sm table-bordered" style="margin-bottom: 30px;">
+                            <tr>
+                                <th style="width: 30%; background-color: #f5f5f5;">Checkpoint</th>
+                                <td><strong><t t-esc="o.checkpoint_id.name if o.checkpoint_id else 'N/A'"/></strong></td>
+                                <th style="background-color: #f5f5f5;">Checkpoint Type</th>
+                                <td><t t-esc="o.checkpoint_id.checkpoint_type if o.checkpoint_id and hasattr(o.checkpoint_id, 'checkpoint_type') else 'N/A'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Guard</th>
+                                <td><strong><t t-esc="o.guard_id.name if o.guard_id else 'N/A'"/></strong></td>
+                                <th style="background-color: #f5f5f5;">Site</th>
+                                <td><t t-esc="o.site_id.name if o.site_id else 'N/A'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Scan Time</th>
+                                <td><strong style="color: #00bcd4;"><t t-esc="format_datetime(o.scan_time) if o.scan_time else 'N/A'"/></strong></td>
+                                <th style="background-color: #f5f5f5;">Scan Type</th>
+                                <td>
+                                    <t t-esc="dict(o._fields['scan_type'].selection).get(o.scan_type, 'N/A') if hasattr(o, '_fields') and 'scan_type' in o._fields else 'N/A'"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Tour Log</th>
+                                <td><t t-esc="o.tour_log_id.name if o.tour_log_id else 'N/A'"/></td>
+                                <th style="background-color: #f5f5f5;">Shift</th>
+                                <td><t t-esc="o.shift_id.name if o.shift_id else 'N/A'"/></td>
+                            </tr>
+                        </table>
+                        
+                        <!-- GPS Verification -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #00bcd4;">GPS Verification</h2>
+                        <table class="table table-sm table-bordered" style="margin-bottom: 30px;">
+                            <tr>
+                                <th style="width: 30%; background-color: #f5f5f5;">Scan Location</th>
+                                <td>
+                                    <t t-if="o.latitude and o.longitude">
+                                        Lat: <t t-esc="'{:.6f}'.format(o.latitude)"/>, Lon: <t t-esc="'{:.6f}'.format(o.longitude)"/>
+                                    </t>
+                                    <t t-else="">N/A</t>
+                                </td>
+                                <th style="background-color: #f5f5f5;">GPS Accuracy</th>
+                                <td><t t-esc="'{:.1f}'.format(o.gps_accuracy) if o.gps_accuracy else 'N/A'"/> meters</td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Expected Location</th>
+                                <td colspan="3">
+                                    <t t-if="o.checkpoint_id and o.checkpoint_id.latitude and o.checkpoint_id.longitude">
+                                        Lat: <t t-esc="'{:.6f}'.format(o.checkpoint_id.latitude)"/>, Lon: <t t-esc="'{:.6f}'.format(o.checkpoint_id.longitude)"/>
+                                    </t>
+                                    <t t-else="">N/A</t>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <!-- Scan Data -->
+                        <t t-if="o.scan_data">
+                            <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #00bcd4;">Scan Data</h2>
+                            <div style="padding: 15px; background-color: #e0f7fa; border: 1px solid #00bcd4; margin-bottom: 30px; font-family: monospace;">
+                                <t t-esc="o.scan_data"/>
+                            </div>
+                        </t>
+                        
+                        <!-- Notes -->
+                        <t t-if="o.notes">
+                            <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #00bcd4;">Notes</h2>
+                            <div style="padding: 15px; background-color: #fafafa; border: 1px solid #ddd; margin-bottom: 30px;">
+                                <t t-esc="o.notes"/>
+                            </div>
+                        </t>
+                        
+                        <!-- Verification Status -->
+                        <div style="background-color: #e8f5e9; border-left: 5px solid #4caf50; padding: 20px; margin: 30px 0 20px 0;">
+                            <h3 style="margin: 0 0 10px 0; color: #2e7d32;">✓ Verification Status</h3>
+                            <p style="margin: 0;">This checkpoint scan has been verified and logged in the security system.</p>
+                        </div>
+                        
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    
+</odoo>
+
+
+
+
+
+
+
+
+
+

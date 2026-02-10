@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Shift Template List View -->
+    <record id="view_shift_template_list" model="ir.ui.view">
+        <field name="name">shift.template.list</field>
+        <field name="model">shift.template</field>
+        <field name="arch" type="xml">
+            <list string="Shift Templates" 
+                  decoration-muted="not active">
+                <field name="name"/>
+                <field name="site_id"/>
+                <field name="guard_ids" widget="many2many_tags"/>
+                <field name="shift_type" widget="badge"/>
+                <field name="recurrence_type" widget="badge"/>
+                <field name="generated_shift_count"/>
+                <field name="last_generation_date"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Shift Template Form View -->
+    <record id="view_shift_template_form" model="ir.ui.view">
+        <field name="name">shift.template.form</field>
+        <field name="model">shift.template</field>
+        <field name="arch" type="xml">
+            <form string="Shift Template">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_generated_shifts" 
+                                type="object" 
+                                class="oe_stat_button" 
+                                icon="fa-calendar">
+                            <field name="generated_shift_count" widget="statinfo" string="Shifts"/>
+                        </button>
+                        <button name="action_generate_shifts_from_form" 
+                                type="object" 
+                                string="Generate Shifts" 
+                                class="oe_stat_button"
+                                icon="fa-calendar-plus-o"/>
+                    </div>
+                    
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g., Morning Security - Main Entrance"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group string="Basic Information">
+                            <field name="site_id" options="{'no_create': True}"/>
+                            <field name="guard_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="shift_type"/>
+                            <field name="start_time" widget="float_time"/>
+                            <field name="duration_hours" widget="float_time"/>
+                            <field name="tour_id" domain="[('site_id', '=', site_id)]" 
+                                   options="{'no_create': True}"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Recurrence Pattern">
+                            <field name="recurrence_type" widget="radio"/>
+                            <field name="day_of_month" 
+                                   placeholder="Enter day (1-31)"
+                                   invisible="recurrence_type != 'monthly'"/>
+                            <group string="Days of Week" invisible="recurrence_type != 'weekly'">
+                                <group>
+                                    <field name="monday"/>
+                                    <field name="tuesday"/>
+                                    <field name="wednesday"/>
+                                    <field name="thursday"/>
+                                </group>
+                                <group>
+                                    <field name="friday"/>
+                                    <field name="saturday"/>
+                                    <field name="sunday"/>
+                                </group>
+                            </group>
+                        </group>
+                    </group>
+                    
+                    <group string="Generation Settings">
+                        <group>
+                            <field name="generation_start_date"/>
+                            <field name="generation_end_date"/>
+                            <field name="last_generation_date"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Instructions &amp; Notes">
+                        <field name="special_instructions" 
+                               placeholder="Enter special instructions or notes for this shift type..."
+                               nolabel="1"/>
+                    </group>
+                    
+                    <div class="alert alert-info" role="alert">
+                        <i class="fa fa-info-circle" title="Information" aria-label="Information"/> 
+                        The selected guards will be assigned to shifts generated from this template.
+                        Shifts will be created for each guard based on the recurrence pattern from the From Date to the To Date.
+                        Specify the date range and click "Generate Shifts" button to create shifts manually.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Shift Template Kanban View -->
+    <record id="view_shift_template_kanban" model="ir.ui.view">
+        <field name="name">shift.template.kanban</field>
+        <field name="model">shift.template</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile">
+                <field name="name"/>
+                <field name="site_id"/>
+                <field name="shift_type"/>
+                <field name="recurrence_type"/>
+                <field name="active"/>
+                <field name="generated_shift_count"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="oe_kanban_global_click #{record.active.raw_value ? '' : 'o_kanban_color_muted'}">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="name"/>
+                                    </strong>
+                                    <div class="o_kanban_record_subtitle">
+                                        <i class="fa fa-map-marker" title="Location" aria-label="Location"/> <field name="site_id"/>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_top_right">
+                                    <field name="active" widget="boolean_toggle"/>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div>
+                                    <field name="shift_type" widget="badge"/>
+                                    <field name="recurrence_type" widget="badge"/>
+                                </div>
+                                <div class="mt-2">
+                                    <i class="fa fa-users" title="Guards" aria-label="Guards"/> <field name="guard_ids" widget="many2many_tags"/>
+                                </div>
+                                <div>
+                                    <i class="fa fa-calendar" title="Date" aria-label="Date"/> <field name="generated_shift_count"/> shifts generated
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Shift Template Search View -->
+    <record id="view_shift_template_search" model="ir.ui.view">
+        <field name="name">shift.template.search</field>
+        <field name="model">shift.template</field>
+        <field name="arch" type="xml">
+            <search string="Search Shift Templates">
+                <field name="name"/>
+                <field name="site_id"/>
+                <field name="guard_ids"/>
+                <field name="shift_type"/>
+                
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter string="Day Shift" name="day_shift" domain="[('shift_type', '=', 'day')]"/>
+                <filter string="Night Shift" name="night_shift" domain="[('shift_type', '=', 'night')]"/>
+                <separator/>
+                <filter string="Daily Recurrence" name="daily" domain="[('recurrence_type', '=', 'daily')]"/>
+                <filter string="Weekly Recurrence" name="weekly" domain="[('recurrence_type', '=', 'weekly')]"/>
+                <filter string="Monthly Recurrence" name="monthly" domain="[('recurrence_type', '=', 'monthly')]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Shift Type" name="group_shift_type" context="{'group_by': 'shift_type'}"/>
+                    <filter string="Recurrence" name="group_recurrence" context="{'group_by': 'recurrence_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Shift Template Calendar View -->
+    <record id="view_shift_template_calendar" model="ir.ui.view">
+        <field name="name">shift.template.calendar</field>
+        <field name="model">shift.template</field>
+        <field name="arch" type="xml">
+            <calendar string="Shift Templates" date_start="last_generation_date" mode="month" quick_create="0">
+                <field name="name"/>
+                <field name="site_id"/>
+                <field name="shift_type"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Shift Template Action -->
+    <record id="action_shift_template" model="ir.actions.act_window">
+        <field name="name">Shift Templates</field>
+        <field name="res_model">shift.template</field>
+        <field name="view_mode">list,kanban,form,calendar</field>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a Shift Template
+            </p>
+            <p>
+                Templates allow you to automatically generate recurring shifts.
+                Define the pattern once and let the system create shifts for you.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item (now defined in guardpro_menus.xml) -->
+    <!--
+    <menuitem id="menu_shift_template" 
+              name="Shift Templates" 
+              parent="guardpro.menu_guardpro_operations" 
+              action="action_shift_template" 
+              sequence="15"/>
+    -->
+
+</odoo>

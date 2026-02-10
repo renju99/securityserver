@@ -1,0 +1,1504 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Guards Map Template -->
+        <template id="guards_map_template" name="Guards Location Map">
+            <t t-set="google_maps_api_key" t-value="google_maps_api_key or request.env['ir.config_parameter'].sudo().get_param('guardpro.google_maps_api_key')"/>
+            <t t-call="web.layout">
+                <t t-set="head">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+                    <meta name="mobile-web-app-capable" content="yes"/>
+                    <meta name="apple-mobile-web-app-capable" content="yes"/>
+                    <t t-if="google_maps_api_key">
+                        <script async="async" defer="defer" t-att-src="'https://maps.googleapis.com/maps/api/js?key=%s&amp;libraries=geometry,visualization&amp;loading=async' % google_maps_api_key"/>
+                        <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+                    </t>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+                        
+                        * {
+                            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                        }
+                        
+                        #map {
+                            height: calc(100vh - 80px);
+                            width: 100%;
+                            border-radius: 0;
+                        }
+                        
+                        .map-container {
+                            position: relative;
+                            padding: 0;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        }
+                        
+                        /* Custom Map Controls Panel */
+                        .map-controls {
+                            position: absolute;
+                            top: 20px;
+                            right: 20px;
+                            z-index: 5;
+                            background: rgba(255, 255, 255, 0.95);
+                            backdrop-filter: blur(20px);
+                            -webkit-backdrop-filter: blur(20px);
+                            padding: 20px;
+                            border-radius: 16px;
+                            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+                            max-width: 340px;
+                            max-height: calc(100vh - 140px);
+                            overflow-y: auto;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                        }
+                        
+                        .map-controls::-webkit-scrollbar {
+                            width: 6px;
+                        }
+                        
+                        .map-controls::-webkit-scrollbar-track {
+                            background: rgba(0,0,0,0.05);
+                            border-radius: 10px;
+                        }
+                        
+                        .map-controls::-webkit-scrollbar-thumb {
+                            background: rgba(102, 126, 234, 0.5);
+                            border-radius: 10px;
+                        }
+                        
+                        /* Custom Zoom Controls */
+                        .custom-zoom-controls {
+                            position: absolute;
+                            bottom: 120px;
+                            right: 20px;
+                            z-index: 5;
+                            display: flex;
+                            flex-direction: column;
+                            gap: 8px;
+                        }
+                        
+                        .zoom-btn {
+                            width: 48px;
+                            height: 48px;
+                            background: rgba(255, 255, 255, 0.95);
+                            backdrop-filter: blur(20px);
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            border-radius: 12px;
+                            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 20px;
+                            color: #667eea;
+                            transition: all 0.3s ease;
+                            font-weight: 600;
+                        }
+                        
+                        .zoom-btn:hover {
+                            background: #667eea;
+                            color: white;
+                            transform: scale(1.05);
+                            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+                        }
+                        
+                        .zoom-btn:active {
+                            transform: scale(0.95);
+                        }
+                        
+                        /* Map Type Switcher */
+                        .map-type-switcher {
+                            position: absolute;
+                            top: 20px;
+                            left: 20px;
+                            z-index: 5;
+                            background: rgba(255, 255, 255, 0.95);
+                            backdrop-filter: blur(20px);
+                            padding: 8px;
+                            border-radius: 12px;
+                            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                            display: flex;
+                            gap: 8px;
+                        }
+                        
+                        .map-type-btn {
+                            padding: 10px 16px;
+                            background: transparent;
+                            border: none;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-size: 13px;
+                            font-weight: 500;
+                            color: #64748b;
+                            transition: all 0.3s ease;
+                        }
+                        
+                        .map-type-btn:hover {
+                            background: rgba(102, 126, 234, 0.1);
+                            color: #667eea;
+                        }
+                        
+                        .map-type-btn.active {
+                            background: #667eea;
+                            color: white;
+                            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+                        }
+                        
+                        /* Mobile Optimizations */
+                        @media (max-width: 768px) {
+                            .map-container {
+                                padding: 0;
+                            }
+                            
+                            .map-controls {
+                                position: fixed;
+                                top: auto;
+                                bottom: 0;
+                                right: 0;
+                                left: 0;
+                                max-width: 100%;
+                                max-height: 60vh;
+                                border-radius: 24px 24px 0 0;
+                                padding: 24px 20px;
+                            }
+                            
+                            .custom-zoom-controls {
+                                bottom: calc(60vh + 20px);
+                                right: 16px;
+                            }
+                            
+                            .map-type-switcher {
+                                top: 16px;
+                                left: 16px;
+                            }
+                            
+                            #map {
+                                height: calc(100vh - 60px);
+                            }
+                            
+                            .page-header {
+                                padding: 16px !important;
+                            }
+                            
+                            .page-header h1 {
+                                font-size: 20px !important;
+                            }
+                            
+                            .refresh-button {
+                                padding: 12px !important;
+                                font-size: 14px !important;
+                                touch-action: manipulation;
+                            }
+                            
+                            select, input[type="checkbox"] {
+                                font-size: 16px !important;
+                                touch-action: manipulation;
+                            }
+                            
+                            .guard-info {
+                                padding: 14px !important;
+                                font-size: 14px !important;
+                            }
+                        }
+                        
+                        @media (max-width: 480px) {
+                            .map-controls {
+                                padding: 20px 16px;
+                            }
+                            
+                            .map-controls h4 {
+                                font-size: 15px !important;
+                            }
+                            
+                            .zoom-btn {
+                                width: 44px;
+                                height: 44px;
+                                font-size: 18px;
+                            }
+                            
+                            .map-type-btn {
+                                padding: 8px 12px;
+                                font-size: 12px;
+                            }
+                        }
+                        
+                        .map-controls h4 {
+                            margin-top: 0;
+                            margin-bottom: 12px;
+                            font-size: 17px;
+                            font-weight: 700;
+                            color: #1e293b;
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                        }
+                        
+                        .map-controls h4 i {
+                            color: #667eea;
+                        }
+                        
+                        .guard-info {
+                            padding: 14px;
+                            border-bottom: 1px solid rgba(0,0,0,0.06);
+                            font-size: 13px;
+                            transition: all 0.3s ease;
+                            border-radius: 8px;
+                            margin-bottom: 4px;
+                        }
+                        
+                        .guard-info:hover {
+                            background: rgba(102, 126, 234, 0.05);
+                            transform: translateX(4px);
+                        }
+                        
+                        .guard-info:last-child {
+                            border-bottom: none;
+                        }
+                        
+                        .guard-name {
+                            font-weight: 600;
+                            color: #1e293b;
+                            font-size: 14px;
+                        }
+                        
+                        .guard-badge {
+                            color: #64748b;
+                            font-size: 12px;
+                            margin-top: 2px;
+                        }
+                        
+                        .guard-time {
+                            color: #94a3b8;
+                            font-size: 11px;
+                            margin-top: 4px;
+                        }
+                        
+                        .status-indicator {
+                            display: inline-block;
+                            width: 10px;
+                            height: 10px;
+                            border-radius: 50%;
+                            margin-right: 6px;
+                            animation: pulse 2s ease-in-out infinite;
+                        }
+                        
+                        @keyframes pulse {
+                            0%, 100% { opacity: 1; }
+                            50% { opacity: 0.6; }
+                        }
+                        
+                        .status-active {
+                            background: linear-gradient(135deg, #10b981, #059669);
+                            box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+                        }
+                        
+                        .status-inactive {
+                            background: linear-gradient(135deg, #ef4444, #dc2626);
+                            box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+                        }
+                        
+                        .status-stale {
+                            background: linear-gradient(135deg, #f59e0b, #d97706);
+                            box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+                        }
+                        
+                        .refresh-button {
+                            width: 100%;
+                            padding: 12px;
+                            background: linear-gradient(135deg, #667eea, #764ba2);
+                            color: white;
+                            border: none;
+                            border-radius: 10px;
+                            cursor: pointer;
+                            margin-top: 12px;
+                            font-size: 14px;
+                            font-weight: 600;
+                            transition: all 0.3s ease;
+                            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+                        }
+                        
+                        .refresh-button:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+                        }
+                        
+                        .refresh-button:active {
+                            transform: translateY(0);
+                        }
+                        
+                        .auto-refresh-toggle {
+                            margin-top: 12px;
+                            font-size: 13px;
+                            color: #64748b;
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                        }
+                        
+                        .auto-refresh-toggle input[type="checkbox"] {
+                            width: 18px;
+                            height: 18px;
+                            cursor: pointer;
+                            accent-color: #667eea;
+                        }
+                        
+                        .guard-count {
+                            font-size: 13px;
+                            color: #64748b;
+                            margin-bottom: 12px;
+                            padding: 10px;
+                            background: rgba(102, 126, 234, 0.08);
+                            border-radius: 8px;
+                            font-weight: 500;
+                        }
+                        
+                        .page-header {
+                            padding: 20px 24px;
+                            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+                            color: white;
+                            margin: 0;
+                            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+                        }
+                        
+                        .page-header h1 {
+                            margin: 0;
+                            font-size: 26px;
+                            font-weight: 700;
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                        }
+                        
+                        .page-header h1 i {
+                            color: #667eea;
+                            font-size: 24px;
+                        }
+                        
+                        .loading-overlay {
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            background: rgba(255, 255, 255, 0.95);
+                            backdrop-filter: blur(20px);
+                            padding: 30px 40px;
+                            border-radius: 16px;
+                            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+                            display: none;
+                            z-index: 1000;
+                            border: 1px solid rgba(255, 255, 255, 0.3);
+                        }
+                        
+                        .loading-overlay.active {
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                            font-size: 16px;
+                            font-weight: 500;
+                            color: #1e293b;
+                        }
+                        
+                        .loading-overlay i {
+                            color: #667eea;
+                            font-size: 20px;
+                        }
+                        
+                        /* Section Dividers */
+                        .control-section {
+                            border-top: 1px solid rgba(0,0,0,0.08);
+                            margin-top: 16px;
+                            padding-top: 16px;
+                        }
+                        
+                        /* Enhanced Select Inputs */
+                        select {
+                            width: 100%;
+                            padding: 10px 12px;
+                            border: 2px solid rgba(102, 126, 234, 0.2);
+                            border-radius: 8px;
+                            font-size: 13px;
+                            color: #1e293b;
+                            background: white;
+                            transition: all 0.3s ease;
+                            cursor: pointer;
+                        }
+                        
+                        select:focus {
+                            outline: none;
+                            border-color: #667eea;
+                            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                        }
+                        
+                        label {
+                            display: block;
+                            font-size: 12px;
+                            font-weight: 600;
+                            margin-bottom: 6px;
+                            color: #475569;
+                        }
+                        
+                        /* Live Indicator */
+                        .live-indicator {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 6px 12px;
+                            background: rgba(239, 68, 68, 0.1);
+                            border-radius: 20px;
+                            font-size: 11px;
+                            font-weight: 600;
+                            color: #ef4444;
+                            margin-left: auto;
+                        }
+                        
+                        .live-indicator::before {
+                            content: '';
+                            width: 6px;
+                            height: 6px;
+                            background: #ef4444;
+                            border-radius: 50%;
+                            animation: blink 1.5s ease-in-out infinite;
+                        }
+                        
+                        @keyframes blink {
+                            0%, 100% { opacity: 1; }
+                            50% { opacity: 0.3; }
+                        }
+                    </style>
+                </t>
+
+                <div class="page-header">
+                    <h1><i class="fa fa-map-marker"></i> Security Guards Location Map<span class="live-indicator">LIVE</span></h1>
+                </div>
+
+                <t t-if="google_maps_api_key">
+                <div class="map-container">
+                    <div class="loading-overlay" id="loading">
+                        <i class="fa fa-spinner fa-spin"></i> Loading map...
+                    </div>
+                    
+                    <!-- Map Type Switcher -->
+                    <div class="map-type-switcher">
+                        <button class="map-type-btn active" onclick="guardMap.setMapType('roadmap')" data-type="roadmap">
+                            <i class="fa fa-road"></i> Map
+                        </button>
+                        <button class="map-type-btn" onclick="guardMap.setMapType('satellite')" data-type="satellite">
+                            <i class="fa fa-globe"></i> Satellite
+                        </button>
+                        <button class="map-type-btn" onclick="guardMap.setMapType('hybrid')" data-type="hybrid">
+                            <i class="fa fa-map"></i> Hybrid
+                        </button>
+                    </div>
+                    
+                    <!-- Custom Zoom Controls -->
+                    <div class="custom-zoom-controls">
+                        <button class="zoom-btn" onclick="guardMap.zoomIn()" title="Zoom In">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                        <button class="zoom-btn" onclick="guardMap.zoomOut()" title="Zoom Out">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                        <button class="zoom-btn" onclick="guardMap.fitAllMarkers()" title="Fit All Guards">
+                            <i class="fa fa-expand"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="map-controls">
+                        <h4><i class="fa fa-users"></i> Active Guards</h4>
+                        <div class="guard-count" id="guard-count">Loading...</div>
+                        <div id="guards-list"></div>
+                        <button class="refresh-button" onclick="guardMap.refreshLocations()">
+                            <i class="fa fa-refresh"></i> Refresh Locations
+                        </button>
+                        <div class="auto-refresh-toggle">
+                            <input type="checkbox" id="auto-refresh" checked="checked"/>
+                            <label for="auto-refresh">Auto-refresh every 30 seconds</label>
+                        </div>
+                        
+                        <!-- Historical Path Tracking -->
+                        <div class="control-section">
+                            <h4><i class="fa fa-map-signs"></i> Path Tracking</h4>
+                            <div style="margin-bottom: 10px;">
+                                <label>Select Guard:</label>
+                                <select id="path-guard-select">
+                                    <option value="">-- Select a guard --</option>
+                                    <t t-foreach="guards" t-as="guard">
+                                        <option t-att-value="guard.id"><t t-esc="guard.name"/> (<t t-esc="guard.badge_number"/>)</option>
+                                    </t>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <label>Time Range:</label>
+                                <select id="path-time-range">
+                                    <option value="1">Last 1 hour</option>
+                                    <option value="6">Last 6 hours</option>
+                                    <option value="24" selected="selected">Last 24 hours</option>
+                                    <option value="168">Last 7 days</option>
+                                    <option value="720">Last 30 days</option>
+                                </select>
+                            </div>
+                            <button class="refresh-button" onclick="guardMap.showGuardPath()" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                <i class="fa fa-map-marker"></i> Show Path
+                            </button>
+                            <button class="refresh-button" onclick="guardMap.clearPath()" style="background: linear-gradient(135deg, #ef4444, #dc2626); margin-top: 5px;">
+                                <i class="fa fa-times"></i> Clear Path
+                            </button>
+                        </div>
+                        
+                        <!-- Site Geofences -->
+                        <div class="control-section">
+                            <h4><i class="fa fa-map-o"></i> Site Geofences</h4>
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="show-geofences" checked="checked"/>
+                                    <span>Show site boundaries</span>
+                                </label>
+                            </div>
+                            <button class="refresh-button" onclick="guardMap.toggleGeofences()" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                <i class="fa fa-globe"></i> Toggle Geofences
+                            </button>
+                        </div>
+                        
+                        <!-- Marker Clustering -->
+                        <div class="control-section">
+                            <h4><i class="fa fa-object-group"></i> Clustering</h4>
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="enable-clustering" checked="checked"/>
+                                    <span>Enable marker clustering</span>
+                                </label>
+                            </div>
+                            <button class="refresh-button" onclick="guardMap.toggleClustering()" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                <i class="fa fa-th"></i> Toggle Clustering
+                            </button>
+                        </div>
+                        
+                        <!-- Heatmap View -->
+                        <div class="control-section">
+                            <h4><i class="fa fa-fire"></i> Heatmap</h4>
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="enable-heatmap"/>
+                                    <span>Show coverage heatmap</span>
+                                </label>
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <label>Heatmap Data:</label>
+                                <select id="heatmap-data-source">
+                                    <option value="current">Current Locations</option>
+                                    <option value="history">Location History (24h)</option>
+                                </select>
+                            </div>
+                            <button class="refresh-button" onclick="guardMap.toggleHeatmap()" style="background: linear-gradient(135deg, #dc2626, #b91c1c);">
+                                <i class="fa fa-thermometer-half"></i> Toggle Heatmap
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="map"></div>
+                </div>
+
+                <script type="text/javascript">
+                    <![CDATA[
+                    // Global GuardMap object
+                    window.guardMap = {
+                        map: null,
+                        markers: {},
+                        infoWindows: {},
+                        autoRefreshInterval: null,
+                        pathPolyline: null,
+                        pathMarkers: [],
+                        geofences: [],
+                        geofencesVisible: true,
+                        markerClusterer: null,
+                        clusteringEnabled: true,
+                        heatmapLayer: null,
+                        heatmapEnabled: false,
+                        
+                        init: function() {
+                            console.log('Initializing GuardMap...');
+                            this.initMap();
+                            this.loadGuardLocations();
+                            this.loadGeofences();
+                            this.setupAutoRefresh();
+                        },
+                        
+                        initMap: function() {
+                            console.log('Initializing Google Map...');
+                            // Default center (Dubai, UAE)
+                            const defaultCenter = { lat: 25.2048, lng: 55.2708 };
+                            
+                            // Detect if mobile device
+                            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                            
+                            this.map = new google.maps.Map(document.getElementById('map'), {
+                                zoom: 12,
+                                center: defaultCenter,
+                                mapTypeId: 'roadmap',
+                                mapTypeControl: false,
+                                streetViewControl: false,
+                                fullscreenControl: true,
+                                zoomControl: false, // We use custom zoom controls
+                                gestureHandling: isMobile ? 'greedy' : 'auto',
+                                disableDefaultUI: false,
+                                minZoom: 3,
+                                maxZoom: 20,
+                                styles: [
+                                    {
+                                        featureType: "poi",
+                                        elementType: "labels",
+                                        stylers: [{ visibility: "off" }]
+                                    }
+                                ]
+                            });
+                            
+                            // Hide loading overlay
+                            const loadingEl = document.getElementById('loading');
+                            if (loadingEl) {
+                                loadingEl.classList.remove('active');
+                            }
+                            console.log('Map initialized successfully');
+                        },
+                        
+                        // Zoom control methods
+                        zoomIn: function() {
+                            const currentZoom = this.map.getZoom();
+                            this.map.setZoom(currentZoom + 1);
+                        },
+                        
+                        zoomOut: function() {
+                            const currentZoom = this.map.getZoom();
+                            this.map.setZoom(currentZoom - 1);
+                        },
+                        
+                        fitAllMarkers: function() {
+                            const markers = Object.values(this.markers);
+                            if (markers.length === 0) {
+                                alert('No guards to display');
+                                return;
+                            }
+                            
+                            const bounds = new google.maps.LatLngBounds();
+                            markers.forEach(marker => {
+                                bounds.extend(marker.getPosition());
+                            });
+                            
+                            this.map.fitBounds(bounds);
+                            
+                            // Prevent over-zooming for single marker
+                            if (markers.length === 1) {
+                                setTimeout(() => {
+                                    this.map.setZoom(15);
+                                }, 100);
+                            }
+                        },
+                        
+                        // Map type switcher
+                        setMapType: function(mapType) {
+                            this.map.setMapTypeId(mapType);
+                            
+                            // Update button states
+                            document.querySelectorAll('.map-type-btn').forEach(btn => {
+                                btn.classList.remove('active');
+                            });
+                            document.querySelector(`[data-type="${mapType}"]`).classList.add('active');
+                        },
+                        
+                        loadGuardLocations: function() {
+                            console.log('Loading guard locations...');
+                            
+                            // Show loading state
+                            const countContainer = document.getElementById('guard-count');
+                            if (countContainer) {
+                                countContainer.textContent = 'Loading...';
+                            }
+                            
+                            // Use Odoo's rpc mechanism for proper authentication
+                            if (typeof odoo !== 'undefined' && odoo.rpc) {
+                                // Use Odoo's rpc if available
+                                odoo.rpc('/guardpro/guards/locations', {})
+                                    .then(response => {
+                                        console.log('Guard locations response:', response);
+                                        // odoo.rpc() automatically unwraps JSON-RPC response
+                                        // but sometimes it returns the full envelope, handle both cases
+                                        const result = response.result || response;
+                                        console.log('Extracted result:', result);
+                                        if (result.success) {
+                                            this.updateMarkers(result.locations);
+                                            this.updateGuardsList(result.locations);
+                                        } else {
+                                            console.error('Error loading locations:', result.error);
+                                            this.updateGuardsList([]);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error fetching guard locations:', error);
+                                        this.updateGuardsList([]);
+                                    });
+                            } else {
+                                // Fallback to direct fetch with CSRF token
+                                const csrfToken = document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || 
+                                                document.querySelector('input[name=csrf_token]')?.value;
+                                
+                                fetch('/guardpro/guards/locations', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'X-CSRFToken': csrfToken
+                                    },
+                                    credentials: 'same-origin',
+                                    body: JSON.stringify({
+                                        jsonrpc: "2.0",
+                                        method: "call",
+                                        params: {},
+                                        id: null
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(response => {
+                                    console.log('Guard locations response (fetch):', response);
+                                    // Handle JSON-RPC response structure
+                                    const result = response.result || response;
+                                    console.log('Extracted result (fetch):', result);
+                                    if (result.success) {
+                                        this.updateMarkers(result.locations);
+                                        this.updateGuardsList(result.locations);
+                                    } else {
+                                        console.error('Error loading locations:', result.error);
+                                        this.updateGuardsList([]);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching guard locations:', error);
+                                    this.updateGuardsList([]);
+                                });
+                            }
+                        },
+                        
+                        updateMarkers: function(locations) {
+                            console.log('Updating markers for', locations.length, 'guards');
+                            
+                            // Clear existing markers
+                            if (this.markerClusterer) {
+                                this.markerClusterer.clearMarkers();
+                            }
+                            Object.values(this.markers).forEach(marker => marker.setMap(null));
+                            Object.values(this.infoWindows).forEach(infoWindow => infoWindow.close());
+                            this.markers = {};
+                            this.infoWindows = {};
+                            
+                            if (!locations || locations.length === 0) {
+                                console.log('No locations to display');
+                                return;
+                            }
+                            
+                            const bounds = new google.maps.LatLngBounds();
+                            const markersArray = [];
+                            
+                            locations.forEach((guard) => {
+                                const position = {
+                                    lat: parseFloat(guard.latitude),
+                                    lng: parseFloat(guard.longitude)
+                                };
+                                
+                                // Determine marker color based on last update time
+                                let markerColor = '#10b981'; // green - active (< 5 min)
+                                if (guard.time_since_update > 30) {
+                                    markerColor = '#ef4444'; // red - inactive (> 30 min)
+                                } else if (guard.time_since_update > 5) {
+                                    markerColor = '#f59e0b'; // yellow - stale (5-30 min)
+                                }
+                                
+                                // Create custom marker icon
+                                const markerIcon = {
+                                    path: google.maps.SymbolPath.CIRCLE,
+                                    scale: 10,
+                                    fillColor: markerColor,
+                                    fillOpacity: 0.9,
+                                    strokeColor: '#ffffff',
+                                    strokeWeight: 2
+                                };
+                                
+                                const marker = new google.maps.Marker({
+                                    position: position,
+                                    map: this.clusteringEnabled ? null : this.map,
+                                    icon: markerIcon,
+                                    title: guard.name,
+                                    animation: google.maps.Animation.DROP
+                                });
+                                
+                                // Create info window
+                                const lastUpdateText = guard.time_since_update 
+                                    ? `${guard.time_since_update} min ago` 
+                                    : 'Just now';
+                                
+                                const infoContent = `
+                                    <div style="padding: 10px; min-width: 200px;">
+                                        <h3 style="margin: 0 0 10px 0;">${guard.name}</h3>
+                                        <p style="margin: 5px 0;"><strong>Badge:</strong> ${guard.badge_number}</p>
+                                        <p style="margin: 5px 0;"><strong>Site:</strong> ${guard.current_site}</p>
+                                        <p style="margin: 5px 0;"><strong>Phone:</strong> ${guard.phone || 'N/A'}</p>
+                                        <p style="margin: 5px 0;"><strong>Last Update:</strong> ${lastUpdateText}</p>
+                                        <p style="margin: 10px 0 0 0;">
+                                            <a href="/web#id=${guard.id}&model=guard.profile&view_type=form" 
+                                               target="_blank" class="btn btn-primary btn-sm">
+                                               View Profile
+                                            </a>
+                                        </p>
+                                    </div>
+                                `;
+                                
+                                const infoWindow = new google.maps.InfoWindow({
+                                    content: infoContent
+                                });
+                                
+                                marker.addListener('click', () => {
+                                    // Close all other info windows
+                                    Object.values(this.infoWindows).forEach(iw => iw.close());
+                                    infoWindow.open(this.map, marker);
+                                });
+                                
+                                this.markers[guard.id] = marker;
+                                this.infoWindows[guard.id] = infoWindow;
+                                markersArray.push(marker);
+                                
+                                bounds.extend(position);
+                            });
+                            
+                            // Setup clustering if enabled
+                            if (this.clusteringEnabled && typeof markerClusterer !== 'undefined') {
+                                this.markerClusterer = new markerClusterer.MarkerClusterer({
+                                    map: this.map,
+                                    markers: markersArray,
+                                    algorithm: new markerClusterer.GridAlgorithm({
+                                        gridSize: 60,
+                                        maxDistance: 40000
+                                    })
+                                });
+                                console.log('Marker clustering enabled with', markersArray.length, 'markers');
+                            } else {
+                                // Display markers directly without clustering
+                                markersArray.forEach(m => m.setMap(this.map));
+                            }
+                            
+                            // Fit map to show all markers
+                            if (locations.length > 0) {
+                                this.map.fitBounds(bounds);
+                                
+                                // Prevent over-zooming for single marker
+                                if (locations.length === 1) {
+                                    this.map.setZoom(15);
+                                }
+                            }
+                        },
+                        
+                        updateGuardsList: function(locations) {
+                            const listContainer = document.getElementById('guards-list');
+                            const countContainer = document.getElementById('guard-count');
+                            
+                            if (countContainer) {
+                                countContainer.textContent = `${locations.length} guard${locations.length !== 1 ? 's' : ''} active`;
+                            }
+                            
+                            if (!listContainer) return;
+                            
+                            if (!locations || locations.length === 0) {
+                                listContainer.innerHTML = '<p style="color: #999; font-size: 12px;">No active guards with location data</p>';
+                                return;
+                            }
+                            
+                            let html = '';
+                            locations.forEach((guard) => {
+                                let statusClass = 'status-active';
+                                if (guard.time_since_update > 30) {
+                                    statusClass = 'status-inactive';
+                                } else if (guard.time_since_update > 5) {
+                                    statusClass = 'status-stale';
+                                }
+                                
+                                const lastUpdateText = guard.time_since_update 
+                                    ? `${guard.time_since_update} min ago` 
+                                    : 'Just now';
+                                
+                                html += `
+                                    <div class="guard-info" onclick="guardMap.focusGuard(${guard.id})" style="cursor: pointer;">
+                                        <div>
+                                            <span class="status-indicator ${statusClass}"></span>
+                                            <span class="guard-name">${guard.name}</span>
+                                        </div>
+                                        <div class="guard-badge">Badge: ${guard.badge_number}</div>
+                                        <div class="guard-time">${lastUpdateText}</div>
+                                    </div>
+                                `;
+                            });
+                            
+                            listContainer.innerHTML = html;
+                        },
+                        
+                        focusGuard: function(guardId) {
+                            const marker = this.markers[guardId];
+                            const infoWindow = this.infoWindows[guardId];
+                            
+                            if (marker && infoWindow) {
+                                this.map.panTo(marker.getPosition());
+                                this.map.setZoom(16);
+                                
+                                // Close all other info windows
+                                Object.values(this.infoWindows).forEach(iw => iw.close());
+                                infoWindow.open(this.map, marker);
+                            }
+                        },
+                        
+                        refreshLocations: function() {
+                            console.log('Refreshing locations...');
+                            this.loadGuardLocations();
+                        },
+                        
+                        setupAutoRefresh: function() {
+                            const checkbox = document.getElementById('auto-refresh');
+                            
+                            if (!checkbox) return;
+                            
+                            const startAutoRefresh = () => {
+                                if (this.autoRefreshInterval) {
+                                    clearInterval(this.autoRefreshInterval);
+                                }
+                                this.autoRefreshInterval = setInterval(() => {
+                                    this.loadGuardLocations();
+                                }, 30000); // 30 seconds
+                            };
+                            
+                            checkbox.addEventListener('change', (e) => {
+                                if (e.target.checked) {
+                                    startAutoRefresh();
+                                } else {
+                                    if (this.autoRefreshInterval) {
+                                        clearInterval(this.autoRefreshInterval);
+                                        this.autoRefreshInterval = null;
+                                    }
+                                }
+                            });
+                            
+                            // Start auto-refresh if checkbox is checked
+                            if (checkbox.checked) {
+                                startAutoRefresh();
+                            }
+                        },
+                        
+                        showGuardPath: function() {
+                            const guardId = document.getElementById('path-guard-select').value;
+                            const timeRange = document.getElementById('path-time-range').value;
+                            
+                            if (!guardId) {
+                                alert('Please select a guard first');
+                                return;
+                            }
+                            
+                            // Clear existing path
+                            this.clearPath();
+                            
+                            // Calculate start datetime
+                            const endDate = new Date();
+                            const startDate = new Date(endDate.getTime() - (timeRange * 60 * 60 * 1000));
+                            
+                            const pathParams = {
+                                guard_id: guardId,
+                                start_datetime: startDate.toISOString(),
+                                end_datetime: endDate.toISOString()
+                            };
+                            
+                            // Fetch path data
+                            if (typeof odoo !== 'undefined' && odoo.rpc) {
+                                odoo.rpc('/guardpro/guard/path', pathParams)
+                                .then(response => {
+                                    const result = response.result || response;
+                                    if (result.success && result.path && result.path.length > 0) {
+                                        this.displayPath(result.path, result.guard);
+                                    } else {
+                                        alert('No location history found for this guard in the selected time range');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching guard path:', error);
+                                    alert('Error loading path data: ' + error);
+                                });
+                            } else {
+                                // Fallback to direct fetch with CSRF token
+                                const csrfToken = document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || 
+                                                document.querySelector('input[name=csrf_token]')?.value;
+                                
+                                fetch('/guardpro/guard/path', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'X-CSRFToken': csrfToken
+                                    },
+                                    credentials: 'same-origin',
+                                    body: JSON.stringify({
+                                        jsonrpc: "2.0",
+                                        method: "call",
+                                        params: pathParams,
+                                        id: null
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(response => {
+                                    console.log('Guard path response (fetch):', response);
+                                    const result = response.result || response;
+                                    if (result.success && result.path && result.path.length > 0) {
+                                        this.displayPath(result.path, result.guard);
+                                    } else {
+                                        alert('No location history found for this guard in the selected time range');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching guard path:', error);
+                                    alert('Error loading path data: ' + error);
+                                });
+                            }
+                        },
+                        
+                        displayPath: function(pathData, guardInfo) {
+                            if (!pathData || pathData.length === 0) return;
+                            
+                            // Create path coordinates array
+                            const pathCoordinates = pathData.map(point => ({
+                                lat: parseFloat(point.latitude),
+                                lng: parseFloat(point.longitude)
+                            }));
+                            
+                            // Create polyline
+                            this.pathPolyline = new google.maps.Polyline({
+                                path: pathCoordinates,
+                                geodesic: true,
+                                strokeColor: '#3b82f6',
+                                strokeOpacity: 0.8,
+                                strokeWeight: 3,
+                                map: this.map
+                            });
+                            
+                            // Add start marker (green)
+                            const startMarker = new google.maps.Marker({
+                                position: pathCoordinates[0],
+                                map: this.map,
+                                icon: {
+                                    path: google.maps.SymbolPath.CIRCLE,
+                                    scale: 8,
+                                    fillColor: '#10b981',
+                                    fillOpacity: 1,
+                                    strokeColor: '#ffffff',
+                                    strokeWeight: 2
+                                },
+                                title: 'Start: ' + pathData[0].timestamp
+                            });
+                            
+                            // Add end marker (red)
+                            const endMarker = new google.maps.Marker({
+                                position: pathCoordinates[pathCoordinates.length - 1],
+                                map: this.map,
+                                icon: {
+                                    path: google.maps.SymbolPath.CIRCLE,
+                                    scale: 8,
+                                    fillColor: '#ef4444',
+                                    fillOpacity: 1,
+                                    strokeColor: '#ffffff',
+                                    strokeWeight: 2
+                                },
+                                title: 'End: ' + pathData[pathData.length - 1].timestamp
+                            });
+                            
+                            this.pathMarkers.push(startMarker, endMarker);
+                            
+                            // Add info windows
+                            const startInfo = new google.maps.InfoWindow({
+                                content: `<div style="padding: 10px;">
+                                    <strong>Start Point</strong><br/>
+                                    Guard: ${guardInfo.name}<br/>
+                                    Time: ${new Date(pathData[0].timestamp).toLocaleString()}
+                                </div>`
+                            });
+                            
+                            const endInfo = new google.maps.InfoWindow({
+                                content: `<div style="padding: 10px;">
+                                    <strong>End Point</strong><br/>
+                                    Guard: ${guardInfo.name}<br/>
+                                    Time: ${new Date(pathData[pathData.length - 1].timestamp).toLocaleString()}
+                                </div>`
+                            });
+                            
+                            startMarker.addListener('click', () => {
+                                startInfo.open(this.map, startMarker);
+                            });
+                            
+                            endMarker.addListener('click', () => {
+                                endInfo.open(this.map, endMarker);
+                            });
+                            
+                            // Fit bounds to show entire path
+                            const bounds = new google.maps.LatLngBounds();
+                            pathCoordinates.forEach(coord => bounds.extend(coord));
+                            this.map.fitBounds(bounds);
+                            
+                            console.log(`Displayed path with ${pathData.length} points for guard ${guardInfo.name}`);
+                        },
+                        
+                        clearPath: function() {
+                            // Remove polyline
+                            if (this.pathPolyline) {
+                                this.pathPolyline.setMap(null);
+                                this.pathPolyline = null;
+                            }
+                            
+                            // Remove path markers
+                            this.pathMarkers.forEach(marker => marker.setMap(null));
+                            this.pathMarkers = [];
+                            
+                            console.log('Path cleared');
+                        },
+                        
+                        loadGeofences: function() {
+                            console.log('Loading site geofences...');
+                            
+                            if (typeof odoo !== 'undefined' && odoo.rpc) {
+                                odoo.rpc('/guardpro/sites/geofences', {})
+                                    .then(response => {
+                                        const result = response.result || response;
+                                        if (result.success && result.geofences) {
+                                            this.displayGeofences(result.geofences);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error fetching geofences:', error);
+                                    });
+                            } else {
+                                // Fallback to direct fetch with CSRF token
+                                const csrfToken = document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || 
+                                                document.querySelector('input[name=csrf_token]')?.value;
+                                
+                                fetch('/guardpro/sites/geofences', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'X-CSRFToken': csrfToken
+                                    },
+                                    credentials: 'same-origin',
+                                    body: JSON.stringify({
+                                        jsonrpc: "2.0",
+                                        method: "call",
+                                        params: {},
+                                        id: null
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(response => {
+                                    console.log('Geofences response (fetch):', response);
+                                    const result = response.result || response;
+                                    if (result.success && result.geofences) {
+                                        this.displayGeofences(result.geofences);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching geofences:', error);
+                                });
+                            }
+                        },
+                        
+                        displayGeofences: function(geofenceData) {
+                            console.log('Displaying', geofenceData.length, 'geofences');
+                            
+                            geofenceData.forEach(geofence => {
+                                let shape;
+                                
+                                if (geofence.type === 'circle') {
+                                    // Create circle
+                                    shape = new google.maps.Circle({
+                                        center: geofence.center,
+                                        radius: geofence.radius,
+                                        strokeColor: '#8b5cf6',
+                                        strokeOpacity: 0.8,
+                                        strokeWeight: 2,
+                                        fillColor: '#8b5cf6',
+                                        fillOpacity: 0.15,
+                                        map: this.map,
+                                        clickable: true
+                                    });
+                                } else if (geofence.type === 'polygon' && geofence.polygon) {
+                                    // Create polygon
+                                    const coords = geofence.polygon.map(point => ({
+                                        lat: parseFloat(point.lat || point.latitude),
+                                        lng: parseFloat(point.lng || point.longitude)
+                                    }));
+                                    
+                                    shape = new google.maps.Polygon({
+                                        paths: coords,
+                                        strokeColor: '#8b5cf6',
+                                        strokeOpacity: 0.8,
+                                        strokeWeight: 2,
+                                        fillColor: '#8b5cf6',
+                                        fillOpacity: 0.15,
+                                        map: this.map,
+                                        clickable: true
+                                    });
+                                }
+                                
+                                if (shape) {
+                                    // Add info window
+                                    const infoWindow = new google.maps.InfoWindow({
+                                        content: `<div style="padding: 10px;">
+                                            <h4 style="margin: 0 0 8px 0;">${geofence.name}</h4>
+                                            <p style="margin: 3px 0;"><strong>Code:</strong> ${geofence.code}</p>
+                                            <p style="margin: 3px 0;"><strong>Client:</strong> ${geofence.client}</p>
+                                            <p style="margin: 3px 0;"><strong>Type:</strong> ${geofence.type}</p>
+                                            ${geofence.type === 'circle' ? 
+                                                `<p style="margin: 3px 0;"><strong>Radius:</strong> ${geofence.radius}m</p>` : ''}
+                                        </div>`
+                                    });
+                                    
+                                    // Add click listener
+                                    google.maps.event.addListener(shape, 'click', (event) => {
+                                        infoWindow.setPosition(event.latLng || geofence.center);
+                                        infoWindow.open(this.map);
+                                    });
+                                    
+                                    this.geofences.push({
+                                        shape: shape,
+                                        infoWindow: infoWindow,
+                                        data: geofence
+                                    });
+                                }
+                            });
+                            
+                            console.log('Geofences displayed:', this.geofences.length);
+                        },
+                        
+                        toggleGeofences: function() {
+                            this.geofencesVisible = !this.geofencesVisible;
+                            
+                            this.geofences.forEach(item => {
+                                item.shape.setMap(this.geofencesVisible ? this.map : null);
+                                if (!this.geofencesVisible && item.infoWindow) {
+                                    item.infoWindow.close();
+                                }
+                            });
+                            
+                            console.log('Geofences', this.geofencesVisible ? 'shown' : 'hidden');
+                        },
+                        
+                        toggleClustering: function() {
+                            this.clusteringEnabled = !this.clusteringEnabled;
+                            
+                            // Reload markers with new clustering setting
+                            this.loadGuardLocations();
+                            
+                            console.log('Marker clustering', this.clusteringEnabled ? 'enabled' : 'disabled');
+                        },
+                        
+                        toggleHeatmap: function() {
+                            this.heatmapEnabled = !this.heatmapEnabled;
+                            
+                            if (this.heatmapEnabled) {
+                                const dataSource = document.getElementById('heatmap-data-source').value;
+                                this.loadHeatmapData(dataSource);
+                            } else {
+                                this.hideHeatmap();
+                            }
+                            
+                            console.log('Heatmap', this.heatmapEnabled ? 'enabled' : 'disabled');
+                        },
+                        
+                        loadHeatmapData: function(dataSource) {
+                            console.log('Loading heatmap data from:', dataSource);
+                            
+                            if (dataSource === 'current') {
+                                // Use current guard locations
+                                const heatmapData = [];
+                                Object.values(this.markers).forEach(marker => {
+                                    heatmapData.push(new google.maps.LatLng(
+                                        marker.getPosition().lat(),
+                                        marker.getPosition().lng()
+                                    ));
+                                });
+                                this.displayHeatmap(heatmapData);
+                            } else {
+                                // Load location history for heatmap
+                                // Get all guard IDs
+                                const guardIds = Object.keys(this.markers).map(id => parseInt(id));
+                                
+                                const heatmapParams = {
+                                    guard_ids: guardIds,
+                                    start_datetime: new Date(Date.now() - 24*60*60*1000).toISOString(),
+                                    end_datetime: new Date().toISOString()
+                                };
+                                
+                                if (typeof odoo !== 'undefined' && odoo.rpc) {
+                                    odoo.rpc('/guardpro/guards/paths/multiple', heatmapParams)
+                                    .then(response => {
+                                        const result = response.result || response;
+                                        if (result.success && result.paths) {
+                                            const heatmapData = [];
+                                            Object.values(result.paths).forEach(guardPath => {
+                                                guardPath.path.forEach(point => {
+                                                    heatmapData.push(new google.maps.LatLng(
+                                                        parseFloat(point.latitude),
+                                                        parseFloat(point.longitude)
+                                                    ));
+                                                });
+                                            });
+                                            this.displayHeatmap(heatmapData);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error loading heatmap data:', error);
+                                        alert('Error loading heatmap data');
+                                    });
+                                } else {
+                                    // Fallback to direct fetch with CSRF token
+                                    const csrfToken = document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || 
+                                                    document.querySelector('input[name=csrf_token]')?.value;
+                                    
+                                    fetch('/guardpro/guards/paths/multiple', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-Requested-With': 'XMLHttpRequest',
+                                            'X-CSRFToken': csrfToken
+                                        },
+                                        credentials: 'same-origin',
+                                        body: JSON.stringify({
+                                            jsonrpc: "2.0",
+                                            method: "call",
+                                            params: heatmapParams,
+                                            id: null
+                                        })
+                                    })
+                                    .then(response => response.json())
+                                    .then(response => {
+                                        console.log('Heatmap paths response (fetch):', response);
+                                        const result = response.result || response;
+                                        if (result.success && result.paths) {
+                                            const heatmapData = [];
+                                            Object.values(result.paths).forEach(guardPath => {
+                                                guardPath.path.forEach(point => {
+                                                    heatmapData.push(new google.maps.LatLng(
+                                                        parseFloat(point.latitude),
+                                                        parseFloat(point.longitude)
+                                                    ));
+                                                });
+                                            });
+                                            this.displayHeatmap(heatmapData);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error loading heatmap data:', error);
+                                        alert('Error loading heatmap data');
+                                    });
+                                }
+                            }
+                        },
+                        
+                        displayHeatmap: function(heatmapData) {
+                            if (!heatmapData || heatmapData.length === 0) {
+                                alert('No data available for heatmap');
+                                return;
+                            }
+                            
+                            // Remove existing heatmap
+                            if (this.heatmapLayer) {
+                                this.heatmapLayer.setMap(null);
+                            }
+                            
+                            // Create heatmap layer
+                            this.heatmapLayer = new google.maps.visualization.HeatmapLayer({
+                                data: heatmapData,
+                                map: this.map,
+                                radius: 50,
+                                opacity: 0.6,
+                                gradient: [
+                                    'rgba(0, 255, 255, 0)',
+                                    'rgba(0, 255, 255, 1)',
+                                    'rgba(0, 191, 255, 1)',
+                                    'rgba(0, 127, 255, 1)',
+                                    'rgba(0, 63, 255, 1)',
+                                    'rgba(0, 0, 255, 1)',
+                                    'rgba(0, 0, 223, 1)',
+                                    'rgba(0, 0, 191, 1)',
+                                    'rgba(0, 0, 159, 1)',
+                                    'rgba(0, 0, 127, 1)',
+                                    'rgba(63, 0, 91, 1)',
+                                    'rgba(127, 0, 63, 1)',
+                                    'rgba(191, 0, 31, 1)',
+                                    'rgba(255, 0, 0, 1)'
+                                ]
+                            });
+                            
+                            // Hide regular markers when heatmap is shown
+                            Object.values(this.markers).forEach(marker => marker.setVisible(false));
+                            if (this.markerClusterer) {
+                                this.markerClusterer.clearMarkers();
+                            }
+                            
+                            console.log('Heatmap displayed with', heatmapData.length, 'data points');
+                        },
+                        
+                        hideHeatmap: function() {
+                            if (this.heatmapLayer) {
+                                this.heatmapLayer.setMap(null);
+                                this.heatmapLayer = null;
+                            }
+                            
+                            // Show regular markers again
+                            Object.values(this.markers).forEach(marker => marker.setVisible(true));
+                            this.loadGuardLocations(); // Reload to reinitialize clustering if needed
+                            
+                            console.log('Heatmap hidden');
+                        }
+                    };
+                    
+                    // Initialize when DOM is ready
+                    document.addEventListener('DOMContentLoaded', function() {
+                        console.log('DOM loaded, initializing GuardMap...');
+                        // Wait a bit for Google Maps to load
+                        setTimeout(() => {
+                            if (typeof google !== 'undefined' && google.maps) {
+                                guardMap.init();
+                            } else {
+                                console.error('Google Maps not loaded');
+                            }
+                        }, 1000);
+                    });
+                    ]]>
+                </script>
+                </t>
+                <t t-else="">
+                    <div class="container mt-5">
+                        <div class="alert alert-warning" role="alert">
+                            <h4 class="alert-heading">
+                                <i class="fa fa-key"></i>
+                                <t t-translate="yes">Google Maps API key required</t>
+                            </h4>
+                            <p t-translate="yes">
+                                GuardPro requires your own Google Maps JavaScript API key. Generate it from the Google Cloud Console and configure it under Settings -> General Settings -> GuardPro -> Google Maps Integration.
+                            </p>
+                            <p t-translate="yes">
+                                Providing a customer-specific key prevents unauthorized consumption of your Google API quota.
+                            </p>
+                            <p class="mb-0" t-translate="yes">
+                                After saving the key, refresh this page to load the guards map.
+                            </p>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </template>
+
+        <!-- Guards Map Action -->
+        <record id="action_guards_map" model="ir.actions.act_url">
+            <field name="name">Guards Location Map</field>
+            <field name="url">/guardpro/guards/map</field>
+            <field name="target">self</field>
+        </record>
+    </data>
+</odoo>
+

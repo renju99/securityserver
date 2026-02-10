@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Guard User Wizard Form View -->
+    <record id="view_guard_user_wizard_form" model="ir.ui.view">
+        <field name="name">guard.user.wizard.form</field>
+        <field name="model">guard.user.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Create Guard User">
+                <group>
+                    <group string="Basic Information">
+                        <field name="name" placeholder="e.g., John Doe"/>
+                        <field name="badge_number" placeholder="e.g., GUARD-001"/>
+                        <field name="email" placeholder="e.g., guard@example.com" widget="email"/>
+                        <field name="phone" placeholder="e.g., +1-555-1234" widget="phone"/>
+                        <field name="photo" widget="image" class="oe_avatar"/>
+                    </group>
+                    <group string="Employment Details">
+                        <field name="hire_date"/>
+                        <field name="status"/>
+                        <field name="availability"/>
+                    </group>
+                </group>
+
+                <group>
+                    <group string="Contact Information">
+                        <field name="address" placeholder="Full address"/>
+                        <field name="emergency_contact" placeholder="Name"/>
+                        <field name="emergency_phone" placeholder="Phone number" widget="phone"/>
+                    </group>
+                    <group string="Certifications &amp; Licenses">
+                        <field name="license_number" placeholder="License number"/>
+                        <field name="license_expiry"/>
+                        <field name="certifications" placeholder="List certifications here..."/>
+                    </group>
+                </group>
+
+                <group>
+                    <group string="Skills &amp; Qualifications">
+                        <field name="skill_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                        <field name="languages" placeholder="e.g., English, Spanish"/>
+                    </group>
+                    <group string="Portal Access">
+                        <field name="create_user"/>
+                        <field name="send_invite" invisible="not create_user"/>
+                    </group>
+                </group>
+
+                <group string="Optional HR Integration">
+                    <field name="link_to_employee"/>
+                    <field name="employee_id" invisible="not link_to_employee" 
+                           options="{'no_create': True}" 
+                           domain="[('user_id', '=', False)]"
+                           help="Link to existing HR employee (must not have a user account)"/>
+                </group>
+
+                <footer>
+                    <button name="action_create_guard" string="Create Guard" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action to open the wizard -->
+    <record id="action_guard_user_wizard" model="ir.actions.act_window">
+        <field name="name">Create Guard User</field>
+        <field name="res_model">guard.user.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Force update of user management actions -->
+    <data noupdate="0">
+        <!-- Action to view all users with guard portal access -->
+        <record id="action_guard_portal_users" model="ir.actions.act_window">
+            <field name="name">Guard Portal Users</field>
+            <field name="res_model">res.users</field>
+            <field name="view_mode">list,form</field>
+            <field name="domain" eval="[('groups_id', 'in', [ref('guardpro.group_guardpro_guard_portal')])]"/>
+            <field name="context">{'search_default_active': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No guard portal users found
+                </p>
+                <p>
+                    Guard portal users can access the mobile app and guard portal.
+                    Use "Create Guard User" to set up new guards with portal access.
+                    Filter by group: "GuardPro / Guard (Portal Access)"
+                </p>
+            </field>
+        </record>
+
+        <!-- Action to view all GuardPro system users -->
+        <record id="action_guardpro_system_users" model="ir.actions.act_window">
+            <field name="name">Sentry System Users</field>
+            <field name="res_model">res.users</field>
+            <field name="view_mode">list,form</field>
+            <field name="domain" eval="['|', '|', ('groups_id', 'in', [ref('guardpro.group_guardpro_supervisor')]), ('groups_id', 'in', [ref('guardpro.group_guardpro_manager')]), ('groups_id', 'in', [ref('guardpro.group_guardpro_admin')])]"/>
+            <field name="context">{'search_default_active': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No GuardPro system users found
+                </p>
+                <p>
+                    System users include supervisors, managers, and administrators.
+                    Create users via Settings → Users &amp; Companies → Users.
+                    Filter by groups: "GuardPro / Supervisor", "GuardPro / Manager", or "GuardPro / Admin"
+                </p>
+            </field>
+        </record>
+
+        <!-- Action to view all client users -->
+        <record id="action_client_users" model="ir.actions.act_window">
+            <field name="name">Client Users</field>
+            <field name="res_model">res.users</field>
+            <field name="view_mode">list,form</field>
+            <field name="domain" eval="[('groups_id', 'in', [ref('guardpro.group_guardpro_client_user')])]"/>
+            <field name="context">{'search_default_active': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No client users found
+                </p>
+                <p>
+                    Client users can view reports and analytics for their sites.
+                    Filter by group: "GuardPro / Client User"
+                </p>
+            </field>
+        </record>
+    </data>
+
+</odoo>
+

@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Course 10: Legal & Compliance Training - Slides -->
+        
+        <record id="slide_legal_m1" model="slide.slide">
+            <field name="name">Module 1: Legal Authority &amp; Limitations</field>
+            <field name="channel_id" ref="elearning_course_legal_compliance"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">1.0</field>
+            <field name="html_content">
+                &lt;h2&gt;The Legal Framework of Security Operations&lt;/h2&gt;
+                &lt;p&gt;Security personnel operate within a complex legal framework that balances public safety needs with individual rights and civil liberties. Understanding legal authority, limitations, and responsibilities is essential for effective and lawful security operations.&lt;/p&gt;
+
+                &lt;h3&gt;The Security Guard's Legal Position&lt;/h3&gt;
+                &lt;p&gt;Security guards are not law enforcement officers but serve as private citizens authorized to perform specific protective functions. This distinction creates both opportunities and limitations in legal authority.&lt;/p&gt;
+
+                &lt;h4&gt;Legal Status and Authority&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Private Citizen Status:&lt;/strong&gt; Guards are private citizens, not public officials&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Contractual Authority:&lt;/strong&gt; Authority derives from employment contracts and client agreements&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Property Rights Enforcement:&lt;/strong&gt; Authorized to protect client's property and enforce rules&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Reasonable Force Rights:&lt;/strong&gt; May use reasonable force to prevent harm or property damage&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Citizen's Arrest Powers:&lt;/strong&gt; Limited authority to detain individuals under specific conditions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Assistance:&lt;/strong&gt; Authorized to provide immediate help in crisis situations&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Legal Limitations and Restrictions&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;No General Police Powers&lt;/dt&gt;
+                    &lt;dd&gt;Cannot conduct traffic stops, issue citations, or enforce general laws&lt;/dd&gt;
+                    &lt;dt&gt;Search Restrictions&lt;/dt&gt;
+                    &lt;dd&gt;Cannot search persons or property without consent or specific authorization&lt;/dd&gt;
+                    &lt;dt&gt;Arrest Limitations&lt;/dt&gt;
+                    &lt;dd&gt;Citizen's arrest only for felonies committed in presence or reasonably believed&lt;/dd&gt;
+                    &lt;dt&gt;Weapon Restrictions&lt;/dt&gt;
+                    &lt;dd&gt;Firearms and weapons require specific licensing and authorization&lt;/dd&gt;
+                    &lt;dt&gt;Interrogation Limits&lt;/dt&gt;
+                    &lt;dd&gt;Cannot question individuals about criminal activities or demand statements&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h3&gt;The Use of Force Continuum&lt;/h3&gt;
+                &lt;p&gt;The use of force continuum provides a graduated framework for responding to threats, ensuring that force used is reasonable, necessary, and proportional to the situation.&lt;/p&gt;
+
+                &lt;h4&gt;Level 1: Officer Presence&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Description:&lt;/strong&gt; Non-threatening uniformed presence and verbal communication&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Purpose:&lt;/strong&gt; Prevent escalation through authoritative but calm demeanor&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Application:&lt;/strong&gt; Routine security interactions and initial contact&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Legal Standard:&lt;/strong&gt; No force involved, purely preventive&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Level 2: Verbal Commands&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Description:&lt;/strong&gt; Clear, firm verbal directions and commands&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Purpose:&lt;/strong&gt; Gain compliance through authoritative communication&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Application:&lt;/strong&gt; Non-compliant individuals, rule violations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Legal Standard:&lt;/strong&gt; Must be reasonable and professionally delivered&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Level 3: Empty Hand Control&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Description:&lt;/strong&gt; Physical control using hands, arms, or body weight&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Purpose:&lt;/strong&gt; Physically restrain or remove non-compliant individuals&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Application:&lt;/strong&gt; Active resistance, attempts to flee, or property protection&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Legal Standard:&lt;/strong&gt; Reasonable force, proportional to threat, documented&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Level 4: Intermediate Weapons&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Description:&lt;/strong&gt; Authorized tools like batons, chemical agents, or restraints&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Purpose:&lt;/strong&gt; Control situations beyond empty-hand capabilities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Application:&lt;/strong&gt; Active aggression, multiple assailants, or escape attempts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Legal Standard:&lt;/strong&gt; Authorized use, proper training, proportional response&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Level 5: Deadly Force&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Description:&lt;/strong&gt; Force likely to cause death or serious bodily harm&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Purpose:&lt;/strong&gt; Protect life when no other options exist&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Application:&lt;/strong&gt; Imminent threat of death or serious injury&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Legal Standard:&lt;/strong&gt; Absolute last resort, reasonable belief of imminent harm&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Reasonable Force Principles&lt;/h3&gt;
+                &lt;p&gt;All use of force must be reasonable, meaning it is necessary, proportional, and appropriate given the circumstances. The reasonableness standard is evaluated objectively.&lt;/p&gt;
+
+                &lt;h4&gt;The Objective Reasonableness Test&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Necessity:&lt;/strong&gt; Force must be required to achieve a legitimate objective&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Proportionality:&lt;/strong&gt; Force used must match the level of threat or resistance&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Immediacy:&lt;/strong&gt; Response must address current threats, not past actions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Alternatives:&lt;/strong&gt; Reasonable options must be considered and attempted&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Minimization:&lt;/strong&gt; Force must cease when threat is eliminated&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Reasonable Perception:&lt;/strong&gt; Based on what officer reasonably believed at the time&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Force Documentation Requirements&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Incident Description:&lt;/strong&gt; Clear, factual account of what occurred&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Justification Statement:&lt;/strong&gt; Why force was necessary and reasonable&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Injury Documentation:&lt;/strong&gt; Any injuries sustained by involved parties&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Witness Information:&lt;/strong&gt; Names and statements from observers&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Supervisor Review:&lt;/strong&gt; Immediate review by supervising personnel&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Medical Attention:&lt;/strong&gt; Ensure injured parties receive appropriate care&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Citizen's Arrest Authority&lt;/h3&gt;
+                &lt;p&gt;Security guards have limited authority to detain individuals under specific circumstances, but this power must be exercised with extreme caution and proper procedures.&lt;/p&gt;
+
+                &lt;h4&gt;Legal Requirements for Citizen's Arrest&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Probable Cause&lt;/dt&gt;
+                    &lt;dd&gt;Reasonable belief that crime has been committed&lt;/dd&gt;
+                    &lt;dt&gt;Witness Requirement&lt;/dt&gt;
+                    &lt;dd&gt;Must have personally witnessed the crime or have strong evidence&lt;/dd&gt;
+                    &lt;dt&gt;Felony Crime&lt;/dt&gt;
+                    &lt;dd&gt;Generally limited to felony offenses (not minor violations)&lt;/dd&gt;
+                    &lt;dt&gt;Imminent Threat&lt;/dt&gt;
+                    &lt;dd&gt;Cannot be used for past crimes without immediate danger&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Proper Citizen's Arrest Procedure&lt;/h4&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Assess Situation:&lt;/strong&gt; Ensure personal safety and gather facts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Contact Authorities:&lt;/strong&gt; Call police immediately, explain situation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Identify Yourself:&lt;/strong&gt; Clearly state you are a security guard making citizen's arrest&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;State Reason:&lt;/strong&gt; Explain specifically why arrest is being made&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Use Reasonable Force:&lt;/strong&gt; Only necessary restraint to prevent escape&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Surrender to Police:&lt;/strong&gt; Immediately transfer custody to law enforcement&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Document Everything:&lt;/strong&gt; Complete detailed incident report&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h3&gt;Search and Seizure Limitations&lt;/h3&gt;
+                &lt;p&gt;Security personnel have significantly restricted search authority compared to law enforcement. Understanding these limitations prevents illegal searches and potential liability.&lt;/p&gt;
+
+                &lt;h4&gt;Permitted Searches&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Consent Searches:&lt;/strong&gt; With voluntary, informed permission from individual&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Plain View Items:&lt;/strong&gt; Contraband or weapons clearly visible&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Abandoned Property:&lt;/strong&gt; Items left unattended in public areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Vehicle Searches:&lt;/strong&gt; With owner consent or as authorized by property owner&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Pat-down Searches:&lt;/strong&gt; Limited to detecting weapons when reasonable suspicion exists&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Prohibited Search Activities&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Strip Searches:&lt;/strong&gt; Never permitted without law enforcement involvement&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Cavity Searches:&lt;/strong&gt; Require medical professionals and legal authority&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;General Searches:&lt;/strong&gt; Cannot search everyone entering a facility&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Warrantless Searches:&lt;/strong&gt; Cannot conduct searches without specific authorization&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Coerced Consent:&lt;/strong&gt; Cannot pressure individuals into allowing searches&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Emergency Powers and Good Samaritan Protection&lt;/h3&gt;
+                &lt;p&gt;Security personnel have expanded authority during emergencies but also benefit from legal protections when providing assistance in good faith.&lt;/p&gt;
+
+                &lt;h4&gt;Emergency Authority&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Scene Security:&lt;/strong&gt; Control access to emergency scenes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Traffic Direction:&lt;/strong&gt; Guide emergency vehicles and personnel&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Crowd Control:&lt;/strong&gt; Manage bystanders and maintain order&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Access:&lt;/strong&gt; Provide keys and access to emergency personnel&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Information Relay:&lt;/strong&gt; Communicate with emergency services&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Good Samaritan Legal Protection&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Good Faith Requirement:&lt;/strong&gt; Actions must be taken with honest intent to help&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Reasonable Care Standard:&lt;/strong&gt; Provide care at level of training and ability&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;No Gross Negligence:&lt;/strong&gt; Cannot be reckless or willfully harmful&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Scope of Practice:&lt;/strong&gt; Stay within limits of certification and training&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Documentation Protection:&lt;/strong&gt; Proper records support good faith claims&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Legal Documentation and Reporting&lt;/h3&gt;
+                &lt;p&gt;Comprehensive documentation is essential for legal protection and effective incident management. Proper reporting creates an audit trail and supports legal defenses.&lt;/p&gt;
+
+                &lt;h4&gt;Required Documentation Elements&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Factual Accuracy:&lt;/strong&gt; Report only observed facts, not opinions or assumptions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Chronological Sequence:&lt;/strong&gt; Document events in time order&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Objective Language:&lt;/strong&gt; Use neutral, professional terminology&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Complete Details:&lt;/strong&gt; Include all relevant parties, actions, and statements&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Witness Information:&lt;/strong&gt; Names, contact information, and statements&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Supervisor Review:&lt;/strong&gt; Immediate review and approval process&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Legal Considerations in Reporting&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Admissibility:&lt;/strong&gt; Reports may be used as evidence in legal proceedings&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Privilege Protection:&lt;/strong&gt; Some information may be legally protected&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Chain of Custody:&lt;/strong&gt; Maintain integrity of evidence and documentation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Confidentiality:&lt;/strong&gt; Protect sensitive personal and business information&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Timeliness:&lt;/strong&gt; Complete reports while details are fresh and accurate&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Practice Exercise:&lt;/strong&gt; Review a hypothetical security incident scenario. Determine what legal authorities you have, what actions you can take, what limitations apply, and what documentation would be required. Consider how the use of force continuum applies to the situation.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_legal_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_legal_compliance"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_legal_m1_q1" model="slide.question">
+            <field name="question">The PRIMARY responsibility of a security guard is to:</field>
+            <field name="slide_id" ref="slide_legal_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_legal_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_legal_m1_q1"/>
+            <field name="text_value">Observe and report</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_legal_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_legal_m1_q1"/>
+            <field name="text_value">Make as many arrests as possible</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="slide_legal_m2" model="slide.slide">
+            <field name="name">Module 2: Privacy &amp; Civil Rights</field>
+            <field name="channel_id" ref="elearning_course_legal_compliance"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Respecting Privacy &amp; Rights&lt;/h2&gt;
+                &lt;h3&gt;Privacy Rights:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Individuals have expectation of privacy in certain areas&lt;/li&gt;
+                    &lt;li&gt;Cannot search personal belongings without consent&lt;/li&gt;
+                    &lt;li&gt;Respect restroom and changing room privacy&lt;/li&gt;
+                    &lt;li&gt;Handle personal information confidentially&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;h3&gt;Discrimination Prohibited:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Treat all people equally regardless of:&lt;/li&gt;
+                    &lt;li&gt;- Race, color, national origin&lt;/li&gt;
+                    &lt;li&gt;- Religion&lt;/li&gt;
+                    &lt;li&gt;- Gender or sexual orientation&lt;/li&gt;
+                    &lt;li&gt;- Age or disability&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;h3&gt;Reasonable Accommodation:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Assist persons with disabilities&lt;/li&gt;
+                    &lt;li&gt;Provide alternative access when needed&lt;/li&gt;
+                    &lt;li&gt;Be patient and respectful&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_legal_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_legal_compliance"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_legal_m2_q1" model="slide.question">
+            <field name="question">Security guards must treat all people equally regardless of:</field>
+            <field name="slide_id" ref="slide_legal_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_legal_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_legal_m2_q1"/>
+            <field name="text_value">Race, religion, gender, age, or disability</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_legal_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_legal_m2_q1"/>
+            <field name="text_value">Their appearance or attitude</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="slide_legal_m3" model="slide.slide">
+            <field name="name">Module 3: Liability &amp; Documentation</field>
+            <field name="channel_id" ref="elearning_course_legal_compliance"/>
+            <field name="sequence">30</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Liability Protection &amp; Documentation&lt;/h2&gt;
+                &lt;h3&gt;Protecting Yourself from Liability:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Follow all policies and procedures&lt;/li&gt;
+                    &lt;li&gt;Act within scope of authority&lt;/li&gt;
+                    &lt;li&gt;Document everything thoroughly&lt;/li&gt;
+                    &lt;li&gt;Use only reasonable force&lt;/li&gt;
+                    &lt;li&gt;Never make false statements&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;h3&gt;Importance of Documentation:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Protects you legally&lt;/li&gt;
+                    &lt;li&gt;Provides evidence for investigations&lt;/li&gt;
+                    &lt;li&gt;Creates official record of events&lt;/li&gt;
+                    &lt;li&gt;Supports insurance claims&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;h3&gt;What to Document:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;All incidents and unusual occurrences&lt;/li&gt;
+                    &lt;li&gt;Visitor and contractor logs&lt;/li&gt;
+                    &lt;li&gt;Equipment inspections&lt;/li&gt;
+                    &lt;li&gt;Patrols and rounds&lt;/li&gt;
+                    &lt;li&gt;Safety hazards&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_legal_m3_quiz" model="slide.slide">
+            <field name="name">Module 3: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_legal_compliance"/>
+            <field name="sequence">31</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_legal_m3_q1" model="slide.question">
+            <field name="question">Why is thorough documentation important?</field>
+            <field name="slide_id" ref="slide_legal_m3_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_legal_m3_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_legal_m3_q1"/>
+            <field name="text_value">Protects you legally and provides evidence for investigations</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_legal_m3_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_legal_m3_q1"/>
+            <field name="text_value">It's just busy work with no real purpose</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="slide_legal_final" model="slide.slide">
+            <field name="name">Final Assessment: Legal &amp; Compliance</field>
+            <field name="channel_id" ref="elearning_course_legal_compliance"/>
+            <field name="sequence">40</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.3</field>
+        </record>
+
+        <record id="quiz_legal_final_q1" model="slide.question">
+            <field name="question">Security guards have the legal authority to:</field>
+            <field name="slide_id" ref="slide_legal_final"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_legal_final_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_legal_final_q1"/>
+            <field name="text_value">Observe, report, and enforce property owner's rules</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_legal_final_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_legal_final_q1"/>
+            <field name="text_value">Act as police officers with full law enforcement powers</field>
+            <field name="is_correct">False</field>
+        </record>
+
+    </data>
+</odoo>
+
+
+
+
+
+
+
+
+
+

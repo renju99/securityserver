@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- ================================================================ -->
+        <!-- STANDARDIZED CHATTER MESSAGE SUBTYPES                            -->
+        <!-- For consistent messaging across all models                       -->
+        <!-- ================================================================ -->
+        
+        <!-- Status Changed -->
+        <record id="mt_status_changed" model="mail.message.subtype">
+            <field name="name">Status Changed</field>
+            <field name="description">Status has been changed</field>
+            <field name="internal" eval="False"/>
+            <field name="default" eval="True"/>
+        </record>
+        
+        <!-- Assigned -->
+        <record id="mt_assigned" model="mail.message.subtype">
+            <field name="name">Assigned</field>
+            <field name="description">Record has been assigned</field>
+            <field name="internal" eval="False"/>
+            <field name="default" eval="True"/>
+        </record>
+        
+        <!-- Escalated -->
+        <record id="mt_escalated" model="mail.message.subtype">
+            <field name="name">Escalated</field>
+            <field name="description">Record has been escalated</field>
+            <field name="internal" eval="False"/>
+            <field name="default" eval="True"/>
+        </record>
+        
+        <!-- Completed -->
+        <record id="mt_completed" model="mail.message.subtype">
+            <field name="name">Completed</field>
+            <field name="description">Task/Action has been completed</field>
+            <field name="internal" eval="False"/>
+            <field name="default" eval="True"/>
+        </record>
+        
+        <!-- Cancelled -->
+        <record id="mt_cancelled" model="mail.message.subtype">
+            <field name="name">Cancelled</field>
+            <field name="description">Record has been cancelled</field>
+            <field name="internal" eval="False"/>
+            <field name="default" eval="True"/>
+        </record>
+        
+        <!-- Approved -->
+        <record id="mt_approved" model="mail.message.subtype">
+            <field name="name">Approved</field>
+            <field name="description">Record has been approved</field>
+            <field name="internal" eval="False"/>
+            <field name="default" eval="True"/>
+        </record>
+        
+        <!-- Rejected -->
+        <record id="mt_rejected" model="mail.message.subtype">
+            <field name="name">Rejected</field>
+            <field name="description">Record has been rejected</field>
+            <field name="internal" eval="False"/>
+            <field name="default" eval="True"/>
+        </record>
+        
+        <!-- ================================================================ -->
+        <!-- INCIDENT-SPECIFIC SUBTYPES                                       -->
+        <!-- ================================================================ -->
+        
+        <record id="mt_incident_created" model="mail.message.subtype">
+            <field name="name">Incident Created</field>
+            <field name="res_model">incident.report</field>
+            <field name="default" eval="True"/>
+            <field name="description">New incident has been reported</field>
+        </record>
+        
+        <record id="mt_incident_escalated" model="mail.message.subtype">
+            <field name="name">Incident Escalated</field>
+            <field name="res_model">incident.report</field>
+            <field name="default" eval="True"/>
+            <field name="description">Incident has been escalated</field>
+        </record>
+        
+        <record id="mt_incident_resolved" model="mail.message.subtype">
+            <field name="name">Incident Resolved</field>
+            <field name="res_model">incident.report</field>
+            <field name="default" eval="True"/>
+            <field name="description">Incident has been resolved</field>
+        </record>
+        
+        <!-- ================================================================ -->
+        <!-- SHIFT-SPECIFIC SUBTYPES                                          -->
+        <!-- ================================================================ -->
+        
+        <record id="mt_shift_assigned" model="mail.message.subtype">
+            <field name="name">Shift Assigned</field>
+            <field name="res_model">guard.shift</field>
+            <field name="default" eval="True"/>
+            <field name="description">Shift has been assigned to guard</field>
+        </record>
+        
+        <record id="mt_shift_started" model="mail.message.subtype">
+            <field name="name">Shift Started</field>
+            <field name="res_model">guard.shift</field>
+            <field name="default" eval="True"/>
+            <field name="description">Guard has checked in for shift</field>
+        </record>
+        
+        <record id="mt_shift_completed" model="mail.message.subtype">
+            <field name="name">Shift Completed</field>
+            <field name="res_model">guard.shift</field>
+            <field name="default" eval="True"/>
+            <field name="description">Guard has checked out from shift</field>
+        </record>
+        
+        <record id="mt_shift_cancelled" model="mail.message.subtype">
+            <field name="name">Shift Cancelled</field>
+            <field name="res_model">guard.shift</field>
+            <field name="default" eval="True"/>
+            <field name="description">Shift has been cancelled</field>
+        </record>
+        
+        <!-- ================================================================ -->
+        <!-- TASK-SPECIFIC SUBTYPES                                           -->
+        <!-- ================================================================ -->
+        
+        <record id="mt_task_assigned" model="mail.message.subtype">
+            <field name="name">Task Assigned</field>
+            <field name="res_model">guard.task</field>
+            <field name="default" eval="True"/>
+            <field name="description">Task has been assigned</field>
+        </record>
+        
+        <record id="mt_task_started" model="mail.message.subtype">
+            <field name="name">Task Started</field>
+            <field name="res_model">guard.task</field>
+            <field name="default" eval="True"/>
+            <field name="description">Task has been started</field>
+        </record>
+        
+        <record id="mt_task_completed" model="mail.message.subtype">
+            <field name="name">Task Completed</field>
+            <field name="res_model">guard.task</field>
+            <field name="default" eval="True"/>
+            <field name="description">Task has been completed</field>
+        </record>
+        
+        <!-- ================================================================ -->
+        <!-- VISITOR-SPECIFIC SUBTYPES                                        -->
+        <!-- ================================================================ -->
+        
+        <record id="mt_visitor_preregistered" model="mail.message.subtype">
+            <field name="name">Visitor Pre-registered</field>
+            <field name="res_model">visitor.management</field>
+            <field name="default" eval="True"/>
+            <field name="description">Visitor has been pre-registered</field>
+        </record>
+        
+        <record id="mt_visitor_checked_in" model="mail.message.subtype">
+            <field name="name">Visitor Checked In</field>
+            <field name="res_model">visitor.management</field>
+            <field name="default" eval="True"/>
+            <field name="description">Visitor has checked in</field>
+        </record>
+        
+        <record id="mt_visitor_checked_out" model="mail.message.subtype">
+            <field name="name">Visitor Checked Out</field>
+            <field name="res_model">visitor.management</field>
+            <field name="default" eval="True"/>
+            <field name="description">Visitor has checked out</field>
+        </record>
+        
+        <!-- ================================================================ -->
+        <!-- COMPLIANCE & AUDIT SUBTYPES                                      -->
+        <!-- ================================================================ -->
+        
+        <record id="mt_audit_completed" model="mail.message.subtype">
+            <field name="name">Audit Completed</field>
+            <field name="res_model">compliance.audit</field>
+            <field name="default" eval="True"/>
+            <field name="description">Compliance audit has been completed</field>
+        </record>
+        
+        <record id="mt_audit_finding" model="mail.message.subtype">
+            <field name="name">Finding Identified</field>
+            <field name="res_model">compliance.audit</field>
+            <field name="default" eval="True"/>
+            <field name="description">Audit finding has been identified</field>
+        </record>
+        
+        <record id="mt_corrective_action" model="mail.message.subtype">
+            <field name="name">Corrective Action</field>
+            <field name="res_model">compliance.audit</field>
+            <field name="default" eval="True"/>
+            <field name="description">Corrective action has been taken</field>
+        </record>
+        
+        <!-- ================================================================ -->
+        <!-- EMERGENCY SUBTYPES                                               -->
+        <!-- ================================================================ -->
+        
+        <record id="mt_emergency_broadcast" model="mail.message.subtype">
+            <field name="name">Emergency Broadcast</field>
+            <field name="res_model">emergency.broadcast</field>
+            <field name="default" eval="True"/>
+            <field name="description">Emergency broadcast has been sent</field>
+        </record>
+        
+        <record id="mt_emergency_acknowledged" model="mail.message.subtype">
+            <field name="name">Emergency Acknowledged</field>
+            <field name="res_model">emergency.broadcast</field>
+            <field name="default" eval="False"/>
+            <field name="description">Emergency has been acknowledged</field>
+        </record>
+        
+        <!-- ================================================================ -->
+        <!-- PACKAGE & KEY SUBTYPES                                           -->
+        <!-- ================================================================ -->
+        
+        <record id="mt_package_received" model="mail.message.subtype">
+            <field name="name">Package Received</field>
+            <field name="res_model">package.management</field>
+            <field name="default" eval="True"/>
+            <field name="description">Package has been received</field>
+        </record>
+        
+        <record id="mt_package_collected" model="mail.message.subtype">
+            <field name="name">Package Collected</field>
+            <field name="res_model">package.management</field>
+            <field name="default" eval="True"/>
+            <field name="description">Package has been collected</field>
+        </record>
+        
+        <record id="mt_key_issued" model="mail.message.subtype">
+            <field name="name">Key Issued</field>
+            <field name="res_model">key.management</field>
+            <field name="default" eval="True"/>
+            <field name="description">Key has been issued</field>
+        </record>
+        
+        <record id="mt_key_returned" model="mail.message.subtype">
+            <field name="name">Key Returned</field>
+            <field name="res_model">key.management</field>
+            <field name="default" eval="True"/>
+            <field name="description">Key has been returned</field>
+        </record>
+        
+    </data>
+</odoo>
+

@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Course 12: Report Writing & Documentation - Slides -->
+        
+        <record id="slide_report_m1" model="slide.slide">
+            <field name="name">Module 1: Professional Report Writing</field>
+            <field name="channel_id" ref="elearning_course_report_writing"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.8</field>
+            <field name="html_content">
+                &lt;h2&gt;The Art and Science of Professional Security Documentation&lt;/h2&gt;
+                &lt;p&gt;Security reports serve as the foundation of professional security operations, transforming observations and incidents into actionable intelligence. Effective documentation requires both technical writing skills and an understanding of legal and operational requirements.&lt;/p&gt;
+
+                &lt;h3&gt;The Strategic Importance of Security Documentation&lt;/h3&gt;
+                &lt;p&gt;Professional security documentation serves multiple critical functions that extend far beyond simple record-keeping, creating a foundation for organizational security and legal protection.&lt;/p&gt;
+
+                &lt;h4&gt;Legal and Compliance Functions&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Evidence Preservation:&lt;/strong&gt; Creates admissible records for investigations and legal proceedings&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Chain of Custody:&lt;/strong&gt; Documents handling of evidence and property&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Liability Protection:&lt;/strong&gt; Provides defense against claims of negligence or misconduct&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Regulatory Compliance:&lt;/strong&gt; Meets legal requirements for incident reporting&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Insurance Documentation:&lt;/strong&gt; Supports claims and risk management&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Operational Intelligence Functions&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Pattern Recognition:&lt;/strong&gt; Identifies trends in security incidents and vulnerabilities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Allocation:&lt;/strong&gt; Guides deployment of security personnel and equipment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Training Development:&lt;/strong&gt; Informs security awareness and procedure updates&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Performance Metrics:&lt;/strong&gt; Measures effectiveness of security operations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Continuous Improvement:&lt;/strong&gt; Drives enhancements to security systems and procedures&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;The Professional Writing Framework&lt;/h3&gt;
+                &lt;p&gt;Effective security reports require adherence to professional writing standards that ensure clarity, accuracy, and utility for all stakeholders who may review the documentation.&lt;/p&gt;
+
+                &lt;h4&gt;Core Writing Principles&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Factual Accuracy&lt;/dt&gt;
+                    &lt;dd&gt;Reports must contain only verifiable facts, observations, and direct statements&lt;/dd&gt;
+                    &lt;dt&gt;Objective Neutrality&lt;/dt&gt;
+                    &lt;dd&gt;Avoid personal opinions, assumptions, or emotional language&lt;/dd&gt;
+                    &lt;dt&gt;Complete Comprehensiveness&lt;/dt&gt;
+                    &lt;dd&gt;Include all relevant details without omitting important information&lt;/dd&gt;
+                    &lt;dt&gt;Clear Conciseness&lt;/dt&gt;
+                    &lt;dd&gt;Present information efficiently without unnecessary elaboration&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Professional Writing Standards&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Active Voice:&lt;/strong&gt; Use direct, active language ("The guard observed..." not "It was observed...")&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Precise Language:&lt;/strong&gt; Choose specific terms over vague descriptions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Chronological Order:&lt;/strong&gt; Present events in sequence of occurrence&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Standard Terminology:&lt;/strong&gt; Use consistent, professional vocabulary&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Proper Grammar:&lt;/strong&gt; Maintain professional language standards&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Appropriate Tone:&lt;/strong&gt; Formal, objective, and respectful&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;The Comprehensive Information Framework&lt;/h3&gt;
+                &lt;p&gt;The "5 W's and H" framework provides a systematic approach to gathering and organizing information, ensuring comprehensive coverage of all critical aspects of security incidents.&lt;/p&gt;
+
+                &lt;h4&gt;Who: Personnel and Parties Involved&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Primary Individuals:&lt;/strong&gt; Names, titles, and organizational affiliations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Physical Descriptions:&lt;/strong&gt; Age, height, weight, clothing, distinctive features&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Identification Details:&lt;/strong&gt; ID numbers, license plates, badge numbers&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Contact Information:&lt;/strong&gt; Phone numbers, addresses, emergency contacts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Relationship Context:&lt;/strong&gt; How individuals are connected to the incident&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Witness Availability:&lt;/strong&gt; Who can provide additional information&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;What: Actions and Events&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Specific Actions:&lt;/strong&gt; Detailed description of what occurred&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Property Involved:&lt;/strong&gt; Items taken, damaged, or affected&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Consequences:&lt;/strong&gt; Immediate results and impacts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Response Actions:&lt;/strong&gt; What was done to address the situation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Equipment Used:&lt;/strong&gt; Tools, vehicles, or devices involved&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communications Made:&lt;/strong&gt; Calls, notifications, or reports initiated&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;When: Temporal Context&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Exact Timing:&lt;/strong&gt; Specific date, time, and duration&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Sequence of Events:&lt;/strong&gt; Chronological progression of activities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Time References:&lt;/strong&gt; Relationship to shift changes or scheduled events&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Weather Conditions:&lt;/strong&gt; Environmental factors affecting visibility or access&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Lighting Conditions:&lt;/strong&gt; Natural and artificial illumination factors&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Response Times:&lt;/strong&gt; Delays between incident and intervention&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Where: Location and Environmental Details&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Specific Address:&lt;/strong&gt; Building, floor, room, or coordinate details&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Geographic Context:&lt;/strong&gt; Relationship to landmarks or access points&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Environmental Factors:&lt;/strong&gt; Lighting, visibility, accessibility conditions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Security Features:&lt;/strong&gt; Cameras, alarms, locks, or barriers present&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Methods:&lt;/strong&gt; How location was entered or exited&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Nearby Resources:&lt;/strong&gt; Emergency equipment, phones, or assistance available&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Why: Causation and Motivation&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Apparent Motivation:&lt;/strong&gt; Stated or inferred reasons for actions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Contributing Factors:&lt;/strong&gt; Environmental or situational influences&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Previous Incidents:&lt;/strong&gt; Related events or pattern of behavior&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;System Failures:&lt;/strong&gt; Equipment malfunctions or procedural breakdowns&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Human Factors:&lt;/strong&gt; Training, fatigue, or judgment issues&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;External Influences:&lt;/strong&gt; Weather, traffic, or other external factors&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;How: Method and Sequence&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Step-by-Step Account:&lt;/strong&gt; Detailed sequence of events&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Tools and Methods:&lt;/strong&gt; Equipment or techniques used&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Techniques:&lt;/strong&gt; How security measures were bypassed&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Detection Methods:&lt;/strong&gt; How the incident was discovered&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Intervention Tactics:&lt;/strong&gt; Response methods employed&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resolution Process:&lt;/strong&gt; Steps taken to resolve the situation&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Advanced Documentation Techniques&lt;/h3&gt;
+                &lt;p&gt;Professional security documentation extends beyond basic reporting to include strategic analysis and intelligence gathering that supports organizational security objectives.&lt;/p&gt;
+
+                &lt;h4&gt;Intelligence Gathering&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Pattern Analysis:&lt;/strong&gt; Identifying trends in incidents or suspicious activities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Risk Assessment:&lt;/strong&gt; Evaluating vulnerabilities and potential threats&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Predictive Indicators:&lt;/strong&gt; Early warning signs of potential security issues&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Requirements:&lt;/strong&gt; Equipment, personnel, or procedural needs&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Effectiveness Metrics:&lt;/strong&gt; Measuring security program performance&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Continuous Improvement:&lt;/strong&gt; Recommendations for system enhancements&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Digital Documentation Tools&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Mobile Applications:&lt;/strong&gt; Digital forms with GPS and timestamp verification&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Photo Documentation:&lt;/strong&gt; Visual evidence with metadata preservation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Audio Recording:&lt;/strong&gt; Voice notes for immediate documentation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Video Integration:&lt;/strong&gt; Linking reports to surveillance footage&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Database Integration:&lt;/strong&gt; Automated cross-referencing with incident history&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Cloud Synchronization:&lt;/strong&gt; Real-time access across multiple locations&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Legal Considerations in Documentation&lt;/h3&gt;
+                &lt;p&gt;Security reports often serve as legal documents, requiring careful attention to legal standards and evidentiary requirements.&lt;/p&gt;
+
+                &lt;h4&gt;Evidentiary Standards&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Admissibility Requirements:&lt;/strong&gt; Standards for use in legal proceedings&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Chain of Custody:&lt;/strong&gt; Proper handling and documentation of evidence&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Witness Credibility:&lt;/strong&gt; Factors affecting reliability of observations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Privacy Protection:&lt;/strong&gt; Balancing disclosure with individual rights&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Confidentiality Standards:&lt;/strong&gt; Protection of sensitive business information&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Professional Liability Considerations&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Accuracy Standards:&lt;/strong&gt; Consequences of false or inaccurate reporting&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Timeliness Requirements:&lt;/strong&gt; Deadlines for incident reporting&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Completeness Standards:&lt;/strong&gt; Required elements for valid documentation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Review Processes:&lt;/strong&gt; Supervisory approval and quality control&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Record Retention:&lt;/strong&gt; Legal requirements for document preservation&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Quality Assurance and Continuous Improvement&lt;/h3&gt;
+                &lt;p&gt;Professional documentation requires ongoing evaluation and improvement to maintain high standards and adapt to changing requirements.&lt;/p&gt;
+
+                &lt;h4&gt;Quality Control Measures&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Peer Review Process:&lt;/strong&gt; Regular review of reports by experienced personnel&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Training Programs:&lt;/strong&gt; Ongoing education in documentation standards&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Template Standardization:&lt;/strong&gt; Consistent formats and required fields&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Feedback Systems:&lt;/strong&gt; Mechanisms for improvement suggestions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Performance Metrics:&lt;/strong&gt; Measurement of documentation quality and completeness&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Audit Procedures:&lt;/strong&gt; Regular reviews for compliance and accuracy&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Practice Exercise:&lt;/strong&gt; Review a sample incident report and identify areas for improvement based on the principles covered in this module. Consider how you would enhance the report to meet professional documentation standards.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_report_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_report_writing"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_report_m1_q1" model="slide.question">
+            <field name="question">A good security report should be:</field>
+            <field name="slide_id" ref="slide_report_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_report_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_report_m1_q1"/>
+            <field name="text_value">Factual, accurate, complete, clear, and concise</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_report_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_report_m1_q1"/>
+            <field name="text_value">Long, detailed, and include personal opinions</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="slide_report_m2" model="slide.slide">
+            <field name="name">Module 2: Writing Incident Reports</field>
+            <field name="channel_id" ref="elearning_course_report_writing"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Documenting Incidents Properly&lt;/h2&gt;
+                &lt;h3&gt;Report Structure:&lt;/h3&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Header Information:&lt;/strong&gt; Date, time, location, your name&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Summary:&lt;/strong&gt; Brief overview of incident&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Detailed Narrative:&lt;/strong&gt; Chronological account&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;People Involved:&lt;/strong&gt; Names, descriptions, contact info&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Actions Taken:&lt;/strong&gt; What you did&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Follow-up Required:&lt;/strong&gt; What needs to happen next&lt;/li&gt;
+                &lt;/ol&gt;
+                &lt;h3&gt;Writing Tips:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Write in first person ("I observed...")&lt;/li&gt;
+                    &lt;li&gt;Use simple, clear language&lt;/li&gt;
+                    &lt;li&gt;Be specific with times and locations&lt;/li&gt;
+                    &lt;li&gt;Describe what you SAW, HEARD, SMELLED&lt;/li&gt;
+                    &lt;li&gt;Quote exact words when possible&lt;/li&gt;
+                    &lt;li&gt;Avoid assumptions and conclusions&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;h3&gt;Common Mistakes to Avoid:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Including personal opinions&lt;/li&gt;
+                    &lt;li&gt;Using slang or unprofessional language&lt;/li&gt;
+                    &lt;li&gt;Leaving out important details&lt;/li&gt;
+                    &lt;li&gt;Poor spelling and grammar&lt;/li&gt;
+                    &lt;li&gt;Waiting too long to write report&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_report_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_report_writing"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_report_m2_q1" model="slide.question">
+            <field name="question">When writing an incident report, you should:</field>
+            <field name="slide_id" ref="slide_report_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_report_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_report_m2_q1"/>
+            <field name="text_value">Be specific, describe what you observed, avoid assumptions</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_report_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_report_m2_q1"/>
+            <field name="text_value">Include opinions and conclusions about what happened</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="slide_report_final" model="slide.slide">
+            <field name="name">Final Assessment: Report Writing</field>
+            <field name="channel_id" ref="elearning_course_report_writing"/>
+            <field name="sequence">30</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.2</field>
+        </record>
+
+        <record id="quiz_report_final_q1" model="slide.question">
+            <field name="question">Which of the following should be AVOIDED in security reports?</field>
+            <field name="slide_id" ref="slide_report_final"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_report_final_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_report_final_q1"/>
+            <field name="text_value">Personal opinions and assumptions</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_report_final_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_report_final_q1"/>
+            <field name="text_value">Specific times and locations</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_report_final_q2" model="slide.question">
+            <field name="question">Reports should be written:</field>
+            <field name="slide_id" ref="slide_report_final"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_report_final_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_report_final_q2"/>
+            <field name="text_value">As soon as possible after the incident</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_report_final_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_report_final_q2"/>
+            <field name="text_value">Days or weeks later when you have time</field>
+            <field name="is_correct">False</field>
+        </record>
+
+    </data>
+</odoo>
+
+
+
+
+
+
+
+
+
+

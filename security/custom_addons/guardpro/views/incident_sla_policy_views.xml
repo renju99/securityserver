@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Incident SLA Policy List View -->
+    <record id="view_incident_sla_policy_list" model="ir.ui.view">
+        <field name="name">incident.sla.policy.list</field>
+        <field name="model">incident.sla.policy</field>
+        <field name="arch" type="xml">
+            <list string="Incident SLA Policies" sample="1">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="severity" widget="badge" decoration-danger="severity=='critical'" decoration-warning="severity=='high'"/>
+                <field name="response_time_target"/>
+                <field name="resolution_time_target"/>
+                <field name="incident_count"/>
+                <field name="breach_count"/>
+                <field name="compliance_rate" widget="progressbar"/>
+                <field name="avg_response_time"/>
+                <field name="auto_escalate" widget="boolean_toggle"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Incident SLA Policy Form View -->
+    <record id="view_incident_sla_policy_form" model="ir.ui.view">
+        <field name="name">incident.sla.policy.form</field>
+        <field name="model">incident.sla.policy</field>
+        <field name="arch" type="xml">
+            <form string="Incident SLA Policy">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_incidents" type="object" class="oe_stat_button" icon="fa-file-text">
+                            <field name="incident_count" widget="statinfo" string="Incidents"/>
+                        </button>
+                        <button name="action_view_breaches" type="object" class="oe_stat_button" icon="fa-exclamation-triangle">
+                            <field name="breach_count" widget="statinfo" string="Breaches"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" string="Policy Name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g., Critical Incident SLA"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="sequence"/>
+                            <field name="severity" widget="selection" options="{'force_save': '1'}"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="compliance_rate" widget="progressbar"/>
+                            <field name="avg_response_time"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Applicability" name="applicability">
+                            <group>
+                                <group string="Apply To">
+                                    <field name="site_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                                    <field name="category_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                                </group>
+                                <group string="Description">
+                                    <field name="description" nolabel="1" placeholder="Describe when this policy applies..."/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="SLA Targets" name="sla_targets">
+                            <group>
+                                <group string="Response Time Targets">
+                                    <field name="acknowledgment_time_target" widget="integer"/>
+                                    <field name="response_time_target" widget="integer"/>
+                                    <field name="resolution_time_target" widget="integer"/>
+                                </group>
+                                <group string="Warning Thresholds">
+                                    <field name="warning_threshold"/>
+                                    <field name="critical_threshold"/>
+                                </group>
+                            </group>
+                            <group string="Help">
+                                <div class="alert alert-info" role="alert">
+                                    <p><strong>Response Time Target:</strong> Maximum time (in minutes) for first response to incident</p>
+                                    <p><strong>Acknowledgment Target:</strong> Maximum time (in minutes) to acknowledge incident receipt</p>
+                                    <p><strong>Resolution Target:</strong> Maximum time (in hours) to resolve incident</p>
+                                    <p><strong>Warning Threshold:</strong> Alert when this percentage of target time is reached (e.g., 75%)</p>
+                                    <p><strong>Critical Threshold:</strong> Critical alert when this percentage of target time is reached (e.g., 90%)</p>
+                                </div>
+                            </group>
+                        </page>
+                        <page string="Auto-Escalation" name="escalation">
+                            <group>
+                                <group string="Escalation Settings">
+                                    <field name="auto_escalate" widget="boolean_toggle"/>
+                                </group>
+                            </group>
+                            <group string="Escalation Users" invisible="not auto_escalate">
+                                <group string="Level 1 - Supervisors">
+                                    <field name="escalation_level_1_user_ids" widget="many2many_tags" options="{'no_create': True}" nolabel="1"/>
+                                    <field name="level_1_escalation_time" widget="integer"/>
+                                </group>
+                                <group string="Level 2 - Managers">
+                                    <field name="escalation_level_2_user_ids" widget="many2many_tags" options="{'no_create': True}" nolabel="1"/>
+                                    <field name="level_2_escalation_time" widget="integer"/>
+                                </group>
+                            </group>
+                            <group string="Management Escalation" invisible="not auto_escalate">
+                                <group string="Level 3 - Senior Management">
+                                    <field name="escalation_level_3_user_ids" widget="many2many_tags" options="{'no_create': True}" nolabel="1"/>
+                                    <field name="level_3_escalation_time" widget="integer"/>
+                                </group>
+                            </group>
+                            <group string="Progressive Escalation Help" invisible="not auto_escalate">
+                                <div class="alert alert-info" role="alert">
+                                    <p><strong>Progressive Escalation:</strong> Escalate to higher levels if breach persists</p>
+                                    <p><strong>Level 1 Time:</strong> Minutes after breach to escalate to Level 1 users</p>
+                                    <p><strong>Level 2 Time:</strong> Minutes after breach to escalate to Level 2 users</p>
+                                    <p><strong>Level 3 Time:</strong> Minutes after breach to escalate to Level 3 users (management)</p>
+                                </div>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Incident SLA Policy Kanban View -->
+    <record id="view_incident_sla_policy_kanban" model="ir.ui.view">
+        <field name="name">incident.sla.policy.kanban</field>
+        <field name="model">incident.sla.policy</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1">
+                <field name="color"/>
+                <field name="severity"/>
+                <field name="incident_count"/>
+                <field name="breach_count"/>
+                <field name="compliance_rate"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_global_click">
+                            <div class="o_kanban_record_top mb16">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title"><field name="name"/></strong>
+                                </div>
+                                <span class="badge rounded-pill" t-attf-class="text-bg-#{record.severity.raw_value === 'critical' ? 'danger' : record.severity.raw_value === 'high' ? 'warning' : 'info'}">
+                                    <field name="severity"/>
+                                </span>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <field name="description"/>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left">
+                                    <field name="response_time_target"/> min response
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <span class="badge rounded-pill text-bg-success"><field name="incident_count"/> incidents</span>
+                                    <span class="badge rounded-pill text-bg-danger" invisible="breach_count == 0"><field name="breach_count"/> breaches</span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Incident SLA Policy Search View -->
+    <record id="view_incident_sla_policy_search" model="ir.ui.view">
+        <field name="name">incident.sla.policy.search</field>
+        <field name="model">incident.sla.policy</field>
+        <field name="arch" type="xml">
+            <search string="SLA Policies">
+                <field name="name"/>
+                <field name="severity"/>
+                <field name="site_ids"/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter string="Auto-Escalate" name="auto_escalate" domain="[('auto_escalate', '=', True)]"/>
+                <separator/>
+                <filter string="Critical Severity" name="critical" domain="[('severity', '=', 'critical')]"/>
+                <filter string="High Severity" name="high" domain="[('severity', '=', 'high')]"/>
+                <filter string="Medium Severity" name="medium" domain="[('severity', '=', 'medium')]"/>
+                <filter string="Low Severity" name="low" domain="[('severity', '=', 'low')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Severity" name="group_severity" context="{'group_by': 'severity'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Incident SLA Policy Action -->
+    <record id="action_incident_sla_policy" model="ir.actions.act_window">
+        <field name="name">Incident SLA Policies</field>
+        <field name="res_model">incident.sla.policy</field>
+        <field name="view_mode">list,form,kanban</field>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first SLA Policy
+            </p>
+            <p>
+                Define Service Level Agreement (SLA) targets for incident response times based on severity levels.
+                Configure auto-escalation rules and progressive escalation to ensure timely incident resolution.
+            </p>
+        </field>
+    </record>
+
+</odoo>
+

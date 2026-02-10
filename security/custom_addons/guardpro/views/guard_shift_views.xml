@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Guard Shift List View -->
+        <record id="view_guard_shift_list" model="ir.ui.view">
+            <field name="name">guard.shift.list</field>
+            <field name="model">guard.shift</field>
+            <field name="arch" type="xml">
+                <list string="Guard Shifts" sample="1" 
+                      decoration-danger="has_conflict and not conflict_override and conflict_type in ['overlap', 'both']"
+                      decoration-warning="has_conflict and not conflict_override and conflict_type == 'rest_period'">
+                    <field name="name"/>
+                    <field name="guard_id"/>
+                    <field name="site_id"/>
+                    <field name="start_datetime"/>
+                    <field name="end_datetime"/>
+                    <field name="duration" widget="float_time"/>
+                    <field name="total_hours_worked" widget="float_time" optional="show"/>
+                    <field name="remaining_hours" widget="float_time" optional="show"/>
+                    <field name="attendance_count" optional="show"/>
+                    <field name="has_conflict" optional="show" 
+                           widget="boolean" 
+                           string="⚠ Conflict"/>
+                    <field name="conflict_type" optional="show"/>
+                    <field name="conflict_override" optional="hide"/>
+                    <field name="status" widget="badge" 
+                           decoration-info="status == 'scheduled'"
+                           decoration-success="status in ['confirmed', 'completed']"
+                           decoration-warning="status == 'in_progress'"
+                           decoration-danger="status in ['cancelled', 'no_show']"/>
+                    <field name="assignment_type" optional="hide"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Guard Shift Form View -->
+        <record id="view_guard_shift_form" model="ir.ui.view">
+            <field name="name">guard.shift.form</field>
+            <field name="model">guard.shift</field>
+            <field name="arch" type="xml">
+                <form string="Guard Shift">
+                    <header>
+                        <button name="action_confirm" string="Confirm" type="object" 
+                                invisible="status != 'scheduled'" class="oe_highlight"/>
+                        <button name="action_open_conflict_wizard" string="Resolve Conflict" type="object" 
+                                invisible="not has_conflict or conflict_override" 
+                                class="btn-warning"/>
+                        <button name="action_cancel" string="Cancel" type="object" 
+                                invisible="status in ['cancelled', 'completed']"/>
+                        <field name="status" widget="statusbar" statusbar_visible="scheduled,confirmed,in_progress,completed"/>
+                    </header>
+                    <sheet>
+                        <!-- Conflict Warning Banner -->
+                        <div class="bg-danger text-white rounded border border-danger p-3 mb-3"
+                             role="alert" aria-live="assertive"
+                             invisible="not has_conflict or conflict_override or conflict_type not in ['overlap', 'both']">
+                            <h4 class="fw-bold mb-2">
+                                <i class="fa fa-exclamation-triangle" aria-hidden="true" title="Critical conflict"/> CRITICAL: Shift Conflict Detected!
+                            </h4>
+                            <p>
+                                <strong>This shift has scheduling conflicts that must be resolved.</strong>
+                            </p>
+                            <field name="conflict_details" readonly="1" nolabel="1" widget="text"/>
+                            <hr/>
+                            <p class="mb-0">
+                                <button name="action_open_conflict_wizard" string="Resolve Conflict Now" 
+                                        type="object" class="btn btn-warning btn-sm"/>
+                            </p>
+                        </div>
+                        
+                        <div class="bg-warning text-dark rounded border border-warning p-3 mb-3"
+                             role="alert" aria-live="assertive"
+                             invisible="not has_conflict or conflict_override or conflict_type != 'rest_period'">
+                            <h4 class="fw-bold mb-2">
+                                <i class="fa fa-exclamation-circle" aria-hidden="true" title="Rest period warning"/> WARNING: Rest Period Violation
+                            </h4>
+                            <p>
+                                <strong>This shift does not provide sufficient rest time for the guard.</strong>
+                            </p>
+                            <field name="conflict_details" readonly="1" nolabel="1" widget="text"/>
+                            <hr/>
+                            <p class="mb-0">
+                                <button name="action_open_conflict_wizard" string="Review Conflict" 
+                                        type="object" class="btn btn-warning btn-sm"/>
+                            </p>
+                        </div>
+                        
+                        <div class="bg-info text-dark rounded border border-info p-3 mb-3"
+                             role="alert" aria-live="polite"
+                             invisible="not conflict_override">
+                            <h4 class="fw-bold mb-2">
+                                <i class="fa fa-check-circle" aria-hidden="true" title="Conflict override approved"/> Conflict Override Approved
+                            </h4>
+                            <p>
+                                This shift was approved by <strong><field name="conflict_override_by" readonly="1" nolabel="1"/></strong> 
+                                on <field name="conflict_override_date" readonly="1" nolabel="1"/>.
+                            </p>
+                            <p><strong>Reason:</strong> <field name="conflict_override_reason" readonly="1" nolabel="1"/></p>
+                        </div>
+                        
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_view_attendance" type="object" class="oe_stat_button" icon="fa-clock-o">
+                                <field name="attendance_count" widget="statinfo" string="Shift Starts"/>
+                            </button>
+                            <button name="action_view_incidents" type="object" class="oe_stat_button" icon="fa-exclamation-triangle">
+                                <field name="incident_count" widget="statinfo" string="Incidents"/>
+                            </button>
+                        </div>
+                        
+                        <!-- Hidden fields for conditions -->
+                        <field name="has_conflict" invisible="1"/>
+                        <field name="conflict_type" invisible="1"/>
+                        <field name="conflict_override" invisible="1"/>
+                        
+                        <group>
+                            <group string="Assignment">
+                                <field name="guard_id"/>
+                                <field name="site_id"/>
+                                <field name="assignment_type"/>
+                                <field name="post_location"/>
+                            </group>
+                            <group string="Schedule">
+                                <field name="start_datetime" required="1"/>
+                                <field name="end_datetime" required="1"/>
+                                <field name="duration" widget="float_time"/>
+                                <field name="shift_type"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Time Tracking">
+                                <field name="total_hours_worked" widget="float_time" readonly="1"/>
+                                <field name="remaining_hours" widget="float_time" readonly="1"/>
+                                <field name="checkin_time" readonly="1"/>
+                                <field name="checkout_time" readonly="1"/>
+                            </group>
+                            <group string="Requirements">
+                                <field name="armed"/>
+                                <field name="uniform_type"/>
+                                <field name="supervisor_id"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Attendance Records">
+                                <field name="attendance_ids" nolabel="1">
+                                    <list string="Shift Start/End Records" editable="bottom">
+                                        <field name="checkin_time"/>
+                                        <field name="checkout_time"/>
+                                        <field name="hours_worked" widget="float_time"/>
+                                        <field name="status" widget="badge" 
+                                               decoration-success="status == 'checked_out'"
+                                               decoration-warning="status == 'checked_in'"
+                                               decoration-muted="status == 'incomplete'"/>
+                                        <field name="checkin_method"/>
+                                        <field name="checkout_method"/>
+                                        <field name="checkin_verified" widget="boolean_toggle"/>
+                                        <field name="checkout_verified" widget="boolean_toggle"/>
+                                    </list>
+                                </field>
+                            </page>
+                            <page string="Tours">
+                                <field name="tour_ids" widget="many2many_tags"/>
+                                <separator string="Completed Tours"/>
+                                <field name="tours_completed" readonly="1"/>
+                            </page>
+                            <page string="Instructions">
+                                <field name="instructions" widget="text"/>
+                                <field name="briefing" widget="html"/>
+                            </page>
+                            <page string="Billing">
+                                <group>
+                                    <field name="hourly_rate"/>
+                                    <field name="total_cost"/>
+                                </group>
+                            </page>
+                            <page string="Notes">
+                                <field name="notes" widget="text"/>
+                                <field name="supervisor_notes" widget="text"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <!-- Guard Shift Calendar View -->
+        <record id="view_guard_shift_calendar" model="ir.ui.view">
+            <field name="name">guard.shift.calendar</field>
+            <field name="model">guard.shift</field>
+            <field name="arch" type="xml">
+                <calendar string="Shift Schedule" date_start="start_datetime" date_stop="end_datetime"
+                          color="color" mode="week" quick_create="0">
+                    <field name="guard_id"/>
+                    <field name="site_id"/>
+                    <field name="status"/>
+                    <field name="has_conflict"/>
+                    <field name="conflict_type"/>
+                    <field name="conflict_override"/>
+                </calendar>
+            </field>
+        </record>
+
+        <!-- Guard Shift Search View -->
+        <record id="view_guard_shift_search" model="ir.ui.view">
+            <field name="name">guard.shift.search</field>
+            <field name="model">guard.shift</field>
+            <field name="arch" type="xml">
+                <search string="Shifts">
+                    <field name="guard_id"/>
+                    <field name="site_id"/>
+                    <field name="start_datetime"/>
+                    <separator/>
+                    <filter string="Scheduled" name="scheduled" domain="[('status', '=', 'scheduled')]"/>
+                    <filter string="In Progress" name="in_progress" domain="[('status', '=', 'in_progress')]"/>
+                    <filter string="Completed" name="completed" domain="[('status', '=', 'completed')]"/>
+                    <separator/>
+                    <filter string="⚠ Has Conflicts" name="has_conflicts" 
+                            domain="[('has_conflict', '=', True), ('conflict_override', '=', False)]"/>
+                    <filter string="Overlapping Shifts" name="overlap_conflicts" 
+                            domain="[('conflict_type', 'in', ['overlap', 'both']), ('conflict_override', '=', False)]"/>
+                    <filter string="Rest Period Issues" name="rest_period_conflicts" 
+                            domain="[('conflict_type', 'in', ['rest_period', 'both']), ('conflict_override', '=', False)]"/>
+                    <filter string="Override Approved" name="override_approved" 
+                            domain="[('conflict_override', '=', True)]"/>
+                    <separator/>
+                    <filter name="filter_start_date" string="Start Date" date="start_datetime"/>
+                    <group expand="0" string="Group By">
+                        <filter name="group_guard" string="Guard" context="{'group_by': 'guard_id'}"/>
+                        <filter name="group_site" string="Site" context="{'group_by': 'site_id'}"/>
+                        <filter name="group_status" string="Status" context="{'group_by': 'status'}"/>
+                        <filter name="group_conflict" string="Conflict Type" context="{'group_by': 'conflict_type'}"/>
+                        <filter name="group_date" string="Date" context="{'group_by': 'start_datetime:day'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Guard Shift Action -->
+        <record id="action_guard_shift" model="ir.actions.act_window">
+            <field name="name">Shifts</field>
+            <field name="res_model">guard.shift</field>
+            <field name="view_mode">calendar,list,form</field>
+            <field name="context">{'search_default_filter_start_date': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Schedule a new guard shift
+                </p>
+                <p>
+                    Manage guard shift schedules with automatic geofence verification.
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>
+

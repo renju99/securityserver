@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Record Rules for Visitor Management -->
+    <record id="visitor_management_rule_guard" model="ir.rule">
+        <field name="name">Guard: All Visitors</field>
+        <field name="model_id" ref="model_visitor_management"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="visitor_management_rule_reception" model="ir.rule">
+        <field name="name">Reception: All Visitors</field>
+        <field name="model_id" ref="model_visitor_management"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_guardpro_reception'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="visitor_management_rule_supervisor" model="ir.rule">
+        <field name="name">Supervisor: All Visitors</field>
+        <field name="model_id" ref="model_visitor_management"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_guardpro_supervisor'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="visitor_management_rule_manager" model="ir.rule">
+        <field name="name">Manager: All Visitors</field>
+        <field name="model_id" ref="model_visitor_management"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Watchlist Rules -->
+    <record id="visitor_watchlist_rule_reception" model="ir.rule">
+        <field name="name">Reception: Watchlist (Read Only)</field>
+        <field name="model_id" ref="model_visitor_watchlist"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_guardpro_reception'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="visitor_watchlist_rule_supervisor" model="ir.rule">
+        <field name="name">Supervisor: Watchlist</field>
+        <field name="model_id" ref="model_visitor_watchlist"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_guardpro_supervisor'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+</odoo>
+

@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Standard Operating Procedures for UAE/SIRA Standards -->
+        
+        <!-- SOP 1: Access Control &amp; Visitor Management -->
+        <record id="sop_access_control_main_gate" model="knowledge.sop">
+            <field name="name">Main Gate Access Control Procedure</field>
+            <field name="code">SOP-AC-001</field>
+            <field name="objective">To ensure secure and efficient access control at main entry points while maintaining professional customer service standards and compliance with SIRA requirements.</field>
+            <field name="scope">Applies to all security guards manning main gates, reception areas, and primary access points at all client sites.</field>
+            <field name="is_sira_compliant" eval="True"/>
+            <field name="sira_category">access_control</field>
+            <field name="risk_level">high</field>
+            <field name="requires_training" eval="True"/>
+            <field name="training_duration">2.0</field>
+            <field name="state">approved</field>
+        </record>
+        
+        <!-- Steps for Access Control SOP -->
+        <record id="sop_step_ac001_01" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_access_control_main_gate"/>
+            <field name="sequence">10</field>
+            <field name="name">Pre-Shift Preparation</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Review shift handover notes and incident log&lt;/li&gt;
+&lt;li&gt;Check visitor log system is operational&lt;/li&gt;
+&lt;li&gt;Verify CCTV cameras are functioning&lt;/li&gt;
+&lt;li&gt;Test barrier/gate operation&lt;/li&gt;
+&lt;li&gt;Ensure emergency contact numbers are accessible&lt;/li&gt;
+&lt;li&gt;Confirm uniform and ID badge are properly worn&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">10</field>
+            <field name="is_critical" eval="True"/>
+        </record>
+        
+        <record id="sop_step_ac001_02" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_access_control_main_gate"/>
+            <field name="sequence">20</field>
+            <field name="name">Vehicle Approach - Initial Assessment</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Observe vehicle as it approaches&lt;/li&gt;
+&lt;li&gt;Note vehicle type, color, and license plate&lt;/li&gt;
+&lt;li&gt;Assess driver and passenger behavior&lt;/li&gt;
+&lt;li&gt;Check for any suspicious items or activities&lt;/li&gt;
+&lt;li&gt;Maintain professional demeanor&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">1</field>
+            <field name="safety_note">Maintain safe distance from vehicle. Be aware of surroundings and potential threats.</field>
+        </record>
+        
+        <record id="sop_step_ac001_03" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_access_control_main_gate"/>
+            <field name="sequence">30</field>
+            <field name="name">Greeting &amp; Identification Request</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Greet visitor politely: "Good morning/afternoon, welcome to [Site Name]"&lt;/li&gt;
+&lt;li&gt;Request Emirates ID or valid identification&lt;/li&gt;
+&lt;li&gt;Ask for purpose of visit and contact person/company&lt;/li&gt;
+&lt;li&gt;Maintain eye contact and professional communication&lt;/li&gt;
+&lt;li&gt;Use Arabic or English as appropriate&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">2</field>
+            <field name="is_critical" eval="True"/>
+        </record>
+        
+        <record id="sop_step_ac001_04" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_access_control_main_gate"/>
+            <field name="sequence">40</field>
+            <field name="name">Verification &amp; Authorization</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Verify ID authenticity (check security features)&lt;/li&gt;
+&lt;li&gt;Check visitor against watchlist if applicable&lt;/li&gt;
+&lt;li&gt;Contact host to confirm visit authorization&lt;/li&gt;
+&lt;li&gt;For pre-registered visitors, verify against appointment list&lt;/li&gt;
+&lt;li&gt;Record visitor details in system/logbook&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">3</field>
+            <field name="is_critical" eval="True"/>
+            <field name="safety_note">Never allow unauthorized entry. When in doubt, deny access and escalate to supervisor.</field>
+        </record>
+        
+        <record id="sop_step_ac001_05" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_access_control_main_gate"/>
+            <field name="sequence">50</field>
+            <field name="name">Badge Issuance &amp; Instructions</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Issue visitor badge with unique number&lt;/li&gt;
+&lt;li&gt;Explain badge must be visible at all times&lt;/li&gt;
+&lt;li&gt;Provide directions to destination&lt;/li&gt;
+&lt;li&gt;Inform about site rules (if applicable)&lt;/li&gt;
+&lt;li&gt;Note badge number in visitor log&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">2</field>
+        </record>
+        
+        <record id="sop_step_ac001_06" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_access_control_main_gate"/>
+            <field name="sequence">60</field>
+            <field name="name">Entry Authorization</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Open barrier/gate&lt;/li&gt;
+&lt;li&gt;Direct vehicle to appropriate area&lt;/li&gt;
+&lt;li&gt;Monitor entry via CCTV&lt;/li&gt;
+&lt;li&gt;Close barrier after vehicle passes&lt;/li&gt;
+&lt;li&gt;Update access log with entry time&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">1</field>
+        </record>
+        
+        <record id="sop_step_ac001_07" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_access_control_main_gate"/>
+            <field name="sequence">70</field>
+            <field name="name">Exit Processing</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Collect visitor badge upon exit&lt;/li&gt;
+&lt;li&gt;Verify badge number matches entry record&lt;/li&gt;
+&lt;li&gt;Update log with exit time&lt;/li&gt;
+&lt;li&gt;Thank visitor for their visit&lt;/li&gt;
+&lt;li&gt;Check for any property/equipment being removed&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">2</field>
+        </record>
+        
+        <!-- Checklist for Access Control SOP -->
+        <record id="sop_checklist_ac001_01" model="knowledge.sop.checklist">
+            <field name="sop_id" ref="sop_access_control_main_gate"/>
+            <field name="sequence">10</field>
+            <field name="name">All equipment tested and operational</field>
+            <field name="category">preparation</field>
+            <field name="is_mandatory" eval="True"/>
+        </record>
+        
+        <record id="sop_checklist_ac001_02" model="knowledge.sop.checklist">
+            <field name="sop_id" ref="sop_access_control_main_gate"/>
+            <field name="sequence">20</field>
+            <field name="name">Valid ID checked and verified</field>
+            <field name="category">execution</field>
+            <field name="is_mandatory" eval="True"/>
+        </record>
+        
+        <record id="sop_checklist_ac001_03" model="knowledge.sop.checklist">
+            <field name="sop_id" ref="sop_access_control_main_gate"/>
+            <field name="sequence">30</field>
+            <field name="name">Visitor details recorded in log</field>
+            <field name="category">documentation</field>
+            <field name="is_mandatory" eval="True"/>
+        </record>
+        
+        <record id="sop_checklist_ac001_04" model="knowledge.sop.checklist">
+            <field name="sop_id" ref="sop_access_control_main_gate"/>
+            <field name="sequence">40</field>
+            <field name="name">Host/contact person verified visit</field>
+            <field name="category">safety</field>
+            <field name="is_mandatory" eval="True"/>
+        </record>
+        
+        <record id="sop_checklist_ac001_05" model="knowledge.sop.checklist">
+            <field name="sop_id" ref="sop_access_control_main_gate"/>
+            <field name="sequence">50</field>
+            <field name="name">Visitor badge issued and recorded</field>
+            <field name="category">execution</field>
+            <field name="is_mandatory" eval="True"/>
+        </record>
+        
+        <!-- SOP 2: Security Patrol Procedures -->
+        <record id="sop_security_patrol" model="knowledge.sop">
+            <field name="name">Security Patrol and Checkpoint Inspection</field>
+            <field name="code">SOP-PT-001</field>
+            <field name="objective">To conduct systematic security patrols ensuring all areas are secure, identifying potential threats, and maintaining visible security presence throughout the facility.</field>
+            <field name="scope">Applies to all guards conducting foot or mobile patrols at client sites.</field>
+            <field name="is_sira_compliant" eval="True"/>
+            <field name="sira_category">patrol</field>
+            <field name="risk_level">medium</field>
+            <field name="requires_training" eval="True"/>
+            <field name="training_duration">1.5</field>
+            <field name="state">approved</field>
+        </record>
+        
+        <record id="sop_step_pt001_01" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_security_patrol"/>
+            <field name="sequence">10</field>
+            <field name="name">Pre-Patrol Preparation</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Review patrol route and checkpoint locations&lt;/li&gt;
+&lt;li&gt;Check communication device (radio/mobile phone)&lt;/li&gt;
+&lt;li&gt;Carry patrol log/mobile app for checkpoint scanning&lt;/li&gt;
+&lt;li&gt;Ensure flashlight is functional (for night patrols)&lt;/li&gt;
+&lt;li&gt;Review previous patrol notes and open issues&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">5</field>
+            <field name="is_critical" eval="True"/>
+        </record>
+        
+        <record id="sop_step_pt001_02" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_security_patrol"/>
+            <field name="sequence">20</field>
+            <field name="name">Checkpoint Scanning &amp; Verification</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Scan QR code/NFC tag at each designated checkpoint&lt;/li&gt;
+&lt;li&gt;Record time and location in patrol app&lt;/li&gt;
+&lt;li&gt;Conduct visual inspection of area&lt;/li&gt;
+&lt;li&gt;Check doors, windows, and access points&lt;/li&gt;
+&lt;li&gt;Note any abnormalities or concerns&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">3</field>
+            <field name="is_critical" eval="True"/>
+        </record>
+        
+        <record id="sop_step_pt001_03" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_security_patrol"/>
+            <field name="sequence">30</field>
+            <field name="name">Security Assessment During Patrol</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Look for unauthorized persons or suspicious behavior&lt;/li&gt;
+&lt;li&gt;Check for fire hazards or safety violations&lt;/li&gt;
+&lt;li&gt;Verify lighting is adequate in all areas&lt;/li&gt;
+&lt;li&gt;Inspect perimeter fencing and barriers&lt;/li&gt;
+&lt;li&gt;Monitor for unusual sounds, smells, or conditions&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">15</field>
+            <field name="safety_note">Always maintain situational awareness. Report any suspicious activity immediately to control room.</field>
+        </record>
+        
+        <record id="sop_step_pt001_04" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_security_patrol"/>
+            <field name="sequence">40</field>
+            <field name="name">Incident Documentation</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Document any findings in patrol log&lt;/li&gt;
+&lt;li&gt;Take photos if necessary (with timestamp)&lt;/li&gt;
+&lt;li&gt;Report hazards or security concerns to supervisor&lt;/li&gt;
+&lt;li&gt;Create incident report for significant issues&lt;/li&gt;
+&lt;li&gt;Update patrol completion status in system&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">5</field>
+        </record>
+        
+        <record id="sop_step_pt001_05" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_security_patrol"/>
+            <field name="sequence">50</field>
+            <field name="name">Post-Patrol Reporting</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Complete patrol report with all checkpoint confirmations&lt;/li&gt;
+&lt;li&gt;Review and submit digital patrol log&lt;/li&gt;
+&lt;li&gt;Brief next shift guard on any issues found&lt;/li&gt;
+&lt;li&gt;Follow up on any open action items&lt;/li&gt;
+&lt;li&gt;Return equipment to designated location&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">10</field>
+        </record>
+        
+        <!-- SOP 3: Incident Response &amp; Reporting -->
+        <record id="sop_incident_response" model="knowledge.sop">
+            <field name="name">Incident Response and Reporting Procedure</field>
+            <field name="code">SOP-IR-001</field>
+            <field name="objective">To provide immediate, effective, and appropriate response to security incidents while ensuring proper documentation and escalation according to SIRA standards.</field>
+            <field name="scope">Applies to all security personnel responding to incidents at any client site.</field>
+            <field name="is_sira_compliant" eval="True"/>
+            <field name="sira_category">incident</field>
+            <field name="risk_level">critical</field>
+            <field name="requires_training" eval="True"/>
+            <field name="training_duration">3.0</field>
+            <field name="state">approved</field>
+        </record>
+        
+        <record id="sop_step_ir001_01" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_incident_response"/>
+            <field name="sequence">10</field>
+            <field name="name">Initial Assessment - FIRST Response</field>
+            <field name="description">&lt;p&gt;&lt;strong&gt;F - Find the facts:&lt;/strong&gt; Quickly assess what happened&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;I - Identify hazards:&lt;/strong&gt; Ensure scene is safe&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;R - Report:&lt;/strong&gt; Notify control room/supervisor immediately&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;S - Secure the area:&lt;/strong&gt; Prevent further damage or injury&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;T - Take action:&lt;/strong&gt; Implement appropriate response&lt;/p&gt;</field>
+            <field name="expected_duration">2</field>
+            <field name="is_critical" eval="True"/>
+            <field name="safety_note">CRITICAL: Your safety comes first. Never put yourself in danger. Call for backup if needed.</field>
+        </record>
+        
+        <record id="sop_step_ir001_02" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_incident_response"/>
+            <field name="sequence">20</field>
+            <field name="name">Emergency Service Notification</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Call 999 for police emergencies&lt;/li&gt;
+&lt;li&gt;Call 998 for ambulance/medical emergencies&lt;/li&gt;
+&lt;li&gt;Call 997 for fire/civil defense emergencies&lt;/li&gt;
+&lt;li&gt;Provide clear location, incident type, and casualties&lt;/li&gt;
+&lt;li&gt;Follow dispatcher instructions&lt;/li&gt;
+&lt;li&gt;Stay on line until advised to disconnect&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">3</field>
+            <field name="is_critical" eval="True"/>
+        </record>
+        
+        <record id="sop_step_ir001_03" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_incident_response"/>
+            <field name="sequence">30</field>
+            <field name="name">Scene Preservation &amp; Evidence Protection</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Secure incident scene with barriers/tape if available&lt;/li&gt;
+&lt;li&gt;Prevent unauthorized access to scene&lt;/li&gt;
+&lt;li&gt;Do not touch or move evidence unless necessary&lt;/li&gt;
+&lt;li&gt;Document scene with photos/video if safe to do so&lt;/li&gt;
+&lt;li&gt;Identify and separate witnesses&lt;/li&gt;
+&lt;li&gt;Note time, weather, lighting conditions&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">10</field>
+        </record>
+        
+        <record id="sop_step_ir001_04" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_incident_response"/>
+            <field name="sequence">40</field>
+            <field name="name">Witness Information Collection</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Record witness names and contact information&lt;/li&gt;
+&lt;li&gt;Obtain brief statements if possible&lt;/li&gt;
+&lt;li&gt;Keep witnesses separated to prevent collaboration&lt;/li&gt;
+&lt;li&gt;Note witness location at time of incident&lt;/li&gt;
+&lt;li&gt;Do not coach or suggest what they should say&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">15</field>
+        </record>
+        
+        <record id="sop_step_ir001_05" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_incident_response"/>
+            <field name="sequence">50</field>
+            <field name="name">Incident Documentation &amp; Reporting</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Complete detailed incident report within 2 hours&lt;/li&gt;
+&lt;li&gt;Include: Who, What, When, Where, Why, How&lt;/li&gt;
+&lt;li&gt;Attach all photos, videos, and witness statements&lt;/li&gt;
+&lt;li&gt;Record all actions taken and notifications made&lt;/li&gt;
+&lt;li&gt;Submit report to supervisor for review&lt;/li&gt;
+&lt;li&gt;Ensure client is notified per agreement&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">30</field>
+            <field name="is_critical" eval="True"/>
+        </record>
+        
+        <!-- SOP 4: Emergency Evacuation -->
+        <record id="sop_emergency_evacuation" model="knowledge.sop">
+            <field name="name">Emergency Evacuation Procedure</field>
+            <field name="code">SOP-EV-001</field>
+            <field name="objective">To ensure safe, orderly, and complete evacuation of personnel from building in emergency situations following UAE Civil Defense regulations.</field>
+            <field name="scope">All security personnel at sites with evacuation plans.</field>
+            <field name="is_sira_compliant" eval="True"/>
+            <field name="sira_category">emergency</field>
+            <field name="risk_level">critical</field>
+            <field name="requires_training" eval="True"/>
+            <field name="training_duration">2.5</field>
+            <field name="state">approved</field>
+        </record>
+        
+        <record id="sop_step_ev001_01" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_emergency_evacuation"/>
+            <field name="sequence">10</field>
+            <field name="name">Alarm Activation &amp; Verification</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Activate fire alarm if not already triggered&lt;/li&gt;
+&lt;li&gt;Verify emergency nature and location&lt;/li&gt;
+&lt;li&gt;Notify Civil Defense (997) immediately&lt;/li&gt;
+&lt;li&gt;Alert control room and security supervisor&lt;/li&gt;
+&lt;li&gt;Announce evacuation order via PA system&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">2</field>
+            <field name="is_critical" eval="True"/>
+        </record>
+        
+        <record id="sop_step_ev001_02" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_emergency_evacuation"/>
+            <field name="sequence">20</field>
+            <field name="name">Evacuation Execution</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Direct occupants to nearest emergency exit&lt;/li&gt;
+&lt;li&gt;Use evacuation maps and exit signage&lt;/li&gt;
+&lt;li&gt;Assist elderly, disabled, and children&lt;/li&gt;
+&lt;li&gt;Ensure elevators are NOT used&lt;/li&gt;
+&lt;li&gt;Check all rooms, restrooms, and spaces&lt;/li&gt;
+&lt;li&gt;Close doors behind (do not lock)&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">10</field>
+            <field name="is_critical" eval="True"/>
+            <field name="safety_note">CRITICAL: Account for all persons. Do not leave anyone behind unless it endangers your life.</field>
+        </record>
+        
+        <record id="sop_step_ev001_03" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_emergency_evacuation"/>
+            <field name="sequence">30</field>
+            <field name="name">Assembly Point Management</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Direct evacuees to designated assembly point&lt;/li&gt;
+&lt;li&gt;Keep minimum 50 meters from building&lt;/li&gt;
+&lt;li&gt;Conduct headcount/roll call&lt;/li&gt;
+&lt;li&gt;Report any missing persons immediately&lt;/li&gt;
+&lt;li&gt;Prevent re-entry to building&lt;/li&gt;
+&lt;li&gt;Provide information to emergency responders&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">15</field>
+        </record>
+        
+        <!-- SOP 5: Fire Emergency Response -->
+        <record id="sop_fire_emergency" model="knowledge.sop">
+            <field name="name">Fire Emergency Response Procedure</field>
+            <field name="code">SOP-FE-001</field>
+            <field name="objective">To respond effectively to fire emergencies, minimize damage, protect life, and comply with UAE Civil Defense regulations.</field>
+            <field name="scope">All security personnel trained in basic fire response.</field>
+            <field name="is_sira_compliant" eval="True"/>
+            <field name="sira_category">emergency</field>
+            <field name="risk_level">critical</field>
+            <field name="requires_training" eval="True"/>
+            <field name="training_duration">3.0</field>
+            <field name="state">approved</field>
+        </record>
+        
+        <record id="sop_step_fe001_01" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_fire_emergency"/>
+            <field name="sequence">10</field>
+            <field name="name">RACE Protocol Activation</field>
+            <field name="description">&lt;p&gt;&lt;strong&gt;R - RESCUE:&lt;/strong&gt; Remove persons in immediate danger&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;A - ALARM:&lt;/strong&gt; Activate fire alarm and call 997&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;C - CONFINE:&lt;/strong&gt; Close doors to contain fire&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;E - EXTINGUISH/EVACUATE:&lt;/strong&gt; Fight small fires OR evacuate if large&lt;/p&gt;</field>
+            <field name="expected_duration">3</field>
+            <field name="is_critical" eval="True"/>
+            <field name="safety_note">CRITICAL: Only fight fire if safe to do so. Evacuate if fire is spreading or smoke is thick.</field>
+        </record>
+        
+        <record id="sop_step_fe001_02" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_fire_emergency"/>
+            <field name="sequence">20</field>
+            <field name="name">Fire Extinguisher Usage - PASS Method</field>
+            <field name="description">&lt;p&gt;&lt;strong&gt;P - PULL:&lt;/strong&gt; Pull the pin&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;A - AIM:&lt;/strong&gt; Aim at base of fire&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;S - SQUEEZE:&lt;/strong&gt; Squeeze handle&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;S - SWEEP:&lt;/strong&gt; Sweep side to side&lt;/p&gt;
+&lt;p&gt;Only attempt on small, contained fires. Maintain clear exit path.&lt;/p&gt;</field>
+            <field name="expected_duration">2</field>
+            <field name="is_critical" eval="True"/>
+        </record>
+        
+        <!-- SOP 6: CCTV Monitoring -->
+        <record id="sop_cctv_monitoring" model="knowledge.sop">
+            <field name="name">CCTV Monitoring and Control Room Operations</field>
+            <field name="code">SOP-CC-001</field>
+            <field name="objective">To maintain continuous, effective monitoring of CCTV systems and ensure proper response to incidents detected via surveillance systems.</field>
+            <field name="scope">All control room operators and CCTV monitoring personnel.</field>
+            <field name="is_sira_compliant" eval="True"/>
+            <field name="sira_category">patrol</field>
+            <field name="risk_level">medium</field>
+            <field name="requires_training" eval="True"/>
+            <field name="training_duration">2.0</field>
+            <field name="state">approved</field>
+        </record>
+        
+        <record id="sop_step_cc001_01" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_cctv_monitoring"/>
+            <field name="sequence">10</field>
+            <field name="name">Control Room Handover &amp; System Check</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Review handover log from previous shift&lt;/li&gt;
+&lt;li&gt;Verify all cameras are operational&lt;/li&gt;
+&lt;li&gt;Check recording system status&lt;/li&gt;
+&lt;li&gt;Test communication systems&lt;/li&gt;
+&lt;li&gt;Review open incidents and action items&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">15</field>
+            <field name="is_critical" eval="True"/>
+        </record>
+        
+        <record id="sop_step_cc001_02" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_cctv_monitoring"/>
+            <field name="sequence">20</field>
+            <field name="name">Active Monitoring Protocol</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Monitor all camera feeds continuously&lt;/li&gt;
+&lt;li&gt;Rotate view every 5-10 minutes&lt;/li&gt;
+&lt;li&gt;Focus on high-risk areas and entry/exit points&lt;/li&gt;
+&lt;li&gt;Watch for suspicious behavior or activities&lt;/li&gt;
+&lt;li&gt;Log all significant events with timestamps&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">480</field>
+        </record>
+        
+        <record id="sop_step_cc001_03" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_cctv_monitoring"/>
+            <field name="sequence">30</field>
+            <field name="name">Incident Detection &amp; Response</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Identify and assess incident via camera feed&lt;/li&gt;
+&lt;li&gt;Immediately notify field guard/supervisor&lt;/li&gt;
+&lt;li&gt;Begin recording incident if not auto-recording&lt;/li&gt;
+&lt;li&gt;Track perpetrators/suspects via multiple cameras&lt;/li&gt;
+&lt;li&gt;Coordinate response team movements&lt;/li&gt;
+&lt;li&gt;Call emergency services if required&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">5</field>
+            <field name="is_critical" eval="True"/>
+        </record>
+        
+        <!-- SOP 7: Medical Emergency First Response -->
+        <record id="sop_medical_emergency" model="knowledge.sop">
+            <field name="name">Medical Emergency First Response</field>
+            <field name="code">SOP-ME-001</field>
+            <field name="objective">To provide immediate first aid response to medical emergencies while ensuring proper notification of professional medical services.</field>
+            <field name="scope">All guards with basic first aid training.</field>
+            <field name="is_sira_compliant" eval="True"/>
+            <field name="sira_category">emergency</field>
+            <field name="risk_level">critical</field>
+            <field name="requires_training" eval="True"/>
+            <field name="training_duration">4.0</field>
+            <field name="state">approved</field>
+        </record>
+        
+        <record id="sop_step_me001_01" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_medical_emergency"/>
+            <field name="sequence">10</field>
+            <field name="name">Primary Survey - DR ABC</field>
+            <field name="description">&lt;p&gt;&lt;strong&gt;D - DANGER:&lt;/strong&gt; Ensure scene is safe&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;R - RESPONSE:&lt;/strong&gt; Check patient responsiveness&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;A - AIRWAY:&lt;/strong&gt; Check airway is open&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;B - BREATHING:&lt;/strong&gt; Check if patient is breathing&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;C - CIRCULATION:&lt;/strong&gt; Check for pulse and severe bleeding&lt;/p&gt;</field>
+            <field name="expected_duration">2</field>
+            <field name="is_critical" eval="True"/>
+            <field name="safety_note">CRITICAL: Call 998 immediately if patient is unconscious, not breathing, or has severe bleeding.</field>
+        </record>
+        
+        <record id="sop_step_me001_02" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_medical_emergency"/>
+            <field name="sequence">20</field>
+            <field name="name">Emergency Services Notification</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Call 998 for ambulance&lt;/li&gt;
+&lt;li&gt;Provide exact location with landmarks&lt;/li&gt;
+&lt;li&gt;State nature of medical emergency&lt;/li&gt;
+&lt;li&gt;Number of patients&lt;/li&gt;
+&lt;li&gt;Patient condition (conscious, breathing, etc.)&lt;/li&gt;
+&lt;li&gt;Follow dispatcher instructions&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">2</field>
+            <field name="is_critical" eval="True"/>
+        </record>
+        
+        <record id="sop_step_me001_03" model="knowledge.sop.step">
+            <field name="sop_id" ref="sop_medical_emergency"/>
+            <field name="sequence">30</field>
+            <field name="name">Basic First Aid Administration</field>
+            <field name="description">&lt;ul&gt;
+&lt;li&gt;Begin CPR if patient not breathing (if trained)&lt;/li&gt;
+&lt;li&gt;Control severe bleeding with direct pressure&lt;/li&gt;
+&lt;li&gt;Place unconscious but breathing patient in recovery position&lt;/li&gt;
+&lt;li&gt;Keep patient warm and comfortable&lt;/li&gt;
+&lt;li&gt;Do not move patient unless in danger&lt;/li&gt;
+&lt;li&gt;Monitor vital signs continuously&lt;/li&gt;
+&lt;/ul&gt;</field>
+            <field name="expected_duration">10</field>
+            <field name="is_critical" eval="True"/>
+        </record>
+        
+    </data>
+</odoo>
+

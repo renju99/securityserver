@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Key Issue Wizard Form View -->
+    <record id="view_key_issue_wizard_form" model="ir.ui.view">
+        <field name="name">key.issue.wizard.form</field>
+        <field name="model">key.issue.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Issue Key">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="key_id" readonly="1" options="{'no_open': True}"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group string="Key Information">
+                            <field name="key_name"/>
+                            <field name="key_type"/>
+                            <field name="location"/>
+                        </group>
+                        <group string="Issue Details">
+                            <field name="issue_date"/>
+                            <field name="expected_return"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <!-- Recipient Information Tab -->
+                        <page string="Recipient Information" name="recipient_info">
+                            <group>
+                                <group>
+                                    <field name="issued_to_type" widget="radio"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group>
+                                    <field name="guard_id" 
+                                           options="{'no_create': True}" 
+                                           invisible="issued_to_type != 'guard'"/>
+                                    <field name="issued_to_name" required="1"/>
+                                    <field name="issued_to_phone" widget="phone"/>
+                                </group>
+                                <group>
+                                    <field name="issued_to_id_number" 
+                                           placeholder="Emirates ID / Passport / etc."/>
+                                </group>
+                            </group>
+                        </page>
+                        
+                        <!-- Purpose Tab -->
+                        <page string="Purpose &amp; Details" name="purpose">
+                            <group>
+                                <field name="purpose" 
+                                       nolabel="1" 
+                                       placeholder="Describe the purpose for issuing this key..."
+                                       required="1"/>
+                            </group>
+                            
+                            <group string="Additional Notes">
+                                <field name="notes" 
+                                       nolabel="1" 
+                                       placeholder="Any additional notes..."/>
+                            </group>
+                        </page>
+                        
+                        <!-- Signature Tab -->
+                        <page string="Signature" name="signature">
+                            <group>
+                                <field name="signature" 
+                                       widget="signature" 
+                                       required="1" 
+                                       options="{'full_name': 'issued_to_name'}"/>
+                            </group>
+                            
+                            <div class="alert alert-warning" role="alert">
+                                <strong>Signature Required:</strong>
+                                The recipient must sign to acknowledge receipt of the key.
+                                Use a touchscreen to draw the signature or upload a scanned signature image.
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <footer>
+                    <button name="action_issue_key" 
+                            string="Issue Key" 
+                            type="object" 
+                            class="btn-primary"
+                            data-hotkey="q"/>
+                    <button string="Cancel" 
+                            class="btn-secondary" 
+                            special="cancel"
+                            data-hotkey="z"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Action for Key Issue Wizard -->
+    <record id="action_key_issue_wizard" model="ir.actions.act_window">
+        <field name="name">Issue Key</field>
+        <field name="res_model">key.issue.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_key_register"/>
+        <field name="binding_type">action</field>
+    </record>
+</odoo>
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Guard Drug Test PDF Report Template -->
+    <template id="guard_drug_test_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h2>Drug/Alcohol Test Certificate</h2>
+                            </div>
+                        </div>
+
+                        <!-- Reference and Result -->
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <h4>Test Reference: <span t-field="o.reference_number"/></h4>
+                            </div>
+                            <div class="col-6 text-end">
+                                <h5>
+                                    Result: 
+                                    <t t-if="o.result == 'negative'">
+                                        <span class="badge bg-success">NEGATIVE</span>
+                                    </t>
+                                    <t t-elif="o.result == 'positive'">
+                                        <span class="badge bg-danger">POSITIVE</span>
+                                    </t>
+                                    <t t-elif="o.result == 'inconclusive'">
+                                        <span class="badge bg-warning">INCONCLUSIVE</span>
+                                    </t>
+                                    <t t-elif="o.result == 'pending'">
+                                        <span class="badge bg-info">PENDING</span>
+                                    </t>
+                                    <t t-elif="o.result == 'refused'">
+                                        <span class="badge bg-dark">REFUSED</span>
+                                    </t>
+                                </h5>
+                            </div>
+                        </div>
+
+                        <!-- Guard Information -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Guard Information</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Guard Name:</strong></td>
+                                        <td t-field="o.guard_id.name"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Employee ID:</strong></td>
+                                        <td t-field="o.guard_id.employee_id"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Test Details -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Test Details</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Test Type:</strong></td>
+                                        <td><span t-field="o.test_type"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Test Category:</strong></td>
+                                        <td><span t-field="o.test_category"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Collection Method:</strong></td>
+                                        <td><span t-field="o.collection_method"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Test Date &amp; Time:</strong></td>
+                                        <td t-field="o.test_date"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Testing Facility -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Testing Facility</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Facility Name:</strong></td>
+                                        <td t-field="o.testing_facility"/>
+                                    </tr>
+                                    <tr t-if="o.facility_contact">
+                                        <td><strong>Contact:</strong></td>
+                                        <td t-field="o.facility_contact"/>
+                                    </tr>
+                                    <tr t-if="o.collector_name">
+                                        <td><strong>Sample Collector:</strong></td>
+                                        <td t-field="o.collector_name"/>
+                                    </tr>
+                                    <tr t-if="o.specimen_id">
+                                        <td><strong>Specimen ID:</strong></td>
+                                        <td t-field="o.specimen_id"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Test Results -->
+                        <div class="row mt-3" t-if="o.result == 'negative'">
+                            <div class="col-12">
+                                <div class="alert alert-success text-center">
+                                    <h4>Test Result: NEGATIVE</h4>
+                                    <p>No prohibited substances detected</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3" t-if="o.result == 'positive'">
+                            <div class="col-12">
+                                <div class="alert alert-danger text-center">
+                                    <h4>Test Result: POSITIVE</h4>
+                                    <p>Prohibited substances detected</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3" t-if="o.result == 'inconclusive'">
+                            <div class="col-12">
+                                <div class="alert alert-warning text-center">
+                                    <h4>Test Result: INCONCLUSIVE</h4>
+                                    <p>Retest recommended</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lab Results -->
+                        <div class="row mt-3" t-if="o.lab_results">
+                            <div class="col-12">
+                                <h5>Laboratory Results</h5>
+                                <p t-field="o.lab_results"/>
+                            </div>
+                        </div>
+
+                        <!-- Medical Review Officer -->
+                        <div class="row mt-3" t-if="o.mro_name or o.mro_review_date">
+                            <div class="col-12">
+                                <h5>Medical Review Officer</h5>
+                                <table class="table table-bordered">
+                                    <tr t-if="o.mro_name">
+                                        <td width="30%"><strong>MRO Name:</strong></td>
+                                        <td t-field="o.mro_name"/>
+                                    </tr>
+                                    <tr t-if="o.mro_review_date">
+                                        <td><strong>Review Date:</strong></td>
+                                        <td t-field="o.mro_review_date"/>
+                                    </tr>
+                                    <tr t-if="o.mro_notes">
+                                        <td><strong>MRO Notes:</strong></td>
+                                        <td t-field="o.mro_notes"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Chain of Custody -->
+                        <div class="row mt-3" t-if="o.chain_of_custody_verified">
+                            <div class="col-12">
+                                <p><strong>Chain of Custody:</strong> 
+                                    <span class="badge bg-success">Verified</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="row mt-3" t-if="o.notes">
+                            <div class="col-12">
+                                <strong>Additional Notes:</strong>
+                                <p t-field="o.notes"/>
+                            </div>
+                        </div>
+
+                        <!-- Important Notice -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <strong>Confidentiality Notice:</strong>
+                                    <p class="mb-0">This document contains confidential medical information protected by privacy laws. Unauthorized disclosure is prohibited.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Signature Section -->
+                        <div class="row mt-5">
+                            <div class="col-6">
+                                <div class="border-top pt-2">
+                                    <p><strong>Testing Facility:</strong></p>
+                                    <p t-field="o.testing_facility"></p>
+                                    <p>Date: <span t-field="o.test_date"/></p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border-top pt-2">
+                                    <p><strong>Medical Review Officer:</strong></p>
+                                    <p t-if="o.mro_name" t-field="o.mro_name"/>
+                                    <p t-if="o.mro_review_date">Date: <span t-field="o.mro_review_date"/></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="row mt-5">
+                            <div class="col-12 text-center text-muted">
+                                <small>
+                                    Drug/Alcohol Test Certificate - Confidential Medical Document
+                                    <br/>
+                                    Protected under applicable privacy and medical confidentiality laws
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Definition -->
+    <record id="action_report_guard_drug_test" model="ir.actions.report">
+        <field name="name">Drug/Alcohol Test Certificate</field>
+        <field name="model">guard.drug.test</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.guard_drug_test_report_template</field>
+        <field name="report_file">guardpro.guard_drug_test_report_template</field>
+        <field name="binding_model_id" ref="model_guard_drug_test"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Drug_Test_%s' % (object.reference_number)</field>
+    </record>
+</odoo>
+

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Resident Complaint Record Rules -->
+        
+        <!-- Residents can only see their own complaints -->
+        <record id="resident_complaint_resident_rule" model="ir.rule">
+            <field name="name">Resident: Own Complaints Only</field>
+            <field name="model_id" ref="model_resident_complaint"/>
+            <field name="domain_force">[('resident_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_resident_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+        
+        <!-- Client users can see complaints from their sites -->
+        <record id="resident_complaint_client_rule" model="ir.rule">
+            <field name="name">Client: Complaints from Own Sites</field>
+            <field name="model_id" ref="model_resident_complaint"/>
+            <field name="domain_force">[('site_id.client_id', '=', user.partner_id.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+        
+        <!-- Supervisors can see all complaints from assigned sites -->
+        <record id="resident_complaint_supervisor_rule" model="ir.rule">
+            <field name="name">Supervisor: All Complaints from Assigned Sites</field>
+            <field name="model_id" ref="model_resident_complaint"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_supervisor'))]"/>
+        </record>
+        
+        <!-- Managers and Admins see all complaints -->
+        <record id="resident_complaint_manager_rule" model="ir.rule">
+            <field name="name">Manager/Admin: All Complaints</field>
+            <field name="model_id" ref="model_resident_complaint"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager')), (4, ref('group_guardpro_admin'))]"/>
+        </record>
+        
+    </data>
+</odoo>
+

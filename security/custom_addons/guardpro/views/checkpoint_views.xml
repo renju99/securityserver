@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_checkpoint_list" model="ir.ui.view">
+            <field name="name">checkpoint.list</field>
+            <field name="model">checkpoint</field>
+            <field name="arch" type="xml">
+                <list string="Checkpoints">
+                    <header>
+                        <button name="%(action_checkpoint_map_creator_url)d" 
+                                type="action" 
+                                string="Create on Map" 
+                                class="btn-primary"
+                                icon="fa-map-marker"
+                                help="Create checkpoints by clicking on an interactive map"/>
+                    </header>
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="site_id"/>
+                    <field name="scan_type"/>
+                    <field name="status" widget="badge"/>
+                    <field name="total_scans" optional="hide"/>
+                    <field name="last_scan_time" optional="hide"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_checkpoint_form" model="ir.ui.view">
+            <field name="name">checkpoint.form</field>
+            <field name="model">checkpoint</field>
+            <field name="arch" type="xml">
+                <form string="Checkpoint">
+                    <header>
+                        <field name="status" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box">
+                            <button name="action_view_scans" type="object" class="oe_stat_button" icon="fa-check">
+                                <field name="total_scans" widget="statinfo" string="Scans"/>
+                            </button>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="code"/>
+                                <field name="site_id"/>
+                                <field name="scan_type"/>
+                            </group>
+                            <group>
+                                <field name="nfc_tag_id" invisible="scan_type not in ['nfc', 'both']"/>
+                                <field name="qr_code" invisible="scan_type not in ['qr', 'both']"/>
+                                <field name="qr_code_image" widget="image" invisible="scan_type not in ['qr', 'both']"/>
+                                <field name="gps_tolerance" invisible="scan_type != 'virtual'"/>
+                            </group>
+                        </group>
+                        <group string="Location Hierarchy">
+                            <field name="building_id"/>
+                            <field name="floor_id"/>
+                            <field name="area_id"/>
+                        </group>
+                        <group string="Location Details">
+                            <field name="location_description"/>
+                            <field name="latitude"/>
+                            <field name="longitude"/>
+                            <field name="floor" string="Legacy Floor/Level"/>
+                            <field name="zone" string="Legacy Zone/Area"/>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="requires_photo"/>
+                                <field name="requires_note"/>
+                                <field name="min_scan_interval"/>
+                            </group>
+                            <group>
+                                <field name="photo" widget="image"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Instructions">
+                                <field name="instructions" widget="text"/>
+                                <field name="special_notes" widget="text"/>
+                            </page>
+                            <page string="Tours">
+                                <field name="tour_ids" widget="many2many_tags"/>
+                            </page>
+                            <page string="Notes">
+                                <field name="notes" widget="text"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_checkpoint" model="ir.actions.act_window">
+            <field name="name">Checkpoints</field>
+            <field name="res_model">checkpoint</field>
+            <field name="view_mode">list,form</field>
+        </record>
+    </data>
+</odoo>
+

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Additional Shifts for NSHAMA Town Square - Past Week -->
+        <record id="shift_ts_past_1" model="guard.shift">
+            <field name="guard_id" ref="guard_john_smith"/>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="start_datetime" eval="(datetime.now() - timedelta(days=7, hours=8)).strftime('%Y-%m-%d 08:00:00')"/>
+            <field name="end_datetime" eval="(datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d 16:00:00')"/>
+            <field name="status">completed</field>
+            <field name="shift_type">regular</field>
+            <field name="assignment_type">patrol</field>
+            <field name="uniform_type">standard</field>
+            <field name="hourly_rate">25.00</field>
+            <field name="checkin_time" eval="(datetime.now() - timedelta(days=7, hours=8)).strftime('%Y-%m-%d 07:55:00')"/>
+            <field name="checkout_time" eval="(datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d 16:05:00')"/>
+            <field name="tour_ids" eval="[(6, 0, [ref('tour_ts_full_patrol')])]"/>
+            <field name="instructions">Regular day shift patrol. Focus on retail and public areas during business hours.</field>
+            <field name="notes">Shift completed successfully. No major incidents reported.</field>
+        </record>
+
+        <record id="shift_ts_past_2" model="guard.shift">
+            <field name="guard_id" ref="guard_michael_brown"/>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="start_datetime" eval="(datetime.now() - timedelta(days=6)).strftime('%Y-%m-%d 22:00:00')"/>
+            <field name="end_datetime" eval="(datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d 06:00:00')"/>
+            <field name="status">completed</field>
+            <field name="shift_type">regular</field>
+            <field name="assignment_type">patrol</field>
+            <field name="uniform_type">standard</field>
+            <field name="hourly_rate">30.00</field>
+            <field name="checkin_time" eval="(datetime.now() - timedelta(days=6)).strftime('%Y-%m-%d 21:58:00')"/>
+            <field name="checkout_time" eval="(datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d 06:03:00')"/>
+            <field name="tour_ids" eval="[(6, 0, [ref('tour_ts_full_patrol'), ref('tour_ts_parking_patrol')])]"/>
+            <field name="instructions">Night shift patrol. Enhanced focus on parking areas and perimeter security.</field>
+            <field name="notes">Night shift completed. All tours completed on schedule.</field>
+        </record>
+
+        <record id="shift_ts_past_3" model="guard.shift">
+            <field name="guard_id" ref="guard_david_wilson"/>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="start_datetime" eval="(datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d 14:00:00')"/>
+            <field name="end_datetime" eval="(datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d 22:00:00')"/>
+            <field name="status">completed</field>
+            <field name="shift_type">regular</field>
+            <field name="assignment_type">patrol</field>
+            <field name="uniform_type">standard</field>
+            <field name="hourly_rate">28.00</field>
+            <field name="checkin_time" eval="(datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d 14:00:00')"/>
+            <field name="checkout_time" eval="(datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d 22:00:00')"/>
+            <field name="tour_ids" eval="[(6, 0, [ref('tour_ts_evening_check')])]"/>
+            <field name="instructions">Evening shift covering retail closure. Ensure all shops are properly secured.</field>
+            <field name="notes">Evening shift completed successfully.</field>
+        </record>
+
+        <!-- Shifts for NSHAMA The Springs - Past Week -->
+        <record id="shift_sp_past_1" model="guard.shift">
+            <field name="guard_id" ref="guard_sarah_johnson"/>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="start_datetime" eval="(datetime.now() - timedelta(days=7, hours=8)).strftime('%Y-%m-%d 06:00:00')"/>
+            <field name="end_datetime" eval="(datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d 14:00:00')"/>
+            <field name="status">completed</field>
+            <field name="shift_type">regular</field>
+            <field name="assignment_type">patrol</field>
+            <field name="uniform_type">standard</field>
+            <field name="hourly_rate">25.00</field>
+            <field name="checkin_time" eval="(datetime.now() - timedelta(days=7, hours=8)).strftime('%Y-%m-%d 05:55:00')"/>
+            <field name="checkout_time" eval="(datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d 14:05:00')"/>
+            <field name="tour_ids" eval="[(6, 0, [ref('tour_sp_perimeter_check')])]"/>
+            <field name="instructions">Morning shift with K9 patrol. Focus on perimeter security and common areas.</field>
+            <field name="notes">K9 patrol completed. Rex performed excellently.</field>
+        </record>
+
+        <record id="shift_sp_past_2" model="guard.shift">
+            <field name="guard_id" ref="guard_lisa_thompson"/>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="start_datetime" eval="(datetime.now() - timedelta(days=6)).strftime('%Y-%m-%d 14:00:00')"/>
+            <field name="end_datetime" eval="(datetime.now() - timedelta(days=6)).strftime('%Y-%m-%d 22:00:00')"/>
+            <field name="status">completed</field>
+            <field name="shift_type">regular</field>
+            <field name="assignment_type">patrol</field>
+            <field name="uniform_type">standard</field>
+            <field name="hourly_rate">26.00</field>
+            <field name="checkin_time" eval="(datetime.now() - timedelta(days=6)).strftime('%Y-%m-%d 14:00:00')"/>
+            <field name="checkout_time" eval="(datetime.now() - timedelta(days=6)).strftime('%Y-%m-%d 22:00:00')"/>
+            <field name="tour_ids" eval="[(6, 0, [ref('tour_sp_facilities_check')])]"/>
+            <field name="instructions">Afternoon shift. Regular facility checks and clubhouse monitoring.</field>
+            <field name="notes">Shift completed without incident.</field>
+        </record>
+
+        <record id="shift_sp_past_3" model="guard.shift">
+            <field name="guard_id" ref="guard_kevin_lee"/>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="start_datetime" eval="(datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d 22:00:00')"/>
+            <field name="end_datetime" eval="(datetime.now() - timedelta(days=4)).strftime('%Y-%m-%d 06:00:00')"/>
+            <field name="status">completed</field>
+            <field name="shift_type">regular</field>
+            <field name="assignment_type">patrol</field>
+            <field name="uniform_type">standard</field>
+            <field name="hourly_rate">30.00</field>
+            <field name="checkin_time" eval="(datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d 21:57:00')"/>
+            <field name="checkout_time" eval="(datetime.now() - timedelta(days=4)).strftime('%Y-%m-%d 06:05:00')"/>
+            <field name="tour_ids" eval="[(6, 0, [ref('tour_sp_night_patrol')])]"/>
+            <field name="instructions">Night shift with hourly patrols. Monitor surveillance systems.</field>
+            <field name="notes">Night shift completed. All systems operational.</field>
+        </record>
+
+        <!-- Current/Upcoming Shifts -->
+        <record id="shift_ts_today_morning" model="guard.shift">
+            <field name="guard_id" ref="guard_emily_davis"/>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="start_datetime" eval="(datetime.now().replace(hour=6, minute=0, second=0)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="end_datetime" eval="(datetime.now().replace(hour=14, minute=0, second=0)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="status">confirmed</field>
+            <field name="shift_type">regular</field>
+            <field name="assignment_type">patrol</field>
+            <field name="uniform_type">standard</field>
+            <field name="hourly_rate">24.00</field>
+            <field name="tour_ids" eval="[(6, 0, [ref('tour_ts_full_patrol')])]"/>
+            <field name="instructions">Morning shift. Opening security check and daytime patrols.</field>
+        </record>
+
+        <record id="shift_sp_today_afternoon" model="guard.shift">
+            <field name="guard_id" ref="guard_jessica_martinez"/>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="start_datetime" eval="(datetime.now().replace(hour=14, minute=0, second=0)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="end_datetime" eval="(datetime.now().replace(hour=22, minute=0, second=0)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="status">scheduled</field>
+            <field name="shift_type">regular</field>
+            <field name="assignment_type">patrol</field>
+            <field name="uniform_type">standard</field>
+            <field name="hourly_rate">25.00</field>
+            <field name="tour_ids" eval="[(6, 0, [ref('tour_sp_facilities_check')])]"/>
+            <field name="instructions">Afternoon shift. Focus on recreation areas during peak usage.</field>
+        </record>
+
+        <!-- Upcoming Weekend Shifts -->
+        <record id="shift_ts_weekend_1" model="guard.shift">
+            <field name="guard_id" ref="guard_robert_taylor"/>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="start_datetime" eval="(datetime.now() + timedelta(days=2, hours=-datetime.now().hour+10)).strftime('%Y-%m-%d 10:00:00')"/>
+            <field name="end_datetime" eval="(datetime.now() + timedelta(days=2, hours=-datetime.now().hour+18)).strftime('%Y-%m-%d 18:00:00')"/>
+            <field name="status">scheduled</field>
+            <field name="shift_type">regular</field>
+            <field name="assignment_type">patrol</field>
+            <field name="uniform_type">standard</field>
+            <field name="hourly_rate">24.00</field>
+            <field name="tour_ids" eval="[(6, 0, [ref('tour_ts_full_patrol')])]"/>
+            <field name="instructions">Weekend day shift. Increased visitor activity expected.</field>
+        </record>
+
+        <!-- Overtime Shift -->
+        <record id="shift_ts_overtime" model="guard.shift">
+            <field name="guard_id" ref="guard_john_smith"/>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="start_datetime" eval="(datetime.now() + timedelta(days=1, hours=-datetime.now().hour+22)).strftime('%Y-%m-%d 22:00:00')"/>
+            <field name="end_datetime" eval="(datetime.now() + timedelta(days=2, hours=-datetime.now().hour+6)).strftime('%Y-%m-%d 06:00:00')"/>
+            <field name="status">scheduled</field>
+            <field name="shift_type">overtime</field>
+            <field name="assignment_type">patrol</field>
+            <field name="uniform_type">standard</field>
+            <field name="hourly_rate">37.50</field>
+            <field name="tour_ids" eval="[(6, 0, [ref('tour_ts_full_patrol'), ref('tour_ts_parking_patrol')])]"/>
+            <field name="instructions">Overtime night shift. Enhanced security coverage due to special event.</field>
+            <field name="notes">1.5x overtime rate applied.</field>
+        </record>
+
+        <!-- Cancelled Shift Example -->
+        <record id="shift_sp_cancelled" model="guard.shift">
+            <field name="guard_id" ref="guard_william_anderson"/>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="start_datetime" eval="(datetime.now() - timedelta(days=3)).strftime('%Y-%m-%d 06:00:00')"/>
+            <field name="end_datetime" eval="(datetime.now() - timedelta(days=3)).strftime('%Y-%m-%d 14:00:00')"/>
+            <field name="status">cancelled</field>
+            <field name="shift_type">regular</field>
+            <field name="assignment_type">patrol</field>
+            <field name="uniform_type">standard</field>
+            <field name="hourly_rate">25.00</field>
+            <field name="notes">Shift cancelled due to guard medical leave. Replacement guard assigned.</field>
+        </record>
+
+    </data>
+</odoo>
+

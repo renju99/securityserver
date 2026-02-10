@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vaccination List View -->
+    <record id="view_guard_vaccination_list" model="ir.ui.view">
+        <field name="name">guard.vaccination.list</field>
+        <field name="model">guard.vaccination</field>
+        <field name="arch" type="xml">
+            <list string="Vaccination Records" default_order="vaccination_date desc">
+                <field name="reference_number"/>
+                <field name="guard_name"/>
+                <field name="vaccine_type"/>
+                <field name="dose_number"/>
+                <field name="total_doses_required"/>
+                <field name="is_series_complete" widget="boolean_toggle"/>
+                <field name="vaccination_date"/>
+                <field name="expiry_date"/>
+                <field name="status" widget="badge" 
+                       decoration-success="status == 'verified'" 
+                       decoration-warning="status in ['scheduled', 'administered']"
+                       decoration-info="status == 'expired'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vaccination Form View -->
+    <record id="view_guard_vaccination_form" model="ir.ui.view">
+        <field name="name">guard.vaccination.form</field>
+        <field name="model">guard.vaccination</field>
+        <field name="arch" type="xml">
+            <form string="Vaccination Record">
+                <header>
+                    <button name="action_verify" string="Verify" type="object" class="oe_highlight" 
+                            invisible="status in ['verified', 'cancelled']"/>
+                    <button name="action_schedule_next_dose" string="Schedule Next Dose" type="object" 
+                            invisible="is_series_complete or status != 'verified'"/>
+                    <button name="action_report_reaction" string="Report Adverse Reaction" type="object" 
+                            invisible="status != 'verified'"/>
+                    <field name="status" widget="statusbar" statusbar_visible="scheduled,administered,verified"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_attachments" type="object" class="oe_stat_button" icon="fa-paperclip">
+                            <field name="attachment_count" widget="statinfo" string="Documents"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Series Complete" bg_color="text-bg-success" invisible="not is_series_complete"/>
+                    <widget name="web_ribbon" title="Expired" bg_color="text-bg-danger" invisible="status != 'expired'"/>
+                    
+                    <group>
+                        <group>
+                            <field name="reference_number" readonly="1"/>
+                            <field name="guard_id" options="{'no_create': True}"/>
+                            <field name="vaccine_type"/>
+                            <field name="other_vaccine" invisible="vaccine_type != 'other'"/>
+                            <field name="vaccine_name"/>
+                        </group>
+                        <group>
+                            <field name="dose_number" widget="integer"/>
+                            <field name="total_doses_required" widget="integer"/>
+                            <field name="is_series_complete" readonly="1"/>
+                            <field name="lot_number"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <group>
+                            <field name="vaccination_date"/>
+                            <field name="expiry_date"/>
+                            <field name="next_dose_date" invisible="is_series_complete"/>
+                        </group>
+                        <group>
+                            <field name="is_mandatory"/>
+                            <field name="exemption_granted" widget="boolean_toggle"/>
+                            <field name="exemption_type" invisible="not exemption_granted"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Administration" name="administration">
+                            <group>
+                                <group>
+                                    <field name="administered_by"/>
+                                    <field name="facility_name"/>
+                                    <field name="site_of_administration"/>
+                                </group>
+                                <group>
+                                    <field name="facility_address" placeholder="Facility address..."/>
+                                </group>
+                            </group>
+                        </page>
+                        
+                        <page string="Verification" name="verification">
+                            <group>
+                                <group>
+                                    <field name="verified_by_id" readonly="1"/>
+                                    <field name="verification_date" readonly="1"/>
+                                </group>
+                                <group>
+                                    <field name="verification_notes" placeholder="Verification notes..."/>
+                                </group>
+                            </group>
+                        </page>
+                        
+                        <page string="Exemption" name="exemption" invisible="not exemption_granted">
+                            <group>
+                                <field name="exemption_reason" placeholder="Reason for exemption..."/>
+                                <field name="exemption_expiry"/>
+                            </group>
+                        </page>
+                        
+                        <page string="Adverse Reactions" name="reactions">
+                            <group>
+                                <group>
+                                    <field name="adverse_reaction" widget="boolean_toggle"/>
+                                    <field name="medical_attention_required" widget="boolean_toggle" 
+                                           invisible="not adverse_reaction"/>
+                                </group>
+                                <group>
+                                    <field name="reaction_details" placeholder="Description of any adverse reactions..." 
+                                           invisible="not adverse_reaction"/>
+                                </group>
+                            </group>
+                        </page>
+                        
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Additional notes..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vaccination Search View -->
+    <record id="view_guard_vaccination_search" model="ir.ui.view">
+        <field name="name">guard.vaccination.search</field>
+        <field name="model">guard.vaccination</field>
+        <field name="arch" type="xml">
+            <search string="Vaccination Records">
+                <field name="guard_id"/>
+                <field name="reference_number"/>
+                <field name="vaccine_type"/>
+                <filter string="Scheduled" name="filter_scheduled" domain="[('status', '=', 'scheduled')]"/>
+                <filter string="Verified" name="filter_verified" domain="[('status', '=', 'verified')]"/>
+                <filter string="Expired" name="filter_expired" domain="[('status', '=', 'expired')]"/>
+                <separator/>
+                <filter string="Series Complete" name="filter_complete" domain="[('is_series_complete', '=', True)]"/>
+                <filter string="Series Incomplete" name="filter_incomplete" domain="[('is_series_complete', '=', False)]"/>
+                <separator/>
+                <filter string="Mandatory" name="filter_mandatory" domain="[('is_mandatory', '=', True)]"/>
+                <filter string="With Exemption" name="filter_exemption" domain="[('exemption_granted', '=', True)]"/>
+                <separator/>
+                <filter string="Adverse Reactions" name="filter_reactions" domain="[('adverse_reaction', '=', True)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Guard" name="group_guard" context="{'group_by': 'guard_id'}"/>
+                    <filter string="Vaccine Type" name="group_type" context="{'group_by': 'vaccine_type'}"/>
+                    <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Vaccination Action -->
+    <record id="action_guard_vaccination" model="ir.actions.act_window">
+        <field name="name">Vaccination Records</field>
+        <field name="res_model">guard.vaccination</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a vaccination record
+            </p>
+            <p>
+                Track vaccination records for guards.
+            </p>
+        </field>
+    </record>
+
+</odoo>
+

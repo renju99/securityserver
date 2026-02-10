@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Compliance Audit PDF Report Template -->
+    <template id="compliance_audit_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h2>Compliance Audit Report</h2>
+                                <h4 t-if="o.site_id" t-field="o.site_id.name"/>
+                            </div>
+                        </div>
+
+                        <!-- Audit Reference and Status -->
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <h4>Audit ID: <span t-field="o.name"/></h4>
+                            </div>
+                            <div class="col-6 text-end">
+                                <h5>
+                                    Status: 
+                                    <t t-if="o.state == 'draft'">
+                                        <span class="badge bg-secondary">Draft</span>
+                                    </t>
+                                    <t t-elif="o.state == 'scheduled'">
+                                        <span class="badge bg-info">Scheduled</span>
+                                    </t>
+                                    <t t-elif="o.state == 'in_progress'">
+                                        <span class="badge bg-warning">In Progress</span>
+                                    </t>
+                                    <t t-elif="o.state == 'completed'">
+                                        <span class="badge bg-success">Completed</span>
+                                    </t>
+                                    <t t-elif="o.state == 'cancelled'">
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    </t>
+                                </h5>
+                            </div>
+                        </div>
+
+                        <!-- Audit Information -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Audit Information</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Audit Type:</strong></td>
+                                        <td>
+                                            <span t-field="o.audit_type"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Audit Date:</strong></td>
+                                        <td>
+                                            <span t-field="o.audit_date"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Auditor:</strong></td>
+                                        <td>
+                                            <span t-field="o.auditor_id.name"/>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="o.site_id">
+                                        <td><strong>Site:</strong></td>
+                                        <td>
+                                            <span t-field="o.site_id.name"/>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="o.guard_id">
+                                        <td><strong>Guard:</strong></td>
+                                        <td>
+                                            <span t-field="o.guard_id.name"/>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="o.audit_start_time">
+                                        <td><strong>Start Time:</strong></td>
+                                        <td>
+                                            <span t-field="o.audit_start_time"/>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="o.audit_end_time">
+                                        <td><strong>End Time:</strong></td>
+                                        <td>
+                                            <span t-field="o.audit_end_time"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Audit Score -->
+                        <div class="row mt-3">
+                            <div class="col-12 text-center">
+                                <h3>
+                                    Overall Score: 
+                                    <t t-if="o.compliance_score &gt;= 90">
+                                        <span class="badge bg-success" style="font-size: 1.5em;">
+                                            <span t-field="o.compliance_score"/>%
+                                        </span>
+                                    </t>
+                                    <t t-elif="o.compliance_score &gt;= 75">
+                                        <span class="badge bg-info" style="font-size: 1.5em;">
+                                            <span t-field="o.compliance_score"/>%
+                                        </span>
+                                    </t>
+                                    <t t-elif="o.compliance_score &gt;= 60">
+                                        <span class="badge bg-warning" style="font-size: 1.5em;">
+                                            <span t-field="o.compliance_score"/>%
+                                        </span>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="badge bg-danger" style="font-size: 1.5em;">
+                                            <span t-field="o.compliance_score"/>%
+                                        </span>
+                                    </t>
+                                </h3>
+                                <p>
+                                    <strong>Overall Rating:</strong>
+                                    <span t-field="o.rating"/>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Checklist Items -->
+                        <div class="row mt-4" t-if="o.checklist_ids">
+                            <div class="col-12">
+                                <h5>Audit Checklist</h5>
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr class="table-active">
+                                            <th>Item</th>
+                                            <th style="width: 100px;">Result</th>
+                                            <th style="width: 100px;">Severity</th>
+                                            <th>Notes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="o.checklist_ids" t-as="item">
+                                            <tr>
+                                                <td>
+                                                    <span t-field="item.description"/>
+                                                </td>
+                                                <td>
+                                                    <t t-if="item.result == 'pass'">
+                                                        <span class="badge bg-success">Pass</span>
+                                                    </t>
+                                                    <t t-elif="item.result == 'fail'">
+                                                        <span class="badge bg-danger">Fail</span>
+                                                    </t>
+                                                    <t t-elif="item.result == 'na'">
+                                                        <span class="badge bg-secondary">N/A</span>
+                                                    </t>
+                                                </td>
+                                                <td>
+                                                    <span t-field="item.severity"/>
+                                                </td>
+                                                <td>
+                                                    <span t-field="item.notes"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Checklist Photos -->
+                        <t t-set="photo_items" t-value="o.checklist_ids.filtered(lambda c: c.photo_1 or c.photo_2 or c.photo_ids)"/>
+                        <div class="row mt-4" t-if="photo_items">
+                            <div class="col-12">
+                                <h5>Checklist Photo Evidence</h5>
+                                <t t-foreach="photo_items" t-as="photo_item">
+                                    <div class="border rounded p-2 mb-3" style="page-break-inside: avoid;">
+                                        <h6 class="mb-2">
+                                            <strong>Checkpoint:</strong>
+                                            <span t-esc="photo_item.name or photo_item.description"/>
+                                        </h6>
+                                        <p class="mb-2" t-if="photo_item.description">
+                                            <strong>Description:</strong>
+                                            <span t-field="photo_item.description"/>
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Result:</strong>
+                                            <t t-if="photo_item.result == 'pass'">Pass</t>
+                                            <t t-elif="photo_item.result == 'fail'">Fail</t>
+                                            <t t-elif="photo_item.result == 'na'">Not Applicable</t>
+                                            <t t-else="">-</t>
+                                        </p>
+                                        <p class="mb-2" t-if="photo_item.notes">
+                                            <strong>Notes:</strong>
+                                            <span t-field="photo_item.notes"/>
+                                        </p>
+                                        <div class="d-flex flex-wrap gap-3">
+                                            <div t-if="photo_item.photo_1">
+                                                <img t-att-src="image_data_uri(photo_item.photo_1)"
+                                                     style="max-width: 240px; max-height: 180px;"
+                                                     alt="Photo 1"/>
+                                            </div>
+                                            <div t-if="photo_item.photo_2">
+                                                <img t-att-src="image_data_uri(photo_item.photo_2)"
+                                                     style="max-width: 240px; max-height: 180px;"
+                                                     alt="Photo 2"/>
+                                            </div>
+                                            <t t-foreach="photo_item.photo_ids" t-as="attachment">
+                                                <div t-if="attachment.datas">
+                                                    <img t-att-src="image_data_uri(attachment.datas)"
+                                                         style="max-width: 240px; max-height: 180px;"
+                                                         t-att-alt="'Photo - %s' % (attachment.name or 'Attachment')"/>
+                                                    <div class="mt-1 text-muted small" t-if="attachment.name">
+                                                        <span t-esc="attachment.name"/>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Findings -->
+                        <div class="row mt-3" t-if="o.findings">
+                            <div class="col-12">
+                                <h5>Findings</h5>
+                                <p t-field="o.findings"/>
+                            </div>
+                        </div>
+
+                        <!-- Corrective Actions -->
+                        <div class="row mt-3" t-if="o.corrective_action_ids">
+                            <div class="col-12">
+                                <h5>Corrective Actions Required</h5>
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr class="table-active">
+                                            <th>Priority</th>
+                                            <th>Action Required</th>
+                                            <th>Due Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="o.corrective_action_ids" t-as="action">
+                                            <tr>
+                                                <td>
+                                                    <span t-field="action.priority"/>
+                                                </td>
+                                                <td>
+                                                    <span t-field="action.name"/>
+                                                </td>
+                                                <td>
+                                                    <span t-field="action.due_date"/>
+                                                </td>
+                                                <td>
+                                                    <span t-field="action.state"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Recommendations & Summary -->
+                        <div class="row mt-3" t-if="o.recommendations or o.executive_summary or o.notes">
+                            <div class="col-12">
+                                <h5>Recommendations &amp; Summary</h5>
+                                <div t-if="o.recommendations">
+                                    <strong>Recommendations</strong>
+                                    <div t-field="o.recommendations"/>
+                                </div>
+                                <div class="mt-2" t-if="o.executive_summary">
+                                    <strong>Executive Summary</strong>
+                                    <div t-field="o.executive_summary"/>
+                                </div>
+                                <div class="mt-2" t-if="o.notes">
+                                    <strong>Additional Notes</strong>
+                                    <div t-field="o.notes"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Signature Section -->
+                        <div class="row mt-5">
+                            <div class="col-6">
+                                <div class="border-top pt-2">
+                                    <p><strong>Audited By:</strong></p>
+                                    <p>
+                                        <span t-field="o.auditor_id.name"/>
+                                    </p>
+                                    <p>Date: <span t-field="o.audit_date"/></p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border-top pt-2">
+                                    <p><strong>Reviewed By:</strong></p>
+                                    <p>Signature: ___________________</p>
+                                    <p>Date: ___________________</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="row mt-5">
+                            <div class="col-12 text-center text-muted">
+                                <small>
+                                    Compliance Audit - Confidential Document
+                                    <br/>
+                                    Generated on <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Definition -->
+    <record id="action_report_compliance_audit" model="ir.actions.report">
+        <field name="name">Compliance Audit Report</field>
+        <field name="model">compliance.audit</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.compliance_audit_report_template</field>
+        <field name="report_file">guardpro.compliance_audit_report_template</field>
+        <field name="binding_model_id" ref="model_compliance_audit"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Audit_Report_%s' % (object.name)</field>
+    </record>
+</odoo>
+

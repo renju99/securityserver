@@ -1,0 +1,623 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Corrective Action Form View -->
+    <record id="view_compliance_corrective_action_form" model="ir.ui.view">
+        <field name="name">compliance.corrective.action.form</field>
+        <field name="model">compliance.corrective.action</field>
+        <field name="arch" type="xml">
+            <form string="Corrective Action">
+                <header>
+                    <button name="action_start" string="Start" type="object"
+                            class="oe_highlight"
+                            invisible="state != 'open'"/>
+                    <button name="action_complete" string="Mark Complete" type="object"
+                            class="oe_highlight"
+                            invisible="state not in ['open', 'in_progress']"/>
+                    <button name="action_verify" string="Verify" type="object"
+                            class="oe_highlight"
+                            invisible="state != 'completed'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="open,in_progress,completed,verified"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Overdue" bg_color="text-bg-danger"
+                            invisible="not is_overdue"/>
+                    <widget name="web_ribbon" title="Urgent" bg_color="text-bg-warning"
+                            invisible="priority != '3'"/>
+                    <group>
+                        <group>
+                            <field name="audit_id"/>
+                            <field name="name"/>
+                            <field name="assigned_to"/>
+                        </group>
+                        <group>
+                            <field name="priority" widget="priority"/>
+                            <field name="due_date"/>
+                            <field name="days_until_due" invisible="state in ['completed', 'verified']"/>
+                            <field name="is_overdue" invisible="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="description" placeholder="Detailed description of the issue and required corrective action..."/>
+                    </group>
+                    <notebook>
+                        <page string="Completion Details" invisible="state not in ['completed', 'verified']">
+                            <group>
+                                <group>
+                                    <field name="completion_date"/>
+                                    <field name="completion_notes" placeholder="Describe actions taken..."/>
+                                </group>
+                                <group>
+                                    <field name="completion_photo" widget="image" options="{'size': [300, 300]}"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Verification" invisible="state != 'verified'">
+                            <group>
+                                <group>
+                                    <field name="verified_by"/>
+                                    <field name="verification_date"/>
+                                </group>
+                                <group>
+                                    <field name="verification_notes" placeholder="Verification notes..."/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Corrective Action List View -->
+    <record id="view_compliance_corrective_action_list" model="ir.ui.view">
+        <field name="name">compliance.corrective.action.list</field>
+        <field name="model">compliance.corrective.action</field>
+        <field name="arch" type="xml">
+            <list string="Corrective Actions" multi_edit="1" sample="1">
+                <field name="audit_id"/>
+                <field name="name"/>
+                <field name="assigned_to"/>
+                <field name="priority" widget="priority"/>
+                <field name="due_date"/>
+                <field name="days_until_due" optional="show"/>
+                <field name="completion_date" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'verified'"
+                       decoration-info="state == 'completed'"
+                       decoration-warning="state == 'in_progress'"
+                       decoration-muted="state == 'open'"/>
+                <field name="is_overdue" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Corrective Action Kanban View -->
+    <record id="view_compliance_corrective_action_kanban" model="ir.ui.view">
+        <field name="name">compliance.corrective.action.kanban</field>
+        <field name="model">compliance.corrective.action</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column" sample="1">
+                <field name="name"/>
+                <field name="assigned_to"/>
+                <field name="priority"/>
+                <field name="due_date"/>
+                <field name="is_overdue"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="name"/>
+                                        <t t-if="record.is_overdue.raw_value">
+                                            <span class="badge text-bg-danger ms-1">Overdue</span>
+                                        </t>
+                                    </strong>
+                                </div>
+                                <div class="o_kanban_record_top_right">
+                                    <field name="priority" widget="priority"/>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <i class="fa fa-user" title="User" aria-label="User"/> <field name="assigned_to"/>
+                                    </div>
+                                    <div class="col-12">
+                                        <i class="fa fa-calendar" title="Date" aria-label="Date"/> Due: <field name="due_date"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_right">
+                                    <field name="activity_ids" widget="kanban_activity"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Corrective Action Search View -->
+    <record id="view_compliance_corrective_action_search" model="ir.ui.view">
+        <field name="name">compliance.corrective.action.search</field>
+        <field name="model">compliance.corrective.action</field>
+        <field name="arch" type="xml">
+            <search string="Search Corrective Actions">
+                <field name="name"/>
+                <field name="audit_id"/>
+                <field name="assigned_to"/>
+                <separator/>
+                <filter string="My Actions" name="my_actions"
+                        domain="[('assigned_to', '=', uid)]"/>
+                <filter string="Overdue" name="overdue"
+                        domain="[('is_overdue', '=', True)]"/>
+                <filter string="Urgent" name="urgent"
+                        domain="[('priority', '=', '3')]"/>
+                <separator/>
+                <filter string="Open" name="open" domain="[('state', '=', 'open')]"/>
+                <filter string="In Progress" name="in_progress" domain="[('state', '=', 'in_progress')]"/>
+                <filter string="Completed" name="completed" domain="[('state', '=', 'completed')]"/>
+                <filter string="Verified" name="verified" domain="[('state', '=', 'verified')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Audit" name="group_audit" context="{'group_by': 'audit_id'}"/>
+                    <filter string="Assigned To" name="group_assigned" context="{'group_by': 'assigned_to'}"/>
+                    <filter string="Status" name="group_status" context="{'group_by': 'state'}"/>
+                    <filter string="Priority" name="group_priority" context="{'group_by': 'priority'}"/>
+                    <filter string="Due Date" name="group_due" context="{'group_by': 'due_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Corrective Action Action -->
+    <record id="action_compliance_corrective_action" model="ir.actions.act_window">
+        <field name="name">Corrective Actions</field>
+        <field name="res_model">compliance.corrective.action</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{'search_default_my_actions': 1, 'search_default_open': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No corrective actions yet
+            </p>
+            <p>
+                Corrective actions are created when audit findings require follow-up.
+            </p>
+        </field>
+    </record>
+    <!-- Compliance Audit Form View -->
+    <record id="view_compliance_audit_form" model="ir.ui.view">
+        <field name="name">compliance.audit.form</field>
+        <field name="model">compliance.audit</field>
+        <field name="arch" type="xml">
+            <form string="Compliance Audit">
+                <header>
+                    <button name="action_start_audit" string="Start Audit" type="object"
+                            class="oe_highlight"
+                            invisible="state != 'draft'"/>
+                    <button name="action_complete_audit" string="Complete Audit" type="object"
+                            class="oe_highlight"
+                            invisible="state != 'in_progress'"/>
+                    <button name="action_create_corrective_action" string="Create Corrective Action" type="object"
+                            invisible="state not in ['completed', 'requires_action']"/>
+                    <button name="action_close_audit" string="Close Audit" type="object"
+                            invisible="state != 'requires_action' or open_actions > 0"/>
+                    <button name="action_generate_report" string="Generate Report" type="object"
+                            icon="fa-file-pdf-o"
+                            invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,in_progress,completed,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(action_compliance_corrective_action)d" type="action"
+                                class="oe_stat_button" icon="fa-tasks"
+                                context="{'search_default_audit_id': id}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="action_count"/></span>
+                                <span class="o_stat_text">Actions</span>
+                            </div>
+                        </button>
+                        <button name="%(action_compliance_corrective_action)d" type="action"
+                                class="oe_stat_button" icon="fa-exclamation-triangle"
+                                context="{'search_default_audit_id': id, 'search_default_open': 1}"
+                                invisible="open_actions == 0">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value text-danger"><field name="open_actions"/></span>
+                                <span class="o_stat_text">Open</span>
+                            </div>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Excellent" bg_color="text-bg-success"
+                            invisible="rating != 'excellent'"/>
+                    <widget name="web_ribbon" title="Needs Improvement" bg_color="text-bg-warning"
+                            invisible="rating not in ['needs_improvement', 'satisfactory']"/>
+                    <widget name="web_ribbon" title="Unsatisfactory" bg_color="text-bg-danger"
+                            invisible="rating != 'unsatisfactory'"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="audit_type"/>
+                            <field name="audit_date"/>
+                            <field name="auditor_id"/>
+                            <field name="template_id" options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="site_id" invisible="audit_type != 'site'"/>
+                            <field name="guard_id" invisible="audit_type != 'guard'"/>
+                            <field name="equipment_id" invisible="audit_type != 'equipment'"/>
+                            <field name="is_scheduled" widget="boolean_toggle"/>
+                            <field name="is_surprise" widget="boolean_toggle"/>
+                            <field name="frequency"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="audit_start_time"/>
+                            <field name="audit_end_time"/>
+                        </group>
+                        <group>
+                            <field name="auditor_team_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Checklist">
+                            <field name="checklist_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="category" optional="hide"/>
+                                    <field name="name"/>
+                                    <field name="description" optional="hide"/>
+                                    <field name="result"
+                                           decoration-success="result == 'pass'"
+                                           decoration-danger="result == 'fail'"
+                                           decoration-muted="result == 'na'"/>
+                                    <field name="notes" optional="hide"/>
+                                    <field name="requires_action" widget="boolean_toggle"/>
+                                    <field name="severity" optional="hide"/>
+                                    <field name="photo_1" string="Photo A" widget="image"
+                                           options="{'size': [96, 96], 'capture': 'camera', 'accepted_file_types': 'image/*'}"
+                                           optional="show"/>
+                                    <field name="photo_2" string="Photo B" widget="image"
+                                           options="{'size': [96, 96], 'capture': 'camera', 'accepted_file_types': 'image/*'}"
+                                           optional="hide"/>
+                                </list>
+                                <form string="Checklist Item">
+                                    <sheet>
+                                        <group>
+                                            <group>
+                                                <field name="name"/>
+                                                <field name="category" optional="hide"/>
+                                                <field name="result" widget="radio"/>
+                                                <field name="requires_action" widget="boolean_toggle"/>
+                                                <field name="severity" optional="hide"/>
+                                            </group>
+                                            <group>
+                                                <field name="description" placeholder="Describe the checkpoint criteria..."/>
+                                                <field name="notes" placeholder="Add observations or context..."/>
+                                            </group>
+                                        </group>
+                                        <group string="Photo Evidence">
+                                            <group>
+                                                <field name="photo_1" widget="image"
+                                                       options="{'size': [512, 512], 'capture': 'camera', 'accept': 'image/*'}"/>
+                                            </group>
+                                            <group>
+                                                <field name="photo_2" widget="image"
+                                                       options="{'size': [512, 512], 'capture': 'camera', 'accept': 'image/*'}"/>
+                                            </group>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Scoring">
+                            <group>
+                                <group>
+                                    <field name="total_items"/>
+                                    <field name="passed_items"/>
+                                    <field name="failed_items"/>
+                                    <field name="na_items"/>
+                                </group>
+                                <group>
+                                    <field name="compliance_score" widget="progressbar"/>
+                                    <field name="rating" widget="badge"
+                                           decoration-success="rating == 'excellent'"
+                                           decoration-info="rating == 'good'"
+                                           decoration-warning="rating in ['satisfactory', 'needs_improvement']"
+                                           decoration-danger="rating == 'unsatisfactory'"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Findings">
+                            <group>
+                                <field name="findings" placeholder="Enter key findings from the audit..."/>
+                            </group>
+                        </page>
+                        <page string="Recommendations">
+                            <group>
+                                <field name="recommendations" placeholder="Enter recommendations for improvement..."/>
+                            </group>
+                        </page>
+                        <page string="Executive Summary">
+                            <group>
+                                <field name="executive_summary" placeholder="Enter high-level summary for management..."/>
+                            </group>
+                        </page>
+                        <page string="Follow-up">
+                            <group>
+                                <group>
+                                    <field name="follow_up_required" widget="boolean_toggle"/>
+                                    <field name="follow_up_date" invisible="not follow_up_required"/>
+                                    <field name="next_audit_date"/>
+                                </group>
+                                <group>
+                                    <field name="incident_ids" widget="many2many_tags"/>
+                                </group>
+                            </group>
+                            <group>
+                                <field name="notes" placeholder="Additional notes..."/>
+                            </group>
+                        </page>
+                        <page string="Attachments">
+                            <field name="attachment_ids" widget="many2many_binary"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Compliance Audit List View -->
+    <record id="view_compliance_audit_list" model="ir.ui.view">
+        <field name="name">compliance.audit.list</field>
+        <field name="model">compliance.audit</field>
+        <field name="arch" type="xml">
+            <list string="Compliance Audits" multi_edit="1" sample="1">
+                <field name="name"/>
+                <field name="audit_type"/>
+                <field name="audit_date"/>
+                <field name="auditor_id"/>
+                <field name="site_id" optional="show"/>
+                <field name="compliance_score" widget="progressbar" optional="show"/>
+                <field name="rating" widget="badge" optional="show"
+                       decoration-success="rating == 'excellent'"
+                       decoration-info="rating == 'good'"
+                       decoration-warning="rating in ['satisfactory', 'needs_improvement']"
+                       decoration-danger="rating == 'unsatisfactory'"/>
+                <field name="open_actions" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'closed'"
+                       decoration-info="state == 'completed'"
+                       decoration-warning="state == 'requires_action'"
+                       decoration-muted="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Compliance Audit Kanban View -->
+    <record id="view_compliance_audit_kanban" model="ir.ui.view">
+        <field name="name">compliance.audit.kanban</field>
+        <field name="model">compliance.audit</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column" sample="1">
+                <field name="name"/>
+                <field name="audit_type"/>
+                <field name="audit_date"/>
+                <field name="compliance_score"/>
+                <field name="rating"/>
+                <field name="state"/>
+                <field name="open_actions"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="name"/>
+                                    </strong>
+                                    <div class="o_kanban_record_subtitle text-muted">
+                                        <field name="audit_type"/> - <field name="audit_date"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <field name="compliance_score" widget="progressbar"/>
+                                    </div>
+                                    <div class="col-12 mt-2">
+                                        Rating: <field name="rating" widget="badge"/>
+                                    </div>
+                                    <div class="col-12" t-if="record.open_actions.raw_value > 0">
+                                        <span class="badge text-bg-warning">
+                                            <field name="open_actions"/> Open Actions
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left">
+                                    <field name="auditor_id" widget="many2one_avatar_user"/>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <field name="activity_ids" widget="kanban_activity"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Compliance Audit Search View -->
+    <record id="view_compliance_audit_search" model="ir.ui.view">
+        <field name="name">compliance.audit.search</field>
+        <field name="model">compliance.audit</field>
+        <field name="arch" type="xml">
+            <search string="Search Audits">
+                <field name="name"/>
+                <field name="audit_type"/>
+                <field name="auditor_id"/>
+                <field name="site_id"/>
+                <separator/>
+                <filter string="My Audits" name="my_audits"
+                        domain="[('auditor_id', '=', uid)]"/>
+                <filter string="Requires Action" name="requires_action"
+                        domain="[('state', '=', 'requires_action')]"/>
+                <filter string="Excellent Rating" name="excellent"
+                        domain="[('rating', '=', 'excellent')]"/>
+                <filter string="Poor Rating" name="poor"
+                        domain="[('rating', 'in', ['needs_improvement', 'unsatisfactory'])]"/>
+                <separator/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="In Progress" name="in_progress" domain="[('state', '=', 'in_progress')]"/>
+                <filter string="Completed" name="completed" domain="[('state', '=', 'completed')]"/>
+                <filter string="Closed" name="closed" domain="[('state', '=', 'closed')]"/>
+                <separator/>
+                <filter string="This Month" name="this_month"
+                        domain="[('audit_date', '&gt;=', (context_today() - relativedelta(days=30)))]"/>
+                <separator/>
+                <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Audit Type" name="group_type" context="{'group_by': 'audit_type'}"/>
+                    <filter string="Auditor" name="group_auditor" context="{'group_by': 'auditor_id'}"/>
+                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Status" name="group_status" context="{'group_by': 'state'}"/>
+                    <filter string="Rating" name="group_rating" context="{'group_by': 'rating'}"/>
+                    <filter string="Audit Date" name="group_date" context="{'group_by': 'audit_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Compliance Audit Pivot View -->
+    <record id="view_compliance_audit_pivot" model="ir.ui.view">
+        <field name="name">compliance.audit.pivot</field>
+        <field name="model">compliance.audit</field>
+        <field name="arch" type="xml">
+            <pivot string="Audit Analysis" sample="1">
+                <field name="audit_type" type="row"/>
+                <field name="state" type="col"/>
+                <field name="compliance_score" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Compliance Audit Graph View -->
+    <record id="view_compliance_audit_graph" model="ir.ui.view">
+        <field name="name">compliance.audit.graph</field>
+        <field name="model">compliance.audit</field>
+        <field name="arch" type="xml">
+            <graph string="Audit Statistics" sample="1" type="bar">
+                <field name="audit_type"/>
+                <field name="compliance_score" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Compliance Audit Action -->
+    <record id="action_compliance_audit" model="ir.actions.act_window">
+        <field name="name">Compliance Audits</field>
+        <field name="res_model">compliance.audit</field>
+        <field name="view_mode">kanban,list,form,pivot,graph</field>
+        <field name="context">{'search_default_in_progress': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first compliance audit
+            </p>
+            <p>
+                Conduct systematic audits to ensure compliance with regulations,
+                standards, and operational procedures.
+            </p>
+        </field>
+    </record>
+
+
+    <!-- Audit Template Form View -->
+    <record id="view_compliance_audit_template_form" model="ir.ui.view">
+        <field name="name">compliance.audit.template.form</field>
+        <field name="model">compliance.audit.template</field>
+        <field name="arch" type="xml">
+            <form string="Audit Template">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_create_audit" string="Create Audit" type="object"
+                                class="oe_stat_button" icon="fa-plus-square">
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="audit_type"/>
+                        </group>
+                        <group>
+                            <field name="frequency"/>
+                            <field name="item_count"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="description"/>
+                    </group>
+                    <notebook>
+                        <page string="Checklist Items">
+                            <field name="item_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="category"/>
+                                    <field name="name"/>
+                                    <field name="description"/>
+                                    <field name="regulation_reference"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Audit Template List View -->
+    <record id="view_compliance_audit_template_list" model="ir.ui.view">
+        <field name="name">compliance.audit.template.list</field>
+        <field name="model">compliance.audit.template</field>
+        <field name="arch" type="xml">
+            <list string="Audit Templates">
+                <field name="name"/>
+                <field name="audit_type"/>
+                <field name="frequency"/>
+                <field name="item_count"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Audit Template Action -->
+    <record id="action_compliance_audit_template" model="ir.actions.act_window">
+        <field name="name">Audit Templates</field>
+        <field name="res_model">compliance.audit.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first audit template
+            </p>
+            <p>
+                Templates allow you to quickly create audits with pre-defined checklists.
+            </p>
+        </field>
+    </record>
+
+</odoo>
+

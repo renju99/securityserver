@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Optimized Route Map Template -->
+        <template id="optimized_route_map_template" name="Optimized Route Map">
+            <t t-set="google_maps_api_key" t-value="google_maps_api_key or request.env['ir.config_parameter'].sudo().get_param('guardpro.google_maps_api_key')"/>
+            <t t-call="web.layout">
+                <t t-set="head">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+                    <meta name="mobile-web-app-capable" content="yes"/>
+                    <meta name="apple-mobile-web-app-capable" content="yes"/>
+                    <t t-if="google_maps_api_key">
+                        <script async="async" defer="defer" t-att-src="'https://maps.googleapis.com/maps/api/js?key=%s&amp;libraries=geometry&amp;loading=async&amp;callback=initMapCallback' % google_maps_api_key"/>
+                    </t>
+                    <style>
+                        #map {
+                            height: calc(100vh - 120px);
+                            width: 100%;
+                        }
+                        
+                        .map-container {
+                            position: relative;
+                            padding: 20px;
+                        }
+                        
+                        .route-info {
+                            position: absolute;
+                            top: 30px;
+                            right: 30px;
+                            z-index: 5;
+                            background: white;
+                            padding: 20px;
+                            border-radius: 8px;
+                            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                            max-width: 350px;
+                        }
+                        
+                        @media (max-width: 768px) {
+                            .route-info {
+                                position: fixed;
+                                top: auto;
+                                bottom: 0;
+                                right: 0;
+                                left: 0;
+                                max-width: 100%;
+                                max-height: 40vh;
+                                overflow-y: auto;
+                                border-radius: 16px 16px 0 0;
+                            }
+                        }
+                        
+                        .route-info h4 {
+                            margin-top: 0;
+                            margin-bottom: 10px;
+                            font-size: 16px;
+                            font-weight: 600;
+                            color: #1f2937;
+                        }
+                        
+                        .route-stats {
+                            margin-bottom: 15px;
+                            padding: 10px;
+                            background: #f3f4f6;
+                            border-radius: 4px;
+                        }
+                        
+                        .route-stats p {
+                            margin: 5px 0;
+                            font-size: 14px;
+                        }
+                        
+                        .checkpoint-list {
+                            max-height: 300px;
+                            overflow-y: auto;
+                        }
+                        
+                        .checkpoint-item {
+                            padding: 8px;
+                            border-bottom: 1px solid #e5e7eb;
+                            font-size: 13px;
+                        }
+                        
+                        .checkpoint-item:last-child {
+                            border-bottom: none;
+                        }
+                        
+                        .checkpoint-number {
+                            display: inline-block;
+                            width: 24px;
+                            height: 24px;
+                            line-height: 24px;
+                            text-align: center;
+                            background: #3b82f6;
+                            color: white;
+                            border-radius: 50%;
+                            margin-right: 8px;
+                            font-size: 12px;
+                            font-weight: bold;
+                        }
+                        
+                        .checkpoint-name {
+                            font-weight: 500;
+                            color: #374151;
+                        }
+                        
+                        .page-header {
+                            padding: 20px;
+                            background: #1f2937;
+                            color: white;
+                            margin: 0;
+                        }
+                        
+                        .page-header h1 {
+                            margin: 0;
+                            font-size: 24px;
+                        }
+                        
+                        .close-button {
+                            margin-top: 15px;
+                            width: 100%;
+                            padding: 10px;
+                            background: #6b7280;
+                            color: white;
+                            border: none;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            font-size: 14px;
+                        }
+                        
+                        .close-button:hover {
+                            background: #4b5563;
+                        }
+                    </style>
+                </t>
+
+                <div class="page-header">
+                    <h1><i class="fa fa-map-signs"></i> Optimized Patrol Route</h1>
+                </div>
+
+                <t t-if="google_maps_api_key">
+                <div class="map-container">
+                    <div class="route-info">
+                        <h4><i class="fa fa-info-circle"></i> Route Information</h4>
+                        
+                        <div class="route-stats">
+                            <p><strong>Site:</strong> <t t-esc="site.name"/></p>
+                            <p><strong>Total Distance:</strong> <t t-esc="'%.2f' % total_distance"/> km</p>
+                            <p><strong>Checkpoints:</strong> <t t-esc="len(route_data) - 1"/> points</p>
+                        </div>
+                        
+                        <h4><i class="fa fa-list-ol"></i> Route Order</h4>
+                        <div class="checkpoint-list">
+                            <t t-foreach="route_data" t-as="point">
+                                <div class="checkpoint-item">
+                                    <span class="checkpoint-number"><t t-esc="point_index + 1"/></span>
+                                    <span class="checkpoint-name"><t t-esc="point.get('name', 'Unknown')"/></span>
+                                </div>
+                            </t>
+                        </div>
+                        
+                        <button class="close-button" onclick="window.close()">
+                            <i class="fa fa-times"></i> Close Map
+                        </button>
+                    </div>
+
+                    <div id="map"></div>
+                </div>
+
+                <script type="text/javascript">
+                    // Define callback function immediately for Google Maps API
+                    window.initMapCallback = function() {
+                        console.log('Google Maps API callback triggered');
+                        if (document.readyState === 'loading') {
+                            document.addEventListener('DOMContentLoaded', initMap);
+                        } else {
+                            initMap();
+                        }
+                    };
+                    
+                    // Route data from server
+                    let routeData;
+                    try {
+                        // Route data is already a JavaScript object from template
+                        routeData = <t t-raw="route_json"/>;
+                        console.log('Route data loaded:', routeData);
+                        console.log('Route data type:', typeof routeData);
+                        console.log('Route data length:', routeData ? routeData.length : 'undefined');
+                    } catch (e) {
+                        console.error('Error loading route data:', e);
+                        alert('Error: Invalid route data format. Please try optimizing the route again.');
+                        routeData = []; // Set empty array instead of return
+                    }
+                    
+                    let map;
+                    let routePolyline;
+                    let markers = [];
+                    
+                    <![CDATA[
+                    function initMap() {
+                        console.log('Initializing route map with', routeData.length, 'points');
+                        console.log('Route data:', routeData);
+                        
+                        // Check if route data is valid
+                        if (!routeData || routeData.length === 0) {
+                            console.error('No valid route data available');
+                            document.getElementById('map').innerHTML = '<div style="padding: 20px; text-align: center; color: red;">Error: No route data available. Please optimize the route first.</div>';
+                            return;
+                        }
+                        
+                        // Check if Google Maps is loaded
+                        if (typeof google === 'undefined' || !google.maps) {
+                            console.error('Google Maps API not loaded');
+                            document.getElementById('map').innerHTML = '<div style="padding: 20px; text-align: center; color: red;">Error: Google Maps API not loaded</div>';
+                            return;
+                        }
+                        
+                        console.log('Google Maps API loaded successfully');
+                        
+                        // Create map centered on first point
+                        const firstPoint = routeData[0];
+                        const center = {
+                            lat: parseFloat(firstPoint.lat),
+                            lng: parseFloat(firstPoint.lng)
+                        };
+                        
+                        // Detect if mobile device
+                        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                        
+                        map = new google.maps.Map(document.getElementById('map'), {
+                            zoom: 15,
+                            center: center,
+                            mapTypeId: 'roadmap',
+                            mapTypeControl: !isMobile,
+                            streetViewControl: !isMobile,
+                            fullscreenControl: true,
+                            zoomControl: true,
+                            gestureHandling: isMobile ? 'greedy' : 'cooperative',
+                            disableDefaultUI: isMobile
+                        });
+                        
+                        // Create route path coordinates
+                        const pathCoordinates = routeData.map(point => ({
+                            lat: parseFloat(point.lat),
+                            lng: parseFloat(point.lng)
+                        }));
+                        
+                        // Draw route polyline
+                        routePolyline = new google.maps.Polyline({
+                            path: pathCoordinates,
+                            geodesic: true,
+                            strokeColor: '#3b82f6',
+                            strokeOpacity: 0.8,
+                            strokeWeight: 4,
+                            map: map
+                        });
+                        
+                        // Add direction arrows
+                        const lineSymbol = {
+                            path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                            scale: 3,
+                            strokeColor: '#1e40af',
+                        };
+                        
+                        routePolyline.setOptions({
+                            icons: [{
+                                icon: lineSymbol,
+                                offset: '50%',
+                                repeat: '100px'
+                            }]
+                        });
+                        
+                        // Add markers for each point
+                        const bounds = new google.maps.LatLngBounds();
+                        
+                        routeData.forEach((point, index) => {
+                            const position = {
+                                lat: parseFloat(point.lat),
+                                lng: parseFloat(point.lng)
+                            };
+                            
+                            // Determine marker color
+                            let markerColor = '#3b82f6'; // blue for regular points
+                            let markerLabel = String(index + 1);
+                            
+                            if (index === 0) {
+                                markerColor = '#10b981'; // green for start
+                                markerLabel = 'S';
+                            } else if (index === routeData.length - 1) {
+                                markerColor = '#ef4444'; // red for end
+                                markerLabel = 'E';
+                            }
+                            
+                            // Create custom marker
+                            const marker = new google.maps.Marker({
+                                position: position,
+                                map: map,
+                                label: {
+                                    text: markerLabel,
+                                    color: 'white',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold'
+                                },
+                                icon: {
+                                    path: google.maps.SymbolPath.CIRCLE,
+                                    scale: 12,
+                                    fillColor: markerColor,
+                                    fillOpacity: 1,
+                                    strokeColor: '#ffffff',
+                                    strokeWeight: 2
+                                },
+                                title: point.name || 'Point ' + (index + 1)
+                            });
+                            
+                            // Create info window
+                            const infoContent = `
+                                <div style="padding: 10px;">
+                                    <h3 style="margin: 0 0 8px 0;">${point.name || 'Point ' + (index + 1)}</h3>
+                                    <p style="margin: 3px 0;"><strong>Order:</strong> ${index + 1}</p>
+                                    ${point.code ? `<p style="margin: 3px 0;"><strong>Code:</strong> ${point.code}</p>` : ''}
+                                    <p style="margin: 3px 0;"><strong>Coordinates:</strong> ${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}</p>
+                                </div>
+                            `;
+                            
+                            const infoWindow = new google.maps.InfoWindow({
+                                content: infoContent
+                            });
+                            
+                            marker.addListener('click', () => {
+                                // Close all other info windows
+                                markers.forEach(m => {
+                                    if (m.infoWindow) {
+                                        m.infoWindow.close();
+                                    }
+                                });
+                                infoWindow.open(map, marker);
+                            });
+                            
+                            marker.infoWindow = infoWindow;
+                            markers.push(marker);
+                            bounds.extend(position);
+                        });
+                        
+                        // Fit map to show entire route
+                        if (routeData.length > 0) {
+                            map.fitBounds(bounds);
+                            
+                            // Adjust zoom for single point
+                            if (routeData.length === 1) {
+                                map.setZoom(16);
+                            }
+                        }
+                        
+                        console.log('Route map initialized successfully');
+                    }
+                    
+                    // Initialize when DOM is ready (fallback)
+                    document.addEventListener('DOMContentLoaded', function() {
+                        console.log('DOM loaded, checking if map needs initialization...');
+                        
+                        // If callback hasn't been triggered after 5 seconds, try direct initialization
+                        setTimeout(() => {
+                            if (!map && typeof google !== 'undefined' && google.maps) {
+                                console.log('Fallback: Direct map initialization');
+                                initMap();
+                            } else if (!map) {
+                                console.error('Fallback: Google Maps still not available');
+                                document.getElementById('map').innerHTML = '<div style="padding: 20px; text-align: center; color: red;">Error: Google Maps failed to load. Please check your internet connection and try again.</div>';
+                            }
+                        }, 5000);
+                    });
+                    ]]>
+                </script>
+                </t>
+                <t t-else="">
+                    <div class="container mt-5">
+                        <div class="alert alert-warning" role="alert">
+                            <h4 class="alert-heading">
+                                <i class="fa fa-key"></i>
+                                <t t-translate="yes">Google Maps API key required</t>
+                            </h4>
+                            <p t-translate="yes">
+                                Configure your Google Maps JavaScript API key under Settings -> General Settings -> GuardPro -> Google Maps Integration to visualize optimized patrol routes.
+                            </p>
+                            <p class="mb-0" t-translate="yes">
+                                Supplying a customer-specific key ensures you stay in control of Google Cloud billing.
+                            </p>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </template>
+
+        <!-- Error Template -->
+        <template id="route_map_error" name="Route Map Error">
+            <t t-call="web.layout">
+                <div class="container mt-5">
+                    <div class="alert alert-danger" role="alert">
+                        <h4 class="alert-heading">
+                            <i class="fa fa-exclamation-triangle"></i> Error Loading Route Map
+                        </h4>
+                        <p><t t-esc="error_message"/></p>
+                        <hr/>
+                        <p class="mb-0">
+                            <a href="/web#action=guardpro.action_route_optimizer_wizard" class="btn btn-primary">
+                                <i class="fa fa-arrow-left"></i> Back to Route Optimizer
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </t>
+        </template>
+    </data>
+</odoo>
+

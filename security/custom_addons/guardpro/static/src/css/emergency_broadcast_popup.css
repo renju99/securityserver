@@ -1,0 +1,221 @@
+/* Emergency Broadcast Popup Styles */
+
+.o_emergency_broadcast_overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.o_emergency_broadcast_modal {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 50px rgba(255, 0, 0, 0.5);
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: auto;
+    animation: slideDown 0.4s ease-out;
+    border: 3px solid #dc3545;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.o_emergency_icon_container {
+    text-align: center;
+    padding: 30px 20px 10px;
+    background: linear-gradient(to bottom, #fff, #ffe6e6);
+}
+
+.o_emergency_icon_pulse {
+    animation: pulse 1.5s infinite;
+    color: #dc3545 !important;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.o_emergency_header {
+    padding: 20px;
+    border-bottom: 3px solid #c82333;
+}
+
+.o_emergency_header h2 {
+    margin: 0;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    animation: blink 2s infinite;
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.o_emergency_body {
+    padding: 30px;
+    background: white;
+}
+
+.o_emergency_message {
+    padding: 20px;
+    background: #fff3cd;
+    border-left: 5px solid #ffc107;
+    border-radius: 5px;
+    margin: 20px 0;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.o_emergency_footer {
+    padding: 20px 30px 30px;
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+.o_emergency_footer .btn {
+    font-size: 18px;
+    padding: 15px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    animation: pulseButton 2s infinite;
+}
+
+@keyframes pulseButton {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 20px 10px rgba(220, 53, 69, 0);
+    }
+}
+
+.o_emergency_footer .btn:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s;
+}
+
+/* Priority-specific colors */
+.o_emergency_broadcast_modal .bg-danger {
+    background-color: #dc3545 !important;
+}
+
+.o_emergency_broadcast_modal .bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.o_emergency_broadcast_modal .bg-info {
+    background-color: #17a2b8 !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .o_emergency_broadcast_modal {
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .o_emergency_icon_container {
+        padding: 20px 10px 10px;
+    }
+
+    .o_emergency_icon_pulse {
+        font-size: 3rem !important;
+    }
+
+    .o_emergency_header h2 {
+        font-size: 1.5rem;
+    }
+
+    .o_emergency_body {
+        padding: 20px 15px;
+    }
+
+    .o_emergency_message {
+        padding: 15px;
+        font-size: 14px;
+    }
+
+    .o_emergency_footer .btn {
+        font-size: 16px;
+        padding: 12px;
+    }
+}
+
+/* Ensure it appears above everything */
+.o_emergency_broadcast_overlay {
+    z-index: 999999 !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

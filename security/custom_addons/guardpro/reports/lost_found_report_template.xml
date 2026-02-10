@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Lost &amp; Found PDF Report Template -->
+    <template id="lost_found_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h2>Lost &amp; Found Property Receipt</h2>
+                                <h4 t-field="o.site_id"/>
+                            </div>
+                        </div>
+
+                        <!-- Item ID and Status -->
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <h4>Item ID: <span t-field="o.name"/></h4>
+                            </div>
+                            <div class="col-6 text-end">
+                                <h5>
+                                    Status: 
+                                    <t t-if="o.state == 'stored'">
+                                        <span class="badge bg-warning">In Storage</span>
+                                    </t>
+                                    <t t-elif="o.state == 'claimed'">
+                                        <span class="badge bg-success">Claimed/Returned</span>
+                                    </t>
+                                    <t t-elif="o.state == 'donated'">
+                                        <span class="badge bg-info">Donated</span>
+                                    </t>
+                                    <t t-elif="o.state == 'disposed'">
+                                        <span class="badge bg-danger">Disposed</span>
+                                    </t>
+                                    <t t-elif="o.state == 'police'">
+                                        <span class="badge bg-primary">Handed to Police</span>
+                                    </t>
+                                    <t t-elif="o.state == 'lost'">
+                                        <span class="badge bg-secondary">Lost/Destroyed</span>
+                                    </t>
+                                </h5>
+                            </div>
+                        </div>
+
+                        <!-- Item Photos -->
+                        <div class="row mb-3" style="page-break-inside: avoid;">
+                            <t t-if="o.photo_1 or o.photo_2 or o.photo_3">
+                                <div class="col-12 text-center">
+                                    <h5>Item Photos</h5>
+                                    <table style="width: 100%; border-collapse: collapse; margin: auto;">
+                                        <tr>
+                                            <td style="text-align: center; padding: 5px;" t-if="o.photo_1">
+                                                <img t-att-src="image_data_uri(o.photo_1)" 
+                                                     style="max-height: 150px; max-width: 150px; border: 2px solid #ccc;"/>
+                                            </td>
+                                            <td style="text-align: center; padding: 5px;" t-if="o.photo_2">
+                                                <img t-att-src="image_data_uri(o.photo_2)" 
+                                                     style="max-height: 150px; max-width: 150px; border: 2px solid #ccc;"/>
+                                            </td>
+                                            <td style="text-align: center; padding: 5px;" t-if="o.photo_3">
+                                                <img t-att-src="image_data_uri(o.photo_3)" 
+                                                     style="max-height: 150px; max-width: 150px; border: 2px solid #ccc;"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </t>
+                        </div>
+
+                        <!-- Item Details -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Item Description</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Item Category:</strong></td>
+                                        <td><span t-field="o.item_category"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Description:</strong></td>
+                                        <td><span t-field="o.description"/></td>
+                                    </tr>
+                                    <tr t-if="o.brand">
+                                        <td><strong>Brand/Make:</strong></td>
+                                        <td><span t-field="o.brand"/></td>
+                                    </tr>
+                                    <tr t-if="o.model">
+                                        <td><strong>Model:</strong></td>
+                                        <td><span t-field="o.model"/></td>
+                                    </tr>
+                                    <tr t-if="o.color">
+                                        <td><strong>Color:</strong></td>
+                                        <td><span t-field="o.color"/></td>
+                                    </tr>
+                                    <tr t-if="o.serial_number">
+                                        <td><strong>Serial Number:</strong></td>
+                                        <td><span t-field="o.serial_number"/></td>
+                                    </tr>
+                                    <tr t-if="o.distinguishing_features">
+                                        <td><strong>Distinguishing Features:</strong></td>
+                                        <td><span t-field="o.distinguishing_features"/></td>
+                                    </tr>
+                                    <tr t-if="o.estimated_value">
+                                        <td><strong>Estimated Value:</strong></td>
+                                        <td>
+                                            <span t-esc="o.currency_id.symbol"/>
+                                            <span t-field="o.estimated_value"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Found Details -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Found Details</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Found Date:</strong></td>
+                                        <td><span t-field="o.found_date"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Found By (Guard):</strong></td>
+                                        <td><span t-field="o.found_by"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Found Location:</strong></td>
+                                        <td><span t-field="o.location_found"/></td>
+                                    </tr>
+                                    <tr t-if="o.storage_location">
+                                        <td><strong>Storage Location:</strong></td>
+                                        <td><span t-field="o.storage_location"/></td>
+                                    </tr>
+                                    <tr t-if="o.holding_expiry_date">
+                                        <td><strong>Holding Period Expires:</strong></td>
+                                        <td><span t-field="o.holding_expiry_date"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Claim Details (if claimed) -->
+                        <div class="row mt-3" t-if="o.state == 'claimed'">
+                            <div class="col-12">
+                                <h5>Claim Details</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Claimed By:</strong></td>
+                                        <td><span t-field="o.claimant_name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Claimant ID:</strong></td>
+                                        <td><span t-field="o.claimant_id_number"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Claimant Contact:</strong></td>
+                                        <td><span t-field="o.claimant_phone"/></td>
+                                    </tr>
+                                    <tr t-if="o.claim_date">
+                                        <td><strong>Claim Date:</strong></td>
+                                        <td><span t-field="o.claim_date"/></td>
+                                    </tr>
+                                    <tr t-if="o.claim_verification">
+                                        <td><strong>Verification Notes:</strong></td>
+                                        <td><span t-field="o.claim_verification"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="row mt-3" t-if="o.notes">
+                            <div class="col-12">
+                                <strong>Additional Notes:</strong>
+                                <p t-field="o.notes"/>
+                            </div>
+                        </div>
+
+                        <!-- Signature Section -->
+                        <div class="row mt-5">
+                            <div class="col-6">
+                                <div class="border-top pt-2">
+                                    <p><strong>Found By:</strong></p>
+                                    <p t-field="o.found_by"></p>
+                                    <p>Date: <span t-field="o.found_date"/></p>
+                                </div>
+                            </div>
+                            <div class="col-6" t-if="o.state == 'claimed'">
+                                <div class="border-top pt-2">
+                                    <p><strong>Claimed By:</strong></p>
+                                    <p t-if="o.claimant_name" t-field="o.claimant_name"></p>
+                                    <p t-if="o.claim_date">Date: <span t-field="o.claim_date"/></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="row mt-5">
+                            <div class="col-12 text-center text-muted">
+                                <small>
+                                    Lost &amp; Found managed by <span t-field="o.site_id"/> Security
+                                    <br/>
+                                    Items are held according to legal requirements and site policy
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Definition -->
+    <record id="action_report_lost_found" model="ir.actions.report">
+        <field name="name">Lost &amp; Found Receipt</field>
+        <field name="model">lost.found.item</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.lost_found_report_template</field>
+        <field name="report_file">guardpro.lost_found_report_template</field>
+        <field name="binding_model_id" ref="model_lost_found_item"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Lost_Found_%s' % (object.name)</field>
+    </record>
+</odoo>
+

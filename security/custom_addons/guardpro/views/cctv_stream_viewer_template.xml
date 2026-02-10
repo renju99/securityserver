@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="cctv_stream_viewer" name="CCTV Stream Viewer">
+        <t t-call="web.layout">
+            <t t-set="title">CCTV Camera - <t t-esc="camera.name"/></t>
+            <!-- Load HLS.js library for HLS stream support -->
+            <t t-if="stream_type == 'hls'">
+                <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+            </t>
+            <div class="container-fluid mt-3">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center py-2">
+                                <div class="d-flex align-items-center">
+                                    <h5 class="mb-0 mr-3">
+                                        <i class="fa fa-video-camera"/> <t t-esc="camera.name"/>
+                                    </h5>
+                                    <small class="text-muted mr-3">
+                                        <t t-esc="site.name"/> | <t t-esc="camera.code"/>
+                                    </small>
+                                    <span t-attf-class="badge badge-pill badge-{{'success' if camera.status == 'online' else 'danger'}}">
+                                        <t t-esc="camera.status"/>
+                                    </span>
+                                </div>
+                                <a href="/web#action=action_cctv_monitoring" class="btn btn-sm btn-secondary">
+                                    <i class="fa fa-arrow-left"/> Back to Cameras
+                                </a>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="cctv-stream-container" style="background: #000; border-radius: 0; padding: 0; min-height: calc(100vh - 200px); width: 100%;">
+                                    <!-- HLS Stream Player -->
+                                    <div t-if="stream_type == 'hls'" class="embed-responsive embed-responsive-16by9">
+                                        <video id="hls-player" 
+                                               class="embed-responsive-item" 
+                                               controls="controls"
+                                               autoplay="autoplay"
+                                               muted="muted"
+                                               style="width: 100%; height: 600px; background: #000;">
+                                            Your browser does not support the video tag.
+                                        </video>
+                                        <script>
+                                            (function() {
+                                                var video = document.getElementById('hls-player');
+                                                var streamUrl = '<t t-esc="stream_url"/>';
+                                                
+                                                if (video &amp;&amp; streamUrl) {
+                                                    // Check if browser supports HLS natively (Safari, iOS)
+                                                    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                                                        video.src = streamUrl;
+                                                    } 
+                                                    // Use HLS.js for other browsers
+                                                    else if (typeof Hls !== 'undefined') {
+                                                        var hls = new Hls();
+                                                        hls.loadSource(streamUrl);
+                                                        hls.attachMedia(video);
+                                                        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                                                            video.play();
+                                                        });
+                                                    } else {
+                                                        // Fallback: try to load HLS.js library
+                                                        var script = document.createElement('script');
+                                                        script.src = 'https://cdn.jsdelivr.net/npm/hls.js@latest';
+                                                        script.onload = function() {
+                                                            var hls = new Hls();
+                                                            hls.loadSource(streamUrl);
+                                                            hls.attachMedia(video);
+                                                            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                                                                video.play();
+                                                            });
+                                                        };
+                                                        document.head.appendChild(script);
+                                                    }
+                                                }
+                                            })();
+                                        </script>
+                                    </div>
+                                    <!-- HTTP/HTTPS Video streams -->
+                                    <div t-if="stream_type == 'http'">
+                                        <!-- Check if URL is MJPEG stream or image endpoint (snapshot) -->
+                                        <div t-if="'video.cgi' in stream_url or 'picture' in stream_url or 'snapshot' in stream_url or stream_url.endswith('.jpg') or stream_url.endswith('.jpeg')" 
+                                             class="embed-responsive embed-responsive-16by9">
+                                            <img id="http-image-stream" 
+                                                 t-att-src="stream_url"
+                                                 class="embed-responsive-item" 
+                                                 style="width: 100%; height: 600px; object-fit: contain; background: #000;"
+                                                 alt="Camera Stream"
+                                                 crossorigin="anonymous"/>
+                                            <script>
+                                                (function() {
+                                                    var img = document.getElementById('http-image-stream');
+                                                    var streamUrl = '<t t-esc="stream_url"/>';
+                                                    
+                                                    console.log('HTTP Image/MJPEG Stream initialized');
+                                                    console.log('Stream URL:', streamUrl);
+                                                    
+                                                    if (img &amp;&amp; streamUrl) {
+                                                        // For MJPEG streams (video.cgi), browser handles it automatically
+                                                        // For snapshots, refresh every 1-2 seconds for live view
+                                                        var isMJPEG = streamUrl.includes('video.cgi') || streamUrl.includes('mjpeg');
+                                                        if (!isMJPEG) {
+                                                            // Auto-refresh snapshot every 1.5 seconds
+                                                            var refreshInterval = setInterval(function() {
+                                                                try {
+                                                                    var timestamp = new Date().getTime();
+                                                                    var separator = streamUrl.indexOf('?') !== -1 ? '&amp;' : '?';
+                                                                    // Add cache buster to force reload
+                                                                    img.src = streamUrl + separator + '_t=' + timestamp;
+                                                                } catch(err) {
+                                                                    console.error('Error refreshing image:', err);
+                                                                }
+                                                            }, 1500);
+                                                            
+                                                            // Clear interval if image fails to load
+                                                            img.addEventListener('error', function() {
+                                                                clearInterval(refreshInterval);
+                                                            });
+                                                        }
+                                                        
+                                                        img.addEventListener('error', function(e) {
+                                                            console.error('Image/MJPEG load error:', e);
+                                                            console.error('Stream URL:', streamUrl);
+                                                            console.error('Error details:', {
+                                                                naturalWidth: img.naturalWidth,
+                                                                naturalHeight: img.naturalHeight,
+                                                                complete: img.complete,
+                                                                src: img.src
+                                                            });
+                                                            
+                                                            // Check if it's a proxy URL and test it
+                                                            if (streamUrl.includes('/proxy/')) {
+                                                                fetch(streamUrl)
+                                                                    .then(function(response) {
+                                                                        console.log('Proxy response status:', response.status);
+                                                                        console.log('Proxy response headers:', response.headers);
+                                                                        return response.text();
+                                                                    })
+                                                                    .then(function(text) {
+                                                                        console.log('Proxy response body (first 200 chars):', text.substring(0, 200));
+                                                                    })
+                                                                    .catch(function(err) {
+                                                                        console.error('Proxy fetch error:', err);
+                                                                    });
+                                                            }
+                                                            
+                                                            // Show error message in the container
+                                                            var existingError = img.parentNode.querySelector('.alert-danger');
+                                                            if (!existingError) {
+                                                                var errorMsg = document.createElement('div');
+                                                                errorMsg.className = 'alert alert-danger mt-2';
+                                                                errorMsg.innerHTML = '&lt;strong&gt;Stream Error:&lt;/strong&gt; Unable to load camera stream. &lt;br/&gt;' +
+                                                                    '&lt;small&gt;URL: ' + streamUrl + '&lt;/small&gt;&lt;br/&gt;' +
+                                                                    '&lt;small&gt;Check browser console (F12) for detailed error information.&lt;/small&gt;' +
+                                                                    '&lt;br/&gt;&lt;small&gt;Possible causes: Camera offline, incorrect URL, authentication failed, or network issue.&lt;/small&gt;';
+                                                                img.parentNode.appendChild(errorMsg);
+                                                            }
+                                                        });
+                                                        
+                                                        img.addEventListener('load', function() {
+                                                            console.log('Image/MJPEG stream loaded successfully');
+                                                            // Remove any error messages if image loads
+                                                            var errorMsg = img.parentNode.querySelector('.alert-danger');
+                                                            if (errorMsg) {
+                                                                errorMsg.remove();
+                                                            }
+                                                        });
+                                                    }
+                                                })();
+                                            </script>
+                                        </div>
+                                        <!-- Video stream -->
+                                        <div t-if="'picture' not in stream_url and 'snapshot' not in stream_url and not stream_url.endswith('.jpg') and not stream_url.endswith('.jpeg')" 
+                                             class="embed-responsive embed-responsive-16by9">
+                                            <video id="http-player" 
+                                                   class="embed-responsive-item" 
+                                                   controls="controls"
+                                                   autoplay="autoplay"
+                                                   muted="muted"
+                                                   style="width: 100%; height: 600px; background: #000;">
+                                                Your browser does not support the video tag.
+                                            </video>
+                                            <script>
+                                                (function() {
+                                                    var video = document.getElementById('http-player');
+                                                    var streamUrl = '<t t-esc="stream_url"/>';
+                                                    
+                                                    console.log('HTTP Player initialized');
+                                                    console.log('Stream URL:', streamUrl);
+                                                    console.log('Stream Type:', '<t t-esc="stream_type"/>');
+                                                    
+                                                    if (video &amp;&amp; streamUrl) {
+                                                        video.src = streamUrl;
+                                                        
+                                                        video.addEventListener('error', function(e) {
+                                                            console.error('Video error:', e);
+                                                            console.error('Error code:', video.error ? video.error.code : 'unknown');
+                                                            console.error('Stream URL:', streamUrl);
+                                                            // Try alternative: use img tag for MJPEG or snapshot
+                                                            if (video.error &amp;&amp; video.error.code === 4) {
+                                                                console.log('Trying image fallback...');
+                                                                var img = document.createElement('img');
+                                                                img.src = streamUrl;
+                                                                img.style.cssText = 'width: 100%; height: 600px; object-fit: contain; background: #000;';
+                                                                video.parentNode.replaceChild(img, video);
+                                                            }
+                                                        });
+                                                        
+                                                        video.addEventListener('loadedmetadata', function() {
+                                                            console.log('Video metadata loaded');
+                                                            console.log('Video duration:', video.duration);
+                                                            console.log('Video dimensions:', video.videoWidth + 'x' + video.videoHeight);
+                                                        });
+                                                        
+                                                        video.addEventListener('canplay', function() {
+                                                            console.log('Video can play');
+                                                            video.play().catch(function(err) {
+                                                                console.error('Play error:', err);
+                                                            });
+                                                        });
+                                                        
+                                                        video.addEventListener('loadstart', function() {
+                                                            console.log('Video load started');
+                                                        });
+                                                        
+                                                        // Try to load the video
+                                                        video.load();
+                                                    } else {
+                                                        console.error('Video element or stream URL not found');
+                                                        if (!video) console.error('Video element not found');
+                                                        if (!streamUrl) console.error('Stream URL is empty');
+                                                    }
+                                                })();
+                                            </script>
+                                        </div>
+                                    </div>
+                                    <!-- iFrame streams (for embedded players) -->
+                                    <div t-if="stream_type == 'iframe'" style="width: 100%; height: 100%; position: relative;">
+                                        <iframe t-att-src="stream_url" 
+                                                frameborder="0" 
+                                                allowfullscreen="true"
+                                                sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
+                                                style="width: 100%; height: 100%; min-height: calc(100vh - 200px); border: none; display: block;">
+                                            Your browser does not support iframes.
+                                        </iframe>
+                                    </div>
+                                    <div t-if="stream_type == 'rtsp'" class="alert alert-warning">
+                                        <h5>RTSP Stream</h5>
+                                        <p>RTSP streams require a compatible video player. Please use VLC Media Player or similar software.</p>
+                                        <p><strong>Stream URL:</strong> <code t-esc="stream_url"/></p>
+                                        <p>To view:</p>
+                                        <ol>
+                                            <li>Open VLC Media Player</li>
+                                            <li>Go to Media → Open Network Stream</li>
+                                            <li>Paste the stream URL above</li>
+                                            <li>Click Play</li>
+                                        </ol>
+                                    </div>
+                                    <div t-if="stream_type == 'webrtc'" class="alert alert-info">
+                                        <h5>WebRTC Stream</h5>
+                                        <p>WebRTC streams require browser support and may need additional configuration.</p>
+                                        <p><strong>Stream URL:</strong> <code t-esc="stream_url"/></p>
+                                        <a t-attf-href="{{stream_url}}" target="_blank" class="btn btn-primary">
+                                            <i class="fa fa-external-link"/> Open Stream in New Tab
+                                        </a>
+                                    </div>
+                                    <div t-if="stream_type not in ['http', 'hls', 'iframe', 'rtsp', 'webrtc']" class="alert alert-secondary">
+                                        <h5>Other Stream Type</h5>
+                                        <p><strong>Stream URL:</strong> <code t-esc="stream_url"/></p>
+                                        <a t-attf-href="{{stream_url}}" target="_blank" class="btn btn-primary">
+                                            <i class="fa fa-external-link"/> Open Stream in New Tab
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

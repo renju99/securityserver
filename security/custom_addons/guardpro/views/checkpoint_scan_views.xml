@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_checkpoint_scan_list" model="ir.ui.view">
+            <field name="name">checkpoint.scan.list</field>
+            <field name="model">checkpoint.scan</field>
+            <field name="arch" type="xml">
+                <list string="Checkpoint Scans">
+                    <field name="checkpoint_id"/>
+                    <field name="guard_id"/>
+                    <field name="site_id"/>
+                    <field name="scan_time"/>
+                    <field name="scan_type"/>
+                    <field name="status" widget="badge"/>
+                    <field name="within_tolerance" widget="boolean_toggle" optional="hide"/>
+                    <field name="offline_scan" optional="hide"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_checkpoint_scan_form" model="ir.ui.view">
+            <field name="name">checkpoint.scan.form</field>
+            <field name="model">checkpoint.scan</field>
+            <field name="arch" type="xml">
+                <form string="Checkpoint Scan">
+                    <header>
+                        <button name="action_manual_verify" string="Manual Verify" type="object" 
+                                invisible="status != 'failed'" groups="guardpro.group_guardpro_supervisor"/>
+                        <field name="status" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="checkpoint_id"/>
+                                <field name="guard_id"/>
+                                <field name="site_id"/>
+                                <field name="tour_log_id"/>
+                                <field name="shift_id"/>
+                            </group>
+                            <group>
+                                <field name="scan_time"/>
+                                <field name="scan_type"/>
+                                <field name="scan_data"/>
+                                <field name="verification_method"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="GPS Data">
+                                <field name="latitude"/>
+                                <field name="longitude"/>
+                                <field name="distance_from_checkpoint"/>
+                                <field name="within_tolerance"/>
+                            </group>
+                            <group>
+                                <field name="offline_scan"/>
+                                <field name="sync_time" invisible="not offline_scan"/>
+                                <field name="device_id"/>
+                            </group>
+                        </group>
+                        <group string="Observations">
+                            <field name="observations" widget="text"/>
+                            <field name="issues_found"/>
+                            <field name="issue_description" widget="text" invisible="not issues_found"/>
+                        </group>
+                        <group string="Media">
+                            <field name="photo" widget="image"/>
+                            <field name="photo_ids" widget="many2many_binary"/>
+                        </group>
+                        <field name="notes" widget="text"/>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_checkpoint_scan" model="ir.actions.act_window">
+            <field name="name">Checkpoint Scans</field>
+            <field name="res_model">checkpoint.scan</field>
+            <field name="view_mode">list,form</field>
+        </record>
+    </data>
+</odoo>
+
+

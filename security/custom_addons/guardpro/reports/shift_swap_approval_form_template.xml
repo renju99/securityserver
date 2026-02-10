@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Report Action Definition -->
+    <record id="action_shift_swap_approval_form" model="ir.actions.report">
+        <field name="name">Shift Swap Approval Form</field>
+        <field name="model">shift.swap.request</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.report_shift_swap_approval_document</field>
+        <field name="report_file">guardpro.report_shift_swap_approval_document</field>
+        <field name="binding_model_id" ref="model_shift_swap_request"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_us"/>
+    </record>
+    
+    <!-- Approval Form Template -->
+    <template id="report_shift_swap_approval_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        
+                        <!-- Form Header -->
+                        <div class="row" style="border-bottom: 3px solid #1976d2; padding-bottom: 15px; margin-bottom: 30px;">
+                            <div class="col-8">
+                                <h1 style="margin: 0; font-size: 28px; color: #1976d2;">SHIFT SWAP APPROVAL FORM</h1>
+                                <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Official Shift Exchange Documentation</p>
+                            </div>
+                            <div class="col-4 text-right">
+                                <p style="margin: 5px 0;"><strong>Reference:</strong> <t t-esc="o.name"/></p>
+                                <p style="margin: 5px 0;"><strong>Date:</strong> <t t-esc="format_date(o.create_date) if o.create_date else 'N/A'"/></p>
+                                <p style="margin: 5px 0;"><strong>Status:</strong> 
+                                    <span t-att-style="'color: %s; font-weight: bold;' % ('#4caf50' if o.status == 'approved' else '#ff9800' if o.status in ['pending', 'accepted'] else '#666')"
+                                          t-esc="dict(o._fields['status'].selection).get(o.status, '') if hasattr(o, '_fields') and 'status' in o._fields else ''"/>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Request Information -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #1976d2;">Swap Request Information</h2>
+                        <table class="table table-sm table-bordered" style="margin-bottom: 30px;">
+                            <tr>
+                                <th style="width: 30%; background-color: #f5f5f5;">Request Date</th>
+                                <td><t t-esc="format_datetime(o.create_date) if o.create_date else 'N/A'"/></td>
+                                <th style="background-color: #f5f5f5;">Swap Date</th>
+                                <td><strong><t t-esc="format_date(o.swap_date) if o.swap_date else 'N/A'"/></strong></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Site Location</th>
+                                <td colspan="3"><strong><t t-esc="o.site_id.name if o.site_id else 'N/A'"/></strong></td>
+                            </tr>
+                        </table>
+                        
+                        <!-- Guard Details -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #1976d2;">Guard Information</h2>
+                        
+                        <!-- Requesting Guard -->
+                        <div style="border: 2px solid #1976d2; padding: 15px; margin-bottom: 20px; background-color: #e3f2fd;">
+                            <h3 style="margin: 0 0 10px 0; color: #1976d2;">Requesting Guard (Giving Up Shift)</h3>
+                            <table class="table table-sm table-bordered" style="background-color: white;">
+                                <tr>
+                                    <th style="width: 30%; background-color: #f5f5f5;">Guard Name</th>
+                                    <td><strong><t t-esc="o.requesting_guard_id.name if o.requesting_guard_id else 'N/A'"/></strong></td>
+                                </tr>
+                                <tr>
+                                    <th style="background-color: #f5f5f5;">Employee ID</th>
+                                    <td><t t-esc="o.requesting_guard_id.employee_number if o.requesting_guard_id and hasattr(o.requesting_guard_id, 'employee_number') else 'N/A'"/></td>
+                                </tr>
+                                <tr>
+                                    <th style="background-color: #f5f5f5;">Contact Number</th>
+                                    <td><t t-esc="o.requesting_guard_id.phone if o.requesting_guard_id else 'N/A'"/></td>
+                                </tr>
+                                <tr>
+                                    <th style="background-color: #f5f5f5;">Email</th>
+                                    <td><t t-esc="o.requesting_guard_id.user_id.email if o.requesting_guard_id and o.requesting_guard_id.user_id else 'N/A'"/></td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <!-- Target Guard -->
+                        <div style="border: 2px solid #4caf50; padding: 15px; margin-bottom: 20px; background-color: #e8f5e9;">
+                            <h3 style="margin: 0 0 10px 0; color: #4caf50;">Target Guard (Taking Over Shift)</h3>
+                            <table class="table table-sm table-bordered" style="background-color: white;">
+                                <tr>
+                                    <th style="width: 30%; background-color: #f5f5f5;">Guard Name</th>
+                                    <td><strong><t t-esc="o.target_guard_id.name if o.target_guard_id else 'N/A'"/></strong></td>
+                                </tr>
+                                <tr>
+                                    <th style="background-color: #f5f5f5;">Employee ID</th>
+                                    <td><t t-esc="o.target_guard_id.employee_number if o.target_guard_id and hasattr(o.target_guard_id, 'employee_number') else 'N/A'"/></td>
+                                </tr>
+                                <tr>
+                                    <th style="background-color: #f5f5f5;">Contact Number</th>
+                                    <td><t t-esc="o.target_guard_id.phone if o.target_guard_id else 'N/A'"/></td>
+                                </tr>
+                                <tr>
+                                    <th style="background-color: #f5f5f5;">Email</th>
+                                    <td><t t-esc="o.target_guard_id.user_id.email if o.target_guard_id and o.target_guard_id.user_id else 'N/A'"/></td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <!-- Shift Details -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #1976d2; margin-top: 30px;">Shift Being Swapped</h2>
+                        <table class="table table-sm table-bordered" style="margin-bottom: 20px;">
+                            <tr>
+                                <th style="width: 30%; background-color: #f5f5f5;">Shift Reference</th>
+                                <td><t t-esc="o.shift_id.name if o.shift_id else 'N/A'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Site</th>
+                                <td><t t-esc="o.shift_id.site_id.name if o.shift_id and o.shift_id.site_id else 'N/A'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Shift Date</th>
+                                <td><strong><t t-esc="format_date(o.shift_id.start_datetime) if o.shift_id and o.shift_id.start_datetime else 'N/A'"/></strong></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Start Time</th>
+                                <td><t t-esc="format_time(o.shift_id.start_datetime) if o.shift_id and o.shift_id.start_datetime else 'N/A'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">End Time</th>
+                                <td><t t-esc="format_time(o.shift_id.end_datetime) if o.shift_id and o.shift_id.end_datetime else 'N/A'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Duration</th>
+                                <td>
+                                    <t t-if="o.shift_id and o.shift_id.start_datetime and o.shift_id.end_datetime">
+                                        <t t-set="duration_hours" t-value="(o.shift_id.end_datetime - o.shift_id.start_datetime).total_seconds() / 3600"/>
+                                        <t t-esc="'{:.1f}'.format(duration_hours)"/> hours
+                                    </t>
+                                    <t t-else="">N/A</t>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <!-- Compensation Shift (if applicable) -->
+                        <t t-if="o.compensation_shift_id">
+                            <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #4caf50;">Compensation Shift Offered</h2>
+                            <table class="table table-sm table-bordered" style="margin-bottom: 20px;">
+                                <tr>
+                                    <th style="width: 30%; background-color: #f5f5f5;">Shift Reference</th>
+                                    <td><t t-esc="o.compensation_shift_id.name"/></td>
+                                </tr>
+                                <tr>
+                                    <th style="background-color: #f5f5f5;">Site</th>
+                                    <td><t t-esc="o.compensation_shift_id.site_id.name if o.compensation_shift_id.site_id else 'N/A'"/></td>
+                                </tr>
+                                <tr>
+                                    <th style="background-color: #f5f5f5;">Shift Date</th>
+                                    <td><strong><t t-esc="format_date(o.compensation_shift_id.start_datetime)"/></strong></td>
+                                </tr>
+                                <tr>
+                                    <th style="background-color: #f5f5f5;">Start Time</th>
+                                    <td><t t-esc="format_time(o.compensation_shift_id.start_datetime)"/></td>
+                                </tr>
+                                <tr>
+                                    <th style="background-color: #f5f5f5;">End Time</th>
+                                    <td><t t-esc="format_time(o.compensation_shift_id.end_datetime)"/></td>
+                                </tr>
+                            </table>
+                        </t>
+                        
+                        <!-- Reason for Swap -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #1976d2;">Reason for Swap Request</h2>
+                        <div style="padding: 15px; background-color: #fafafa; border: 1px solid #ddd; margin-bottom: 30px; min-height: 80px;">
+                            <t t-if="o.reason">
+                                <t t-esc="o.reason"/>
+                            </t>
+                            <t t-else="">
+                                <p style="font-style: italic; color: #666;">No reason provided</p>
+                            </t>
+                        </div>
+                        
+                        <!-- Guard Response -->
+                        <t t-if="o.guard_response">
+                            <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #4caf50;">Target Guard Response</h2>
+                            <div style="padding: 15px; background-color: #fafafa; border: 1px solid #ddd; margin-bottom: 30px;">
+                                <t t-esc="o.guard_response"/>
+                            </div>
+                        </t>
+                        
+                        <!-- Supervisor Notes -->
+                        <t t-if="o.supervisor_notes">
+                            <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #ff9800;">Supervisor Notes</h2>
+                            <div style="padding: 15px; background-color: #fff3e0; border: 1px solid #ff9800; margin-bottom: 30px;">
+                                <t t-esc="o.supervisor_notes"/>
+                            </div>
+                        </t>
+                        
+                        <!-- Terms and Conditions -->
+                        <div style="background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; margin: 30px 0;">
+                            <h3 style="margin: 0 0 10px 0; color: #2e7d32;">Terms and Conditions</h3>
+                            <ol style="margin: 10px 0; padding-left: 20px; line-height: 1.8;">
+                                <li>Both guards agree to the shift exchange as detailed above</li>
+                                <li>Guards must arrive 15 minutes before shift start time</li>
+                                <li>Guards are responsible for reviewing all shift duties and post orders</li>
+                                <li>This swap is contingent upon supervisor approval</li>
+                                <li>Either party may cancel with 24 hours notice (pending supervisor approval)</li>
+                                <li>No-shows or late arrivals may result in disciplinary action</li>
+                                <li>All company policies and procedures remain in effect</li>
+                            </ol>
+                        </div>
+                        
+                        <!-- Signatures Section -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #1976d2; margin-top: 40px;">Approvals and Signatures</h2>
+                        
+                        <div class="row" style="margin-top: 30px;">
+                            <!-- Requesting Guard Signature -->
+                            <div class="col-6">
+                                <div style="border: 1px solid #ddd; padding: 20px; min-height: 150px; background-color: #fafafa;">
+                                    <p style="margin: 0; font-weight: bold; color: #1976d2;">Requesting Guard Agreement</p>
+                                    <p style="margin: 5px 0; font-size: 12px; color: #666;">I agree to give up my shift as detailed above</p>
+                                    <div style="border-top: 2px solid #000; margin-top: 50px; padding-top: 5px;">
+                                        <p style="margin: 0;"><t t-esc="o.requesting_guard_id.name if o.requesting_guard_id else '_______________________________'"/></p>
+                                        <p style="margin: 5px 0; font-size: 12px; color: #666;">Requesting Guard Signature</p>
+                                        <p style="margin: 5px 0;">Date: __________</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Target Guard Signature -->
+                            <div class="col-6">
+                                <div style="border: 1px solid #ddd; padding: 20px; min-height: 150px; background-color: #fafafa;">
+                                    <p style="margin: 0; font-weight: bold; color: #4caf50;">Target Guard Acceptance</p>
+                                    <p style="margin: 5px 0; font-size: 12px; color: #666;">I agree to take over the shift as detailed above</p>
+                                    <div style="border-top: 2px solid #000; margin-top: 50px; padding-top: 5px;">
+                                        <p style="margin: 0;"><t t-esc="o.target_guard_id.name if o.target_guard_id else '_______________________________'"/></p>
+                                        <p style="margin: 5px 0; font-size: 12px; color: #666;">Target Guard Signature</p>
+                                        <p style="margin: 5px 0;">Date: __________</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Supervisor Approval -->
+                        <div style="border: 2px solid #ff9800; padding: 20px; margin-top: 30px; background-color: #fff3e0;">
+                            <h3 style="margin: 0 0 15px 0; color: #ff6f00;">Supervisor Approval (Required)</h3>
+                            <table class="table table-sm" style="background-color: white;">
+                                <tr>
+                                    <th style="width: 30%;">Supervisor Name:</th>
+                                    <td><t t-esc="o.supervisor_id.name if o.supervisor_id else '_______________________________'"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Approval Status:</th>
+                                    <td>
+                                        <t t-if="o.status == 'approved'">
+                                            <strong style="color: #4caf50;">✓ APPROVED</strong>
+                                        </t>
+                                        <t t-elif="o.status == 'rejected'">
+                                            <strong style="color: #d32f2f;">✗ REJECTED</strong>
+                                        </t>
+                                        <t t-else="">
+                                            ☐ APPROVED   ☐ REJECTED
+                                        </t>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Signature:</th>
+                                    <td>_______________________________</td>
+                                </tr>
+                                <tr>
+                                    <th>Date:</th>
+                                    <td><t t-if="o.status == 'approved'"><t t-esc="format_date(o.write_date) if o.write_date else '__________'"/></t><t t-else="">__________</t></td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <!-- HR/Payroll Acknowledgment -->
+                        <div style="border: 1px solid #666; padding: 15px; margin-top: 30px; margin-bottom: 20px; background-color: #fafafa;">
+                            <h4 style="margin: 0 0 10px 0;">HR/Payroll Department Use Only</h4>
+                            <p style="margin: 5px 0; font-size: 12px;">Processed by: _______________________________</p>
+                            <p style="margin: 5px 0; font-size: 12px;">Date: __________</p>
+                            <p style="margin: 5px 0; font-size: 12px;">System updated: ☐ Yes   ☐ No</p>
+                        </div>
+                        
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    
+</odoo>
+
+
+
+
+
+
+
+
+
+

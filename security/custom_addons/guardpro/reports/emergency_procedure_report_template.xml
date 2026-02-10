@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Report Action Definition -->
+    <record id="action_report_emergency_procedure" model="ir.actions.report">
+        <field name="name">Emergency Procedure Document</field>
+        <field name="model">emergency.procedure</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.report_emergency_procedure_document</field>
+        <field name="report_file">guardpro.report_emergency_procedure_document</field>
+        <field name="binding_model_id" ref="model_emergency_procedure"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_us"/>
+    </record>
+    
+    <!-- Report Template -->
+    <template id="report_emergency_procedure_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        
+                        <!-- Report Header -->
+                        <div class="row" style="border-bottom: 3px solid #d32f2f; padding-bottom: 15px; margin-bottom: 30px;">
+                            <div class="col-8">
+                                <h1 style="margin: 0; font-size: 28px; color: #d32f2f;">EMERGENCY PROCEDURE</h1>
+                                <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Standard Operating Procedure</p>
+                            </div>
+                            <div class="col-4 text-right">
+                                <p style="margin: 5px 0;"><strong>Procedure #:</strong> <t t-esc="o.sequence"/></p>
+                                <p style="margin: 5px 0;"><strong>Type:</strong> 
+                                    <span t-att-style="'color: %s; font-weight: bold;' % ('#d32f2f' if o.emergency_type == 'fire' else '#ff9800' if o.emergency_type == 'medical' else '#666')"
+                                          t-esc="dict(o._fields['emergency_type'].selection).get(o.emergency_type, '') if hasattr(o, '_fields') and 'emergency_type' in o._fields else ''"/>
+                                </p>
+                                <p style="margin: 5px 0;"><strong>Status:</strong> 
+                                    <span t-att-style="'color: %s; font-weight: bold;' % ('#4caf50' if o.active else '#999')">
+                                        <t t-if="o.active">Active</t>
+                                        <t t-else="">Archived</t>
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Procedure Overview -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f; margin-top: 20px;">Procedure Information</h2>
+                        <table class="table table-sm table-bordered" style="margin-bottom: 20px;">
+                            <tr>
+                                <th style="width: 30%; background-color: #f5f5f5;">Procedure Name</th>
+                                <td colspan="3"><strong><t t-esc="o.name or 'N/A'"/></strong></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Emergency Type</th>
+                                <td><t t-esc="dict(o._fields['emergency_type'].selection).get(o.emergency_type, 'N/A') if hasattr(o, '_fields') and 'emergency_type' in o._fields else 'N/A'"/></td>
+                                <th style="background-color: #f5f5f5;">Total Steps</th>
+                                <td><t t-esc="o.step_count or 0"/> steps</td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Critical Steps</th>
+                                <td><span style="color: #d32f2f; font-weight: bold;"><t t-esc="o.critical_step_count or 0"/> critical steps</span></td>
+                                <th style="background-color: #f5f5f5;">Execution Count</th>
+                                <td><t t-esc="o.execution_count or 0"/> times executed</td>
+                            </tr>
+                        </table>
+                        
+                        <!-- Description -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f; margin-top: 30px;">When to Use This Procedure</h2>
+                        <div style="padding: 15px; background-color: #fafafa; border: 1px solid #ddd; margin-bottom: 20px;">
+                            <t t-if="o.description">
+                                <t t-raw="o.description"/>
+                            </t>
+                            <t t-else="">
+                                <p style="font-style: italic; color: #666;">No description provided.</p>
+                            </t>
+                        </div>
+                        
+                        <!-- Emergency Steps -->
+                        <h2 style="background-color: #d32f2f; color: white; padding: 10px;">Emergency Response Steps</h2>
+                        <t t-if="o.step_ids">
+                            <table class="table table-sm table-bordered" style="margin-top: 20px;">
+                                <thead style="background-color: #f5f5f5;">
+                                    <tr>
+                                        <th style="width: 5%;">Step</th>
+                                        <th style="width: 55%;">Action Description</th>
+                                        <th style="width: 10%;">Critical</th>
+                                        <th style="width: 10%;">Photo Required</th>
+                                        <th style="width: 10%;">Confirmation Required</th>
+                                        <th style="width: 10%;">Est. Duration</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="o.step_ids.sorted('sequence')" t-as="step">
+                                        <tr t-att-style="'background-color: %s;' % ('#ffebee' if hasattr(step, 'critical') and step.critical else 'white')">
+                                            <td style="text-align: center; font-weight: bold;">
+                                                <t t-esc="step_index + 1"/>
+                                            </td>
+                                            <td>
+                                                <strong><t t-esc="step.name if hasattr(step, 'name') else 'Step ' + str(step_index + 1)"/></strong>
+                                                <t t-if="hasattr(step, 'description') and step.description">
+                                                    <br/><small style="color: #666;"><t t-esc="step.description[:200]"/>...</small>
+                                                </t>
+                                            </td>
+                                            <td style="text-align: center;">
+                                                <t t-if="hasattr(step, 'critical') and step.critical">
+                                                    <span style="color: #d32f2f; font-weight: bold;">✓ CRITICAL</span>
+                                                </t>
+                                                <t t-else="">
+                                                    <span style="color: #999;">-</span>
+                                                </t>
+                                            </td>
+                                            <td style="text-align: center;">
+                                                <t t-if="hasattr(step, 'requires_photo') and step.requires_photo">
+                                                    <span style="color: #1976d2;">✓ Yes</span>
+                                                </t>
+                                                <t t-else="">-</t>
+                                            </td>
+                                            <td style="text-align: center;">
+                                                <t t-if="hasattr(step, 'requires_confirmation') and step.requires_confirmation">
+                                                    <span style="color: #f57c00;">✓ Yes</span>
+                                                </t>
+                                                <t t-else="">-</t>
+                                            </td>
+                                            <td style="text-align: center;">
+                                                <t t-if="hasattr(step, 'estimated_duration') and step.estimated_duration">
+                                                    <t t-esc="step.estimated_duration"/> min
+                                                </t>
+                                                <t t-else="">-</t>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+                        <t t-else="">
+                            <p style="font-style: italic; color: #666; padding: 20px; background-color: #fafafa;">No steps defined for this procedure.</p>
+                        </t>
+                        
+                        <!-- Site Assignment -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f; margin-top: 30px;">Site Assignment</h2>
+                        <t t-if="o.site_ids">
+                            <div style="padding: 15px; background-color: #fafafa; border: 1px solid #ddd; margin-bottom: 20px;">
+                                <p><strong>This procedure applies to the following sites:</strong></p>
+                                <ul>
+                                    <t t-foreach="o.site_ids" t-as="site">
+                                        <li><t t-esc="site.name"/></li>
+                                    </t>
+                                </ul>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="alert alert-info" style="padding: 15px; background-color: #e3f2fd; border-left: 4px solid #2196f3;">
+                                <p style="margin: 0;">
+                                    <i class="fa fa-info-circle"/> This procedure applies to <strong>ALL SITES</strong>.
+                                </p>
+                            </div>
+                        </t>
+                        
+                        <!-- Emergency Notifications -->
+                        <t t-if="o.auto_notify_authorities">
+                            <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f; margin-top: 30px;">Automatic Emergency Notifications</h2>
+                            <div class="alert alert-warning" style="padding: 15px; background-color: #fff3e0; border-left: 4px solid #ff9800;">
+                                <p><i class="fa fa-bell"/> <strong>Automatic Notification Enabled</strong></p>
+                                <table class="table table-sm" style="margin-top: 10px;">
+                                    <tr t-if="o.notify_phone">
+                                        <th style="width: 30%;">Emergency Phone:</th>
+                                        <td><t t-esc="o.notify_phone"/></td>
+                                    </tr>
+                                    <tr t-if="o.notify_email">
+                                        <th>Emergency Email:</th>
+                                        <td><t t-esc="o.notify_email"/></td>
+                                    </tr>
+                                </table>
+                                <t t-if="o.notify_message">
+                                    <p style="margin-top: 10px;"><strong>Notification Message Template:</strong></p>
+                                    <div style="background: white; padding: 10px; border: 1px solid #ddd;">
+                                        <t t-esc="o.notify_message"/>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+                        
+                        <!-- Important Safety Notice -->
+                        <div style="margin-top: 40px; padding: 20px; background-color: #ffebee; border-left: 4px solid #d32f2f;">
+                            <p style="margin: 0; font-weight: bold; color: #c62828; font-size: 16px;">⚠️ IMPORTANT SAFETY NOTICE</p>
+                            <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">
+                                • Follow all steps in the order presented<br/>
+                                • Critical steps must be completed before proceeding<br/>
+                                • Document all actions taken during emergency response<br/>
+                                • Ensure all required photos are captured<br/>
+                                • Notify supervisors and authorities as needed<br/>
+                                • Safety of personnel is the top priority
+                            </p>
+                        </div>
+                        
+                        <!-- Confidentiality Notice -->
+                        <div style="margin-top: 20px; margin-bottom: 20px; padding: 15px; background-color: #fff3e0; border-left: 4px solid #ff9800;">
+                            <p style="margin: 0; font-weight: bold; color: #e65100;">CONFIDENTIAL DOCUMENT - INTERNAL USE ONLY</p>
+                            <p style="margin: 5px 0 0 0; font-size: 12px; color: #666;">
+                                This emergency procedure document is for authorized security personnel only. 
+                                Do not distribute without proper authorization.
+                            </p>
+                        </div>
+                        
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    
+</odoo>
+
+
+
+
+
+
+
+
+
+

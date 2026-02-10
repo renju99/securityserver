@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Course 5: Emergency Response & Procedures - Slides -->
+        
+        <!-- Module 1: Emergency Response Overview -->
+        <record id="slide_emergency_m1_overview" model="slide.slide">
+            <field name="name">Module 1: Emergency Response Overview</field>
+            <field name="channel_id" ref="elearning_course_emergency_response"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.83</field>
+            <field name="html_content">
+                &lt;h2&gt;The Critical Role of Security in Emergency Response&lt;/h2&gt;
+                &lt;p&gt;Security personnel are often the first responders to emergencies, playing a vital role in protecting lives, coordinating response efforts, and maintaining order during crisis situations. This comprehensive module establishes the foundational principles and professional standards for effective emergency response.&lt;/p&gt;
+
+                &lt;h3&gt;The Strategic Importance of Emergency Preparedness&lt;/h3&gt;
+                &lt;p&gt;Effective emergency response by security personnel can mean the difference between life and death, successful crisis management, and long-term organizational recovery. Security guards serve as the critical bridge between the initial emergency and the arrival of specialized emergency services.&lt;/p&gt;
+
+                &lt;h4&gt;Life-Saving Impact&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Immediate Response:&lt;/strong&gt; Critical first minutes when professional help can save lives&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Scene Stabilization:&lt;/strong&gt; Containing hazards and preventing secondary incidents&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Coordination:&lt;/strong&gt; Directing emergency services and managing crowd control&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Information Management:&lt;/strong&gt; Providing accurate details to responding agencies&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Evidence Preservation:&lt;/strong&gt; Maintaining scene integrity for investigations&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Business Continuity Protection&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Property Safeguarding:&lt;/strong&gt; Protecting assets during crisis situations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Operational Continuity:&lt;/strong&gt; Maintaining essential business functions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Stakeholder Confidence:&lt;/strong&gt; Demonstrating commitment to safety and preparedness&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Regulatory Compliance:&lt;/strong&gt; Meeting legal requirements for emergency preparedness&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Comprehensive Emergency Classification System&lt;/h3&gt;
+                &lt;p&gt;Understanding different types of emergencies enables security personnel to provide appropriate responses tailored to each situation's unique requirements and risks.&lt;/p&gt;
+
+                &lt;h4&gt;Medical Emergencies&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Cardiac Events&lt;/dt&gt;
+                    &lt;dd&gt;Heart attacks, cardiac arrest, chest pain, and cardiovascular emergencies&lt;/dd&gt;
+                    &lt;dt&gt;Traumatic Injuries&lt;/dt&gt;
+                    &lt;dd&gt;Falls, cuts, fractures, head injuries, and workplace accidents&lt;/dd&gt;
+                    &lt;dt&gt;Neurological Incidents&lt;/dt&gt;
+                    &lt;dd&gt;Seizures, strokes, loss of consciousness, and neurological symptoms&lt;/dd&gt;
+                    &lt;dt&gt;Respiratory Emergencies&lt;/dt&gt;
+                    &lt;dd&gt;Difficulty breathing, asthma attacks, allergic reactions, and choking&lt;/dd&gt;
+                    &lt;dt&gt;Environmental Injuries&lt;/dt&gt;
+                    &lt;dd&gt;Heat exhaustion, hypothermia, chemical exposure, and poisoning&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Fire and Structural Emergencies&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Building Fires:&lt;/strong&gt; Structural fires, electrical fires, and chemical fires&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Smoke Incidents:&lt;/strong&gt; Smoke inhalation, poor ventilation, and carbon monoxide&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Explosion Hazards:&lt;/strong&gt; Gas leaks, flammable materials, and pressure vessel failures&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Structural Collapse:&lt;/strong&gt; Building damage, foundation failure, and falling debris&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Elevator Malfunctions:&lt;/strong&gt; Stuck elevators, free-fall incidents, and power failures&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Security and Threat Emergencies&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Active Threat Incidents&lt;/dt&gt;
+                    &lt;dd&gt;Active shooters, hostage situations, and terrorist attacks&lt;/dd&gt;
+                    &lt;dt&gt;Suspicious Package Threats&lt;/dt&gt;
+                    &lt;dd&gt;Bomb threats, suspicious packages, and chemical/biological hazards&lt;/dd&gt;
+                    &lt;dt&gt;Intrusion and Assault&lt;/dt&gt;
+                    &lt;dd&gt;Unauthorized access, violent confrontations, and criminal activity&lt;/dd&gt;
+                    &lt;dt&gt;Cyber Security Incidents&lt;/dt&gt;
+                    &lt;dd&gt;System breaches, data theft, and digital infrastructure attacks&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Natural and Environmental Disasters&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Severe Weather:&lt;/strong&gt; Hurricanes, tornadoes, floods, and lightning strikes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Geological Events:&lt;/strong&gt; Earthquakes, landslides, and volcanic activity&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Utility Failures:&lt;/strong&gt; Power outages, water main breaks, and gas leaks&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Biological Hazards:&lt;/strong&gt; Disease outbreaks and pandemic situations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Transportation Accidents:&lt;/strong&gt; Vehicle collisions and mass transit incidents&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;The Professional Emergency Response Framework&lt;/h3&gt;
+                &lt;p&gt;The "Three C's" framework provides a structured approach to emergency response that ensures systematic, professional handling of crisis situations.&lt;/p&gt;
+
+                &lt;h4&gt;Check: Initial Assessment and Scene Evaluation&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Personal Safety Assessment:&lt;/strong&gt; Evaluate immediate threats to your safety&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Scene Security Evaluation:&lt;/strong&gt; Determine if the area is safe to approach&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Victim Condition Check:&lt;/strong&gt; Assess the status and needs of affected individuals&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Requirements:&lt;/strong&gt; Identify what assistance and equipment are needed&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication Needs:&lt;/strong&gt; Determine who needs to be notified immediately&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Call: Emergency Notification and Coordination&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Services Activation:&lt;/strong&gt; Contact appropriate emergency response agencies&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Internal Notification:&lt;/strong&gt; Alert supervisors and organizational leadership&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Stakeholder Communication:&lt;/strong&gt; Notify affected parties and next of kin&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Mobilization:&lt;/strong&gt; Activate backup personnel and equipment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Media Relations:&lt;/strong&gt; Prepare for potential media inquiries&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Care: Intervention and Support Provision&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Immediate Medical Aid:&lt;/strong&gt; Provide basic first aid within your training limits&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Psychological Support:&lt;/strong&gt; Offer comfort and reassurance to affected individuals&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Scene Management:&lt;/strong&gt; Control access and maintain order at the incident site&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Distribution:&lt;/strong&gt; Direct emergency personnel and equipment to priority areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Information Management:&lt;/strong&gt; Keep accurate records and provide updates&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;The Security Professional's Emergency Priorities&lt;/h3&gt;
+                &lt;p&gt;During emergencies, security personnel must maintain a clear hierarchy of priorities that balances safety, response effectiveness, and legal responsibilities.&lt;/p&gt;
+
+                &lt;h4&gt;Priority 1: Personal and Responder Safety&lt;/h4&gt;
+                &lt;p&gt;&lt;strong&gt;"You cannot help others if you become a victim yourself."&lt;/strong&gt;&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Never enter hazardous situations without proper equipment and training&lt;/li&gt;
+                    &lt;li&gt;Continuously reassess personal safety throughout the response&lt;/li&gt;
+                    &lt;li&gt;Know when to withdraw and allow specialized responders to take over&lt;/li&gt;
+                    &lt;li&gt;Protect fellow responders and emergency personnel&lt;/li&gt;
+                    &lt;li&gt;Use proper personal protective equipment (PPE) when available&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Priority 2: Life Preservation and Protection&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Immediate Life Threats:&lt;/strong&gt; Address cardiac arrest, severe bleeding, and airway obstruction&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Vulnerable Populations:&lt;/strong&gt; Prioritize children, elderly, and disabled individuals&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Multiple Casualties:&lt;/strong&gt; Triage injuries and direct medical resources to most critical cases&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Psychological Trauma:&lt;/strong&gt; Provide immediate emotional support and prevent panic&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Priority 3: Emergency Services Coordination&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Accurate Information:&lt;/strong&gt; Provide clear, factual details to emergency responders&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Facilitation:&lt;/strong&gt; Guide emergency vehicles and personnel to incident locations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication Relay:&lt;/strong&gt; Act as liaison between victims and emergency services&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Direction:&lt;/strong&gt; Help emergency personnel locate necessary equipment and access points&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Priority 4: Scene Security and Evidence Preservation&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Area Containment:&lt;/strong&gt; Establish secure perimeters around incident scenes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Unauthorized Access Prevention:&lt;/strong&gt; Control entry to emergency areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Evidence Protection:&lt;/strong&gt; Prevent contamination of potential evidence&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Witness Management:&lt;/strong&gt; Keep witnesses available for emergency personnel&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Priority 5: Documentation and Follow-Up&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Incident Recording:&lt;/strong&gt; Document all actions, observations, and communications&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Timeline Creation:&lt;/strong&gt; Maintain chronological record of emergency response&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Tracking:&lt;/strong&gt; Record equipment and personnel utilized&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Lessons Learned:&lt;/strong&gt; Identify areas for improvement in future responses&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Fundamental Emergency Response Principles&lt;/h3&gt;
+                &lt;p&gt;These core principles guide all emergency response activities and ensure professional, effective crisis management.&lt;/p&gt;
+
+                &lt;h4&gt;Preparation and Readiness&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Continuous Training:&lt;/strong&gt; Regular practice and skill maintenance&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Equipment Familiarity:&lt;/strong&gt; Know how to use emergency equipment and systems&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Procedure Knowledge:&lt;/strong&gt; Understand organizational emergency protocols&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Awareness:&lt;/strong&gt; Know available emergency resources and contacts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Personal Preparedness:&lt;/strong&gt; Maintain physical fitness and mental readiness&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Response Execution Principles&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Calm Professionalism:&lt;/strong&gt; Maintain composure and project confidence&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Decisive Action:&lt;/strong&gt; Make timely decisions based on available information&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Clear Communication:&lt;/strong&gt; Use precise language and avoid jargon&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Team Coordination:&lt;/strong&gt; Work effectively with all responding agencies&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Adaptability:&lt;/strong&gt; Adjust response based on evolving situation&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Ethical and Legal Standards&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Duty of Care:&lt;/strong&gt; Provide reasonable assistance within your capabilities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Good Samaritan Protection:&lt;/strong&gt; Act in good faith without fear of liability&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Scope of Practice:&lt;/strong&gt; Never exceed your training and legal authority&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Confidentiality:&lt;/strong&gt; Respect privacy rights during emergency situations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Accountability:&lt;/strong&gt; Document actions and be prepared to justify decisions&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;The Security Guard's Emergency Mindset&lt;/h3&gt;
+                &lt;p&gt;Developing the right mental framework is crucial for effective emergency response. Security personnel must balance urgency with methodical thinking.&lt;/p&gt;
+
+                &lt;h4&gt;Mental Preparedness Factors&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Situational Awareness:&lt;/strong&gt; Continuously monitor and assess changing conditions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Crisis Decision-Making:&lt;/strong&gt; Make sound judgments under pressure&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Stress Management:&lt;/strong&gt; Control emotional responses and maintain focus&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Optimization:&lt;/strong&gt; Efficiently use available personnel and equipment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Continuous Learning:&lt;/strong&gt; View each emergency as a learning opportunity&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Post-Emergency Considerations&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Debriefing Requirements:&lt;/strong&gt; Participate in after-action reviews&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Psychological Support:&lt;/strong&gt; Address stress and emotional impacts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Procedure Updates:&lt;/strong&gt; Incorporate lessons learned into protocols&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Personal Recovery:&lt;/strong&gt; Allow time for rest and recovery&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Professional Development:&lt;/strong&gt; Seek additional training based on experience&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Practice Exercise:&lt;/strong&gt; Review your current emergency response procedures. Identify three potential emergency scenarios you might encounter at your work site and outline your specific response actions for each, following the Check-Call-Care framework.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_emergency_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_emergency_response"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_emergency_m1_q1" model="slide.question">
+            <field name="question">What are the "Three C's" of emergency response?</field>
+            <field name="slide_id" ref="slide_emergency_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_emergency_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_emergency_m1_q1"/>
+            <field name="text_value">Check, Call, Care</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_emergency_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_emergency_m1_q1"/>
+            <field name="text_value">Clear, Calm, Communicate</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_emergency_m1_q2" model="slide.question">
+            <field name="question">What is your FIRST priority during an emergency?</field>
+            <field name="slide_id" ref="slide_emergency_m1_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_emergency_m1_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_emergency_m1_q2"/>
+            <field name="text_value">Ensuring your own safety</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_emergency_m1_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_emergency_m1_q2"/>
+            <field name="text_value">Writing a detailed report</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 2: Evacuation Procedures -->
+        <record id="slide_emergency_m2_evacuation" model="slide.slide">
+            <field name="name">Module 2: Evacuation Procedures</field>
+            <field name="channel_id" ref="elearning_course_emergency_response"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Building Evacuation Procedures&lt;/h2&gt;
+                &lt;p&gt;Master the procedures for safe and orderly building evacuations.&lt;/p&gt;
+                
+                &lt;h3&gt;When to Evacuate:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Fire alarm activation&lt;/li&gt;
+                    &lt;li&gt;Gas leak or chemical spill&lt;/li&gt;
+                    &lt;li&gt;Bomb threat (when directed)&lt;/li&gt;
+                    &lt;li&gt;Structural damage or collapse risk&lt;/li&gt;
+                    &lt;li&gt;Other imminent dangers&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Evacuation Steps:&lt;/h3&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Alert:&lt;/strong&gt; Activate alarm if not already sounding&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communicate:&lt;/strong&gt; Use PA system or radio to direct occupants&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Direct:&lt;/strong&gt; Guide people to nearest safe exit&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Assist:&lt;/strong&gt; Help those who need assistance&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Account:&lt;/strong&gt; Gather at assembly point and account for everyone&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Report:&lt;/strong&gt; Inform emergency services of anyone missing&lt;/li&gt;
+                &lt;/ol&gt;
+                
+                &lt;h3&gt;Safety Guidelines:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Use stairs, NEVER elevators&lt;/li&gt;
+                    &lt;li&gt;Stay low if there's smoke&lt;/li&gt;
+                    &lt;li&gt;Feel doors before opening (check for heat)&lt;/li&gt;
+                    &lt;li&gt;Keep evacuation routes clear&lt;/li&gt;
+                    &lt;li&gt;Know primary and alternate exits&lt;/li&gt;
+                    &lt;li&gt;Do not re-enter building until cleared by authorities&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Assembly Points:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Know designated assembly point locations&lt;/li&gt;
+                    &lt;li&gt;Must be safe distance from building&lt;/li&gt;
+                    &lt;li&gt;Keep pathways clear for emergency vehicles&lt;/li&gt;
+                    &lt;li&gt;Conduct headcount and report to incident commander&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_emergency_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_emergency_response"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_emergency_m2_q1" model="slide.question">
+            <field name="question">During a building evacuation, you should:</field>
+            <field name="slide_id" ref="slide_emergency_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_emergency_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_emergency_m2_q1"/>
+            <field name="text_value">Take the elevator for faster exit</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_emergency_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_emergency_m2_q1"/>
+            <field name="text_value">Use stairs and never use elevators</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <!-- Module 3: Medical Emergencies -->
+        <record id="slide_emergency_m3_medical" model="slide.slide">
+            <field name="name">Module 3: Medical Emergencies</field>
+            <field name="channel_id" ref="elearning_course_emergency_response"/>
+            <field name="sequence">30</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Responding to Medical Emergencies&lt;/h2&gt;
+                &lt;p&gt;Learn initial response procedures for common medical emergencies.&lt;/p&gt;
+                
+                &lt;h3&gt;Common Medical Emergencies:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Heart attacks&lt;/li&gt;
+                    &lt;li&gt;Strokes&lt;/li&gt;
+                    &lt;li&gt;Choking&lt;/li&gt;
+                    &lt;li&gt;Severe bleeding&lt;/li&gt;
+                    &lt;li&gt;Seizures&lt;/li&gt;
+                    &lt;li&gt;Unconsciousness&lt;/li&gt;
+                    &lt;li&gt;Allergic reactions&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Initial Response Steps:&lt;/h3&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Assess scene safety&lt;/li&gt;
+                    &lt;li&gt;Call 911 immediately&lt;/li&gt;
+                    &lt;li&gt;Check victim's responsiveness&lt;/li&gt;
+                    &lt;li&gt;Provide reassurance to the victim&lt;/li&gt;
+                    &lt;li&gt;Follow dispatcher instructions&lt;/li&gt;
+                    &lt;li&gt;Stay with victim until EMS arrives&lt;/li&gt;
+                    &lt;li&gt;Provide information to paramedics&lt;/li&gt;
+                &lt;/ol&gt;
+                
+                &lt;h3&gt;Warning Signs - Heart Attack:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Chest pain or discomfort&lt;/li&gt;
+                    &lt;li&gt;Shortness of breath&lt;/li&gt;
+                    &lt;li&gt;Pain in arms, back, neck, or jaw&lt;/li&gt;
+                    &lt;li&gt;Nausea or lightheadedness&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Warning Signs - Stroke (FAST):&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;F&lt;/strong&gt;ace drooping&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;A&lt;/strong&gt;rm weakness&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;S&lt;/strong&gt;peech difficulty&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;T&lt;/strong&gt;ime to call 911&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Important Reminders:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Do not move someone with a neck or back injury&lt;/li&gt;
+                    &lt;li&gt;Do not give food or drink to an unconscious person&lt;/li&gt;
+                    &lt;li&gt;Keep the person warm and comfortable&lt;/li&gt;
+                    &lt;li&gt;Document all observations and actions taken&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_emergency_m3_quiz" model="slide.slide">
+            <field name="name">Module 3: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_emergency_response"/>
+            <field name="sequence">31</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_emergency_m3_q1" model="slide.question">
+            <field name="question">What does "FAST" stand for when recognizing stroke symptoms?</field>
+            <field name="slide_id" ref="slide_emergency_m3_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_emergency_m3_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_emergency_m3_q1"/>
+            <field name="text_value">Face, Arm, Speech, Time</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_emergency_m3_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_emergency_m3_q1"/>
+            <field name="text_value">First, Alert, Secure, Transport</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 4: Active Threat Response -->
+        <record id="slide_emergency_m4_threat" model="slide.slide">
+            <field name="name">Module 4: Active Threat Response</field>
+            <field name="channel_id" ref="elearning_course_emergency_response"/>
+            <field name="sequence">40</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Active Threat Situations&lt;/h2&gt;
+                &lt;p&gt;Learn survival strategies for active threat situations.&lt;/p&gt;
+                
+                &lt;h3&gt;Run, Hide, Fight Protocol:&lt;/h3&gt;
+                
+                &lt;h4&gt;1. RUN (First Option):&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Have an escape route and plan in mind&lt;/li&gt;
+                    &lt;li&gt;Leave belongings behind&lt;/li&gt;
+                    &lt;li&gt;Help others escape if possible&lt;/li&gt;
+                    &lt;li&gt;Call 911 when safe&lt;/li&gt;
+                    &lt;li&gt;Do not attempt to move injured people&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h4&gt;2. HIDE (If Running Not Possible):&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Hide in an area out of the threat's view&lt;/li&gt;
+                    &lt;li&gt;Lock and barricade doors&lt;/li&gt;
+                    &lt;li&gt;Turn off lights&lt;/li&gt;
+                    &lt;li&gt;Silence phones and other devices&lt;/li&gt;
+                    &lt;li&gt;Remain quiet and still&lt;/li&gt;
+                    &lt;li&gt;Spread out if in a group&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h4&gt;3. FIGHT (Last Resort):&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Only if life is in imminent danger&lt;/li&gt;
+                    &lt;li&gt;Act with physical aggression&lt;/li&gt;
+                    &lt;li&gt;Use improvised weapons&lt;/li&gt;
+                    &lt;li&gt;Commit to your actions&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;When Law Enforcement Arrives:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Remain calm and follow instructions&lt;/li&gt;
+                    &lt;li&gt;Keep hands visible at all times&lt;/li&gt;
+                    &lt;li&gt;Avoid making sudden movements&lt;/li&gt;
+                    &lt;li&gt;Do not run toward officers&lt;/li&gt;
+                    &lt;li&gt;Provide information about situation and threats&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_emergency_m4_quiz" model="slide.slide">
+            <field name="name">Module 4: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_emergency_response"/>
+            <field name="sequence">41</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_emergency_m4_q1" model="slide.question">
+            <field name="question">In an active threat situation, what is the recommended order of response?</field>
+            <field name="slide_id" ref="slide_emergency_m4_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_emergency_m4_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_emergency_m4_q1"/>
+            <field name="text_value">Run, Hide, Fight</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_emergency_m4_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_emergency_m4_q1"/>
+            <field name="text_value">Fight, Hide, Run</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Final Assessment -->
+        <record id="slide_emergency_final" model="slide.slide">
+            <field name="name">Final Assessment: Emergency Response</field>
+            <field name="channel_id" ref="elearning_course_emergency_response"/>
+            <field name="sequence">50</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.3</field>
+        </record>
+
+        <record id="quiz_emergency_final_q1" model="slide.question">
+            <field name="question">What is your FIRST priority in any emergency?</field>
+            <field name="slide_id" ref="slide_emergency_final"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_emergency_final_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_emergency_final_q1"/>
+            <field name="text_value">Your own safety</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_emergency_final_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_emergency_final_q1"/>
+            <field name="text_value">Protecting property</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_emergency_final_q2" model="slide.question">
+            <field name="question">During evacuation, why should you never use elevators?</field>
+            <field name="slide_id" ref="slide_emergency_final"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_emergency_final_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_emergency_final_q2"/>
+            <field name="text_value">They may malfunction or trap you during emergencies</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_emergency_final_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_emergency_final_q2"/>
+            <field name="text_value">They are too slow</field>
+            <field name="is_correct">False</field>
+        </record>
+
+    </data>
+</odoo>
+
+
+
+
+
+
+
+
+
+

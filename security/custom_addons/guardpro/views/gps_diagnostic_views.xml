@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- GPS Diagnostic Wizard Form -->
+    <record id="view_gps_diagnostic_form" model="ir.ui.view">
+        <field name="name">gps.diagnostic.form</field>
+        <field name="model">gps.diagnostic</field>
+        <field name="arch" type="xml">
+            <form string="GPS Tracking Diagnostic">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <i class="fa fa-map-marker-alt text-primary"/>
+                            GPS Tracking Diagnostic Tool
+                        </h1>
+                        <p class="text-muted">
+                            This tool helps diagnose GPS tracking issues for guards.
+                            Select a guard to run comprehensive diagnostics.
+                        </p>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="guard_id" options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                            <!-- Empty column for layout -->
+                        </group>
+                    </group>
+                    
+                    <group string="Diagnostic Results" invisible="not guard_id">
+                        <group>
+                            <field name="has_user_account"/>
+                            <field name="user_id" invisible="not has_user_account"/>
+                            <field name="has_location_data"/>
+                            <field name="current_latitude" invisible="not has_location_data"/>
+                            <field name="current_longitude" invisible="not has_location_data"/>
+                        </group>
+                        <group>
+                            <field name="last_location_update" invisible="not has_location_data"/>
+                            <field name="location_history_count"/>
+                            <field name="last_history_record" invisible="location_history_count == 0"/>
+                        </group>
+                    </group>
+                    
+                    <notebook invisible="not guard_id">
+                        <page string="Detailed Report">
+                            <field name="diagnostic_message" widget="html"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <footer>
+                    <button string="Open Guard Profile" 
+                            name="action_open_guard_profile" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="not guard_id"/>
+                    <button string="View Location History" 
+                            name="action_view_location_history" 
+                            type="object" 
+                            class="btn-secondary"
+                            invisible="location_history_count == 0"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- GPS Diagnostic Action -->
+    <record id="action_gps_diagnostic" model="ir.actions.act_window">
+        <field name="name">GPS Tracking Diagnostic</field>
+        <field name="res_model">gps.diagnostic</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_guard_profile"/>
+        <field name="binding_view_types">form</field>
+    </record>
+
+    <!-- GPS Diagnostic button removed from Guard Profile - diagnostic tool still accessible via global menu -->
+</odoo>
+

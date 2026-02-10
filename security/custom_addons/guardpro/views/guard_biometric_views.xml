@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Guard Biometric Template Views -->
+    
+    <!-- Biometric Template Tree View -->
+    <record id="view_guard_biometric_template_tree" model="ir.ui.view">
+        <field name="name">guard.biometric.template.tree</field>
+        <field name="model">guard.biometric.template</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list string="Biometric Templates" decoration-success="is_primary == True" decoration-muted="is_active == False">
+                <field name="display_name"/>
+                <field name="guard_id"/>
+                <field name="biometric_type"/>
+                <field name="device_model"/>
+                <field name="quality_score"/>
+                <field name="is_primary"/>
+                <field name="is_active"/>
+                <field name="verification_count"/>
+                <field name="last_used" widget="datetime"/>
+                <field name="enrolled_date" widget="datetime"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Biometric Template Form View -->
+    <record id="view_guard_biometric_template_form" model="ir.ui.view">
+        <field name="name">guard.biometric.template.form</field>
+        <field name="model">guard.biometric.template</field>
+        <field name="arch" type="xml">
+            <form string="Biometric Template">
+                <header>
+                    <button name="action_set_as_primary" string="Set as Primary" type="object" 
+                            class="oe_highlight" invisible="is_primary == True"/>
+                    <button name="action_activate" string="Activate" type="object" 
+                            invisible="is_active == True"/>
+                    <button name="action_deactivate" string="Deactivate" type="object" 
+                            invisible="is_active == False"/>
+                    <button name="action_view_verifications" string="View Verifications" type="object"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_verifications" type="object" class="oe_stat_button" icon="fa-check-circle">
+                            <field name="verification_count" widget="statinfo" string="Verifications"/>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="display_name" readonly="1"/>
+                            <field name="guard_id" readonly="1"/>
+                            <field name="biometric_type" readonly="1"/>
+                            <field name="is_primary"/>
+                            <field name="is_active"/>
+                        </group>
+                        <group>
+                            <field name="device_model" readonly="1"/>
+                            <field name="device_id" readonly="1"/>
+                            <field name="algorithm_version" readonly="1"/>
+                            <field name="quality_score" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Enrollment Information">
+                        <field name="enrolled_date" readonly="1"/>
+                        <field name="enrolled_by" readonly="1"/>
+                        <field name="enrollment_location" readonly="1"/>
+                        <field name="enrollment_latitude" readonly="1"/>
+                        <field name="enrollment_longitude" readonly="1"/>
+                    </group>
+                    <group string="Usage Statistics">
+                        <field name="verification_count" readonly="1"/>
+                        <field name="last_used" readonly="1"/>
+                        <field name="last_used_location" readonly="1"/>
+                    </group>
+                    <group string="Security">
+                        <field name="template_hash" readonly="1"/>
+                        <field name="encryption_key_id" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="notes" widget="text"/>
+                    </group>
+                    <notebook>
+                        <page string="Template Data" invisible="not template_data">
+                            <field name="template_data" readonly="1" filename="template_hash"/>
+                            <p class="text-muted">
+                                <i class="fa fa-lock"/> Template is encrypted and cannot be viewed directly.
+                            </p>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Biometric Template Search View -->
+    <record id="view_guard_biometric_template_search" model="ir.ui.view">
+        <field name="name">guard.biometric.template.search</field>
+        <field name="model">guard.biometric.template</field>
+        <field name="arch" type="xml">
+            <search string="Biometric Templates">
+                <field name="guard_id"/>
+                <field name="biometric_type"/>
+                <field name="device_model"/>
+                <filter string="Primary Templates" name="primary" domain="[('is_primary', '=', True)]"/>
+                <filter string="Active" name="active" domain="[('is_active', '=', True)]"/>
+                <filter string="Inactive" name="inactive" domain="[('is_active', '=', False)]"/>
+                <separator/>
+                <filter string="Fingerprint" name="fingerprint" domain="[('biometric_type', '=', 'fingerprint')]"/>
+                <filter string="Facial" name="facial" domain="[('biometric_type', '=', 'facial')]"/>
+                <filter string="Voice" name="voice" domain="[('biometric_type', '=', 'voice')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Guard" name="group_guard" context="{'group_by': 'guard_id'}"/>
+                    <filter string="Type" name="group_type" context="{'group_by': 'biometric_type'}"/>
+                    <filter string="Device" name="group_device" context="{'group_by': 'device_model'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Biometric Verification Tree View -->
+    <record id="view_guard_biometric_verification_tree" model="ir.ui.view">
+        <field name="name">guard.biometric.verification.tree</field>
+        <field name="model">guard.biometric.verification</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list string="Verifications" decoration-success="verification_result == 'success'" 
+                  decoration-danger="verification_result == 'failed'" decoration-warning="is_suspicious == True">
+                <field name="name"/>
+                <field name="verification_time" widget="datetime"/>
+                <field name="guard_id"/>
+                <field name="biometric_type"/>
+                <field name="verification_purpose"/>
+                <field name="verification_result"/>
+                <field name="confidence_score"/>
+                <field name="device_model"/>
+                <field name="is_suspicious"/>
+                <field name="review_required"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Biometric Verification Form View -->
+    <record id="view_guard_biometric_verification_form" model="ir.ui.view">
+        <field name="name">guard.biometric.verification.form</field>
+        <field name="model">guard.biometric.verification</field>
+        <field name="arch" type="xml">
+            <form string="Biometric Verification">
+                <header>
+                    <button name="action_mark_suspicious" string="Mark as Suspicious" type="object" 
+                            invisible="is_suspicious == True"/>
+                    <button name="action_review" string="Mark as Reviewed" type="object" 
+                            class="oe_highlight" invisible="review_required == False"/>
+                    <button name="action_view_guard" string="View Guard" type="object"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" readonly="1"/>
+                            <field name="guard_id"/>
+                            <field name="biometric_type"/>
+                            <field name="verification_purpose"/>
+                            <field name="verification_result"/>
+                            <field name="confidence_score"/>
+                        </group>
+                        <group>
+                            <field name="verification_time" readonly="1"/>
+                            <field name="template_id" readonly="1"/>
+                            <field name="device_id" readonly="1"/>
+                            <field name="device_model" readonly="1"/>
+                            <field name="device_type" readonly="1"/>
+                            <field name="is_suspicious"/>
+                            <field name="review_required"/>
+                        </group>
+                    </group>
+                    <group string="Location">
+                        <field name="latitude" readonly="1"/>
+                        <field name="longitude" readonly="1"/>
+                        <field name="location_name" readonly="1"/>
+                    </group>
+                    <group string="Related Records">
+                        <field name="attendance_id"/>
+                        <field name="shift_id"/>
+                        <field name="tour_log_id"/>
+                        <field name="incident_id"/>
+                    </group>
+                    <group string="Device Information">
+                        <field name="ip_address" readonly="1"/>
+                        <field name="user_agent" readonly="1"/>
+                    </group>
+                    <group string="Error Details" invisible="verification_result != 'error'">
+                        <field name="error_message" widget="text" readonly="1"/>
+                        <field name="error_code" readonly="1"/>
+                    </group>
+                    <group string="Security" invisible="is_suspicious == False">
+                        <field name="fraud_indicators" widget="text"/>
+                    </group>
+                    <group string="Review" invisible="not reviewed_by">
+                        <field name="reviewed_by" readonly="1"/>
+                        <field name="reviewed_date" readonly="1"/>
+                        <field name="review_notes" widget="text"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Biometric Verification Search View -->
+    <record id="view_guard_biometric_verification_search" model="ir.ui.view">
+        <field name="name">guard.biometric.verification.search</field>
+        <field name="model">guard.biometric.verification</field>
+        <field name="arch" type="xml">
+            <search string="Verifications">
+                <field name="guard_id"/>
+                <field name="name"/>
+                <filter string="Successful" name="success" domain="[('verification_result', '=', 'success')]"/>
+                <filter string="Failed" name="failed" domain="[('verification_result', '=', 'failed')]"/>
+                <filter string="Suspicious" name="suspicious" domain="[('is_suspicious', '=', True)]"/>
+                <filter string="Review Required" name="review" domain="[('review_required', '=', True)]"/>
+                <filter string="Today" name="today" domain="[('verification_time', '>=', datetime.datetime.now().replace(hour=0, minute=0, second=0))]"/>
+                <separator/>
+                <filter string="Check-in" name="checkin" domain="[('verification_purpose', '=', 'checkin')]"/>
+                <filter string="Check-out" name="checkout" domain="[('verification_purpose', '=', 'checkout')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Guard" name="group_guard" context="{'group_by': 'guard_id'}"/>
+                    <filter string="Type" name="group_type" context="{'group_by': 'biometric_type'}"/>
+                    <filter string="Result" name="group_result" context="{'group_by': 'verification_result'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'verification_time'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Biometric Device Tree View -->
+    <record id="view_guard_biometric_device_tree" model="ir.ui.view">
+        <field name="name">guard.biometric.device.tree</field>
+        <field name="model">guard.biometric.device</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list string="Devices" decoration-success="last_seen_status == 'online'" 
+                  decoration-danger="last_seen_status == 'error'">
+                <field name="name"/>
+                <field name="device_type"/>
+                <field name="device_model"/>
+                <field name="manufacturer"/>
+                <field name="site_id"/>
+                <field name="location_name"/>
+                <field name="last_seen_status"/>
+                <field name="last_seen" widget="datetime"/>
+                <field name="is_active"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Biometric Device Form View -->
+    <record id="view_guard_biometric_device_form" model="ir.ui.view">
+        <field name="name">guard.biometric.device.form</field>
+        <field name="model">guard.biometric.device</field>
+        <field name="arch" type="xml">
+            <form string="Biometric Device">
+                <header>
+                    <button name="action_test_connection" string="Test Connection" type="object" class="oe_highlight"/>
+                    <button name="action_view_verifications" string="View Verifications" type="object"/>
+                    <button name="action_view_templates" string="View Templates" type="object"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_verifications" type="object" class="oe_stat_button" icon="fa-check-circle">
+                            <field name="verification_count" widget="statinfo" string="Verifications"/>
+                        </button>
+                        <button name="action_view_templates" type="object" class="oe_stat_button" icon="fa-fingerprint">
+                            <field name="current_templates" widget="statinfo" string="Templates"/>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="device_type"/>
+                            <field name="device_model"/>
+                            <field name="manufacturer"/>
+                            <field name="serial_number"/>
+                            <field name="is_active"/>
+                        </group>
+                        <group>
+                            <field name="supported_biometric_types"/>
+                            <field name="connection_type"/>
+                            <field name="last_seen_status" readonly="1"/>
+                            <field name="last_seen" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Location">
+                        <field name="site_id"/>
+                        <field name="location_name"/>
+                        <field name="latitude"/>
+                        <field name="longitude"/>
+                    </group>
+                    <group string="Connection Details" invisible="connection_type == 'usb'">
+                        <field name="api_endpoint" invisible="connection_type != 'network'"/>
+                        <field name="api_key" password="True" invisible="connection_type != 'network'"/>
+                        <field name="ip_address" invisible="connection_type != 'network'"/>
+                        <field name="port" invisible="connection_type != 'network'"/>
+                    </group>
+                    <group string="USB Details" invisible="connection_type != 'usb'">
+                        <field name="usb_vendor_id"/>
+                        <field name="usb_product_id"/>
+                    </group>
+                    <group string="Statistics">
+                        <field name="verification_count" readonly="1"/>
+                        <field name="success_count" readonly="1"/>
+                        <field name="failure_count" readonly="1"/>
+                        <field name="success_rate" readonly="1"/>
+                        <field name="current_templates" readonly="1"/>
+                        <field name="max_templates"/>
+                    </group>
+                    <group>
+                        <field name="notes" widget="text"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Biometric Device Search View -->
+    <record id="view_guard_biometric_device_search" model="ir.ui.view">
+        <field name="name">guard.biometric.device.search</field>
+        <field name="model">guard.biometric.device</field>
+        <field name="arch" type="xml">
+            <search string="Devices">
+                <field name="name"/>
+                <field name="device_model"/>
+                <field name="serial_number"/>
+                <field name="site_id"/>
+                <filter string="Active" name="active" domain="[('is_active', '=', True)]"/>
+                <filter string="Online" name="online" domain="[('last_seen_status', '=', 'online')]"/>
+                <filter string="Offline" name="offline" domain="[('last_seen_status', '=', 'offline')]"/>
+                <separator/>
+                <filter string="USB" name="usb" domain="[('connection_type', '=', 'usb')]"/>
+                <filter string="Network" name="network" domain="[('connection_type', '=', 'network')]"/>
+                <filter string="Mobile" name="mobile" domain="[('connection_type', '=', 'mobile_app')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Type" name="group_type" context="{'group_by': 'device_type'}"/>
+                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Status" name="group_status" context="{'group_by': 'last_seen_status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Actions -->
+    <record id="action_guard_biometric_template" model="ir.actions.act_window">
+        <field name="name">Biometric Templates</field>
+        <field name="res_model">guard.biometric.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No biometric templates yet!
+            </p>
+            <p>
+                Enroll guards' biometrics (fingerprint, facial, voice) for secure verification.
+            </p>
+        </field>
+    </record>
+    
+    <record id="action_guard_biometric_verification" model="ir.actions.act_window">
+        <field name="name">Biometric Verifications</field>
+        <field name="res_model">guard.biometric.verification</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No verifications yet!
+            </p>
+            <p>
+                View all biometric verification attempts and results.
+            </p>
+        </field>
+    </record>
+    
+    <record id="action_guard_biometric_device" model="ir.actions.act_window">
+        <field name="name">Biometric Devices</field>
+        <field name="res_model">guard.biometric.device</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Register a device!
+            </p>
+            <p>
+                Register biometric devices (fingerprint scanners, cameras, etc.) for use in verification.
+            </p>
+        </field>
+    </record>
+    
+</odoo>
+

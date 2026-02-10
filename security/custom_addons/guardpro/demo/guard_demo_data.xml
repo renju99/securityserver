@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Guard Skills -->
+        <record id="skill_armed" model="guard.skill">
+            <field name="name">Armed Security</field>
+            <field name="description">Certified to carry and operate firearms</field>
+            <field name="requires_certification" eval="True"/>
+            <field name="color">1</field>
+        </record>
+        
+        <record id="skill_k9" model="guard.skill">
+            <field name="name">K9 Handler</field>
+            <field name="description">Trained in canine handling and deployment</field>
+            <field name="requires_certification" eval="True"/>
+            <field name="color">2</field>
+        </record>
+        
+        <record id="skill_first_aid" model="guard.skill">
+            <field name="name">First Aid/CPR</field>
+            <field name="description">Basic first aid and CPR certification</field>
+            <field name="requires_certification" eval="True"/>
+            <field name="color">3</field>
+        </record>
+        
+        <record id="skill_fire_safety" model="guard.skill">
+            <field name="name">Fire Safety</field>
+            <field name="description">Fire prevention and emergency response</field>
+            <field name="requires_certification" eval="True"/>
+            <field name="color">4</field>
+        </record>
+        
+        <record id="skill_crowd_control" model="guard.skill">
+            <field name="name">Crowd Control</field>
+            <field name="description">Managing large groups and events</field>
+            <field name="requires_certification" eval="False"/>
+            <field name="color">5</field>
+        </record>
+        
+        <record id="skill_surveillance" model="guard.skill">
+            <field name="name">CCTV Surveillance</field>
+            <field name="description">Security camera monitoring and operation</field>
+            <field name="requires_certification" eval="False"/>
+            <field name="color">6</field>
+        </record>
+        
+        <record id="skill_access_control" model="guard.skill">
+            <field name="name">Access Control Systems</field>
+            <field name="description">Operating advanced access control systems</field>
+            <field name="requires_certification" eval="False"/>
+            <field name="color">7</field>
+        </record>
+        
+        <record id="skill_defensive_tactics" model="guard.skill">
+            <field name="name">Defensive Tactics</field>
+            <field name="description">Hand-to-hand combat and restraint techniques</field>
+            <field name="requires_certification" eval="True"/>
+            <field name="color">8</field>
+        </record>
+        
+        <!-- Guard Profiles -->
+        
+        <!-- Guard 1: Senior Guard with full qualifications -->
+        <record id="guard_john_smith" model="guard.profile">
+            <field name="name">John Smith</field>
+            <field name="badge_number">GP-001</field>
+            <field name="phone">+1-555-0101</field>
+            <field name="email">john.smith@guardpro.example.com</field>
+            <field name="hire_date" eval="(datetime.now() - timedelta(days=1825)).strftime('%Y-%m-%d')"/>
+            <field name="status">active</field>
+            <field name="certifications">Armed Security License (Class A), First Aid/CPR, Fire Safety Officer</field>
+            <field name="license_number">ASL-2020-001234</field>
+            <field name="license_expiry" eval="(datetime.now() + timedelta(days=365)).strftime('%Y-%m-%d')"/>
+            <field name="emergency_contact">Mary Smith</field>
+            <field name="emergency_phone">+1-555-0102</field>
+            <field name="address">123 Main Street, Apt 4B, New York, NY 10001</field>
+            <field name="skills" eval="[(6, 0, [ref('skill_armed'), ref('skill_first_aid'), ref('skill_fire_safety'), ref('skill_surveillance')])]"/>
+            <field name="languages">English, Spanish</field>
+            <field name="availability">full_time</field>
+            <field name="rating">4</field>
+            <field name="device_model">Samsung Galaxy S23</field>
+            <field name="app_version">1.0.0</field>
+            <field name="notes">Senior guard with excellent track record. Recommended for high-security assignments.</field>
+        </record>
+        
+        <!-- Guard 2: K9 Handler -->
+        <record id="guard_sarah_johnson" model="guard.profile">
+            <field name="name">Sarah Johnson</field>
+            <field name="badge_number">GP-002</field>
+            <field name="phone">+1-555-0201</field>
+            <field name="email">sarah.johnson@guardpro.example.com</field>
+            <field name="hire_date" eval="(datetime.now() - timedelta(days=1095)).strftime('%Y-%m-%d')"/>
+            <field name="status">active</field>
+            <field name="certifications">K9 Handler Certification, First Aid/CPR, Defensive Tactics</field>
+            <field name="license_number">ASL-2021-005678</field>
+            <field name="license_expiry" eval="(datetime.now() + timedelta(days=540)).strftime('%Y-%m-%d')"/>
+            <field name="emergency_contact">Michael Johnson</field>
+            <field name="emergency_phone">+1-555-0202</field>
+            <field name="address">456 Oak Avenue, Brooklyn, NY 11201</field>
+            <field name="skills" eval="[(6, 0, [ref('skill_k9'), ref('skill_first_aid'), ref('skill_defensive_tactics'), ref('skill_crowd_control')])]"/>
+            <field name="languages">English</field>
+            <field name="availability">full_time</field>
+            <field name="rating">4</field>
+            <field name="device_model">iPhone 14 Pro</field>
+            <field name="app_version">1.0.0</field>
+            <field name="notes">Specialized K9 handler with German Shepherd partner 'Rex'. Excellent for patrol duties.</field>
+        </record>
+        
+        <!-- Guard 3: Night Shift Specialist -->
+        <record id="guard_michael_brown" model="guard.profile">
+            <field name="name">Michael Brown</field>
+            <field name="badge_number">GP-003</field>
+            <field name="phone">+1-555-0301</field>
+            <field name="email">michael.brown@guardpro.example.com</field>
+            <field name="hire_date" eval="(datetime.now() - timedelta(days=730)).strftime('%Y-%m-%d')"/>
+            <field name="status">active</field>
+            <field name="certifications">First Aid/CPR, CCTV Surveillance, Access Control Systems</field>
+            <field name="license_number">ASL-2022-009876</field>
+            <field name="license_expiry" eval="(datetime.now() + timedelta(days=450)).strftime('%Y-%m-%d')"/>
+            <field name="emergency_contact">Lisa Brown</field>
+            <field name="emergency_phone">+1-555-0302</field>
+            <field name="address">789 Park Lane, Queens, NY 11375</field>
+            <field name="skills" eval="[(6, 0, [ref('skill_first_aid'), ref('skill_surveillance'), ref('skill_access_control')])]"/>
+            <field name="languages">English, French</field>
+            <field name="availability">full_time</field>
+            <field name="rating">4</field>
+            <field name="device_model">Google Pixel 7</field>
+            <field name="app_version">1.0.0</field>
+            <field name="notes">Prefers night shifts. Highly reliable with strong attention to detail.</field>
+        </record>
+        
+        <!-- Guard 4: Part-Time Guard -->
+        <record id="guard_emily_davis" model="guard.profile">
+            <field name="name">Emily Davis</field>
+            <field name="badge_number">GP-004</field>
+            <field name="phone">+1-555-0401</field>
+            <field name="email">emily.davis@guardpro.example.com</field>
+            <field name="hire_date" eval="(datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')"/>
+            <field name="status">active</field>
+            <field name="certifications">First Aid/CPR, Fire Safety</field>
+            <field name="license_number">ASL-2023-012345</field>
+            <field name="license_expiry" eval="(datetime.now() + timedelta(days=600)).strftime('%Y-%m-%d')"/>
+            <field name="emergency_contact">Robert Davis</field>
+            <field name="emergency_phone">+1-555-0402</field>
+            <field name="address">321 Elm Street, Manhattan, NY 10019</field>
+            <field name="skills" eval="[(6, 0, [ref('skill_first_aid'), ref('skill_fire_safety'), ref('skill_crowd_control')])]"/>
+            <field name="languages">English, Italian</field>
+            <field name="availability">part_time</field>
+            <field name="rating">4</field>
+            <field name="device_model">iPhone 13</field>
+            <field name="app_version">1.0.0</field>
+            <field name="notes">College student, available weekends and evenings. Very dependable.</field>
+        </record>
+        
+        <!-- Guard 5: Armed Security Specialist -->
+        <record id="guard_david_wilson" model="guard.profile">
+            <field name="name">David Wilson</field>
+            <field name="badge_number">GP-005</field>
+            <field name="phone">+1-555-0501</field>
+            <field name="email">david.wilson@guardpro.example.com</field>
+            <field name="hire_date" eval="(datetime.now() - timedelta(days=1460)).strftime('%Y-%m-%d')"/>
+            <field name="status">active</field>
+            <field name="certifications">Armed Security License (Class A), Defensive Tactics, First Aid/CPR</field>
+            <field name="license_number">ASL-2020-067890</field>
+            <field name="license_expiry" eval="(datetime.now() + timedelta(days=420)).strftime('%Y-%m-%d')"/>
+            <field name="emergency_contact">Jennifer Wilson</field>
+            <field name="emergency_phone">+1-555-0502</field>
+            <field name="address">654 Cedar Road, Bronx, NY 10451</field>
+            <field name="skills" eval="[(6, 0, [ref('skill_armed'), ref('skill_defensive_tactics'), ref('skill_first_aid'), ref('skill_fire_safety')])]"/>
+            <field name="languages">English</field>
+            <field name="availability">full_time</field>
+            <field name="rating">4</field>
+            <field name="device_model">Samsung Galaxy S22</field>
+            <field name="app_version">1.0.0</field>
+            <field name="notes">Former military. Excellent for high-risk security assignments.</field>
+        </record>
+        
+        <!-- Guard 6: Event Security Specialist -->
+        <record id="guard_jessica_martinez" model="guard.profile">
+            <field name="name">Jessica Martinez</field>
+            <field name="badge_number">GP-006</field>
+            <field name="phone">+1-555-0601</field>
+            <field name="email">jessica.martinez@guardpro.example.com</field>
+            <field name="hire_date" eval="(datetime.now() - timedelta(days=548)).strftime('%Y-%m-%d')"/>
+            <field name="status">active</field>
+            <field name="certifications">Crowd Control, First Aid/CPR, Event Security</field>
+            <field name="license_number">ASL-2022-023456</field>
+            <field name="license_expiry" eval="(datetime.now() + timedelta(days=500)).strftime('%Y-%m-%d')"/>
+            <field name="emergency_contact">Carlos Martinez</field>
+            <field name="emergency_phone">+1-555-0602</field>
+            <field name="address">987 Broadway, Manhattan, NY 10003</field>
+            <field name="skills" eval="[(6, 0, [ref('skill_crowd_control'), ref('skill_first_aid'), ref('skill_access_control')])]"/>
+            <field name="languages">English, Spanish, Portuguese</field>
+            <field name="availability">on_call</field>
+            <field name="rating">4</field>
+            <field name="device_model">iPhone 14</field>
+            <field name="app_version">1.0.0</field>
+            <field name="notes">Specializes in large events and concerts. Excellent communication skills.</field>
+        </record>
+        
+        <!-- Guard 7: Recently Hired -->
+        <record id="guard_robert_taylor" model="guard.profile">
+            <field name="name">Robert Taylor</field>
+            <field name="badge_number">GP-007</field>
+            <field name="phone">+1-555-0701</field>
+            <field name="email">robert.taylor@guardpro.example.com</field>
+            <field name="hire_date" eval="(datetime.now() - timedelta(days=90)).strftime('%Y-%m-%d')"/>
+            <field name="status">active</field>
+            <field name="certifications">First Aid/CPR</field>
+            <field name="license_number">ASL-2024-034567</field>
+            <field name="license_expiry" eval="(datetime.now() + timedelta(days=730)).strftime('%Y-%m-%d')"/>
+            <field name="emergency_contact">Amanda Taylor</field>
+            <field name="emergency_phone">+1-555-0702</field>
+            <field name="address">147 River Street, Staten Island, NY 10301</field>
+            <field name="skills" eval="[(6, 0, [ref('skill_first_aid'), ref('skill_surveillance')])]"/>
+            <field name="languages">English</field>
+            <field name="availability">full_time</field>
+            <field name="rating">4</field>
+            <field name="device_model">Samsung Galaxy A54</field>
+            <field name="app_version">1.0.0</field>
+            <field name="notes">New hire, currently in probationary period. Shows good potential.</field>
+        </record>
+        
+        <!-- Guard 8: On Leave -->
+        <record id="guard_william_anderson" model="guard.profile">
+            <field name="name">William Anderson</field>
+            <field name="badge_number">GP-008</field>
+            <field name="phone">+1-555-0801</field>
+            <field name="email">william.anderson@guardpro.example.com</field>
+            <field name="hire_date" eval="(datetime.now() - timedelta(days=912)).strftime('%Y-%m-%d')"/>
+            <field name="status">on_leave</field>
+            <field name="certifications">Armed Security License, First Aid/CPR, Fire Safety</field>
+            <field name="license_number">ASL-2021-045678</field>
+            <field name="license_expiry" eval="(datetime.now() + timedelta(days=300)).strftime('%Y-%m-%d')"/>
+            <field name="emergency_contact">Patricia Anderson</field>
+            <field name="emergency_phone">+1-555-0802</field>
+            <field name="address">258 Maple Drive, Brooklyn, NY 11234</field>
+            <field name="skills" eval="[(6, 0, [ref('skill_armed'), ref('skill_first_aid'), ref('skill_fire_safety')])]"/>
+            <field name="languages">English, German</field>
+            <field name="availability">full_time</field>
+            <field name="rating">4</field>
+            <field name="device_model">iPhone 12</field>
+            <field name="app_version">0.9.8</field>
+            <field name="notes">Currently on medical leave. Expected return in 2 weeks.</field>
+        </record>
+        
+        <!-- Guard 9: Experienced Female Guard -->
+        <record id="guard_lisa_thompson" model="guard.profile">
+            <field name="name">Lisa Thompson</field>
+            <field name="badge_number">GP-009</field>
+            <field name="phone">+1-555-0901</field>
+            <field name="email">lisa.thompson@guardpro.example.com</field>
+            <field name="hire_date" eval="(datetime.now() - timedelta(days=1642)).strftime('%Y-%m-%d')"/>
+            <field name="status">active</field>
+            <field name="certifications">First Aid/CPR, Defensive Tactics, Access Control Systems</field>
+            <field name="license_number">ASL-2020-056789</field>
+            <field name="license_expiry" eval="(datetime.now() + timedelta(days=380)).strftime('%Y-%m-%d')"/>
+            <field name="emergency_contact">James Thompson</field>
+            <field name="emergency_phone">+1-555-0902</field>
+            <field name="address">369 Pine Street, Queens, NY 11421</field>
+            <field name="skills" eval="[(6, 0, [ref('skill_first_aid'), ref('skill_defensive_tactics'), ref('skill_access_control'), ref('skill_surveillance')])]"/>
+            <field name="languages">English, Mandarin</field>
+            <field name="availability">full_time</field>
+            <field name="rating">4</field>
+            <field name="device_model">Google Pixel 8 Pro</field>
+            <field name="app_version">1.0.0</field>
+            <field name="notes">Excellent performance record. Often requested for corporate office assignments.</field>
+        </record>
+        
+        <!-- Guard 10: Technology Specialist -->
+        <record id="guard_kevin_lee" model="guard.profile">
+            <field name="name">Kevin Lee</field>
+            <field name="badge_number">GP-010</field>
+            <field name="phone">+1-555-1001</field>
+            <field name="email">kevin.lee@guardpro.example.com</field>
+            <field name="hire_date" eval="(datetime.now() - timedelta(days=456)).strftime('%Y-%m-%d')"/>
+            <field name="status">active</field>
+            <field name="certifications">CCTV Surveillance, Access Control Systems, First Aid/CPR</field>
+            <field name="license_number">ASL-2023-078901</field>
+            <field name="license_expiry" eval="(datetime.now() + timedelta(days=650)).strftime('%Y-%m-%d')"/>
+            <field name="emergency_contact">Susan Lee</field>
+            <field name="emergency_phone">+1-555-1002</field>
+            <field name="address">741 Tech Boulevard, Manhattan, NY 10011</field>
+            <field name="skills" eval="[(6, 0, [ref('skill_surveillance'), ref('skill_access_control'), ref('skill_first_aid')])]"/>
+            <field name="languages">English, Korean, Japanese</field>
+            <field name="availability">full_time</field>
+            <field name="rating">4</field>
+            <field name="device_model">Samsung Galaxy S23 Ultra</field>
+            <field name="app_version">1.0.0</field>
+            <field name="notes">Tech-savvy guard, excellent with security systems and IT infrastructure protection.</field>
+        </record>
+        
+    </data>
+</odoo>
+

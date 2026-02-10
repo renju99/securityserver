@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Security Tour Route PDF Report Template -->
+    <template id="security_tour_route_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h2>Security Tour Route Map</h2>
+                                <h4 t-field="o.site_id.name"/>
+                            </div>
+                        </div>
+
+                        <!-- Tour Information -->
+                        <div class="row mt-3">
+                            <div class="col-6">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><strong>Tour Name:</strong></td>
+                                        <td t-field="o.name"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Tour Code:</strong></td>
+                                        <td t-field="o.code"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Status:</strong></td>
+                                        <td>
+                                            <t t-if="o.status == 'active'">
+                                                <span class="badge bg-success">Active</span>
+                                            </t>
+                                            <t t-elif="o.status == 'draft'">
+                                                <span class="badge bg-secondary">Draft</span>
+                                            </t>
+                                            <t t-elif="o.status == 'inactive'">
+                                                <span class="badge bg-warning">Inactive</span>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><strong>Total Checkpoints:</strong></td>
+                                        <td><h5 class="mb-0" t-field="o.total_checkpoints"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Estimated Duration:</strong></td>
+                                        <td><span t-field="o.estimated_duration"/> hours</td>
+                                    </tr>
+                                    <tr t-if="o.frequency">
+                                        <td><strong>Frequency:</strong></td>
+                                        <td><span t-field="o.frequency"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Tour Description -->
+                        <div class="row mt-3" t-if="o.description">
+                            <div class="col-12">
+                                <h5>Tour Description</h5>
+                                <p t-field="o.description"/>
+                            </div>
+                        </div>
+
+                        <!-- Checkpoint Sequence -->
+                        <div class="row mt-4" t-if="o.checkpoint_ids">
+                            <div class="col-12">
+                                <h5>Checkpoint Route Sequence</h5>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr class="table-active">
+                                            <th style="width: 60px;">Order</th>
+                                            <th>Checkpoint Name</th>
+                                            <th>Location</th>
+                                            <th>Type</th>
+                                            <th>Scan Required</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-set="counter" t-value="1"/>
+                                        <t t-foreach="o.checkpoint_ids" t-as="cp">
+                                            <tr>
+                                                <td class="text-center">
+                                                    <strong t-esc="counter"/>
+                                                </td>
+                                                <td t-field="cp.name"/>
+                                                <td t-field="cp.location"/>
+                                                <td>
+                                                    <span t-if="cp.checkpoint_type" t-field="cp.checkpoint_type"/>
+                                                    <span t-else="">-</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <t t-if="cp.scan_required">
+                                                        <span class="badge bg-success">Yes</span>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="badge bg-secondary">No</span>
+                                                    </t>
+                                                </td>
+                                            </tr>
+                                            <t t-set="counter" t-value="counter + 1"/>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Special Instructions -->
+                        <div class="row mt-3" t-if="o.special_instructions">
+                            <div class="col-12">
+                                <div class="alert alert-warning">
+                                    <h5>⚠ Special Instructions</h5>
+                                    <p class="mb-0" t-field="o.special_instructions"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Safety Notes -->
+                        <div class="row mt-3" t-if="o.safety_notes">
+                            <div class="col-12">
+                                <div class="alert alert-danger">
+                                    <h5>🛡 Safety Notes</h5>
+                                    <p class="mb-0" t-field="o.safety_notes"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Required Equipment -->
+                        <div class="row mt-3" t-if="o.required_equipment_ids">
+                            <div class="col-12">
+                                <h5>Required Equipment</h5>
+                                <ul>
+                                    <t t-foreach="o.required_equipment_ids" t-as="equipment">
+                                        <li t-field="equipment.name"/>
+                                    </t>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Tour Map (if available) -->
+                        <div class="row mt-3" t-if="o.route_map_image">
+                            <div class="col-12 text-center">
+                                <h5>Route Map</h5>
+                                <img t-att-src="image_data_uri(o.route_map_image)" 
+                                     style="max-width: 100%; max-height: 500px; border: 2px solid #ccc;"/>
+                            </div>
+                        </div>
+
+                        <!-- Important Guidelines -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="border p-3">
+                                    <h5>Tour Execution Guidelines</h5>
+                                    <ul>
+                                        <li>Follow the checkpoint sequence as listed above</li>
+                                        <li>Scan NFC/QR code at each checkpoint (if required)</li>
+                                        <li>Report any irregularities immediately</li>
+                                        <li>Complete tour within estimated duration</li>
+                                        <li>Document any skipped checkpoints with reason</li>
+                                        <li>Maintain radio/phone communication throughout tour</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- QR Code for Mobile Access -->
+                        <div class="row mt-3" t-if="o.tour_qr_code">
+                            <div class="col-12 text-center">
+                                <strong>Quick Access QR Code:</strong><br/>
+                                <img t-att-src="image_data_uri(o.tour_qr_code)" 
+                                     style="max-height: 150px; max-width: 150px;"/>
+                                <p class="text-muted small">Scan to load tour on mobile device</p>
+                            </div>
+                        </div>
+
+                        <!-- Emergency Contacts -->
+                        <div class="row mt-4" t-if="o.site_id">
+                            <div class="col-12">
+                                <h5>Emergency Contacts</h5>
+                                <table class="table table-sm table-bordered">
+                                    <tr t-if="o.site_id.emergency_contact_name">
+                                        <td width="30%"><strong>Primary Contact:</strong></td>
+                                        <td t-field="o.site_id.emergency_contact_name"/>
+                                    </tr>
+                                    <tr t-if="o.site_id.emergency_contact_phone">
+                                        <td><strong>Emergency Phone:</strong></td>
+                                        <td t-field="o.site_id.emergency_contact_phone"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="row mt-5">
+                            <div class="col-12 text-center text-muted">
+                                <small>
+                                    Security Tour Route - For Guard Reference
+                                    <br/>
+                                    Keep this document accessible during patrol operations
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Definition -->
+    <record id="action_report_security_tour_route" model="ir.actions.report">
+        <field name="name">Tour Route Map</field>
+        <field name="model">security.tour</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.security_tour_route_report_template</field>
+        <field name="report_file">guardpro.security_tour_route_report_template</field>
+        <field name="binding_model_id" ref="model_security_tour"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Tour_Route_%s' % (object.code)</field>
+    </record>
+</odoo>
+

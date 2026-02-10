@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_guardpro" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.guardpro</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="Documentation" name="guardpro" groups="guardpro.group_guardpro_manager">
+                    
+                    <!-- Google Maps Integration -->
+                    <block title="Google Maps Integration">
+                        <setting help="Configure Google Maps API key for location tracking and mapping features">
+                            <field name="google_maps_api_key" password="True" placeholder="AIza..."/>
+                            <div class="text-muted">
+                                Required for real-time guard location tracking on maps.
+                                Get your API key at: https://console.cloud.google.com
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- GPS Tracking Settings -->
+                    <block title="GPS Tracking">
+                        <setting help="Configure GPS location tracking parameters">
+                            <label for="gps_update_interval"/>
+                            <div class="row mt-2">
+                                <label for="gps_update_interval" class="col-lg-3 o_light_label"/>
+                                <field name="gps_update_interval" class="oe_inline"/>
+                            </div>
+                            <div class="text-muted">
+                                Lower = more accurate but uses more battery (10-300 seconds)
+                            </div>
+                        </setting>
+                        
+                        <setting help="Minimum GPS accuracy required">
+                            <label for="gps_accuracy_threshold"/>
+                            <div class="row mt-2">
+                                <label for="gps_accuracy_threshold" class="col-lg-3 o_light_label"/>
+                                <field name="gps_accuracy_threshold" class="oe_inline"/> meters
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Data Retention Policies -->
+                    <block title="Data Retention">
+                        <setting help="Configure how long to keep historical data">
+                            <label for="location_history_retention"/>
+                            <div class="row mt-2">
+                                <label for="location_history_retention" class="col-lg-3 o_light_label"/>
+                                <field name="location_history_retention" class="oe_inline"/> days
+                            </div>
+                            <div class="text-muted">
+                                Location data older than this will be automatically deleted
+                            </div>
+                        </setting>
+                        
+                        <setting help="Shift records retention period">
+                            <label for="shift_records_retention"/>
+                            <div class="row mt-2">
+                                <label for="shift_records_retention" class="col-lg-3 o_light_label"/>
+                                <field name="shift_records_retention" class="oe_inline"/> days
+                            </div>
+                        </setting>
+                        
+                        <setting help="Incident records retention period">
+                            <label for="incident_records_retention"/>
+                            <div class="row mt-2">
+                                <label for="incident_records_retention" class="col-lg-3 o_light_label"/>
+                                <field name="incident_records_retention" class="oe_inline"/> days
+                            </div>
+                            <div class="text-muted">
+                                Recommended: 7 years (2555 days) for legal compliance
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Notifications -->
+                    <block title="Notifications &amp; Alerts">
+                        <setting help="When to send shift reminder notifications">
+                            <label for="shift_reminder_minutes"/>
+                            <div class="row mt-2">
+                                <label for="shift_reminder_minutes" class="col-lg-3 o_light_label"/>
+                                <field name="shift_reminder_minutes" class="oe_inline"/> minutes before shift
+                            </div>
+                        </setting>
+                        
+                        <setting help="Auto-escalate critical incidents not responded to">
+                            <label for="critical_incident_escalation"/>
+                            <div class="row mt-2">
+                                <label for="critical_incident_escalation" class="col-lg-3 o_light_label"/>
+                                <field name="critical_incident_escalation" class="oe_inline"/> minutes
+                            </div>
+                            <div class="text-muted">
+                                Critical incidents will be escalated to management after this time
+                            </div>
+                        </setting>
+                        
+                        <setting help="Grace period before alerting about missed check-ins">
+                            <label for="missed_checkin_grace_period"/>
+                            <div class="row mt-2">
+                                <label for="missed_checkin_grace_period" class="col-lg-3 o_light_label"/>
+                                <field name="missed_checkin_grace_period" class="oe_inline"/> minutes
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Geofencing -->
+                    <block title="Geofencing">
+                        <setting help="Default geofence radius for new sites">
+                            <label for="geofence_default_radius"/>
+                            <div class="row mt-2">
+                                <label for="geofence_default_radius" class="col-lg-3 o_light_label"/>
+                                <field name="geofence_default_radius" class="oe_inline"/> meters
+                            </div>
+                            <div class="text-muted">
+                                Can be customized per site (50-200 meters recommended)
+                            </div>
+                        </setting>
+                        
+                        <setting help="How often to check geofence compliance">
+                            <label for="geofence_check_interval"/>
+                            <div class="row mt-2">
+                                <label for="geofence_check_interval" class="col-lg-3 o_light_label"/>
+                                <field name="geofence_check_interval" class="oe_inline"/> seconds
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Security Features -->
+                    <block title="Security Features">
+                        <setting>
+                            <label for="enable_panic_button"/>
+                            <field name="enable_panic_button"/>
+                            <div class="text-muted">
+                                Allow guards to trigger emergency alerts from mobile app
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <label for="require_photo_on_checkin"/>
+                            <field name="require_photo_on_checkin"/>
+                            <div class="text-muted">
+                                Require photo verification when checking in
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <label for="require_photo_on_checkout"/>
+                            <field name="require_photo_on_checkout"/>
+                            <div class="text-muted">
+                                Require photo verification when checking out
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Performance -->
+                    <block title="Performance">
+                        <setting help="Limit location points to prevent database bloat">
+                            <label for="max_location_points_per_shift"/>
+                            <div class="row mt-2">
+                                <label for="max_location_points_per_shift" class="col-lg-3 o_light_label"/>
+                                <field name="max_location_points_per_shift" class="oe_inline"/> points
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <label for="enable_location_clustering"/>
+                            <field name="enable_location_clustering"/>
+                            <div class="text-muted">
+                                Cluster nearby points on maps for better performance
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Feature Flags -->
+                    <block title="Features">
+                        <setting>
+                            <label for="enable_nfc_scanning"/>
+                            <field name="enable_nfc_scanning"/>
+                            <div class="text-muted">
+                                NFC checkpoint scanning (Android only)
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <label for="enable_qr_scanning"/>
+                            <field name="enable_qr_scanning"/>
+                            <div class="text-muted">
+                                QR code checkpoint scanning
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <label for="enable_offline_mode"/>
+                            <field name="enable_offline_mode"/>
+                            <div class="text-muted">
+                                Offline sync capability in mobile app
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <label for="enable_visitor_qr_codes"/>
+                            <field name="enable_visitor_qr_codes"/>
+                            <div class="text-muted">
+                                Generate QR codes for visitor badges
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Lost &amp; Found Settings -->
+                    <block title="Lost &amp; Found Management">
+                        <setting help="Default holding period for lost items">
+                            <label for="lost_found_default_holding_period"/>
+                            <div class="row mt-2">
+                                <label for="lost_found_default_holding_period" class="col-lg-3 o_light_label"/>
+                                <field name="lost_found_default_holding_period" class="oe_inline"/> days
+                            </div>
+                            <div class="text-muted">
+                                Legal holding period before disposal (30-90 days typical)
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Package Management Settings -->
+                    <block title="Package Management">
+                        <setting help="Package overdue threshold">
+                            <label for="package_overdue_threshold"/>
+                            <div class="row mt-2">
+                                <label for="package_overdue_threshold" class="col-lg-3 o_light_label"/>
+                                <field name="package_overdue_threshold" class="oe_inline"/> days
+                            </div>
+                            <div class="text-muted">
+                                Alert if package not collected within this timeframe
+                            </div>
+                        </setting>
+                        
+                        <setting help="Mark packages unclaimed after this period">
+                            <label for="package_unclaimed_period"/>
+                            <div class="row mt-2">
+                                <label for="package_unclaimed_period" class="col-lg-3 o_light_label"/>
+                                <field name="package_unclaimed_period" class="oe_inline"/> days
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Visitor Management Settings -->
+                    <block title="Visitor Management">
+                        <setting help="Pre-registration expiry period">
+                            <label for="visitor_registration_expiry"/>
+                            <div class="row mt-2">
+                                <label for="visitor_registration_expiry" class="col-lg-3 o_light_label"/>
+                                <field name="visitor_registration_expiry" class="oe_inline"/> days
+                            </div>
+                            <div class="text-muted">
+                                Unused pre-registrations expire after this period
+                            </div>
+                        </setting>
+                        
+                        <setting help="Maximum expected visitor duration">
+                            <label for="visitor_max_duration"/>
+                            <div class="row mt-2">
+                                <label for="visitor_max_duration" class="col-lg-3 o_light_label"/>
+                                <field name="visitor_max_duration" class="oe_inline"/> hours
+                            </div>
+                            <div class="text-muted">
+                                Alert if visitor exceeds this duration
+                            </div>
+                        </setting>
+                    </block>
+
+                    <!-- Task Management Settings -->
+                    <block title="Task Management">
+                        <setting help="Overdue task alert frequency">
+                            <label for="task_overdue_alert_hours"/>
+                            <div class="row mt-2">
+                                <label for="task_overdue_alert_hours" class="col-lg-3 o_light_label"/>
+                                <field name="task_overdue_alert_hours" class="oe_inline"/> hours
+                            </div>
+                            <div class="text-muted">
+                                How often to send overdue task alerts
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Audit Settings -->
+                    <block title="Audit &amp; Compliance">
+                        <setting help="Audit reminder advance notice">
+                            <label for="audit_reminder_days"/>
+                            <div class="row mt-2">
+                                <label for="audit_reminder_days" class="col-lg-3 o_light_label"/>
+                                <field name="audit_reminder_days" class="oe_inline"/> days before
+                            </div>
+                            <div class="text-muted">
+                                Send reminders for scheduled audits
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Daily Activity Report Settings -->
+                    <block title="Daily Activity Reports">
+                        <setting>
+                            <label for="dar_auto_generate"/>
+                            <field name="dar_auto_generate"/>
+                            <div class="text-muted">
+                                Automatically generate reports for previous day
+                            </div>
+                        </setting>
+                        
+                        <setting help="Time to auto-send reports">
+                            <label for="dar_auto_send_time"/>
+                            <div class="row mt-2">
+                                <label for="dar_auto_send_time" class="col-lg-3 o_light_label"/>
+                                <field name="dar_auto_send_time" class="oe_inline" widget="float_time"/>
+                            </div>
+                            <div class="text-muted">
+                                24-hour format (e.g., 8.0 = 8:00 AM, 17.5 = 5:30 PM)
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- SLA Settings -->
+                    <block title="SLA Management">
+                        <setting help="SLA performance alert threshold">
+                            <label for="sla_alert_threshold"/>
+                            <div class="row mt-2">
+                                <label for="sla_alert_threshold" class="col-lg-3 o_light_label"/>
+                                <field name="sla_alert_threshold" class="oe_inline"/> %
+                            </div>
+                            <div class="text-muted">
+                                Alert if performance drops below this level
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Performance Management Settings -->
+                    <block title="Performance Management">
+                        <setting help="Configure performance review settings">
+                            <label for="performance_review_frequency"/>
+                            <div class="row mt-2">
+                                <label for="performance_review_frequency" class="col-lg-3 o_light_label"/>
+                                <field name="performance_review_frequency" class="oe_inline"/>
+                            </div>
+                            <div class="text-muted">
+                                Default frequency for guard performance reviews
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <field name="performance_auto_calculate"/>
+                            <label for="performance_auto_calculate">
+                                Automatically calculate performance metrics
+                            </label>
+                            <div class="text-muted">
+                                Metrics will be auto-calculated at the end of each review period
+                            </div>
+                        </setting>
+                        
+                        <setting help="Review reminder timing">
+                            <label for="performance_review_reminder_days"/>
+                            <div class="row mt-2">
+                                <label for="performance_review_reminder_days" class="col-lg-3 o_light_label"/>
+                                <field name="performance_review_reminder_days" class="oe_inline"/> days before due
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <field name="performance_badge_enabled"/>
+                            <label for="performance_badge_enabled">
+                                Enable performance badges
+                            </label>
+                            <div class="text-muted">
+                                Automatically award badges for exceptional performance
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Performance Thresholds -->
+                    <block title="Performance Rating Thresholds">
+                        <setting help="Score thresholds for performance ratings (0-100)">
+                            <label for="performance_excellent_threshold"/>
+                            <div class="row mt-2">
+                                <label for="performance_excellent_threshold" class="col-lg-3 o_light_label" string="Excellent"/>
+                                <field name="performance_excellent_threshold" class="oe_inline"/>
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <label for="performance_good_threshold"/>
+                            <div class="row mt-2">
+                                <label for="performance_good_threshold" class="col-lg-3 o_light_label" string="Good"/>
+                                <field name="performance_good_threshold" class="oe_inline"/>
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <label for="performance_satisfactory_threshold"/>
+                            <div class="row mt-2">
+                                <label for="performance_satisfactory_threshold" class="col-lg-3 o_light_label" string="Satisfactory"/>
+                                <field name="performance_satisfactory_threshold" class="oe_inline"/>
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <label for="performance_needs_improvement_threshold"/>
+                            <div class="row mt-2">
+                                <label for="performance_needs_improvement_threshold" class="col-lg-3 o_light_label" string="Needs Improvement"/>
+                                <field name="performance_needs_improvement_threshold" class="oe_inline"/>
+                            </div>
+                            <div class="text-muted">
+                                Scores below this threshold are rated as Unsatisfactory
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- Performance Criteria Weights -->
+                    <block title="Performance Criteria Weights">
+                        <setting help="Weight of each criteria in overall performance score (total should be 100%)">
+                            <label for="performance_punctuality_weight"/>
+                            <div class="row mt-2">
+                                <label for="performance_punctuality_weight" class="col-lg-3 o_light_label" string="Punctuality"/>
+                                <field name="performance_punctuality_weight" class="oe_inline"/> %
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <label for="performance_tour_completion_weight"/>
+                            <div class="row mt-2">
+                                <label for="performance_tour_completion_weight" class="col-lg-3 o_light_label" string="Tour Completion"/>
+                                <field name="performance_tour_completion_weight" class="oe_inline"/> %
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <label for="performance_incident_response_weight"/>
+                            <div class="row mt-2">
+                                <label for="performance_incident_response_weight" class="col-lg-3 o_light_label" string="Incident Response"/>
+                                <field name="performance_incident_response_weight" class="oe_inline"/> %
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <label for="performance_client_satisfaction_weight"/>
+                            <div class="row mt-2">
+                                <label for="performance_client_satisfaction_weight" class="col-lg-3 o_light_label" string="Client Satisfaction"/>
+                                <field name="performance_client_satisfaction_weight" class="oe_inline"/> %
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <label for="performance_shift_adherence_weight"/>
+                            <div class="row mt-2">
+                                <label for="performance_shift_adherence_weight" class="col-lg-3 o_light_label" string="Shift Adherence"/>
+                                <field name="performance_shift_adherence_weight" class="oe_inline"/> %
+                            </div>
+                            <div class="text-muted">
+                                Ensure all weights total 100%
+                            </div>
+                        </setting>
+                    </block>
+                    
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+
+

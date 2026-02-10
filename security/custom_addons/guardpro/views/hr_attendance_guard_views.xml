@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Enhanced HR Attendance List View for Guards -->
+    <record id="view_hr_attendance_guard_list" model="ir.ui.view">
+        <field name="name">hr.attendance.guard.list</field>
+        <field name="model">hr.attendance</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <list string="Guard Attendance" create="false" edit="false">
+                <field name="employee_id"/>
+                <field name="guard_id" optional="show"/>
+                <field name="site_id" optional="show"/>
+                <field name="shift_type" optional="show"/>
+                <field name="check_in"/>
+                <field name="check_out"/>
+                <field name="worked_hours" widget="float_time" sum="Total Hours"/>
+                <field name="attendance_status" optional="show"/>
+                <field name="incident_count" optional="hide"/>
+                <field name="tour_count" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Enhanced HR Attendance Form View for Guards -->
+    <record id="view_hr_attendance_guard_form" model="ir.ui.view">
+        <field name="name">hr.attendance.guard.form</field>
+        <field name="model">hr.attendance</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <form string="Guard Attendance" create="false">
+                <header>
+                    <button name="action_view_incidents" string="View Incidents" 
+                            type="object" class="btn-primary"
+                            invisible="incident_count == 0"/>
+                    <button name="action_view_tours" string="View Tours" 
+                            type="object" class="btn-primary"
+                            invisible="tour_count == 0"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_incidents" type="object" 
+                                class="oe_stat_button" icon="fa-exclamation-triangle"
+                                invisible="incident_count == 0">
+                            <field name="incident_count" widget="statinfo" string="Incidents"/>
+                        </button>
+                        <button name="action_view_tours" type="object" 
+                                class="oe_stat_button" icon="fa-map-signs"
+                                invisible="tour_count == 0">
+                            <field name="tour_count" widget="statinfo" string="Tours"/>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="employee_id"/>
+                            <field name="guard_id"/>
+                            <field name="site_id"/>
+                            <field name="shift_type"/>
+                            <field name="planned_shift_id"/>
+                        </group>
+                        <group>
+                            <field name="check_in"/>
+                            <field name="check_out"/>
+                            <field name="worked_hours" widget="float_time"/>
+                            <field name="attendance_status"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="GPS Location">
+                            <group>
+                                <group string="Check-in Location">
+                                    <field name="checkin_latitude"/>
+                                    <field name="checkin_longitude"/>
+                                </group>
+                                <group string="Check-out Location">
+                                    <field name="checkout_latitude"/>
+                                    <field name="checkout_longitude"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Notes">
+                            <group>
+                                <field name="checkin_notes" nolabel="1" placeholder="Check-in notes..."/>
+                                <field name="checkout_notes" nolabel="1" placeholder="Check-out notes..."/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View for Guard Attendance -->
+    <record id="view_hr_attendance_guard_search" model="ir.ui.view">
+        <field name="name">hr.attendance.guard.search</field>
+        <field name="model">hr.attendance</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <search string="Guard Attendance">
+                <field name="employee_id"/>
+                <field name="guard_id"/>
+                <field name="site_id"/>
+                <field name="check_in"/>
+                <separator/>
+                <filter name="my_attendance" string="My Attendance" 
+                        domain="[('employee_id.user_id', '=', uid)]"/>
+                <filter name="open" string="Currently Checked In" 
+                        domain="[('check_out', '=', False)]"/>
+                <filter name="completed" string="Completed" 
+                        domain="[('check_out', '!=', False)]"/>
+                <separator/>
+                <filter name="today" string="Today" 
+                        domain="[('check_in', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                <filter name="this_week" string="This Week" 
+                        domain="[('check_in', '&gt;=', datetime.datetime.combine(context_today() - relativedelta(weeks=1), datetime.time(0,0,0)))]"/>
+                <filter name="this_month" string="This Month" 
+                        domain="[('check_in', '&gt;=', datetime.datetime.combine(context_today() + relativedelta(day=1), datetime.time(0,0,0)))]"/>
+                <separator/>
+                <filter name="has_incidents" string="With Incidents" 
+                        domain="[('incident_count', '>', 0)]"/>
+                <filter name="has_tours" string="With Tours" 
+                        domain="[('tour_count', '>', 0)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_employee" string="Employee" context="{'group_by': 'employee_id'}"/>
+                    <filter name="group_site" string="Site" context="{'group_by': 'site_id'}"/>
+                    <filter name="group_shift_type" string="Shift Type" context="{'group_by': 'shift_type'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'check_in:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Calendar View for Guard Attendance -->
+    <record id="view_hr_attendance_guard_calendar" model="ir.ui.view">
+        <field name="name">hr.attendance.guard.calendar</field>
+        <field name="model">hr.attendance</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <calendar string="Guard Attendance" date_start="check_in" date_stop="check_out" 
+                      color="site_id" mode="week" quick_create="0">
+                <field name="employee_id"/>
+                <field name="site_id"/>
+                <field name="worked_hours"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Pivot View for Guard Attendance Analytics -->
+    <record id="view_hr_attendance_guard_pivot" model="ir.ui.view">
+        <field name="name">hr.attendance.guard.pivot</field>
+        <field name="model">hr.attendance</field>
+        <field name="arch" type="xml">
+            <pivot string="Guard Attendance Analysis">
+                <field name="employee_id" type="row"/>
+                <field name="site_id" type="col"/>
+                <field name="worked_hours" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Graph View for Guard Attendance -->
+    <record id="view_hr_attendance_guard_graph" model="ir.ui.view">
+        <field name="name">hr.attendance.guard.graph</field>
+        <field name="model">hr.attendance</field>
+        <field name="arch" type="xml">
+            <graph string="Guard Attendance Statistics" type="bar">
+                <field name="employee_id"/>
+                <field name="worked_hours" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Action for Guard Attendance -->
+    <record id="action_hr_attendance_guard" model="ir.actions.act_window">
+        <field name="name">Guard Attendance</field>
+        <field name="res_model">hr.attendance</field>
+        <field name="view_mode">list,form,calendar,pivot,graph</field>
+        <field name="search_view_id" ref="view_hr_attendance_guard_search"/>
+        <field name="context">{
+            'search_default_today': 1,
+            'create': False
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No attendance records yet
+            </p>
+            <p>
+                Guards check in and out through the mobile app or kiosk mode.
+                All attendance records will appear here with GPS tracking and site information.
+            </p>
+        </field>
+    </record>
+
+    <!-- Mobile Kiosk Mode Action -->
+    <record id="action_hr_attendance_kiosk_guard" model="ir.actions.act_window">
+        <field name="name">Guard Check-in/out</field>
+        <field name="res_model">hr.attendance</field>
+        <field name="view_mode">form</field>
+        <field name="target">fullscreen</field>
+        <field name="context">{
+            'kiosk_mode': True
+        }</field>
+    </record>
+
+</odoo>
+

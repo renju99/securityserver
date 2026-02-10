@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- ========================================== -->
+    <!-- Tenant/Resident Views                      -->
+    <!-- ========================================== -->
+    
+    <!-- List View -->
+    <record id="tenant_resident_view_list" model="ir.ui.view">
+        <field name="name">tenant.resident.view.list</field>
+        <field name="model">tenant.resident</field>
+        <field name="arch" type="xml">
+            <list string="Residents/Tenants">
+                <field name="name"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <field name="site_id"/>
+                <field name="unit_number"/>
+                <field name="status" decoration-success="status == 'active'" decoration-muted="status != 'active'"/>
+                <field name="portal_access" widget="boolean_toggle"/>
+                <field name="feedback_count"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Form View -->
+    <record id="tenant_resident_view_form" model="ir.ui.view">
+        <field name="name">tenant.resident.view.form</field>
+        <field name="model">tenant.resident</field>
+        <field name="arch" type="xml">
+            <form string="Resident/Tenant">
+                <header>
+                    <button name="action_grant_portal_access" type="object" string="Grant Portal Access"
+                            invisible="portal_access" class="btn-primary"/>
+                    <button name="action_revoke_portal_access" type="object" string="Revoke Portal Access"
+                            invisible="not portal_access" class="btn-warning"/>
+                    <button name="action_send_invitation_email" type="object" string="Send Portal Invitation"
+                            invisible="not portal_access" class="btn-info"/>
+                    <field name="status" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_feedback" type="object" class="oe_stat_button" icon="fa-comments">
+                            <field name="feedback_count" widget="statbutton" string="Feedback"/>
+                        </button>
+                        <button name="action_view_complaints" type="object" class="oe_stat_button" icon="fa-exclamation-triangle">
+                            <field name="complaint_count" widget="statbutton" string="Complaints"/>
+                        </button>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="email"/>
+                            <field name="phone"/>
+                        </group>
+                        <group>
+                            <field name="site_id" options="{'no_create': True}"/>
+                            <field name="client_id"/>
+                            <field name="unit_number"/>
+                            <field name="building"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Portal Access">
+                        <group>
+                            <field name="portal_access" widget="boolean_toggle"/>
+                            <field name="user_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="partner_id" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Residency Information">
+                        <group>
+                            <field name="move_in_date"/>
+                            <field name="move_out_date"/>
+                        </group>
+                        <group>
+                            <field name="emergency_contact_name"/>
+                            <field name="emergency_contact_phone"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Notes">
+                        <field name="notes" nolabel="1" placeholder="Additional notes about this resident..."/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Search View -->
+    <record id="tenant_resident_view_search" model="ir.ui.view">
+        <field name="name">tenant.resident.view.search</field>
+        <field name="model">tenant.resident</field>
+        <field name="arch" type="xml">
+            <search string="Residents/Tenants">
+                <field name="name"/>
+                <field name="email"/>
+                <field name="site_id"/>
+                <field name="unit_number"/>
+                <filter name="active" string="Active" domain="[('status', '=', 'active')]"/>
+                <filter name="inactive" string="Inactive" domain="[('status', '=', 'inactive')]"/>
+                <filter name="moved_out" string="Moved Out" domain="[('status', '=', 'moved_out')]"/>
+                <separator/>
+                <filter name="with_portal" string="With Portal Access" domain="[('portal_access', '=', True)]"/>
+                <filter name="without_portal" string="Without Portal Access" domain="[('portal_access', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_site" string="Site" context="{'group_by': 'site_id'}"/>
+                    <filter name="group_by_status" string="Status" context="{'group_by': 'status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Kanban View -->
+    <record id="tenant_resident_view_kanban" model="ir.ui.view">
+        <field name="name">tenant.resident.view.kanban</field>
+        <field name="model">tenant.resident</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <field name="site_id"/>
+                <field name="unit_number"/>
+                <field name="status"/>
+                <field name="portal_access"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="name"/>
+                                    </strong>
+                                    <div class="o_kanban_record_subtitle">
+                                        Unit: <field name="unit_number"/>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_action">
+                                    <field name="portal_access" widget="boolean_toggle"/>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <field name="site_id"/>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left">
+                                    <field name="status" widget="label_selection" 
+                                           options="{'classes': {'active': 'success', 'inactive': 'default', 'moved_out': 'warning'}}"/>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <i class="fa fa-envelope" title="Email"/> <field name="email"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    
+    <!-- Action -->
+    <record id="tenant_resident_action" model="ir.actions.act_window">
+        <field name="name">Residents/Tenants</field>
+        <field name="res_model">tenant.resident</field>
+        <field name="view_mode">list,form,kanban</field>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first resident/tenant
+            </p>
+            <p>
+                Manage residents and tenants for community sites. Enable portal access
+                to allow them to submit feedback and view security information.
+            </p>
+        </field>
+    </record>
+    
+    <!-- Menu Item - Defined in guardpro_menus.xml -->
+    
+</odoo>
+

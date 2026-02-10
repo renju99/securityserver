@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- ============================================
+             SLA Template 1: Basic Residential Security
+             ============================================ -->
+        <record id="sla_template_basic_residential" model="sla.template">
+            <field name="name">Basic Residential Security</field>
+            <field name="sequence">10</field>
+            <field name="industry">residential</field>
+            <field name="service_level">basic</field>
+            <field name="default_contract_duration">12</field>
+            <field name="penalty_applicable" eval="False"/>
+            <field name="description"><![CDATA[
+                <h4>Basic Residential Security SLA</h4>
+                <p>Ideal for small to medium residential communities requiring fundamental security coverage.</p>
+                <ul>
+                    <li>Regular patrol monitoring</li>
+                    <li>Incident response and reporting</li>
+                    <li>Basic guard attendance tracking</li>
+                </ul>
+            ]]></field>
+            <field name="notes">Standard 12-month contract with quarterly reviews</field>
+        </record>
+
+        <record id="sla_kpi_basic_res_incident_response" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_basic_residential"/>
+            <field name="sequence">10</field>
+            <field name="name">Incident Response Time</field>
+            <field name="kpi_type">incident_response</field>
+            <field name="description">Maximum time for guards to respond to any reported incident</field>
+            <field name="target_value">30</field>
+            <field name="unit">minutes</field>
+            <field name="target_direction">minimize</field>
+            <field name="measurement_period">monthly</field>
+            <field name="warning_threshold">85</field>
+            <field name="critical_threshold">75</field>
+            <field name="weight">1.5</field>
+            <field name="penalty_applicable" eval="False"/>
+        </record>
+
+        <record id="sla_kpi_basic_res_patrol" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_basic_residential"/>
+            <field name="sequence">20</field>
+            <field name="name">Patrol Completion Rate</field>
+            <field name="kpi_type">patrol_completion</field>
+            <field name="description">Percentage of scheduled patrols completed on time</field>
+            <field name="target_value">90</field>
+            <field name="unit">percentage</field>
+            <field name="target_direction">maximize</field>
+            <field name="measurement_period">monthly</field>
+            <field name="warning_threshold">85</field>
+            <field name="critical_threshold">80</field>
+            <field name="weight">1.0</field>
+            <field name="penalty_applicable" eval="False"/>
+        </record>
+
+        <record id="sla_kpi_basic_res_punctuality" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_basic_residential"/>
+            <field name="sequence">30</field>
+            <field name="name">Guard Punctuality</field>
+            <field name="kpi_type">guard_punctuality</field>
+            <field name="description">Percentage of on-time guard shift check-ins</field>
+            <field name="target_value">85</field>
+            <field name="unit">percentage</field>
+            <field name="target_direction">maximize</field>
+            <field name="measurement_period">monthly</field>
+            <field name="warning_threshold">80</field>
+            <field name="critical_threshold">75</field>
+            <field name="weight">0.8</field>
+            <field name="penalty_applicable" eval="False"/>
+        </record>
+
+        <!-- ============================================
+             SLA Template 2: Standard Commercial Security
+             ============================================ -->
+        <record id="sla_template_standard_commercial" model="sla.template">
+            <field name="name">Standard Commercial Security</field>
+            <field name="sequence">20</field>
+            <field name="industry">commercial</field>
+            <field name="service_level">standard</field>
+            <field name="default_contract_duration">12</field>
+            <field name="penalty_applicable" eval="True"/>
+            <field name="description"><![CDATA[
+                <h4>Standard Commercial Security SLA</h4>
+                <p>Comprehensive security solution for commercial buildings and office complexes.</p>
+                <ul>
+                    <li>Enhanced incident response times</li>
+                    <li>Checkpoint compliance monitoring</li>
+                    <li>Task completion tracking</li>
+                    <li>Quality assurance audits</li>
+                </ul>
+            ]]></field>
+            <field name="notes">Includes monthly performance reviews and quality audits</field>
+        </record>
+
+        <record id="sla_kpi_std_com_incident_response" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_standard_commercial"/>
+            <field name="sequence">10</field>
+            <field name="name">Incident Response Time</field>
+            <field name="kpi_type">incident_response</field>
+            <field name="description">Maximum time to respond to any incident</field>
+            <field name="target_value">15</field>
+            <field name="unit">minutes</field>
+            <field name="target_direction">minimize</field>
+            <field name="measurement_period">monthly</field>
+            <field name="warning_threshold">90</field>
+            <field name="critical_threshold">80</field>
+            <field name="weight">2.0</field>
+            <field name="penalty_applicable" eval="True"/>
+            <field name="penalty_amount">500</field>
+        </record>
+
+        <record id="sla_kpi_std_com_patrol" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_standard_commercial"/>
+            <field name="sequence">20</field>
+            <field name="name">Patrol Completion Rate</field>
+            <field name="kpi_type">patrol_completion</field>
+            <field name="description">Percentage of scheduled patrols completed</field>
+            <field name="target_value">95</field>
+            <field name="unit">percentage</field>
+            <field name="target_direction">maximize</field>
+            <field name="measurement_period">monthly</field>
+            <field name="warning_threshold">90</field>
+            <field name="critical_threshold">85</field>
+            <field name="weight">1.5</field>
+            <field name="penalty_applicable" eval="True"/>
+            <field name="penalty_amount">300</field>
+        </record>
+
+        <record id="sla_kpi_std_com_checkpoint" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_standard_commercial"/>
+            <field name="sequence">30</field>
+            <field name="name">Checkpoint Compliance</field>
+            <field name="kpi_type">checkpoint_compliance</field>
+            <field name="description">Percentage of required checkpoints scanned during patrols</field>
+            <field name="target_value">95</field>
+            <field name="unit">percentage</field>
+            <field name="target_direction">maximize</field>
+            <field name="measurement_period">monthly</field>
+            <field name="warning_threshold">90</field>
+            <field name="critical_threshold">85</field>
+            <field name="weight">1.2</field>
+            <field name="penalty_applicable" eval="False"/>
+        </record>
+
+        <record id="sla_kpi_std_com_task_completion" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_standard_commercial"/>
+            <field name="sequence">40</field>
+            <field name="name">Task Completion Rate</field>
+            <field name="kpi_type">task_completion</field>
+            <field name="description">Percentage of assigned tasks completed on time</field>
+            <field name="target_value">90</field>
+            <field name="unit">percentage</field>
+            <field name="target_direction">maximize</field>
+            <field name="measurement_period">monthly</field>
+            <field name="warning_threshold">85</field>
+            <field name="critical_threshold">80</field>
+            <field name="weight">1.0</field>
+            <field name="penalty_applicable" eval="False"/>
+        </record>
+
+        <record id="sla_kpi_std_com_audit_score" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_standard_commercial"/>
+            <field name="sequence">50</field>
+            <field name="name">Quality Audit Score</field>
+            <field name="kpi_type">audit_score</field>
+            <field name="description">Average compliance score from quality audits</field>
+            <field name="target_value">80</field>
+            <field name="unit">percentage</field>
+            <field name="target_direction">maximize</field>
+            <field name="measurement_period">monthly</field>
+            <field name="warning_threshold">90</field>
+            <field name="critical_threshold">80</field>
+            <field name="weight">1.5</field>
+            <field name="penalty_applicable" eval="False"/>
+        </record>
+
+        <!-- ============================================
+             SLA Template 3: Premium Enterprise Security
+             ============================================ -->
+        <record id="sla_template_premium_enterprise" model="sla.template">
+            <field name="name">Premium Enterprise Security</field>
+            <field name="sequence">30</field>
+            <field name="industry">mixed</field>
+            <field name="service_level">premium</field>
+            <field name="default_contract_duration">24</field>
+            <field name="penalty_applicable" eval="True"/>
+            <field name="description"><![CDATA[
+                <h4>Premium Enterprise Security SLA</h4>
+                <p>Top-tier security service with stringent performance standards and comprehensive monitoring.</p>
+                <ul>
+                    <li>Rapid incident response (under 10 minutes)</li>
+                    <li>100% patrol completion target</li>
+                    <li>Full checkpoint and task compliance</li>
+                    <li>Regular quality and compliance audits</li>
+                    <li>Training compliance monitoring</li>
+                    <li>Equipment uptime guarantees</li>
+                </ul>
+            ]]></field>
+            <field name="notes">24-month contract with monthly KPI reviews and quarterly audits. Financial penalties for breaches.</field>
+        </record>
+
+        <record id="sla_kpi_prem_ent_incident_response" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_premium_enterprise"/>
+            <field name="sequence">10</field>
+            <field name="name">Incident Response Time</field>
+            <field name="kpi_type">incident_response</field>
+            <field name="description">Maximum response time for any incident (critical: 5 min, standard: 10 min)</field>
+            <field name="target_value">10</field>
+            <field name="unit">minutes</field>
+            <field name="target_direction">minimize</field>
+            <field name="measurement_period">monthly</field>
+            <field name="warning_threshold">95</field>
+            <field name="critical_threshold">90</field>
+            <field name="weight">2.5</field>
+            <field name="penalty_applicable" eval="True"/>
+            <field name="penalty_amount">1000</field>
+        </record>
+
+        <record id="sla_kpi_prem_ent_patrol" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_premium_enterprise"/>
+            <field name="sequence">20</field>
+            <field name="name">Patrol Completion Rate</field>
+            <field name="kpi_type">patrol_completion</field>
+            <field name="description">All scheduled patrols must be completed on time</field>
+            <field name="target_value">100</field>
+            <field name="unit">percentage</field>
+            <field name="target_direction">maximize</field>
+            <field name="measurement_period">monthly</field>
+            <field name="warning_threshold">95</field>
+            <field name="critical_threshold">90</field>
+            <field name="weight">2.0</field>
+            <field name="penalty_applicable" eval="True"/>
+            <field name="penalty_amount">750</field>
+        </record>
+
+        <record id="sla_kpi_prem_ent_punctuality" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_premium_enterprise"/>
+            <field name="sequence">30</field>
+            <field name="name">Guard Punctuality</field>
+            <field name="kpi_type">guard_punctuality</field>
+            <field name="description">Guards must be on time for shift start</field>
+            <field name="target_value">95</field>
+            <field name="unit">percentage</field>
+            <field name="target_direction">maximize</field>
+            <field name="measurement_period">monthly</field>
+            <field name="warning_threshold">92</field>
+            <field name="critical_threshold">88</field>
+            <field name="weight">1.5</field>
+            <field name="penalty_applicable" eval="False"/>
+        </record>
+
+        <record id="sla_kpi_prem_ent_checkpoint" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_premium_enterprise"/>
+            <field name="sequence">40</field>
+            <field name="name">Checkpoint Compliance</field>
+            <field name="kpi_type">checkpoint_compliance</field>
+            <field name="description">All checkpoints must be scanned during patrols</field>
+            <field name="target_value">98</field>
+            <field name="unit">percentage</field>
+            <field name="target_direction">maximize</field>
+            <field name="measurement_period">monthly</field>
+            <field name="warning_threshold">95</field>
+            <field name="critical_threshold">90</field>
+            <field name="weight">1.5</field>
+            <field name="penalty_applicable" eval="True"/>
+            <field name="penalty_amount">500</field>
+        </record>
+
+        <record id="sla_kpi_prem_ent_task_completion" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_premium_enterprise"/>
+            <field name="sequence">50</field>
+            <field name="name">Task Completion Rate</field>
+            <field name="kpi_type">task_completion</field>
+            <field name="description">All assigned tasks completed on time</field>
+            <field name="target_value">95</field>
+            <field name="unit">percentage</field>
+            <field name="target_direction">maximize</field>
+            <field name="measurement_period">monthly</field>
+            <field name="warning_threshold">92</field>
+            <field name="critical_threshold">88</field>
+            <field name="weight">1.2</field>
+            <field name="penalty_applicable" eval="False"/>
+        </record>
+
+        <record id="sla_kpi_prem_ent_training" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_premium_enterprise"/>
+            <field name="sequence">60</field>
+            <field name="name">Training Compliance</field>
+            <field name="kpi_type">training_compliance</field>
+            <field name="description">All guards must complete required training on time</field>
+            <field name="target_value">100</field>
+            <field name="unit">percentage</field>
+            <field name="target_direction">maximize</field>
+            <field name="measurement_period">quarterly</field>
+            <field name="warning_threshold">95</field>
+            <field name="critical_threshold">90</field>
+            <field name="weight">1.0</field>
+            <field name="penalty_applicable" eval="False"/>
+        </record>
+
+        <record id="sla_kpi_prem_ent_audit_score" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_premium_enterprise"/>
+            <field name="sequence">70</field>
+            <field name="name">Compliance Audit Score</field>
+            <field name="kpi_type">audit_score</field>
+            <field name="description">Average score from monthly compliance audits</field>
+            <field name="target_value">90</field>
+            <field name="unit">percentage</field>
+            <field name="target_direction">maximize</field>
+            <field name="measurement_period">monthly</field>
+            <field name="warning_threshold">92</field>
+            <field name="critical_threshold">85</field>
+            <field name="weight">2.0</field>
+            <field name="penalty_applicable" eval="True"/>
+            <field name="penalty_amount">1500</field>
+        </record>
+
+        <record id="sla_kpi_prem_ent_equipment" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_premium_enterprise"/>
+            <field name="sequence">80</field>
+            <field name="name">Equipment Uptime</field>
+            <field name="kpi_type">equipment_uptime</field>
+            <field name="description">Security equipment must be operational</field>
+            <field name="target_value">98</field>
+            <field name="unit">percentage</field>
+            <field name="target_direction">maximize</field>
+            <field name="measurement_period">monthly</field>
+            <field name="warning_threshold">95</field>
+            <field name="critical_threshold">90</field>
+            <field name="weight">1.0</field>
+            <field name="penalty_applicable" eval="False"/>
+        </record>
+
+        <!-- ============================================
+             SLA Template 4: Retail & Shopping Centers
+             ============================================ -->
+        <record id="sla_template_retail" model="sla.template">
+            <field name="name">Retail &amp; Shopping Security</field>
+            <field name="sequence">40</field>
+            <field name="industry">retail</field>
+            <field name="service_level">standard</field>
+            <field name="default_contract_duration">12</field>
+            <field name="penalty_applicable" eval="True"/>
+            <field name="description"><![CDATA[
+                <h4>Retail & Shopping Center Security SLA</h4>
+                <p>Specialized security services for retail environments with high foot traffic.</p>
+                <ul>
+                    <li>Fast incident response for customer-facing areas</li>
+                    <li>Visitor management and processing</li>
+                    <li>Regular patrols during operating hours</li>
+                    <li>Loss prevention support</li>
+                </ul>
+            ]]></field>
+            <field name="notes">Tailored for retail environments with extended operating hours</field>
+        </record>
+
+        <record id="sla_kpi_retail_incident_response" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_retail"/>
+            <field name="sequence">10</field>
+            <field name="name">Incident Response Time</field>
+            <field name="kpi_type">incident_response</field>
+            <field name="description">Fast response for customer-facing incidents</field>
+            <field name="target_value">10</field>
+            <field name="unit">minutes</field>
+            <field name="target_direction">minimize</field>
+            <field name="measurement_period">monthly</field>
+            <field name="warning_threshold">90</field>
+            <field name="critical_threshold">80</field>
+            <field name="weight">2.0</field>
+            <field name="penalty_applicable" eval="True"/>
+            <field name="penalty_amount">600</field>
+        </record>
+
+        <record id="sla_kpi_retail_visitor_processing" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_retail"/>
+            <field name="sequence">20</field>
+            <field name="name">Visitor Processing Time</field>
+            <field name="kpi_type">visitor_processing</field>
+            <field name="description">Average time to process visitor/contractor check-in</field>
+            <field name="target_value">5</field>
+            <field name="unit">minutes</field>
+            <field name="target_direction">minimize</field>
+            <field name="measurement_period">monthly</field>
+            <field name="warning_threshold">85</field>
+            <field name="critical_threshold">75</field>
+            <field name="weight">1.5</field>
+            <field name="penalty_applicable" eval="False"/>
+        </record>
+
+        <record id="sla_kpi_retail_patrol" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_retail"/>
+            <field name="sequence">30</field>
+            <field name="name">Patrol Completion Rate</field>
+            <field name="kpi_type">patrol_completion</field>
+            <field name="description">All scheduled patrols during operating hours</field>
+            <field name="target_value">95</field>
+            <field name="unit">percentage</field>
+            <field name="target_direction">maximize</field>
+            <field name="measurement_period">monthly</field>
+            <field name="warning_threshold">90</field>
+            <field name="critical_threshold">85</field>
+            <field name="weight">1.5</field>
+            <field name="penalty_applicable" eval="True"/>
+            <field name="penalty_amount">400</field>
+        </record>
+
+        <record id="sla_kpi_retail_audit_score" model="sla.kpi.template">
+            <field name="sla_template_id" ref="sla_template_retail"/>
+            <field name="sequence">40</field>
+            <field name="name">Security Audit Score</field>
+            <field name="kpi_type">audit_score</field>
+            <field name="description">Monthly security and safety audit compliance</field>
+            <field name="target_value">85</field>
+            <field name="unit">percentage</field>
+            <field name="target_direction">maximize</field>
+            <field name="measurement_period">monthly</field>
+            <field name="warning_threshold">90</field>
+            <field name="critical_threshold">80</field>
+            <field name="weight">1.0</field>
+            <field name="penalty_applicable" eval="False"/>
+        </record>
+
+    </data>
+</odoo>
+
+
+
+
+
+

@@ -1,0 +1,613 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- Module 1: CCTV & Surveillance Systems -->
+        <record id="slide_advanced_m1_cctv" model="slide.slide">
+            <field name="name">Module 1: CCTV &amp; Surveillance Systems</field>
+            <field name="channel_id" ref="elearning_course_advanced_operations"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.7</field>
+            <field name="html_content">
+                &lt;h2&gt;Modern CCTV and Surveillance Operations&lt;/h2&gt;
+                
+                &lt;h3&gt;Types of Surveillance Systems:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Analog CCTV:&lt;/strong&gt; Traditional coaxial cable systems&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;IP Cameras:&lt;/strong&gt; Network-based digital cameras&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;PTZ Cameras:&lt;/strong&gt; Pan-Tilt-Zoom remote control&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Fixed Cameras:&lt;/strong&gt; Stationary position monitoring&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Dome Cameras:&lt;/strong&gt; Discreet 360-degree coverage&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Thermal Cameras:&lt;/strong&gt; Heat detection for perimeter security&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;License Plate Recognition (LPR):&lt;/strong&gt; Automated vehicle identification&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Camera Specifications:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Resolution:&lt;/strong&gt; 1080p (2MP), 4MP, 4K (8MP) and higher&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Field of View:&lt;/strong&gt; Wide angle vs. narrow focus&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Night Vision:&lt;/strong&gt; IR illumination range&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Weather Rating:&lt;/strong&gt; IP66, IP67 for outdoor use&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Frame Rate:&lt;/strong&gt; FPS (frames per second) for smooth video&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Monitoring Best Practices:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Scan all monitors systematically every 15-30 minutes&lt;/li&gt;
+                    &lt;li&gt;Focus attention on critical areas (entrances, cash handling, etc.)&lt;/li&gt;
+                    &lt;li&gt;Take regular breaks to prevent monitor fatigue&lt;/li&gt;
+                    &lt;li&gt;Use PTZ cameras to investigate suspicious activity&lt;/li&gt;
+                    &lt;li&gt;Respond immediately to motion detection alerts&lt;/li&gt;
+                    &lt;li&gt;Document all significant observations&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Video Management Systems (VMS):&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Recording and playback functions&lt;/li&gt;
+                    &lt;li&gt;Live view and multi-screen display&lt;/li&gt;
+                    &lt;li&gt;Search and export video clips&lt;/li&gt;
+                    &lt;li&gt;Motion detection configuration&lt;/li&gt;
+                    &lt;li&gt;Camera health monitoring&lt;/li&gt;
+                    &lt;li&gt;User access management&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Video Evidence Management:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Properly export and save video clips&lt;/li&gt;
+                    &lt;li&gt;Include date, time, and camera location&lt;/li&gt;
+                    &lt;li&gt;Maintain chain of custody documentation&lt;/li&gt;
+                    &lt;li&gt;Store securely with restricted access&lt;/li&gt;
+                    &lt;li&gt;Follow data retention policies&lt;/li&gt;
+                    &lt;li&gt;Privacy compliance (GDPR, UAE data protection)&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;AI-Powered Video Analytics:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Facial recognition systems&lt;/li&gt;
+                    &lt;li&gt;People counting and crowd detection&lt;/li&gt;
+                    &lt;li&gt;Loitering detection&lt;/li&gt;
+                    &lt;li&gt;Object detection (abandoned packages)&lt;/li&gt;
+                    &lt;li&gt;Perimeter intrusion detection&lt;/li&gt;
+                    &lt;li&gt;License plate recognition&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Common Issues and Troubleshooting:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;No Video:&lt;/strong&gt; Check power, cables, network connection&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Poor Image:&lt;/strong&gt; Clean lens, adjust focus, check lighting&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Recording Failure:&lt;/strong&gt; Check storage space, HDD health&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Network Issues:&lt;/strong&gt; Verify IP address, switch connections&lt;/li&gt;
+                    &lt;li&gt;Report technical issues to IT/supervisor immediately&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_advanced_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_advanced_operations"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_advanced_m1_q1" model="slide.question">
+            <field name="question">What does PTZ stand for in camera technology?</field>
+            <field name="slide_id" ref="slide_advanced_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_advanced_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_advanced_m1_q1"/>
+            <field name="text_value">Pan-Tilt-Zoom</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_advanced_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_advanced_m1_q1"/>
+            <field name="text_value">Power-Television-Zoom</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 2: Access Control Systems -->
+        <record id="slide_advanced_m2_access" model="slide.slide">
+            <field name="name">Module 2: Advanced Access Control Systems</field>
+            <field name="channel_id" ref="elearning_course_advanced_operations"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.6</field>
+            <field name="html_content">
+                &lt;h2&gt;Modern Access Control Technology&lt;/h2&gt;
+                
+                &lt;h3&gt;Types of Access Control Systems:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Card Readers:&lt;/strong&gt; RFID proximity cards and badges&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Biometric Systems:&lt;/strong&gt; Fingerprint, facial, iris recognition&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;PIN/Keypad:&lt;/strong&gt; Number code entry&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Mobile Access:&lt;/strong&gt; Bluetooth/smartphone credentials&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Turnstiles:&lt;/strong&gt; Physical barriers with card readers&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Vehicle Barriers:&lt;/strong&gt; Gates, bollards, speed bumps&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Biometric Technology in Dubai:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Facial Recognition:&lt;/strong&gt; Common in airports, borders, high-security sites&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Fingerprint:&lt;/strong&gt; Most common in residential and commercial&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Iris Scanning:&lt;/strong&gt; Used in immigration and border control&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Palm Vein:&lt;/strong&gt; High security applications&lt;/li&gt;
+                    &lt;li&gt;Understand privacy concerns and regulations&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Access Control Zones:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Public Zone:&lt;/strong&gt; No restrictions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Semi-Restricted:&lt;/strong&gt; Badge/verification required&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Restricted:&lt;/strong&gt; Authorized personnel only&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;High Security:&lt;/strong&gt; Multi-factor authentication required&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Secure/Vault:&lt;/strong&gt; Maximum security, escort required&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;System Operations:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Grant temporary access to visitors&lt;/li&gt;
+                    &lt;li&gt;Deactivate lost or stolen cards immediately&lt;/li&gt;
+                    &lt;li&gt;Monitor door held open alarms&lt;/li&gt;
+                    &lt;li&gt;Respond to forced door alarms&lt;/li&gt;
+                    &lt;li&gt;Review access logs for anomalies&lt;/li&gt;
+                    &lt;li&gt;Maintain anti-passback enforcement&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Emergency Procedures:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Fire Alarm:&lt;/strong&gt; All doors unlock automatically (fail-safe)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Lockdown:&lt;/strong&gt; All doors lock (active shooter, threat)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Power Failure:&lt;/strong&gt; Understand fail-safe vs. fail-secure&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;System Override:&lt;/strong&gt; Manual release procedures&lt;/li&gt;
+                    &lt;li&gt;Know emergency contact procedures&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Common Security Threats:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Tailgating:&lt;/strong&gt; Following authorized person through door&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Piggybacking:&lt;/strong&gt; Entering with authorization knowledge&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Card Sharing:&lt;/strong&gt; Lending access cards&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Door Propping:&lt;/strong&gt; Keeping secured doors open&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Credential Theft:&lt;/strong&gt; Stolen cards or codes&lt;/li&gt;
+                    &lt;li&gt;Challenge all unauthorized access attempts&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Integration with Other Systems:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Video surveillance (CCTV) integration&lt;/li&gt;
+                    &lt;li&gt;Intrusion detection systems&lt;/li&gt;
+                    &lt;li&gt;Visitor management systems&lt;/li&gt;
+                    &lt;li&gt;Building management systems (BMS)&lt;/li&gt;
+                    &lt;li&gt;Time and attendance tracking&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_advanced_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_advanced_operations"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_advanced_m2_q1" model="slide.question">
+            <field name="question">What is "tailgating" in access control?</field>
+            <field name="slide_id" ref="slide_advanced_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_advanced_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_advanced_m2_q1"/>
+            <field name="text_value">Following an authorized person through a secured door without authorization</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_advanced_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_advanced_m2_q1"/>
+            <field name="text_value">Following a vehicle too closely</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 3: Intrusion Detection & Alarm Systems -->
+        <record id="slide_advanced_m3_alarms" model="slide.slide">
+            <field name="name">Module 3: Intrusion Detection &amp; Alarm Systems</field>
+            <field name="channel_id" ref="elearning_course_advanced_operations"/>
+            <field name="sequence">30</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.6</field>
+            <field name="html_content">
+                &lt;h2&gt;Alarm and Intrusion Detection Systems&lt;/h2&gt;
+                
+                &lt;h3&gt;Types of Detection Devices:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Motion Detectors (PIR):&lt;/strong&gt; Passive infrared sensors&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Door/Window Contacts:&lt;/strong&gt; Magnetic switches&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Glass Break Sensors:&lt;/strong&gt; Acoustic detection&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Beam Sensors:&lt;/strong&gt; Invisible infrared beams&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Vibration Sensors:&lt;/strong&gt; Detect tampering&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Pressure Mats:&lt;/strong&gt; Floor-based detection&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Alarm Zones:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Perimeter Protection:&lt;/strong&gt; Doors, windows, external walls&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Interior Protection:&lt;/strong&gt; Motion detectors inside buildings&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Point Protection:&lt;/strong&gt; Specific high-value items/areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;24-Hour Zones:&lt;/strong&gt; Always armed (panic buttons, fire)&lt;/li&gt;
+                    &lt;li&gt;Understand zone programming and coverage&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Alarm Response Procedures:&lt;/h3&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Note exact time and zone of alarm activation&lt;/li&gt;
+                    &lt;li&gt;Check CCTV for visual verification&lt;/li&gt;
+                    &lt;li&gt;Notify supervisor and/or police if intrusion confirmed&lt;/li&gt;
+                    &lt;li&gt;Dispatch security to investigate (in pairs for safety)&lt;/li&gt;
+                    &lt;li&gt;Do NOT enter if intruder may still be present&lt;/li&gt;
+                    &lt;li&gt;Await police arrival if break-in confirmed&lt;/li&gt;
+                    &lt;li&gt;Document incident thoroughly&lt;/li&gt;
+                    &lt;li&gt;Reset alarm only after all-clear given&lt;/li&gt;
+                &lt;/ol&gt;
+                
+                &lt;h3&gt;False Alarm Management:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Common causes: user error, pets, environmental factors&lt;/li&gt;
+                    &lt;li&gt;Always investigate - never assume false alarm&lt;/li&gt;
+                    &lt;li&gt;Document all alarms, including false ones&lt;/li&gt;
+                    &lt;li&gt;Report recurring false alarms for system adjustment&lt;/li&gt;
+                    &lt;li&gt;Dubai Police may fine for excessive false alarms&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Central Monitoring Station (CMS):&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;24/7 professional alarm monitoring&lt;/li&gt;
+                    &lt;li&gt;Receive signals from multiple sites&lt;/li&gt;
+                    &lt;li&gt;Verify alarms and dispatch response&lt;/li&gt;
+                    &lt;li&gt;Contact key holders and emergency services&lt;/li&gt;
+                    &lt;li&gt;Maintain detailed logs&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Duress/Panic Alarms:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Purpose:&lt;/strong&gt; Silent alarm for robbery, assault, medical emergency&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Response:&lt;/strong&gt; Immediate priority, notify police&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Test Procedures:&lt;/strong&gt; Regular testing with advance notice&lt;/li&gt;
+                    &lt;li&gt;Never ignore panic alarm activations&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;System Maintenance:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Regular testing of all devices&lt;/li&gt;
+                    &lt;li&gt;Battery backup checks&lt;/li&gt;
+                    &lt;li&gt;Communication path testing&lt;/li&gt;
+                    &lt;li&gt;Clean sensors and cameras&lt;/li&gt;
+                    &lt;li&gt;Update software and firmware&lt;/li&gt;
+                    &lt;li&gt;Coordinate with technical support&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_advanced_m3_quiz" model="slide.slide">
+            <field name="name">Module 3: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_advanced_operations"/>
+            <field name="sequence">31</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_advanced_m3_q1" model="slide.question">
+            <field name="question">What is the first step when an alarm is activated?</field>
+            <field name="slide_id" ref="slide_advanced_m3_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_advanced_m3_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_advanced_m3_q1"/>
+            <field name="text_value">Note exact time and zone, then check CCTV for verification</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_advanced_m3_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_advanced_m3_q1"/>
+            <field name="text_value">Immediately reset the alarm</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 4: Close Protection & VIP Security -->
+        <record id="slide_advanced_m4_close_protection" model="slide.slide">
+            <field name="name">Module 4: Close Protection &amp; VIP Security</field>
+            <field name="channel_id" ref="elearning_course_advanced_operations"/>
+            <field name="sequence">40</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.7</field>
+            <field name="html_content">
+                &lt;h2&gt;Close Protection Operations in Dubai&lt;/h2&gt;
+                &lt;p&gt;Dubai is home to many VIPs, including royalty, government officials, business leaders, and celebrities requiring professional protection.&lt;/p&gt;
+                
+                &lt;h3&gt;Close Protection Principles:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Advance Planning:&lt;/strong&gt; Route reconnaissance, venue surveys&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Risk Assessment:&lt;/strong&gt; Identify and mitigate threats&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Discretion:&lt;/strong&gt; Low profile, professional appearance&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Alertness:&lt;/strong&gt; Continuous threat scanning&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication:&lt;/strong&gt; Secure radio/phone protocols&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Protection Formations:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Close Formation:&lt;/strong&gt; Within arm's reach of principal&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Extended Formation:&lt;/strong&gt; Wider perimeter, more freedom&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Diamond Formation:&lt;/strong&gt; Four-person team positioning&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Wedge Formation:&lt;/strong&gt; Moving through crowds&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Advance Security Preparations:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Survey and secure venues before arrival&lt;/li&gt;
+                    &lt;li&gt;Identify emergency exits and safe rooms&lt;/li&gt;
+                    &lt;li&gt;Plan primary and alternate routes&lt;/li&gt;
+                    &lt;li&gt;Coordinate with venue security&lt;/li&gt;
+                    &lt;li&gt;Position vehicles for quick departure&lt;/li&gt;
+                    &lt;li&gt;Establish communication protocols&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;VIP Transportation Security:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Vehicle Preparation:&lt;/strong&gt; Inspect before use&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Route Selection:&lt;/strong&gt; Vary routes, avoid predictable patterns&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Motorcade Operations:&lt;/strong&gt; Lead, principal, and follow vehicles&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Counter-Surveillance:&lt;/strong&gt; Detect and evade followers&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Driving:&lt;/strong&gt; Evasive maneuvers if necessary&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Threat Recognition:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Suspicious individuals (surveillance, following)&lt;/li&gt;
+                    &lt;li&gt;Unusual vehicles or packages&lt;/li&gt;
+                    &lt;li&gt;Crowd behavior anomalies&lt;/li&gt;
+                    &lt;li&gt;Environmental hazards&lt;/li&gt;
+                    &lt;li&gt;Social media threats&lt;/li&gt;
+                    &lt;li&gt;Insider threats&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Emergency Response Procedures:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Cover and Evacuate:&lt;/strong&gt; Shield principal and move to safety&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Safe Room:&lt;/strong&gt; Secure location for lockdown&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Medical Emergency:&lt;/strong&gt; First aid and hospital coordination&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Attack Response:&lt;/strong&gt; Defensive tactics, evacuation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication:&lt;/strong&gt; Alert team and authorities&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Cultural Sensitivity in UAE:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Respect for Emirati royalty and officials&lt;/li&gt;
+                    &lt;li&gt;Understanding of Islamic customs&lt;/li&gt;
+                    &lt;li&gt;Gender-appropriate protection (female officers for female principals)&lt;/li&gt;
+                    &lt;li&gt;Discretion and confidentiality paramount&lt;/li&gt;
+                    &lt;li&gt;Professional attire and conduct&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Legal Considerations:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;SIRA licensing for close protection role&lt;/li&gt;
+                    &lt;li&gt;Weapon permits (if applicable)&lt;/li&gt;
+                    &lt;li&gt;Use of force limitations&lt;/li&gt;
+                    &lt;li&gt;Privacy and data protection laws&lt;/li&gt;
+                    &lt;li&gt;Coordination with Dubai Police&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_advanced_m4_quiz" model="slide.slide">
+            <field name="name">Module 4: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_advanced_operations"/>
+            <field name="sequence">41</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_advanced_m4_q1" model="slide.question">
+            <field name="question">What is the primary goal of close protection?</field>
+            <field name="slide_id" ref="slide_advanced_m4_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_advanced_m4_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_advanced_m4_q1"/>
+            <field name="text_value">Prevent threats through advance planning, vigilance, and rapid response</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_advanced_m4_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_advanced_m4_q1"/>
+            <field name="text_value">Make the principal feel important</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 5: Cybersecurity Awareness for Security Personnel -->
+        <record id="slide_advanced_m5_cyber" model="slide.slide">
+            <field name="name">Module 5: Cybersecurity Awareness for Physical Security</field>
+            <field name="channel_id" ref="elearning_course_advanced_operations"/>
+            <field name="sequence">50</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Cybersecurity in Physical Security Operations&lt;/h2&gt;
+                &lt;p&gt;Modern security threats combine physical and cyber elements. Security guards must understand basic cybersecurity principles.&lt;/p&gt;
+                
+                &lt;h3&gt;Common Cyber Threats:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Phishing:&lt;/strong&gt; Fake emails to steal information&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Malware:&lt;/strong&gt; Viruses, ransomware, spyware&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Social Engineering:&lt;/strong&gt; Manipulating people to reveal information&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;USB Drops:&lt;/strong&gt; Infected devices left to be found&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Tailgating:&lt;/strong&gt; Physical access to install malware&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Security Guard's Role in Cybersecurity:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Prevent unauthorized physical access to IT infrastructure&lt;/li&gt;
+                    &lt;li&gt;Report suspicious persons near server rooms&lt;/li&gt;
+                    &lt;li&gt;Verify identity of IT contractors&lt;/li&gt;
+                    &lt;li&gt;Report found USB drives or electronic devices&lt;/li&gt;
+                    &lt;li&gt;Secure disposal of documents and media&lt;/li&gt;
+                    &lt;li&gt;Never leave security workstations unlocked&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Password Security:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Use strong, unique passwords&lt;/li&gt;
+                    &lt;li&gt;Never share passwords&lt;/li&gt;
+                    &lt;li&gt;Change passwords regularly&lt;/li&gt;
+                    &lt;li&gt;Enable two-factor authentication&lt;/li&gt;
+                    &lt;li&gt;Don't write passwords down&lt;/li&gt;
+                    &lt;li&gt;Lock computer when away from desk&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Data Protection:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Handle sensitive information confidentially&lt;/li&gt;
+                    &lt;li&gt;Secure visitor logs and access records&lt;/li&gt;
+                    &lt;li&gt;Encrypt sensitive communications&lt;/li&gt;
+                    &lt;li&gt;Follow data retention and disposal policies&lt;/li&gt;
+                    &lt;li&gt;Comply with GDPR and UAE data protection laws&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Recognizing Social Engineering:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Pretexting:&lt;/strong&gt; False identity to gain trust&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Baiting:&lt;/strong&gt; Offering something to get information&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Urgency:&lt;/strong&gt; Creating fake emergencies&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Authority:&lt;/strong&gt; Impersonating management or IT&lt;/li&gt;
+                    &lt;li&gt;Always verify requests through official channels&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Incident Reporting:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Report all suspicious cyber activities&lt;/li&gt;
+                    &lt;li&gt;Document date, time, and details&lt;/li&gt;
+                    &lt;li&gt;Don't attempt to investigate yourself&lt;/li&gt;
+                    &lt;li&gt;Contact IT security team immediately&lt;/li&gt;
+                    &lt;li&gt;Preserve evidence (don't delete emails, etc.)&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_advanced_m5_quiz" model="slide.slide">
+            <field name="name">Module 5: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_advanced_operations"/>
+            <field name="sequence">51</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_advanced_m5_q1" model="slide.question">
+            <field name="question">What should you do if you find a USB drive on site?</field>
+            <field name="slide_id" ref="slide_advanced_m5_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_advanced_m5_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_advanced_m5_q1"/>
+            <field name="text_value">Report it to IT security - do not plug it into any computer</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_advanced_m5_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_advanced_m5_q1"/>
+            <field name="text_value">Plug it in to see what's on it</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Final Assessment -->
+        <record id="slide_advanced_final" model="slide.slide">
+            <field name="name">Final Assessment: Advanced Security Operations</field>
+            <field name="channel_id" ref="elearning_course_advanced_operations"/>
+            <field name="sequence">60</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.4</field>
+        </record>
+
+        <record id="quiz_advanced_final_q1" model="slide.question">
+            <field name="question">What does PTZ stand for in CCTV technology?</field>
+            <field name="slide_id" ref="slide_advanced_final"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_advanced_final_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_advanced_final_q1"/>
+            <field name="text_value">Pan-Tilt-Zoom</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_advanced_final_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_advanced_final_q1"/>
+            <field name="text_value">Personal Tracking Zone</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_advanced_final_q2" model="slide.question">
+            <field name="question">What is tailgating in access control?</field>
+            <field name="slide_id" ref="slide_advanced_final"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_advanced_final_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_advanced_final_q2"/>
+            <field name="text_value">Following an authorized person through a secured door without authorization</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_advanced_final_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_advanced_final_q2"/>
+            <field name="text_value">A type of alarm system</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_advanced_final_q3" model="slide.question">
+            <field name="question">When an intrusion alarm is activated, what is the FIRST thing you should do?</field>
+            <field name="slide_id" ref="slide_advanced_final"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="quiz_advanced_final_q3_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_advanced_final_q3"/>
+            <field name="text_value">Note the exact time and zone, then verify with CCTV</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_advanced_final_q3_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_advanced_final_q3"/>
+            <field name="text_value">Immediately reset the alarm</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_advanced_final_q4" model="slide.question">
+            <field name="question">What should you do if you find a USB drive on the premises?</field>
+            <field name="slide_id" ref="slide_advanced_final"/>
+            <field name="sequence">4</field>
+        </record>
+        <record id="quiz_advanced_final_q4_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_advanced_final_q4"/>
+            <field name="text_value">Report it to IT security without plugging it into any computer</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_advanced_final_q4_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_advanced_final_q4"/>
+            <field name="text_value">Plug it into your computer to check ownership</field>
+            <field name="is_correct">False</field>
+        </record>
+
+    </data>
+</odoo>
+
+
+
+
+
+
+
+
+
+

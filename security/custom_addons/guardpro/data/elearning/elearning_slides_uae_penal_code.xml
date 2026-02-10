@@ -1,0 +1,522 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- Course 20: UAE Penal Code & Security Responsibilities - Slides -->
+
+        <!-- Module 1: Security Guard Authority and Limitations -->
+        <record id="slide_uae_penal_m1_authority" model="slide.slide">
+            <field name="name">Module 1: Security Guard Authority and Legal Limitations</field>
+            <field name="channel_id" ref="elearning_course_uae_penal_code"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.83</field>
+            <field name="html_content">
+                &lt;h2&gt;The Legal Authority and Limitations of Security Guards in the UAE&lt;/h2&gt;
+                &lt;p&gt;Security guards in the UAE operate under carefully defined legal boundaries. While they play a crucial role in maintaining safety and security, they are not law enforcement officers and must understand the limits of their authority to avoid legal violations and ensure proper cooperation with police.&lt;/p&gt;
+
+                &lt;h3&gt;Legal Status of Security Guards&lt;/h3&gt;
+                &lt;p&gt;Security guards are private citizens authorized to perform specific security functions, not public officials with general law enforcement powers:&lt;/p&gt;
+
+                &lt;h4&gt;Private Security Role&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Contractual Authority:&lt;/strong&gt; Powers derived from employment contract and client authorization&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Property Protection:&lt;/strong&gt; Authorized to protect specific premises and property&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Control:&lt;/strong&gt; Permission to control entry and exit from designated areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Observation Rights:&lt;/strong&gt; Authority to monitor and report suspicious activities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Client Interests:&lt;/strong&gt; Acting on behalf of employer/client, not public interest&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Key Legal Distinction&lt;/h4&gt;
+                &lt;p&gt;&lt;strong&gt;Critical Understanding:&lt;/strong&gt; Security guards are not police officers. They cannot exercise general law enforcement powers and must defer to police for criminal matters.&lt;/p&gt;
+
+                &lt;h3&gt;Permitted Security Functions&lt;/h3&gt;
+                &lt;p&gt;The UAE Penal Code and security regulations authorize security guards to perform specific functions within defined limits:&lt;/p&gt;
+
+                &lt;h4&gt;Access Control and Monitoring&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Entry Control:&lt;/strong&gt; Regulate access to premises per client instructions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Visitor Management:&lt;/strong&gt; Check identification and log visitor information&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Security Screening:&lt;/strong&gt; Conduct authorized searches of persons and belongings&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Surveillance:&lt;/strong&gt; Monitor premises using approved security systems&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Patrol Activities:&lt;/strong&gt; Regular inspection of assigned areas&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Intervention Authority&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Property Protection:&lt;/strong&gt; Prevent damage to or theft of protected property&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Initial Response:&lt;/strong&gt; Address immediate security threats on premises&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Detention Rights:&lt;/strong&gt; Temporarily detain individuals for police arrival&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Evidence Preservation:&lt;/strong&gt; Secure crime scenes until police arrive&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Assistance:&lt;/strong&gt; Provide immediate help in medical emergencies&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Prohibited Actions and Legal Boundaries&lt;/h3&gt;
+                &lt;p&gt;Security guards must strictly avoid actions that exceed their authority or violate legal standards:&lt;/p&gt;
+
+                &lt;h4&gt;Law Enforcement Restrictions&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;No Arrest Powers:&lt;/strong&gt; Cannot arrest or formally detain individuals&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;No Search Warrants:&lt;/strong&gt; Cannot conduct searches without specific authorization&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;No Interrogation Rights:&lt;/strong&gt; Cannot question individuals about criminal matters&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;No Legal Authority:&lt;/strong&gt; Cannot issue citations or legal notices&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;No Force Monopoly:&lt;/strong&gt; Cannot use force beyond reasonable self-defense&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Use of Force Limitations&lt;/h4&gt;
+                &lt;p&gt;The use of force by security guards is strictly regulated and limited to reasonable and necessary measures:&lt;/p&gt;
+
+                &lt;h5&gt;Permitted Force Levels&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Verbal Commands:&lt;/strong&gt; Primary method of control and direction&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Physical Restraint:&lt;/strong&gt; Minimal force to control uncooperative individuals&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Self-Defense Force:&lt;/strong&gt; Reasonable force to protect oneself or others&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Property Defense:&lt;/strong&gt; Force to prevent immediate property damage&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h5&gt;Prohibited Force Applications&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Excessive Force:&lt;/strong&gt; Force beyond what's reasonably necessary&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Preemptive Force:&lt;/strong&gt; Force against individuals not posing immediate threat&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Punitive Force:&lt;/strong&gt; Force used as punishment rather than control&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Weapon Discharge:&lt;/strong&gt; Use of firearms except in extreme self-defense&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Restraint Devices:&lt;/strong&gt; Handcuffs or restraints without police authorization&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Detention Authority and Procedures&lt;/h3&gt;
+                &lt;p&gt;Security guards have limited detention authority, strictly regulated by law:&lt;/p&gt;
+
+                &lt;h4&gt;Legal Basis for Detention&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Property Trespass:&lt;/strong&gt; Individuals refusing to leave authorized premises&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Theft in Progress:&lt;/strong&gt; Active theft or property damage on premises&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Criminal Activity:&lt;/strong&gt; Witnessed commission of criminal offenses&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Police Request:&lt;/strong&gt; Detention requested by law enforcement&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Client Authorization:&lt;/strong&gt; Specific detention authority granted by client&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Detention Procedures&lt;/h4&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Reasonable Suspicion:&lt;/strong&gt; Must have valid reason for detention&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Immediate Police Notification:&lt;/strong&gt; Call police immediately (999)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Minimal Restraint:&lt;/strong&gt; Use only necessary restraint methods&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Rights Explanation:&lt;/strong&gt; Inform detainee of rights and reasons&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Documentation:&lt;/strong&gt; Record all details of detention&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Police Handover:&lt;/strong&gt; Transfer custody to police as soon as possible&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h4&gt;Detention Time Limits&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Maximum Period:&lt;/strong&gt; Cannot detain individuals longer than 2 hours&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Police Response Time:&lt;/strong&gt; Release if police don't arrive within reasonable time&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Extended Detention:&lt;/strong&gt; Only possible with police authorization&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Documentation Required:&lt;/strong&gt; All detention periods must be fully documented&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Search and Seizure Authority&lt;/h3&gt;
+                &lt;p&gt;Security guards have very limited search authority compared to police officers:&lt;/p&gt;
+
+                &lt;h4&gt;Authorized Searches&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Consent Searches:&lt;/strong&gt; Searches conducted with individual's voluntary consent&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Security Screening:&lt;/strong&gt; Authorized entry screening at access points&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Plain View Evidence:&lt;/strong&gt; Items clearly visible during legitimate observation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Abandoned Property:&lt;/strong&gt; Items left unattended in secured areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Situations:&lt;/strong&gt; Searches necessary to prevent immediate harm&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Prohibited Search Methods&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Body Cavity Searches:&lt;/strong&gt; Cannot conduct intimate or invasive searches&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Strip Searches:&lt;/strong&gt; No removal of clothing for search purposes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Coercive Searches:&lt;/strong&gt; Cannot force individuals to submit to searches&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Warrantless Searches:&lt;/strong&gt; Cannot search without specific authorization&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Comprehensive Searches:&lt;/strong&gt; Limited to specific security concerns&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Evidence Handling Responsibilities&lt;/h3&gt;
+                &lt;p&gt;Security guards frequently encounter potential evidence and must handle it properly:&lt;/p&gt;
+
+                &lt;h4&gt;Evidence Preservation&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Secure Scene:&lt;/strong&gt; Prevent contamination or disturbance of evidence&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Document Location:&lt;/strong&gt; Note exact position and condition of all evidence&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Minimize Handling:&lt;/strong&gt; Touch evidence only when necessary for safety&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Chain of Custody:&lt;/strong&gt; Maintain record of everyone who handles evidence&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Police Transfer:&lt;/strong&gt; Immediately transfer evidence to police custody&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Photography Guidelines&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Before Disturbing:&lt;/strong&gt; Photograph evidence in original condition&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Multiple Angles:&lt;/strong&gt; Capture evidence from various perspectives&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Scale Reference:&lt;/strong&gt; Include objects of known size in photos&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Time Stamps:&lt;/strong&gt; Note exact time and location of photographs&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Privacy Respect:&lt;/strong&gt; Avoid photographing uninvolved individuals&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Legal Consequences of Authority Violations&lt;/h3&gt;
+                &lt;p&gt;Exceeding legal authority can result in severe criminal and civil penalties:&lt;/p&gt;
+
+                &lt;h4&gt;Criminal Liabilities&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Unauthorized Detention:&lt;/strong&gt; False imprisonment charges&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Excessive Force:&lt;/strong&gt; Assault and battery charges&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Illegal Search:&lt;/strong&gt; Violation of privacy rights&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Evidence Tampering:&lt;/strong&gt; Obstruction of justice charges&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;License Revocation:&lt;/strong&gt; Loss of security license and employment&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Civil Consequences&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Lawsuits:&lt;/strong&gt; Personal liability for damages and injuries&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Employer Liability:&lt;/strong&gt; Company responsibility for employee actions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Insurance Impact:&lt;/strong&gt; Increased premiums or coverage denial&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Professional Reputation:&lt;/strong&gt; Damage to career prospects&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Professional Conduct Standards&lt;/h3&gt;
+                &lt;p&gt;Maintaining professional conduct is essential for legal compliance and effective security operations:&lt;/p&gt;
+
+                &lt;h4&gt;Ethical Standards&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Impartiality:&lt;/strong&gt; Treat all individuals fairly regardless of background&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Professional Courtesy:&lt;/strong&gt; Maintain respectful demeanor in all interactions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Truthfulness:&lt;/strong&gt; Provide accurate information and avoid deception&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Discretion:&lt;/strong&gt; Respect privacy and avoid unnecessary disclosure&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Accountability:&lt;/strong&gt; Accept responsibility for actions and decisions&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;De-escalation Techniques&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Verbal Communication:&lt;/strong&gt; Use calm, clear language to resolve conflicts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Active Listening:&lt;/strong&gt; Understand concerns before responding&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Time Provision:&lt;/strong&gt; Allow individuals time to calm down&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Professional Distance:&lt;/strong&gt; Maintain appropriate physical space&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Supervisor Involvement:&lt;/strong&gt; Escalate to management when appropriate&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Fundamental Principle:&lt;/strong&gt; A security guard's authority ends where police authority begins. Always prioritize legal compliance and professional conduct over aggressive enforcement.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_uae_penal_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_uae_penal_code"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <record id="quiz_uae_penal_m1_q1" model="slide.question">
+            <field name="question">Can security guards legally arrest individuals in the UAE?</field>
+            <field name="slide_id" ref="slide_uae_penal_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_uae_penal_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_penal_m1_q1"/>
+            <field name="text_value">Yes, they have full arrest powers</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_uae_penal_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_penal_m1_q1"/>
+            <field name="text_value">No, only police can make arrests</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <record id="quiz_uae_penal_m1_q2" model="slide.question">
+            <field name="question">What is the maximum time a security guard can detain someone?</field>
+            <field name="slide_id" ref="slide_uae_penal_m1_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_uae_penal_m1_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_penal_m1_q2"/>
+            <field name="text_value">2 hours</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_penal_m1_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_penal_m1_q2"/>
+            <field name="text_value">24 hours</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 2: Criminal Offenses and Security Responsibilities -->
+        <record id="slide_uae_penal_m2_criminal_offenses" model="slide.slide">
+            <field name="name">Module 2: Criminal Offenses Relevant to Security Personnel</field>
+            <field name="channel_id" ref="elearning_course_uae_penal_code"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.83</field>
+            <field name="html_content">
+                &lt;h2&gt;Criminal Offenses and Security Guard Responsibilities under UAE Penal Code&lt;/h2&gt;
+                &lt;p&gt;Security guards frequently encounter various criminal activities and must understand their legal obligations in responding to offenses. The UAE Penal Code provides the framework for understanding criminal behavior and the appropriate security response.&lt;/p&gt;
+
+                &lt;h3&gt;Theft and Property Crimes&lt;/h3&gt;
+                &lt;p&gt;Theft is one of the most common offenses security guards encounter and respond to:&lt;/p&gt;
+
+                &lt;h4&gt;Theft Classification (Article 391-394)&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Simple Theft&lt;/dt&gt;
+                    &lt;dd&gt;Taking property without permission - up to 1 year imprisonment and/or fine&lt;/dd&gt;
+                    &lt;dt&gt;Theft with Aggravating Factors&lt;/dt&gt;
+                    &lt;dd&gt;Theft at night, by public servant, or valued over AED 10,000 - up to 3 years imprisonment&lt;/dd&gt;
+                    &lt;dt&gt;Grand Theft&lt;/dt&gt;
+                    &lt;dd&gt;Theft of property valued over AED 100,000 - up to 5 years imprisonment&lt;/dd&gt;
+                    &lt;dt&gt;Theft by Force&lt;/dt&gt;
+                    &lt;dd&gt;Robbery involving threat or force - up to 15 years imprisonment&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Security Response to Theft&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Immediate Action:&lt;/strong&gt; Secure the scene and prevent suspect escape&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Evidence Preservation:&lt;/strong&gt; Protect property and document scene&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Witness Management:&lt;/strong&gt; Control access and identify witnesses&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Police Notification:&lt;/strong&gt; Report incident immediately to authorities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Victim Support:&lt;/strong&gt; Assist victims while awaiting police&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Violent Crimes and Assault&lt;/h3&gt;
+                &lt;p&gt;Violent offenses require immediate security intervention and police involvement:&lt;/p&gt;
+
+                &lt;h4&gt;Assault Offenses (Article 333-344)&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Simple Assault:&lt;/strong&gt; Causing injury without weapon - up to 1 year imprisonment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Aggravated Assault:&lt;/strong&gt; With weapon or serious injury - up to 5 years imprisonment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Assault on Public Servant:&lt;/strong&gt; Attack on security/police - up to 10 years imprisonment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Attempted Murder:&lt;/strong&gt; Intentional harm with lethal potential - up to life imprisonment&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Security Intervention Guidelines&lt;/h4&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Ensure Safety:&lt;/strong&gt; Protect yourself and others from immediate danger&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Separate Parties:&lt;/strong&gt; Keep combatants apart using minimal necessary force&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Medical Attention:&lt;/strong&gt; Arrange immediate medical care for injured parties&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Scene Control:&lt;/strong&gt; Secure area and prevent evidence contamination&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Police Coordination:&lt;/strong&gt; Provide complete information to responding officers&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h3&gt;Trespass and Unauthorized Access&lt;/h3&gt;
+                &lt;p&gt;Trespass offenses are common in secured facilities and require specific security responses:&lt;/p&gt;
+
+                &lt;h4&gt;Trespass Violations (Article 84-86)&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Simple Trespass&lt;/dt&gt;
+                    &lt;dd&gt;Unauthorized entry to private property - fine up to AED 5,000&lt;/dd&gt;
+                    &lt;dt&gt;Aggravated Trespass&lt;/dt&gt;
+                    &lt;dd&gt;Trespass with intent to commit crime - up to 1 year imprisonment&lt;/dd&gt;
+                    &lt;dt&gt;Breaking and Entering&lt;/dt&gt;
+                    &lt;dd&gt;Forced entry to premises - up to 3 years imprisonment&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Security Guard Authorities&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Entry Denial:&lt;/strong&gt; Refuse entry to unauthorized individuals&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Removal Orders:&lt;/strong&gt; Direct trespassers to leave premises&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Temporary Detention:&lt;/strong&gt; Hold individuals until police arrive&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Control:&lt;/strong&gt; Maintain authorized entry/exit procedures&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Documentation:&lt;/strong&gt; Record all trespass incidents and actions taken&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Drug-Related Offenses&lt;/h3&gt;
+                &lt;p&gt;Drug offenses in the UAE carry severe penalties and require careful security handling:&lt;/p&gt;
+
+                &lt;h4&gt;Drug Offenses (Article 35-49)&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Possession (Small Amount):&lt;/strong&gt; Up to 4 years imprisonment and AED 20,000 fine&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Possession (Large Amount):&lt;/strong&gt; 5-15 years imprisonment and AED 50,000 fine&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Trafficking:&lt;/strong&gt; Life imprisonment or death penalty for large quantities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Manufacturing:&lt;/strong&gt; 15 years to life imprisonment&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Security Response Protocol&lt;/h4&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Avoid Direct Contact:&lt;/strong&gt; Do not touch suspected drug materials&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Isolate Area:&lt;/strong&gt; Clear and secure the location&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Notify Authorities:&lt;/strong&gt; Contact police immediately (provide detailed description)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Preserve Evidence:&lt;/strong&gt; Do not disturb or collect suspected substances&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Personal Safety:&lt;/strong&gt; Maintain safe distance and avoid confrontation&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h3&gt;Fraud and Financial Crimes&lt;/h3&gt;
+                &lt;p&gt;Financial crimes often occur in commercial environments and require documentation expertise:&lt;/p&gt;
+
+                &lt;h4&gt;Fraud Offenses (Article 399-406)&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Simple Fraud&lt;/dt&gt;
+                    &lt;dd&gt;Deception for financial gain - up to 3 years imprisonment&lt;/dd&gt;
+                    &lt;dt&gt;Fraud by Public Servant&lt;/dt&gt;
+                    &lt;dd&gt;Abuse of position for gain - up to 7 years imprisonment&lt;/dd&gt;
+                    &lt;dt&gt;Large-Scale Fraud&lt;/dt&gt;
+                    &lt;dd&gt;Fraud exceeding AED 100,000 - up to 10 years imprisonment&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Security Detection Methods&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Behavioral Observation:&lt;/strong&gt; Monitor for suspicious activities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Pattern Analysis:&lt;/strong&gt; Identify unusual entry/exit patterns&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Document Verification:&lt;/strong&gt; Check identification and authorization&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Surveillance Review:&lt;/strong&gt; Examine security camera footage&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Incident Reporting:&lt;/strong&gt; Document and report suspicious activities&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Public Order Offenses&lt;/h3&gt;
+                &lt;p&gt;Maintaining public order is essential in UAE society and security facilities:&lt;/p&gt;
+
+                &lt;h4&gt;Disorderly Conduct (Article 220-225)&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Disturbing Peace:&lt;/strong&gt; Creating public disturbance - up to 6 months imprisonment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Obscenity:&lt;/strong&gt; Indecent behavior in public - up to 1 year imprisonment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Fighting:&lt;/strong&gt; Public altercations - up to 1 year imprisonment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Noise Violations:&lt;/strong&gt; Excessive noise disturbing others - fines up to AED 5,000&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Security Management Approaches&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Verbal Warnings:&lt;/strong&gt; Attempt peaceful resolution first&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;De-escalation:&lt;/strong&gt; Use conflict resolution techniques&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Removal Orders:&lt;/strong&gt; Direct individuals to leave premises&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Police Assistance:&lt;/strong&gt; Call authorities for persistent violations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Documentation:&lt;/strong&gt; Record all incidents and actions taken&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Traffic and Transportation Offenses&lt;/h3&gt;
+                &lt;p&gt;Security personnel at parking facilities and access points encounter traffic violations:&lt;/p&gt;
+
+                &lt;h4&gt;Traffic Offenses (Federal Traffic Law)&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Parking Violations&lt;/dt&gt;
+                    &lt;dd&gt;Unauthorized parking - fines AED 500-1,000&lt;/dd&gt;
+                    &lt;dt&gt;Unauthorized Entry&lt;/dt&gt;
+                    &lt;dd&gt;Driving into restricted areas - fines AED 1,000-5,000&lt;/dd&gt;
+                    &lt;dt&gt;Security Breaches&lt;/dt&gt;
+                    &lt;dd&gt;Ignoring security barriers - fines AED 2,000-10,000&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Security Enforcement&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Barrier Control:&lt;/strong&gt; Operate security barriers and gates&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Vehicle Inspection:&lt;/strong&gt; Check permits and authorizations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Violation Documentation:&lt;/strong&gt; Record license plates and violations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Towing Authorization:&lt;/strong&gt; Arrange vehicle removal for serious violations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Police Coordination:&lt;/strong&gt; Report major traffic offenses to authorities&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Cyber and Technology Crimes&lt;/h3&gt;
+                &lt;p&gt;Modern security includes protection against digital offenses:&lt;/p&gt;
+
+                &lt;h4&gt;Cyber Offenses (Federal Decree Law 34/2021)&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Unauthorized Access:&lt;/strong&gt; Hacking computer systems - up to 2 years imprisonment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Data Theft:&lt;/strong&gt; Stealing confidential information - up to 5 years imprisonment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;System Damage:&lt;/strong&gt; Causing computer system harm - up to 10 years imprisonment&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Security Technology Protection&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;System Monitoring:&lt;/strong&gt; Watch for unauthorized access attempts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Control:&lt;/strong&gt; Protect computer systems and networks&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Incident Detection:&lt;/strong&gt; Identify suspicious digital activities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Evidence Preservation:&lt;/strong&gt; Maintain digital records for investigations&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Reporting Obligations&lt;/h3&gt;
+                &lt;p&gt;Security guards have specific legal duties to report criminal activities:&lt;/p&gt;
+
+                &lt;h4&gt;Mandatory Reporting&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;All Criminal Offenses:&lt;/strong&gt; Must report any witnessed crimes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Suspicious Activities:&lt;/strong&gt; Report potentially criminal behavior&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Situations:&lt;/strong&gt; Immediate notification for threats to safety&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Evidence Discovery:&lt;/strong&gt; Report found stolen property or contraband&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Reporting Procedures&lt;/h4&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Immediate Action:&lt;/strong&gt; Ensure safety and scene security&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Supervisor Notification:&lt;/strong&gt; Inform immediate supervisor&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Police Contact:&lt;/strong&gt; Call Dubai Police emergency (999)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Complete Information:&lt;/strong&gt; Provide detailed, accurate reports&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Documentation:&lt;/strong&gt; Maintain records of all communications&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;p&gt;&lt;strong&gt;Critical Legal Duty:&lt;/strong&gt; Failure to report known criminal activities can result in legal penalties for security personnel, including charges of being an accessory to crime.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_uae_penal_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_uae_penal_code"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <record id="quiz_uae_penal_m2_q1" model="slide.question">
+            <field name="question">What is the penalty for simple theft in the UAE?</field>
+            <field name="slide_id" ref="slide_uae_penal_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_uae_penal_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_penal_m2_q1"/>
+            <field name="text_value">Up to 1 year imprisonment</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_penal_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_penal_m2_q1"/>
+            <field name="text_value">Death penalty</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_uae_penal_m2_q2" model="slide.question">
+            <field name="question">Must security guards report all criminal offenses they witness?</field>
+            <field name="slide_id" ref="slide_uae_penal_m2_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_uae_penal_m2_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_penal_m2_q2"/>
+            <field name="text_value">Yes, it's a legal requirement</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_penal_m2_q2_a2" model="slide.answer">
+            <field name="question_id" ref="slide_uae_penal_m2_quiz"/>
+            <field name="text_value">No, only if instructed by supervisor</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Final Assessment -->
+        <record id="slide_uae_penal_final" model="slide.slide">
+            <field name="name">Final Assessment: UAE Penal Code &amp; Security Responsibilities</field>
+            <field name="channel_id" ref="elearning_course_uae_penal_code"/>
+            <field name="sequence">70</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.17</field>
+            <field name="html_content">
+                &lt;h2&gt;Final Examination: UAE Penal Code &amp; Security Responsibilities&lt;/h2&gt;
+                &lt;p&gt;&lt;strong&gt;Assessment Overview:&lt;/strong&gt;&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;40 multiple-choice questions&lt;/li&gt;
+                    &lt;li&gt;Covers security authority, criminal offenses, and legal responsibilities&lt;/li&gt;
+                    &lt;li&gt;90% passing score required&lt;/li&gt;
+                    &lt;li&gt;90 minutes time limit&lt;/li&gt;
+                    &lt;li&gt;Can retake once if needed&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;p&gt;&lt;strong&gt;Key Topics Covered:&lt;/strong&gt;&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Security guard authority and legal limitations&lt;/li&gt;
+                    &lt;li&gt;Use of force and detention procedures&lt;/li&gt;
+                    &lt;li&gt;Criminal offenses and security response protocols&lt;/li&gt;
+                    &lt;li&gt;Evidence handling and police coordination&lt;/li&gt;
+                    &lt;li&gt;Legal consequences of authority violations&lt;/li&gt;
+                    &lt;li&gt;Professional conduct and ethical standards&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;p&gt;Upon passing, you'll receive your UAE Penal Code &amp; Security Responsibilities certification, demonstrating your comprehensive understanding of legal boundaries and criminal law responsibilities!&lt;/p&gt;
+            </field>
+        </record>
+
+    </data>
+</odoo>

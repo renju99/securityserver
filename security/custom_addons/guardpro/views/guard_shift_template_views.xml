@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Guard Shift Template List View -->
+    <record id="view_guard_shift_template_list" model="ir.ui.view">
+        <field name="name">guard.shift.template.list</field>
+        <field name="model">guard.shift.template</field>
+        <field name="arch" type="xml">
+            <list string="Shift Templates">
+                <field name="name"/>
+                <field name="site_id"/>
+                <field name="shift_type"/>
+                <field name="start_time" widget="float_time"/>
+                <field name="duration_hours" widget="float_time"/>
+                <field name="required_guards"/>
+                <field name="generated_shift_count"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Guard Shift Template Form View -->
+    <record id="view_guard_shift_template_form" model="ir.ui.view">
+        <field name="name">guard.shift.template.form</field>
+        <field name="model">guard.shift.template</field>
+        <field name="arch" type="xml">
+            <form string="Shift Template">
+                <header>
+                    <button name="action_generate_shifts" string="Generate Shifts" 
+                            type="object" class="btn-primary"/>
+                    <button name="action_view_generated_shifts" string="View Generated Shifts" 
+                            type="object" invisible="generated_shift_count == 0"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_generated_shifts" type="object" 
+                                class="oe_stat_button" icon="fa-calendar"
+                                invisible="generated_shift_count == 0">
+                            <field name="generated_shift_count" widget="statinfo" string="Shifts"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" 
+                            invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g., Morning Security - Dubai Marina"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Basic Information">
+                            <field name="site_id"/>
+                            <field name="shift_type"/>
+                            <field name="required_guards"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                        <group string="Timing">
+                            <field name="start_time" widget="float_time"/>
+                            <field name="duration_hours" widget="float_time"/>
+                        </group>
+                    </group>
+                    <group string="Recurrence Pattern">
+                        <group>
+                            <label for="monday" string="Days of Week"/>
+                            <div>
+                                <field name="monday" widget="boolean_toggle"/> Monday
+                                <field name="tuesday" widget="boolean_toggle"/> Tuesday
+                                <field name="wednesday" widget="boolean_toggle"/> Wednesday
+                                <field name="thursday" widget="boolean_toggle"/> Thursday
+                            </div>
+                        </group>
+                        <group>
+                            <label for="friday" string=""/>
+                            <div>
+                                <field name="friday" widget="boolean_toggle"/> Friday
+                                <field name="saturday" widget="boolean_toggle"/> Saturday
+                                <field name="sunday" widget="boolean_toggle"/> Sunday
+                            </div>
+                        </group>
+                    </group>
+                    <group string="Auto-Generation Settings">
+                        <field name="auto_generate_days_ahead"/>
+                        <field name="last_generation_date" readonly="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Assignment">
+                            <group>
+                                <field name="preferred_employee_ids" widget="many2many_tags" 
+                                       options="{'no_create': True}"/>
+                                <field name="tour_ids" widget="many2many_tags"/>
+                            </group>
+                        </page>
+                        <page string="Instructions">
+                            <group>
+                                <field name="special_requirements" nolabel="1" 
+                                       placeholder="Special requirements or equipment..."/>
+                            </group>
+                            <field name="instructions" nolabel="1" 
+                                   placeholder="Detailed shift instructions..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Guard Shift Template Search View -->
+    <record id="view_guard_shift_template_search" model="ir.ui.view">
+        <field name="name">guard.shift.template.search</field>
+        <field name="model">guard.shift.template</field>
+        <field name="arch" type="xml">
+            <search string="Shift Templates">
+                <field name="name"/>
+                <field name="site_id"/>
+                <separator/>
+                <filter name="active" string="Active" domain="[('active', '=', True)]"/>
+                <filter name="inactive" string="Inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_site" string="Site" context="{'group_by': 'site_id'}"/>
+                    <filter name="group_shift_type" string="Shift Type" context="{'group_by': 'shift_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action for Guard Shift Templates -->
+    <record id="action_guard_shift_template" model="ir.actions.act_window">
+        <field name="name">Shift Templates</field>
+        <field name="res_model">guard.shift.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_guard_shift_template_search"/>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first shift template
+            </p>
+            <p>
+                Templates allow you to automatically generate recurring shifts.
+                Set up your weekly patterns and let the system create shifts for you.
+            </p>
+        </field>
+    </record>
+
+</odoo>
+

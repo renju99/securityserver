@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Demo Buildings -->
+        <record id="demo_building_main" model="site.building">
+            <field name="name">Main Building</field>
+            <field name="code">BLD-0001</field>
+            <field name="site_id" ref="guardpro.demo_site_1"/>
+            <field name="building_type">office</field>
+            <field name="total_floors">5</field>
+            <field name="basement_floors">1</field>
+            <field name="ground_floors">1</field>
+            <field name="description">Main office building with 5 floors</field>
+            <field name="status">active</field>
+        </record>
+
+        <record id="demo_building_annex" model="site.building">
+            <field name="name">Annex Building</field>
+            <field name="code">BLD-0002</field>
+            <field name="site_id" ref="guardpro.demo_site_1"/>
+            <field name="building_type">industrial</field>
+            <field name="total_floors">2</field>
+            <field name="ground_floors">2</field>
+            <field name="description">Annex building for storage and maintenance</field>
+            <field name="status">active</field>
+        </record>
+
+        <!-- Demo Floors for Main Building -->
+        <record id="demo_floor_b1" model="building.floor">
+            <field name="name">Basement Level 1</field>
+            <field name="code">FLR-0001</field>
+            <field name="building_id" ref="demo_building_main"/>
+            <field name="floor_number">-1</field>
+            <field name="description">Basement level with utilities and storage</field>
+            <field name="status">active</field>
+        </record>
+
+        <record id="demo_floor_g" model="building.floor">
+            <field name="name">Ground Floor</field>
+            <field name="code">FLR-0002</field>
+            <field name="building_id" ref="demo_building_main"/>
+            <field name="floor_number">0</field>
+            <field name="description">Ground floor with reception and main entrance</field>
+            <field name="status">active</field>
+        </record>
+
+        <record id="demo_floor_1" model="building.floor">
+            <field name="name">Floor 1</field>
+            <field name="code">FLR-0003</field>
+            <field name="building_id" ref="demo_building_main"/>
+            <field name="floor_number">1</field>
+            <field name="description">First floor with administrative offices</field>
+            <field name="status">active</field>
+        </record>
+
+        <record id="demo_floor_2" model="building.floor">
+            <field name="name">Floor 2</field>
+            <field name="code">FLR-0004</field>
+            <field name="building_id" ref="demo_building_main"/>
+            <field name="floor_number">2</field>
+            <field name="description">Second floor with executive offices</field>
+            <field name="status">active</field>
+        </record>
+
+        <!-- Demo Areas for Ground Floor -->
+        <record id="demo_area_lobby" model="floor.area">
+            <field name="name">Main Lobby</field>
+            <field name="code">AREA-0001</field>
+            <field name="floor_id" ref="demo_floor_g"/>
+            <field name="area_type">lobby</field>
+            <field name="area_size">150.0</field>
+            <field name="access_level">public</field>
+            <field name="description">Main entrance lobby</field>
+            <field name="status">active</field>
+        </record>
+
+        <record id="demo_area_reception" model="floor.area">
+            <field name="name">Reception Desk</field>
+            <field name="code">AREA-0002</field>
+            <field name="floor_id" ref="demo_floor_g"/>
+            <field name="area_type">office</field>
+            <field name="area_size">25.0</field>
+            <field name="access_level">restricted</field>
+            <field name="description">Reception and security desk area</field>
+            <field name="status">active</field>
+        </record>
+
+        <record id="demo_area_conference" model="floor.area">
+            <field name="name">Conference Room A</field>
+            <field name="code">AREA-0003</field>
+            <field name="floor_id" ref="demo_floor_g"/>
+            <field name="area_type">conference_room</field>
+            <field name="area_size">45.0</field>
+            <field name="access_level">restricted</field>
+            <field name="description">Main conference room</field>
+            <field name="status">active</field>
+        </record>
+
+        <!-- Demo Areas for Floor 1 -->
+        <record id="demo_area_hr_office" model="floor.area">
+            <field name="name">HR Office</field>
+            <field name="code">AREA-0004</field>
+            <field name="floor_id" ref="demo_floor_1"/>
+            <field name="area_type">office</field>
+            <field name="area_size">30.0</field>
+            <field name="access_level">restricted</field>
+            <field name="description">Human Resources department office</field>
+            <field name="status">active</field>
+        </record>
+
+        <record id="demo_area_server_room" model="floor.area">
+            <field name="name">Server Room</field>
+            <field name="code">AREA-0005</field>
+            <field name="floor_id" ref="demo_floor_1"/>
+            <field name="area_type">server_room</field>
+            <field name="area_size">20.0</field>
+            <field name="access_level">high_security</field>
+            <field name="description">IT server room with climate control</field>
+            <field name="status">active</field>
+        </record>
+
+    </data>
+</odoo>
+
+
+
+

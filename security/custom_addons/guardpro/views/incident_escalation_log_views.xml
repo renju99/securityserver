@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Incident Escalation Log List View -->
+    <record id="view_incident_escalation_log_list" model="ir.ui.view">
+        <field name="name">incident.escalation.log.list</field>
+        <field name="model">incident.escalation.log</field>
+        <field name="arch" type="xml">
+            <list string="Incident Escalations" sample="1" decoration-danger="is_critical" decoration-success="status=='resolved'">
+                <field name="escalation_datetime"/>
+                <field name="incident_name"/>
+                <field name="incident_severity" widget="badge" decoration-danger="incident_severity=='critical'" decoration-warning="incident_severity=='high'"/>
+                <field name="site_id"/>
+                <field name="escalation_type"/>
+                <field name="escalation_level"/>
+                <field name="time_since_incident" widget="float_time"/>
+                <field name="escalated_to_user_ids" widget="many2many_tags"/>
+                <field name="status" widget="badge" 
+                       decoration-success="status=='resolved'" 
+                       decoration-warning="status=='acknowledged'"
+                       decoration-danger="status=='open'"/>
+                <field name="response_time_minutes" widget="float_time" optional="hide"/>
+                <field name="is_critical" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Incident Escalation Log Form View -->
+    <record id="view_incident_escalation_log_form" model="ir.ui.view">
+        <field name="name">incident.escalation.log.form</field>
+        <field name="model">incident.escalation.log</field>
+        <field name="arch" type="xml">
+            <form string="Incident Escalation">
+                <header>
+                    <button name="action_acknowledge" string="Acknowledge" type="object" 
+                            invisible="status != 'open'" class="btn-warning"/>
+                    <button name="action_resolve" string="Resolve" type="object" 
+                            invisible="status not in ['open', 'acknowledged']" class="btn-success"/>
+                    <button name="action_cancel" string="Cancel" type="object" 
+                            invisible="status not in ['open', 'acknowledged']" class="btn-secondary"/>
+                    <field name="status" widget="statusbar" statusbar_visible="open,acknowledged,resolved"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(action_incident_report)d" type="action" class="oe_stat_button" icon="fa-file-text"
+                                context="{'search_default_id': incident_id}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">View</span>
+                                <span class="o_stat_text">Incident</span>
+                            </div>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Critical" bg_color="text-bg-danger" invisible="not is_critical"/>
+                    <widget name="web_ribbon" title="Resolved" bg_color="text-bg-success" invisible="status != 'resolved'"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="display_name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Incident Information">
+                            <field name="incident_id" readonly="1"/>
+                            <field name="incident_name" readonly="1"/>
+                            <field name="incident_severity" widget="badge" readonly="1"/>
+                            <field name="site_id" readonly="1"/>
+                        </group>
+                        <group string="Escalation Details">
+                            <field name="escalation_type" readonly="1"/>
+                            <field name="escalation_level" readonly="1"/>
+                            <field name="escalation_datetime" readonly="1"/>
+                            <field name="escalated_by_user_id" readonly="1"/>
+                            <field name="is_critical" invisible="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="SLA Information">
+                            <field name="sla_policy_id" readonly="1"/>
+                            <field name="sla_target_time" readonly="1"/>
+                            <field name="time_since_incident" widget="float_time" readonly="1"/>
+                            <field name="sla_breach_time" readonly="1" invisible="sla_breach_time == 0"/>
+                        </group>
+                        <group string="Escalated To">
+                            <field name="escalated_to_user_ids" widget="many2many_tags" nolabel="1" readonly="1"/>
+                            <field name="notification_sent" readonly="1"/>
+                            <field name="notification_sent_datetime" readonly="1" invisible="not notification_sent"/>
+                        </group>
+                    </group>
+                    <group string="Escalation Reason">
+                        <field name="escalation_reason" nolabel="1" readonly="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Response" name="response" invisible="status == 'open'">
+                            <group>
+                                <group string="Acknowledgment">
+                                    <field name="acknowledged_by_user_id" readonly="1"/>
+                                    <field name="acknowledged_datetime" readonly="1"/>
+                                </group>
+                                <group string="Resolution" invisible="status != 'resolved'">
+                                    <field name="resolved_by_user_id" readonly="1"/>
+                                    <field name="resolved_datetime" readonly="1"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Performance Metrics">
+                                    <field name="response_time_minutes" widget="float_time" readonly="1"/>
+                                    <field name="resolution_time_minutes" widget="float_time" readonly="1" invisible="status != 'resolved'"/>
+                                </group>
+                            </group>
+                            <group string="Action Taken">
+                                <field name="action_taken" nolabel="1" placeholder="Describe actions taken to address this escalation..."/>
+                            </group>
+                        </page>
+                        <page string="Additional Notes" name="notes">
+                            <field name="notes" nolabel="1" placeholder="Additional notes or comments..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Incident Escalation Log Kanban View -->
+    <record id="view_incident_escalation_log_kanban" model="ir.ui.view">
+        <field name="name">incident.escalation.log.kanban</field>
+        <field name="model">incident.escalation.log</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1" default_group_by="status">
+                <field name="color"/>
+                <field name="is_critical"/>
+                <field name="incident_severity"/>
+                <field name="escalation_type"/>
+                <field name="escalation_level"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_global_click">
+                            <div class="o_kanban_record_top mb16">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="incident_name"/>
+                                    </strong>
+                                    <div class="o_kanban_record_subtitle">
+                                        <field name="site_id"/>
+                                    </div>
+                                </div>
+                                <span t-if="record.is_critical.raw_value" class="badge rounded-pill text-bg-danger">CRITICAL</span>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <strong>Type:</strong> <field name="escalation_type"/>
+                                    </div>
+                                    <div class="col-6">
+                                        <strong>Level:</strong> <field name="escalation_level"/>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-12">
+                                        <field name="escalation_reason" widget="text"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left">
+                                    <field name="escalation_datetime" widget="date"/>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <field name="escalated_to_user_ids" widget="many2many_avatar_user"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Incident Escalation Log Search View -->
+    <record id="view_incident_escalation_log_search" model="ir.ui.view">
+        <field name="name">incident.escalation.log.search</field>
+        <field name="model">incident.escalation.log</field>
+        <field name="arch" type="xml">
+            <search string="Incident Escalations">
+                <field name="incident_name"/>
+                <field name="incident_id"/>
+                <field name="site_id"/>
+                <field name="escalated_to_user_ids"/>
+                <filter string="Open" name="open" domain="[('status', '=', 'open')]"/>
+                <filter string="Acknowledged" name="acknowledged" domain="[('status', '=', 'acknowledged')]"/>
+                <filter string="Resolved" name="resolved" domain="[('status', '=', 'resolved')]"/>
+                <separator/>
+                <filter string="Critical" name="critical" domain="[('is_critical', '=', True)]"/>
+                <separator/>
+                <filter string="SLA Breach" name="sla_breach" domain="[('escalation_type', '=', 'response_sla_breach')]"/>
+                <filter string="Warning Threshold" name="warning" domain="[('escalation_type', '=', 'warning_threshold')]"/>
+                <filter string="Critical Threshold" name="critical_threshold" domain="[('escalation_type', '=', 'critical_threshold')]"/>
+                <separator/>
+                <filter string="Today" name="today" domain="[('escalation_datetime', '&gt;=', datetime.datetime.now().replace(hour=0, minute=0, second=0)), ('escalation_datetime', '&lt;=', datetime.datetime.now().replace(hour=23, minute=59, second=59))]"/>
+                <filter string="This Week" name="this_week" domain="[('escalation_datetime', '&gt;=', datetime.datetime.combine(context_today() - relativedelta(weeks=1), datetime.time(0,0,0)))]"/>
+                <filter string="This Month" name="this_month"
+                        domain="[('escalation_datetime', '&gt;=', datetime.datetime.combine(context_today() + relativedelta(day=1), datetime.time(0,0,0)))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
+                    <filter string="Escalation Type" name="group_type" context="{'group_by': 'escalation_type'}"/>
+                    <filter string="Escalation Level" name="group_level" context="{'group_by': 'escalation_level'}"/>
+                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Incident Severity" name="group_severity" context="{'group_by': 'incident_severity'}"/>
+                    <filter string="Escalation Date" name="group_date" context="{'group_by': 'escalation_datetime'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Incident Escalation Log Pivot View -->
+    <record id="view_incident_escalation_log_pivot" model="ir.ui.view">
+        <field name="name">incident.escalation.log.pivot</field>
+        <field name="model">incident.escalation.log</field>
+        <field name="arch" type="xml">
+            <pivot string="Escalation Analysis" sample="1">
+                <field name="site_id" type="row"/>
+                <field name="escalation_type" type="col"/>
+                <field name="time_since_incident" type="measure"/>
+                <field name="response_time_minutes" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Incident Escalation Log Graph View -->
+    <record id="view_incident_escalation_log_graph" model="ir.ui.view">
+        <field name="name">incident.escalation.log.graph</field>
+        <field name="model">incident.escalation.log</field>
+        <field name="arch" type="xml">
+            <graph string="Escalation Trends" sample="1">
+                <field name="escalation_datetime" interval="day"/>
+                <field name="escalation_level" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Incident Escalation Log Action -->
+    <record id="action_incident_escalation_log" model="ir.actions.act_window">
+        <field name="name">Incident Escalations</field>
+        <field name="res_model">incident.escalation.log</field>
+        <field name="view_mode">list,kanban,form,pivot,graph</field>
+        <field name="context">{'search_default_open': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No escalations found
+            </p>
+            <p>
+                Escalations are automatically created when incidents breach their SLA targets
+                or reach warning/critical thresholds. You can also manually escalate incidents.
+            </p>
+        </field>
+    </record>
+
+</odoo>
+

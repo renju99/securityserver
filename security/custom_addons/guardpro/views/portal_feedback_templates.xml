@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- ========================================== -->
+    <!-- Portal Feedback List                       -->
+    <!-- ========================================== -->
+    
+    <template id="portal_my_feedback" name="My Feedback">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">My Feedback</t>
+            </t>
+            
+            <div class="container mt-3">
+                <div class="mb-3">
+                    <a href="/my/feedback/new" class="btn btn-primary">
+                        <i class="fa fa-plus"/> Submit New Feedback
+                    </a>
+                </div>
+                
+                <t t-if="not feedbacks">
+                    <div class="alert alert-info">
+                        You haven't submitted any feedback yet.
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="row">
+                        <t t-foreach="feedbacks" t-as="feedback">
+                            <div class="col-md-12 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <h5>
+                                                    <a t-attf-href="/my/feedback/#{feedback.id}">
+                                                        Feedback for <t t-esc="feedback.guard_id.name"/>
+                                                    </a>
+                                                </h5>
+                                                <p class="text-muted mb-1">
+                                                    <i class="fa fa-calendar"/> <t t-esc="feedback.feedback_date"/>
+                                                    <span class="ml-3">
+                                                        <i class="fa fa-map-marker"/> <t t-esc="feedback.site_id.name"/>
+                                                    </span>
+                                                </p>
+                                                <p class="mb-0">
+                                                    <t t-esc="feedback.comments[:150]"/>...
+                                                </p>
+                                            </div>
+                                            <div class="col-md-4 text-right">
+                                                <!-- Rating Stars -->
+                                                <div class="rating mb-2">
+                                                    <t t-set="rating" t-value="int(feedback.overall_rating)"/>
+                                                    <t t-foreach="range(1, 6)" t-as="star">
+                                                        <i t-attf-class="fa fa-star#{'-o' if star > rating else ''} text-warning"/>
+                                                    </t>
+                                                </div>
+                                                
+                                                <!-- Feedback Type Badge -->
+                                                <t t-set="type_class" t-value="'success' if feedback.feedback_type == 'compliment' else 'danger' if feedback.feedback_type == 'complaint' else 'info'"/>
+                                                <span t-attf-class="badge badge-#{type_class}">
+                                                    <t t-esc="feedback.feedback_type.title()"/>
+                                                </span>
+                                                <br/>
+                                                
+                                                <!-- Status Badge -->
+                                                <span class="badge badge-secondary mt-2">
+                                                    <t t-esc="feedback.status.replace('_', ' ').title()"/>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                    
+                    <!-- Pager -->
+                    <div t-if="pager" class="mt-3">
+                        <t t-call="portal.pager"/>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+    
+    <!-- ========================================== -->
+    <!-- Portal Feedback Form (New/Edit)            -->
+    <!-- ========================================== -->
+    
+    <template id="portal_feedback_form" name="Submit Feedback">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            
+            <div class="container mt-3">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">Submit Guard Feedback</h3>
+                    </div>
+                    <div class="card-body">
+                        <form action="/my/feedback/submit" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <input type="hidden" name="site_id" t-att-value="site.id"/>
+                            
+                            <!-- Guard Selection -->
+                            <div class="form-group">
+                                <label for="guard_id" class="required">Select Guard</label>
+                                <select name="guard_id" id="guard_id" class="form-control" required="required">
+                                    <option value="">-- Select Guard --</option>
+                                    <t t-foreach="guards" t-as="guard">
+                                        <option t-att-value="guard.id">
+                                            <t t-esc="guard.name"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+                            
+                            <!-- Shift Selection (Optional) -->
+                            <div class="form-group">
+                                <label for="shift_id">Related Shift (Optional)</label>
+                                <select name="shift_id" id="shift_id" class="form-control">
+                                    <option value="">-- Select Shift (if applicable) --</option>
+                                    <t t-foreach="shifts" t-as="shift">
+                                        <option t-att-value="shift.id">
+                                            <t t-esc="shift.name"/> - <t t-esc="shift.start_datetime"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+                            
+                            <!-- Feedback Type -->
+                            <div class="form-group">
+                                <label for="feedback_type" class="required">Feedback Type</label>
+                                <select name="feedback_type" id="feedback_type" class="form-control" required="required">
+                                    <option value="general">General Feedback</option>
+                                    <option value="compliment">Compliment</option>
+                                    <option value="suggestion">Suggestion</option>
+                                    <option value="complaint">Complaint</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Overall Rating -->
+                            <div class="form-group">
+                                <label for="overall_rating" class="required">Overall Rating</label>
+                                <div class="rating-input">
+                                    <select name="overall_rating" id="overall_rating" class="form-control" required="required">
+                                        <option value="">-- Select Rating --</option>
+                                        <option value="5">5 - Excellent</option>
+                                        <option value="4">4 - Good</option>
+                                        <option value="3">3 - Average</option>
+                                        <option value="2">2 - Below Average</option>
+                                        <option value="1">1 - Poor</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Detailed Ratings -->
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Detailed Ratings (Optional)</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 form-group">
+                                            <label for="professionalism_rating">Professionalism</label>
+                                            <select name="professionalism_rating" id="professionalism_rating" class="form-control">
+                                                <option value="">-- Select --</option>
+                                                <option value="5">5</option>
+                                                <option value="4">4</option>
+                                                <option value="3">3</option>
+                                                <option value="2">2</option>
+                                                <option value="1">1</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="col-md-6 form-group">
+                                            <label for="punctuality_rating">Punctuality</label>
+                                            <select name="punctuality_rating" id="punctuality_rating" class="form-control">
+                                                <option value="">-- Select --</option>
+                                                <option value="5">5</option>
+                                                <option value="4">4</option>
+                                                <option value="3">3</option>
+                                                <option value="2">2</option>
+                                                <option value="1">1</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="col-md-6 form-group">
+                                            <label for="communication_rating">Communication</label>
+                                            <select name="communication_rating" id="communication_rating" class="form-control">
+                                                <option value="">-- Select --</option>
+                                                <option value="5">5</option>
+                                                <option value="4">4</option>
+                                                <option value="3">3</option>
+                                                <option value="2">2</option>
+                                                <option value="1">1</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="col-md-6 form-group">
+                                            <label for="appearance_rating">Appearance</label>
+                                            <select name="appearance_rating" id="appearance_rating" class="form-control">
+                                                <option value="">-- Select --</option>
+                                                <option value="5">5</option>
+                                                <option value="4">4</option>
+                                                <option value="3">3</option>
+                                                <option value="2">2</option>
+                                                <option value="1">1</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Comments -->
+                            <div class="form-group">
+                                <label for="comments" class="required">Comments</label>
+                                <textarea name="comments" id="comments" class="form-control" rows="5" required="required" placeholder="Please provide detailed feedback..."/>
+                            </div>
+                            
+                            <!-- Preferences -->
+                            <div class="form-group">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="request_same_guard" name="request_same_guard" value="1"/>
+                                    <label class="custom-control-label" for="request_same_guard">
+                                        I would like this guard assigned to my site again
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="request_different_guard" name="request_different_guard" value="1"/>
+                                    <label class="custom-control-label" for="request_different_guard">
+                                        I prefer a different guard for future assignments
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Submit Buttons -->
+                            <div class="form-group mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fa fa-check"/> Submit Feedback
+                                </button>
+                                <a href="/my/feedback" class="btn btn-secondary btn-lg ml-2">
+                                    <i class="fa fa-times"/> Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    
+    <!-- ========================================== -->
+    <!-- Portal Feedback Detail                     -->
+    <!-- ========================================== -->
+    
+    <template id="portal_feedback_detail" name="Feedback Detail">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            
+            <div class="container mt-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Feedback Details</h3>
+                        <p class="mb-0 text-muted">
+                            Reference: <t t-esc="feedback.name"/>
+                        </p>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Guard:</strong><br/>
+                                <t t-esc="feedback.guard_id.name"/>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Date:</strong><br/>
+                                <t t-esc="feedback.feedback_date"/>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Site:</strong><br/>
+                                <t t-esc="feedback.site_id.name"/>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Type:</strong><br/>
+                                <t t-set="type_class" t-value="'success' if feedback.feedback_type == 'compliment' else 'danger' if feedback.feedback_type == 'complaint' else 'info'"/>
+                                <span t-attf-class="badge badge-#{type_class}">
+                                    <t t-esc="feedback.feedback_type.title()"/>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <hr/>
+                        
+                        <h5>Overall Rating</h5>
+                        <div class="rating mb-3">
+                            <t t-set="rating" t-value="int(feedback.overall_rating)"/>
+                            <t t-foreach="range(1, 6)" t-as="star">
+                                <i t-attf-class="fa fa-star#{'-o' if star > rating else ''} text-warning fa-2x"/>
+                            </t>
+                            <span class="ml-2 h4"><t t-esc="rating"/>/5</span>
+                        </div>
+                        
+                        <t t-if="feedback.professionalism_rating or feedback.punctuality_rating or feedback.communication_rating or feedback.appearance_rating">
+                            <hr/>
+                            <h5>Detailed Ratings</h5>
+                            <div class="row">
+                                <t t-if="feedback.professionalism_rating">
+                                    <div class="col-md-6 mb-2">
+                                        <strong>Professionalism:</strong> <t t-esc="feedback.professionalism_rating"/>/5
+                                    </div>
+                                </t>
+                                <t t-if="feedback.punctuality_rating">
+                                    <div class="col-md-6 mb-2">
+                                        <strong>Punctuality:</strong> <t t-esc="feedback.punctuality_rating"/>/5
+                                    </div>
+                                </t>
+                                <t t-if="feedback.communication_rating">
+                                    <div class="col-md-6 mb-2">
+                                        <strong>Communication:</strong> <t t-esc="feedback.communication_rating"/>/5
+                                    </div>
+                                </t>
+                                <t t-if="feedback.appearance_rating">
+                                    <div class="col-md-6 mb-2">
+                                        <strong>Appearance:</strong> <t t-esc="feedback.appearance_rating"/>/5
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+                        
+                        <hr/>
+                        
+                        <h5>Comments</h5>
+                        <p><t t-esc="feedback.comments"/></p>
+                        
+                        <t t-if="feedback.management_response">
+                            <hr/>
+                            <div class="alert alert-info">
+                                <h5><i class="fa fa-reply"/> Management Response</h5>
+                                <p class="mb-0"><t t-esc="feedback.management_response"/></p>
+                                <small class="text-muted">
+                                    <t t-esc="feedback.response_date"/> by <t t-esc="feedback.responded_by_id.name"/>
+                                </small>
+                            </div>
+                        </t>
+                        
+                        <div class="mt-4">
+                            <a href="/my/feedback" class="btn btn-secondary">
+                                <i class="fa fa-arrow-left"/> Back to Feedback List
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    
+</odoo>
+

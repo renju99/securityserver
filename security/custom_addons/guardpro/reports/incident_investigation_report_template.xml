@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Report Action Definition -->
+    <record id="action_incident_investigation_report" model="ir.actions.report">
+        <field name="name">Incident Investigation Report</field>
+        <field name="model">incident.investigation</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.report_incident_investigation_document</field>
+        <field name="report_file">guardpro.report_incident_investigation_document</field>
+        <field name="binding_model_id" ref="model_incident_investigation"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_us"/>
+    </record>
+    
+    <!-- Report Template -->
+    <template id="report_incident_investigation_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        
+                        <!-- Report Header -->
+                        <div class="row" style="border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 30px;">
+                            <div class="col-8">
+                                <h1 style="margin: 0; font-size: 28px; color: #d32f2f;">INCIDENT INVESTIGATION REPORT</h1>
+                                <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Comprehensive Investigation Documentation</p>
+                            </div>
+                            <div class="col-4 text-right">
+                                <p style="margin: 5px 0;"><strong>Investigation #:</strong> <t t-esc="o.name"/></p>
+                                <p style="margin: 5px 0;"><strong>Date:</strong> <t t-esc="format_date(o.start_date) if o.start_date else ''"/></p>
+                                <p style="margin: 5px 0;"><strong>Status:</strong> 
+                                    <span t-att-style="'color: %s; font-weight: bold;' % ('#4caf50' if o.status == 'completed' else '#ff9800')"
+                                          t-esc="dict(o._fields['status']._description_selection(o.env)).get(o.status, '') if o.status else ''"/>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Investigation Overview -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f; margin-top: 20px;">Investigation Overview</h2>
+                        <table class="table table-sm table-bordered" style="margin-bottom: 20px;">
+                            <tr>
+                                <th style="width: 30%; background-color: #f5f5f5;">Investigation Title</th>
+                                <td colspan="3"><strong><t t-esc="o.title or 'N/A'"/></strong></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Related Incident</th>
+                                <td><t t-esc="o.incident_name or 'N/A'"/></td>
+                                <th style="background-color: #f5f5f5;">Incident Severity</th>
+                                <td>
+                                    <span t-att-style="'color: %s; font-weight: bold;' % ('#d32f2f' if o.incident_severity == 'critical' else '#ff9800' if o.incident_severity == 'high' else '#666')"
+                                          t-esc="dict(o.incident_id._fields['severity']._description_selection(o.incident_id.env)).get(o.incident_severity, 'N/A') if o.incident_id and o.incident_severity else 'N/A'"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Site Location</th>
+                                <td><t t-esc="o.site_id.name if o.site_id else 'N/A'"/></td>
+                                <th style="background-color: #f5f5f5;">Investigation Type</th>
+                                <td><t t-esc="dict(o._fields['investigation_type']._description_selection(o.env)).get(o.investigation_type, 'N/A') if o.investigation_type else 'N/A'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Lead Investigator</th>
+                                <td><t t-esc="o.lead_investigator_id.name if o.lead_investigator_id else 'N/A'"/></td>
+                                <th style="background-color: #f5f5f5;">Investigation Team</th>
+                                <td>
+                                    <t t-if="o.investigator_ids">
+                                        <t t-foreach="o.investigator_ids" t-as="investigator">
+                                            <t t-esc="investigator.name"/><t t-if="not investigator_last">, </t>
+                                        </t>
+                                    </t>
+                                    <t t-else="">N/A</t>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <!-- Timeline -->
+                        <table class="table table-sm table-bordered" style="margin-bottom: 20px;">
+                            <tr>
+                                <th style="width: 30%; background-color: #f5f5f5;">Start Date</th>
+                                <td><t t-esc="format_datetime(o.start_date) if o.start_date else 'N/A'"/></td>
+                                <th style="background-color: #f5f5f5;">Target Completion</th>
+                                <td><t t-esc="format_date(o.target_completion_date) if o.target_completion_date else 'N/A'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Actual Completion</th>
+                                <td><t t-esc="format_date(o.actual_completion_date) if o.actual_completion_date else 'In Progress'"/></td>
+                                <th style="background-color: #f5f5f5;">Duration</th>
+                                <td>
+                                    <t t-if="o.actual_completion_date and o.start_date">
+                                        <t t-set="duration" t-value="(o.actual_completion_date - o.start_date.date()).days"/>
+                                        <t t-esc="duration"/> days
+                                    </t>
+                                    <t t-else="">Ongoing</t>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <!-- Investigation Scope -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f; margin-top: 30px;">Investigation Scope</h2>
+                        <div style="padding: 15px; background-color: #fafafa; border: 1px solid #ddd; margin-bottom: 20px;">
+                            <t t-if="o.description">
+                                <t t-raw="o.description"/>
+                            </t>
+                            <t t-else="">
+                                <p style="font-style: italic; color: #666;">No scope description provided.</p>
+                            </t>
+                        </div>
+                        
+                        <!-- Investigation Findings -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f;">Investigation Findings</h2>
+                        <t t-if="o.finding_ids">
+                            <table class="table table-sm table-bordered" style="margin-bottom: 20px;">
+                                <thead style="background-color: #f5f5f5;">
+                                    <tr>
+                                        <th style="width: 5%;">#</th>
+                                        <th style="width: 40%;">Finding Description</th>
+                                        <th style="width: 15%;">Category</th>
+                                        <th style="width: 15%;">Severity</th>
+                                        <th style="width: 25%;">Evidence</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="finding_index" t-value="0"/>
+                                    <t t-foreach="o.finding_ids" t-as="finding">
+                                        <t t-set="finding_index" t-value="finding_index + 1"/>
+                                        <tr>
+                                            <td><t t-esc="finding_index"/></td>
+                                            <td><strong><t t-esc="finding.title or ''"/></strong><br/>
+                                                <small><t t-if="finding.description" t-esc="finding.description[:150] if len(finding.description) > 150 else finding.description"/>...</small>
+                                            </td>
+                                            <td><t t-esc="dict(finding._fields['finding_type']._description_selection(finding.env)).get(finding.finding_type, 'N/A') if finding.finding_type else 'N/A'"/></td>
+                                            <td>
+                                                <span t-att-style="'color: %s; font-weight: bold;' % ('#d32f2f' if finding.severity == 'critical' else '#ff9800' if finding.severity == 'major' else '#666')"
+                                                      t-esc="dict(finding._fields['severity']._description_selection(finding.env)).get(finding.severity, 'N/A') if finding.severity else 'N/A'"/>
+                                            </td>
+                                            <td><t t-esc="'%d evidence item(s)' % len(finding.evidence_ids) if finding.evidence_ids else 'No evidence'"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+                        <t t-else="">
+                            <p style="font-style: italic; color: #666; padding: 20px; background-color: #fafafa;">No findings recorded yet.</p>
+                        </t>
+                        
+                        <!-- Witness Statements -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f; margin-top: 30px;">Witness Statements</h2>
+                        <t t-if="o.witness_ids">
+                            <t t-foreach="o.witness_ids" t-as="witness">
+                                <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; background-color: #fafafa;">
+                                    <h4 style="margin: 0 0 10px 0;"><t t-esc="witness.witness_name or 'Witness'"/></h4>
+                                    <table class="table table-sm" style="margin-bottom: 10px;">
+                                        <tr>
+                                            <th style="width: 25%;">Contact:</th>
+                                            <td><t t-esc="witness.contact_info or 'N/A'"/></td>
+                                            <th style="width: 25%;">Interview Date:</th>
+                                            <td><t t-esc="format_datetime(witness.interview_date) if witness.interview_date else 'N/A'"/></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Interviewed By:</th>
+                                            <td colspan="3"><t t-esc="witness.interviewer_id.name if witness.interviewer_id else 'N/A'"/></td>
+                                        </tr>
+                                    </table>
+                                    <div style="background-color: white; padding: 10px; border-left: 3px solid #2196f3;">
+                                        <strong>Statement:</strong><br/>
+                                        <t t-if="witness.statement">
+                                            <t t-raw="witness.statement"/>
+                                        </t>
+                                        <t t-else="">
+                                            <em>No statement recorded</em>
+                                        </t>
+                                    </div>
+                                </div>
+                            </t>
+                        </t>
+                        <t t-else="">
+                            <p style="font-style: italic; color: #666; padding: 20px; background-color: #fafafa;">No witness statements recorded.</p>
+                        </t>
+                        
+                        <!-- Evidence Catalog -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f;">Evidence Catalog</h2>
+                        <t t-if="o.evidence_ids">
+                            <table class="table table-sm table-bordered">
+                                <thead style="background-color: #f5f5f5;">
+                                    <tr>
+                                        <th style="width: 5%;">#</th>
+                                        <th style="width: 30%;">Evidence Item</th>
+                                        <th style="width: 20%;">Type</th>
+                                        <th style="width: 15%;">Collected By</th>
+                                        <th style="width: 15%;">Date Collected</th>
+                                        <th style="width: 15%;">Location</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="evidence_index" t-value="0"/>
+                                    <t t-foreach="o.evidence_ids" t-as="evidence">
+                                        <t t-set="evidence_index" t-value="evidence_index + 1"/>
+                                        <tr>
+                                            <td><t t-esc="evidence_index"/></td>
+                                            <td><strong><t t-esc="evidence.display_name or evidence.evidence_number or ('Evidence ' + str(evidence_index))"/></strong><br/>
+                                                <small><t t-esc="evidence.description[:100] if evidence.description and len(evidence.description) > 100 else (evidence.description or '')"/></small>
+                                            </td>
+                                            <td><t t-esc="dict(evidence._fields['evidence_type']._description_selection(evidence.env)).get(evidence.evidence_type, 'N/A') if evidence.evidence_type else 'N/A'"/></td>
+                                            <td><t t-esc="evidence.collected_by_id.name if evidence.collected_by_id else 'N/A'"/></td>
+                                            <td><t t-esc="format_datetime(evidence.collection_date) if evidence.collection_date else 'N/A'"/></td>
+                                            <td><t t-esc="evidence.collection_location or evidence.storage_location or 'N/A'"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+                        <t t-else="">
+                            <p style="font-style: italic; color: #666; padding: 20px; background-color: #fafafa;">No evidence items cataloged.</p>
+                        </t>
+                        
+                        <!-- Investigation Timeline -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f; margin-top: 30px;">Investigation Timeline</h2>
+                        <t t-if="o.timeline_ids">
+                            <div style="position: relative; padding-left: 40px;">
+                                <t t-foreach="o.timeline_ids" t-as="timeline">
+                                    <div style="border-left: 3px solid #2196f3; padding: 10px 20px; margin-bottom: 15px; position: relative;">
+                                        <div style="position: absolute; left: -8px; top: 15px; width: 12px; height: 12px; background-color: #2196f3; border-radius: 50%;"></div>
+                                        <p style="margin: 0; color: #2196f3; font-weight: bold;">
+                                            <t t-esc="format_datetime(timeline.timestamp) if timeline.timestamp else 'Date Unknown'"/>
+                                        </p>
+                                        <h4 style="margin: 5px 0;"><t t-esc="dict(timeline._fields['entry_type']._description_selection(timeline.env)).get(timeline.entry_type, 'Event') if timeline.entry_type else 'Event'"/></h4>
+                                        <p style="margin: 5px 0; color: #666;">
+                                            <t t-esc="timeline.description or ''"/>
+                                        </p>
+                                        <p style="margin: 5px 0; font-size: 12px; color: #999;">
+                                            By: <t t-esc="timeline.user_id.name if timeline.user_id else 'Unknown'"/>
+                                        </p>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <p style="font-style: italic; color: #666; padding: 20px; background-color: #fafafa;">No timeline events recorded.</p>
+                        </t>
+                        
+                        <!-- Root Cause Analysis -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f;">Root Cause Analysis</h2>
+                        <div style="padding: 15px; background-color: #fafafa; border: 1px solid #ddd; margin-bottom: 20px;">
+                            <t t-if="o.root_cause">
+                                <p style="white-space: pre-wrap;"><t t-esc="o.root_cause"/></p>
+                            </t>
+                            <t t-else="">
+                                <p style="font-style: italic; color: #666;">Root cause analysis not yet completed.</p>
+                            </t>
+                        </div>
+                        
+                        <!-- Recommendations -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f; margin-top: 30px;">Recommendations &amp; Corrective Actions</h2>
+                        <div style="padding: 15px; background-color: #fafafa; border: 1px solid #ddd; margin-bottom: 20px;">
+                            <t t-if="o.recommendations">
+                                <t t-raw="o.recommendations"/>
+                            </t>
+                            <t t-else="">
+                                <p style="font-style: italic; color: #666;">Recommendations pending completion of investigation.</p>
+                            </t>
+                        </div>
+                        
+                        <!-- Executive Summary / Conclusion -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f; margin-top: 30px;">Executive Summary</h2>
+                        <div style="padding: 15px; background-color: #fafafa; border: 1px solid #ddd; margin-bottom: 30px;">
+                            <t t-if="o.executive_summary">
+                                <t t-raw="o.executive_summary"/>
+                            </t>
+                            <t t-else="">
+                                <p style="font-style: italic; color: #666;">Executive summary to be provided upon completion.</p>
+                            </t>
+                        </div>
+                        
+                        <!-- Signatures -->
+                        <div class="row" style="margin-top: 60px; page-break-inside: avoid;">
+                            <div class="col-6">
+                                <div style="border-top: 2px solid #000; padding-top: 10px; margin-top: 50px;">
+                                    <p style="margin: 0;"><strong>Lead Investigator:</strong></p>
+                                    <p style="margin: 5px 0;"><t t-esc="o.lead_investigator_id.name if o.lead_investigator_id else ''"/></p>
+                                    <p style="margin: 5px 0;">Date: <t t-esc="format_date(o.actual_completion_date) if o.actual_completion_date else '__________'"/></p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div style="border-top: 2px solid #000; padding-top: 10px; margin-top: 50px;">
+                                    <p style="margin: 0;"><strong>Reviewed By:</strong></p>
+                                    <p style="margin: 5px 0;">_______________________________</p>
+                                    <p style="margin: 5px 0;">Date: __________</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Confidentiality Notice -->
+                        <div style="margin-top: 40px; margin-bottom: 20px; padding: 15px; background-color: #fff3e0; border-left: 4px solid #ff9800;">
+                            <p style="margin: 0; font-weight: bold; color: #ff6f00;">CONFIDENTIAL DOCUMENT</p>
+                            <p style="margin: 5px 0 0 0; font-size: 12px; color: #666;">
+                                This investigation report contains confidential and privileged information. Distribution is limited to authorized personnel only.
+                                Unauthorized disclosure may result in legal consequences.
+                            </p>
+                        </div>
+                        
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    
+</odoo>
+

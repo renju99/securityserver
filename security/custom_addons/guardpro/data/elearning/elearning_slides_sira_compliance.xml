@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- Module 1: Introduction to SIRA -->
+        <record id="slide_sira_m1_intro" model="slide.slide">
+            <field name="name">Module 1: Introduction to SIRA</field>
+            <field name="channel_id" ref="elearning_course_sira_compliance"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Security Industry Regulatory Agency (SIRA)&lt;/h2&gt;
+                &lt;p&gt;SIRA is the regulatory authority for the security industry in Dubai, established by Law No. 6 of 2019.&lt;/p&gt;
+                
+                &lt;h3&gt;SIRA's Mission:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Regulate and license security companies in Dubai&lt;/li&gt;
+                    &lt;li&gt;Set professional standards for security personnel&lt;/li&gt;
+                    &lt;li&gt;Ensure public safety and security&lt;/li&gt;
+                    &lt;li&gt;Promote excellence in the security industry&lt;/li&gt;
+                    &lt;li&gt;Protect consumer rights&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;SIRA Licensing Categories:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Security Guard:&lt;/strong&gt; Entry-level security personnel&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Security Supervisor:&lt;/strong&gt; Site and team supervision&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Security Manager:&lt;/strong&gt; Strategic security management&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Specialized Roles:&lt;/strong&gt; K9 handlers, close protection, etc.&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Licensing Requirements:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Complete SIRA-approved training program&lt;/li&gt;
+                    &lt;li&gt;Pass SIRA certification examination&lt;/li&gt;
+                    &lt;li&gt;Background check and security clearance&lt;/li&gt;
+                    &lt;li&gt;Medical fitness certificate&lt;/li&gt;
+                    &lt;li&gt;Valid UAE residence visa&lt;/li&gt;
+                    &lt;li&gt;Minimum age: 21 years&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;License Validity &amp; Renewal:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;SIRA license valid for 2 years&lt;/li&gt;
+                    &lt;li&gt;Must renew before expiration&lt;/li&gt;
+                    &lt;li&gt;Continuing education required for renewal&lt;/li&gt;
+                    &lt;li&gt;Renewal training: 16 hours minimum&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Penalties for Non-Compliance:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Working without valid SIRA license: Heavy fines&lt;/li&gt;
+                    &lt;li&gt;License suspension or revocation&lt;/li&gt;
+                    &lt;li&gt;Employment ban in security industry&lt;/li&gt;
+                    &lt;li&gt;Deportation for serious violations&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_sira_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_sira_compliance"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_sira_m1_q1" model="slide.question">
+            <field name="question">What is SIRA?</field>
+            <field name="slide_id" ref="slide_sira_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_sira_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_sira_m1_q1"/>
+            <field name="text_value">Security Industry Regulatory Agency - regulates security industry in Dubai</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_sira_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_sira_m1_q1"/>
+            <field name="text_value">A private security company</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_sira_m1_q2" model="slide.question">
+            <field name="question">How long is a SIRA security guard license valid?</field>
+            <field name="slide_id" ref="slide_sira_m1_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_sira_m1_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_sira_m1_q2"/>
+            <field name="text_value">2 years</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_sira_m1_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_sira_m1_q2"/>
+            <field name="text_value">5 years</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 2: UAE Federal Laws for Security Personnel -->
+        <record id="slide_sira_m2_laws" model="slide.slide">
+            <field name="name">Module 2: UAE Federal Laws for Security Personnel</field>
+            <field name="channel_id" ref="elearning_course_sira_compliance"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.6</field>
+            <field name="html_content">
+                &lt;h2&gt;UAE Legal Framework for Security Operations&lt;/h2&gt;
+                
+                &lt;h3&gt;Key Federal Laws:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Federal Law No. 3 of 1987:&lt;/strong&gt; UAE Penal Code&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Federal Law No. 5 of 2012:&lt;/strong&gt; Combating Cybercrimes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Federal Decree Law No. 31 of 2021:&lt;/strong&gt; Labor Relations Law&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Dubai Law No. 6 of 2019:&lt;/strong&gt; Security Industry Regulation&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Security Guard Powers in UAE:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Observe and Report:&lt;/strong&gt; Primary duty&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Control:&lt;/strong&gt; Control entry to private property&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Detention:&lt;/strong&gt; Only until police arrive (no arrest power)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Self-Defense:&lt;/strong&gt; Reasonable force only&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Search:&lt;/strong&gt; Only with consent or clear authorization&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Prohibited Actions:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Carrying weapons without proper authorization&lt;/li&gt;
+                    &lt;li&gt;Using excessive force&lt;/li&gt;
+                    &lt;li&gt;Impersonating police or government officials&lt;/li&gt;
+                    &lt;li&gt;Making arrests (this is police authority only)&lt;/li&gt;
+                    &lt;li&gt;Violating privacy laws&lt;/li&gt;
+                    &lt;li&gt;Discrimination based on nationality, religion, or race&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Use of Force Guidelines:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Minimum Force:&lt;/strong&gt; Use only necessary force&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Proportionate:&lt;/strong&gt; Match level of threat&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Reasonable:&lt;/strong&gt; What a reasonable person would do&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Document:&lt;/strong&gt; Report all use of force incidents&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Privacy and Data Protection:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Respect visitor and employee privacy&lt;/li&gt;
+                    &lt;li&gt;Handle personal data confidentially&lt;/li&gt;
+                    &lt;li&gt;CCTV must comply with Dubai regulations&lt;/li&gt;
+                    &lt;li&gt;Cannot share footage without authorization&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Workplace Rights &amp; Responsibilities:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Right to safe working conditions&lt;/li&gt;
+                    &lt;li&gt;Right to timely salary payment&lt;/li&gt;
+                    &lt;li&gt;Duty to follow lawful instructions&lt;/li&gt;
+                    &lt;li&gt;Duty to report violations&lt;/li&gt;
+                    &lt;li&gt;Maximum working hours: 8 hours/day, 48 hours/week&lt;/li&gt;
+                    &lt;li&gt;Annual leave: 30 days after one year service&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_sira_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_sira_compliance"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_sira_m2_q1" model="slide.question">
+            <field name="question">Can security guards in UAE make arrests?</field>
+            <field name="slide_id" ref="slide_sira_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_sira_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_sira_m2_q1"/>
+            <field name="text_value">No, only police have arrest authority. Guards can detain until police arrive.</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_sira_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_sira_m2_q1"/>
+            <field name="text_value">Yes, guards have full arrest powers</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 3: Professional Conduct Standards -->
+        <record id="slide_sira_m3_conduct" model="slide.slide">
+            <field name="name">Module 3: SIRA Professional Conduct Standards</field>
+            <field name="channel_id" ref="elearning_course_sira_compliance"/>
+            <field name="sequence">30</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Professional Standards for Security Personnel&lt;/h2&gt;
+                
+                &lt;h3&gt;SIRA Code of Conduct:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Integrity:&lt;/strong&gt; Act with honesty and honor&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Professionalism:&lt;/strong&gt; Maintain high standards&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Accountability:&lt;/strong&gt; Take responsibility for actions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Respect:&lt;/strong&gt; Treat all with dignity&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Competence:&lt;/strong&gt; Maintain skills and knowledge&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Uniform and Appearance Standards:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Wear SIRA-approved uniform at all times on duty&lt;/li&gt;
+                    &lt;li&gt;Display SIRA license card visibly&lt;/li&gt;
+                    &lt;li&gt;Maintain clean, pressed uniform&lt;/li&gt;
+                    &lt;li&gt;Professional grooming (neat hair, trimmed facial hair)&lt;/li&gt;
+                    &lt;li&gt;Proper footwear (black, polished shoes)&lt;/li&gt;
+                    &lt;li&gt;No unauthorized modifications to uniform&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Mandatory Equipment:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;SIRA license card&lt;/li&gt;
+                    &lt;li&gt;Company ID badge&lt;/li&gt;
+                    &lt;li&gt;Communication device (radio/phone)&lt;/li&gt;
+                    &lt;li&gt;Incident report forms or tablet&lt;/li&gt;
+                    &lt;li&gt;Flashlight (for night shifts)&lt;/li&gt;
+                    &lt;li&gt;First aid kit (as required)&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Prohibited Activities:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Sleeping or negligence while on duty&lt;/li&gt;
+                    &lt;li&gt;Using mobile phone for personal calls&lt;/li&gt;
+                    &lt;li&gt;Leaving post without authorization&lt;/li&gt;
+                    &lt;li&gt;Alcohol or drug use (zero tolerance)&lt;/li&gt;
+                    &lt;li&gt;Accepting bribes or gifts&lt;/li&gt;
+                    &lt;li&gt;Disclosing confidential information&lt;/li&gt;
+                    &lt;li&gt;Engaging in outside employment during shift&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Reporting Requirements:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Report all incidents immediately&lt;/li&gt;
+                    &lt;li&gt;Maintain accurate logs&lt;/li&gt;
+                    &lt;li&gt;Complete daily activity reports&lt;/li&gt;
+                    &lt;li&gt;Document visitor and vehicle movements&lt;/li&gt;
+                    &lt;li&gt;Report suspicious activities to police&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Continuing Professional Development:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Attend mandatory refresher training&lt;/li&gt;
+                    &lt;li&gt;Stay updated on SIRA regulations&lt;/li&gt;
+                    &lt;li&gt;Participate in company training programs&lt;/li&gt;
+                    &lt;li&gt;Maintain physical fitness&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_sira_m3_quiz" model="slide.slide">
+            <field name="name">Module 3: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_sira_compliance"/>
+            <field name="sequence">31</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_sira_m3_q1" model="slide.question">
+            <field name="question">What must security guards display visibly while on duty?</field>
+            <field name="slide_id" ref="slide_sira_m3_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_sira_m3_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_sira_m3_q1"/>
+            <field name="text_value">SIRA license card</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_sira_m3_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_sira_m3_q1"/>
+            <field name="text_value">Passport</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 4: Dubai Emergency Services -->
+        <record id="slide_sira_m4_emergency" model="slide.slide">
+            <field name="name">Module 4: Dubai Emergency Services &amp; Protocols</field>
+            <field name="channel_id" ref="elearning_course_sira_compliance"/>
+            <field name="sequence">40</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Emergency Response in Dubai&lt;/h2&gt;
+                
+                &lt;h3&gt;Dubai Emergency Numbers:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;999:&lt;/strong&gt; Dubai Police (Emergency)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;998:&lt;/strong&gt; Dubai Civil Defense (Fire)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;997:&lt;/strong&gt; Dubai Ambulance&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;991:&lt;/strong&gt; Dubai Electricity &amp; Water Emergency&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;901:&lt;/strong&gt; Non-Emergency Police&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;800-4663:&lt;/strong&gt; Dubai Municipality&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;When to Call Emergency Services:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Any crime in progress&lt;/li&gt;
+                    &lt;li&gt;Fire or smell of gas&lt;/li&gt;
+                    &lt;li&gt;Medical emergency&lt;/li&gt;
+                    &lt;li&gt;Traffic accident with injuries&lt;/li&gt;
+                    &lt;li&gt;Suspicious packages or items&lt;/li&gt;
+                    &lt;li&gt;Security threat or terrorism&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Information to Provide:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Location:&lt;/strong&gt; Exact address, landmarks, building name&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Nature:&lt;/strong&gt; Type of emergency&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Details:&lt;/strong&gt; Number of people involved, injuries&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Your Info:&lt;/strong&gt; Name, company, contact number&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Actions Taken:&lt;/strong&gt; What you've done so far&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Police Interaction Protocol:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Be respectful and cooperative&lt;/li&gt;
+                    &lt;li&gt;Provide factual information only&lt;/li&gt;
+                    &lt;li&gt;Show your SIRA license immediately&lt;/li&gt;
+                    &lt;li&gt;Follow all instructions&lt;/li&gt;
+                    &lt;li&gt;Do not interfere with investigations&lt;/li&gt;
+                    &lt;li&gt;Provide written reports as requested&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Evacuation Procedures:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Know all emergency exits&lt;/li&gt;
+                    &lt;li&gt;Assembly points locations&lt;/li&gt;
+                    &lt;li&gt;Evacuation routes&lt;/li&gt;
+                    &lt;li&gt;Assist people with disabilities&lt;/li&gt;
+                    &lt;li&gt;Account for all personnel&lt;/li&gt;
+                    &lt;li&gt;Do not re-enter until cleared by authorities&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Civil Defense Cooperation:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Maintain clear access routes&lt;/li&gt;
+                    &lt;li&gt;Know location of fire equipment&lt;/li&gt;
+                    &lt;li&gt;Provide building access&lt;/li&gt;
+                    &lt;li&gt;Share floor plans if requested&lt;/li&gt;
+                    &lt;li&gt;Keep crowd at safe distance&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_sira_m4_quiz" model="slide.slide">
+            <field name="name">Module 4: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_sira_compliance"/>
+            <field name="sequence">41</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_sira_m4_q1" model="slide.question">
+            <field name="question">What is the emergency number for Dubai Police?</field>
+            <field name="slide_id" ref="slide_sira_m4_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_sira_m4_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_sira_m4_q1"/>
+            <field name="text_value">999</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_sira_m4_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_sira_m4_q1"/>
+            <field name="text_value">911</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_sira_m4_q2" model="slide.question">
+            <field name="question">What is the emergency number for Dubai Civil Defense (Fire)?</field>
+            <field name="slide_id" ref="slide_sira_m4_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_sira_m4_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_sira_m4_q2"/>
+            <field name="text_value">998</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_sira_m4_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_sira_m4_q2"/>
+            <field name="text_value">997</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Final Assessment -->
+        <record id="slide_sira_final" model="slide.slide">
+            <field name="name">Final Assessment: SIRA Compliance</field>
+            <field name="channel_id" ref="elearning_course_sira_compliance"/>
+            <field name="sequence">50</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.3</field>
+        </record>
+
+        <record id="quiz_sira_final_q1" model="slide.question">
+            <field name="question">What is required to work as a security guard in Dubai?</field>
+            <field name="slide_id" ref="slide_sira_final"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_sira_final_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_sira_final_q1"/>
+            <field name="text_value">Valid SIRA license after completing approved training</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_sira_final_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_sira_final_q1"/>
+            <field name="text_value">Just a residence visa</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_sira_final_q2" model="slide.question">
+            <field name="question">Security guards in UAE have the authority to:</field>
+            <field name="slide_id" ref="slide_sira_final"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_sira_final_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_sira_final_q2"/>
+            <field name="text_value">Observe, report, control access, and detain suspects until police arrive</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_sira_final_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_sira_final_q2"/>
+            <field name="text_value">Make arrests and conduct searches freely</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_sira_final_q3" model="slide.question">
+            <field name="question">How often must SIRA licenses be renewed?</field>
+            <field name="slide_id" ref="slide_sira_final"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="quiz_sira_final_q3_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_sira_final_q3"/>
+            <field name="text_value">Every 2 years</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_sira_final_q3_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_sira_final_q3"/>
+            <field name="text_value">Every 5 years</field>
+            <field name="is_correct">False</field>
+        </record>
+
+    </data>
+</odoo>
+
+
+
+
+
+
+
+
+
+

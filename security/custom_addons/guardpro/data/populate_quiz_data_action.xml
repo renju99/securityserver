@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Server Action to Populate Quiz Question Data -->
+    <record id="action_populate_quiz_question_data" model="ir.actions.server">
+        <field name="name">Populate Quiz Question Data (Test)</field>
+        <field name="model_id" ref="website_slides.model_slide_slide_partner"/>
+        <field name="binding_model_id" ref="website_slides.model_slide_slide_partner"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code"><![CDATA[
+import random
+from odoo.exceptions import UserError
+
+# Process selected quiz attempts or all without details
+if records:
+    quiz_attempts = records.filtered(lambda r: r.slide_id.slide_category == 'quiz' and r.completed and not r.quiz_line_ids)
+else:
+    quiz_attempts = env['slide.slide.partner'].search([
+        ('slide_id.slide_category', '=', 'quiz'),
+        ('completed', '=', True),
+        ('quiz_line_ids', '=', False)
+    ], limit=50)
+
+populated_count = 0
+skipped_count = 0
+messages = []
+
+for attempt in quiz_attempts:
+    slide = attempt.slide_id
+    questions = slide.question_ids if hasattr(slide, 'question_ids') else []
+    
+    if not questions:
+        skipped_count += 1
+        continue
+    
+    quiz_lines = []
+    correct_count = 0
+    
+    for question in questions:
+        answer_records = (
+            getattr(question, 'answer_ids', None) or 
+            getattr(question, 'option_ids', None) or 
+            getattr(question, 'suggested_answer_ids', None) or 
+            []
+        )
+        
+        if not answer_records:
+            continue
+        
+        correct_answers = answer_records.filtered(lambda a: getattr(a, 'is_correct', False))
+        is_correct = random.random() < 0.8  # 80% pass rate
+        
+        if is_correct:
+            selected_answers = correct_answers[:1] if correct_answers else answer_records[:1]
+            correct_count += 1
+        else:
+            wrong_answers = answer_records - correct_answers
+            selected_answers = wrong_answers[:1] if wrong_answers else answer_records[:1]
+        
+        quiz_line_vals = {
+            'slide_partner_id': attempt.id,
+            'question_id': question.id,
+            'answer_ids': [(6, 0, selected_answers.ids)],
+            'is_correct': is_correct,
+            'score': 100.0 if is_correct else 0.0,
+        }
+        
+        quiz_lines.append((0, 0, quiz_line_vals))
+    
+    if quiz_lines:
+        attempt.write({'quiz_line_ids': quiz_lines})
+        score = (correct_count / len(questions) * 100) if questions else 0
+        messages.append(f"{slide.name}: {correct_count}/{len(questions)} ({score:.0f}%)")
+        populated_count += 1
+    else:
+        skipped_count += 1
+
+# Show notification
+if populated_count > 0:
+    message = f"✓ Populated {populated_count} quiz attempts with question-level data!\n\n" + "\n".join(messages[:10])
+    if len(messages) > 10:
+        message += f"\n\n...and {len(messages) - 10} more"
+else:
+    message = "No quiz attempts found that need population. All quizzes already have question-level data or have no questions."
+
+raise UserError(message)
+]]></field>
+    </record>
+
+    <!-- Menu item to run the action -->
+    <menuitem
+        id="menu_populate_quiz_data"
+        name="Populate Quiz Test Data"
+        parent="website_slides.website_slides_menu_courses"
+        action="action_populate_quiz_question_data"
+        sequence="100"
+        groups="guardpro.group_guardpro_admin"/>
+
+</odoo>

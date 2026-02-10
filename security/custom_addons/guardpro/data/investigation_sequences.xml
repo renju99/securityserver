@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Investigation Sequence -->
+        <record id="seq_incident_investigation" model="ir.sequence">
+            <field name="name">Incident Investigation</field>
+            <field name="code">incident.investigation</field>
+            <field name="prefix">INV-</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="implementation">standard</field>
+        </record>
+        
+        <!-- Evidence Sequence -->
+        <record id="seq_incident_investigation_evidence" model="ir.sequence">
+            <field name="name">Investigation Evidence</field>
+            <field name="code">incident.investigation.evidence</field>
+            <field name="prefix">EVD-</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="implementation">standard</field>
+        </record>
+        
+    </data>
+</odoo>
+

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Guard Skills -->
+        <record id="skill_armed" model="guard.skill">
+            <field name="name">Armed Security</field>
+            <field name="description">Licensed to carry firearms</field>
+            <field name="requires_certification" eval="True"/>
+        </record>
+
+        <record id="skill_first_aid" model="guard.skill">
+            <field name="name">First Aid/CPR</field>
+            <field name="description">Certified in first aid and CPR</field>
+            <field name="requires_certification" eval="True"/>
+        </record>
+
+        <record id="skill_k9" model="guard.skill">
+            <field name="name">K9 Handler</field>
+            <field name="description">Trained K9 handler</field>
+            <field name="requires_certification" eval="True"/>
+        </record>
+
+        <record id="skill_patrol" model="guard.skill">
+            <field name="name">Mobile Patrol</field>
+            <field name="description">Mobile patrol operations</field>
+            <field name="requires_certification" eval="False"/>
+        </record>
+
+        <record id="skill_crowd" model="guard.skill">
+            <field name="name">Crowd Control</field>
+            <field name="description">Crowd management and control</field>
+            <field name="requires_certification" eval="False"/>
+        </record>
+
+        <record id="skill_fire" model="guard.skill">
+            <field name="name">Fire Safety</field>
+            <field name="description">Fire safety and prevention</field>
+            <field name="requires_certification" eval="True"/>
+        </record>
+
+        <record id="skill_surveillance" model="guard.skill">
+            <field name="name">CCTV/Surveillance</field>
+            <field name="description">CCTV monitoring and surveillance</field>
+            <field name="requires_certification" eval="False"/>
+        </record>
+
+        <record id="skill_access" model="guard.skill">
+            <field name="name">Access Control</field>
+            <field name="description">Access control systems</field>
+            <field name="requires_certification" eval="False"/>
+        </record>
+
+        <!-- Sequences -->
+        <record id="seq_incident_report" model="ir.sequence">
+            <field name="name">Incident Report Sequence</field>
+            <field name="code">incident.report</field>
+            <field name="prefix">INC</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
+
+        <record id="seq_tour_log" model="ir.sequence">
+            <field name="name">Tour Log Sequence</field>
+            <field name="code">tour.log</field>
+            <field name="prefix">TOUR</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
+    </data>
+</odoo>
+
+

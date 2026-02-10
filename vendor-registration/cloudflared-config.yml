@@ -1,0 +1,13 @@
+tunnel: vendor-form-tunnel
+credentials-file: /etc/cloudflared/credentials.json
+
+ingress:
+  # Route vendor.berkeleyuae.com to the nginx container
+  - hostname: vendor.berkeleyuae.com
+    service: http://vendor-form-nginx:80
+  
+  # Catch-all rule (must be last)
+  - service: http_status:404
+
+
+

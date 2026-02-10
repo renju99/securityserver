@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Berkeley Services Custom Homepage with Sign-In -->
+    <template id="berkeley_homepage" name="Berkeley Services Homepage">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure oe_empty">
+                <!-- Custom CSS -->
+                <style>
+                    :root {
+                        --berkeley-primary: #2c3e50;
+                        --berkeley-secondary: #3498db;
+                        --berkeley-accent: #e74c3c;
+                        --text-primary: #2c3e50;
+                        --text-secondary: #7f8c8d;
+                        --bg-light: #ecf0f1;
+                    }
+
+                    .berkeley-hero {
+                        min-height: 90vh;
+                        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+                        position: relative;
+                        overflow: hidden;
+                        padding: 80px 0;
+                    }
+
+                    .berkeley-hero::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background-image: 
+                            radial-gradient(circle at 20% 50%, rgba(52, 152, 219, 0.1) 0%, transparent 50%),
+                            radial-gradient(circle at 80% 20%, rgba(231, 76, 60, 0.1) 0%, transparent 50%);
+                        pointer-events: none;
+                    }
+
+                    .berkeley-container {
+                        max-width: 1200px;
+                        margin: 0 auto;
+                        padding: 0 20px;
+                        position: relative;
+                        z-index: 2;
+                    }
+
+                    .berkeley-grid {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 60px;
+                        align-items: center;
+                    }
+
+                    .berkeley-content {
+                        color: white;
+                    }
+
+                    .berkeley-badge {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        background: rgba(255, 255, 255, 0.1);
+                        backdrop-filter: blur(10px);
+                        padding: 8px 20px;
+                        border-radius: 50px;
+                        font-size: 14px;
+                        font-weight: 600;
+                        margin-bottom: 24px;
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                    }
+
+                    .berkeley-title {
+                        font-size: 3.5rem;
+                        font-weight: 800;
+                        line-height: 1.1;
+                        margin-bottom: 24px;
+                        color: white;
+                    }
+
+                    .berkeley-subtitle {
+                        font-size: 1.25rem;
+                        color: rgba(255, 255, 255, 0.9);
+                        margin-bottom: 32px;
+                        line-height: 1.6;
+                    }
+
+                    .berkeley-features {
+                        display: grid;
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 16px;
+                        margin-top: 32px;
+                    }
+
+                    .berkeley-feature-item {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        color: rgba(255, 255, 255, 0.9);
+                        font-size: 15px;
+                    }
+
+                    .berkeley-feature-icon {
+                        width: 24px;
+                        height: 24px;
+                        background: var(--berkeley-secondary);
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-size: 12px;
+                        flex-shrink: 0;
+                    }
+
+                    /* Sign-In Card */
+                    .berkeley-signin-card {
+                        background: white;
+                        border-radius: 24px;
+                        padding: 40px;
+                        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                        animation: slideInRight 0.8s ease-out;
+                    }
+
+                    .berkeley-signin-header {
+                        text-align: center;
+                        margin-bottom: 32px;
+                    }
+
+                    .berkeley-signin-header h2 {
+                        font-size: 28px;
+                        font-weight: 700;
+                        color: var(--text-primary);
+                        margin-bottom: 8px;
+                    }
+
+                    .berkeley-signin-header p {
+                        color: var(--text-secondary);
+                        font-size: 15px;
+                    }
+
+                    .berkeley-form-group {
+                        margin-bottom: 20px;
+                    }
+
+                    .berkeley-form-group label {
+                        display: block;
+                        font-size: 14px;
+                        font-weight: 600;
+                        color: var(--text-primary);
+                        margin-bottom: 8px;
+                    }
+
+                    .berkeley-input-wrapper {
+                        position: relative;
+                    }
+
+                    .berkeley-input-icon {
+                        position: absolute;
+                        left: 16px;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        color: var(--text-secondary);
+                        font-size: 16px;
+                    }
+
+                    .berkeley-input {
+                        width: 100%;
+                        padding: 14px 16px 14px 48px;
+                        border: 2px solid #e0e0e0;
+                        border-radius: 12px;
+                        font-size: 15px;
+                        transition: all 0.3s ease;
+                        outline: none;
+                    }
+
+                    .berkeley-input:focus {
+                        border-color: var(--berkeley-secondary);
+                        box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);
+                    }
+
+                    .berkeley-form-options {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        margin-bottom: 24px;
+                        font-size: 14px;
+                    }
+
+                    .berkeley-checkbox-label {
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        cursor: pointer;
+                        color: var(--text-secondary);
+                    }
+
+                    .berkeley-forgot-link {
+                        color: var(--berkeley-secondary);
+                        text-decoration: none;
+                        font-weight: 600;
+                    }
+
+                    .berkeley-forgot-link:hover {
+                        text-decoration: underline;
+                    }
+
+                    .berkeley-btn-signin {
+                        width: 100%;
+                        padding: 16px;
+                        background: linear-gradient(135deg, var(--berkeley-secondary) 0%, #2980b9 100%);
+                        color: white;
+                        border: none;
+                        border-radius: 12px;
+                        font-size: 16px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+                    }
+
+                    .berkeley-btn-signin:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+                    }
+
+                    .berkeley-divider {
+                        display: flex;
+                        align-items: center;
+                        text-align: center;
+                        margin: 24px 0;
+                    }
+
+                    .berkeley-divider::before,
+                    .berkeley-divider::after {
+                        content: '';
+                        flex: 1;
+                        border-bottom: 1px solid #e0e0e0;
+                    }
+
+                    .berkeley-divider span {
+                        padding: 0 16px;
+                        color: var(--text-secondary);
+                        font-size: 14px;
+                    }
+
+                    .berkeley-contact-prompt {
+                        text-align: center;
+                        font-size: 14px;
+                        color: var(--text-secondary);
+                    }
+
+                    .berkeley-contact-prompt a {
+                        color: var(--berkeley-secondary);
+                        text-decoration: none;
+                        font-weight: 600;
+                    }
+
+                    .berkeley-contact-prompt a:hover {
+                        text-decoration: underline;
+                    }
+
+                    @keyframes slideInRight {
+                        from {
+                            opacity: 0;
+                            transform: translateX(50px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateX(0);
+                        }
+                    }
+
+                    /* Responsive */
+                    @media (max-width: 968px) {
+                        .berkeley-grid {
+                            grid-template-columns: 1fr;
+                            gap: 40px;
+                        }
+
+                        .berkeley-title {
+                            font-size: 2.5rem;
+                        }
+
+                        .berkeley-signin-card {
+                            padding: 32px 24px;
+                        }
+                    }
+
+                    @media (max-width: 576px) {
+                        .berkeley-title {
+                            font-size: 2rem;
+                        }
+
+                        .berkeley-features {
+                            grid-template-columns: 1fr;
+                        }
+                    }
+                </style>
+
+                <!-- Hero Section -->
+                <section class="berkeley-hero">
+                    <div class="berkeley-container">
+                        <div class="berkeley-grid">
+                            <!-- Left Content -->
+                            <div class="berkeley-content">
+                                <div class="berkeley-badge">
+                                    <i class="fa fa-shield-alt"></i>
+                                    <span>Enterprise Security Management</span>
+                                </div>
+                                
+                                <h1 class="berkeley-title">
+                                    Welcome to Berkeley Services
+                                </h1>
+                                
+                                <p class="berkeley-subtitle">
+                                    Comprehensive guard management software designed to streamline security operations, 
+                                    enhance workforce efficiency, and deliver exceptional service quality.
+                                </p>
+
+                                <div class="berkeley-features">
+                                    <div class="berkeley-feature-item">
+                                        <div class="berkeley-feature-icon">
+                                            <i class="fa fa-check"></i>
+                                        </div>
+                                        <span>Real-time Guard Tracking</span>
+                                    </div>
+                                    <div class="berkeley-feature-item">
+                                        <div class="berkeley-feature-icon">
+                                            <i class="fa fa-check"></i>
+                                        </div>
+                                        <span>Patrol Management</span>
+                                    </div>
+                                    <div class="berkeley-feature-item">
+                                        <div class="berkeley-feature-icon">
+                                            <i class="fa fa-check"></i>
+                                        </div>
+                                        <span>Incident Reporting</span>
+                                    </div>
+                                    <div class="berkeley-feature-item">
+                                        <div class="berkeley-feature-icon">
+                                            <i class="fa fa-check"></i>
+                                        </div>
+                                        <span>Shift Scheduling</span>
+                                    </div>
+                                    <div class="berkeley-feature-item">
+                                        <div class="berkeley-feature-icon">
+                                            <i class="fa fa-check"></i>
+                                        </div>
+                                        <span>Mobile Access</span>
+                                    </div>
+                                    <div class="berkeley-feature-item">
+                                        <div class="berkeley-feature-icon">
+                                            <i class="fa fa-check"></i>
+                                        </div>
+                                        <span>Analytics &amp; Reports</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Sign-In Card -->
+                            <div>
+                                <t t-if="not request.env.user or request.env.user._is_public()">
+                                    <div class="berkeley-signin-card">
+                                        <div class="berkeley-signin-header">
+                                            <h2>Sign In</h2>
+                                            <p>Access your security management dashboard</p>
+                                        </div>
+
+                                        <form action="/web/login" method="post">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                            
+                                            <div class="berkeley-form-group">
+                                                <label for="login">Email Address</label>
+                                                <div class="berkeley-input-wrapper">
+                                                    <i class="fa fa-envelope berkeley-input-icon"></i>
+                                                    <input 
+                                                        type="text" 
+                                                        name="login" 
+                                                        id="login" 
+                                                        class="berkeley-input"
+                                                        placeholder="Enter your email"
+                                                        required="required"
+                                                        autofocus="autofocus"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div class="berkeley-form-group">
+                                                <label for="password">Password</label>
+                                                <div class="berkeley-input-wrapper">
+                                                    <i class="fa fa-lock berkeley-input-icon"></i>
+                                                    <input 
+                                                        type="password" 
+                                                        name="password" 
+                                                        id="password" 
+                                                        class="berkeley-input"
+                                                        placeholder="Enter your password"
+                                                        required="required"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div class="berkeley-form-options">
+                                                <label class="berkeley-checkbox-label">
+                                                    <input type="checkbox" name="remember_me"/>
+                                                    <span>Remember me</span>
+                                                </label>
+                                                <a href="/web/reset_password" class="berkeley-forgot-link">Forgot password?</a>
+                                            </div>
+
+                                            <button type="submit" class="berkeley-btn-signin">
+                                                <i class="fa fa-sign-in-alt"></i>
+                                                Sign In
+                                            </button>
+
+                                            <div class="berkeley-divider">
+                                                <span>Need access?</span>
+                                            </div>
+
+                                            <div class="berkeley-contact-prompt">
+                                                Contact your administrator or <a href="/contactus">reach out to us</a>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </t>
+
+                                <t t-if="request.env.user and not request.env.user._is_public()">
+                                    <div class="berkeley-signin-card">
+                                        <div class="berkeley-signin-header">
+                                            <h2>Welcome Back!</h2>
+                                            <p>You are already signed in</p>
+                                        </div>
+                                        
+                                        <div style="text-align: center; padding: 20px 0;">
+                                            <p style="color: var(--text-secondary); margin-bottom: 24px;">
+                                                <i class="fa fa-user-circle" style="font-size: 48px; color: var(--berkeley-secondary);"></i>
+                                            </p>
+                                            <p style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">
+                                                <t t-esc="request.env.user.name"/>
+                                            </p>
+                                            <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 32px;">
+                                                <t t-esc="request.env.user.email"/>
+                                            </p>
+                                            
+                                            <a href="/web" class="berkeley-btn-signin" style="display: inline-block; text-decoration: none;">
+                                                <i class="fa fa-tachometer-alt"></i>
+                                                Go to Dashboard
+                                            </a>
+                                            
+                                            <div style="margin-top: 16px;">
+                                                <a href="/web/session/logout?redirect=/" style="color: var(--text-secondary); font-size: 14px; text-decoration: none;">
+                                                    Sign out
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <!-- Menu item to make this page accessible -->
+    <record id="menu_berkeley_homepage" model="website.menu">
+        <field name="name">Home</field>
+        <field name="url">/</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence">1</field>
+    </record>
+
+    <!-- Page record -->
+    <record id="page_berkeley_homepage" model="website.page">
+        <field name="name">Berkeley Services Home</field>
+        <field name="url">/</field>
+        <field name="view_id" ref="berkeley_homepage"/>
+        <field name="is_published" eval="True"/>
+    </record>
+</odoo>

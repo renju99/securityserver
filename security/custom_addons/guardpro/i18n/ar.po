@@ -1,0 +1,342 @@
+# Translation of Sentry Security Guard Management System into Arabic
+# This file contains Arabic translations for the Sentry module
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Sentry 18.0.1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-11 12:00:00+0000\n"
+"PO-Revision-Date: 2025-10-11 12:00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Arabic\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
+
+#. module: guardpro
+#: model:ir.module.module,shortdesc:guardpro.module_meta_information
+msgid "GuardPro - Security Guard Management"
+msgstr "Sentry - إدارة الحراس الأمنيين"
+
+#. module: guardpro
+#: model:ir.module.module,summary:guardpro.module_meta_information
+msgid "Complete security guard management with GPS tracking, NFC/QR checkpoints, scheduling, and mobile PWA"
+msgstr "نظام إدارة الحراس الأمنيين الشامل مع تتبع GPS ونقاط التفتيش NFC/QR والجدولة وتطبيق الجوال PWA"
+
+#. module: guardpro
+#: model:ir.ui.menu,name:guardpro.menu_guardpro_root
+msgid "GuardPro"
+msgstr "Sentry"
+
+#. module: guardpro
+#: model:ir.ui.menu,name:guardpro.menu_guardpro_operations
+msgid "Operations"
+msgstr "العمليات"
+
+#. module: guardpro
+#: model:ir.ui.menu,name:guardpro.menu_guardpro_resources
+msgid "Resources"
+msgstr "الموارد"
+
+#. module: guardpro
+#: model:ir.ui.menu,name:guardpro.menu_guardpro_reports
+msgid "Reports"
+msgstr "التقارير"
+
+#. module: guardpro
+#: model:ir.ui.menu,name:guardpro.menu_guardpro_configuration
+msgid "Configuration"
+msgstr "الإعدادات"
+
+#. module: guardpro
+#: model:ir.model.fields,field_description:guardpro.field_guard_profile__name
+msgid "Guard Name"
+msgstr "اسم الحارس"
+
+#. module: guardpro
+#: model:ir.model.fields,field_description:guardpro.field_guard_profile__badge_number
+msgid "Badge Number"
+msgstr "رقم الشارة"
+
+#. module: guardpro
+#: model:ir.model.fields,field_description:guardpro.field_guard_profile__phone
+msgid "Phone"
+msgstr "الهاتف"
+
+#. module: guardpro
+#: model:ir.model.fields,field_description:guardpro.field_guard_profile__email
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+#. module: guardpro
+#: model:ir.model.fields,field_description:guardpro.field_guard_profile__status
+msgid "Status"
+msgstr "الحالة"
+
+#. module: guardpro
+#: model:ir.model.fields.selection,name:guardpro.selection__guard_profile__status__active
+msgid "Active"
+msgstr "نشط"
+
+#. module: guardpro
+#: model:ir.model.fields.selection,name:guardpro.selection__guard_profile__status__inactive
+msgid "Inactive"
+msgstr "غير نشط"
+
+#. module: guardpro
+#: model:ir.model.fields.selection,name:guardpro.selection__guard_profile__status__on_shift
+msgid "On Shift"
+msgstr "في المناوبة"
+
+#. module: guardpro
+#: model:ir.model.fields.selection,name:guardpro.selection__guard_profile__status__off_duty
+msgid "Off Duty"
+msgstr "خارج الخدمة"
+
+#. module: guardpro
+#: model:ir.model.fields,field_description:guardpro.field_guard_shift__name
+msgid "Shift Name"
+msgstr "اسم المناوبة"
+
+#. module: guardpro
+#: model:ir.model.fields,field_description:guardpro.field_guard_shift__start_datetime
+msgid "Start Date/Time"
+msgstr "تاريخ/وقت البدء"
+
+#. module: guardpro
+#: model:ir.model.fields,field_description:guardpro.field_guard_shift__end_datetime
+msgid "End Date/Time"
+msgstr "تاريخ/وقت الانتهاء"
+
+#. module: guardpro
+#: model:ir.model.fields,field_description:guardpro.field_guard_shift__duration
+msgid "Duration (hours)"
+msgstr "المدة (ساعات)"
+
+#. module: guardpro
+#: model:ir.model.fields,field_description:guardpro.field_incident_report__title
+msgid "Incident Title"
+msgstr "عنوان الحادثة"
+
+#. module: guardpro
+#: model:ir.model.fields,field_description:guardpro.field_incident_report__severity
+msgid "Severity"
+msgstr "الخطورة"
+
+#. module: guardpro
+#: model:ir.model.fields.selection,name:guardpro.selection__incident_report__severity__low
+msgid "Low"
+msgstr "منخفضة"
+
+#. module: guardpro
+#: model:ir.model.fields.selection,name:guardpro.selection__incident_report__severity__medium
+msgid "Medium"
+msgstr "متوسطة"
+
+#. module: guardpro
+#: model:ir.model.fields.selection,name:guardpro.selection__incident_report__severity__high
+msgid "High"
+msgstr "عالية"
+
+#. module: guardpro
+#: model:ir.model.fields.selection,name:guardpro.selection__incident_report__severity__critical
+msgid "Critical"
+msgstr "حرجة"
+
+#. module: guardpro
+#: model:ir.model.fields,field_description:guardpro.field_client_site__name
+msgid "Site Name"
+msgstr "اسم الموقع"
+
+#. module: guardpro
+#: model:ir.model.fields,field_description:guardpro.field_client_site__address
+msgid "Address"
+msgstr "العنوان"
+
+#. module: guardpro
+#: model:ir.model.fields,field_description:guardpro.field_checkpoint__name
+msgid "Checkpoint Name"
+msgstr "اسم نقطة التفتيش"
+
+#. module: guardpro
+#: model:ir.model.fields,field_description:guardpro.field_security_tour__name
+msgid "Tour Name"
+msgstr "اسم الجولة"
+
+#. module: guardpro
+#: model:ir.actions.act_window,name:guardpro.action_guard_profile
+#: model:ir.ui.menu,name:guardpro.menu_guard_profile
+msgid "Guards"
+msgstr "الحراس"
+
+#. module: guardpro
+#: model:ir.actions.act_window,name:guardpro.action_guard_shift
+#: model:ir.ui.menu,name:guardpro.menu_guard_shift
+msgid "Shifts"
+msgstr "المناوبات"
+
+#. module: guardpro
+#: model:ir.actions.act_window,name:guardpro.action_incident_report
+#: model:ir.ui.menu,name:guardpro.menu_incident_report
+msgid "Incidents"
+msgstr "الحوادث"
+
+#. module: guardpro
+#: model:ir.actions.act_window,name:guardpro.action_client_site
+#: model:ir.ui.menu,name:guardpro.menu_client_site
+msgid "Sites"
+msgstr "المواقع"
+
+#. module: guardpro
+#: model:ir.actions.act_window,name:guardpro.action_checkpoint
+#: model:ir.ui.menu,name:guardpro.menu_checkpoint
+msgid "Checkpoints"
+msgstr "نقاط التفتيش"
+
+#. module: guardpro
+#: model:ir.actions.act_window,name:guardpro.action_security_tour
+#: model:ir.ui.menu,name:guardpro.menu_security_tour
+msgid "Tours"
+msgstr "الجولات"
+
+#. module: guardpro
+#: model:ir.actions.act_window,name:guardpro.action_guard_attendance
+#: model:ir.ui.menu,name:guardpro.menu_guard_attendance
+msgid "Attendance"
+msgstr "الحضور"
+
+#. module: guardpro
+#: model:ir.actions.act_window,name:guardpro.action_guardpro_equipment
+#: model:ir.ui.menu,name:guardpro.menu_guardpro_equipment
+msgid "Equipment"
+msgstr "المعدات"
+
+#. module: guardpro
+#: model:ir.ui.view,arch_db:guardpro.view_guard_profile_form
+msgid "Save"
+msgstr "حفظ"
+
+#. module: guardpro
+#: model:ir.ui.view,arch_db:guardpro.view_guard_profile_form
+msgid "Cancel"
+msgstr "إلغاء"
+
+#. module: guardpro
+#: model:ir.ui.view,arch_db:guardpro.view_guard_profile_form
+msgid "Check In"
+msgstr "تسجيل الدخول"
+
+#. module: guardpro
+#: model:ir.ui.view,arch_db:guardpro.view_guard_profile_form
+msgid "Check Out"
+msgstr "تسجيل الخروج"
+
+#. module: guardpro
+#: model:ir.cron,name:guardpro.cron_shift_reminders
+msgid "GuardPro: Send Shift Reminders"
+msgstr "GuardPro: إرسال تذكيرات المناوبة"
+
+#. module: guardpro
+#: model:ir.cron,name:guardpro.cron_cleanup_location_history
+msgid "GuardPro: Cleanup Old Location History"
+msgstr "GuardPro: تنظيف سجل المواقع القديمة"
+
+#. module: guardpro
+#: model:ir.cron,name:guardpro.cron_certification_expiry
+msgid "GuardPro: Check Certification Expiry"
+msgstr "GuardPro: التحقق من انتهاء صلاحية الشهادات"
+
+#. module: guardpro
+#: model:ir.cron,name:guardpro.cron_escalate_incidents
+msgid "GuardPro: Escalate Unresponded Critical Incidents"
+msgstr "GuardPro: تصعيد الحوادث الحرجة غير المستجاب لها"
+
+#. module: guardpro
+#: code:addons/guardpro/models/guard_shift.py
+#, python-format
+msgid "Shift Reminder"
+msgstr "تذكير المناوبة"
+
+#. module: guardpro
+#: code:addons/guardpro/models/guard_shift.py
+#, python-format
+msgid "Your shift starts in %d minutes at %s."
+msgstr "تبدأ مناوبتك خلال %d دقيقة في %s."
+
+#. module: guardpro
+#: code:addons/guardpro/models/incident_report.py
+#, python-format
+msgid "URGENT: Critical Incident Escalation"
+msgstr "عاجل: تصعيد حادثة حرجة"
+
+#. module: guardpro
+#: code:addons/guardpro/models/incident_report.py
+#, python-format
+msgid "INCIDENT ESCALATED"
+msgstr "تم تصعيد الحادثة"
+
+#. module: guardpro
+#: code:addons/guardpro/models/guard_profile.py
+#, python-format
+msgid "License Expiring: %s"
+msgstr "انتهاء صلاحية الرخصة: %s"
+
+#. module: guardpro
+#: code:addons/guardpro/models/guard_profile.py
+#, python-format
+msgid "License Expiration Warning"
+msgstr "تحذير انتهاء صلاحية الرخصة"
+
+#. module: guardpro
+#: model:ir.model.fields,help:guardpro.field_guard_shift__reminder_sent
+msgid "Whether shift reminder notification has been sent"
+msgstr "ما إذا تم إرسال إشعار تذكير المناوبة"
+
+#. module: guardpro
+#: model:ir.model.fields,help:guardpro.field_incident_report__escalated
+msgid "Indicates if this incident has been escalated to management"
+msgstr "يشير إلى ما إذا تم تصعيد هذه الحادثة إلى الإدارة"
+
+#. module: guardpro
+#: model:res.config.settings,string:guardpro.google_maps_api_key
+msgid "Google Maps API Key"
+msgstr "مفتاح API خرائط جوجل"
+
+#. module: guardpro
+#: model:res.config.settings,string:guardpro.gps_update_interval
+msgid "GPS Update Interval (seconds)"
+msgstr "فترة تحديث GPS (بالثواني)"
+
+#. module: guardpro
+#: model:res.config.settings,string:guardpro.location_history_retention
+msgid "Location History Retention (days)"
+msgstr "الاحتفاظ بسجل المواقع (أيام)"
+
+#. module: guardpro
+#: model:res.config.settings,string:guardpro.shift_reminder_minutes
+msgid "Shift Reminder (minutes before start)"
+msgstr "تذكير المناوبة (دقائق قبل البدء)"
+
+#. module: guardpro
+#: model:res.config.settings,string:guardpro.critical_incident_escalation
+msgid "Critical Incident Escalation (minutes)"
+msgstr "تصعيد الحادثة الحرجة (دقائق)"
+
+#. module: guardpro
+#: model:res.config.settings,help:guardpro.google_maps_api_key
+msgid "API key for Google Maps integration. Required for real-time location tracking and mapping features."
+msgstr "مفتاح API لتكامل خرائط جوجل. مطلوب لتتبع المواقع في الوقت الفعلي وميزات الخرائط."
+
+#. module: guardpro
+#: model:res.config.settings,help:guardpro.gps_update_interval
+msgid "How often the mobile app should update GPS location. Lower values = more accurate but use more battery. Recommended: 30-60 seconds."
+msgstr "كم مرة يجب على تطبيق الجوال تحديث موقع GPS. القيم الأقل = أكثر دقة ولكن تستخدم البطارية أكثر. الموصى به: 30-60 ثانية."
+
+#. module: guardpro
+#: model:res.config.settings,help:guardpro.location_history_retention
+msgid "How long to keep location history records before automatic deletion. Recommended: 90-180 days for compliance and performance."
+msgstr "كم من الوقت للاحتفاظ بسجلات سجل المواقع قبل الحذف التلقائي. الموصى به: 90-180 يومًا للامتثال والأداء."
+
+

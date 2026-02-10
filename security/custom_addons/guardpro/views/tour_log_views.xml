@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_tour_log_list" model="ir.ui.view">
+            <field name="name">tour.log.list</field>
+            <field name="model">tour.log</field>
+            <field name="arch" type="xml">
+                <list string="Tour Logs">
+                    <field name="name"/>
+                    <field name="tour_id"/>
+                    <field name="guard_id"/>
+                    <field name="site_id"/>
+                    <field name="start_time"/>
+                    <field name="end_time"/>
+                    <field name="duration" widget="float_time"/>
+                    <field name="completion_percentage" widget="progressbar"/>
+                    <field name="status" widget="badge"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_tour_log_form" model="ir.ui.view">
+            <field name="name">tour.log.form</field>
+            <field name="model">tour.log</field>
+            <field name="arch" type="xml">
+                <form string="Tour Log">
+                    <header>
+                        <button name="action_complete" string="Complete Tour" type="object" 
+                                invisible="status != 'in_progress'"/>
+                        <button name="action_review" string="Mark Reviewed" type="object"
+                                invisible="reviewed" groups="guardpro.group_guardpro_supervisor"/>
+                        <field name="status" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="tour_id"/>
+                                <field name="guard_id"/>
+                                <field name="site_id"/>
+                                <field name="shift_id"/>
+                            </group>
+                            <group>
+                                <field name="start_time"/>
+                                <field name="end_time"/>
+                                <field name="duration" widget="float_time"/>
+                                <field name="distance_traveled"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="expected_checkpoints"/>
+                            <field name="scanned_checkpoints"/>
+                            <field name="completion_percentage" widget="progressbar"/>
+                        </group>
+                        <notebook>
+                            <page string="Checkpoint Scans">
+                                <field name="scan_ids">
+                                    <list>
+                                        <field name="checkpoint_id"/>
+                                        <field name="scan_time"/>
+                                        <field name="scan_type"/>
+                                        <field name="status"/>
+                                    </list>
+                                </field>
+                            </page>
+                            <page string="Observations">
+                                <field name="observations" widget="text"/>
+                                <field name="issues_found" widget="text"/>
+                            </page>
+                            <page string="Review">
+                                <group>
+                                    <field name="reviewed"/>
+                                    <field name="reviewed_by"/>
+                                    <field name="review_notes" widget="text"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_tour_log" model="ir.actions.act_window">
+            <field name="name">Tour Logs</field>
+            <field name="res_model">tour.log</field>
+            <field name="view_mode">list,form</field>
+        </record>
+    </data>
+</odoo>
+
+

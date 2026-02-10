@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Report Action Definition -->
+    <record id="action_monthly_performance_dashboard_report" model="ir.actions.report">
+        <field name="name">Monthly Performance Dashboard</field>
+        <field name="model">guard.performance.review</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.report_monthly_performance_dashboard_document</field>
+        <field name="report_file">guardpro.report_monthly_performance_dashboard_document</field>
+        <field name="binding_model_id" ref="model_guard_performance_review"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_us"/>
+    </record>
+    
+    <!-- Report Template -->
+    <template id="report_monthly_performance_dashboard_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        
+                        <!-- Report Header -->
+                        <div class="row" style="border-bottom: 3px solid #4caf50; padding-bottom: 15px; margin-bottom: 30px;">
+                            <div class="col-8">
+                                <h1 style="margin: 0; font-size: 28px; color: #4caf50;">MONTHLY PERFORMANCE DASHBOARD</h1>
+                                <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Guard Performance Summary</p>
+                            </div>
+                            <div class="col-4 text-right">
+                                <p style="margin: 5px 0;"><strong>Guard:</strong> <t t-esc="o.guard_id.name if o.guard_id else 'N/A'"/></p>
+                                <p style="margin: 5px 0;"><strong>Period:</strong> <t t-esc="format_date(o.review_period_start) if hasattr(o, 'review_period_start') and o.review_period_start else 'N/A'"/></p>
+                            </div>
+                        </div>
+                        
+                        <!-- Performance Summary -->
+                        <div class="row" style="margin-bottom: 30px;">
+                            <div class="col-3" style="text-align: center; padding: 15px; border: 1px solid #ddd; background-color: #e8f5e9;">
+                                <h3 style="margin: 0; font-size: 32px; color: #4caf50;">
+                                    <t t-esc="'{:.1f}'.format(o.overall_score) if hasattr(o, 'overall_score') and o.overall_score else 'N/A'"/>
+                                </h3>
+                                <p style="margin: 5px 0 0 0; font-size: 12px; color: #666;">Overall Score</p>
+                            </div>
+                            <div class="col-3" style="text-align: center; padding: 15px; border: 1px solid #ddd; background-color: #e3f2fd;">
+                                <h3 style="margin: 0; font-size: 32px; color: #2196f3;">
+                                    <t t-esc="o.total_shifts if hasattr(o, 'total_shifts') else 'N/A'"/>
+                                </h3>
+                                <p style="margin: 5px 0 0 0; font-size: 12px; color: #666;">Total Shifts</p>
+                            </div>
+                            <div class="col-3" style="text-align: center; padding: 15px; border: 1px solid #ddd; background-color: #fff3e0;">
+                                <h3 style="margin: 0; font-size: 32px; color: #ff9800;">
+                                    <t t-esc="o.total_hours if hasattr(o, 'total_hours') else 'N/A'"/>
+                                </h3>
+                                <p style="margin: 5px 0 0 0; font-size: 12px; color: #666;">Hours Worked</p>
+                            </div>
+                            <div class="col-3" style="text-align: center; padding: 15px; border: 1px solid #ddd; background-color: #fce4ec;">
+                                <h3 style="margin: 0; font-size: 32px; color: #e91e63;">
+                                    <t t-esc="o.incidents_count if hasattr(o, 'incidents_count') else 0"/>
+                                </h3>
+                                <p style="margin: 5px 0 0 0; font-size: 12px; color: #666;">Incidents Handled</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Performance Metrics -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #4caf50;">Performance Metrics</h2>
+                        <table class="table table-sm table-bordered" style="margin-bottom: 30px;">
+                            <thead style="background-color: #f5f5f5;">
+                                <tr>
+                                    <th style="width: 40%;">Metric</th>
+                                    <th style="width: 20%; text-align: center;">Score</th>
+                                    <th style="width: 40%;">Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Punctuality</td>
+                                    <td style="text-align: center;"><strong><t t-esc="'{:.1f}'.format(o.punctuality_score) if hasattr(o, 'punctuality_score') and o.punctuality_score else 'N/A'"/></strong></td>
+                                    <td>
+                                        <div style="background-color: #e0e0e0; border-radius: 4px; height: 20px; overflow: hidden;">
+                                            <div t-att-style="'width: %s%%; background-color: #4caf50; height: 100%%;' % (o.punctuality_score if hasattr(o, 'punctuality_score') and o.punctuality_score else 0)"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Professionalism</td>
+                                    <td style="text-align: center;"><strong><t t-esc="'{:.1f}'.format(o.professionalism_score) if hasattr(o, 'professionalism_score') and o.professionalism_score else 'N/A'"/></strong></td>
+                                    <td>
+                                        <div style="background-color: #e0e0e0; border-radius: 4px; height: 20px; overflow: hidden;">
+                                            <div t-att-style="'width: %s%%; background-color: #2196f3; height: 100%%;' % (o.professionalism_score if hasattr(o, 'professionalism_score') and o.professionalism_score else 0)"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Communication</td>
+                                    <td style="text-align: center;"><strong><t t-esc="'{:.1f}'.format(o.communication_score) if hasattr(o, 'communication_score') and o.communication_score else 'N/A'"/></strong></td>
+                                    <td>
+                                        <div style="background-color: #e0e0e0; border-radius: 4px; height: 20px; overflow: hidden;">
+                                            <div t-att-style="'width: %s%%; background-color: #ff9800; height: 100%%;' % (o.communication_score if hasattr(o, 'communication_score') and o.communication_score else 0)"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Quality of Work</td>
+                                    <td style="text-align: center;"><strong><t t-esc="'{:.1f}'.format(o.quality_score) if hasattr(o, 'quality_score') and o.quality_score else 'N/A'"/></strong></td>
+                                    <td>
+                                        <div style="background-color: #e0e0e0; border-radius: 4px; height: 20px; overflow: hidden;">
+                                            <div t-att-style="'width: %s%%; background-color: #9c27b0; height: 100%%;' % (o.quality_score if hasattr(o, 'quality_score') and o.quality_score else 0)"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <!-- Recommendations -->
+                        <t t-if="o.recommendations">
+                            <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #4caf50;">Recommendations</h2>
+                            <div style="padding: 15px; background-color: #fafafa; border: 1px solid #ddd; margin-bottom: 30px;">
+                                <t t-raw="o.recommendations"/>
+                            </div>
+                        </t>
+                        
+                        <!-- Signature -->
+                        <div style="margin-top: 80px; page-break-inside: avoid;">
+                            <div style="border-top: 2px solid #000; padding-top: 10px; margin-top: 50px; width: 50%;">
+                                <p style="margin: 0;"><strong>Reviewed By:</strong></p>
+                                <p style="margin: 5px 0;"><t t-esc="o.reviewer_id.name if hasattr(o, 'reviewer_id') and o.reviewer_id else '_______________________________'"/></p>
+                                <p style="margin: 5px 0;">Date: <t t-esc="format_date(o.review_date) if hasattr(o, 'review_date') and o.review_date else '__________'"/></p>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    
+</odoo>
+

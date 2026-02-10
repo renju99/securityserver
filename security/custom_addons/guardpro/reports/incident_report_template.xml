@@ -1,0 +1,1468 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Incident Report PDF Template -->
+    <template id="incident_report_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <style>
+                            /* Compact styling for incident reports */
+                            .page h2 { font-size: 20px !important; margin-bottom: 10px !important; }
+                            .page h4 { font-size: 14px !important; margin-bottom: 8px !important; margin-top: 10px !important; }
+                            .page h3 { font-size: 16px !important; margin-bottom: 8px !important; }
+                            .page p { font-size: 11px !important; margin-bottom: 5px !important; line-height: 1.4 !important; }
+                            .page .table td, .page .table th { font-size: 11px !important; padding: 5px 8px !important; line-height: 1.4 !important; }
+                            .page .table strong { font-size: 11px !important; }
+                            .page .badge { font-size: 11px !important; padding: 4px 10px !important; }
+                            .page .border { padding: 10px !important; }
+                            .page .mb-4 { margin-bottom: 12px !important; }
+                            .page .mb-3 { margin-bottom: 10px !important; }
+                            .page .mb-2 { margin-bottom: 8px !important; }
+                            .page .mt-5 { margin-top: 15px !important; }
+                            .page .p-3 { padding: 10px !important; }
+                            .page .p-2 { padding: 8px !important; }
+                            .page span { font-size: 11px !important; }
+                        </style>
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h2 class="text-center">
+                                    <strong>INCIDENT REPORT</strong>
+                                </h2>
+                                <h4 class="text-center text-muted">
+                                    <span t-field="doc.name"/>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <div class="row mb-3">
+                            <div class="col-12 text-center">
+                                <span class="badge badge-pill" 
+                                      t-att-class="{'badge-danger': doc.severity in ['high', 'critical'],
+                                                    'badge-warning': doc.severity == 'medium',
+                                                    'badge-info': doc.severity == 'low'}">
+                                    <t t-esc="doc.severity.upper()"/> SEVERITY
+                                </span>
+                                <span class="badge badge-pill badge-secondary ml-2">
+                                    <t t-esc="doc.status.replace('_', ' ').upper()"/>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Basic Information -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4><strong>Incident Details</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="25%"><strong>Title:</strong></td>
+                                        <td width="75%"><span t-field="doc.title"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Reporting Guard:</strong></td>
+                                        <td><span t-field="doc.guard_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Site:</strong></td>
+                                        <td><span t-field="doc.site_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Incident Date/Time:</strong></td>
+                                        <td><span t-field="doc.incident_datetime" t-options='{"widget": "datetime"}'/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Reported Date/Time:</strong></td>
+                                        <td><span t-field="doc.reported_datetime" t-options='{"widget": "datetime"}'/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Category:</strong></td>
+                                        <td><span t-field="doc.category_id.name"/></td>
+                                    </tr>
+                                    <tr t-if="doc.shift_id">
+                                        <td><strong>Shift:</strong></td>
+                                        <td><span t-field="doc.shift_id.name"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Location Information -->
+                        <div class="row mb-3" t-if="doc.location or doc.latitude">
+                            <div class="col-12">
+                                <h4><strong>Location</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr t-if="doc.location">
+                                        <td width="25%"><strong>Location:</strong></td>
+                                        <td width="75%"><span t-field="doc.location"/></td>
+                                    </tr>
+                                    <tr t-if="doc.latitude">
+                                        <td><strong>Coordinates:</strong></td>
+                                        <td><t t-esc="doc.latitude"/>, <t t-esc="doc.longitude"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4><strong>Description</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.description"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- People Involved -->
+                        <div class="row mb-3" t-if="doc.persons_involved or doc.witnesses">
+                            <div class="col-12">
+                                <h4><strong>People Involved</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr t-if="doc.persons_involved">
+                                        <td width="25%"><strong>Persons Involved:</strong></td>
+                                        <td width="75%"><span t-field="doc.persons_involved"/></td>
+                                    </tr>
+                                    <tr t-if="doc.witnesses">
+                                        <td><strong>Witnesses:</strong></td>
+                                        <td><span t-field="doc.witnesses"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Actions Taken -->
+                        <div class="row mb-3" t-if="doc.immediate_actions">
+                            <div class="col-12">
+                                <h4><strong>Actions Taken</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.immediate_actions"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Emergency Services -->
+                        <div class="row mb-3" t-if="doc.police_notified or doc.medical_required or doc.ambulance_called or doc.fire_department or doc.client_notified">
+                            <div class="col-12">
+                                <h4><strong>Emergency Services</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr t-if="doc.police_notified">
+                                        <td width="25%"><strong>Police Notified:</strong></td>
+                                        <td width="75%">Yes <span t-if="doc.police_report_number">- Report #<span t-field="doc.police_report_number"/></span></td>
+                                    </tr>
+                                    <tr t-if="doc.medical_required">
+                                        <td><strong>Medical Assistance:</strong></td>
+                                        <td>Required</td>
+                                    </tr>
+                                    <tr t-if="doc.ambulance_called">
+                                        <td><strong>Ambulance Called:</strong></td>
+                                        <td>Yes</td>
+                                    </tr>
+                                    <tr t-if="doc.fire_department">
+                                        <td><strong>Fire Department:</strong></td>
+                                        <td>Notified</td>
+                                    </tr>
+                                    <tr t-if="doc.client_notified">
+                                        <td><strong>Client Notified:</strong></td>
+                                        <td>Yes - <span t-field="doc.client_notification_datetime" t-options='{"widget": "datetime"}'/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Injuries and Damage -->
+                        <div class="row mb-3" t-if="doc.injuries or doc.property_damage">
+                            <div class="col-12">
+                                <h4><strong>Injuries &amp; Damage</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr t-if="doc.injuries">
+                                        <td width="25%"><strong>Injuries:</strong></td>
+                                        <td width="75%"><span t-field="doc.injury_details"/></td>
+                                    </tr>
+                                    <tr t-if="doc.property_damage">
+                                        <td><strong>Property Damage:</strong></td>
+                                        <td><span t-field="doc.damage_details"/></td>
+                                    </tr>
+                                    <tr t-if="doc.estimated_cost">
+                                        <td><strong>Estimated Cost:</strong></td>
+                                        <td><span t-field="doc.estimated_cost" t-options='{"widget": "monetary"}'/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Review Information -->
+                        <div class="row mb-3" t-if="doc.reviewed_by">
+                            <div class="col-12">
+                                <h4><strong>Review Information</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="25%"><strong>Reviewed By:</strong></td>
+                                        <td width="75%"><span t-field="doc.reviewed_by.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Review Date:</strong></td>
+                                        <td><span t-field="doc.review_datetime" t-options='{"widget": "datetime"}'/></td>
+                                    </tr>
+                                    <tr t-if="doc.review_notes">
+                                        <td><strong>Review Notes:</strong></td>
+                                        <td><span t-field="doc.review_notes"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Follow-up -->
+                        <div class="row mb-3" t-if="doc.requires_followup">
+                            <div class="col-12">
+                                <h4><strong>Follow-up</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="25%"><strong>Status:</strong></td>
+                                        <td width="75%">
+                                            <span t-if="doc.followup_completed" class="badge badge-success">Completed</span>
+                                            <span t-else="" class="badge badge-warning">Pending</span>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="doc.followup_notes">
+                                        <td><strong>Notes:</strong></td>
+                                        <td><span t-field="doc.followup_notes"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Additional Notes -->
+                        <div class="row mb-3" t-if="doc.notes">
+                            <div class="col-12">
+                                <h4><strong>Additional Notes</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.notes"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Photos -->
+                        <div class="row mb-3" t-if="doc.photo_ids" style="page-break-inside: avoid;">
+                            <div class="col-12">
+                                <h4><strong>Photos</strong></h4>
+                                <div class="border p-2">
+                                    <p class="mb-2"><strong>Number of photos attached:</strong> <t t-esc="len(doc.photo_ids)"/></p>
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <t t-set="photo_list" t-value="[p for p in doc.photo_ids if p.mimetype and p.mimetype.startswith('image/')]"/>
+                                        <t t-foreach="photo_list" t-as="photo">
+                                            <t t-if="photo_index % 2 == 0">
+                                                <tr>
+                                                    <td style="width: 48%; padding: 5px; vertical-align: top;">
+                                                        <img t-att-src="'data:image/png;base64,%s' % photo.datas.decode('utf-8')" 
+                                                             alt="Incident Photo" 
+                                                             style="width: 100%; height: auto; max-height: 250px; object-fit: contain; border: 1px solid #ddd; padding: 3px;"/>
+                                                        <p class="text-center text-muted" style="margin: 2px 0;">
+                                                            <t t-esc="photo.name"/>
+                                                        </p>
+                                                    </td>
+                                                    <td style="width: 48%; padding: 5px; vertical-align: top;" t-if="photo_index + 1 &lt; len(photo_list)">
+                                                        <t t-set="next_photo" t-value="photo_list[photo_index + 1]"/>
+                                                        <img t-att-src="'data:image/png;base64,%s' % next_photo.datas.decode('utf-8')" 
+                                                             alt="Incident Photo" 
+                                                             style="width: 100%; height: auto; max-height: 250px; object-fit: contain; border: 1px solid #ddd; padding: 3px;"/>
+                                                        <p class="text-center text-muted" style="margin: 2px 0;">
+                                                            <t t-esc="next_photo.name"/>
+                                                        </p>
+                                                    </td>
+                                                    <td style="width: 48%; padding: 5px;" t-if="photo_index + 1 >= len(photo_list)">
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </t>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer with signature line -->
+                        <div class="row mt-5">
+                            <div class="col-6">
+                                <p>__________________________<br/>
+                                   Guard Signature
+                                </p>
+                            </div>
+                            <div class="col-6">
+                                <p>__________________________<br/>
+                                   Supervisor Signature
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Medical Emergency Report Template -->
+    <template id="incident_medical_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <style>
+                            /* Compact styling for incident reports */
+                            .page h2 { font-size: 20px !important; margin-bottom: 10px !important; }
+                            .page h4 { font-size: 14px !important; margin-bottom: 8px !important; margin-top: 10px !important; }
+                            .page h3 { font-size: 16px !important; margin-bottom: 8px !important; }
+                            .page p { font-size: 11px !important; margin-bottom: 5px !important; line-height: 1.4 !important; }
+                            .page .table td, .page .table th { font-size: 11px !important; padding: 5px 8px !important; line-height: 1.4 !important; }
+                            .page .table strong { font-size: 11px !important; }
+                            .page .badge { font-size: 11px !important; padding: 4px 10px !important; }
+                            .page .border { padding: 10px !important; }
+                            .page .mb-4 { margin-bottom: 12px !important; }
+                            .page .mb-3 { margin-bottom: 10px !important; }
+                            .page .mb-2 { margin-bottom: 8px !important; }
+                            .page .mt-5 { margin-top: 15px !important; }
+                            .page .p-3 { padding: 10px !important; }
+                            .page .p-2 { padding: 8px !important; }
+                            .page span { font-size: 11px !important; }
+                        </style>
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h2 class="text-center" style="color: #d32f2f;">
+                                    <strong>MEDICAL EMERGENCY INCIDENT REPORT</strong>
+                                </h2>
+                                <h4 class="text-center text-muted">
+                                    <span t-field="doc.name"/>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <div class="row mb-3">
+                            <div class="col-12 text-center">
+                                <span class="badge badge-pill badge-danger">
+                                    MEDICAL EMERGENCY - <t t-esc="doc.severity.upper()"/> SEVERITY
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Basic Information -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #f5f5f5; padding: 10px;"><strong>Incident Details</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="30%"><strong>Incident Title:</strong></td>
+                                        <td width="70%"><span t-field="doc.title"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Incident Date/Time:</strong></td>
+                                        <td><span t-field="doc.incident_datetime" t-options='{"widget": "datetime"}'/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Reporting Guard:</strong></td>
+                                        <td><span t-field="doc.guard_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Site Location:</strong></td>
+                                        <td><span t-field="doc.site_id.name"/></td>
+                                    </tr>
+                                    <tr t-if="doc.location">
+                                        <td><strong>Specific Location:</strong></td>
+                                        <td><span t-field="doc.location"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Patient/Victim Information -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #f5f5f5; padding: 10px;"><strong>Patient/Victim Information</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr t-if="doc.persons_involved">
+                                        <td width="30%"><strong>Patient Details:</strong></td>
+                                        <td width="70%"><span t-field="doc.persons_involved"/></td>
+                                    </tr>
+                                    <tr t-if="doc.injuries">
+                                        <td><strong>Injury/Medical Condition:</strong></td>
+                                        <td style="color: #d32f2f; font-weight: bold;"><span t-field="doc.injury_details"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Emergency Response -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #f5f5f5; padding: 10px;"><strong>Emergency Response</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="30%"><strong>Medical Assistance Required:</strong></td>
+                                        <td width="70%">
+                                            <span t-if="doc.medical_required" class="badge badge-danger">YES</span>
+                                            <span t-else="" class="badge badge-secondary">NO</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Ambulance Called:</strong></td>
+                                        <td>
+                                            <span t-if="doc.ambulance_called" class="badge badge-danger">YES</span>
+                                            <span t-else="" class="badge badge-secondary">NO</span>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="doc.immediate_actions">
+                                        <td><strong>First Aid/Actions Taken:</strong></td>
+                                        <td><span t-field="doc.immediate_actions"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Witnesses -->
+                        <div class="row mb-3" t-if="doc.witnesses">
+                            <div class="col-12">
+                                <h4 style="background-color: #f5f5f5; padding: 10px;"><strong>Witnesses</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.witnesses"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #f5f5f5; padding: 10px;"><strong>Detailed Description</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.description"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="row mb-3" t-if="doc.notes">
+                            <div class="col-12">
+                                <h4 style="background-color: #f5f5f5; padding: 10px;"><strong>Additional Notes</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.notes"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Photos -->
+                        <div class="row mb-3" t-if="doc.photo_ids" style="page-break-inside: avoid;">
+                            <div class="col-12">
+                                <h4 style="background-color: #f5f5f5; padding: 10px;"><strong>Photos</strong></h4>
+                                <div class="border p-2">
+                                    <p class="mb-2"><strong>Number of photos attached:</strong> <t t-esc="len(doc.photo_ids)"/></p>
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <t t-set="photo_list" t-value="[p for p in doc.photo_ids if p.mimetype and p.mimetype.startswith('image/')]"/>
+                                        <t t-foreach="photo_list" t-as="photo">
+                                            <t t-if="photo_index % 2 == 0">
+                                                <tr>
+                                                    <td style="width: 48%; padding: 5px; vertical-align: top;">
+                                                        <img t-att-src="'data:image/png;base64,%s' % photo.datas.decode('utf-8')" 
+                                                             alt="Medical Incident Photo" 
+                                                             style="width: 100%; height: auto; max-height: 250px; object-fit: contain; border: 1px solid #ddd; padding: 3px;"/>
+                                                        <p class="text-center text-muted" style="margin: 2px 0;">
+                                                            <t t-esc="photo.name"/>
+                                                        </p>
+                                                    </td>
+                                                    <td style="width: 48%; padding: 5px; vertical-align: top;" t-if="photo_index + 1 &lt; len(photo_list)">
+                                                        <t t-set="next_photo" t-value="photo_list[photo_index + 1]"/>
+                                                        <img t-att-src="'data:image/png;base64,%s' % next_photo.datas.decode('utf-8')" 
+                                                             alt="Medical Incident Photo" 
+                                                             style="width: 100%; height: auto; max-height: 250px; object-fit: contain; border: 1px solid #ddd; padding: 3px;"/>
+                                                        <p class="text-center text-muted" style="margin: 2px 0;">
+                                                            <t t-esc="next_photo.name"/>
+                                                        </p>
+                                                    </td>
+                                                    <td style="width: 48%; padding: 5px;" t-if="photo_index + 1 >= len(photo_list)">
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </t>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Signatures -->
+                        <div class="row mt-5">
+                            <div class="col-6">
+                                <p>__________________________<br/>
+                                   Guard Signature<br/>
+                                   Date: _______________
+                                </p>
+                            </div>
+                            <div class="col-6">
+                                <p>__________________________<br/>
+                                   Supervisor Signature<br/>
+                                   Date: _______________
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Fire/Smoke Incident Report Template -->
+    <template id="incident_fire_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h2 class="text-center" style="color: #ff6f00;">
+                                    <strong>FIRE/SMOKE INCIDENT REPORT</strong>
+                                </h2>
+                                <h4 class="text-center text-muted">
+                                    <span t-field="doc.name"/>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <div class="row mb-3">
+                            <div class="col-12 text-center">
+                                <span class="badge badge-pill badge-danger">
+                                    FIRE/SMOKE - <t t-esc="doc.severity.upper()"/> SEVERITY
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Basic Information -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #fff3e0; padding: 10px;"><strong>Incident Details</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="30%"><strong>Incident Title:</strong></td>
+                                        <td width="70%"><span t-field="doc.title"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Discovery Date/Time:</strong></td>
+                                        <td><span t-field="doc.incident_datetime" t-options='{"widget": "datetime"}'/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Reporting Guard:</strong></td>
+                                        <td><span t-field="doc.guard_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Site Location:</strong></td>
+                                        <td><span t-field="doc.site_id.name"/></td>
+                                    </tr>
+                                    <tr t-if="doc.location">
+                                        <td><strong>Specific Location:</strong></td>
+                                        <td><span t-field="doc.location"/></td>
+                                    </tr>
+                                    <tr t-if="doc.latitude">
+                                        <td><strong>GPS Coordinates:</strong></td>
+                                        <td><t t-esc="doc.latitude"/>, <t t-esc="doc.longitude"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Emergency Services Response -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #fff3e0; padding: 10px;"><strong>Emergency Services Response</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="30%"><strong>Fire Department Notified:</strong></td>
+                                        <td width="70%">
+                                            <span t-if="doc.fire_department" class="badge badge-danger">YES</span>
+                                            <span t-else="" class="badge badge-secondary">NO</span>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="doc.ambulance_called">
+                                        <td><strong>Ambulance Called:</strong></td>
+                                        <td>
+                                            <span class="badge badge-danger">YES</span>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="doc.police_notified">
+                                        <td><strong>Police Notified:</strong></td>
+                                        <td>
+                                            <span class="badge badge-warning">YES</span>
+                                            <span t-if="doc.police_report_number"> - Report #<span t-field="doc.police_report_number"/></span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Evacuation &amp; Safety -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #fff3e0; padding: 10px;"><strong>Evacuation &amp; Safety Measures</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.immediate_actions"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Damage Assessment -->
+                        <div class="row mb-3" t-if="doc.property_damage">
+                            <div class="col-12">
+                                <h4 style="background-color: #fff3e0; padding: 10px;"><strong>Damage Assessment</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="30%"><strong>Property Damage:</strong></td>
+                                        <td width="70%"><span class="badge badge-danger">YES</span></td>
+                                    </tr>
+                                    <tr t-if="doc.damage_details">
+                                        <td><strong>Damage Details:</strong></td>
+                                        <td><span t-field="doc.damage_details"/></td>
+                                    </tr>
+                                    <tr t-if="doc.estimated_cost">
+                                        <td><strong>Estimated Cost:</strong></td>
+                                        <td><span t-field="doc.estimated_cost" t-options='{"widget": "monetary"}'/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Injuries -->
+                        <div class="row mb-3" t-if="doc.injuries">
+                            <div class="col-12">
+                                <h4 style="background-color: #fff3e0; padding: 10px;"><strong>Injuries</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="30%"><strong>Injuries Occurred:</strong></td>
+                                        <td width="70%"><span class="badge badge-danger">YES</span></td>
+                                    </tr>
+                                    <tr t-if="doc.injury_details">
+                                        <td><strong>Injury Details:</strong></td>
+                                        <td><span t-field="doc.injury_details"/></td>
+                                    </tr>
+                                    <tr t-if="doc.persons_involved">
+                                        <td><strong>Persons Affected:</strong></td>
+                                        <td><span t-field="doc.persons_involved"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #fff3e0; padding: 10px;"><strong>Detailed Description</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.description"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Witnesses -->
+                        <div class="row mb-3" t-if="doc.witnesses">
+                            <div class="col-12">
+                                <h4 style="background-color: #fff3e0; padding: 10px;"><strong>Witnesses</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.witnesses"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Photos -->
+                        <div class="row mb-3" t-if="doc.photo_ids" style="page-break-inside: avoid;">
+                            <div class="col-12">
+                                <h4 style="background-color: #fff3e0; padding: 10px;"><strong>Photos</strong></h4>
+                                <div class="border p-2">
+                                    <p class="mb-2"><strong>Number of photos attached:</strong> <t t-esc="len(doc.photo_ids)"/></p>
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <t t-set="photo_list" t-value="[p for p in doc.photo_ids if p.mimetype and p.mimetype.startswith('image/')]"/>
+                                        <t t-foreach="photo_list" t-as="photo">
+                                            <t t-if="photo_index % 2 == 0">
+                                                <tr>
+                                                    <td style="width: 48%; padding: 5px; vertical-align: top;">
+                                                        <img t-att-src="'data:image/png;base64,%s' % photo.datas.decode('utf-8')" 
+                                                             alt="Fire Incident Photo" 
+                                                             style="width: 100%; height: auto; max-height: 250px; object-fit: contain; border: 1px solid #ddd; padding: 3px;"/>
+                                                        <p class="text-center text-muted" style="margin: 2px 0;">
+                                                            <t t-esc="photo.name"/>
+                                                        </p>
+                                                    </td>
+                                                    <td style="width: 48%; padding: 5px; vertical-align: top;" t-if="photo_index + 1 &lt; len(photo_list)">
+                                                        <t t-set="next_photo" t-value="photo_list[photo_index + 1]"/>
+                                                        <img t-att-src="'data:image/png;base64,%s' % next_photo.datas.decode('utf-8')" 
+                                                             alt="Fire Incident Photo" 
+                                                             style="width: 100%; height: auto; max-height: 250px; object-fit: contain; border: 1px solid #ddd; padding: 3px;"/>
+                                                        <p class="text-center text-muted" style="margin: 2px 0;">
+                                                            <t t-esc="next_photo.name"/>
+                                                        </p>
+                                                    </td>
+                                                    <td style="width: 48%; padding: 5px;" t-if="photo_index + 1 >= len(photo_list)">
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </t>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Signatures -->
+                        <div class="row mt-5">
+                            <div class="col-6">
+                                <p>__________________________<br/>
+                                   Guard Signature<br/>
+                                   Date: _______________
+                                </p>
+                            </div>
+                            <div class="col-6">
+                                <p>__________________________<br/>
+                                   Fire Safety Officer Signature<br/>
+                                   Date: _______________
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Security/Theft Incident Report Template -->
+    <template id="incident_security_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <style>
+                            /* Compact styling for incident reports */
+                            .page h2 { font-size: 20px !important; margin-bottom: 10px !important; }
+                            .page h4 { font-size: 14px !important; margin-bottom: 8px !important; margin-top: 10px !important; }
+                            .page h3 { font-size: 16px !important; margin-bottom: 8px !important; }
+                            .page p { font-size: 11px !important; margin-bottom: 5px !important; line-height: 1.4 !important; }
+                            .page .table td, .page .table th { font-size: 11px !important; padding: 5px 8px !important; line-height: 1.4 !important; }
+                            .page .table strong { font-size: 11px !important; }
+                            .page .badge { font-size: 11px !important; padding: 4px 10px !important; }
+                            .page .border { padding: 10px !important; }
+                            .page .mb-4 { margin-bottom: 12px !important; }
+                            .page .mb-3 { margin-bottom: 10px !important; }
+                            .page .mb-2 { margin-bottom: 8px !important; }
+                            .page .mt-5 { margin-top: 15px !important; }
+                            .page .p-3 { padding: 10px !important; }
+                            .page .p-2 { padding: 8px !important; }
+                            .page span { font-size: 11px !important; }
+                        </style>
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h2 class="text-center" style="color: #c62828;">
+                                    <strong>SECURITY INCIDENT REPORT</strong>
+                                </h2>
+                                <h4 class="text-center text-muted">
+                                    <span t-field="doc.name"/>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <div class="row mb-3">
+                            <div class="col-12 text-center">
+                                <span class="badge badge-pill badge-danger">
+                                    <t t-esc="doc.category_id.name.upper()"/> - <t t-esc="doc.severity.upper()"/> SEVERITY
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Basic Information -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #ffebee; padding: 10px;"><strong>Incident Details</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="30%"><strong>Incident Type:</strong></td>
+                                        <td width="70%"><span t-field="doc.category_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Incident Title:</strong></td>
+                                        <td><span t-field="doc.title"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Incident Date/Time:</strong></td>
+                                        <td><span t-field="doc.incident_datetime" t-options='{"widget": "datetime"}'/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Reporting Guard:</strong></td>
+                                        <td><span t-field="doc.guard_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Site Location:</strong></td>
+                                        <td><span t-field="doc.site_id.name"/></td>
+                                    </tr>
+                                    <tr t-if="doc.location">
+                                        <td><strong>Specific Location:</strong></td>
+                                        <td><span t-field="doc.location"/></td>
+                                    </tr>
+                                    <tr t-if="doc.latitude">
+                                        <td><strong>GPS Coordinates:</strong></td>
+                                        <td><t t-esc="doc.latitude"/>, <t t-esc="doc.longitude"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Suspects/Persons Involved -->
+                        <div class="row mb-3" t-if="doc.persons_involved">
+                            <div class="col-12">
+                                <h4 style="background-color: #ffebee; padding: 10px;"><strong>Suspects/Persons Involved</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.persons_involved"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Law Enforcement -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #ffebee; padding: 10px;"><strong>Law Enforcement Response</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="30%"><strong>Police Notified:</strong></td>
+                                        <td width="70%">
+                                            <span t-if="doc.police_notified" class="badge badge-danger">YES</span>
+                                            <span t-else="" class="badge badge-secondary">NO</span>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="doc.police_report_number">
+                                        <td><strong>Police Report Number:</strong></td>
+                                        <td><strong><span t-field="doc.police_report_number"/></strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Property/Items -->
+                        <div class="row mb-3" t-if="doc.property_damage">
+                            <div class="col-12">
+                                <h4 style="background-color: #ffebee; padding: 10px;"><strong>Property/Items Affected</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="30%"><strong>Property Damage/Theft:</strong></td>
+                                        <td width="70%"><span class="badge badge-danger">YES</span></td>
+                                    </tr>
+                                    <tr t-if="doc.damage_details">
+                                        <td><strong>Details:</strong></td>
+                                        <td><span t-field="doc.damage_details"/></td>
+                                    </tr>
+                                    <tr t-if="doc.estimated_cost">
+                                        <td><strong>Estimated Value/Cost:</strong></td>
+                                        <td><span t-field="doc.estimated_cost" t-options='{"widget": "monetary"}'/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Security Actions -->
+                        <div class="row mb-3" t-if="doc.immediate_actions">
+                            <div class="col-12">
+                                <h4 style="background-color: #ffebee; padding: 10px;"><strong>Security Actions Taken</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.immediate_actions"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #ffebee; padding: 10px;"><strong>Detailed Description</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.description"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Witnesses -->
+                        <div class="row mb-3" t-if="doc.witnesses">
+                            <div class="col-12">
+                                <h4 style="background-color: #ffebee; padding: 10px;"><strong>Witnesses</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.witnesses"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Evidence -->
+                        <div class="row mb-3" t-if="doc.photo_ids or doc.video_ids" style="page-break-inside: avoid;">
+                            <div class="col-12">
+                                <h4 style="background-color: #ffebee; padding: 10px;"><strong>Evidence Collected</strong></h4>
+                                <div class="border p-2">
+                                    <p class="mb-2">
+                                        <t t-if="doc.photo_ids"><strong>Photos:</strong> <t t-esc="len(doc.photo_ids)"/> file(s)<br/></t>
+                                        <t t-if="doc.video_ids"><strong>Videos:</strong> <t t-esc="len(doc.video_ids)"/> file(s)<br/></t>
+                                    </p>
+                                    <!-- Display Photos -->
+                                    <table style="width: 100%; border-collapse: collapse;" t-if="doc.photo_ids">
+                                        <t t-set="photo_list" t-value="[p for p in doc.photo_ids if p.mimetype and p.mimetype.startswith('image/')]"/>
+                                        <t t-foreach="photo_list" t-as="photo">
+                                            <t t-if="photo_index % 2 == 0">
+                                                <tr>
+                                                    <td style="width: 48%; padding: 5px; vertical-align: top;">
+                                                        <img t-att-src="'data:image/png;base64,%s' % photo.datas.decode('utf-8')" 
+                                                             alt="Security Evidence Photo" 
+                                                             style="width: 100%; height: auto; max-height: 250px; object-fit: contain; border: 1px solid #ddd; padding: 3px;"/>
+                                                        <p class="text-center text-muted" style="margin: 2px 0;">
+                                                            <t t-esc="photo.name"/>
+                                                        </p>
+                                                    </td>
+                                                    <td style="width: 48%; padding: 5px; vertical-align: top;" t-if="photo_index + 1 &lt; len(photo_list)">
+                                                        <t t-set="next_photo" t-value="photo_list[photo_index + 1]"/>
+                                                        <img t-att-src="'data:image/png;base64,%s' % next_photo.datas.decode('utf-8')" 
+                                                             alt="Security Evidence Photo" 
+                                                             style="width: 100%; height: auto; max-height: 250px; object-fit: contain; border: 1px solid #ddd; padding: 3px;"/>
+                                                        <p class="text-center text-muted" style="margin: 2px 0;">
+                                                            <t t-esc="next_photo.name"/>
+                                                        </p>
+                                                    </td>
+                                                    <td style="width: 48%; padding: 5px;" t-if="photo_index + 1 >= len(photo_list)">
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </t>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Signatures -->
+                        <div class="row mt-5">
+                            <div class="col-6">
+                                <p>__________________________<br/>
+                                   Security Guard Signature<br/>
+                                   Date: _______________
+                                </p>
+                            </div>
+                            <div class="col-6">
+                                <p>__________________________<br/>
+                                   Security Supervisor Signature<br/>
+                                   Date: _______________
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Vehicle Incident Report Template -->
+    <template id="incident_vehicle_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <style>
+                            /* Compact styling for incident reports */
+                            .page h2 { font-size: 20px !important; margin-bottom: 10px !important; }
+                            .page h4 { font-size: 14px !important; margin-bottom: 8px !important; margin-top: 10px !important; }
+                            .page h3 { font-size: 16px !important; margin-bottom: 8px !important; }
+                            .page p { font-size: 11px !important; margin-bottom: 5px !important; line-height: 1.4 !important; }
+                            .page .table td, .page .table th { font-size: 11px !important; padding: 5px 8px !important; line-height: 1.4 !important; }
+                            .page .table strong { font-size: 11px !important; }
+                            .page .badge { font-size: 11px !important; padding: 4px 10px !important; }
+                            .page .border { padding: 10px !important; }
+                            .page .mb-4 { margin-bottom: 12px !important; }
+                            .page .mb-3 { margin-bottom: 10px !important; }
+                            .page .mb-2 { margin-bottom: 8px !important; }
+                            .page .mt-5 { margin-top: 15px !important; }
+                            .page .p-3 { padding: 10px !important; }
+                            .page .p-2 { padding: 8px !important; }
+                            .page span { font-size: 11px !important; }
+                        </style>
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h2 class="text-center" style="color: #1976d2;">
+                                    <strong>VEHICLE INCIDENT REPORT</strong>
+                                </h2>
+                                <h4 class="text-center text-muted">
+                                    <span t-field="doc.name"/>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <div class="row mb-3">
+                            <div class="col-12 text-center">
+                                <span class="badge badge-pill badge-primary">
+                                    VEHICLE INCIDENT - <t t-esc="doc.severity.upper()"/> SEVERITY
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Basic Information -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #e3f2fd; padding: 10px;"><strong>Incident Details</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="30%"><strong>Incident Title:</strong></td>
+                                        <td width="70%"><span t-field="doc.title"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Incident Date/Time:</strong></td>
+                                        <td><span t-field="doc.incident_datetime" t-options='{"widget": "datetime"}'/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Reporting Guard:</strong></td>
+                                        <td><span t-field="doc.guard_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Site Location:</strong></td>
+                                        <td><span t-field="doc.site_id.name"/></td>
+                                    </tr>
+                                    <tr t-if="doc.location">
+                                        <td><strong>Specific Location:</strong></td>
+                                        <td><span t-field="doc.location"/></td>
+                                    </tr>
+                                    <tr t-if="doc.latitude">
+                                        <td><strong>GPS Coordinates:</strong></td>
+                                        <td><t t-esc="doc.latitude"/>, <t t-esc="doc.longitude"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Vehicle/Driver Information -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #e3f2fd; padding: 10px;"><strong>Vehicle/Driver Information</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.persons_involved"/>
+                                    <p class="mt-2"><em>Include: Vehicle make/model, license plate, driver name, insurance information</em></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Damage Assessment -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #e3f2fd; padding: 10px;"><strong>Damage Assessment</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="30%"><strong>Property/Vehicle Damage:</strong></td>
+                                        <td width="70%">
+                                            <span t-if="doc.property_damage" class="badge badge-warning">YES</span>
+                                            <span t-else="" class="badge badge-secondary">NO</span>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="doc.damage_details">
+                                        <td><strong>Damage Details:</strong></td>
+                                        <td><span t-field="doc.damage_details"/></td>
+                                    </tr>
+                                    <tr t-if="doc.estimated_cost">
+                                        <td><strong>Estimated Repair Cost:</strong></td>
+                                        <td><span t-field="doc.estimated_cost" t-options='{"widget": "monetary"}'/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Injuries -->
+                        <div class="row mb-3" t-if="doc.injuries">
+                            <div class="col-12">
+                                <h4 style="background-color: #e3f2fd; padding: 10px;"><strong>Injuries</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="30%"><strong>Injuries Occurred:</strong></td>
+                                        <td width="70%"><span class="badge badge-danger">YES</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Injury Details:</strong></td>
+                                        <td><span t-field="doc.injury_details"/></td>
+                                    </tr>
+                                    <tr t-if="doc.medical_required">
+                                        <td><strong>Medical Assistance:</strong></td>
+                                        <td><span class="badge badge-danger">REQUIRED</span></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Law Enforcement -->
+                        <div class="row mb-3" t-if="doc.police_notified">
+                            <div class="col-12">
+                                <h4 style="background-color: #e3f2fd; padding: 10px;"><strong>Law Enforcement</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="30%"><strong>Police Notified:</strong></td>
+                                        <td width="70%"><span class="badge badge-warning">YES</span></td>
+                                    </tr>
+                                    <tr t-if="doc.police_report_number">
+                                        <td><strong>Police Report Number:</strong></td>
+                                        <td><strong><span t-field="doc.police_report_number"/></strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #e3f2fd; padding: 10px;"><strong>Incident Description</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.description"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Witnesses -->
+                        <div class="row mb-3" t-if="doc.witnesses">
+                            <div class="col-12">
+                                <h4 style="background-color: #e3f2fd; padding: 10px;"><strong>Witnesses</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.witnesses"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Photos/Evidence -->
+                        <div class="row mb-3" t-if="doc.photo_ids" style="page-break-inside: avoid;">
+                            <div class="col-12">
+                                <h4 style="background-color: #e3f2fd; padding: 10px;"><strong>Photos/Evidence</strong></h4>
+                                <div class="border p-2">
+                                    <p class="mb-2"><strong>Number of photos attached:</strong> <t t-esc="len(doc.photo_ids)"/></p>
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <t t-set="photo_list" t-value="[p for p in doc.photo_ids if p.mimetype and p.mimetype.startswith('image/')]"/>
+                                        <t t-foreach="photo_list" t-as="photo">
+                                            <t t-if="photo_index % 2 == 0">
+                                                <tr>
+                                                    <td style="width: 48%; padding: 5px; vertical-align: top;">
+                                                        <img t-att-src="'data:image/png;base64,%s' % photo.datas.decode('utf-8')" 
+                                                             alt="Vehicle Incident Photo" 
+                                                             style="width: 100%; height: auto; max-height: 250px; object-fit: contain; border: 1px solid #ddd; padding: 3px;"/>
+                                                        <p class="text-center text-muted" style="margin: 2px 0;">
+                                                            <t t-esc="photo.name"/>
+                                                        </p>
+                                                    </td>
+                                                    <td style="width: 48%; padding: 5px; vertical-align: top;" t-if="photo_index + 1 &lt; len(photo_list)">
+                                                        <t t-set="next_photo" t-value="photo_list[photo_index + 1]"/>
+                                                        <img t-att-src="'data:image/png;base64,%s' % next_photo.datas.decode('utf-8')" 
+                                                             alt="Vehicle Incident Photo" 
+                                                             style="width: 100%; height: auto; max-height: 250px; object-fit: contain; border: 1px solid #ddd; padding: 3px;"/>
+                                                        <p class="text-center text-muted" style="margin: 2px 0;">
+                                                            <t t-esc="next_photo.name"/>
+                                                        </p>
+                                                    </td>
+                                                    <td style="width: 48%; padding: 5px;" t-if="photo_index + 1 >= len(photo_list)">
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </t>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Signatures -->
+                        <div class="row mt-5">
+                            <div class="col-6">
+                                <p>__________________________<br/>
+                                   Guard Signature<br/>
+                                   Date: _______________
+                                </p>
+                            </div>
+                            <div class="col-6">
+                                <p>__________________________<br/>
+                                   Supervisor Signature<br/>
+                                   Date: _______________
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Safety Hazard Report Template -->
+    <template id="incident_safety_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <style>
+                            /* Compact styling for incident reports */
+                            .page h2 { font-size: 20px !important; margin-bottom: 10px !important; }
+                            .page h4 { font-size: 14px !important; margin-bottom: 8px !important; margin-top: 10px !important; }
+                            .page h3 { font-size: 16px !important; margin-bottom: 8px !important; }
+                            .page p { font-size: 11px !important; margin-bottom: 5px !important; line-height: 1.4 !important; }
+                            .page .table td, .page .table th { font-size: 11px !important; padding: 5px 8px !important; line-height: 1.4 !important; }
+                            .page .table strong { font-size: 11px !important; }
+                            .page .badge { font-size: 11px !important; padding: 4px 10px !important; }
+                            .page .border { padding: 10px !important; }
+                            .page .mb-4 { margin-bottom: 12px !important; }
+                            .page .mb-3 { margin-bottom: 10px !important; }
+                            .page .mb-2 { margin-bottom: 8px !important; }
+                            .page .mt-5 { margin-top: 15px !important; }
+                            .page .p-3 { padding: 10px !important; }
+                            .page .p-2 { padding: 8px !important; }
+                            .page span { font-size: 11px !important; }
+                        </style>
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h2 class="text-center" style="color: #f57c00;">
+                                    <strong>SAFETY HAZARD REPORT</strong>
+                                </h2>
+                                <h4 class="text-center text-muted">
+                                    <span t-field="doc.name"/>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <div class="row mb-3">
+                            <div class="col-12 text-center">
+                                <span class="badge badge-pill badge-warning">
+                                    SAFETY HAZARD - <t t-esc="doc.severity.upper()"/> SEVERITY
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Basic Information -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #fff8e1; padding: 10px;"><strong>Hazard Details</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="30%"><strong>Hazard Type:</strong></td>
+                                        <td width="70%"><span t-field="doc.title"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Identified Date/Time:</strong></td>
+                                        <td><span t-field="doc.incident_datetime" t-options='{"widget": "datetime"}'/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Reporting Guard:</strong></td>
+                                        <td><span t-field="doc.guard_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Site Location:</strong></td>
+                                        <td><span t-field="doc.site_id.name"/></td>
+                                    </tr>
+                                    <tr t-if="doc.location">
+                                        <td><strong>Specific Location:</strong></td>
+                                        <td><span t-field="doc.location"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Risk Level:</strong></td>
+                                        <td>
+                                            <span t-if="doc.severity == 'critical'" class="badge badge-danger">CRITICAL - Immediate Action Required</span>
+                                            <span t-elif="doc.severity == 'high'" class="badge badge-danger">HIGH RISK</span>
+                                            <span t-elif="doc.severity == 'medium'" class="badge badge-warning">MEDIUM RISK</span>
+                                            <span t-else="" class="badge badge-info">LOW RISK</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Hazard Description -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #fff8e1; padding: 10px;"><strong>Hazard Description</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.description"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Potential Risks -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #fff8e1; padding: 10px;"><strong>Potential Risks/Consequences</strong></h4>
+                                <div class="border p-3">
+                                    <p><strong>Could result in:</strong></p>
+                                    <ul>
+                                        <li t-if="doc.injuries">Risk of injury to personnel or visitors</li>
+                                        <li t-if="doc.property_damage">Risk of property damage</li>
+                                        <li>Other safety concerns as described above</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Immediate Actions -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #fff8e1; padding: 10px;"><strong>Immediate Actions Taken</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.immediate_actions"/>
+                                    <p t-if="not doc.immediate_actions" class="text-muted"><em>No immediate actions documented</em></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recommended Corrective Actions -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="background-color: #fff8e1; padding: 10px;"><strong>Recommended Corrective Actions</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.followup_notes"/>
+                                    <p t-if="not doc.followup_notes" class="text-muted"><em>To be determined by safety officer</em></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Follow-up Status -->
+                        <div class="row mb-3" t-if="doc.requires_followup">
+                            <div class="col-12">
+                                <h4 style="background-color: #fff8e1; padding: 10px;"><strong>Follow-up Status</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="30%"><strong>Requires Follow-up:</strong></td>
+                                        <td width="70%"><span class="badge badge-warning">YES</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Status:</strong></td>
+                                        <td>
+                                            <span t-if="doc.followup_completed" class="badge badge-success">COMPLETED</span>
+                                            <span t-else="" class="badge badge-warning">PENDING</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Photos -->
+                        <div class="row mb-3" t-if="doc.photo_ids" style="page-break-inside: avoid;">
+                            <div class="col-12">
+                                <h4 style="background-color: #fff8e1; padding: 10px;"><strong>Photos</strong></h4>
+                                <div class="border p-2">
+                                    <p class="mb-2"><strong>Number of photos attached:</strong> <t t-esc="len(doc.photo_ids)"/></p>
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <t t-set="photo_list" t-value="[p for p in doc.photo_ids if p.mimetype and p.mimetype.startswith('image/')]"/>
+                                        <t t-foreach="photo_list" t-as="photo">
+                                            <t t-if="photo_index % 2 == 0">
+                                                <tr>
+                                                    <td style="width: 48%; padding: 5px; vertical-align: top;">
+                                                        <img t-att-src="'data:image/png;base64,%s' % photo.datas.decode('utf-8')" 
+                                                             alt="Safety Hazard Photo" 
+                                                             style="width: 100%; height: auto; max-height: 250px; object-fit: contain; border: 1px solid #ddd; padding: 3px;"/>
+                                                        <p class="text-center text-muted" style="margin: 2px 0;">
+                                                            <t t-esc="photo.name"/>
+                                                        </p>
+                                                    </td>
+                                                    <td style="width: 48%; padding: 5px; vertical-align: top;" t-if="photo_index + 1 &lt; len(photo_list)">
+                                                        <t t-set="next_photo" t-value="photo_list[photo_index + 1]"/>
+                                                        <img t-att-src="'data:image/png;base64,%s' % next_photo.datas.decode('utf-8')" 
+                                                             alt="Safety Hazard Photo" 
+                                                             style="width: 100%; height: auto; max-height: 250px; object-fit: contain; border: 1px solid #ddd; padding: 3px;"/>
+                                                        <p class="text-center text-muted" style="margin: 2px 0;">
+                                                            <t t-esc="next_photo.name"/>
+                                                        </p>
+                                                    </td>
+                                                    <td style="width: 48%; padding: 5px;" t-if="photo_index + 1 >= len(photo_list)">
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </t>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Signatures -->
+                        <div class="row mt-5">
+                            <div class="col-4">
+                                <p>__________________________<br/>
+                                   Guard Signature<br/>
+                                   Date: _______________
+                                </p>
+                            </div>
+                            <div class="col-4">
+                                <p>__________________________<br/>
+                                   Safety Officer Signature<br/>
+                                   Date: _______________
+                                </p>
+                            </div>
+                            <div class="col-4">
+                                <p>__________________________<br/>
+                                   Site Manager Signature<br/>
+                                   Date: _______________
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Actions -->
+    <record id="action_report_incident" model="ir.actions.report">
+        <field name="name">Incident Report (General)</field>
+        <field name="model">incident.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.incident_report_pdf_template</field>
+        <field name="report_file">guardpro.incident_report_pdf_template</field>
+        <field name="print_report_name">'Incident_Report_%s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_incident_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_incident_medical" model="ir.actions.report">
+        <field name="name">Medical Emergency Report</field>
+        <field name="model">incident.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.incident_medical_pdf_template</field>
+        <field name="report_file">guardpro.incident_medical_pdf_template</field>
+        <field name="print_report_name">'Medical_Emergency_%s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_incident_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_incident_fire" model="ir.actions.report">
+        <field name="name">Fire/Smoke Incident Report</field>
+        <field name="model">incident.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.incident_fire_pdf_template</field>
+        <field name="report_file">guardpro.incident_fire_pdf_template</field>
+        <field name="print_report_name">'Fire_Incident_%s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_incident_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_incident_security" model="ir.actions.report">
+        <field name="name">Security Incident Report</field>
+        <field name="model">incident.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.incident_security_pdf_template</field>
+        <field name="report_file">guardpro.incident_security_pdf_template</field>
+        <field name="print_report_name">'Security_Incident_%s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_incident_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_incident_vehicle" model="ir.actions.report">
+        <field name="name">Vehicle Incident Report</field>
+        <field name="model">incident.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.incident_vehicle_pdf_template</field>
+        <field name="report_file">guardpro.incident_vehicle_pdf_template</field>
+        <field name="print_report_name">'Vehicle_Incident_%s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_incident_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_incident_safety" model="ir.actions.report">
+        <field name="name">Safety Hazard Report</field>
+        <field name="model">incident.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.incident_safety_pdf_template</field>
+        <field name="report_file">guardpro.incident_safety_pdf_template</field>
+        <field name="print_report_name">'Safety_Hazard_%s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_incident_report"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>
+

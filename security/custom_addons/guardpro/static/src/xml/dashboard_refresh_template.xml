@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="guardpro.DashboardRefresh">
+        <div class="o_dashboard_refresh">
+            <button class="btn btn-primary" t-on-click="manualRefresh" title="Refresh Dashboard">
+                <i class="fa fa-sync-alt"></i>
+            </button>
+        </div>
+    </t>
+</templates>
+

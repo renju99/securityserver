@@ -1,0 +1,341 @@
+/* GuardPro Analytics Dashboard Styles */
+
+.o_guardpro_analytics_dashboard,
+.o_guardpro_analytics_dashboard_view {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    overflow-y: auto;
+    height: 100%;
+    width: 100%;
+    padding-bottom: 40px;
+
+    /* Header Styles */
+    .o_dashboard_header {
+        background: white;
+        padding: 20px 25px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+
+        .o_dashboard_title {
+            h2 {
+                color: #2c3e50;
+                font-weight: 600;
+                font-size: 1.75rem;
+            }
+
+            p {
+                font-size: 0.95rem;
+                margin-top: 4px;
+            }
+        }
+
+        .o_dashboard_controls {
+            .btn {
+                padding: 8px 20px;
+                font-weight: 500;
+                border-radius: 6px;
+                transition: all 0.2s ease;
+
+                &:hover:not(:disabled) {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+                }
+
+                i {
+                    font-size: 0.9rem;
+                }
+            }
+        }
+    }
+
+    /* Loading State */
+    .o_dashboard_loading {
+        background: white;
+        padding: 60px 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+
+        .fa-spinner {
+            color: #0d6efd;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: #6c757d;
+        }
+    }
+
+    /* KPI Cards */
+    .o_dashboard_kpis {
+        .o_kpi_card {
+            border: none;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+
+            &.cursor-pointer {
+                cursor: pointer;
+            }
+
+            &:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 16px rgba(0,0,0,0.15) !important;
+            }
+
+            .card-body {
+                padding: 20px;
+            }
+
+            .o_kpi_icon_wrapper {
+                width: 64px;
+                height: 64px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+                backdrop-filter: blur(10px);
+            }
+
+            .o_kpi_content {
+                .o_kpi_name {
+                    font-size: 0.85rem;
+                    font-weight: 500;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+
+                .o_kpi_value {
+                    color: #2c3e50;
+                    line-height: 1.2;
+                }
+
+                .o_kpi_variance {
+                    font-weight: 600;
+                    font-size: 0.8rem;
+
+                    i {
+                        font-size: 0.75rem;
+                    }
+                }
+            }
+        }
+    }
+
+    /* Chart Widgets */
+    .o_dashboard_charts {
+        .o_chart_widget {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 100%;
+
+            .card-header {
+                padding: 15px 20px;
+                border-bottom: 1px solid rgba(0,0,0,0.08);
+
+                h5 {
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                    color: #2c3e50;
+
+                    i {
+                        font-size: 1rem;
+                    }
+                }
+            }
+
+            .card-body {
+                .o_chart_container {
+                    canvas {
+                        max-height: 300px;
+                    }
+                }
+            }
+        }
+    }
+
+    /* Table Widgets */
+    .o_dashboard_tables {
+        .o_table_widget {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+
+            .card-header {
+                padding: 15px 20px;
+                border-bottom: 1px solid rgba(0,0,0,0.08);
+
+                h5 {
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                    color: #2c3e50;
+
+                    i {
+                        font-size: 1rem;
+                    }
+                }
+            }
+
+            .table-responsive {
+                max-height: 400px;
+                overflow-y: auto;
+
+                /* Custom scrollbar */
+                &::-webkit-scrollbar {
+                    width: 8px;
+                    height: 8px;
+                }
+
+                &::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                }
+
+                &::-webkit-scrollbar-thumb {
+                    background: #888;
+                    border-radius: 4px;
+
+                    &:hover {
+                        background: #555;
+                    }
+                }
+            }
+
+            table {
+                thead {
+                    position: sticky;
+                    top: 0;
+                    z-index: 10;
+
+                    th {
+                        font-weight: 600;
+                        font-size: 0.85rem;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                        color: #495057;
+                        padding: 12px 16px;
+                    }
+                }
+
+                tbody {
+                    tr {
+                        transition: background-color 0.2s ease;
+
+                        &:hover {
+                            background-color: rgba(0,123,255,0.05);
+                        }
+
+                        td {
+                            padding: 12px 16px;
+                            font-size: 0.9rem;
+                            color: #495057;
+                            vertical-align: middle;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .o_dashboard_header {
+            flex-direction: column;
+            gap: 15px;
+
+            .o_dashboard_controls {
+                width: 100%;
+
+                .btn {
+                    width: 100%;
+                }
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        padding: 15px;
+
+        .o_dashboard_header {
+            padding: 15px;
+
+            .o_dashboard_title h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        .o_kpi_card {
+            .card-body {
+                padding: 15px !important;
+            }
+
+            .o_kpi_icon_wrapper {
+                width: 50px !important;
+                height: 50px !important;
+
+                i {
+                    font-size: 1.5rem !important;
+                }
+            }
+        }
+
+        .o_chart_widget {
+            .card-body {
+                .o_chart_container {
+                    height: 250px !important;
+                }
+            }
+        }
+    }
+}
+
+/* Bootstrap Color Utilities Extensions for Backgrounds */
+.bg-primary-subtle {
+    background-color: rgba(13, 110, 253, 0.1) !important;
+}
+
+.bg-success-subtle {
+    background-color: rgba(25, 135, 84, 0.1) !important;
+}
+
+.bg-info-subtle {
+    background-color: rgba(13, 202, 240, 0.1) !important;
+}
+
+.bg-warning-subtle {
+    background-color: rgba(255, 193, 7, 0.1) !important;
+}
+
+.bg-danger-subtle {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+}
+
+.bg-secondary-subtle {
+    background-color: rgba(108, 117, 125, 0.1) !important;
+}
+
+/* Cursor Pointer Utility */
+.cursor-pointer {
+    cursor: pointer !important;
+    
+    &:hover {
+        transform: translateY(-2px);
+        transition: transform 0.2s ease;
+    }
+}
+
+/* Animation for Cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.o_guardpro_analytics_dashboard_view .o_dashboard_content {
+    animation: fadeInUp 0.4s ease-out;
+}
+

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- User Favorites List View -->
+    <record id="view_user_favorite_list" model="ir.ui.view">
+        <field name="name">user.favorite.list</field>
+        <field name="model">user.favorite</field>
+        <field name="arch" type="xml">
+            <list string="My Favorites" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="record_name"/>
+                <field name="model_name"/>
+                <field name="icon"/>
+                <field name="notes"/>
+                <button name="action_open_record" string="Open" type="object" icon="fa-external-link"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- User Favorites Kanban View -->
+    <record id="view_user_favorite_kanban" model="ir.ui.view">
+        <field name="name">user.favorite.kanban</field>
+        <field name="model">user.favorite</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile">
+                <field name="record_name"/>
+                <field name="model_name"/>
+                <field name="icon"/>
+                <field name="color"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click" t-attf-style="border-left: 3px solid #{kanban_color(record.color.raw_value)};">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong>
+                                        <i t-attf-class="fa {{record.icon.raw_value}}"/> 
+                                        <field name="record_name"/>
+                                    </strong>
+                                    <div class="text-muted">
+                                        <field name="model_name"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <field name="notes"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_user_favorite" model="ir.actions.act_window">
+        <field name="name">My Favorites</field>
+        <field name="res_model">user.favorite</field>
+        <field name="view_mode">kanban,list</field>
+        <field name="domain">[('user_id', '=', uid)]</field>
+        <field name="context">{'default_user_id': uid}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Favorites Yet
+            </p>
+            <p>
+                Click the star icon on guards, sites, or other records to add them to your favorites for quick access.
+            </p>
+        </field>
+    </record>
+
+</odoo>
+

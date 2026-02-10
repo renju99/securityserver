@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="key_001" model="key.register">
+            <field name="name">MASTER-A-001</field>
+            <field name="key_type">master</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="description">Master key for Building A</field>
+        </record>
+    </data>
+</odoo>

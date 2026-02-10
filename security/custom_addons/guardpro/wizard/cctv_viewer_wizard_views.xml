@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- CCTV Viewer Wizard Form -->
+        <record id="view_cctv_viewer_wizard_form" model="ir.ui.view">
+            <field name="name">cctv.viewer.wizard.form</field>
+            <field name="model">cctv.viewer.wizard</field>
+            <field name="arch" type="xml">
+                <form string="View CCTV Camera">
+                    <sheet>
+                        <div class="alert alert-info" role="alert" invisible="site_id">
+                            <i class="fa fa-info-circle" title="Information"/> 
+                            <strong>No cameras found?</strong> 
+                            <a href="/web#action=guardpro.action_cctv_camera" target="_blank" class="alert-link" role="button">
+                                Click here to add cameras
+                            </a>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="site_id" options="{'no_create': True}" required="1"/>
+                                <div invisible="not site_id" class="mt-2">
+                                    <a href="/web#action=guardpro.action_cctv_camera" target="_blank" class="btn btn-sm btn-link" role="button">
+                                        <i class="fa fa-plus"/> Add Camera for this Site
+                                    </a>
+                                </div>
+                            </group>
+                        </group>
+                        <group invisible="not site_id">
+                            <group>
+                                <field name="camera_ids" readonly="1" widget="many2many_tags" 
+                                       options="{'color_field': 'status', 'no_create': True}"/>
+                            </group>
+                        </group>
+                        <group invisible="not site_id or not camera_ids">
+                            <group>
+                                <field name="camera_id" options="{'no_create': True}" required="1"/>
+                            </group>
+                            <group invisible="not camera_id">
+                                <field name="camera_name" readonly="1"/>
+                                <field name="camera_code" readonly="1"/>
+                                <field name="camera_status" readonly="1" widget="badge"/>
+                                <field name="stream_type" readonly="1"/>
+                            </group>
+                        </group>
+                        <div invisible="not camera_id" class="alert alert-info mt-3" role="alert">
+                            <p><strong>Ready to view camera:</strong> <field name="camera_name" readonly="1"/></p>
+                            <p class="text-muted">Click "View Camera" to open the live stream.</p>
+                        </div>
+                    </sheet>
+                    <footer>
+                        <button string="View Camera" name="action_view_camera" type="object" 
+                                class="btn-primary" invisible="not camera_id"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- CCTV Viewer Wizard Action -->
+        <record id="action_cctv_viewer_wizard" model="ir.actions.act_window">
+            <field name="name">View CCTV Camera</field>
+            <field name="res_model">cctv.viewer.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="context">{}</field>
+        </record>
+    </data>
+</odoo>

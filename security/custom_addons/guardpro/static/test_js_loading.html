@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GuardPro JavaScript Loading Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #1a237e;
+            border-bottom: 3px solid #3f51b5;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-item {
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #ccc;
+            background: #f9f9f9;
+        }
+        .test-item.loading {
+            border-left-color: #ff9800;
+        }
+        .test-item.success {
+            border-left-color: #4caf50;
+        }
+        .test-item.error {
+            border-left-color: #f44336;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .status.loading {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        .status.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        code {
+            background: #263238;
+            color: #aed581;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        .console-output {
+            background: #263238;
+            color: #cfd8dc;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        .console-output .error {
+            color: #ef5350;
+        }
+        .console-output .success {
+            color: #66bb6a;
+        }
+        .console-output .info {
+            color: #42a5f5;
+        }
+        .refresh-btn {
+            background: #3f51b5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .refresh-btn:hover {
+            background: #303f9f;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 GuardPro JavaScript Loading Diagnostic</h1>
+    
+    <div class="test-section">
+        <h2>Test Summary</h2>
+        <div id="summary">
+            <p>Running tests...</p>
+        </div>
+        <button class="refresh-btn" onclick="location.reload()">🔄 Refresh Tests</button>
+    </div>
+
+    <div class="test-section">
+        <h2>JavaScript Files Loading Test</h2>
+        <div id="file-tests"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Global Objects Test</h2>
+        <div id="global-tests"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Browser Console Output</h2>
+        <div class="console-output" id="console-output"></div>
+    </div>
+
+    <script>
+        // Capture console output
+        const consoleOutput = document.getElementById('console-output');
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+
+        function addToConsole(type, ...args) {
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            
+            const line = document.createElement('div');
+            line.className = type;
+            line.textContent = `[${type.toUpperCase()}] ${message}`;
+            consoleOutput.appendChild(line);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole('info', ...args);
+        };
+
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole('error', ...args);
+        };
+
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToConsole('info', ...args);
+        };
+
+        // Test results
+        const results = {
+            total: 0,
+            passed: 0,
+            failed: 0,
+            loading: 0
+        };
+
+        // Files to test
+        const jsFiles = [
+            '/guardpro/static/src/js/error_suppression.js',
+            '/guardpro/static/src/js/pwa_register.js',
+            '/guardpro/static/src/js/pwa_navigation.js',
+            '/guardpro/static/src/js/pwa_lazy_loader.js',
+            '/guardpro/static/src/js/mobile_header_fix.js',
+            '/guardpro/static/src/js/gps_tracker.js',
+            '/guardpro/static/src/js/offline_sync.js'
+        ];
+
+        // Global objects to test
+        const globalObjects = [
+            'GuardProErrorSuppression',
+            'GuardProPWA',
+            'GuardProNavigation',
+            'PWALazyLoader'
+        ];
+
+        function createTestItem(name, status = 'loading') {
+            const div = document.createElement('div');
+            div.className = `test-item ${status}`;
+            div.innerHTML = `
+                <strong>${name}</strong>
+                <span class="status ${status}">${status.toUpperCase()}</span>
+            `;
+            return div;
+        }
+
+        function updateTestItem(item, status, message = '') {
+            item.className = `test-item ${status}`;
+            const statusSpan = item.querySelector('.status');
+            statusSpan.className = `status ${status}`;
+            statusSpan.textContent = status.toUpperCase();
+            
+            if (message) {
+                const msgDiv = document.createElement('div');
+                msgDiv.style.marginTop = '8px';
+                msgDiv.style.fontSize = '13px';
+                msgDiv.style.color = '#666';
+                msgDiv.textContent = message;
+                item.appendChild(msgDiv);
+            }
+        }
+
+        // Test JavaScript file loading
+        function testFileLoading(file) {
+            results.total++;
+            results.loading++;
+            
+            const fileTestsDiv = document.getElementById('file-tests');
+            const testItem = createTestItem(file, 'loading');
+            fileTestsDiv.appendChild(testItem);
+
+            const script = document.createElement('script');
+            script.src = file;
+            
+            script.onload = function() {
+                results.loading--;
+                results.passed++;
+                updateTestItem(testItem, 'success', 'Loaded successfully');
+                console.log('✓ Loaded:', file);
+                updateSummary();
+                
+                // Test global objects after all files loaded
+                if (results.loading === 0) {
+                    setTimeout(testGlobalObjects, 500);
+                }
+            };
+            
+            script.onerror = function() {
+                results.loading--;
+                results.failed++;
+                updateTestItem(testItem, 'error', 'Failed to load - Check if file exists and server is running');
+                console.error('✗ Failed to load:', file);
+                updateSummary();
+            };
+            
+            document.body.appendChild(script);
+        }
+
+        // Test global objects
+        function testGlobalObjects() {
+            const globalTestsDiv = document.getElementById('global-tests');
+            
+            globalObjects.forEach(objName => {
+                results.total++;
+                const testItem = createTestItem(`window.${objName}`, 'loading');
+                globalTestsDiv.appendChild(testItem);
+                
+                if (typeof window[objName] !== 'undefined') {
+                    results.passed++;
+                    const version = window[objName].version || 'unknown';
+                    updateTestItem(testItem, 'success', `Available (version: ${version})`);
+                    console.log(`✓ Global object available: window.${objName}`, window[objName]);
+                } else {
+                    results.failed++;
+                    updateTestItem(testItem, 'error', 'Not available - Check if JavaScript loaded correctly');
+                    console.error(`✗ Global object not available: window.${objName}`);
+                }
+            });
+            
+            updateSummary();
+        }
+
+        // Update summary
+        function updateSummary() {
+            const summaryDiv = document.getElementById('summary');
+            const passRate = results.total > 0 ? Math.round((results.passed / results.total) * 100) : 0;
+            
+            summaryDiv.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin: 15px 0;">
+                    <div>
+                        <strong>Total Tests:</strong> ${results.total}
+                    </div>
+                    <div style="color: #4caf50;">
+                        <strong>Passed:</strong> ${results.passed}
+                    </div>
+                    <div style="color: #f44336;">
+                        <strong>Failed:</strong> ${results.failed}
+                    </div>
+                    <div style="color: #ff9800;">
+                        <strong>Loading:</strong> ${results.loading}
+                    </div>
+                    <div style="color: ${passRate >= 80 ? '#4caf50' : passRate >= 50 ? '#ff9800' : '#f44336'};">
+                        <strong>Pass Rate:</strong> ${passRate}%
+                    </div>
+                </div>
+                ${results.failed > 0 ? `
+                    <div style="background: #ffebee; padding: 15px; border-radius: 4px; margin-top: 15px; border-left: 4px solid #f44336;">
+                        <strong>⚠️ Issues Detected</strong><br>
+                        Some JavaScript files failed to load. This could indicate:<br>
+                        • Odoo server not running<br>
+                        • GuardPro module not installed/enabled<br>
+                        • Assets not built (run: <code>./fix_guardpro_loading.sh</code>)<br>
+                        • File paths incorrect in manifest<br>
+                        • Browser blocking scripts (check console for CORS errors)
+                    </div>
+                ` : results.total > 0 && results.loading === 0 ? `
+                    <div style="background: #e8f5e9; padding: 15px; border-radius: 4px; margin-top: 15px; border-left: 4px solid #4caf50;">
+                        <strong>✓ All Tests Passed!</strong><br>
+                        All JavaScript files loaded successfully and global objects are available.
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        // Run tests
+        console.log('Starting GuardPro JavaScript diagnostic tests...');
+        jsFiles.forEach(testFileLoading);
+        updateSummary();
+    </script>
+</body>
+</html>
+

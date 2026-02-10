@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Default Performance Criteria -->
+        <record id="performance_criteria_punctuality" model="guard.performance.criteria">
+            <field name="name">Punctuality</field>
+            <field name="code">punctuality</field>
+            <field name="description">Measures on-time arrival for scheduled shifts with 5-minute grace period</field>
+            <field name="weight">18.0</field>
+            <field name="calculation_method">automatic</field>
+            <field name="min_score">0.0</field>
+            <field name="max_score">100.0</field>
+            <field name="sequence">10</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <record id="performance_criteria_tour_completion" model="guard.performance.criteria">
+            <field name="name">Tour Completion Rate</field>
+            <field name="code">tour_completion</field>
+            <field name="description">Percentage of assigned tours completed successfully with all checkpoints scanned</field>
+            <field name="weight">22.0</field>
+            <field name="calculation_method">automatic</field>
+            <field name="min_score">0.0</field>
+            <field name="max_score">100.0</field>
+            <field name="sequence">20</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <record id="performance_criteria_incident_response" model="guard.performance.criteria">
+            <field name="name">Incident Response Quality</field>
+            <field name="code">incident_response</field>
+            <field name="description">Quality and timeliness of incident reports including documentation and photos</field>
+            <field name="weight">18.0</field>
+            <field name="calculation_method">automatic</field>
+            <field name="min_score">0.0</field>
+            <field name="max_score">100.0</field>
+            <field name="sequence">30</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <record id="performance_criteria_client_satisfaction" model="guard.performance.criteria">
+            <field name="name">Client Satisfaction</field>
+            <field name="code">client_satisfaction</field>
+            <field name="description">Client feedback ratings and satisfaction scores from surveys and reviews</field>
+            <field name="weight">15.0</field>
+            <field name="calculation_method">automatic</field>
+            <field name="min_score">0.0</field>
+            <field name="max_score">100.0</field>
+            <field name="sequence">40</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <record id="performance_criteria_shift_adherence" model="guard.performance.criteria">
+            <field name="name">Shift Adherence</field>
+            <field name="code">shift_adherence</field>
+            <field name="description">Attendance and completion of scheduled shifts without unauthorized absences</field>
+            <field name="weight">15.0</field>
+            <field name="calculation_method">automatic</field>
+            <field name="min_score">0.0</field>
+            <field name="max_score">100.0</field>
+            <field name="sequence">50</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <record id="performance_criteria_communication" model="guard.performance.criteria">
+            <field name="name">Communication Quality</field>
+            <field name="code">communication</field>
+            <field name="description">Effectiveness of communication with team, supervisors, and clients</field>
+            <field name="weight">7.0</field>
+            <field name="calculation_method">manual</field>
+            <field name="min_score">0.0</field>
+            <field name="max_score">100.0</field>
+            <field name="sequence">60</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <record id="performance_criteria_professionalism" model="guard.performance.criteria">
+            <field name="name">Professionalism</field>
+            <field name="code">professionalism</field>
+            <field name="description">Professional conduct, appearance, and adherence to company standards</field>
+            <field name="weight">5.0</field>
+            <field name="calculation_method">manual</field>
+            <field name="min_score">0.0</field>
+            <field name="max_score">100.0</field>
+            <field name="sequence">70</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <record id="performance_criteria_training" model="guard.performance.criteria">
+            <field name="name">Training Completion</field>
+            <field name="code">training_completion</field>
+            <field name="description">Completion rate of required training courses and certifications</field>
+            <field name="weight">0.0</field>
+            <field name="calculation_method">automatic</field>
+            <field name="min_score">0.0</field>
+            <field name="max_score">100.0</field>
+            <field name="sequence">80</field>
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="performance_criteria_equipment_care" model="guard.performance.criteria">
+            <field name="name">Equipment Care</field>
+            <field name="code">equipment_care</field>
+            <field name="description">Proper handling and maintenance of assigned equipment and resources</field>
+            <field name="weight">0.0</field>
+            <field name="calculation_method">manual</field>
+            <field name="min_score">0.0</field>
+            <field name="max_score">100.0</field>
+            <field name="sequence">90</field>
+            <field name="active" eval="False"/>
+        </record>
+
+    </data>
+</odoo>
+

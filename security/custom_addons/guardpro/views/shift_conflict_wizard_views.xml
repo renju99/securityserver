@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Shift Conflict Resolution Wizard -->
+    <record id="view_guard_shift_conflict_wizard_form" model="ir.ui.view">
+        <field name="name">guard.shift.conflict.wizard.form</field>
+        <field name="model">guard.shift.conflict.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Shift Conflict Warning">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <i class="fa fa-exclamation-triangle text-danger"/> 
+                            Shift Conflict Detected
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="shift_id" invisible="1"/>
+                            <field name="has_overlap" invisible="1"/>
+                            <field name="has_rest_violation" invisible="1"/>
+                            <field name="show_warning_message" invisible="1"/>
+                            <field name="alternative_guard_ids" invisible="1"/>
+                            <field name="alternative_count" invisible="1"/>
+                            
+                            <field name="guard_id" readonly="1"/>
+                            <field name="site_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="start_datetime" readonly="1"/>
+                            <field name="end_datetime" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Warning Message -->
+                    <notebook>
+                        <page string="Conflict Details">
+                            <field name="warning_message" widget="html" nolabel="1"/>
+                        </page>
+                        
+                        <page string="Resolution Options">
+                            <group>
+                                <field name="action" widget="radio"/>
+                            </group>
+                            
+                            <!-- Override Section -->
+                            <group invisible="action != 'override'">
+                                <group colspan="2">
+                                    <div class="alert alert-warning" role="alert">
+                                        <strong>Warning:</strong> Overriding shift conflicts should only be done 
+                                        in exceptional circumstances. You must provide a clear justification.
+                                    </div>
+                                </group>
+                                <field name="override_reason" 
+                                       placeholder="Explain why this conflict needs to be overridden..."
+                                       required="action == 'override'"
+                                       nolabel="1"
+                                       colspan="2"/>
+                            </group>
+                            
+                            <!-- Reassign Section -->
+                            <group invisible="action != 'reassign'">
+                                <group colspan="2">
+                                    <div class="alert alert-info" role="alert" invisible="alternative_count == 0">
+                                        <strong>Recommended:</strong> Reassigning to an available guard resolves the conflict 
+                                        without requiring an override. Guards with site experience are listed first.
+                                    </div>
+                                    <div class="alert alert-danger" role="alert" invisible="alternative_count > 0">
+                                        <strong>No Alternative Guards Available!</strong> There are no available guards 
+                                        for this time slot. You will need to choose a different resolution option.
+                                    </div>
+                                </group>
+                                <field name="selected_guard_id" 
+                                       options="{'no_create': True, 'no_open': True}"
+                                       required="action == 'reassign'"
+                                       domain="[('id', 'in', alternative_guard_ids)]"
+                                       invisible="alternative_count == 0"/>
+                            </group>
+                            
+                            <!-- Cancel Section -->
+                            <group invisible="action != 'cancel'">
+                                <group colspan="2">
+                                    <div class="alert alert-secondary" role="alert">
+                                        <strong>Cancel Operation:</strong> No changes will be made to the shift. 
+                                        You can modify the shift dates or guard assignment and try again.
+                                    </div>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <footer>
+                    <button name="action_apply" 
+                            string="Apply Resolution" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="action == 'cancel'"/>
+                    <button name="action_apply" 
+                            string="Close" 
+                            type="object" 
+                            class="btn-secondary"
+                            invisible="action != 'cancel'"/>
+                    <button string="Cancel" 
+                            class="btn-secondary" 
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
+

@@ -1,0 +1,1187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Course 3: Supervisor Operations Management - Slides -->
+        
+        <!--Module 1: Supervisor Role and Responsibilities -->
+        <record id="slide_supervisor_m1_role" model="slide.slide">
+            <field name="name">Module 1: Supervisor Role and Responsibilities</field>
+            <field name="channel_id" ref="elearning_course_supervisor_ops"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.83</field>
+            <field name="html_content">
+                &lt;h2&gt;The Critical Role of Security Supervisors: Leadership in Action&lt;/h2&gt;
+                &lt;p&gt;Security supervisors serve as the backbone of effective security operations, bridging the gap between frontline security personnel and management. This role demands a unique combination of leadership skills, operational expertise, and crisis management capabilities. Understanding and embracing these responsibilities is essential for successful security supervision.&lt;/p&gt;
+
+                &lt;h3&gt;The Strategic Importance of Security Supervision&lt;/h3&gt;
+                &lt;p&gt;Supervisors are not just managers - they are the critical link ensuring that security operations run smoothly, incidents are handled properly, and the organization's security objectives are met. Your role directly impacts:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Operational Excellence:&lt;/strong&gt; Ensuring consistent, professional security service delivery&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Risk Mitigation:&lt;/strong&gt; Identifying and addressing security vulnerabilities before they become incidents&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Team Performance:&lt;/strong&gt; Developing and motivating security personnel&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Client Satisfaction:&lt;/strong&gt; Maintaining positive relationships with clients and stakeholders&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Crisis Management:&lt;/strong&gt; Leading response efforts during security incidents&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Regulatory Compliance:&lt;/strong&gt; Ensuring adherence to security standards and legal requirements&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Core Supervisory Responsibilities&lt;/h3&gt;
+                &lt;p&gt;The supervisor role encompasses multiple critical functions that require diverse skills and constant attention:&lt;/p&gt;
+
+                &lt;h4&gt;Operational Management&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Shift Planning and Scheduling&lt;/dt&gt;
+                    &lt;dd&gt;Creating efficient shift schedules that ensure adequate coverage while considering guard skills, availability, and workload balance&lt;/dd&gt;
+                    &lt;dt&gt;Resource Allocation&lt;/dt&gt;
+                    &lt;dd&gt;Assigning appropriate personnel and equipment to meet security requirements and handle special circumstances&lt;/dd&gt;
+                    &lt;dt&gt;Quality Control&lt;/dt&gt;
+                    &lt;dd&gt;Monitoring service delivery, conducting regular inspections, and implementing corrective actions&lt;/dd&gt;
+                    &lt;dt&gt;Performance Monitoring&lt;/dt&gt;
+                    &lt;dd&gt;Tracking guard performance, attendance, and adherence to procedures through regular evaluation&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Incident Management and Investigation&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Initial Response:&lt;/strong&gt; Coordinating immediate response to security incidents&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Investigation Oversight:&lt;/strong&gt; Ensuring thorough and objective incident investigations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Evidence Management:&lt;/strong&gt; Maintaining chain of custody for incident-related evidence&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Report Review:&lt;/strong&gt; Evaluating incident reports for completeness and accuracy&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Preventive Actions:&lt;/strong&gt; Implementing measures to prevent incident recurrence&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Team Leadership and Development&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Staff Development&lt;/dt&gt;
+                    &lt;dd&gt;Identifying training needs, conducting performance evaluations, and mentoring team members&lt;/dd&gt;
+                    &lt;dt&gt;Motivation and Morale&lt;/dt&gt;
+                    &lt;dd&gt;Creating a positive work environment, recognizing achievements, and addressing concerns&lt;/dd&gt;
+                    &lt;dt&gt;Disciplinary Actions&lt;/dt&gt;
+                    &lt;dd&gt;Handling performance issues fairly and consistently according to company policies&lt;/dd&gt;
+                    &lt;dt&gt;Succession Planning&lt;/dt&gt;
+                    &lt;dd&gt;Identifying and developing potential leaders within the team&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Client and Stakeholder Relations&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication:&lt;/strong&gt; Maintaining regular contact with clients and addressing their concerns&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Relationship Building:&lt;/strong&gt; Developing trust and rapport with client representatives&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Expectation Management:&lt;/strong&gt; Setting realistic expectations and managing service level agreements&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Conflict Resolution:&lt;/strong&gt; Handling client complaints and resolving service issues&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Reporting:&lt;/strong&gt; Providing regular updates on security status and performance&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Daily Operational Duties&lt;/h3&gt;
+                &lt;p&gt;The supervisor's day involves a structured routine of essential tasks that ensure operational continuity:&lt;/p&gt;
+
+                &lt;h4&gt;Morning Preparation (Pre-Shift)&lt;/h4&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Review overnight incident reports and unresolved issues&lt;/li&gt;
+                    &lt;li&gt;Check guard attendance and shift coverage status&lt;/li&gt;
+                    &lt;li&gt;Review current shift schedules and assignments&lt;/li&gt;
+                    &lt;li&gt;Address any scheduling conflicts or coverage gaps&lt;/li&gt;
+                    &lt;li&gt;Prepare shift briefings and special instructions&lt;/li&gt;
+                    &lt;li&gt;Conduct pre-shift meetings with outgoing and incoming guards&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h4&gt;Ongoing Supervision (During Shifts)&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Monitor active shifts through GuardPro dashboard&lt;/li&gt;
+                    &lt;li&gt;Respond to alerts and notifications in real-time&lt;/li&gt;
+                    &lt;li&gt;Conduct random site inspections and guard check-ins&lt;/li&gt;
+                    &lt;li&gt;Handle emergency situations and incident responses&lt;/li&gt;
+                    &lt;li&gt;Provide guidance and support to guards as needed&lt;/li&gt;
+                    &lt;li&gt;Coordinate with other supervisors and management&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Administrative Duties (Throughout Day)&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Documentation&lt;/dt&gt;
+                    &lt;dd&gt;Review and approve incident reports, tour logs, and other security documentation&lt;/dd&gt;
+                    &lt;dt&gt;Communication&lt;/dt&gt;
+                    &lt;dd&gt;Respond to client inquiries, update stakeholders, and coordinate with support teams&lt;/dd&gt;
+                    &lt;dt&gt;Quality Assurance&lt;/dt&gt;
+                    &lt;dd&gt;Audit security procedures, review performance data, and identify improvement opportunities&lt;/dd&gt;
+                    &lt;dt&gt;Planning&lt;/dt&gt;
+                    &lt;dd&gt;Prepare for upcoming shifts, address staffing needs, and plan special assignments&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Evening Wrap-Up (Post-Shift)&lt;/h4&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Review shift performance and incident logs&lt;/li&gt;
+                    &lt;li&gt;Conduct post-shift debriefings with guards&lt;/li&gt;
+                    &lt;li&gt;Document any outstanding issues or follow-up requirements&lt;/li&gt;
+                    &lt;li&gt;Prepare shift reports for management review&lt;/li&gt;
+                    &lt;li&gt;Plan for the next shift and address any immediate needs&lt;/li&gt;
+                    &lt;li&gt;Ensure proper handoff to night shift supervisor (if applicable)&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h3&gt;Essential Leadership Competencies&lt;/h3&gt;
+                &lt;p&gt;Effective supervision requires a blend of technical skills and interpersonal abilities:&lt;/p&gt;
+
+                &lt;h4&gt;Technical Proficiency&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Security Systems Knowledge:&lt;/strong&gt; Understanding of security technology and procedures&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Regulatory Compliance:&lt;/strong&gt; Familiarity with applicable laws and industry standards&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Response:&lt;/strong&gt; Ability to manage crisis situations effectively&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Report Writing:&lt;/strong&gt; Clear, comprehensive documentation skills&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Technology Utilization:&lt;/strong&gt; Proficiency with security management software&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Interpersonal Skills&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Communication&lt;/dt&gt;
+                    &lt;dd&gt;Clear, concise verbal and written communication with all stakeholders&lt;/dd&gt;
+                    &lt;dt&gt;Emotional Intelligence&lt;/dt&gt;
+                    &lt;dd&gt;Understanding and managing emotions in high-stress situations&lt;/dd&gt;
+                    &lt;dt&gt;Conflict Resolution&lt;/dt&gt;
+                    &lt;dd&gt;Mediating disputes and finding mutually acceptable solutions&lt;/dd&gt;
+                    &lt;dt&gt;Motivation&lt;/dt&gt;
+                    &lt;dd&gt;Inspiring and encouraging team members to perform at their best&lt;/dd&gt;
+                    &lt;dt&gt;Decision Making&lt;/dt&gt;
+                    &lt;dd&gt;Making timely, well-reasoned decisions under pressure&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Ethical Standards&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Integrity:&lt;/strong&gt; Maintaining honesty and ethical behavior in all actions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Fairness:&lt;/strong&gt; Treating all team members and stakeholders equitably&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Professionalism:&lt;/strong&gt; Demonstrating appropriate conduct and appearance&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Confidentiality:&lt;/strong&gt; Protecting sensitive information and maintaining trust&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Accountability:&lt;/strong&gt; Taking responsibility for decisions and actions&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;The Supervisor's Code of Professional Conduct&lt;/h3&gt;
+                &lt;p&gt;Supervisors must adhere to the highest standards of professional conduct:&lt;/p&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Lead by Example:&lt;/strong&gt; Demonstrate the behavior you expect from your team&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Maintain Objectivity:&lt;/strong&gt; Make decisions based on facts, not personal bias&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Foster Team Development:&lt;/strong&gt; Invest time in training and mentoring team members&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communicate Effectively:&lt;/strong&gt; Keep all stakeholders informed and engaged&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Promote Safety:&lt;/strong&gt; Prioritize the safety of team members and the public&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Seek Continuous Improvement:&lt;/strong&gt; Always look for ways to enhance performance&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Build Trust:&lt;/strong&gt; Establish credibility through consistent, reliable actions&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h3&gt;Supervisor Success Metrics&lt;/h3&gt;
+                &lt;p&gt;Your performance as a supervisor will be evaluated based on key indicators:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Team Performance:&lt;/strong&gt; Guard productivity, attendance, and service quality&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Incident Management:&lt;/strong&gt; Response times, investigation quality, and prevention&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Client Satisfaction:&lt;/strong&gt; Feedback scores and relationship strength&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Operational Efficiency:&lt;/strong&gt; Resource utilization and cost management&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Compliance:&lt;/strong&gt; Adherence to policies, procedures, and regulations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Professional Development:&lt;/strong&gt; Team training completion and skill improvement&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Practice Exercise:&lt;/strong&gt; Reflect on your current supervisory responsibilities. Identify three areas where you can strengthen your leadership skills and develop an action plan for improvement. Consider how your daily activities contribute to overall security objectives.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_supervisor_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_supervisor_ops"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <record id="quiz_supervisor_m1_q1" model="slide.question">
+            <field name="question">What is a key responsibility of a supervisor?</field>
+            <field name="slide_id" ref="slide_supervisor_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_supervisor_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_m1_q1"/>
+            <field name="text_value">Shift planning and assignment</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_m1_q1"/>
+            <field name="text_value">Only checking emails</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 2: Shift Management -->
+        <record id="slide_supervisor_m2_shifts" model="slide.slide">
+            <field name="name">Module 2: Shift Management</field>
+            <field name="channel_id" ref="elearning_course_supervisor_ops"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">1.0</field>
+            <field name="html_content">
+                &lt;h2&gt;Strategic Shift Management: Ensuring 24/7 Security Coverage&lt;/h2&gt;
+                &lt;p&gt;Effective shift management is the foundation of reliable security operations. Supervisors must master the art of creating schedules that balance operational requirements with personnel needs, while maintaining flexibility for unexpected situations. This module covers the comprehensive skills needed for professional shift management.&lt;/p&gt;
+
+                &lt;h3&gt;The Strategic Importance of Shift Planning&lt;/h3&gt;
+                &lt;p&gt;Proper shift management directly impacts security effectiveness, operational costs, and team morale. A well-planned schedule ensures:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Continuous Coverage:&lt;/strong&gt; No gaps in security presence during critical hours&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Cost Efficiency:&lt;/strong&gt; Optimal use of personnel resources&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Staff Satisfaction:&lt;/strong&gt; Fair distribution of shifts and adequate rest periods&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Performance Quality:&lt;/strong&gt; Rested, motivated guards performing at their best&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Compliance:&lt;/strong&gt; Adherence to labor laws and contractual obligations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Crisis Readiness:&lt;/strong&gt; Backup coverage for emergency situations&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Understanding Shift Types and Requirements&lt;/h3&gt;
+                &lt;p&gt;Different sites and situations require different shift configurations:&lt;/p&gt;
+
+                &lt;h4&gt;Standard Shift Patterns&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;8-Hour Shifts&lt;/dt&gt;
+                    &lt;dd&gt;Traditional day/night rotations with clear start/end times&lt;/dd&gt;
+                    &lt;dt&gt;12-Hour Shifts&lt;/dt&gt;
+                    &lt;dd&gt;Extended shifts reducing handoffs but requiring more rest days&lt;/dd&gt;
+                    &lt;dt&gt;Split Shifts&lt;/dt&gt;
+                    &lt;dd&gt;Two shorter shifts with break in between&lt;/dd&gt;
+                    &lt;dt&gt;On-Call Shifts&lt;/dt&gt;
+                    &lt;dd&gt;Standby availability with rapid response capability&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Specialized Coverage Requirements&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Peak Hours Coverage:&lt;/strong&gt; Additional personnel during high-activity periods&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Holiday Schedules:&lt;/strong&gt; Modified shifts for holidays and special events&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Event Security:&lt;/strong&gt; Temporary increased staffing for special occasions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Seasonal Adjustments:&lt;/strong&gt; Weather-related or seasonal coverage changes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Training Coverage:&lt;/strong&gt; Backup staffing during training sessions&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;The Shift Creation Process&lt;/h3&gt;
+                &lt;p&gt;Creating effective shifts requires careful consideration of multiple factors:&lt;/p&gt;
+
+                &lt;h4&gt;Planning Phase&lt;/h4&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Assess Requirements:&lt;/strong&gt; Review site security needs and contractual obligations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Check Availability:&lt;/strong&gt; Review guard schedules, time-off requests, and availability&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Consider Workload Balance:&lt;/strong&gt; Ensure fair distribution of desirable/undesirable shifts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Plan for Contingencies:&lt;/strong&gt; Identify backup personnel for each shift&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Review Budget Constraints:&lt;/strong&gt; Balance coverage needs with cost limitations&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h4&gt;Creation Steps in GuardPro&lt;/h4&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Operations Module:&lt;/strong&gt; Navigate to Operations → Shifts in GuardPro&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Initiate Creation:&lt;/strong&gt; Click the "Create" button to start a new shift&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Select Site and Type:&lt;/strong&gt; Choose the appropriate site location and shift category&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Set Schedule Parameters:&lt;/strong&gt; Define start date, time, duration, and end time&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Assign Personnel:&lt;/strong&gt; Select qualified guards based on skills and availability&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Add Special Instructions:&lt;/strong&gt; Include site-specific requirements or special circumstances&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Review and Save:&lt;/strong&gt; Verify all information and save the shift schedule&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Confirm Notifications:&lt;/strong&gt; Ensure assigned guards receive notification of their assignment&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h3&gt;Advanced Shift Assignment Strategies&lt;/h3&gt;
+                &lt;p&gt;Effective shift assignment requires balancing multiple competing priorities:&lt;/p&gt;
+
+                &lt;h4&gt;Skill-Based Assignments&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Technical Skills:&lt;/strong&gt; Match guards with required technical competencies&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Site Knowledge:&lt;/strong&gt; Assign guards familiar with specific locations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Language Requirements:&lt;/strong&gt; Ensure appropriate language skills for client interactions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Specialized Training:&lt;/strong&gt; Assign guards with required certifications&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Experience Level:&lt;/strong&gt; Match complexity of assignment to guard experience&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Workload Distribution Principles&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Fair Rotation&lt;/dt&gt;
+                    &lt;dd&gt;Regularly rotate between desirable (day shifts, weekends off) and less desirable assignments&lt;/dd&gt;
+                    &lt;dt&gt;Rest Requirements&lt;/dt&gt;
+                    &lt;dd&gt;Ensure adequate rest periods between shifts to prevent fatigue&lt;/dd&gt;
+                    &lt;dt&gt;Overtime Management&lt;/dt&gt;
+                    &lt;dd&gt;Monitor and limit overtime hours to maintain performance and satisfaction&lt;/dd&gt;
+                    &lt;dt&gt;Preference Accommodation&lt;/dt&gt;
+                    &lt;dd&gt;Consider guard preferences when possible without compromising coverage&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Predictive Scheduling&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Historical Analysis:&lt;/strong&gt; Use past incident data to predict staffing needs&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Seasonal Patterns:&lt;/strong&gt; Adjust schedules for seasonal variations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Event Calendars:&lt;/strong&gt; Plan for known events and holidays&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Performance Metrics:&lt;/strong&gt; Schedule based on guard performance data&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Managing Shift Changes and Modifications&lt;/h3&gt;
+                &lt;p&gt;Flexibility is essential in security operations. Handle changes professionally and efficiently:&lt;/p&gt;
+
+                &lt;h4&gt;Shift Swap Procedures&lt;/h4&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Receive Request:&lt;/strong&gt; Accept formal shift swap requests from guards&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Verify Qualifications:&lt;/strong&gt; Ensure both guards meet assignment requirements&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Check Impact:&lt;/strong&gt; Assess effects on overall coverage and other assignments&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Obtain Approval:&lt;/strong&gt; Get supervisor approval for significant changes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Update System:&lt;/strong&gt; Modify assignments in GuardPro immediately&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Notify Parties:&lt;/strong&gt; Inform all affected guards and supervisors&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Document Change:&lt;/strong&gt; Record reason and approval in system notes&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h4&gt;Emergency Coverage Management&lt;/h4&gt;
+                &lt;p&gt;When unexpected absences occur, rapid response is critical:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Immediate Assessment:&lt;/strong&gt; Evaluate coverage gap and time sensitivity&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Contact Backup Pool:&lt;/strong&gt; Reach out to pre-identified backup guards&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Assess Options:&lt;/strong&gt; Consider overtime, shift splitting, or temporary measures&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Make Assignment:&lt;/strong&gt; Assign most qualified available guard&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Update Records:&lt;/strong&gt; Document change and notify all parties&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Brief Replacement:&lt;/strong&gt; Provide essential information about the assignment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Follow Up:&lt;/strong&gt; Monitor coverage and address any issues&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Long-Term Planning and Optimization&lt;/h3&gt;
+                &lt;p&gt;Effective supervisors plan shifts well in advance to ensure optimal coverage:&lt;/p&gt;
+
+                &lt;h4&gt;Advance Planning Guidelines&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Minimum 2-Week Horizon:&lt;/strong&gt; Plan at least two weeks in advance for stability&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Monthly Reviews:&lt;/strong&gt; Assess long-term patterns and staffing needs&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Backup Strategies:&lt;/strong&gt; Maintain pools of qualified backup personnel&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Cross-Training:&lt;/strong&gt; Ensure multiple guards can cover critical assignments&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Performance Tracking:&lt;/strong&gt; Monitor attendance and reliability trends&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Schedule Optimization Techniques&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Workload Analysis&lt;/dt&gt;
+                    &lt;dd&gt;Analyze peak hours, incident patterns, and coverage requirements&lt;/dd&gt;
+                    &lt;dt&gt;Staff Utilization&lt;/dt&gt;
+                    &lt;dd&gt;Maximize productive hours while ensuring adequate rest periods&lt;/dd&gt;
+                    &lt;dt&gt;Cost Management&lt;/dt&gt;
+                    &lt;dd&gt;Balance coverage requirements with budget constraints&lt;/dd&gt;
+                    &lt;dt&gt;Morale Considerations&lt;/dt&gt;
+                    &lt;dd&gt;Factor in team satisfaction and work-life balance&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h3&gt;Technology and Tools for Shift Management&lt;/h3&gt;
+                &lt;p&gt;Modern shift management relies on technology for efficiency and accuracy:&lt;/p&gt;
+
+                &lt;h4&gt;GuardPro Shift Management Features&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Automated Scheduling:&lt;/strong&gt; Intelligent assignment based on skills and availability&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Real-Time Updates:&lt;/strong&gt; Instant notifications of changes and updates&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Conflict Detection:&lt;/strong&gt; Automatic identification of scheduling conflicts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Mobile Access:&lt;/strong&gt; Access and updates from mobile devices&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Reporting Tools:&lt;/strong&gt; Comprehensive schedule and attendance reports&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Integration Capabilities:&lt;/strong&gt; Connect with payroll and HR systems&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Communication Tools&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Automated Notifications:&lt;/strong&gt; Email and SMS alerts for schedule changes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Group Messaging:&lt;/strong&gt; Team communication for urgent updates&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Shift Briefing Tools:&lt;/strong&gt; Digital handover notes and instructions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Feedback Mechanisms:&lt;/strong&gt; Channels for guard input and concerns&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Legal and Regulatory Compliance&lt;/h3&gt;
+                &lt;p&gt;Shift scheduling must comply with labor laws and company policies:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Working Hours Limits:&lt;/strong&gt; Adhere to maximum shift lengths and overtime rules&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Rest Period Requirements:&lt;/strong&gt; Ensure mandatory break times and rest days&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Overtime Regulations:&lt;/strong&gt; Proper calculation and approval of overtime pay&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Equal Opportunity:&lt;/strong&gt; Fair assignment practices without discrimination&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Contractual Obligations:&lt;/strong&gt; Meet client requirements and service agreements&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Performance Metrics and Quality Assurance&lt;/h3&gt;
+                &lt;p&gt;Monitor shift management effectiveness through key performance indicators:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Coverage Rate:&lt;/strong&gt; Percentage of shifts properly staffed&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Overtime Percentage:&lt;/strong&gt; Control of overtime expenses&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Attendance Rate:&lt;/strong&gt; Guard reliability and punctuality&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Schedule Stability:&lt;/strong&gt; Frequency of unexpected changes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Staff Satisfaction:&lt;/strong&gt; Feedback on schedule fairness&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Practice Exercise:&lt;/strong&gt; Review your current shift schedules for the next two weeks. Identify opportunities for optimization, such as better skill matching or reduced overtime. Consider how you would handle an unexpected guard absence during a critical shift.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_supervisor_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_supervisor_ops"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <record id="quiz_supervisor_m2_q1" model="slide.question">
+            <field name="question">How far in advance should shifts be planned?</field>
+            <field name="slide_id" ref="slide_supervisor_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_supervisor_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_m2_q1"/>
+            <field name="text_value">2 weeks minimum</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_m2_q1"/>
+            <field name="text_value">Same day</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 3: Incident Investigation -->
+        <record id="slide_supervisor_m3_investigation" model="slide.slide">
+            <field name="name">Module 3: Incident Investigation</field>
+            <field name="channel_id" ref="elearning_course_supervisor_ops"/>
+            <field name="sequence">30</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">1.25</field>
+            <field name="html_content">
+                &lt;h2&gt;Mastering Incident Investigation: Professional Fact-Finding and Resolution&lt;/h2&gt;
+                &lt;p&gt;Incident investigation is one of the most critical supervisory responsibilities. The ability to conduct thorough, objective investigations can mean the difference between preventing future incidents and allowing security breaches to continue. This module provides the comprehensive framework for professional incident investigation.&lt;/p&gt;
+
+                &lt;h3&gt;The Strategic Role of Incident Investigation&lt;/h3&gt;
+                &lt;p&gt;Effective incident investigation serves multiple vital organizational purposes beyond simply documenting what happened:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Root Cause Analysis:&lt;/strong&gt; Identify underlying causes to prevent recurrence&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Legal Protection:&lt;/strong&gt; Create defensible documentation for legal proceedings&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Process Improvement:&lt;/strong&gt; Identify systemic weaknesses and improvement opportunities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Accountability Establishment:&lt;/strong&gt; Determine responsibility without presumption of guilt&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Insurance Claims Support:&lt;/strong&gt; Provide necessary documentation for claims processing&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Stakeholder Communication:&lt;/strong&gt; Enable clear communication with clients and authorities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Training Development:&lt;/strong&gt; Identify training needs and develop preventive measures&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;The Professional Investigation Framework&lt;/h3&gt;
+                &lt;p&gt;Follow this systematic, six-phase approach to ensure thorough and objective investigations:&lt;/p&gt;
+
+                &lt;h4&gt;Phase 1: Initial Assessment and Preparation&lt;/h4&gt;
+                &lt;p&gt;The foundation of any investigation is proper preparation and initial assessment:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Secure the Scene:&lt;/strong&gt; Ensure safety and prevent evidence contamination&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Initial Briefing:&lt;/strong&gt; Gather immediate information from first responders&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Preliminary Assessment:&lt;/strong&gt; Determine investigation scope and resource needs&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Team Assembly:&lt;/strong&gt; Identify investigators and support personnel&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Allocation:&lt;/strong&gt; Assign appropriate tools and time for investigation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication Plan:&lt;/strong&gt; Establish stakeholder notification protocols&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Phase 2: Evidence Collection and Preservation&lt;/h4&gt;
+                &lt;p&gt;Evidence must be collected systematically and preserved according to legal standards:&lt;/p&gt;
+
+                &lt;h5&gt;Physical Evidence&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Photographic Documentation:&lt;/strong&gt; Multiple angles, scales, and lighting conditions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Video Recording:&lt;/strong&gt; Security footage and scene recordings&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Measurements and Sketches:&lt;/strong&gt; Detailed diagrams of scene layout&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Physical Samples:&lt;/strong&gt; Items requiring forensic analysis&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Environmental Factors:&lt;/strong&gt; Weather, lighting, and accessibility conditions&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h5&gt;Digital Evidence&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Logs:&lt;/strong&gt; Security system access records&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Surveillance Footage:&lt;/strong&gt; Camera recordings from multiple sources&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication Records:&lt;/strong&gt; Radio logs, phone records, and messages&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;System Logs:&lt;/strong&gt; Alarm system and access control data&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;GPS Data:&lt;/strong&gt; Location tracking from mobile devices&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h5&gt;Documentary Evidence&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Incident Reports:&lt;/strong&gt; Initial guard reports and follow-up documentation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Policies and Procedures:&lt;/strong&gt; Relevant security protocols&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Training Records:&lt;/strong&gt; Guard qualifications and certifications&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Previous Incidents:&lt;/strong&gt; Similar historical events&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Maintenance Logs:&lt;/strong&gt; Equipment service and repair records&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Phase 3: Witness Interviews and Statements&lt;/h4&gt;
+                &lt;p&gt;Effective interviewing requires skill, objectivity, and proper technique:&lt;/p&gt;
+
+                &lt;h5&gt;Interview Preparation&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Interview Planning:&lt;/strong&gt; Identify all potential witnesses and prepare questions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Separate Interviews:&lt;/strong&gt; Interview witnesses individually to avoid influence&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Neutral Environment:&lt;/strong&gt; Conduct interviews in private, comfortable settings&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Recording Equipment:&lt;/strong&gt; Use audio/video recording when appropriate&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Legal Considerations:&lt;/strong&gt; Follow applicable privacy and recording laws&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h5&gt;Effective Interview Techniques&lt;/h5&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Open-Ended Questions&lt;/dt&gt;
+                    &lt;dd&gt;"Can you describe what you observed?" rather than "Did you see the suspect?"&lt;/dd&gt;
+                    &lt;dt&gt;Active Listening&lt;/dt&gt;
+                    &lt;dd&gt;Give full attention, ask clarifying questions, avoid interruptions&lt;/dd&gt;
+                    &lt;dt&gt;Neutral Stance&lt;/dt&gt;
+                    &lt;dd&gt;Remain objective, avoid leading questions or showing bias&lt;/dd&gt;
+                    &lt;dt&gt;Detailed Note-Taking&lt;/dt&gt;
+                    &lt;dd&gt;Record exact quotes, times, and observations without interpretation&lt;/dd&gt;
+                    &lt;dt&gt;Follow-Up Questions&lt;/dt&gt;
+                    &lt;dd&gt;Ask for clarification and additional details as needed&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h5&gt;Special Interview Considerations&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Traumatized Witnesses:&lt;/strong&gt; Be patient, allow breaks, use sensitive language&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Language Barriers:&lt;/strong&gt; Use qualified interpreters, verify understanding&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Involved Employees:&lt;/strong&gt; Explain rights, offer support person if needed&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Hostile Witnesses:&lt;/strong&gt; Remain professional, redirect focus to facts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Multiple Interviews:&lt;/strong&gt; May be necessary as new information emerges&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Phase 4: Fact Analysis and Root Cause Determination&lt;/h4&gt;
+                &lt;p&gt;Analysis transforms raw data into actionable insights:&lt;/p&gt;
+
+                &lt;h5&gt;Chronological Reconstruction&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Timeline Creation:&lt;/strong&gt; Establish exact sequence of events&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Gap Identification:&lt;/strong&gt; Note missing information or inconsistencies&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Correlation Analysis:&lt;/strong&gt; Connect evidence from multiple sources&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Pattern Recognition:&lt;/strong&gt; Identify recurring issues or behaviors&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h5&gt;Root Cause Analysis Techniques&lt;/h5&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;5-Why Analysis&lt;/dt&gt;
+                    &lt;dd&gt;Ask "why" repeatedly to drill down to fundamental causes&lt;/dd&gt;
+                    &lt;dt&gt;Fishbone Diagram&lt;/dt&gt;
+                    &lt;dd&gt;Categorize potential causes into main contributing factors&lt;/dd&gt;
+                    &lt;dt&gt;Fault Tree Analysis&lt;/dt&gt;
+                    &lt;dd&gt;Map logical relationships between events and conditions&lt;/dd&gt;
+                    &lt;dt&gt;Comparative Analysis&lt;/dt&gt;
+                    &lt;dd&gt;Compare with similar incidents to identify common factors&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h5&gt;Contributing Factor Evaluation&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Human Factors:&lt;/strong&gt; Training, fatigue, judgment, procedures&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Equipment Factors:&lt;/strong&gt; Malfunction, maintenance, design flaws&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Environmental Factors:&lt;/strong&gt; Weather, lighting, layout, accessibility&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Procedural Factors:&lt;/strong&gt; Policy gaps, communication breakdowns&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Organizational Factors:&lt;/strong&gt; Resource allocation, supervision, culture&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Phase 5: Investigation Report Development&lt;/h4&gt;
+                &lt;p&gt;The investigation report is the permanent record and must be comprehensive and objective:&lt;/p&gt;
+
+                &lt;h5&gt;Report Structure and Content&lt;/h5&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Executive Summary:&lt;/strong&gt; Brief overview of incident and key findings&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Incident Description:&lt;/strong&gt; Detailed narrative of what occurred&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Investigation Methodology:&lt;/strong&gt; Methods used and scope of inquiry&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Evidence Summary:&lt;/strong&gt; Key evidence collected and analyzed&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Witness Statements:&lt;/strong&gt; Summaries of interviews conducted&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Timeline of Events:&lt;/strong&gt; Chronological reconstruction&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Root Cause Analysis:&lt;/strong&gt; Contributing factors and underlying causes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Findings and Conclusions:&lt;/strong&gt; Objective determination of facts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Recommendations:&lt;/strong&gt; Preventive measures and improvements&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Corrective Actions:&lt;/strong&gt; Specific steps to be implemented&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h5&gt;Report Quality Standards&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Factual Accuracy:&lt;/strong&gt; All information verified and supported by evidence&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Objective Tone:&lt;/strong&gt; Neutral language without speculation or blame&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Clear Organization:&lt;/strong&gt; Logical structure with clear headings and numbering&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Comprehensive Coverage:&lt;/strong&gt; All relevant aspects addressed thoroughly&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Professional Presentation:&lt;/strong&gt; Proper grammar, formatting, and readability&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Actionable Recommendations:&lt;/strong&gt; Specific, measurable improvement suggestions&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Phase 6: Implementation and Follow-Up&lt;/h4&gt;
+                &lt;p&gt;Investigation completion requires action and monitoring:&lt;/p&gt;
+
+                &lt;h5&gt;Corrective Action Implementation&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Action Planning:&lt;/strong&gt; Develop detailed implementation plans&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resource Assignment:&lt;/strong&gt; Identify responsible parties and timelines&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Training Requirements:&lt;/strong&gt; Address skill gaps identified&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Equipment Upgrades:&lt;/strong&gt; Implement necessary system improvements&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Policy Updates:&lt;/strong&gt; Modify procedures based on findings&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h5&gt;Effectiveness Monitoring&lt;/h5&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Progress Tracking:&lt;/strong&gt; Regular check-ins on action implementation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Outcome Measurement:&lt;/strong&gt; Assess effectiveness of corrective measures&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Recurrence Prevention:&lt;/strong&gt; Monitor for similar incidents&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Lesson Documentation:&lt;/strong&gt; Record insights for future reference&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Legal and Ethical Considerations in Investigations&lt;/h3&gt;
+                &lt;p&gt;Investigations carry significant legal and ethical responsibilities:&lt;/p&gt;
+
+                &lt;h4&gt;Legal Standards&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Due Process:&lt;/strong&gt; Fair treatment and presumption of innocence&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Evidence Handling:&lt;/strong&gt; Proper chain of custody and preservation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Privacy Rights:&lt;/strong&gt; Protection of personal information&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Disclosure Requirements:&lt;/strong&gt; Appropriate sharing of information&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Documentation Standards:&lt;/strong&gt; Records suitable for legal proceedings&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Ethical Principles&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Objectivity:&lt;/strong&gt; Unbiased pursuit of facts without predetermined conclusions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Confidentiality:&lt;/strong&gt; Protection of sensitive information&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Professionalism:&lt;/strong&gt; Conduct investigations with integrity and respect&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Thoroughness:&lt;/strong&gt; Complete investigations without cutting corners&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Accountability:&lt;/strong&gt; Accept responsibility for investigation quality&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Specialized Investigation Scenarios&lt;/h3&gt;
+                &lt;p&gt;Different incident types require tailored investigation approaches:&lt;/p&gt;
+
+                &lt;h4&gt;Critical Incident Investigations&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Immediate response team activation&lt;/li&gt;
+                    &lt;li&gt;Coordination with law enforcement&lt;/li&gt;
+                    &lt;li&gt;Victim and family support&lt;/li&gt;
+                    &lt;li&gt;Crisis communication management&lt;/li&gt;
+                    &lt;li&gt;Trauma-informed interviewing&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Internal Investigations&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Employee rights considerations&lt;/li&gt;
+                    &lt;li&gt;Union consultation requirements&lt;/li&gt;
+                    &lt;li&gt;Progressive discipline alignment&lt;/li&gt;
+                    &lt;li&gt;Workplace safety compliance&lt;/li&gt;
+                    &lt;li&gt;Confidentiality maintenance&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Technology-Related Investigations&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Digital evidence preservation&lt;/li&gt;
+                    &lt;li&gt;Technical expert consultation&lt;/li&gt;
+                    &lt;li&gt;System log analysis&lt;/li&gt;
+                    &lt;li&gt;Cybersecurity protocols&lt;/li&gt;
+                    &lt;li&gt;Data privacy compliance&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Quality Assurance and Continuous Improvement&lt;/h3&gt;
+                &lt;p&gt;Professional investigators continuously refine their skills and processes:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Case Review:&lt;/strong&gt; Regular review of investigation quality and outcomes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Training Updates:&lt;/strong&gt; Stay current with investigation techniques&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Process Refinement:&lt;/strong&gt; Identify and implement process improvements&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Peer Consultation:&lt;/strong&gt; Learn from other investigators' experiences&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Technology Adoption:&lt;/strong&gt; Utilize new tools and methodologies&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Practice Exercise:&lt;/strong&gt; Review a recent incident report from your organization. Evaluate it using the investigation framework presented in this module. Identify areas for improvement and consider how you would approach a similar investigation differently.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_supervisor_m3_quiz" model="slide.slide">
+            <field name="name">Module 3: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_supervisor_ops"/>
+            <field name="sequence">31</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <record id="quiz_supervisor_m3_q1" model="slide.question">
+            <field name="question">What is the first step in incident investigation?</field>
+            <field name="slide_id" ref="slide_supervisor_m3_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_supervisor_m3_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_m3_q1"/>
+            <field name="text_value">Initial review of incident report</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_m3_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_m3_q1"/>
+            <field name="text_value">Punish the guard</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 4: Performance Management -->
+        <record id="slide_supervisor_m4_performance" model="slide.slide">
+            <field name="name">Module 4: Performance Management</field>
+            <field name="channel_id" ref="elearning_course_supervisor_ops"/>
+            <field name="sequence">40</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.50</field>
+            <field name="html_content">
+                &lt;h2&gt;Performance Management&lt;/h2&gt;
+                &lt;h3&gt;Monitoring Performance:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Attendance and punctuality&lt;/li&gt;
+                    &lt;li&gt;Tour completion rates&lt;/li&gt;
+                    &lt;li&gt;Incident report quality&lt;/li&gt;
+                    &lt;li&gt;Client feedback&lt;/li&gt;
+                    &lt;li&gt;Uniform and appearance&lt;/li&gt;
+                    &lt;li&gt;Communication responsiveness&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Providing Feedback:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Be specific and factual&lt;/li&gt;
+                    &lt;li&gt;Focus on behavior, not personality&lt;/li&gt;
+                    &lt;li&gt;Give both positive and constructive feedback&lt;/li&gt;
+                    &lt;li&gt;Provide feedback promptly&lt;/li&gt;
+                    &lt;li&gt;Offer solutions and support&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Performance Reviews:&lt;/h3&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Prepare review documentation&lt;/li&gt;
+                    &lt;li&gt;Schedule meeting&lt;/li&gt;
+                    &lt;li&gt;Discuss achievements&lt;/li&gt;
+                    &lt;li&gt;Address areas for improvement&lt;/li&gt;
+                    &lt;li&gt;Set goals for next period&lt;/li&gt;
+                    &lt;li&gt;Document the review&lt;/li&gt;
+                &lt;/ol&gt;
+                
+                &lt;h3&gt;Addressing Performance Issues:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Address issues early&lt;/li&gt;
+                    &lt;li&gt;Have private conversations&lt;/li&gt;
+                    &lt;li&gt;Document discussions&lt;/li&gt;
+                    &lt;li&gt;Provide improvement plan&lt;/li&gt;
+                    &lt;li&gt;Follow up regularly&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_supervisor_m4_quiz" model="slide.slide">
+            <field name="name">Module 4: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_supervisor_ops"/>
+            <field name="sequence">41</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <record id="quiz_supervisor_m4_q1" model="slide.question">
+            <field name="question">When should you address performance issues?</field>
+            <field name="slide_id" ref="slide_supervisor_m4_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_supervisor_m4_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_m4_q1"/>
+            <field name="text_value">Address issues early</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_m4_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_m4_q1"/>
+            <field name="text_value">Wait until it's a major problem</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 5: Client Relations -->
+        <record id="slide_supervisor_m5_client" model="slide.slide">
+            <field name="name">Module 5: Client Relations</field>
+            <field name="channel_id" ref="elearning_course_supervisor_ops"/>
+            <field name="sequence">50</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.33</field>
+            <field name="html_content">
+                &lt;h2&gt;Client Relations&lt;/h2&gt;
+                &lt;h3&gt;Professional Communication:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Respond to inquiries within 24 hours&lt;/li&gt;
+                    &lt;li&gt;Be professional and courteous&lt;/li&gt;
+                    &lt;li&gt;Provide clear, accurate information&lt;/li&gt;
+                    &lt;li&gt;Follow up on commitments&lt;/li&gt;
+                    &lt;li&gt;Keep clients informed&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Regular Client Updates:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Weekly activity reports&lt;/li&gt;
+                    &lt;li&gt;Incident summaries&lt;/li&gt;
+                    &lt;li&gt;Guard performance highlights&lt;/li&gt;
+                    &lt;li&gt;Site inspection findings&lt;/li&gt;
+                    &lt;li&gt;Recommendations&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Handling Client Complaints:&lt;/h3&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Listen without interrupting&lt;/li&gt;
+                    &lt;li&gt;Acknowledge their concern&lt;/li&gt;
+                    &lt;li&gt;Gather all facts&lt;/li&gt;
+                    &lt;li&gt;Investigate thoroughly&lt;/li&gt;
+                    &lt;li&gt;Provide timely response&lt;/li&gt;
+                    &lt;li&gt;Take corrective action&lt;/li&gt;
+                    &lt;li&gt;Follow up&lt;/li&gt;
+                &lt;/ol&gt;
+            </field>
+        </record>
+
+        <record id="slide_supervisor_m5_quiz" model="slide.slide">
+            <field name="name">Module 5: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_supervisor_ops"/>
+            <field name="sequence">51</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <record id="quiz_supervisor_m5_q1" model="slide.question">
+            <field name="question">How quickly should you respond to client inquiries?</field>
+            <field name="slide_id" ref="slide_supervisor_m5_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_supervisor_m5_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_m5_q1"/>
+            <field name="text_value">Within 24 hours</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_m5_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_m5_q1"/>
+            <field name="text_value">Whenever you feel like it</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Final Assessment -->
+        <record id="slide_supervisor_final_exam" model="slide.slide">
+            <field name="name">Final Assessment</field>
+            <field name="channel_id" ref="elearning_course_supervisor_ops"/>
+            <field name="sequence">80</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.25</field>
+            <field name="html_content">
+                &lt;h2&gt;Final Examination&lt;/h2&gt;
+                &lt;p&gt;&lt;strong&gt;Requirements:&lt;/strong&gt;&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;20 questions&lt;/li&gt;
+                    &lt;li&gt;85% pass required&lt;/li&gt;
+                    &lt;li&gt;15 minutes time limit&lt;/li&gt;
+                    &lt;li&gt;Can retake if needed&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;p&gt;Upon passing, you'll receive your Supervisor Operations Management certificate!&lt;/p&gt;
+            </field>
+        </record>
+
+        <!-- Final Assessment Questions -->
+        <record id="quiz_supervisor_final_q1" model="slide.question">
+            <field name="question">What is the primary responsibility of a site supervisor?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_supervisor_final_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q1"/>
+            <field name="text_value">Oversee daily operations and team management</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q1"/>
+            <field name="text_value">Handle all client billing</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_supervisor_final_q2" model="slide.question">
+            <field name="question">How often should shift briefings occur?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_supervisor_final_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q2"/>
+            <field name="text_value">At the start of each shift</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q2"/>
+            <field name="text_value">Only when there are changes</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_supervisor_final_q3" model="slide.question">
+            <field name="question">What should be included in an incident investigation?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="quiz_supervisor_final_q3_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q3"/>
+            <field name="text_value">Witness statements, evidence, and timeline</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q3_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q3"/>
+            <field name="text_value">Only the supervisor's opinion</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_supervisor_final_q4" model="slide.question">
+            <field name="question">What is the first step in performance management?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">4</field>
+        </record>
+        <record id="quiz_supervisor_final_q4_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q4"/>
+            <field name="text_value">Set clear expectations and goals</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q4_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q4"/>
+            <field name="text_value">Issue warnings immediately</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_supervisor_final_q5" model="slide.question">
+            <field name="question">How should emergency situations be handled?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">5</field>
+        </record>
+        <record id="quiz_supervisor_final_q5_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q5"/>
+            <field name="text_value">Follow established protocols and coordinate response</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q5_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q5"/>
+            <field name="text_value">Handle everything personally without coordination</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_supervisor_final_q6" model="slide.question">
+            <field name="question">What is crucial for maintaining team morale?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">6</field>
+        </record>
+        <record id="quiz_supervisor_final_q6_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q6"/>
+            <field name="text_value">Regular communication and recognition</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q6_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q6"/>
+            <field name="text_value">Strict discipline only</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_supervisor_final_q7" model="slide.question">
+            <field name="question">When should incident reports be filed?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">7</field>
+        </record>
+        <record id="quiz_supervisor_final_q7_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q7"/>
+            <field name="text_value">Immediately after any security incident</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q7_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q7"/>
+            <field name="text_value">Only at the end of the shift</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_supervisor_final_q8" model="slide.question">
+            <field name="question">What is the supervisor's role in client relations?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">8</field>
+        </record>
+        <record id="quiz_supervisor_final_q8_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q8"/>
+            <field name="text_value">Maintain regular contact and address concerns</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q8_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q8"/>
+            <field name="text_value">Avoid direct client interaction</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_supervisor_final_q9" model="slide.question">
+            <field name="question">How should shift schedules be managed?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">9</field>
+        </record>
+        <record id="quiz_supervisor_final_q9_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q9"/>
+            <field name="text_value">Ensure adequate coverage and fair distribution</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q9_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q9"/>
+            <field name="text_value">Assign based on personal preferences only</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_supervisor_final_q10" model="slide.question">
+            <field name="question">What should be done during a site inspection?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">10</field>
+        </record>
+        <record id="quiz_supervisor_final_q10_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q10"/>
+            <field name="text_value">Check security systems, access points, and personnel</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q10_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q10"/>
+            <field name="text_value">Focus only on guard appearance</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_supervisor_final_q11" model="slide.question">
+            <field name="question">How should disciplinary issues be handled?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">11</field>
+        </record>
+        <record id="quiz_supervisor_final_q11_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q11"/>
+            <field name="text_value">Document, discuss privately, and follow policy</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q11_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q11"/>
+            <field name="text_value">Publicly reprimand immediately</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_supervisor_final_q12" model="slide.question">
+            <field name="question">What is important for crisis management?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">12</field>
+        </record>
+        <record id="quiz_supervisor_final_q12_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q12"/>
+            <field name="text_value">Clear communication and coordination</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q12_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q12"/>
+            <field name="text_value">Individual decision making</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_supervisor_final_q13" model="slide.question">
+            <field name="question">How should training records be maintained?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">13</field>
+        </record>
+        <record id="quiz_supervisor_final_q13_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q13"/>
+            <field name="text_value">Keep accurate and up-to-date records</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q13_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q13"/>
+            <field name="text_value">Records are not necessary</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_supervisor_final_q14" model="slide.question">
+            <field name="question">What should supervisors monitor daily?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">14</field>
+        </record>
+        <record id="quiz_supervisor_final_q14_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q14"/>
+            <field name="text_value">Guard performance, security systems, and incidents</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q14_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q14"/>
+            <field name="text_value">Only coffee breaks</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_supervisor_final_q15" model="slide.question">
+            <field name="question">How should feedback be given to guards?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">15</field>
+        </record>
+        <record id="quiz_supervisor_final_q15_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q15"/>
+            <field name="text_value">Constructive, timely, and specific</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q15_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q15"/>
+            <field name="text_value">Only when performance is poor</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_supervisor_final_q16" model="slide.question">
+            <field name="question">What is the supervisor's role in emergency response?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">16</field>
+        </record>
+        <record id="quiz_supervisor_final_q16_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q16"/>
+            <field name="text_value">Coordinate response and communicate with authorities</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q16_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q16"/>
+            <field name="text_value">Stay out of the way</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_supervisor_final_q17" model="slide.question">
+            <field name="question">How should conflicts between guards be resolved?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">17</field>
+        </record>
+        <record id="quiz_supervisor_final_q17_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q17"/>
+            <field name="text_value">Address privately and fairly</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q17_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q17"/>
+            <field name="text_value">Take sides without investigation</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_supervisor_final_q18" model="slide.question">
+            <field name="question">What should be included in shift reports?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">18</field>
+        </record>
+        <record id="quiz_supervisor_final_q18_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q18"/>
+            <field name="text_value">Incidents, observations, and handovers</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q18_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q18"/>
+            <field name="text_value">Only major incidents</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_supervisor_final_q19" model="slide.question">
+            <field name="question">How should new guards be onboarded?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">19</field>
+        </record>
+        <record id="quiz_supervisor_final_q19_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q19"/>
+            <field name="text_value">Provide orientation and ongoing support</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q19_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q19"/>
+            <field name="text_value">Let them figure it out alone</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_supervisor_final_q20" model="slide.question">
+            <field name="question">What is important for maintaining security standards?</field>
+            <field name="slide_id" ref="slide_supervisor_final_exam"/>
+            <field name="sequence">20</field>
+        </record>
+        <record id="quiz_supervisor_final_q20_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q20"/>
+            <field name="text_value">Regular audits and compliance checks</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_supervisor_final_q20_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_supervisor_final_q20"/>
+            <field name="text_value">Standards can be flexible</field>
+            <field name="is_correct">False</field>
+        </record>
+
+    </data>
+</odoo>
+

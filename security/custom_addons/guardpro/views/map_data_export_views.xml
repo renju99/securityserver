@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Map Data Export Wizard Form View -->
+        <record id="view_map_data_export_wizard_form" model="ir.ui.view">
+            <field name="name">map.data.export.wizard.form</field>
+            <field name="model">map.data.export.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Export Map Data">
+                    <group invisible="file_data">
+                        <group>
+                            <field name="export_type"/>
+                            <field name="export_format"/>
+                        </group>
+                        <group>
+                            <field name="date_from" invisible="export_type not in ('location_history', 'patrol_routes')"/>
+                            <field name="date_to" invisible="export_type not in ('location_history', 'patrol_routes')"/>
+                        </group>
+                    </group>
+                    
+                    <group invisible="file_data">
+                        <group>
+                            <field name="guard_ids" widget="many2many_tags" invisible="export_type == 'geofences'"/>
+                        </group>
+                        <group>
+                            <field name="site_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                    
+                    <group invisible="not file_data">
+                        <group>
+                            <field name="file_name"/>
+                            <field name="file_data" filename="file_name"/>
+                        </group>
+                    </group>
+                    
+                    <footer>
+                        <button string="Export" 
+                                name="action_export" 
+                                type="object" 
+                                class="btn-primary"
+                                invisible="file_data"/>
+                        <button string="Close" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- Map Data Export Action -->
+        <record id="action_map_data_export_wizard" model="ir.actions.act_window">
+            <field name="name">Export Map Data</field>
+            <field name="res_model">map.data.export.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+    </data>
+</odoo>
+

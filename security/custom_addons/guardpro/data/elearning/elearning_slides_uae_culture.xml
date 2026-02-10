@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- Module 1: Understanding UAE Culture -->
+        <record id="slide_uae_m1_culture" model="slide.slide">
+            <field name="name">Module 1: Understanding UAE Culture &amp; Values</field>
+            <field name="channel_id" ref="elearning_course_uae_culture"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.6</field>
+            <field name="html_content">
+                &lt;h2&gt;UAE Culture and Values&lt;/h2&gt;
+                
+                &lt;h3&gt;About the UAE:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Federation of 7 Emirates established in 1971&lt;/li&gt;
+                    &lt;li&gt;Dubai is the most populous emirate&lt;/li&gt;
+                    &lt;li&gt;Islam is the official religion&lt;/li&gt;
+                    &lt;li&gt;Arabic is the official language&lt;/li&gt;
+                    &lt;li&gt;Multicultural society with over 200 nationalities&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Core Emirati Values:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Respect:&lt;/strong&gt; For authority, elders, and traditions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Hospitality:&lt;/strong&gt; Welcoming and generous to guests&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Family:&lt;/strong&gt; Strong family bonds and loyalty&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Honor:&lt;/strong&gt; Personal and family reputation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Modesty:&lt;/strong&gt; In dress and behavior&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Islamic Practices to Respect:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Prayer Times:&lt;/strong&gt; 5 daily prayers - Fajr, Dhuhr, Asr, Maghrib, Isha&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Friday:&lt;/strong&gt; Holy day for Muslims (extended Friday prayer)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Ramadan:&lt;/strong&gt; Month of fasting (no eating/drinking in public)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Eid Al Fitr:&lt;/strong&gt; Festival after Ramadan&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Eid Al Adha:&lt;/strong&gt; Festival of Sacrifice&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Dress Code in UAE:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Security Uniform:&lt;/strong&gt; Must be clean and professional&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Off-Duty:&lt;/strong&gt; Dress modestly, no revealing clothing&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Public Places:&lt;/strong&gt; Cover shoulders and knees&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Malls:&lt;/strong&gt; Modest clothing required&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Beaches:&lt;/strong&gt; Swimwear only at beach/pool areas&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Social Etiquette:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Greetings:&lt;/strong&gt; "As-salamu alaykum" (Peace be upon you)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Handshakes:&lt;/strong&gt; Right hand only, wait for women to extend hand first&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Left Hand:&lt;/strong&gt; Considered unclean, avoid giving/receiving with left&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Feet:&lt;/strong&gt; Don't point soles at people or cross legs showing sole&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Personal Space:&lt;/strong&gt; Respect personal space, especially with opposite gender&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Public Affection:&lt;/strong&gt; Not acceptable between opposite genders&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Prohibited Behaviors:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Public intoxication (zero tolerance)&lt;/li&gt;
+                    &lt;li&gt;Drug use (severe penalties)&lt;/li&gt;
+                    &lt;li&gt;Insulting Islam, UAE leaders, or flag&lt;/li&gt;
+                    &lt;li&gt;Photography without permission&lt;/li&gt;
+                    &lt;li&gt;Offensive gestures or language&lt;/li&gt;
+                    &lt;li&gt;Eating/drinking in public during Ramadan&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_uae_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_uae_culture"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_uae_m1_q1" model="slide.question">
+            <field name="question">What is the official religion of the UAE?</field>
+            <field name="slide_id" ref="slide_uae_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_uae_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_m1_q1"/>
+            <field name="text_value">Islam</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_m1_q1"/>
+            <field name="text_value">Christianity</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_uae_m1_q2" model="slide.question">
+            <field name="question">During Ramadan, what should security guards avoid in public?</field>
+            <field name="slide_id" ref="slide_uae_m1_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_uae_m1_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_m1_q2"/>
+            <field name="text_value">Eating, drinking, or smoking in public</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_m1_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_m1_q2"/>
+            <field name="text_value">Working</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 2: Customer Service in Multicultural Environment -->
+        <record id="slide_uae_m2_service" model="slide.slide">
+            <field name="name">Module 2: Customer Service in Dubai's Multicultural Environment</field>
+            <field name="channel_id" ref="elearning_course_uae_culture"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Serving Dubai's Diverse Population&lt;/h2&gt;
+                
+                &lt;h3&gt;Dubai's Multicultural Reality:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Over 90% expatriate population&lt;/li&gt;
+                    &lt;li&gt;200+ nationalities represented&lt;/li&gt;
+                    &lt;li&gt;Major communities: Indian, Pakistani, Filipino, British, Arab, etc.&lt;/li&gt;
+                    &lt;li&gt;Multiple languages spoken&lt;/li&gt;
+                    &lt;li&gt;Various religious practices&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Cultural Sensitivity Skills:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Open-mindedness:&lt;/strong&gt; Respect all cultures equally&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Non-judgmental:&lt;/strong&gt; Accept differences in customs&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Patience:&lt;/strong&gt; Language barriers may require extra time&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Adaptability:&lt;/strong&gt; Adjust communication style as needed&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Awareness:&lt;/strong&gt; Understand cultural celebrations and customs&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Communicating Across Language Barriers:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Speak slowly and clearly&lt;/li&gt;
+                    &lt;li&gt;Use simple, common words&lt;/li&gt;
+                    &lt;li&gt;Avoid slang and idioms&lt;/li&gt;
+                    &lt;li&gt;Use visual aids when possible&lt;/li&gt;
+                    &lt;li&gt;Be patient with accents&lt;/li&gt;
+                    &lt;li&gt;Confirm understanding&lt;/li&gt;
+                    &lt;li&gt;Use translation apps if needed&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Interacting with VIPs and Dignitaries:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Emirati Royalty:&lt;/strong&gt; Address as "Your Highness" or "Sheikh"&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Government Officials:&lt;/strong&gt; Show extra respect and courtesy&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Diplomatic Personnel:&lt;/strong&gt; Professional and discreet&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Celebrities:&lt;/strong&gt; Protect privacy, no photos&lt;/li&gt;
+                    &lt;li&gt;Follow security protocols strictly&lt;/li&gt;
+                    &lt;li&gt;Maintain confidentiality&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Gender Considerations:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Conservative Approach:&lt;/strong&gt; When in doubt, be formal&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Eye Contact:&lt;/strong&gt; Brief with opposite gender&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Physical Contact:&lt;/strong&gt; Avoid with opposite gender unless initiated&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Female Searches:&lt;/strong&gt; Only by female security officers&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Abaya/Hijab:&lt;/strong&gt; Respect religious dress&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Handling Special Requests:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Prayer room directions&lt;/li&gt;
+                    &lt;li&gt;Halal food inquiries&lt;/li&gt;
+                    &lt;li&gt;Gender-segregated facilities&lt;/li&gt;
+                    &lt;li&gt;Religious observance accommodations&lt;/li&gt;
+                    &lt;li&gt;Cultural event information&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_uae_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_uae_culture"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_uae_m2_q1" model="slide.question">
+            <field name="question">How should you address an Emirati royal family member?</field>
+            <field name="slide_id" ref="slide_uae_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_uae_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_m2_q1"/>
+            <field name="text_value">Your Highness or Sheikh</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_m2_q1"/>
+            <field name="text_value">Sir or Madam</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 3: Basic Arabic for Security Personnel -->
+        <record id="slide_uae_m3_arabic" model="slide.slide">
+            <field name="name">Module 3: Basic Arabic for Security Personnel</field>
+            <field name="channel_id" ref="elearning_course_uae_culture"/>
+            <field name="sequence">30</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.6</field>
+            <field name="html_content">
+                &lt;h2&gt;Essential Arabic Phrases&lt;/h2&gt;
+                
+                &lt;h3&gt;Basic Greetings:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;As-salamu alaykum&lt;/strong&gt; (as-sa-LAH-mu a-LAY-kum) - Peace be upon you&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Wa alaykumu as-salam&lt;/strong&gt; (wa a-LAY-ku-mu as-sa-LAM) - And peace be upon you too (response)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Sabah al-khair&lt;/strong&gt; (sa-BAH al-KHAIR) - Good morning&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Masaa al-khair&lt;/strong&gt; (ma-SAA al-KHAIR) - Good evening&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Marhaba&lt;/strong&gt; (mar-HA-ba) - Hello/Welcome&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Ahlan wa sahlan&lt;/strong&gt; (AH-lan wa SAH-lan) - Welcome&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Common Courtesies:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Shukran&lt;/strong&gt; (SHUK-ran) - Thank you&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Afwan&lt;/strong&gt; (AF-wan) - You're welcome&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Min fadlak/fadlik&lt;/strong&gt; (min FAD-lak/FAD-lik) - Please (m/f)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Aasif&lt;/strong&gt; (AA-sif) - Sorry&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Ma'assalama&lt;/strong&gt; (ma-as-sa-LA-ma) - Goodbye&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Inshallah&lt;/strong&gt; (in-sha-AL-lah) - God willing&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Security-Related Phrases:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Mumkin musa'adatak?&lt;/strong&gt; - Can I help you?&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Hawiyyah min fadlak&lt;/strong&gt; - ID please&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Waqif!&lt;/strong&gt; (WA-qif) - Stop!&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Mamnu'&lt;/strong&gt; (mam-NU) - Forbidden/Not allowed&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Ila huna faqat&lt;/strong&gt; - Only until here&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Intathir huna&lt;/strong&gt; - Wait here&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Ta'aal ma'i&lt;/strong&gt; - Come with me&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Directions:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Yamin&lt;/strong&gt; (ya-MEEN) - Right&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Yasar&lt;/strong&gt; (ya-SAR) - Left&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Tuul/yaseer&lt;/strong&gt; - Straight&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Foq&lt;/strong&gt; - Up/Upstairs&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Taht&lt;/strong&gt; - Down/Downstairs&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Huna&lt;/strong&gt; (HU-na) - Here&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Hunak&lt;/strong&gt; (hu-NAK) - There&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Emergency Phrases:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Najdah!&lt;/strong&gt; - Help!&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Khatar!&lt;/strong&gt; - Danger!&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Naar!&lt;/strong&gt; - Fire!&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Akhrug!&lt;/strong&gt; - Get out! (evacuation)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Ittisal ash-shurtah&lt;/strong&gt; - Call the police&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Is'aaf&lt;/strong&gt; - Ambulance&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Common Questions:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Hal tatakallam al-ingliziyyah?&lt;/strong&gt; - Do you speak English?&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Ayna...?&lt;/strong&gt; - Where is...?&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Ma ismuk?&lt;/strong&gt; - What is your name?&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Kam?&lt;/strong&gt; - How many?&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Numbers 1-10:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Wahid&lt;/strong&gt; - One&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Ithnain&lt;/strong&gt; - Two&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Thalatha&lt;/strong&gt; - Three&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Arba'a&lt;/strong&gt; - Four&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Khamsa&lt;/strong&gt; - Five&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Sitta&lt;/strong&gt; - Six&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Sab'a&lt;/strong&gt; - Seven&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Thamaniya&lt;/strong&gt; - Eight&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Tis'a&lt;/strong&gt; - Nine&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;'Ashara&lt;/strong&gt; - Ten&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_uae_m3_quiz" model="slide.slide">
+            <field name="name">Module 3: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_uae_culture"/>
+            <field name="sequence">31</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_uae_m3_q1" model="slide.question">
+            <field name="question">What does "As-salamu alaykum" mean?</field>
+            <field name="slide_id" ref="slide_uae_m3_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_uae_m3_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_m3_q1"/>
+            <field name="text_value">Peace be upon you</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_m3_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_m3_q1"/>
+            <field name="text_value">Good morning</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_uae_m3_q2" model="slide.question">
+            <field name="question">How do you say "Stop!" in Arabic?</field>
+            <field name="slide_id" ref="slide_uae_m3_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_uae_m3_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_m3_q2"/>
+            <field name="text_value">Waqif!</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_m3_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_m3_q2"/>
+            <field name="text_value">Shukran!</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Final Assessment -->
+        <record id="slide_uae_final" model="slide.slide">
+            <field name="name">Final Assessment: UAE Culture</field>
+            <field name="channel_id" ref="elearning_course_uae_culture"/>
+            <field name="sequence">40</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.3</field>
+        </record>
+
+        <record id="quiz_uae_final_q1" model="slide.question">
+            <field name="question">During Ramadan, what must be avoided in public during daylight hours?</field>
+            <field name="slide_id" ref="slide_uae_final"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_uae_final_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_final_q1"/>
+            <field name="text_value">Eating, drinking, and smoking</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_final_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_final_q1"/>
+            <field name="text_value">Walking</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_uae_final_q2" model="slide.question">
+            <field name="question">When greeting in UAE, which hand should you use?</field>
+            <field name="slide_id" ref="slide_uae_final"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_uae_final_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_final_q2"/>
+            <field name="text_value">Right hand</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_final_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_final_q2"/>
+            <field name="text_value">Left hand</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_uae_final_q3" model="slide.question">
+            <field name="question">What is the proper response to "As-salamu alaykum"?</field>
+            <field name="slide_id" ref="slide_uae_final"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="quiz_uae_final_q3_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_final_q3"/>
+            <field name="text_value">Wa alaykumu as-salam</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_final_q3_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_final_q3"/>
+            <field name="text_value">Shukran</field>
+            <field name="is_correct">False</field>
+        </record>
+
+    </data>
+</odoo>
+
+
+
+
+
+
+
+
+
+

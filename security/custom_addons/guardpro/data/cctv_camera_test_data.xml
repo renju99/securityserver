@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 
+        Note: This test data references demo sites (site_nshama_town_square and site_nshama_springs).
+        To load these cameras, either:
+        1. Enable demo data when installing/upgrading the module, OR
+        2. Create the sites manually first (they are defined in demo/client_demo_data.xml)
+    -->
+    <data noupdate="0">
+        
+        <!-- CCTV Cameras for NSHAMA Town Square -->
+        
+        <!-- Main Entrance Camera -->
+        <record id="cctv_ts_main_entrance" model="cctv.camera">
+            <field name="name">Main Entrance Camera</field>
+            <field name="code">CCTV-TS-001</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="camera_type">dome</field>
+            <field name="location_description">Main entrance gate - Security booth area, facing north, covers vehicle and pedestrian access</field>
+            <field name="stream_url">https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4</field>
+            <field name="stream_type">http</field>
+            <field name="ip_address">192.168.1.100</field>
+            <field name="port" eval="8080"/>
+            <field name="manufacturer">Hikvision</field>
+            <field name="model">DS-2CD2142FWD-I</field>
+            <field name="status">online</field>
+            <field name="is_active" eval="True"/>
+            <field name="username">admin</field>
+            <field name="password">password123</field>
+            <field name="notes">24/7 monitoring of main entrance. High priority camera for access control verification. NOTE: This is a test camera using a sample video stream for demonstration purposes.</field>
+        </record>
+
+        <!-- Retail Area Camera -->
+        <record id="cctv_ts_retail_plaza" model="cctv.camera">
+            <field name="name">Retail Plaza Camera</field>
+            <field name="code">CCTV-TS-002</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="camera_type">ptz</field>
+            <field name="location_description">Central retail plaza near fountain, PTZ camera with 360-degree coverage</field>
+            <field name="stream_url">rtsp://192.168.1.101:554/Streaming/Channels/101</field>
+            <field name="stream_type">rtsp</field>
+            <field name="ip_address">192.168.1.101</field>
+            <field name="port" eval="554"/>
+            <field name="manufacturer">Dahua</field>
+            <field name="model">DH-SD6AL230V-HNI</field>
+            <field name="status">online</field>
+            <field name="is_active" eval="True"/>
+            <field name="username">admin</field>
+            <field name="password">admin123</field>
+            <field name="notes">PTZ camera for retail area surveillance. Can be remotely controlled for pan/tilt/zoom operations.</field>
+        </record>
+
+        <!-- Parking Structure Camera -->
+        <record id="cctv_ts_parking_north" model="cctv.camera">
+            <field name="name">North Parking Structure</field>
+            <field name="code">CCTV-TS-003</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="camera_type">bullet</field>
+            <field name="location_description">Multi-level parking structure - Ground floor entrance, fixed view covering vehicle entry/exit</field>
+            <field name="stream_url">https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8</field>
+            <field name="stream_type">hls</field>
+            <field name="ip_address">192.168.1.102</field>
+            <field name="port" eval="443"/>
+            <field name="manufacturer">Axis</field>
+            <field name="model">P3245-LVE</field>
+            <field name="status">online</field>
+            <field name="is_active" eval="True"/>
+            <field name="notes">Parking structure monitoring. HLS stream for web-based viewing.</field>
+        </record>
+
+        <!-- Loading Bay Camera -->
+        <record id="cctv_ts_loading_bay" model="cctv.camera">
+            <field name="name">Loading Bay Camera</field>
+            <field name="code">CCTV-TS-004</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="camera_type">fixed</field>
+            <field name="location_description">Rear loading bay area, monitoring delivery vehicle access</field>
+            <field name="stream_url">https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4</field>
+            <field name="stream_type">http</field>
+            <field name="ip_address">192.168.1.103</field>
+            <field name="port" eval="8080"/>
+            <field name="manufacturer">Hikvision</field>
+            <field name="model">DS-2CD2042WD-I</field>
+            <field name="status">offline</field>
+            <field name="is_active" eval="True"/>
+            <field name="username">admin</field>
+            <field name="password">password123</field>
+            <field name="notes">Currently offline - requires maintenance check. Last seen online 2 days ago.</field>
+        </record>
+
+        <!-- License Plate Recognition Camera -->
+        <record id="cctv_ts_lpr_entrance" model="cctv.camera">
+            <field name="name">LPR Entrance Camera</field>
+            <field name="code">CCTV-TS-005</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="camera_type">lpr</field>
+            <field name="location_description">Vehicle entrance - License Plate Recognition camera for automated access control</field>
+            <field name="stream_url">rtsp://192.168.1.104:554/Streaming/Channels/101</field>
+            <field name="stream_type">rtsp</field>
+            <field name="ip_address">192.168.1.104</field>
+            <field name="port" eval="554"/>
+            <field name="manufacturer">Hikvision</field>
+            <field name="model">DS-2CD7A26G0/P-IZS</field>
+            <field name="status">online</field>
+            <field name="is_active" eval="True"/>
+            <field name="username">admin</field>
+            <field name="password">password123</field>
+            <field name="notes">License Plate Recognition camera integrated with access control system. Automatically captures and logs vehicle plates.</field>
+        </record>
+
+        <!-- CCTV Cameras for NSHAMA The Springs -->
+        
+        <!-- Community Entrance Camera -->
+        <record id="cctv_sp_main_entrance" model="cctv.camera">
+            <field name="name">Community Entrance Camera</field>
+            <field name="code">CCTV-SP-001</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="camera_type">dome</field>
+            <field name="location_description">Main community entrance gate, covers vehicle and pedestrian access</field>
+            <field name="stream_url">https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4</field>
+            <field name="stream_type">http</field>
+            <field name="ip_address">192.168.2.100</field>
+            <field name="port" eval="8080"/>
+            <field name="manufacturer">Dahua</field>
+            <field name="model">DH-IPC-HDW2431T-AS</field>
+            <field name="status">online</field>
+            <field name="is_active" eval="True"/>
+            <field name="username">admin</field>
+            <field name="password">admin123</field>
+            <field name="notes">Primary entrance monitoring for The Springs community. 24/7 surveillance.</field>
+        </record>
+
+        <!-- Community Center Camera -->
+        <record id="cctv_sp_community_center" model="cctv.camera">
+            <field name="name">Community Center Camera</field>
+            <field name="code">CCTV-SP-002</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="camera_type">ptz</field>
+            <field name="location_description">Community center building, PTZ camera covering recreational facilities area</field>
+            <field name="stream_url">rtsp://192.168.2.101:554/Streaming/Channels/101</field>
+            <field name="stream_type">rtsp</field>
+            <field name="ip_address">192.168.2.101</field>
+            <field name="port" eval="554"/>
+            <field name="manufacturer">Hikvision</field>
+            <field name="model">DS-2DE4A425IW-DE</field>
+            <field name="status">online</field>
+            <field name="is_active" eval="True"/>
+            <field name="username">admin</field>
+            <field name="password">password123</field>
+            <field name="notes">PTZ camera for community center area. Can be remotely controlled for monitoring recreational facilities.</field>
+        </record>
+
+        <!-- Playground Area Camera -->
+        <record id="cctv_sp_playground" model="cctv.camera">
+            <field name="name">Playground Area Camera</field>
+            <field name="code">CCTV-SP-003</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="camera_type">bullet</field>
+            <field name="location_description">Children's playground area, fixed view covering play equipment and surrounding area</field>
+            <field name="stream_url">https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8</field>
+            <field name="stream_type">hls</field>
+            <field name="ip_address">192.168.2.102</field>
+            <field name="port" eval="443"/>
+            <field name="manufacturer">Axis</field>
+            <field name="model">P1365-E</field>
+            <field name="status">maintenance</field>
+            <field name="is_active" eval="True"/>
+            <field name="notes">Playground monitoring camera. Currently under maintenance - lens cleaning and calibration scheduled.</field>
+        </record>
+
+        <!-- Pool Area Camera -->
+        <record id="cctv_sp_pool_area" model="cctv.camera">
+            <field name="name">Pool Area Camera</field>
+            <field name="code">CCTV-SP-004</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="camera_type">dome</field>
+            <field name="location_description">Swimming pool area, weatherproof dome camera covering pool and surrounding deck</field>
+            <field name="stream_url">https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4</field>
+            <field name="stream_type">http</field>
+            <field name="ip_address">192.168.2.103</field>
+            <field name="port" eval="8080"/>
+            <field name="manufacturer">Dahua</field>
+            <field name="model">DH-IPC-HDW2431T-AS-S2</field>
+            <field name="status">online</field>
+            <field name="is_active" eval="True"/>
+            <field name="username">admin</field>
+            <field name="password">admin123</field>
+            <field name="notes">Pool area surveillance for safety monitoring. Weatherproof housing for outdoor installation.</field>
+        </record>
+
+        <!-- Residential Block Camera -->
+        <record id="cctv_sp_residential_block" model="cctv.camera">
+            <field name="name">Residential Block A Camera</field>
+            <field name="code">CCTV-SP-005</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="camera_type">fixed</field>
+            <field name="location_description">Residential Block A entrance, monitoring resident access and visitor entry</field>
+            <field name="stream_url">rtsp://192.168.2.104:554/Streaming/Channels/101</field>
+            <field name="stream_type">rtsp</field>
+            <field name="ip_address">192.168.2.104</field>
+            <field name="port" eval="554"/>
+            <field name="manufacturer">Hikvision</field>
+            <field name="model">DS-2CD2042WD-I</field>
+            <field name="status">error</field>
+            <field name="is_active" eval="True"/>
+            <field name="username">admin</field>
+            <field name="password">password123</field>
+            <field name="notes">Residential block monitoring. Currently showing error - network connectivity issue detected. Requires technician visit.</field>
+        </record>
+
+        <!-- Laundry CCTV Camera -->
+        <record id="cctv_laundry" model="cctv.camera">
+            <field name="name">Laundry CCTV Camera</field>
+            <field name="code">CCTV-LAUNDRY-001</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="camera_type">dome</field>
+            <field name="location_description">Laundry area monitoring camera</field>
+            <field name="stream_url">http://laundrycctv.dnsalias.com:86/doc/page/login.asp</field>
+            <field name="stream_type">iframe</field>
+            <field name="ip_address">laundrycctv.dnsalias.com</field>
+            <field name="port" eval="86"/>
+            <field name="manufacturer">Hikvision</field>
+            <field name="status">online</field>
+            <field name="is_active" eval="True"/>
+            <field name="username">admin</field>
+            <field name="password">10August2010</field>
+            <field name="notes">Laundry area CCTV camera. Using MJPEG stream (/video.cgi). If this doesn't work, try these alternatives in the camera settings: /ISAPI/Streaming/channels/101/picture (snapshot), /Streaming/Channels/101 (video stream), /ISAPI/Streaming/channels/1/picture (channel 1 snapshot), or /Streaming/Channels/1 (channel 1 video).</field>
+        </record>
+
+        <!-- Laundry CCTV Camera - Direct Video Stream (Alternative) -->
+        <!-- Uncomment and use this if the iframe approach doesn't work -->
+        <!--
+        <record id="cctv_laundry_stream" model="cctv.camera">
+            <field name="name">Laundry CCTV Camera - Direct Stream</field>
+            <field name="code">CCTV-LAUNDRY-002</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="camera_type">dome</field>
+            <field name="location_description">Laundry area monitoring camera - Direct video stream</field>
+            <field name="stream_url">http://laundrycctv.dnsalias.com:86/ISAPI/Streaming/channels/101/picture</field>
+            <field name="stream_type">http</field>
+            <field name="ip_address">laundrycctv.dnsalias.com</field>
+            <field name="port" eval="86"/>
+            <field name="manufacturer">Hikvision</field>
+            <field name="status">online</field>
+            <field name="is_active" eval="True"/>
+            <field name="username">admin</field>
+            <field name="password">10August2010</field>
+            <field name="notes">Direct video stream URL for Hikvision camera. Try /ISAPI/Streaming/channels/101/picture for snapshot or /Streaming/Channels/101 for video stream.</field>
+        </record>
+        -->
+
+    </data>
+</odoo>
+

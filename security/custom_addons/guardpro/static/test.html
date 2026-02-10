@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Odoo Connection Test</title>
+    <style>
+        body { font-family: Arial; padding: 40px; background: #f0f0f0; }
+        .box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto; }
+        h1 { color: #00A09D; }
+        .status { margin: 20px 0; padding: 15px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button { background: #00A09D; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; font-size: 16px; margin: 10px 5px; }
+        button:hover { background: #008c89; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>✓ Odoo Server is Running!</h1>
+        <div class="status success">
+            <strong>Success!</strong> If you can see this page, your browser can connect to the Odoo server.
+        </div>
+        <div class="status info">
+            <strong>Server Status:</strong><br>
+            • Odoo is running on port 8069<br>
+            • Database: security<br>
+            • All assets are loading correctly
+        </div>
+        <h2>Login Information</h2>
+        <p><strong>Email:</strong> guard02@berkeleyuae.com<br>
+        <strong>Password:</strong> 123456</p>
+        
+        <h2>Next Steps:</h2>
+        <button onclick="window.location.href='/web'">Go to Login Page</button>
+        <button onclick="window.location.href='/guardpro/pwa/'">Go to GuardPro PWA</button>
+        
+        <h3>If you see a blank login page:</h3>
+        <ol>
+            <li>Press <strong>F12</strong> to open Developer Tools</li>
+            <li>Go to the <strong>Console</strong> tab</li>
+            <li>Look for red error messages</li>
+            <li>Try a hard refresh: <strong>Ctrl+Shift+R</strong> (Cmd+Shift+R on Mac)</li>
+        </ol>
+    </div>
+    <script>
+        console.log("✓ JavaScript is working!");
+        console.log("✓ If you see this, your browser can execute JavaScript");
+    </script>
+</body>
+</html>
+

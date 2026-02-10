@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="guardpro.CheckpointMapCreatorTemplate">
+        <div class="checkpoint-map-creator-wrapper" style="height: 100vh; position: relative;">
+            <!-- Loading Overlay -->
+            <div t-if="state.loading" class="loading-overlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+                <div style="background: white; padding: 30px; border-radius: 8px; text-align: center;">
+                    <i class="fa fa-spinner fa-spin fa-3x text-primary"></i>
+                    <p style="margin-top: 15px; font-size: 16px;">Loading...</p>
+                </div>
+            </div>
+
+            <!-- Map Container -->
+            <div id="checkpoint-creator-map" style="height: 100%; width: 100%;"></div>
+
+            <!-- Control Panel -->
+            <div class="creator-controls" style="position: absolute; top: 20px; left: 20px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); max-width: 350px; z-index: 1000;">
+                <h3 style="margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">
+                    <i class="fa fa-cog"></i> Checkpoint Settings
+                </h3>
+                
+                <!-- Site Selector -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px;">
+                        <i class="fa fa-building"></i> Select Site *
+                    </label>
+                    <select class="form-control" t-on-change="(ev) => this.onSiteChange(ev)">
+                        <option value="">-- Choose a site --</option>
+                        <t t-if="state.sites and state.sites.length > 0">
+                            <t t-foreach="state.sites" t-as="site" t-key="site.id">
+                                <option t-att-value="site.id">
+                                    <t t-esc="site.name"/> (<t t-esc="site.code"/>)
+                                </option>
+                            </t>
+                        </t>
+                    </select>
+                </div>
+                
+                <!-- Status Info Box -->
+                <div style="background: #f3f4f6; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
+                    <p style="margin: 3px 0; font-size: 12px;">
+                        <strong>Status:</strong> 
+                        <span t-if="!state.selectedSiteId">Select a site to begin</span>
+                        <span t-else="">Ready to place checkpoints</span>
+                    </p>
+                    <p style="margin: 3px 0; font-size: 12px;">
+                        <strong>Existing Checkpoints:</strong> <t t-esc="state.checkpointCount || 0"/>
+                    </p>
+                    <p style="margin: 3px 0; font-size: 12px;">
+                        <strong>New Checkpoints:</strong> <t t-esc="state.tempMarkers ? state.tempMarkers.length : 0"/>
+                    </p>
+                </div>
+                
+                <!-- Instructions -->
+                <div style="font-size: 11px; color: #6b7280; padding: 10px; background: #fef3c7; border-radius: 4px; border-left: 3px solid #f59e0b; margin-bottom: 15px;">
+                    <i class="fa fa-info-circle"></i> <strong>Instructions:</strong><br/>
+                    1. Select a site from the dropdown<br/>
+                    2. Click anywhere on the map to place a checkpoint<br/>
+                    3. Fill in the checkpoint details in the popup<br/>
+                    4. Drag markers to adjust position<br/>
+                    5. Click "Save" in the popup to create
+                </div>
+                
+                <!-- Legend -->
+                <div style="padding-top: 15px; border-top: 1px solid #e5e7eb;">
+                    <div style="font-size: 12px; font-weight: 600; margin-bottom: 8px;">Marker Legend</div>
+                    <div style="display: flex; align-items: center; margin-bottom: 5px; font-size: 11px;">
+                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #3b82f6; margin-right: 8px; border: 2px solid white; box-shadow: 0 0 3px rgba(0,0,0,0.3);"></div>
+                        <span>New Checkpoint (Unsaved)</span>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 5px; font-size: 11px;">
+                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #10b981; margin-right: 8px; border: 2px solid white; box-shadow: 0 0 3px rgba(0,0,0,0.3);"></div>
+                        <span>Existing Checkpoint</span>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <button class="btn btn-secondary w-100 mt-2" t-on-click="() => this.clearAllTemp()" t-if="state.tempMarkers and state.tempMarkers.length > 0">
+                    <i class="fa fa-eraser"></i> Clear All New
+                </button>
+                
+                <button class="btn btn-danger w-100 mt-2" t-on-click="() => this.closeMap()">
+                    <i class="fa fa-times"></i> Close Map
+                </button>
+            </div>
+        </div>
+    </t>
+</templates>
+
+
+

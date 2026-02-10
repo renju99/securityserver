@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="attendance_001" model="guard.attendance">
+            <field name="guard_id" ref="guard_john_smith"/>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="shift_id" ref="shift_ts_past_1"/>
+            <field name="checkin_time">2025-10-08 08:00:00</field>
+            <field name="checkout_time">2025-10-08 16:00:00</field>
+        </record>
+
+        <record id="attendance_002" model="guard.attendance">
+            <field name="guard_id" ref="guard_sarah_johnson"/>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="checkin_time">2025-10-14 06:00:00</field>
+            <field name="checkout_time">2025-10-14 14:00:00</field>
+        </record>
+    </data>
+</odoo>

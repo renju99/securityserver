@@ -1,0 +1,483 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Site Geofence Map Template -->
+        <template id="site_geofence_map_template" name="Site Geofence Map">
+            <t t-set="google_maps_api_key" t-value="google_maps_api_key or request.env['ir.config_parameter'].sudo().get_param('guardpro.google_maps_api_key')"/>
+            <t t-call="web.layout">
+                <t t-set="head">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+                    <meta name="mobile-web-app-capable" content="yes"/>
+                    <meta name="apple-mobile-web-app-capable" content="yes"/>
+                    <script>
+                        <![CDATA[
+                        // Site data for geofence map
+                        window.siteGeofenceData = {
+                            id: ]]><t t-esc="site.id"/><![CDATA[,
+                            name: ']]><t t-esc="site.name"/><![CDATA[',
+                            latitude: ]]><t t-esc="site.latitude"/><![CDATA[,
+                            longitude: ]]><t t-esc="site.longitude"/><![CDATA[,
+                            geofence_enabled: ]]><t t-esc="'true' if site.geofence_enabled else 'false'"/><![CDATA[,
+                            geofence_type: ']]><t t-esc="site.geofence_type or 'circle'"/><![CDATA[',
+                            geofence_radius: ]]><t t-esc="site.geofence_radius or 1000"/><![CDATA[,
+                            geofence_polygon: ]]><t t-esc="site.geofence_polygon if site.geofence_polygon else 'null'"/><![CDATA[,
+                        };
+                        
+                        // Define callback function for Google Maps API
+                        window.initSiteGeofenceMap = function() {
+                            console.log('Google Maps API loaded');
+                            
+                            // Initialize map after Google Maps API is ready
+                            function initGeofenceMap() {
+                                console.log('initGeofenceMap called');
+                                console.log('SiteGeofenceMap defined:', typeof SiteGeofenceMap !== 'undefined');
+                                console.log('Google Maps defined:', typeof google !== 'undefined' && typeof google.maps !== 'undefined');
+                                console.log('Site data available:', !!window.siteGeofenceData);
+                                
+                                // Check if all required components are ready
+                                if (typeof SiteGeofenceMap === 'undefined') {
+                                    console.log('Waiting for SiteGeofenceMap class...');
+                                    setTimeout(initGeofenceMap, 100);
+                                    return;
+                                }
+                                
+                                // Try multiple ways to find the map element
+                                let mapElement = document.getElementById('geofence-map');
+                                
+                                // If not found, try querySelector
+                                if (!mapElement) {
+                                    mapElement = document.querySelector('#geofence-map');
+                                }
+                                
+                                // If still not found, create the entire structure dynamically
+                                if (!mapElement) {
+                                    console.log('Map element not found, creating structure dynamically...');
+                                    
+                                    // Clear body and create structure
+                                    document.body.innerHTML = '';
+                                    document.body.style.margin = '0';
+                                    document.body.style.padding = '0';
+                                    document.body.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+                                    
+                                    // Create container
+                                    const container = document.createElement('div');
+                                    container.className = 'geofence-container';
+                                    container.style.position = 'relative';
+                                    container.style.padding = '0';
+                                    
+                                    // Create header
+                                    const header = document.createElement('div');
+                                    header.className = 'geofence-header';
+                                    header.style.background = '#1f2937';
+                                    header.style.color = 'white';
+                                    header.style.padding = '15px 20px';
+                                    header.style.display = 'flex';
+                                    header.style.justifyContent = 'space-between';
+                                    header.style.alignItems = 'center';
+                                    
+                                    const headerTitle = document.createElement('h2');
+                                    headerTitle.style.margin = '0';
+                                    headerTitle.style.fontSize = '18px';
+                                    headerTitle.style.fontWeight = '600';
+                                    headerTitle.textContent = 'Geofencing Map - ' + (window.siteGeofenceData ? window.siteGeofenceData.name : 'Site');
+                                    
+                                    const closeBtn = document.createElement('button');
+                                    closeBtn.innerHTML = '&#215;';
+                                    closeBtn.onclick = function() { window.close(); };
+                                    closeBtn.style.background = 'transparent';
+                                    closeBtn.style.border = 'none';
+                                    closeBtn.style.color = 'white';
+                                    closeBtn.style.fontSize = '20px';
+                                    closeBtn.style.cursor = 'pointer';
+                                    
+                                    header.appendChild(headerTitle);
+                                    header.appendChild(closeBtn);
+                                    
+                                    // Create map element
+                                    const mapDiv = document.createElement('div');
+                                    mapDiv.id = 'geofence-map';
+                                    mapDiv.style.height = 'calc(100vh - 120px)';
+                                    mapDiv.style.width = '100%';
+                                    
+                                    // Create controls
+                                    const controls = document.createElement('div');
+                                    controls.className = 'geofence-controls';
+                                    controls.style.position = 'absolute';
+                                    controls.style.top = '20px';
+                                    controls.style.left = '20px';
+                                    controls.style.zIndex = '5';
+                                    controls.style.background = 'white';
+                                    controls.style.padding = '20px';
+                                    controls.style.borderRadius = '8px';
+                                    controls.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+                                    controls.style.maxWidth = '350px';
+                                    
+                                    controls.innerHTML = `
+                                        <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 16px; font-weight: 600; color: #1f2937;">Geofence Controls</h3>
+                                        <div class="info-box" style="background: #f3f4f6; padding: 12px; border-radius: 4px; margin-bottom: 15px; font-size: 12px; color: #4b5563;">
+                                            <strong>Instructions:</strong><br/>
+                                            1. Search for a location or click "Current Location"<br/>
+                                            2. Select geofence type (Circle or Polygon)<br/>
+                                            3. Draw the geofence on the map<br/>
+                                            4. Click "Save Geofence" to save
+                                        </div>
+                                        <div class="form-group" style="margin-bottom: 15px;">
+                                            <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #374151;">Search Location</label>
+                                            <div style="display: flex; gap: 5px;">
+                                                <input type="text" id="location-search" placeholder="Enter address or place name" style="flex: 1; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; box-sizing: border-box;"/>
+                                                <button class="btn btn-secondary" id="btn-search-location" style="width: auto; padding: 8px 15px; margin-top: 0; white-space: nowrap; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">🔍 Search</button>
+                                            </div>
+                                        </div>
+                                        <div class="form-group" style="margin-bottom: 15px;">
+                                            <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #374151;">Geofence Type</label>
+                                            <select id="geofence-type" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
+                                                <option value="circle">Circle</option>
+                                                <option value="polygon">Polygon</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group" id="radius-group" style="margin-bottom: 15px;">
+                                            <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #374151;">Radius (meters)</label>
+                                            <input type="number" id="geofence-radius" min="10" max="10000" value="1000" step="10" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; box-sizing: border-box;"/>
+                                        </div>
+                                        <button class="btn btn-secondary" id="btn-current-location" style="width: 100%; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; margin-top: 5px; background: #6b7280; color: white;">📍 Current Location</button>
+                                        <button class="btn btn-primary" id="btn-draw-circle" style="display: none; width: 100%; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; margin-top: 5px; background: #3b82f6; color: white;">Draw Circle</button>
+                                        <button class="btn btn-primary" id="btn-draw-polygon" style="display: none; width: 100%; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; margin-top: 5px; background: #3b82f6; color: white;">Draw Polygon</button>
+                                        <button class="btn btn-danger" id="btn-clear" style="display: none; width: 100%; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; margin-top: 5px; background: #ef4444; color: white;">Clear Geofence</button>
+                                        <button class="btn btn-success" id="btn-save" style="display: none; width: 100%; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; margin-top: 5px; background: #10b981; color: white;">Save Geofence</button>
+                                        <div class="status-message" id="status-message" style="padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 13px; display: none;"></div>
+                                    `;
+                                    
+                                    // Assemble structure
+                                    container.appendChild(header);
+                                    container.appendChild(mapDiv);
+                                    container.appendChild(controls);
+                                    document.body.appendChild(container);
+                                    
+                                    mapElement = mapDiv;
+                                    console.log('Structure created dynamically, map element:', !!mapElement);
+                                }
+                                
+                                console.log('Map element found:', !!mapElement);
+                                if (!mapElement) {
+                                    console.log('Map element not found, retrying...');
+                                    setTimeout(initGeofenceMap, 100);
+                                    return;
+                                }
+                                
+                                // Check if Google Maps API is loaded
+                                if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+                                    console.log('Waiting for Google Maps API...');
+                                    setTimeout(initGeofenceMap, 100);
+                                    return;
+                                }
+                                
+                                // Check if site data is available
+                                if (!window.siteGeofenceData) {
+                                    console.log('Waiting for site data...');
+                                    setTimeout(initGeofenceMap, 100);
+                                    return;
+                                }
+                                
+                                // All ready, initialize the map
+                                if (!window.siteGeofenceMapInstance) {
+                                    console.log('Initializing Site Geofence Map');
+                                    try {
+                                        window.siteGeofenceMapInstance = new SiteGeofenceMap(window.siteGeofenceData);
+                                        console.log('Map initialized successfully');
+                                    } catch (error) {
+                                        console.error('Error initializing map:', error);
+                                    }
+                                }
+                            }
+                            
+                            // Start initialization - wait longer for Odoo's layout to render
+                            function startInit() {
+                                // Check if body content is rendered
+                                const body = document.body;
+                                console.log('Body exists:', !!body);
+                                console.log('Body innerHTML length:', body ? body.innerHTML.length : 0);
+                                
+                                // Try to find the element immediately
+                                const testElement = document.getElementById('geofence-map');
+                                console.log('Test element found on start:', !!testElement);
+                                
+                                if (testElement) {
+                                    console.log('Element found immediately, starting init...');
+                                    setTimeout(initGeofenceMap, 100);
+                                } else {
+                                    console.log('Element not found yet, waiting...');
+                                    setTimeout(initGeofenceMap, 1000);
+                                }
+                            }
+                            
+                            if (document.readyState === 'complete') {
+                                console.log('Document already complete, starting init...');
+                                setTimeout(startInit, 1000);
+                            } else {
+                                console.log('Waiting for window load...');
+                                window.addEventListener('load', function() {
+                                    console.log('Window loaded, starting init...');
+                                    setTimeout(startInit, 1000);
+                                });
+                                
+                                // Also try DOMContentLoaded
+                                if (document.readyState === 'loading') {
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        console.log('DOMContentLoaded fired, starting init...');
+                                        setTimeout(startInit, 1000);
+                                    });
+                                } else {
+                                    setTimeout(startInit, 1000);
+                                }
+                            }
+                        };
+                        ]]>
+                    </script>
+                    <script src="/guardpro/static/src/js/site_geofence_map.js?v=1.1"></script>
+                    <t t-if="google_maps_api_key">
+                        <script async="async" defer="defer" t-att-src="'https://maps.googleapis.com/maps/api/js?key=%s&amp;libraries=drawing,geometry,places&amp;loading=async&amp;callback=initSiteGeofenceMap' % google_maps_api_key"/>
+                    </t>
+                    <style>
+                        body {
+                            margin: 0;
+                            padding: 0;
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                        }
+                        
+                        #geofence-map {
+                            height: calc(100vh - 120px);
+                            width: 100%;
+                        }
+                        
+                        .geofence-container {
+                            position: relative;
+                            padding: 0;
+                        }
+                        
+                        .geofence-controls {
+                            position: absolute;
+                            top: 20px;
+                            left: 20px;
+                            z-index: 5;
+                            background: white;
+                            padding: 20px;
+                            border-radius: 8px;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                            max-width: 350px;
+                        }
+                        
+                        .geofence-header {
+                            background: #1f2937;
+                            color: white;
+                            padding: 15px 20px;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                        }
+                        
+                        .geofence-header h2 {
+                            margin: 0;
+                            font-size: 18px;
+                            font-weight: 600;
+                        }
+                        
+                        @media (max-width: 768px) {
+                            .geofence-container {
+                                padding: 0;
+                            }
+                            
+                            .geofence-controls {
+                                position: fixed;
+                                top: auto;
+                                bottom: 0;
+                                left: 0;
+                                right: 0;
+                                max-width: 100%;
+                                max-height: 50vh;
+                                overflow-y: auto;
+                                border-radius: 16px 16px 0 0;
+                            }
+                            
+                            #geofence-map {
+                                height: calc(100vh - 80px);
+                            }
+                        }
+                        
+                        .geofence-controls h3 {
+                            margin-top: 0;
+                            margin-bottom: 15px;
+                            font-size: 16px;
+                            font-weight: 600;
+                            color: #1f2937;
+                        }
+                        
+                        .form-group {
+                            margin-bottom: 15px;
+                        }
+                        
+                        .form-group label {
+                            display: block;
+                            font-size: 13px;
+                            font-weight: 600;
+                            margin-bottom: 5px;
+                            color: #374151;
+                        }
+                        
+                        .form-group select,
+                        .form-group input {
+                            width: 100%;
+                            padding: 8px;
+                            border: 1px solid #d1d5db;
+                            border-radius: 4px;
+                            font-size: 14px;
+                            box-sizing: border-box;
+                        }
+                        
+                        .btn {
+                            width: 100%;
+                            padding: 10px;
+                            border: none;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            font-size: 14px;
+                            font-weight: 600;
+                            margin-top: 5px;
+                            transition: background 0.2s;
+                        }
+                        
+                        .btn-primary {
+                            background: #3b82f6;
+                            color: white;
+                        }
+                        
+                        .btn-primary:hover {
+                            background: #2563eb;
+                        }
+                        
+                        .btn-success {
+                            background: #10b981;
+                            color: white;
+                        }
+                        
+                        .btn-success:hover {
+                            background: #059669;
+                        }
+                        
+                        .btn-secondary {
+                            background: #6b7280;
+                            color: white;
+                        }
+                        
+                        .btn-secondary:hover {
+                            background: #4b5563;
+                        }
+                        
+                        .btn-danger {
+                            background: #ef4444;
+                            color: white;
+                        }
+                        
+                        .btn-danger:hover {
+                            background: #dc2626;
+                        }
+                        
+                        .btn:disabled {
+                            opacity: 0.5;
+                            cursor: not-allowed;
+                        }
+                        
+                        .info-box {
+                            background: #f3f4f6;
+                            padding: 12px;
+                            border-radius: 4px;
+                            margin-bottom: 15px;
+                            font-size: 12px;
+                            color: #4b5563;
+                        }
+                        
+                        .status-message {
+                            padding: 10px;
+                            border-radius: 4px;
+                            margin-top: 10px;
+                            font-size: 13px;
+                            display: none;
+                        }
+                        
+                        .status-message.success {
+                            background: #d1fae5;
+                            color: #065f46;
+                            border: 1px solid #10b981;
+                        }
+                        
+                        .status-message.error {
+                            background: #fee2e2;
+                            color: #991b1b;
+                            border: 1px solid #ef4444;
+                        }
+                        
+                        .status-message.show {
+                            display: block;
+                        }
+                    </style>
+                </t>
+
+                <div class="geofence-container">
+                        <div class="geofence-header">
+                            <h2>Geofencing Map - <t t-esc="site.name"/></h2>
+                            <button onclick="window.close()" style="background: transparent; border: none; color: white; font-size: 20px; cursor: pointer;">&#215;</button>
+                        </div>
+                        <div id="geofence-map"></div>
+                        <div class="geofence-controls">
+                            <h3>Geofence Controls</h3>
+                            <div class="info-box">
+                                <strong>Instructions:</strong><br/>
+                                1. Search for a location or click "Current Location"<br/>
+                                2. Select geofence type (Circle or Polygon)<br/>
+                                3. Draw the geofence on the map<br/>
+                                4. Click "Save Geofence" to save
+                            </div>
+                            <div class="form-group">
+                                <label>Geofence Type</label>
+                                <select id="geofence-type">
+                                    <option value="circle">Circle</option>
+                                    <option value="polygon">Polygon</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="radius-group">
+                                <label>Radius (meters)</label>
+                                <input type="number" id="geofence-radius" min="10" max="10000" value="1000" step="10"/>
+                            </div>
+                            <div class="form-group">
+                                <label>Search Location</label>
+                                <div style="display: flex; gap: 5px;">
+                                    <input type="text" id="location-search" placeholder="Enter address or place name" 
+                                           style="flex: 1; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; box-sizing: border-box;"/>
+                                    <button class="btn btn-secondary" id="btn-search-location" 
+                                            style="width: auto; padding: 8px 15px; margin-top: 0; white-space: nowrap;">
+                                        🔍 Search
+                                    </button>
+                                </div>
+                            </div>
+                            <button class="btn btn-secondary" id="btn-current-location">
+                                📍 Current Location
+                            </button>
+                            <button class="btn btn-primary" id="btn-draw-circle" style="display: none;">
+                                Draw Circle
+                            </button>
+                            <button class="btn btn-primary" id="btn-draw-polygon" style="display: none;">
+                                Draw Polygon
+                            </button>
+                            <button class="btn btn-danger" id="btn-clear" style="display: none;">
+                                Clear Geofence
+                            </button>
+                            <button class="btn btn-success" id="btn-save" style="display: none;">
+                                Save Geofence
+                            </button>
+                            <div class="status-message" id="status-message"></div>
+                        </div>
+                    </div>
+            </t>
+        </template>
+    </data>
+</odoo>
+

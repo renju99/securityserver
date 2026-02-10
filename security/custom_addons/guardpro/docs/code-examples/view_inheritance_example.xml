@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Example: Inheriting and Extending GuardPro Views
+        
+        This example shows how to add custom fields to existing GuardPro views
+        using XML inheritance.
+    -->
+
+    <!-- Example 1: Add custom fields to Guard Profile form view -->
+    <record id="view_guard_profile_form_custom" model="ir.ui.view">
+        <field name="name">guard.profile.form.custom</field>
+        <field name="model">guard.profile</field>
+        <field name="inherit_id" ref="guardpro.view_guard_profile_form"/>
+        <field name="arch" type="xml">
+            
+            <!-- Add a new tab after existing tabs -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Additional Info" name="additional_info">
+                    <group>
+                        <group string="Company Information">
+                            <field name="custom_employee_id"/>
+                            <field name="years_of_experience"/>
+                            <field name="previous_employer"/>
+                        </group>
+                        <group string="Security Clearance">
+                            <field name="security_clearance_level"/>
+                            <field name="clearance_expiry_date"/>
+                            <field name="clearance_status" widget="badge"
+                                   decoration-success="clearance_status == 'valid'"
+                                   decoration-warning="clearance_status == 'expiring_soon'"
+                                   decoration-danger="clearance_status == 'expired'"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Uniform">
+                            <field name="uniform_size"/>
+                        </group>
+                        <group string="Weapon Authorization">
+                            <field name="is_armed_guard"/>
+                            <field name="weapon_permit_number" 
+                                   invisible="not is_armed_guard"/>
+                            <field name="weapon_permit_expiry" 
+                                   invisible="not is_armed_guard"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Emergency Contact">
+                            <field name="emergency_contact_name"/>
+                            <field name="emergency_contact_phone"/>
+                            <field name="emergency_contact_relation"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+            
+            <!-- Add field after an existing field -->
+            <xpath expr="//field[@name='badge_number']" position="after">
+                <field name="custom_employee_id"/>
+            </xpath>
+            
+        </field>
+    </record>
+
+    <!-- Example 2: Add custom fields to Client Site form view -->
+    <record id="view_client_site_form_custom" model="ir.ui.view">
+        <field name="name">client.site.form.custom</field>
+        <field name="model">client.site</field>
+        <field name="inherit_id" ref="guardpro.view_client_site_form"/>
+        <field name="arch" type="xml">
+            
+            <!-- Add new tab for contract information -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Contract Details" name="contract_details">
+                    <group>
+                        <group string="Contract Information">
+                            <field name="site_code"/>
+                            <field name="contract_number"/>
+                            <field name="contract_start_date"/>
+                            <field name="contract_end_date"/>
+                            <field name="monthly_hours"/>
+                            <field name="billing_rate"/>
+                        </group>
+                        <group string="Site Manager">
+                            <field name="site_manager_name"/>
+                            <field name="site_manager_phone"/>
+                            <field name="site_manager_email" widget="email"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Security Systems">
+                            <field name="has_cctv"/>
+                            <field name="has_alarm_system"/>
+                            <field name="has_access_control"/>
+                            <field name="alarm_code" password="True" 
+                                   invisible="not has_alarm_system"/>
+                        </group>
+                        <group string="Special Instructions">
+                            <field name="special_instructions" nolabel="1"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+            
+        </field>
+    </record>
+
+    <!-- Example 3: Add columns to Guard Profile list view -->
+    <record id="view_guard_profile_tree_custom" model="ir.ui.view">
+        <field name="name">guard.profile.tree.custom</field>
+        <field name="model">guard.profile</field>
+        <field name="inherit_id" ref="guardpro.view_guard_profile_tree"/>
+        <field name="arch" type="xml">
+            
+            <!-- Add custom column after badge number -->
+            <xpath expr="//field[@name='badge_number']" position="after">
+                <field name="custom_employee_id"/>
+                <field name="security_clearance_level"/>
+                <field name="clearance_status" widget="badge"
+                       decoration-success="clearance_status == 'valid'"
+                       decoration-warning="clearance_status == 'expiring_soon'"
+                       decoration-danger="clearance_status == 'expired'"/>
+            </xpath>
+            
+        </field>
+    </record>
+
+    <!-- Example 4: Add custom fields to Incident Report form -->
+    <record id="view_incident_report_form_custom" model="ir.ui.view">
+        <field name="name">incident.report.form.custom</field>
+        <field name="model">incident.report</field>
+        <field name="inherit_id" ref="guardpro.view_incident_report_form"/>
+        <field name="arch" type="xml">
+            
+            <!-- Add new tab for emergency services -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Emergency Response" name="emergency_response">
+                    <group>
+                        <group string="Services Contacted">
+                            <field name="police_notified"/>
+                            <field name="police_report_number" 
+                                   invisible="not police_notified"/>
+                            <field name="fire_department_notified"/>
+                            <field name="ambulance_called"/>
+                        </group>
+                        <group string="Incident Impact">
+                            <field name="injuries_reported"/>
+                            <field name="property_damage"/>
+                            <field name="estimated_damage_cost" 
+                                   invisible="not property_damage"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Insurance">
+                            <field name="insurance_claim_filed"/>
+                            <field name="insurance_claim_number" 
+                                   invisible="not insurance_claim_filed"/>
+                        </group>
+                        <group string="Follow-up">
+                            <field name="follow_up_required"/>
+                            <field name="follow_up_date" 
+                                   invisible="not follow_up_required"/>
+                            <field name="client_notified_date"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+            
+        </field>
+    </record>
+
+    <!-- Example 5: Add custom search filters -->
+    <record id="view_guard_profile_search_custom" model="ir.ui.view">
+        <field name="name">guard.profile.search.custom</field>
+        <field name="model">guard.profile</field>
+        <field name="inherit_id" ref="guardpro.view_guard_profile_search"/>
+        <field name="arch" type="xml">
+            
+            <!-- Add custom search filters -->
+            <xpath expr="//search" position="inside">
+                <!-- Filter by clearance status -->
+                <filter string="Valid Clearance" name="valid_clearance"
+                        domain="[('clearance_status', '=', 'valid')]"/>
+                <filter string="Expiring Soon" name="expiring_clearance"
+                        domain="[('clearance_status', '=', 'expiring_soon')]"/>
+                <filter string="Expired Clearance" name="expired_clearance"
+                        domain="[('clearance_status', '=', 'expired')]"/>
+                
+                <separator/>
+                
+                <!-- Filter armed guards -->
+                <filter string="Armed Guards" name="armed_guards"
+                        domain="[('is_armed_guard', '=', True)]"/>
+                <filter string="Unarmed Guards" name="unarmed_guards"
+                        domain="[('is_armed_guard', '=', False)]"/>
+                
+                <separator/>
+                
+                <!-- Group by clearance level -->
+                <group expand="0" string="Group By">
+                    <filter string="Security Clearance" name="group_clearance"
+                            context="{'group_by': 'security_clearance_level'}"/>
+                    <filter string="Clearance Status" name="group_status"
+                            context="{'group_by': 'clearance_status'}"/>
+                </group>
+            </xpath>
+            
+            <!-- Add searchable fields -->
+            <xpath expr="//search" position="inside">
+                <field name="custom_employee_id"/>
+                <field name="emergency_contact_name"/>
+                <field name="weapon_permit_number"/>
+            </xpath>
+            
+        </field>
+    </record>
+
+    <!-- Example 6: Modify existing field attributes -->
+    <record id="view_guard_profile_modify_field" model="ir.ui.view">
+        <field name="name">guard.profile.form.modify</field>
+        <field name="model">guard.profile</field>
+        <field name="inherit_id" ref="guardpro.view_guard_profile_form"/>
+        <field name="arch" type="xml">
+            
+            <!-- Make badge number required (if it wasn't already) -->
+            <xpath expr="//field[@name='badge_number']" position="attributes">
+                <attribute name="required">True</attribute>
+            </xpath>
+            
+            <!-- Add help text to a field -->
+            <xpath expr="//field[@name='status']" position="attributes">
+                <attribute name="help">Current employment status of the guard</attribute>
+            </xpath>
+            
+        </field>
+    </record>
+
+    <!-- Example 7: Add custom action buttons -->
+    <record id="view_guard_profile_form_buttons" model="ir.ui.view">
+        <field name="name">guard.profile.form.buttons</field>
+        <field name="model">guard.profile</field>
+        <field name="inherit_id" ref="guardpro.view_guard_profile_form"/>
+        <field name="arch" type="xml">
+            
+            <!-- Add custom button in header -->
+            <xpath expr="//header" position="inside">
+                <button name="action_check_clearance_expiry" 
+                        string="Check Clearance" 
+                        type="object" 
+                        class="btn-primary"
+                        invisible="clearance_status == 'none'"/>
+                <button name="action_renew_clearance" 
+                        string="Renew Clearance" 
+                        type="object" 
+                        class="btn-warning"
+                        invisible="clearance_status not in ('expiring_soon', 'expired')"/>
+            </xpath>
+            
+        </field>
+    </record>
+
+    <!-- Example 8: Add custom kanban view -->
+    <record id="view_guard_profile_kanban_custom" model="ir.ui.view">
+        <field name="name">guard.profile.kanban.custom</field>
+        <field name="model">guard.profile</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <field name="badge_number"/>
+                <field name="custom_employee_id"/>
+                <field name="security_clearance_level"/>
+                <field name="clearance_status"/>
+                <field name="is_armed_guard"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="oe_kanban_details">
+                                <strong class="o_kanban_record_title">
+                                    <field name="name"/>
+                                </strong>
+                                <div>
+                                    Badge: <field name="badge_number"/>
+                                </div>
+                                <div>
+                                    ID: <field name="custom_employee_id"/>
+                                </div>
+                                <div>
+                                    <span class="badge" 
+                                          t-attf-class="badge-{{clearance_status == 'valid' and 'success' or clearance_status == 'expiring_soon' and 'warning' or 'danger'}}">
+                                        <field name="clearance_status"/>
+                                    </span>
+                                    <t t-if="record.is_armed_guard.raw_value">
+                                        <span class="badge badge-info ml-2">Armed</span>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+</odoo>
+
+<!--
+USAGE INSTRUCTIONS:
+===================
+
+1. Create a new custom module:
+   - Module name: guardpro_custom (or your choice)
+   - Depends on: ['guardpro']
+
+2. Add this file to your module:
+   - Path: guardpro_custom/views/guard_custom_views.xml
+
+3. Declare in __manifest__.py:
+   'data': [
+       'views/guard_custom_views.xml',
+   ]
+
+4. Install or upgrade your custom module
+
+5. The custom fields will appear in the GuardPro views
+
+XPATH TIPS:
+===========
+
+Common XPath positions:
+- position="before": Insert before the element
+- position="after": Insert after the element
+- position="inside": Insert inside the element (as last child)
+- position="replace": Replace the entire element
+- position="attributes": Modify attributes of the element
+
+Common XPath expressions:
+- //field[@name='field_name']: Find field by name
+- //page[@name='page_name']: Find notebook page
+- //notebook: Find notebook element
+- //header: Find form header
+- //group: Find group element
+
+-->
+

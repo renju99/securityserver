@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Visitor Management Form View -->
+    <record id="view_visitor_management_form" model="ir.ui.view">
+        <field name="name">visitor.management.form</field>
+        <field name="model">visitor.management</field>
+        <field name="arch" type="xml">
+            <form string="Visitor Management">
+                <header>
+                    <button name="action_check_watchlist" string="Check Watchlist" type="object"
+                            class="oe_highlight"
+                            invisible="watchlist_checked or state == 'denied'"/>
+                    <button name="action_checkin" string="Check In" type="object"
+                            class="oe_highlight"
+                            invisible="state != 'pre_registered' or watchlist_hit"/>
+                    <button name="action_checkout" string="Check Out" type="object"
+                            class="oe_highlight"
+                            invisible="state != 'checked_in'"/>
+                    <button name="action_notify_host" string="Notify Host" type="object"
+                            invisible="host_notified or not host_email"/>
+                    <button name="action_deny_access" string="Deny Access" type="object"
+                            class="btn-danger"
+                            invisible="state in ['checked_in', 'checked_out', 'denied']"/>
+                    <button name="action_return_badge" string="Return Badge" type="object"
+                            invisible="badge_returned or not badge_number"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state in ['checked_in', 'checked_out', 'cancelled']"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="pre_registered,checked_in,checked_out"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="VIP" bg_color="text-bg-warning"
+                            invisible="not is_vip"/>
+                    <widget name="web_ribbon" title="Watchlist Hit" bg_color="text-bg-danger"
+                            invisible="not watchlist_hit"/>
+                    <widget name="web_ribbon" title="Overdue" bg_color="text-bg-danger"
+                            invisible="not is_overdue_checkout"/>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="visitor_type"/>
+                            <field name="mobile_number"/>
+                            <field name="email"/>
+                            <field name="company"/>
+                        </group>
+                        <group>
+                            <field name="site_id" options="{'no_create': True}"/>
+                            <field name="visit_date"/>
+                            <field name="visit_purpose"/>
+                            <field name="expected_duration"/>
+                            <field name="is_vip" invisible="1"/>
+                            <field name="is_overdue_checkout" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Identification">
+                            <group>
+                                <group>
+                                    <field name="id_type"/>
+                                    <field name="id_number"/>
+                                    <field name="id_photo" widget="image" options="{'size': [200, 200]}"/>
+                                </group>
+                                <group>
+                                    <field name="name_arabic"/>
+                                    <field name="nationality"/>
+                                    <field name="date_of_birth"/>
+                                    <field name="gender"/>
+                                    <field name="visitor_photo" widget="image" options="{'size': [200, 200]}"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Host Information">
+                            <group>
+                                <group>
+                                    <field name="host_name"/>
+                                    <field name="host_phone"/>
+                                    <field name="host_email"/>
+                                    <field name="host_department"/>
+                                </group>
+                                <group>
+                                    <field name="host_notified" widget="boolean_toggle"/>
+                                    <field name="host_notification_date" invisible="not host_notified"/>
+                                    <field name="purpose_details" placeholder="Detailed purpose of visit..."/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Security &amp; Screening">
+                            <group>
+                                <group string="Watchlist Check">
+                                    <field name="watchlist_checked" widget="boolean_toggle"/>
+                                    <field name="watchlist_hit" widget="boolean_toggle"
+                                           invisible="not watchlist_checked"/>
+                                    <field name="watchlist_notes" invisible="not watchlist_hit"/>
+                                    <field name="denied_reason" invisible="state != 'denied'"/>
+                                </group>
+                                <group string="Compliance">
+                                    <field name="nda_signed" widget="boolean_toggle"/>
+                                    <field name="nda_document" filename="nda_filename"
+                                           invisible="not nda_signed"/>
+                                    <field name="code_of_conduct_accepted" widget="boolean_toggle"/>
+                                    <field name="safety_briefing_completed" widget="boolean_toggle"/>
+                                    <field name="health_declaration" widget="boolean_toggle"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Health Check">
+                                    <field name="temperature_checked" widget="boolean_toggle"/>
+                                    <field name="temperature_reading" invisible="not temperature_checked"/>
+                                </group>
+                                <group string="Vehicle &amp; Items">
+                                    <field name="vehicle_number"/>
+                                    <field name="vehicle_make"/>
+                                    <field name="parking_slot"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group>
+                                    <field name="items_carried_in" placeholder="List any items/equipment brought in..."/>
+                                </group>
+                                <group>
+                                    <field name="items_carried_out" placeholder="List any items taken out..."/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Visit Details">
+                            <group>
+                                <group string="Check-in">
+                                    <field name="checkin_time"/>
+                                    <field name="guard_checkin_id"/>
+                                    <field name="pre_registered" widget="boolean_toggle"/>
+                                </group>
+                                <group string="Check-out">
+                                    <field name="checkout_time"/>
+                                    <field name="guard_checkout_id"/>
+                                    <field name="actual_duration"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Badge">
+                                    <field name="badge_number"/>
+                                    <field name="badge_returned" widget="boolean_toggle"/>
+                                    <field name="badge_return_date" invisible="not badge_returned"/>
+                                </group>
+                                <group string="QR Code">
+                                    <field name="qr_code" readonly="1"/>
+                                    <field name="qr_image" widget="image" options="{'size': [150, 150]}"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Additional Information">
+                            <group>
+                                <field name="notes" placeholder="Additional notes about this visit..."/>
+                            </group>
+                            <group>
+                                <field name="attachment_ids" widget="many2many_binary"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Visitor Management List View -->
+    <record id="view_visitor_management_list" model="ir.ui.view">
+        <field name="name">visitor.management.list</field>
+        <field name="model">visitor.management</field>
+        <field name="arch" type="xml">
+            <list string="Visitors" multi_edit="1" sample="1">
+                <field name="name"/>
+                <field name="visitor_type"/>
+                <field name="site_id"/>
+                <field name="visit_date"/>
+                <field name="checkin_time" optional="show"/>
+                <field name="checkout_time" optional="hide"/>
+                <field name="host_name"/>
+                <field name="visit_purpose" optional="hide"/>
+                <field name="watchlist_hit" widget="boolean_toggle" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'checked_out'"
+                       decoration-info="state == 'checked_in'"
+                       decoration-warning="state == 'pre_registered'"
+                       decoration-danger="state == 'denied'"/>
+                <field name="is_overdue_checkout" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Visitor Management Kanban View -->
+    <record id="view_visitor_management_kanban" model="ir.ui.view">
+        <field name="name">visitor.management.kanban</field>
+        <field name="model">visitor.management</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column" sample="1">
+                <field name="name"/>
+                <field name="visitor_type"/>
+                <field name="site_id"/>
+                <field name="visit_date"/>
+                <field name="host_name"/>
+                <field name="state"/>
+                <field name="watchlist_hit"/>
+                <field name="is_vip"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="name"/>
+                                        <t t-if="record.is_vip.raw_value">
+                                            <span class="badge text-bg-warning ms-1">VIP</span>
+                                        </t>
+                                        <t t-if="record.watchlist_hit.raw_value">
+                                            <span class="badge text-bg-danger ms-1">Watchlist</span>
+                                        </t>
+                                    </strong>
+                                    <div class="o_kanban_record_subtitle text-muted">
+                                        <field name="site_id"/> - <field name="visitor_type"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <i class="fa fa-user" title="User" aria-label="User"/> Host: <field name="host_name"/>
+                                    </div>
+                                    <div class="col-12">
+                                        <i class="fa fa-calendar" title="Date" aria-label="Date"/> <field name="visit_date"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left">
+                                    <field name="activity_ids" widget="kanban_activity"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Visitor Management Calendar View -->
+    <record id="view_visitor_management_calendar" model="ir.ui.view">
+        <field name="name">visitor.management.calendar</field>
+        <field name="model">visitor.management</field>
+        <field name="arch" type="xml">
+            <calendar string="Visitors" date_start="visit_date" color="visitor_type" mode="month">
+                <field name="name"/>
+                <field name="site_id"/>
+                <field name="host_name"/>
+                <field name="state"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Visitor Management Search View -->
+    <record id="view_visitor_management_search" model="ir.ui.view">
+        <field name="name">visitor.management.search</field>
+        <field name="model">visitor.management</field>
+        <field name="arch" type="xml">
+            <search string="Search Visitors">
+                <field name="name" string="Visitor" filter_domain="[('name', 'ilike', self)]"/>
+                <field name="id_number"/>
+                <field name="site_id"/>
+                <field name="host_name"/>
+                <field name="company"/>
+                <separator/>
+                <filter string="VIP" name="vip" domain="[('is_vip', '=', True)]"/>
+                <filter string="Watchlist Hits" name="watchlist_hits" domain="[('watchlist_hit', '=', True)]"/>
+                <!-- <filter string="Overdue" name="overdue" domain="[('is_overdue_checkout', '=', True)]"/> -->
+                <separator/>
+                <filter string="Pre-Registered" name="pre_registered" domain="[('state', '=', 'pre_registered')]"/>
+                <filter string="Checked In" name="checked_in" domain="[('state', '=', 'checked_in')]"/>
+                <filter string="Checked Out" name="checked_out" domain="[('state', '=', 'checked_out')]"/>
+                <filter string="Denied" name="denied" domain="[('state', '=', 'denied')]"/>
+                <separator/>
+                <filter string="Today" name="today"
+                        domain="[('visit_date', '=', context_today())]"/>
+                <filter string="This Week" name="this_week"
+                        domain="[('visit_date', '&gt;=', context_today() - relativedelta(weeks=1))]"/>
+                <separator/>
+                <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Visitor Type" name="group_type" context="{'group_by': 'visitor_type'}"/>
+                    <filter string="Status" name="group_status" context="{'group_by': 'state'}"/>
+                    <filter string="Visit Date" name="group_date" context="{'group_by': 'visit_date'}"/>
+                    <filter string="Host" name="group_host" context="{'group_by': 'host_name'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Visitor Management Pivot View -->
+    <record id="view_visitor_management_pivot" model="ir.ui.view">
+        <field name="name">visitor.management.pivot</field>
+        <field name="model">visitor.management</field>
+        <field name="arch" type="xml">
+            <pivot string="Visitor Analysis" sample="1">
+                <field name="site_id" type="row"/>
+                <field name="visitor_type" type="col"/>
+                <field name="id" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Visitor Management Graph View -->
+    <record id="view_visitor_management_graph" model="ir.ui.view">
+        <field name="name">visitor.management.graph</field>
+        <field name="model">visitor.management</field>
+        <field name="arch" type="xml">
+            <graph string="Visitor Statistics" sample="1">
+                <field name="visit_date" interval="day"/>
+                <field name="visitor_type" type="col"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Visitor Management Action -->
+    <record id="action_visitor_management" model="ir.actions.act_window">
+        <field name="name">Visitor Management</field>
+        <field name="res_model">visitor.management</field>
+        <field name="view_mode">kanban,list,form,calendar,pivot,graph</field>
+        <field name="context">{'search_default_today': 1, 'search_default_checked_in': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Register your first visitor
+            </p>
+            <p>
+                Manage visitor and contractor check-ins, security screening,
+                and maintain a complete audit trail of all site visits.
+            </p>
+        </field>
+    </record>
+
+    <!-- Visitor Watchlist Form View -->
+    <record id="view_visitor_watchlist_form" model="ir.ui.view">
+        <field name="name">visitor.watchlist.form</field>
+        <field name="model">visitor.watchlist</field>
+        <field name="arch" type="xml">
+            <form string="Visitor Watchlist">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="id_number"/>
+                            <field name="category"/>
+                        </group>
+                        <group>
+                            <field name="added_date"/>
+                            <field name="expiry_date"/>
+                            <field name="active" widget="boolean_toggle"/>
+                            <field name="added_by"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="reason" placeholder="Provide reason for adding to watchlist..."/>
+                        <field name="notes" placeholder="Additional notes..."/>
+                    </group>
+                    <group>
+                        <field name="photo" widget="image" options="{'size': [200, 200]}"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Visitor Watchlist List View -->
+    <record id="view_visitor_watchlist_list" model="ir.ui.view">
+        <field name="name">visitor.watchlist.list</field>
+        <field name="model">visitor.watchlist</field>
+        <field name="arch" type="xml">
+            <list string="Watchlist" sample="1">
+                <field name="name"/>
+                <field name="id_number"/>
+                <field name="category"/>
+                <field name="reason"/>
+                <field name="added_date"/>
+                <field name="expiry_date" optional="show"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Visitor Watchlist Action -->
+    <record id="action_visitor_watchlist" model="ir.actions.act_window">
+        <field name="name">Visitor Watchlist</field>
+        <field name="res_model">visitor.watchlist</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create watchlist entry
+            </p>
+            <p>
+                Maintain a list of individuals who should be denied access
+                or flagged for additional security screening.
+            </p>
+        </field>
+    </record>
+
+</odoo>
+

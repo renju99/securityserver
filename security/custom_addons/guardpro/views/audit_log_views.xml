@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- ================================================================ -->
+    <!-- AUDIT LOG VIEWS                                                  -->
+    <!-- ================================================================ -->
+    
+    <!-- Tree View -->
+    <record id="view_audit_log_tree" model="ir.ui.view">
+        <field name="name">audit.log.tree</field>
+        <field name="model">audit.log</field>
+        <field name="arch" type="xml">
+            <list string="Audit Logs" default_order="create_date desc" 
+                  decoration-danger="is_tampered" 
+                  decoration-info="action_type == 'create'"
+                  decoration-warning="action_type == 'write'"
+                  decoration-muted="action_type == 'unlink'">
+                <field name="create_date" string="Timestamp"/>
+                <field name="action_type"/>
+                <field name="model_name"/>
+                <field name="record_name"/>
+                <field name="user_id"/>
+                <field name="ip_address"/>
+                <field name="is_tampered" invisible="1"/>
+                <field name="hash_value" optional="hide"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Form View -->
+    <record id="view_audit_log_form" model="ir.ui.view">
+        <field name="name">audit.log.form</field>
+        <field name="model">audit.log</field>
+        <field name="arch" type="xml">
+            <form string="Audit Log Entry" create="false" edit="false" delete="false">
+                <header>
+                    <button name="action_verify_integrity" 
+                            string="Verify Integrity" 
+                            type="object" 
+                            class="oe_highlight"
+                            icon="fa-shield"/>
+                    <field name="is_tampered" widget="badge" 
+                           decoration-danger="is_tampered == True"
+                           decoration-success="is_tampered == False"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" 
+                                name="action_verify_integrity" icon="fa-shield">
+                            <div class="o_stat_info">
+                                <field name="is_tampered" widget="boolean"/>
+                                <span class="o_stat_text">Integrity</span>
+                            </div>
+                        </button>
+                    </div>
+                    
+                    <div class="oe_title">
+                        <h1>
+                            <field name="action_type" readonly="1"/>
+                            <span> - </span>
+                            <field name="model_name" readonly="1"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group string="Event Information">
+                            <field name="action_type"/>
+                            <field name="model_name"/>
+                            <field name="record_id"/>
+                            <field name="record_name"/>
+                            <field name="create_date" string="Timestamp"/>
+                        </group>
+                        <group string="User Information">
+                            <field name="user_id"/>
+                            <field name="ip_address"/>
+                            <field name="user_agent"/>
+                            <field name="device_fingerprint"/>
+                            <field name="geo_location"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Security &amp; Integrity">
+                        <group>
+                            <field name="hash_value"/>
+                            <field name="previous_hash"/>
+                        </group>
+                        <group>
+                            <field name="is_tampered"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Changes" invisible="action_type == 'create'">
+                            <group>
+                                <field name="changes_summary" widget="text"/>
+                            </group>
+                            <group>
+                                <group string="Old Values">
+                                    <field name="old_values" widget="ace" options="{'mode': 'json'}"/>
+                                </group>
+                                <group string="New Values">
+                                    <field name="new_values" widget="ace" options="{'mode': 'json'}"/>
+                                </group>
+                            </group>
+                        </page>
+                        
+                        <page string="Created Record" invisible="action_type != 'create'">
+                            <group>
+                                <field name="new_values" widget="ace" options="{'mode': 'json'}"/>
+                            </group>
+                        </page>
+                        
+                        <page string="Deleted Record" invisible="action_type != 'unlink'">
+                            <group>
+                                <field name="old_values" widget="ace" options="{'mode': 'json'}"/>
+                            </group>
+                        </page>
+                        
+                        <page string="Notes">
+                            <field name="notes" placeholder="Additional audit notes..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Search View -->
+    <record id="view_audit_log_search" model="ir.ui.view">
+        <field name="name">audit.log.search</field>
+        <field name="model">audit.log</field>
+        <field name="arch" type="xml">
+            <search string="Audit Logs">
+                <field name="model_name"/>
+                <field name="record_name"/>
+                <field name="user_id"/>
+                <field name="ip_address"/>
+                <field name="action_type"/>
+                
+                <filter string="Created Records" name="filter_create" 
+                        domain="[('action_type', '=', 'create')]"/>
+                <filter string="Updated Records" name="filter_write" 
+                        domain="[('action_type', '=', 'write')]"/>
+                <filter string="Deleted Records" name="filter_unlink" 
+                        domain="[('action_type', '=', 'unlink')]"/>
+                
+                <separator/>
+                
+                <filter string="Today" name="filter_today" 
+                        domain="[('create_date', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                <filter string="Last 7 Days" name="filter_week" 
+                        domain="[('create_date', '&gt;=', datetime.datetime.combine(context_today() - relativedelta(weeks=1), datetime.time(0,0,0)))]"/>
+                <filter string="Last 30 Days" name="filter_month" 
+                        domain="[('create_date', '&gt;=', datetime.datetime.combine(context_today() - relativedelta(days=30), datetime.time(0,0,0)))]"/>
+                
+                <separator/>
+                
+                <filter string="⚠ Tampered" name="filter_tampered" 
+                        domain="[('is_tampered', '=', True)]"/>
+                <filter string="✓ Verified" name="filter_verified" 
+                        domain="[('is_tampered', '=', False)]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Action Type" name="group_action" 
+                            context="{'group_by': 'action_type'}"/>
+                    <filter string="Model" name="group_model" 
+                            context="{'group_by': 'model_name'}"/>
+                    <filter string="User" name="group_user" 
+                            context="{'group_by': 'user_id'}"/>
+                    <filter string="Date" name="group_date" 
+                            context="{'group_by': 'create_date:day'}"/>
+                    <filter string="IP Address" name="group_ip" 
+                            context="{'group_by': 'ip_address'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Pivot View for Analytics -->
+    <record id="view_audit_log_pivot" model="ir.ui.view">
+        <field name="name">audit.log.pivot</field>
+        <field name="model">audit.log</field>
+        <field name="arch" type="xml">
+            <pivot string="Audit Analytics" sample="1">
+                <field name="model_name" type="row"/>
+                <field name="action_type" type="col"/>
+                <field name="user_id" type="row"/>
+            </pivot>
+        </field>
+    </record>
+    
+    <!-- Graph View -->
+    <record id="view_audit_log_graph" model="ir.ui.view">
+        <field name="name">audit.log.graph</field>
+        <field name="model">audit.log</field>
+        <field name="arch" type="xml">
+            <graph string="Audit Activity" sample="1" type="line">
+                <field name="create_date" interval="day"/>
+                <field name="action_type" type="col"/>
+            </graph>
+        </field>
+    </record>
+    
+    <!-- Calendar View -->
+    <record id="view_audit_log_calendar" model="ir.ui.view">
+        <field name="name">audit.log.calendar</field>
+        <field name="model">audit.log</field>
+        <field name="arch" type="xml">
+            <calendar string="Audit Timeline" date_start="create_date" 
+                      color="action_type" mode="month" event_limit="5">
+                <field name="model_name"/>
+                <field name="user_id"/>
+                <field name="record_name"/>
+            </calendar>
+        </field>
+    </record>
+    
+    <!-- Action -->
+    <record id="action_audit_log" model="ir.actions.act_window">
+        <field name="name">Audit Logs</field>
+        <field name="res_model">audit.log</field>
+        <field name="view_mode">list,form,pivot,graph,calendar</field>
+        <field name="search_view_id" ref="view_audit_log_search"/>
+        <field name="context">{'search_default_filter_week': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No audit logs found
+            </p>
+            <p>
+                Audit logs are automatically created when users perform operations 
+                on critical models like incidents, shifts, and reports.
+            </p>
+        </field>
+    </record>
+    
+    <!-- Dashboard Action -->
+    <record id="action_audit_dashboard" model="ir.actions.act_window">
+        <field name="name">Audit Dashboard</field>
+        <field name="res_model">audit.log</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="view_audit_log_search"/>
+        <field name="context">{'search_default_filter_month': 1}</field>
+    </record>
+    
+    <!-- Action for Tampered Records -->
+    <record id="action_audit_log_tampered" model="ir.actions.act_window">
+        <field name="name">⚠ Tampered Audit Logs</field>
+        <field name="res_model">audit.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_tampered', '=', True)]</field>
+        <field name="context">{'create': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                ✓ No tampered audit logs detected
+            </p>
+            <p>
+                All audit logs have passed integrity verification.
+                The system is secure and audit trail is intact.
+            </p>
+        </field>
+    </record>
+    
+    <!-- Action by Model -->
+    <record id="action_audit_log_by_model" model="ir.actions.act_window">
+        <field name="name">Audit Logs by Model</field>
+        <field name="res_model">audit.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_audit_log_search"/>
+        <field name="context">{'search_default_group_model': 1}</field>
+    </record>
+    
+    <!-- Action by User -->
+    <record id="action_audit_log_by_user" model="ir.actions.act_window">
+        <field name="name">Audit Logs by User</field>
+        <field name="res_model">audit.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_audit_log_search"/>
+        <field name="context">{'search_default_group_user': 1}</field>
+    </record>
+    
+    <!-- ================================================================ -->
+    <!-- MENU ITEMS                                                       -->
+    <!-- ================================================================ -->
+    
+    <!-- Main Audit Menu (Admin Only) -->
+    <menuitem id="menu_audit_root" 
+              name="Audit &amp; Compliance" 
+              sequence="100"
+              groups="base.group_system"
+              web_icon="account,static/description/icon.png"/>
+    
+    <menuitem id="menu_audit_logs" 
+              name="Audit Logs"
+              parent="menu_audit_root" 
+              action="action_audit_log" 
+              sequence="10"
+              groups="base.group_system"/>
+    
+    <menuitem id="menu_audit_dashboard" 
+              name="Audit Dashboard"
+              parent="menu_audit_root" 
+              action="action_audit_dashboard" 
+              sequence="20"
+              groups="base.group_system"/>
+    
+    <menuitem id="menu_audit_tampered" 
+              name="⚠ Integrity Alerts"
+              parent="menu_audit_root" 
+              action="action_audit_log_tampered" 
+              sequence="30"
+              groups="base.group_system"/>
+    
+    <menuitem id="menu_audit_by_model" 
+              name="By Model"
+              parent="menu_audit_root" 
+              action="action_audit_log_by_model" 
+              sequence="40"
+              groups="base.group_system"/>
+    
+    <menuitem id="menu_audit_by_user" 
+              name="By User"
+              parent="menu_audit_root" 
+              action="action_audit_log_by_user" 
+              sequence="50"
+              groups="base.group_system"/>
+
+</odoo>

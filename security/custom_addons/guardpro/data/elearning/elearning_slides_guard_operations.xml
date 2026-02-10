@@ -1,0 +1,1152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Course 2: Security Guard Field Operations - Slides -->
+        
+        <!-- Module 1: Mobile App Setup -->
+        <record id="slide_guard_ops_m1_intro" model="slide.slide">
+            <field name="name">Module 1: Mobile App Setup</field>
+            <field name="channel_id" ref="elearning_course_guard_operations"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.25</field>
+            <field name="html_content">
+                &lt;h2&gt;Mobile App Setup&lt;/h2&gt;
+                &lt;h3&gt;Learning Objectives:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Install and configure the mobile app&lt;/li&gt;
+                    &lt;li&gt;Log in on mobile device&lt;/li&gt;
+                    &lt;li&gt;Navigate the mobile interface&lt;/li&gt;
+                    &lt;li&gt;Enable required permissions&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;1.1 Accessing the Mobile App&lt;/h3&gt;
+                &lt;p&gt;GuardPro is a Progressive Web App (PWA) - no installation required:&lt;/p&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Open browser on your phone&lt;/li&gt;
+                    &lt;li&gt;Navigate to GuardPro URL&lt;/li&gt;
+                    &lt;li&gt;Login with your credentials&lt;/li&gt;
+                    &lt;li&gt;Tap "Add to Home Screen"&lt;/li&gt;
+                &lt;/ol&gt;
+                
+                &lt;h3&gt;1.2 Required Permissions&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Camera&lt;/strong&gt;: For QR scanning and photos&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Location/GPS&lt;/strong&gt;: For check-in verification&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Notifications&lt;/strong&gt;: For alerts&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;1.3 Mobile Interface Tour&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Home screen with quick actions&lt;/li&gt;
+                    &lt;li&gt;Navigation menu&lt;/li&gt;
+                    &lt;li&gt;Profile settings&lt;/li&gt;
+                    &lt;li&gt;Offline mode capabilities&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Practice Exercise:&lt;/h3&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Access GuardPro on your mobile device&lt;/li&gt;
+                    &lt;li&gt;Add to home screen&lt;/li&gt;
+                    &lt;li&gt;Enable camera and location permissions&lt;/li&gt;
+                    &lt;li&gt;Take a test photo&lt;/li&gt;
+                &lt;/ol&gt;
+            </field>
+        </record>
+
+        <record id="slide_guard_ops_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_guard_operations"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <record id="quiz_guard_ops_m1_q1" model="slide.question">
+            <field name="question">Do you need to download the GuardPro app from app store?</field>
+            <field name="slide_id" ref="slide_guard_ops_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_guard_ops_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m1_q1"/>
+            <field name="text_value">Yes, from App Store/Google Play</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_guard_ops_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m1_q1"/>
+            <field name="text_value">No, it's a web app</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <record id="quiz_guard_ops_m1_q2" model="slide.question">
+            <field name="question">Which permissions are required for the mobile app?</field>
+            <field name="slide_id" ref="slide_guard_ops_m1_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_guard_ops_m1_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m1_q2"/>
+            <field name="text_value">Camera and Location</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_guard_ops_m1_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m1_q2"/>
+            <field name="text_value">No permissions needed</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 2: Shift Check-In/Check-Out -->
+        <record id="slide_guard_ops_m2_checkin" model="slide.slide">
+            <field name="name">Module 2: Shift Check-In/Check-Out</field>
+            <field name="channel_id" ref="elearning_course_guard_operations"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.67</field>
+            <field name="html_content">
+                &lt;h2&gt;Professional Shift Management: Check-In and Check-Out Procedures&lt;/h2&gt;
+                &lt;p&gt;Proper shift management is the foundation of professional security operations. This module covers the essential procedures for starting and ending your security shifts using GuardPro's mobile application.&lt;/p&gt;
+
+                &lt;h3&gt;The Importance of Proper Check-In/Check-Out&lt;/h3&gt;
+                &lt;p&gt;Your check-in and check-out procedures serve multiple critical purposes in security operations:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Accountability:&lt;/strong&gt; Creates an official record of your presence&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Verification:&lt;/strong&gt; Confirms you're at the correct location&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication:&lt;/strong&gt; Notifies supervisors of your status&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Payroll:&lt;/strong&gt; Ensures accurate time tracking for compensation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Safety:&lt;/strong&gt; Allows monitoring of guard welfare&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Coverage:&lt;/strong&gt; Prevents gaps in security coverage&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Pre-Shift Preparation&lt;/h3&gt;
+                &lt;p&gt;Success begins before you even check in. Proper preparation ensures a smooth shift start:&lt;/p&gt;
+
+                &lt;h4&gt;Review Your Schedule&lt;/h4&gt;
+                &lt;p&gt;Access the GuardPro mobile app and review your assigned shifts:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Check the date, time, and duration of your shift&lt;/li&gt;
+                    &lt;li&gt;Note the specific site location and post assignment&lt;/li&gt;
+                    &lt;li&gt;Review any special instructions or requirements&lt;/li&gt;
+                    &lt;li&gt;Check for overlapping shifts or handoff procedures&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Personal Preparation&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Uniform and Equipment:&lt;/strong&gt; Ensure you have all required items&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Transportation:&lt;/strong&gt; Plan your route and allow extra time&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Weather Considerations:&lt;/strong&gt; Check forecasts and prepare accordingly&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Personal Items:&lt;/strong&gt; Bring ID, keys, and any site-specific items&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Mobile Device:&lt;/strong&gt; Ensure GuardPro app is updated and charged&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Arrival Time&lt;/h4&gt;
+                &lt;p&gt;&lt;strong&gt;Professional Standard:&lt;/strong&gt; Arrive at least 10 minutes before your scheduled start time. This allows you to:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Review post orders and site-specific procedures&lt;/li&gt;
+                    &lt;li&gt;Meet with the outgoing guard for briefing&lt;/li&gt;
+                    &lt;li&gt;Inspect the site and note any immediate concerns&lt;/li&gt;
+                    &lt;li&gt;Complete check-in without being rushed&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;The Check-In Process&lt;/h3&gt;
+                &lt;p&gt;Follow these steps precisely to ensure proper check-in:&lt;/p&gt;
+
+                &lt;h4&gt;Step 1: Access the Mobile App&lt;/h4&gt;
+                &lt;p&gt;Open the GuardPro mobile app on your smartphone. Ensure you have a stable internet connection.&lt;/p&gt;
+
+                &lt;h4&gt;Step 2: Navigate to Check-In&lt;/h4&gt;
+                &lt;p&gt;From the main dashboard, locate and tap the "Check In" button. This is typically prominently displayed on the home screen.&lt;/p&gt;
+
+                &lt;h4&gt;Step 3: Verify Shift Details&lt;/h4&gt;
+                &lt;p&gt;The app will display your assigned shift information. Carefully review:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Correct date and time&lt;/li&gt;
+                    &lt;li&gt;Site location and address&lt;/li&gt;
+                    &lt;li&gt;Your assigned post or patrol area&lt;/li&gt;
+                    &lt;li&gt;Any special instructions&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Step 4: Location Verification&lt;/h4&gt;
+                &lt;p&gt;The app will request permission to access your GPS location. This is mandatory for security verification.&lt;/p&gt;
+                &lt;p&gt;&lt;strong&gt;Why GPS Matters:&lt;/strong&gt;&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Confirms you're physically present at the assigned site&lt;/li&gt;
+                    &lt;li&gt;Prevents fraudulent check-ins from remote locations&lt;/li&gt;
+                    &lt;li&gt;Provides audit trail for payroll and security purposes&lt;/li&gt;
+                    &lt;li&gt;Enables real-time location tracking during patrols&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Step 5: Photo Verification (If Required)&lt;/h4&gt;
+                &lt;p&gt;Some sites require photo verification during check-in. This may include:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Selfie at the site location&lt;/li&gt;
+                    &lt;li&gt;Photo of the site entrance or specific landmark&lt;/li&gt;
+                    &lt;li&gt;Photo of equipment or access points&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;p&gt;&lt;strong&gt;Photo Best Practices:&lt;/strong&gt;&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Ensure good lighting and clear image quality&lt;/li&gt;
+                    &lt;li&gt;Include identifiable site features&lt;/li&gt;
+                    &lt;li&gt;Respect privacy - avoid photographing people without permission&lt;/li&gt;
+                    &lt;li&gt;Take photos quickly to minimize delay&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Step 6: Submit Check-In&lt;/h4&gt;
+                &lt;p&gt;Once all requirements are met, tap "Submit Check-In". The system will:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Record the timestamp&lt;/li&gt;
+                    &lt;li&gt;Update your status to "On Duty"&lt;/li&gt;
+                    &lt;li&gt;Notify your supervisor&lt;/li&gt;
+                    &lt;li&gt;Log the GPS coordinates&lt;/li&gt;
+                    &lt;li&gt;Start your shift timer&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;During Your Shift&lt;/h3&gt;
+                &lt;p&gt;Once checked in, maintain professional standards throughout your shift:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Stay Alert:&lt;/strong&gt; Remain vigilant and responsive&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Follow Procedures:&lt;/strong&gt; Adhere to post orders and protocols&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Report Issues:&lt;/strong&gt; Document any incidents or concerns&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Complete Tours:&lt;/strong&gt; Perform required patrols on schedule&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Maintain Contact:&lt;/strong&gt; Keep supervisor informed of status&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;The Check-Out Process&lt;/h3&gt;
+                &lt;p&gt;Proper check-out ensures seamless transition and accurate records:&lt;/p&gt;
+
+                &lt;h4&gt;Pre-Check-Out Requirements&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Complete all assigned patrol routes&lt;/li&gt;
+                    &lt;li&gt;Secure all access points and equipment&lt;/li&gt;
+                    &lt;li&gt;Brief the incoming guard on current status&lt;/li&gt;
+                    &lt;li&gt;Return any borrowed equipment or keys&lt;/li&gt;
+                    &lt;li&gt;Document any end-of-shift observations&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Check-Out Steps&lt;/h4&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Open GuardPro mobile app&lt;/li&gt;
+                    &lt;li&gt;Navigate to your active shift&lt;/li&gt;
+                    &lt;li&gt;Tap "Check Out" button&lt;/li&gt;
+                    &lt;li&gt;Add end-of-shift notes (required)&lt;/li&gt;
+                    &lt;li&gt;Review and confirm shift summary&lt;/li&gt;
+                    &lt;li&gt;Submit check-out&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h4&gt;End-of-Shift Notes&lt;/h4&gt;
+                &lt;p&gt;Always include relevant information in your check-out notes:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Any incidents or unusual occurrences&lt;/li&gt;
+                    &lt;li&gt;Equipment status and condition&lt;/li&gt;
+                    &lt;li&gt;Recommendations for the next shift&lt;/li&gt;
+                    &lt;li&gt;Contact information for the relieving guard&lt;/li&gt;
+                    &lt;li&gt;Weather conditions or other relevant factors&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Troubleshooting Common Issues&lt;/h3&gt;
+                &lt;p&gt;Be prepared to handle technical or procedural challenges:&lt;/p&gt;
+
+                &lt;h4&gt;GPS Issues&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Problem:&lt;/strong&gt; GPS not working or inaccurate&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Solution:&lt;/strong&gt; Move to an open area away from buildings&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Alternative:&lt;/strong&gt; Use site Wi-Fi if available&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Last Resort:&lt;/strong&gt; Contact supervisor for manual verification&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Check-In Button Not Visible&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Verify you're within the allowed check-in time window&lt;/li&gt;
+                    &lt;li&gt;Check that you're assigned to the current shift&lt;/li&gt;
+                    &lt;li&gt;Ensure your app is updated to the latest version&lt;/li&gt;
+                    &lt;li&gt;Contact supervisor if issue persists&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Wrong Site Location&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Double-check the shift assignment in the app&lt;/li&gt;
+                    &lt;li&gt;Verify the physical address matches your assignment&lt;/li&gt;
+                    &lt;li&gt;Contact supervisor immediately if there's a discrepancy&lt;/li&gt;
+                    &lt;li&gt;Do not proceed until the issue is resolved&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;App Crashes or Freezes&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Close and restart the app&lt;/li&gt;
+                    &lt;li&gt;Check your internet connection&lt;/li&gt;
+                    &lt;li&gt;Clear app cache if available&lt;/li&gt;
+                    &lt;li&gt;Contact technical support if problem continues&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Professional Standards and Accountability&lt;/h3&gt;
+                &lt;p&gt;Remember that your check-in and check-out procedures create an official record of your professional conduct:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Punctuality:&lt;/strong&gt; Always arrive early and check in on time&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Accuracy:&lt;/strong&gt; Ensure all information is correct and complete&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Professionalism:&lt;/strong&gt; Maintain professional standards throughout&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication:&lt;/strong&gt; Keep supervisors informed of any issues&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Documentation:&lt;/strong&gt; Provide clear, detailed shift notes&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Practice Exercise:&lt;/strong&gt; Review your upcoming shifts in the GuardPro app. Practice the check-in procedure mentally, noting each step and potential challenges you might encounter at your assigned site.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_guard_ops_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_guard_operations"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <record id="quiz_guard_ops_m2_q1" model="slide.question">
+            <field name="question">When should you arrive for your shift?</field>
+            <field name="slide_id" ref="slide_guard_ops_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_guard_ops_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m2_q1"/>
+            <field name="text_value">10 minutes early</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_guard_ops_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m2_q1"/>
+            <field name="text_value">Exactly at start time</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_guard_ops_m2_q2" model="slide.question">
+            <field name="question">What does GPS verify during check-in?</field>
+            <field name="slide_id" ref="slide_guard_ops_m2_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_guard_ops_m2_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m2_q2"/>
+            <field name="text_value">Your location</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_guard_ops_m2_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m2_q2"/>
+            <field name="text_value">Your identity</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 3: Incident Reporting -->
+        <record id="slide_guard_ops_m3_incidents" model="slide.slide">
+            <field name="name">Module 3: Incident Reporting</field>
+            <field name="channel_id" ref="elearning_course_guard_operations"/>
+            <field name="sequence">30</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">1.0</field>
+            <field name="html_content">
+                &lt;h2&gt;Professional Incident Reporting: Documentation That Protects and Informs&lt;/h2&gt;
+                &lt;p&gt;Incident reporting is one of the most critical responsibilities of a security guard. Your ability to accurately document and report security events can mean the difference between preventing future incidents and allowing patterns of criminal activity to continue. This module covers the essential skills for comprehensive incident documentation.&lt;/p&gt;
+
+                &lt;h3&gt;The Critical Role of Incident Reporting&lt;/h3&gt;
+                &lt;p&gt;Effective incident reporting serves multiple vital purposes in security operations:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Legal Protection:&lt;/strong&gt; Creates official documentation for investigations and legal proceedings&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Pattern Recognition:&lt;/strong&gt; Helps identify recurring issues and crime patterns&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Insurance Claims:&lt;/strong&gt; Provides necessary documentation for claims processing&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Performance Tracking:&lt;/strong&gt; Measures response times and effectiveness&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Accountability:&lt;/strong&gt; Establishes clear records of actions taken&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Continuous Improvement:&lt;/strong&gt; Data for refining security procedures&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Defining Security Incidents&lt;/h3&gt;
+                &lt;p&gt;Understanding what constitutes a reportable incident is fundamental to effective security work. An incident is any event that impacts or has the potential to impact security, safety, or business operations.&lt;/p&gt;
+
+                &lt;h4&gt;Primary Incident Categories&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Theft and Property Crimes&lt;/dt&gt;
+                    &lt;dd&gt;Theft, attempted theft, burglary, robbery, vandalism, or property damage&lt;/dd&gt;
+                    &lt;dt&gt;Unauthorized Access&lt;/dt&gt;
+                    &lt;dd&gt;Trespassing, unauthorized entry, tailgating, or access control failures&lt;/dd&gt;
+                    &lt;dt&gt;Suspicious Activity&lt;/dt&gt;
+                    &lt;dd&gt;Loitering, surveillance of premises, unusual behavior, or unidentified persons&lt;/dd&gt;
+                    &lt;dt&gt;Safety and Emergency Events&lt;/dt&gt;
+                    &lt;dd&gt;Medical emergencies, fires, hazardous conditions, or safety violations&lt;/dd&gt;
+                    &lt;dt&gt;Disturbances and Conflicts&lt;/dt&gt;
+                    &lt;dd&gt;Verbal altercations, physical confrontations, or disruptive behavior&lt;/dd&gt;
+                    &lt;dt&gt;Equipment and System Failures&lt;/dt&gt;
+                    &lt;dd&gt;Alarm malfunctions, access control issues, or security system problems&lt;/dd&gt;
+                    &lt;dt&gt;Policy Violations&lt;/dt&gt;
+                    &lt;dd&gt;Breaches of company policies, procedures, or security protocols&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;The "When in Doubt, Report It" Principle&lt;/h4&gt;
+                &lt;p&gt;&lt;strong&gt;Golden Rule of Security:&lt;/strong&gt; If you observe anything unusual, suspicious, or potentially concerning, document and report it. It's better to report an incident that turns out to be minor than to miss something significant.&lt;/p&gt;
+                &lt;p&gt;Remember: Your judgment and documentation can prevent future incidents and protect lives and property.&lt;/p&gt;
+
+                &lt;h3&gt;The Incident Reporting Process&lt;/h3&gt;
+                &lt;p&gt;Follow this systematic approach to ensure complete and accurate incident documentation:&lt;/p&gt;
+
+                &lt;h4&gt;Step 1: Assess the Situation&lt;/h4&gt;
+                &lt;p&gt;Before reporting, ensure your safety and the safety of others. Only then proceed with documentation.&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Secure the scene if safe to do so&lt;/li&gt;
+                    &lt;li&gt;Call for emergency assistance if needed&lt;/li&gt;
+                    &lt;li&gt;Notify immediate supervisor if appropriate&lt;/li&gt;
+                    &lt;li&gt;Begin gathering information while details are fresh&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Step 2: Access the Reporting System&lt;/h4&gt;
+                &lt;p&gt;Open GuardPro and navigate to the incident reporting function. This is typically accessible from the main dashboard or operations menu.&lt;/p&gt;
+
+                &lt;h4&gt;Step 3: Select Incident Category&lt;/h4&gt;
+                &lt;p&gt;Choose the most appropriate category from the predefined options. This ensures proper routing and response protocols.&lt;/p&gt;
+
+                &lt;h4&gt;Step 4: Set Priority Level&lt;/h4&gt;
+                &lt;p&gt;Priority determines response urgency and resource allocation:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Critical (Immediate Response):&lt;/strong&gt; Active threats to life, property, or safety&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;High (Prompt Response):&lt;/strong&gt; Serious incidents requiring quick attention&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Medium (Standard Response):&lt;/strong&gt; Notable incidents within normal timeframe&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Low (Observation):&lt;/strong&gt; Minor incidents for documentation and trend analysis&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Step 5: Record Date, Time, and Location&lt;/h4&gt;
+                &lt;p&gt;Precise timing and location are crucial for investigations and response coordination:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Use the current timestamp or exact time of incident&lt;/li&gt;
+                    &lt;li&gt;Include specific location details (building, floor, room, coordinates)&lt;/li&gt;
+                    &lt;li&gt;Note environmental conditions (lighting, weather, etc.)&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Step 6: Write Comprehensive Description&lt;/h4&gt;
+                &lt;p&gt;The incident description is the heart of your report. Use the professional 5W+H framework:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Who:&lt;/strong&gt; Involved parties (victims, suspects, witnesses)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;What:&lt;/strong&gt; Specific actions or events that occurred&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;When:&lt;/strong&gt; Exact timing of the incident&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Where:&lt;/strong&gt; Precise location and environmental details&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Why:&lt;/strong&gt; Known or suspected motivation (if applicable)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;How:&lt;/strong&gt; Method or means used in the incident&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Professional Description Example&lt;/h4&gt;
+                &lt;p&gt;&lt;em&gt;"At 14:30 hours on [date], while conducting routine patrol of the north parking lot, I observed a male subject (approximately 30 years old, 5'10", 180 lbs, wearing dark hooded sweatshirt and blue jeans) attempting to forcibly open the driver-side door of a silver Toyota Camry parked in space B-42. The subject was using a slim-jim tool and appeared focused on gaining entry. Upon my approach and verbal challenge identifying myself as security, the subject immediately fled on foot eastward toward the service road exit. No entry was gained, and no property was observed as taken. I notified the vehicle owner (badge displayed) and contacted local law enforcement at 14:35 hours. Incident number [assigned] for reference."&lt;/em&gt;&lt;/p&gt;
+
+                &lt;h4&gt;Step 7: Document Involved Parties&lt;/h4&gt;
+                &lt;p&gt;Record detailed information about all individuals involved:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Victims:&lt;/strong&gt; Name, contact information, relationship to incident&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Suspects:&lt;/strong&gt; Physical description, clothing, direction of flight&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Witnesses:&lt;/strong&gt; Names, statements, contact information&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Responders:&lt;/strong&gt; Police, medical, fire department personnel&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Step 8: Attach Supporting Evidence&lt;/h4&gt;
+                &lt;p&gt;Visual evidence strengthens your report and aids investigations:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Photographs:&lt;/strong&gt; Scene, damage, evidence, suspect descriptions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Videos:&lt;/strong&gt; Incident footage, surveillance recordings&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Sketches:&lt;/strong&gt; Hand-drawn diagrams of scene layout&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Documents:&lt;/strong&gt; Related reports, witness statements&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Photography Best Practices&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Take photos immediately while scene is fresh&lt;/li&gt;
+                    &lt;li&gt;Include scale references (ruler, objects of known size)&lt;/li&gt;
+                    &lt;li&gt;Photograph from multiple angles&lt;/li&gt;
+                    &lt;li&gt;Note time and location in photo descriptions&lt;/li&gt;
+                    &lt;li&gt;Respect privacy - avoid photographing uninvolved individuals&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Step 9: Submit and Follow Up&lt;/h4&gt;
+                &lt;p&gt;Complete the reporting process and ensure proper follow-up:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Review report for completeness before submission&lt;/li&gt;
+                    &lt;li&gt;Note the incident reference number&lt;/li&gt;
+                    &lt;li&gt;Follow up on status with supervisor&lt;/li&gt;
+                    &lt;li&gt;Provide additional information as requested&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Writing Effective Incident Descriptions&lt;/h3&gt;
+                &lt;p&gt;Your description must be clear, concise, professional, and comprehensive. Avoid these common pitfalls:&lt;/p&gt;
+
+                &lt;h4&gt;What to Include&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Objective facts, not personal opinions&lt;/li&gt;
+                    &lt;li&gt;Specific details and measurements&lt;/li&gt;
+                    &lt;li&gt;Chronological sequence of events&lt;/li&gt;
+                    &lt;li&gt;Actions taken and results achieved&lt;/li&gt;
+                    &lt;li&gt;Relevant environmental factors&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;What to Avoid&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Speculation about motives or guilt&lt;/li&gt;
+                    &lt;li&gt;Emotional language or personal judgments&lt;/li&gt;
+                    &lt;li&gt;Technical jargon without explanation&lt;/li&gt;
+                    &lt;li&gt;Incomplete or vague descriptions&lt;/li&gt;
+                    &lt;li&gt;Irrelevant personal anecdotes&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Legal and Ethical Considerations&lt;/h3&gt;
+                &lt;p&gt;Incident reporting carries significant legal and ethical responsibilities:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Truthfulness:&lt;/strong&gt; All information must be accurate and honest&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Privacy:&lt;/strong&gt; Respect confidentiality requirements&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Chain of Custody:&lt;/strong&gt; Properly handle and document evidence&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Professional Conduct:&lt;/strong&gt; Maintain objectivity and neutrality&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Timeliness:&lt;/strong&gt; Report incidents promptly while details are fresh&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Common Reporting Challenges&lt;/h3&gt;
+                &lt;p&gt;Be prepared to handle these frequent reporting situations:&lt;/p&gt;
+
+                &lt;h4&gt;High-Stress Situations&lt;/h4&gt;
+                &lt;p&gt;In emergency situations, remember: SAFETY FIRST, then DOCUMENT. Take notes immediately after ensuring safety.&lt;/p&gt;
+
+                &lt;h4&gt;Multiple Simultaneous Incidents&lt;/h4&gt;
+                &lt;p&gt;Prioritize by severity, report critical incidents first, then follow up with others.&lt;/p&gt;
+
+                &lt;h4&gt;Incomplete Information&lt;/h4&gt;
+                &lt;p&gt;Report what you know immediately, then update the report as additional information becomes available.&lt;/p&gt;
+
+                &lt;h4&gt;Language Barriers&lt;/h4&gt;
+                &lt;p&gt;Use clear, simple language. If translation is needed, note language barriers in your report.&lt;/p&gt;
+
+                &lt;h3&gt;Quality Assurance and Follow-Up&lt;/h3&gt;
+                &lt;p&gt;Professional incident reporting doesn't end with submission:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Supervisor Review:&lt;/strong&gt; Be prepared to discuss and clarify your report&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Investigation Support:&lt;/strong&gt; Provide additional details as requested&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Lessons Learned:&lt;/strong&gt; Review similar incidents to improve future responses&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Feedback Incorporation:&lt;/strong&gt; Use supervisor feedback to improve reporting skills&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Practice Exercise:&lt;/strong&gt; Review recent incident reports in your area. Analyze them for completeness using the 5W+H framework. Practice writing descriptions for common security scenarios you might encounter at your assigned site.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_guard_ops_m3_quiz" model="slide.slide">
+            <field name="name">Module 3: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_guard_operations"/>
+            <field name="sequence">31</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.10</field>
+        </record>
+
+        <record id="quiz_guard_ops_m3_q1" model="slide.question">
+            <field name="question">When should you report an incident?</field>
+            <field name="slide_id" ref="slide_guard_ops_m3_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_guard_ops_m3_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m3_q1"/>
+            <field name="text_value">Immediately (when safe)</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_guard_ops_m3_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m3_q1"/>
+            <field name="text_value">End of shift</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_guard_ops_m3_q2" model="slide.question">
+            <field name="question">What priority is a medical emergency?</field>
+            <field name="slide_id" ref="slide_guard_ops_m3_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_guard_ops_m3_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m3_q2"/>
+            <field name="text_value">Critical</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_guard_ops_m3_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m3_q2"/>
+            <field name="text_value">Low</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_guard_ops_m3_q3" model="slide.question">
+            <field name="question">What should a good incident description include?</field>
+            <field name="slide_id" ref="slide_guard_ops_m3_quiz"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="quiz_guard_ops_m3_q3_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m3_q3"/>
+            <field name="text_value">Who, What, When, Where, How</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_guard_ops_m3_q3_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m3_q3"/>
+            <field name="text_value">Your opinion</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 4: Security Tours and Checkpoints -->
+        <record id="slide_guard_ops_m4_tours" model="slide.slide">
+            <field name="name">Module 4: Security Tours and Checkpoints</field>
+            <field name="channel_id" ref="elearning_course_guard_operations"/>
+            <field name="sequence">40</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">1.0</field>
+            <field name="html_content">
+                &lt;h2&gt;Mastering Security Tours: Systematic Patrol Excellence&lt;/h2&gt;
+                &lt;p&gt;Security tours and checkpoints form the backbone of effective premises security. This module covers the systematic approach to conducting professional patrols that deter crime, detect issues early, and maintain comprehensive security coverage.&lt;/p&gt;
+
+                &lt;h3&gt;The Strategic Role of Security Tours&lt;/h3&gt;
+                &lt;p&gt;Security tours serve multiple critical functions in a comprehensive security program:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Deterrence:&lt;/strong&gt; Visible security presence discourages criminal activity&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Detection:&lt;/strong&gt; Early identification of security breaches or hazards&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Verification:&lt;/strong&gt; Confirmation that security systems and procedures are functioning&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Accountability:&lt;/strong&gt; Documented evidence of security coverage and diligence&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Compliance:&lt;/strong&gt; Meeting regulatory requirements for security patrols&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Customer Confidence:&lt;/strong&gt; Demonstrating commitment to security excellence&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Understanding Tour Structure and Requirements&lt;/h3&gt;
+                &lt;p&gt;Each security tour is carefully designed to ensure comprehensive coverage of critical areas:&lt;/p&gt;
+
+                &lt;h4&gt;Tour Components&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Scheduled Timing&lt;/dt&gt;
+                    &lt;dd&gt;Predetermined intervals ensuring consistent coverage throughout shifts&lt;/dd&gt;
+                    &lt;dt&gt;Designated Route&lt;/dt&gt;
+                    &lt;dd&gt;Specific path covering all critical areas and high-risk zones&lt;/dd&gt;
+                    &lt;dt&gt;Checkpoint System&lt;/dt&gt;
+                    &lt;dd&gt;Strategic points requiring verification and documentation&lt;/dd&gt;
+                    &lt;dt&gt;Time Windows&lt;/dt&gt;
+                    &lt;dd&gt;Acceptable completion times with built-in flexibility&lt;/dd&gt;
+                    &lt;dt&gt;Documentation Requirements&lt;/dt&gt;
+                    &lt;dd&gt;Standardized reporting of findings and observations&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Checkpoint Design Principles&lt;/h4&gt;
+                &lt;p&gt;Checkpoints are strategically placed to ensure maximum security coverage:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Entry/Exit Points:&lt;/strong&gt; All doors, gates, and access points&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;High-Value Areas:&lt;/strong&gt; Locations containing valuable assets&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Isolated Zones:&lt;/strong&gt; Areas with limited visibility or access&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Equipment Locations:&lt;/strong&gt; Security systems, alarms, and cameras&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Hazard Areas:&lt;/strong&gt; Locations with potential safety risks&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Perimeter Boundaries:&lt;/strong&gt; Fence lines and boundary markers&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;The Tour Execution Process&lt;/h3&gt;
+                &lt;p&gt;Professional tour execution requires systematic adherence to established procedures:&lt;/p&gt;
+
+                &lt;h4&gt;Pre-Tour Preparation&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Review Tour Details:&lt;/strong&gt; Access GuardPro to confirm route, checkpoints, and timing&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Equipment Check:&lt;/strong&gt; Ensure mobile device, flashlight, and communication tools are functional&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Weather Considerations:&lt;/strong&gt; Adjust route or timing for severe weather conditions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Briefing Review:&lt;/strong&gt; Note any special instructions or recent incidents&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Personal Safety:&lt;/strong&gt; Assess route safety and carry emergency equipment&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Initiating the Tour&lt;/h4&gt;
+                &lt;p&gt;Proper tour initiation ensures accurate tracking and accountability:&lt;/p&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Access GuardPro mobile application&lt;/li&gt;
+                    &lt;li&gt;Navigate to "My Tours" or "Active Tours" section&lt;/li&gt;
+                    &lt;li&gt;Select the scheduled tour for your current shift&lt;/li&gt;
+                    &lt;li&gt;Review tour details and special instructions&lt;/li&gt;
+                    &lt;li&gt;Tap "Start Tour" to initiate the patrol&lt;/li&gt;
+                    &lt;li&gt;Confirm GPS location and timestamp recording&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h3&gt;Checkpoint Verification Technologies&lt;/h3&gt;
+                &lt;p&gt;Modern security tours utilize technology to ensure accurate verification and eliminate fraud:&lt;/p&gt;
+
+                &lt;h4&gt;QR Code Scanning System&lt;/h4&gt;
+                &lt;p&gt;QR codes provide precise location verification and eliminate checkpoint skipping:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Unique Identification:&lt;/strong&gt; Each checkpoint has a unique QR code&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Tamper Resistance:&lt;/strong&gt; Difficult to duplicate or spoof&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Instant Verification:&lt;/strong&gt; Immediate confirmation of location&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Audit Trail:&lt;/strong&gt; Records exact time and location of scan&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Weather Resistant:&lt;/strong&gt; Functions in various environmental conditions&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;QR Code Scanning Procedure&lt;/h4&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Navigate precisely to the checkpoint location&lt;/li&gt;
+                    &lt;li&gt;Locate the QR code (typically on a sign or plaque)&lt;/li&gt;
+                    &lt;li&gt;Open GuardPro and tap "Scan Checkpoint"&lt;/li&gt;
+                    &lt;li&gt;Allow camera access when prompted&lt;/li&gt;
+                    &lt;li&gt;Position device so QR code fills the scan area&lt;/li&gt;
+                    &lt;li&gt;Hold steady until scan completes successfully&lt;/li&gt;
+                    &lt;li&gt;Receive confirmation of successful checkpoint verification&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h4&gt;GPS-Based Verification&lt;/h4&gt;
+                &lt;p&gt;GPS verification serves as a backup system for checkpoints without QR codes:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Geofencing:&lt;/strong&gt; Predefined geographic boundaries for each checkpoint&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Accuracy Requirements:&lt;/strong&gt; Must be within specified radius of checkpoint&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Signal Verification:&lt;/strong&gt; Ensures GPS signal strength and accuracy&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Backup System:&lt;/strong&gt; Functions when QR codes are unavailable&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Security Assessment at Each Checkpoint&lt;/h3&gt;
+                &lt;p&gt;Each checkpoint visit requires systematic security evaluation:&lt;/p&gt;
+
+                &lt;h4&gt;Physical Security Inspection&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Control:&lt;/strong&gt; Verify doors, gates, and locks are secure&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Lighting:&lt;/strong&gt; Ensure adequate illumination for security&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Equipment Status:&lt;/strong&gt; Check cameras, alarms, and sensors&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Structural Integrity:&lt;/strong&gt; Inspect for damage or tampering&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Environmental Hazards:&lt;/strong&gt; Note water damage, fire hazards, or safety issues&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Situational Awareness&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Unauthorized Persons:&lt;/strong&gt; Report any individuals without proper access&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Suspicious Activity:&lt;/strong&gt; Note unusual behavior or circumstances&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Property Issues:&lt;/strong&gt; Report damaged or misplaced items&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Maintenance Needs:&lt;/strong&gt; Document required repairs or upkeep&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Environmental Changes:&lt;/strong&gt; Weather damage or seasonal considerations&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Documentation Requirements&lt;/h4&gt;
+                &lt;p&gt;Professional documentation enhances the value of your security tour:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Photographic Evidence:&lt;/strong&gt; Document issues or confirm normal conditions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Detailed Notes:&lt;/strong&gt; Describe observations with specific details&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Time Stamps:&lt;/strong&gt; Record exact times of significant observations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Location References:&lt;/strong&gt; Note specific areas or equipment&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Severity Assessment:&lt;/strong&gt; Indicate urgency of issues found&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Tour Completion and Reporting&lt;/h3&gt;
+                &lt;p&gt;Proper tour completion ensures comprehensive documentation and follow-up:&lt;/p&gt;
+
+                &lt;h4&gt;Final Checkpoint Verification&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Confirm all assigned checkpoints have been visited&lt;/li&gt;
+                    &lt;li&gt;Verify all required scans or GPS verifications are complete&lt;/li&gt;
+                    &lt;li&gt;Ensure tour was completed within the designated time window&lt;/li&gt;
+                    &lt;li&gt;Review any issues or observations documented during the tour&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Tour Summary and Notes&lt;/h4&gt;
+                &lt;p&gt;Comprehensive tour completion requires detailed summary information:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Overall Assessment:&lt;/strong&gt; General condition of patrolled areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Issues Identified:&lt;/strong&gt; Summary of problems requiring attention&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Recommendations:&lt;/strong&gt; Suggestions for security improvements&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Follow-up Actions:&lt;/strong&gt; Steps taken or recommended&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Special Observations:&lt;/strong&gt; Unusual circumstances or noteworthy events&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Submitting Tour Completion&lt;/h4&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Review complete tour summary in GuardPro&lt;/li&gt;
+                    &lt;li&gt;Add any final notes or observations&lt;/li&gt;
+                    &lt;li&gt;Attach additional photos if needed&lt;/li&gt;
+                    &lt;li&gt;Tap "Complete Tour" to finalize&lt;/li&gt;
+                    &lt;li&gt;Receive confirmation of successful submission&lt;/li&gt;
+                    &lt;li&gt;Note any immediate follow-up requirements&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h3&gt;Handling Tour Challenges and Exceptions&lt;/h3&gt;
+                &lt;p&gt;Professional security requires flexibility and problem-solving skills:&lt;/p&gt;
+
+                &lt;h4&gt;Technical Issues&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;QR Code Scanning Problems&lt;/dt&gt;
+                    &lt;dd&gt;Clean camera lens, ensure adequate lighting, try different angles, use GPS backup&lt;/dd&gt;
+                    &lt;dt&gt;GPS Signal Issues&lt;/dt&gt;
+                    &lt;dd&gt;Move to open area, wait for better signal, use QR codes when possible&lt;/dd&gt;
+                    &lt;dt&gt;App Performance&lt;/dt&gt;
+                    &lt;dd&gt;Close and restart app, check internet connection, ensure device battery is adequate&lt;/dd&gt;
+                    &lt;dt&gt;Device Problems&lt;/dt&gt;
+                    &lt;dd&gt;Switch to backup device, use manual reporting procedures, inform supervisor immediately&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Missed Checkpoints&lt;/h4&gt;
+                &lt;p&gt;If a checkpoint cannot be completed due to legitimate circumstances:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Document Reason:&lt;/strong&gt; Provide specific explanation for missing checkpoint&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Alternative Verification:&lt;/strong&gt; Use photos or detailed descriptions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Supervisor Notification:&lt;/strong&gt; Inform supervisor immediately&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Make-up Procedure:&lt;/strong&gt; Complete checkpoint as soon as possible&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Tour Status:&lt;/strong&gt; Mark as incomplete until resolved&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Security Threats During Tours&lt;/h4&gt;
+                &lt;p&gt;Prioritize safety in all situations:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Assess Risk:&lt;/strong&gt; Evaluate threat level before proceeding&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Call for Backup:&lt;/strong&gt; Request additional security personnel&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Response:&lt;/strong&gt; Follow established emergency protocols&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Documentation:&lt;/strong&gt; Record all actions and decisions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;De-escalation:&lt;/strong&gt; Use appropriate conflict resolution techniques&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Quality Assurance and Continuous Improvement&lt;/h3&gt;
+                &lt;p&gt;Professional patrols require ongoing evaluation and enhancement:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Performance Metrics:&lt;/strong&gt; Track completion times and thoroughness&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Feedback Integration:&lt;/strong&gt; Use supervisor input to improve techniques&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Route Optimization:&lt;/strong&gt; Identify more efficient patrol patterns&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Technology Utilization:&lt;/strong&gt; Maximize use of available tools&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Professional Development:&lt;/strong&gt; Stay current with best practices&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Legal and Professional Standards&lt;/h3&gt;
+                &lt;p&gt;Security tours must meet legal requirements and professional standards:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Due Diligence:&lt;/strong&gt; Reasonable and prudent level of care&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Documentation Standards:&lt;/strong&gt; Accurate and timely reporting&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Chain of Custody:&lt;/strong&gt; Proper handling of evidence or documentation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Privacy Compliance:&lt;/strong&gt; Respect privacy rights during patrols&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Professional Conduct:&lt;/strong&gt; Maintain professional demeanor at all times&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Practice Exercise:&lt;/strong&gt; Review your site's tour routes and checkpoint locations. Practice the QR scanning procedure and develop a systematic approach for documenting observations at each checkpoint type.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_guard_ops_m4_quiz" model="slide.slide">
+            <field name="name">Module 4: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_guard_operations"/>
+            <field name="sequence">41</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.10</field>
+        </record>
+
+        <record id="quiz_guard_ops_m4_q1" model="slide.question">
+            <field name="question">What must you do at each checkpoint?</field>
+            <field name="slide_id" ref="slide_guard_ops_m4_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_guard_ops_m4_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m4_q1"/>
+            <field name="text_value">Scan QR code or verify GPS</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_guard_ops_m4_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m4_q1"/>
+            <field name="text_value">Just walk by</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_guard_ops_m4_q2" model="slide.question">
+            <field name="question">What happens if you miss a checkpoint?</field>
+            <field name="slide_id" ref="slide_guard_ops_m4_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_guard_ops_m4_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m4_q2"/>
+            <field name="text_value">Tour marked incomplete</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_guard_ops_m4_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m4_q2"/>
+            <field name="text_value">Nothing</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 5: Emergency Procedures -->
+        <record id="slide_guard_ops_m5_emergency" model="slide.slide">
+            <field name="name">Module 5: Emergency Procedures</field>
+            <field name="channel_id" ref="elearning_course_guard_operations"/>
+            <field name="sequence">50</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.50</field>
+            <field name="html_content">
+                &lt;h2&gt;Emergency Procedures&lt;/h2&gt;
+                &lt;h3&gt;Learning Objectives:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Recognize emergency situations&lt;/li&gt;
+                    &lt;li&gt;Follow emergency protocols&lt;/li&gt;
+                    &lt;li&gt;Use emergency broadcast system&lt;/li&gt;
+                    &lt;li&gt;Coordinate with first responders&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;5.1 Types of Emergencies&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Fire&lt;/li&gt;
+                    &lt;li&gt;Medical emergency&lt;/li&gt;
+                    &lt;li&gt;Active threat/violence&lt;/li&gt;
+                    &lt;li&gt;Natural disaster&lt;/li&gt;
+                    &lt;li&gt;Hazardous material spill&lt;/li&gt;
+                    &lt;li&gt;Facility evacuation&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;5.2 General Emergency Response&lt;/h3&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Ensure Personal Safety&lt;/strong&gt; - Don't become a victim&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Call Emergency Services&lt;/strong&gt; - 911 first if life-threatening&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Notify Supervisor&lt;/strong&gt; - Use emergency contact&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Follow Procedures&lt;/strong&gt; - Site-specific protocols&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Document Everything&lt;/strong&gt; - Create incident report&lt;/li&gt;
+                &lt;/ol&gt;
+                
+                &lt;h3&gt;5.3 Fire Emergency&lt;/h3&gt;
+                &lt;p&gt;&lt;strong&gt;Immediate Actions:&lt;/strong&gt;&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Pull fire alarm&lt;/li&gt;
+                    &lt;li&gt;Call 911&lt;/li&gt;
+                    &lt;li&gt;Evacuate building&lt;/li&gt;
+                    &lt;li&gt;Close doors behind you&lt;/li&gt;
+                    &lt;li&gt;Go to assembly point&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;p&gt;&lt;strong&gt;DO NOT:&lt;/strong&gt; Use elevators, stop for belongings, re-enter building&lt;/p&gt;
+                
+                &lt;h3&gt;5.4 Medical Emergency&lt;/h3&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Call 911 if serious&lt;/li&gt;
+                    &lt;li&gt;Provide first aid if trained&lt;/li&gt;
+                    &lt;li&gt;Don't move injured person&lt;/li&gt;
+                    &lt;li&gt;Stay with person until help arrives&lt;/li&gt;
+                    &lt;li&gt;Document incident&lt;/li&gt;
+                &lt;/ol&gt;
+                
+                &lt;h3&gt;5.5 Active Threat - Run, Hide, Fight&lt;/h3&gt;
+                &lt;p&gt;&lt;strong&gt;Run:&lt;/strong&gt; Escape if possible&lt;/p&gt;
+                &lt;p&gt;&lt;strong&gt;Hide:&lt;/strong&gt; Find secure location if can't escape&lt;/p&gt;
+                &lt;p&gt;&lt;strong&gt;Fight:&lt;/strong&gt; Last resort only - act with physical aggression&lt;/p&gt;
+                
+                &lt;h3&gt;5.6 Using Emergency Broadcast&lt;/h3&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Open GuardPro mobile app&lt;/li&gt;
+                    &lt;li&gt;Tap "Emergency Broadcast"&lt;/li&gt;
+                    &lt;li&gt;Select emergency type&lt;/li&gt;
+                    &lt;li&gt;Enter brief message&lt;/li&gt;
+                    &lt;li&gt;Send broadcast&lt;/li&gt;
+                &lt;/ol&gt;
+                &lt;p&gt;All guards receive push notification, SMS, and in-app alert.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_guard_ops_m5_quiz" model="slide.slide">
+            <field name="name">Module 5: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_guard_operations"/>
+            <field name="sequence">51</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.10</field>
+        </record>
+
+        <record id="quiz_guard_ops_m5_q1" model="slide.question">
+            <field name="question">In an emergency, what's the first priority?</field>
+            <field name="slide_id" ref="slide_guard_ops_m5_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_guard_ops_m5_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m5_q1"/>
+            <field name="text_value">Personal safety</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_guard_ops_m5_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m5_q1"/>
+            <field name="text_value">Save property</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_guard_ops_m5_q2" model="slide.question">
+            <field name="question">When should you call 911?</field>
+            <field name="slide_id" ref="slide_guard_ops_m5_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_guard_ops_m5_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m5_q2"/>
+            <field name="text_value">Life-threatening situations</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_guard_ops_m5_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m5_q2"/>
+            <field name="text_value">After talking to supervisor</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 6: Equipment Management -->
+        <record id="slide_guard_ops_m6_equipment" model="slide.slide">
+            <field name="name">Module 6: Equipment Management</field>
+            <field name="channel_id" ref="elearning_course_guard_operations"/>
+            <field name="sequence">60</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.33</field>
+            <field name="html_content">
+                &lt;h2&gt;Equipment Management&lt;/h2&gt;
+                &lt;h3&gt;Learning Objectives:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Collect assigned equipment&lt;/li&gt;
+                    &lt;li&gt;Inspect equipment condition&lt;/li&gt;
+                    &lt;li&gt;Report equipment issues&lt;/li&gt;
+                    &lt;li&gt;Return equipment properly&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;6.1 Types of Equipment&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Two-way radios&lt;/li&gt;
+                    &lt;li&gt;Flashlights&lt;/li&gt;
+                    &lt;li&gt;Keys and access cards&lt;/li&gt;
+                    &lt;li&gt;Safety equipment&lt;/li&gt;
+                    &lt;li&gt;Mobile devices/tablets&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;6.2 Equipment Collection&lt;/h3&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Check your assignment&lt;/li&gt;
+                    &lt;li&gt;Review equipment list&lt;/li&gt;
+                    &lt;li&gt;Collect each item&lt;/li&gt;
+                    &lt;li&gt;Inspect condition&lt;/li&gt;
+                    &lt;li&gt;Test functionality&lt;/li&gt;
+                    &lt;li&gt;Sign equipment log&lt;/li&gt;
+                    &lt;li&gt;Report any issues immediately&lt;/li&gt;
+                &lt;/ol&gt;
+                
+                &lt;h3&gt;6.3 Equipment Inspection&lt;/h3&gt;
+                &lt;p&gt;Before accepting equipment:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Check for damage&lt;/li&gt;
+                    &lt;li&gt;Test batteries&lt;/li&gt;
+                    &lt;li&gt;Verify all parts present&lt;/li&gt;
+                    &lt;li&gt;Don't accept broken equipment&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;6.5 Equipment Return&lt;/h3&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Collect all assigned equipment&lt;/li&gt;
+                    &lt;li&gt;Clean if needed&lt;/li&gt;
+                    &lt;li&gt;Check for damage&lt;/li&gt;
+                    &lt;li&gt;Return to designated location&lt;/li&gt;
+                    &lt;li&gt;Sign return log&lt;/li&gt;
+                    &lt;li&gt;Report any issues&lt;/li&gt;
+                &lt;/ol&gt;
+                
+                &lt;h3&gt;6.6 Lost or Damaged Equipment&lt;/h3&gt;
+                &lt;p&gt;&lt;strong&gt;If Equipment is Lost:&lt;/strong&gt;&lt;/p&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Report immediately to supervisor&lt;/li&gt;
+                    &lt;li&gt;Create incident report&lt;/li&gt;
+                    &lt;li&gt;Retrace your steps&lt;/li&gt;
+                    &lt;li&gt;Complete loss form&lt;/li&gt;
+                &lt;/ol&gt;
+            </field>
+        </record>
+
+        <record id="slide_guard_ops_m6_quiz" model="slide.slide">
+            <field name="name">Module 6: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_guard_operations"/>
+            <field name="sequence">61</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <record id="quiz_guard_ops_m6_q1" model="slide.question">
+            <field name="question">When should you inspect equipment?</field>
+            <field name="slide_id" ref="slide_guard_ops_m6_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_guard_ops_m6_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m6_q1"/>
+            <field name="text_value">Before accepting it</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_guard_ops_m6_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m6_q1"/>
+            <field name="text_value">Never</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_guard_ops_m6_q2" model="slide.question">
+            <field name="question">When should you report lost equipment?</field>
+            <field name="slide_id" ref="slide_guard_ops_m6_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_guard_ops_m6_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m6_q2"/>
+            <field name="text_value">Immediately</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_guard_ops_m6_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_guard_ops_m6_q2"/>
+            <field name="text_value">Next week</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 7: Best Practices -->
+        <record id="slide_guard_ops_m7_best_practices" model="slide.slide">
+            <field name="name">Module 7: Best Practices</field>
+            <field name="channel_id" ref="elearning_course_guard_operations"/>
+            <field name="sequence">70</field>
+            <field name="slide_category">infographic</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.25</field>
+            <field name="description">
+                &lt;h2&gt;Best Practices&lt;/h2&gt;
+                &lt;h3&gt;Professional Conduct:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Punctuality&lt;/li&gt;
+                    &lt;li&gt;Proper uniform&lt;/li&gt;
+                    &lt;li&gt;Respectful communication&lt;/li&gt;
+                    &lt;li&gt;Follow instructions&lt;/li&gt;
+                    &lt;li&gt;Stay alert&lt;/li&gt;
+                    &lt;li&gt;Maintain confidentiality&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Communication:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Check messages regularly&lt;/li&gt;
+                    &lt;li&gt;Respond promptly&lt;/li&gt;
+                    &lt;li&gt;Use professional language&lt;/li&gt;
+                    &lt;li&gt;Document conversations&lt;/li&gt;
+                    &lt;li&gt;Ask questions if unclear&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Safety First:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Never compromise safety&lt;/li&gt;
+                    &lt;li&gt;Don't take unnecessary risks&lt;/li&gt;
+                    &lt;li&gt;Use safety equipment&lt;/li&gt;
+                    &lt;li&gt;Report hazards&lt;/li&gt;
+                    &lt;li&gt;Follow procedures&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Continuous Improvement:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Learn from experiences&lt;/li&gt;
+                    &lt;li&gt;Ask for feedback&lt;/li&gt;
+                    &lt;li&gt;Attend training&lt;/li&gt;
+                    &lt;li&gt;Stay current on procedures&lt;/li&gt;
+                    &lt;li&gt;Share knowledge&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <!-- Final Assessment -->
+        <record id="slide_guard_ops_final_exam" model="slide.slide">
+            <field name="name">Final Assessment</field>
+            <field name="channel_id" ref="elearning_course_guard_operations"/>
+            <field name="sequence">80</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.25</field>
+            <field name="description">
+                &lt;h2&gt;Final Examination&lt;/h2&gt;
+                &lt;p&gt;&lt;strong&gt;Requirements:&lt;/strong&gt;&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;30 questions&lt;/li&gt;
+                    &lt;li&gt;85% pass required&lt;/li&gt;
+                    &lt;li&gt;15 minutes time limit&lt;/li&gt;
+                    &lt;li&gt;Can retake if needed&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;p&gt;Upon passing, you'll receive your Security Guard Field Operations certificate!&lt;/p&gt;
+            </field>
+        </record>
+
+    </data>
+</odoo>
+

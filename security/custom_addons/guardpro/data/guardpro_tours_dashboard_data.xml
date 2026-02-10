@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Default Tours Dashboard -->
+        <record id="default_tours_dashboard" model="guardpro.tours.dashboard">
+            <field name="name">GuardPro Tours Dashboard</field>
+        </record>
+    </data>
+</odoo>

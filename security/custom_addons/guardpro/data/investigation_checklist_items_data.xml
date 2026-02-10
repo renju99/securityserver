@@ -1,0 +1,1550 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- ========================================== -->
+        <!-- THEFT INVESTIGATION CHECKLIST ITEMS -->
+        <!-- ========================================== -->
+        
+        <record id="checklist_theft_01" model="incident.investigation.checklist.item">
+            <field name="name">Secure the crime scene</field>
+            <field name="description">Immediately secure the area where the theft occurred to preserve evidence</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_theft"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-lock</field>
+        </record>
+        
+        <record id="checklist_theft_02" model="incident.investigation.checklist.item">
+            <field name="name">Document missing items</field>
+            <field name="description">Create detailed list of all stolen items including descriptions, serial numbers, and estimated values</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_theft"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-list</field>
+        </record>
+        
+        <record id="checklist_theft_03" model="incident.investigation.checklist.item">
+            <field name="name">Review CCTV footage</field>
+            <field name="description">Collect and review all relevant CCTV footage from the time period of the theft</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_theft"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-video</field>
+        </record>
+        
+        <record id="checklist_theft_04" model="incident.investigation.checklist.item">
+            <field name="name">Interview witnesses</field>
+            <field name="description">Conduct interviews with all witnesses and persons who had access to the area</field>
+            <field name="sequence">40</field>
+            <field name="template_id" ref="investigation_template_theft"/>
+            <field name="category">witness</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-users</field>
+        </record>
+        
+        <record id="checklist_theft_05" model="incident.investigation.checklist.item">
+            <field name="name">Check access logs</field>
+            <field name="description">Review access control logs to identify who entered the area during the relevant time period</field>
+            <field name="sequence">50</field>
+            <field name="template_id" ref="investigation_template_theft"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-key</field>
+        </record>
+        
+        <record id="checklist_theft_06" model="incident.investigation.checklist.item">
+            <field name="name">Photograph the scene</field>
+            <field name="description">Take comprehensive photographs of the scene from multiple angles</field>
+            <field name="sequence">60</field>
+            <field name="template_id" ref="investigation_template_theft"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">False</field>
+            <field name="icon">fa-camera</field>
+        </record>
+        
+        <record id="checklist_theft_07" model="incident.investigation.checklist.item">
+            <field name="name">Notify police</field>
+            <field name="description">File police report if required based on value of stolen items</field>
+            <field name="sequence">70</field>
+            <field name="template_id" ref="investigation_template_theft"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">False</field>
+            <field name="icon">fa-phone</field>
+        </record>
+        
+        <record id="checklist_theft_08" model="incident.investigation.checklist.item">
+            <field name="name">Analyze findings</field>
+            <field name="description">Review all collected evidence and identify patterns or suspects</field>
+            <field name="sequence">80</field>
+            <field name="template_id" ref="investigation_template_theft"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-search</field>
+        </record>
+        
+        <record id="checklist_theft_09" model="incident.investigation.checklist.item">
+            <field name="name">Prepare investigation report</field>
+            <field name="description">Complete comprehensive investigation report with findings and recommendations</field>
+            <field name="sequence">90</field>
+            <field name="template_id" ref="investigation_template_theft"/>
+            <field name="category">documentation</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-file-alt</field>
+        </record>
+        
+        <record id="checklist_theft_10" model="incident.investigation.checklist.item">
+            <field name="name">Implement preventive measures</field>
+            <field name="description">Recommend and implement security improvements to prevent future thefts</field>
+            <field name="sequence">100</field>
+            <field name="template_id" ref="investigation_template_theft"/>
+            <field name="category">followup</field>
+            <field name="is_mandatory">False</field>
+            <field name="icon">fa-shield-alt</field>
+        </record>
+        
+        <!-- ========================================== -->
+        <!-- FIRE EMERGENCY INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        
+        <record id="checklist_fire_01" model="incident.investigation.checklist.item">
+            <field name="name">Ensure area is safe</field>
+            <field name="description">Verify fire is extinguished and area is safe to enter before investigation</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_fire"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-check-circle</field>
+        </record>
+        
+        <record id="checklist_fire_02" model="incident.investigation.checklist.item">
+            <field name="name">Identify point of origin</field>
+            <field name="description">Determine where the fire started</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_fire"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-map-marker-alt</field>
+        </record>
+        
+        <record id="checklist_fire_03" model="incident.investigation.checklist.item">
+            <field name="name">Document fire damage</field>
+            <field name="description">Photograph and document all fire damage and affected areas</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_fire"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-camera</field>
+        </record>
+        
+        <record id="checklist_fire_04" model="incident.investigation.checklist.item">
+            <field name="name">Review fire alarm activation</field>
+            <field name="description">Check fire alarm system logs and verify proper activation</field>
+            <field name="sequence">40</field>
+            <field name="template_id" ref="investigation_template_fire"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-bell</field>
+        </record>
+        
+        <record id="checklist_fire_05" model="incident.investigation.checklist.item">
+            <field name="name">Interview first responders</field>
+            <field name="description">Interview guards, fire department, and others who responded to the fire</field>
+            <field name="sequence">50</field>
+            <field name="template_id" ref="investigation_template_fire"/>
+            <field name="category">witness</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-users</field>
+        </record>
+        
+        <record id="checklist_fire_06" model="incident.investigation.checklist.item">
+            <field name="name">Collect fire department report</field>
+            <field name="description">Obtain official fire department investigation report</field>
+            <field name="sequence">60</field>
+            <field name="template_id" ref="investigation_template_fire"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-file-pdf</field>
+        </record>
+        
+        <record id="checklist_fire_07" model="incident.investigation.checklist.item">
+            <field name="name">Determine cause of fire</field>
+            <field name="description">Analyze evidence to determine the root cause (electrical, arson, accident, etc.)</field>
+            <field name="sequence">70</field>
+            <field name="template_id" ref="investigation_template_fire"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-search</field>
+        </record>
+        
+        <record id="checklist_fire_08" model="incident.investigation.checklist.item">
+            <field name="name">Review evacuation procedures</field>
+            <field name="description">Evaluate effectiveness of evacuation and identify improvements</field>
+            <field name="sequence">80</field>
+            <field name="template_id" ref="investigation_template_fire"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">False</field>
+            <field name="icon">fa-sign-out-alt</field>
+        </record>
+        
+        <record id="checklist_fire_09" model="incident.investigation.checklist.item">
+            <field name="name">Test fire suppression systems</field>
+            <field name="description">Verify fire suppression systems functioned properly</field>
+            <field name="sequence">90</field>
+            <field name="template_id" ref="investigation_template_fire"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-fire-extinguisher</field>
+        </record>
+        
+        <record id="checklist_fire_10" model="incident.investigation.checklist.item">
+            <field name="name">Recommend fire safety improvements</field>
+            <field name="description">Provide recommendations to prevent future fires and improve response</field>
+            <field name="sequence">100</field>
+            <field name="template_id" ref="investigation_template_fire"/>
+            <field name="category">followup</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-lightbulb</field>
+        </record>
+        
+        <!-- ========================================== -->
+        <!-- WORKPLACE INJURY INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        
+        <record id="checklist_injury_01" model="incident.investigation.checklist.item">
+            <field name="name">Provide immediate medical attention</field>
+            <field name="description">Ensure injured person receives appropriate medical care</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_workplace_injury"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-medkit</field>
+        </record>
+        
+        <record id="checklist_injury_02" model="incident.investigation.checklist.item">
+            <field name="name">Secure the accident scene</field>
+            <field name="description">Preserve the scene in its current state for investigation</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_workplace_injury"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-lock</field>
+        </record>
+        
+        <record id="checklist_injury_03" model="incident.investigation.checklist.item">
+            <field name="name">Interview injured worker</field>
+            <field name="description">Get detailed account from injured worker about how the incident occurred</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_workplace_injury"/>
+            <field name="category">witness</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-user</field>
+        </record>
+        
+        <record id="checklist_injury_04" model="incident.investigation.checklist.item">
+            <field name="name">Interview witnesses</field>
+            <field name="description">Collect statements from all witnesses to the incident</field>
+            <field name="sequence">40</field>
+            <field name="template_id" ref="investigation_template_workplace_injury"/>
+            <field name="category">witness</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-users</field>
+        </record>
+        
+        <record id="checklist_injury_05" model="incident.investigation.checklist.item">
+            <field name="name">Photograph scene and equipment</field>
+            <field name="description">Document scene conditions and any equipment involved</field>
+            <field name="sequence">50</field>
+            <field name="template_id" ref="investigation_template_workplace_injury"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-camera</field>
+        </record>
+        
+        <record id="checklist_injury_06" model="incident.investigation.checklist.item">
+            <field name="name">Review safety procedures</field>
+            <field name="description">Verify if proper safety procedures were being followed</field>
+            <field name="sequence">60</field>
+            <field name="template_id" ref="investigation_template_workplace_injury"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-clipboard-check</field>
+        </record>
+        
+        <record id="checklist_injury_07" model="incident.investigation.checklist.item">
+            <field name="name">Check PPE usage</field>
+            <field name="description">Verify if required personal protective equipment was being used</field>
+            <field name="sequence">70</field>
+            <field name="template_id" ref="investigation_template_workplace_injury"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-hard-hat</field>
+        </record>
+        
+        <record id="checklist_injury_08" model="incident.investigation.checklist.item">
+            <field name="name">Identify root causes</field>
+            <field name="description">Determine underlying causes using root cause analysis methods</field>
+            <field name="sequence">80</field>
+            <field name="template_id" ref="investigation_template_workplace_injury"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-sitemap</field>
+        </record>
+        
+        <record id="checklist_injury_09" model="incident.investigation.checklist.item">
+            <field name="name">File regulatory reports</field>
+            <field name="description">Complete required OSHA or other regulatory incident reports</field>
+            <field name="sequence">90</field>
+            <field name="template_id" ref="investigation_template_workplace_injury"/>
+            <field name="category">documentation</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-file-alt</field>
+        </record>
+        
+        <record id="checklist_injury_10" model="incident.investigation.checklist.item">
+            <field name="name">Implement corrective actions</field>
+            <field name="description">Put in place measures to prevent recurrence</field>
+            <field name="sequence">100</field>
+            <field name="template_id" ref="investigation_template_workplace_injury"/>
+            <field name="category">followup</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-tools</field>
+        </record>
+        
+        <!-- ========================================== -->
+        <!-- VEHICLE ACCIDENT INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        
+        <record id="checklist_vehicle_01" model="incident.investigation.checklist.item">
+            <field name="name">Check for injuries</field>
+            <field name="description">Assess all parties for injuries and call emergency services if needed</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_vehicle_accident"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-ambulance</field>
+        </record>
+        
+        <record id="checklist_vehicle_02" model="incident.investigation.checklist.item">
+            <field name="name">Secure the accident scene</field>
+            <field name="description">Set up safety perimeter and warning signs</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_vehicle_accident"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-exclamation-triangle</field>
+        </record>
+        
+        <record id="checklist_vehicle_03" model="incident.investigation.checklist.item">
+            <field name="name">Document vehicle positions</field>
+            <field name="description">Photograph and diagram final positions of all vehicles</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_vehicle_accident"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-car</field>
+        </record>
+        
+        <record id="checklist_vehicle_04" model="incident.investigation.checklist.item">
+            <field name="name">Photograph vehicle damage</field>
+            <field name="description">Take detailed photos of all vehicle damage from multiple angles</field>
+            <field name="sequence">40</field>
+            <field name="template_id" ref="investigation_template_vehicle_accident"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-camera</field>
+        </record>
+        
+        <record id="checklist_vehicle_05" model="incident.investigation.checklist.item">
+            <field name="name">Collect driver information</field>
+            <field name="description">Obtain driver licenses, insurance, and vehicle registration from all parties</field>
+            <field name="sequence">50</field>
+            <field name="template_id" ref="investigation_template_vehicle_accident"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-id-card</field>
+        </record>
+        
+        <record id="checklist_vehicle_06" model="incident.investigation.checklist.item">
+            <field name="name">Interview all parties</field>
+            <field name="description">Get statements from all drivers and passengers involved</field>
+            <field name="sequence">60</field>
+            <field name="template_id" ref="investigation_template_vehicle_accident"/>
+            <field name="category">witness</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-users</field>
+        </record>
+        
+        <record id="checklist_vehicle_07" model="incident.investigation.checklist.item">
+            <field name="name">Interview witnesses</field>
+            <field name="description">Collect contact information and statements from independent witnesses</field>
+            <field name="sequence">70</field>
+            <field name="template_id" ref="investigation_template_vehicle_accident"/>
+            <field name="category">witness</field>
+            <field name="is_mandatory">False</field>
+            <field name="icon">fa-user-friends</field>
+        </record>
+        
+        <record id="checklist_vehicle_08" model="incident.investigation.checklist.item">
+            <field name="name">Check for CCTV footage</field>
+            <field name="description">Identify and secure any CCTV footage of the accident</field>
+            <field name="sequence">80</field>
+            <field name="template_id" ref="investigation_template_vehicle_accident"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">False</field>
+            <field name="icon">fa-video</field>
+        </record>
+        
+        <record id="checklist_vehicle_09" model="incident.investigation.checklist.item">
+            <field name="name">File police report</field>
+            <field name="description">Contact police and file official accident report</field>
+            <field name="sequence">90</field>
+            <field name="template_id" ref="investigation_template_vehicle_accident"/>
+            <field name="category">documentation</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-phone</field>
+        </record>
+        
+        <record id="checklist_vehicle_10" model="incident.investigation.checklist.item">
+            <field name="name">Notify insurance companies</field>
+            <field name="description">Report accident to all relevant insurance providers</field>
+            <field name="sequence">100</field>
+            <field name="template_id" ref="investigation_template_vehicle_accident"/>
+            <field name="category">followup</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-file-contract</field>
+        </record>
+        
+        <!-- ========================================== -->
+        <!-- GENERIC CHECKLIST ITEMS FOR ALL TEMPLATES -->
+        <!-- ========================================== -->
+        
+        <!-- Add basic checklist items for remaining templates -->
+        
+        <!-- Trespassing -->
+        <record id="checklist_trespassing_01" model="incident.investigation.checklist.item">
+            <field name="name">Identify trespasser</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_trespassing"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-user</field>
+        </record>
+        
+        <record id="checklist_trespassing_02" model="incident.investigation.checklist.item">
+            <field name="name">Review access control logs</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_trespassing"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-key</field>
+        </record>
+        
+        <record id="checklist_trespassing_03" model="incident.investigation.checklist.item">
+            <field name="name">Check CCTV footage</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_trespassing"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-video</field>
+        </record>
+        
+        <record id="checklist_trespassing_04" model="incident.investigation.checklist.item">
+            <field name="name">Document entry point</field>
+            <field name="sequence">40</field>
+            <field name="template_id" ref="investigation_template_trespassing"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-door-open</field>
+        </record>
+        
+        <record id="checklist_trespassing_05" model="incident.investigation.checklist.item">
+            <field name="name">Recommend security improvements</field>
+            <field name="sequence">50</field>
+            <field name="template_id" ref="investigation_template_trespassing"/>
+            <field name="category">followup</field>
+            <field name="is_mandatory">False</field>
+            <field name="icon">fa-shield-alt</field>
+        </record>
+        
+        <!-- Data Breach -->
+        <record id="checklist_databreach_01" model="incident.investigation.checklist.item">
+            <field name="name">Contain the breach</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_data_breach"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-stop</field>
+        </record>
+        
+        <record id="checklist_databreach_02" model="incident.investigation.checklist.item">
+            <field name="name">Identify compromised data</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_data_breach"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-database</field>
+        </record>
+        
+        <record id="checklist_databreach_03" model="incident.investigation.checklist.item">
+            <field name="name">Review system logs</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_data_breach"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-file-alt</field>
+        </record>
+        
+        <record id="checklist_databreach_04" model="incident.investigation.checklist.item">
+            <field name="name">Notify affected parties</field>
+            <field name="sequence">40</field>
+            <field name="template_id" ref="investigation_template_data_breach"/>
+            <field name="category">followup</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-envelope</field>
+        </record>
+        
+        <record id="checklist_databreach_05" model="incident.investigation.checklist.item">
+            <field name="name">Report to authorities</field>
+            <field name="sequence">50</field>
+            <field name="template_id" ref="investigation_template_data_breach"/>
+            <field name="category">followup</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-phone</field>
+        </record>
+        
+        <!-- ========================================== -->
+        <!-- ACCESS CONTROL BREACH INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        
+        <record id="checklist_access_control_01" model="incident.investigation.checklist.item">
+            <field name="name">Identify affected access points</field>
+            <field name="description">Determine which doors, gates, or access control systems were compromised</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_access_control"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-door-open</field>
+        </record>
+        
+        <record id="checklist_access_control_02" model="incident.investigation.checklist.item">
+            <field name="name">Review access control logs</field>
+            <field name="description">Examine system logs to identify unauthorized access attempts and successful breaches</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_access_control"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-file-alt</field>
+        </record>
+        
+        <record id="checklist_access_control_03" model="incident.investigation.checklist.item">
+            <field name="name">Check CCTV footage</field>
+            <field name="description">Review surveillance footage of the affected access points during the breach timeframe</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_access_control"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-video</field>
+        </record>
+        
+        <record id="checklist_access_control_04" model="incident.investigation.checklist.item">
+            <field name="name">Identify unauthorized individuals</field>
+            <field name="description">Determine who gained unauthorized access and their method of entry</field>
+            <field name="sequence">40</field>
+            <field name="template_id" ref="investigation_template_access_control"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-user-secret</field>
+        </record>
+        
+        <record id="checklist_access_control_05" model="incident.investigation.checklist.item">
+            <field name="name">Interview security personnel</field>
+            <field name="description">Get statements from guards who were on duty during the breach</field>
+            <field name="sequence">50</field>
+            <field name="template_id" ref="investigation_template_access_control"/>
+            <field name="category">witness</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-users</field>
+        </record>
+        
+        <record id="checklist_access_control_06" model="incident.investigation.checklist.item">
+            <field name="name">Test access control system</field>
+            <field name="description">Verify if the breach was due to system malfunction or human error</field>
+            <field name="sequence">60</field>
+            <field name="template_id" ref="investigation_template_access_control"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-cog</field>
+        </record>
+        
+        <record id="checklist_access_control_07" model="incident.investigation.checklist.item">
+            <field name="name">Review card/credential usage</field>
+            <field name="description">Check if stolen, cloned, or unauthorized credentials were used</field>
+            <field name="sequence">70</field>
+            <field name="template_id" ref="investigation_template_access_control"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-id-card</field>
+        </record>
+        
+        <record id="checklist_access_control_08" model="incident.investigation.checklist.item">
+            <field name="name">Document security vulnerabilities</field>
+            <field name="description">Identify weaknesses in the access control system that allowed the breach</field>
+            <field name="sequence">80</field>
+            <field name="template_id" ref="investigation_template_access_control"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-exclamation-triangle</field>
+        </record>
+        
+        <record id="checklist_access_control_09" model="incident.investigation.checklist.item">
+            <field name="name">Revoke compromised credentials</field>
+            <field name="description">Immediately deactivate any access cards or credentials that were compromised</field>
+            <field name="sequence">90</field>
+            <field name="template_id" ref="investigation_template_access_control"/>
+            <field name="category">followup</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-ban</field>
+        </record>
+        
+        <record id="checklist_access_control_10" model="incident.investigation.checklist.item">
+            <field name="name">Implement security improvements</field>
+            <field name="description">Recommend and implement measures to prevent future access control breaches</field>
+            <field name="sequence">100</field>
+            <field name="template_id" ref="investigation_template_access_control"/>
+            <field name="category">followup</field>
+            <field name="is_mandatory">False</field>
+            <field name="icon">fa-shield-alt</field>
+        </record>
+        
+        <!-- ========================================== -->
+        <!-- VANDALISM INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_vandalism_01" model="incident.investigation.checklist.item">
+            <field name="name">Secure the damaged area</field>
+            <field name="description">Prevent further damage and preserve evidence at the scene.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_vandalism"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-shield-alt</field>
+        </record>
+        <record id="checklist_vandalism_02" model="incident.investigation.checklist.item">
+            <field name="name">Photograph all damage</field>
+            <field name="description">Take detailed photos of graffiti, broken property, or other signs of vandalism.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_vandalism"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-camera</field>
+        </record>
+        <record id="checklist_vandalism_03" model="incident.investigation.checklist.item">
+            <field name="name">Identify method of damage</field>
+            <field name="description">Determine what tools or materials were used (e.g., spray paint, blunt force).</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_vandalism"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-search</field>
+        </record>
+        <record id="checklist_vandalism_04" model="incident.investigation.checklist.item">
+            <field name="name">Review CCTV footage</field>
+            <field name="description">Check cameras covering the area for any suspicious persons or activities.</field>
+            <field name="sequence">40</field>
+            <field name="template_id" ref="investigation_template_vandalism"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-video</field>
+        </record>
+        <record id="checklist_vandalism_05" model="incident.investigation.checklist.item">
+            <field name="name">Estimate repair costs</field>
+            <field name="description">Obtain estimates for the cost of repairing or replacing damaged property.</field>
+            <field name="sequence">50</field>
+            <field name="template_id" ref="investigation_template_vandalism"/>
+            <field name="category">documentation</field>
+            <field name="is_mandatory">False</field>
+            <field name="icon">fa-money-bill</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- ASSAULT INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_assault_01" model="incident.investigation.checklist.item">
+            <field name="name">Call emergency services</field>
+            <field name="description">Ensure immediate medical help and police notification if required.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_assault"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-ambulance</field>
+        </record>
+        <record id="checklist_assault_02" model="incident.investigation.checklist.item">
+            <field name="name">Isolate involved parties</field>
+            <field name="description">Keep the victim, suspect, and witnesses separate to prevent further conflict or collaboration.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_assault"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-user-slash</field>
+        </record>
+        <record id="checklist_assault_03" model="incident.investigation.checklist.item">
+            <field name="name">Document visible injuries</field>
+            <field name="description">Photograph any physical injuries on the victim (and suspect if applicable).</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_assault"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-camera</field>
+        </record>
+        <record id="checklist_assault_04" model="incident.investigation.checklist.item">
+            <field name="name">Obtain detailed statements</field>
+            <field name="description">Conduct formal interviews with all individuals involved or present.</field>
+            <field name="sequence">40</field>
+            <field name="template_id" ref="investigation_template_assault"/>
+            <field name="category">witness</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-microphone</field>
+        </record>
+        <record id="checklist_assault_05" model="incident.investigation.checklist.item">
+            <field name="name">Check for weapons/objects</field>
+            <field name="description">Search vicinity for any objects used during the altercation.</field>
+            <field name="sequence">50</field>
+            <field name="template_id" ref="investigation_template_assault"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-search</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- SUSPICIOUS ACTIVITY INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_suspicious_01" model="incident.investigation.checklist.item">
+            <field name="name">Define nature of suspicion</field>
+            <field name="description">Clearly state what behavior or object was flagged as suspicious.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_suspicious"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-eye</field>
+        </record>
+        <record id="checklist_suspicious_02" model="incident.investigation.checklist.item">
+            <field name="name">Gather person/vehicle description</field>
+            <field name="description">Note physical characteristics, clothing, license plates, or vehicle models.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_suspicious"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-id-card</field>
+        </record>
+        <record id="checklist_suspicious_03" model="incident.investigation.checklist.item">
+            <field name="name">Track movements via CCTV</field>
+            <field name="description">Follow the subject's path through the site using available cameras.</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_suspicious"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-video</field>
+        </record>
+        <record id="checklist_suspicious_04" model="incident.investigation.checklist.item">
+            <field name="name">Evaluate potential threat</field>
+            <field name="description">Assess if the activity suggests a precursors to criminal act or security breach.</field>
+            <field name="sequence">40</field>
+            <field name="template_id" ref="investigation_template_suspicious"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-user-secret</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- MEDICAL EMERGENCY INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_medical_01" model="incident.investigation.checklist.item">
+            <field name="name">Confirm medical aid was provided</field>
+            <field name="description">Verify that first aid or professional medical help was administered promptly.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_medical"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-first-aid</field>
+        </record>
+        <record id="checklist_medical_02" model="incident.investigation.checklist.item">
+            <field name="name">Record patient information</field>
+            <field name="description">Note name, age (if known), and relationship to the site (employee, visitor, etc.).</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_medical"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-user</field>
+        </record>
+        <record id="checklist_medical_03" model="incident.investigation.checklist.item">
+            <field name="name">Document symptoms and response</field>
+            <field name="description">Describe visible symptoms and the patient's response to initial aid.</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_medical"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-notes-medical</field>
+        </record>
+        <record id="checklist_medical_04" model="incident.investigation.checklist.item">
+            <field name="name">Collect ambulance/hospital info</field>
+            <field name="description">If transported, record the ambulance service and the hospital name.</field>
+            <field name="sequence">40</field>
+            <field name="template_id" ref="investigation_template_medical"/>
+            <field name="category">documentation</field>
+            <field name="is_mandatory">False</field>
+            <field name="icon">fa-hospital</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- EVACUATION INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_evacuation_01" model="incident.investigation.checklist.item">
+            <field name="name">Verify all occupants accounted for</field>
+            <field name="description">Check roll-call logs or assembly point counts to ensure everyone is safe.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_evacuation"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-users-cog</field>
+        </record>
+        <record id="checklist_evacuation_02" model="incident.investigation.checklist.item">
+            <field name="name">Identify trigger for evacuation</field>
+            <field name="description">Determine what caused the evacuation (alarm, manual call, verbal order).</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_evacuation"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-bell</field>
+        </record>
+        <record id="checklist_evacuation_03" model="incident.investigation.checklist.item">
+            <field name="name">Evaluate exit availability</field>
+            <field name="description">Check if all fire exits and routes were clear and accessible during the process.</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_evacuation"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-sign-out-alt</field>
+        </record>
+        <record id="checklist_evacuation_04" model="incident.investigation.checklist.item">
+            <field name="name">Review warden performance</field>
+            <field name="description">Assess if fire wardens or security staff followed evacuation protocols correctly.</field>
+            <field name="sequence">40</field>
+            <field name="template_id" ref="investigation_template_evacuation"/>
+            <field name="category">witness</field>
+            <field name="is_mandatory">False</field>
+            <field name="icon">fa-user-shield</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- BOMB THREAT INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_bomb_01" model="incident.investigation.checklist.item">
+            <field name="name">Isolate threat communication</field>
+            <field name="description">Preserve the call recording, email, or physical note for forensic analysis.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_bomb_threat"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-file-signature</field>
+        </record>
+        <record id="checklist_bomb_02" model="incident.investigation.checklist.item">
+            <field name="name">Conduct systematic search</field>
+            <field name="description">Ensure all areas mentioned (or sensitive zones) are searched by qualified staff.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_bomb_threat"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-search-location</field>
+        </record>
+        <record id="checklist_bomb_03" model="incident.investigation.checklist.item">
+            <field name="name">Interview person who received threat</field>
+            <field name="description">Get details on voice, tone, background noises, or specific wording used.</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_bomb_threat"/>
+            <field name="category">witness</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-comment</field>
+        </record>
+        <record id="checklist_bomb_04" model="incident.investigation.checklist.item">
+            <field name="name">Review access logs before threat</field>
+            <field name="description">Check for suspicious visitors or deliveries prior to the threat.</field>
+            <field name="sequence">40</field>
+            <field name="template_id" ref="investigation_template_bomb_threat"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-key</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- HAZMAT INCIDENT INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_hazmat_01" model="incident.investigation.checklist.item">
+            <field name="name">Identify the hazardous material</field>
+            <field name="description">Check SDS (Safety Data Sheets) if the substance or container is labeled.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_hazmat"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-flask</field>
+        </record>
+        <record id="checklist_hazmat_02" model="incident.investigation.checklist.item">
+            <field name="name">Define the hot/warm/cold zones</field>
+            <field name="description">Document how the exclusion zones were established and managed.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_hazmat"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-draw-polygon</field>
+        </record>
+        <record id="checklist_hazmat_03" model="incident.investigation.checklist.item">
+            <field name="name">Inspect PPE effectiveness</field>
+            <field name="description">Evaluate if responders used the correct level of protection and if it held up.</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_hazmat"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">False</field>
+            <field name="icon">fa-user-shield</field>
+        </record>
+        <record id="checklist_hazmat_04" model="incident.investigation.checklist.item">
+            <field name="name">Trace source of the leak/spill</field>
+            <field name="description">Investigate if it was due to equipment failure, poor storage, or human error.</field>
+            <field name="sequence">40</field>
+            <field name="template_id" ref="investigation_template_hazmat"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-search</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- SLIP, TRIP, AND FALL INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_slip_01" model="incident.investigation.checklist.item">
+            <field name="name">Inspect floor conditions</field>
+            <field name="description">Check for spills, loose rugs, clutter, or uneven surfaces.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_slip_trip_fall"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-wind</field>
+        </record>
+        <record id="checklist_slip_02" model="incident.investigation.checklist.item">
+            <field name="name">Check lighting levels</field>
+            <field name="description">Assess if the area was sufficiently lit at the time of the incident.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_slip_trip_fall"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-lightbulb</field>
+        </record>
+        <record id="checklist_slip_03" model="incident.investigation.checklist.item">
+            <field name="name">Verify signage presence</field>
+            <field name="description">Note if 'Wet Floor' or other warning signs were in place if needed.</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_slip_trip_fall"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-exclamation-triangle</field>
+        </record>
+        <record id="checklist_slip_04" model="incident.investigation.checklist.item">
+            <field name="name">Analyze footwear</field>
+            <field name="description">Note the type and condition of the footwear worn by the involved person.</field>
+            <field name="sequence">40</field>
+            <field name="template_id" ref="investigation_template_slip_trip_fall"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">False</field>
+            <field name="icon">fa-shoe-prints</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- EQUIPMENT MALFUNCTION INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_equipment_01" model="incident.investigation.checklist.item">
+            <field name="name">Tag and lock out equipment</field>
+            <field name="description">Ensure the equipment cannot be used until the investigation is complete.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_equipment_malfunction"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-tag</field>
+        </record>
+        <record id="checklist_equipment_02" model="incident.investigation.checklist.item">
+            <field name="name">Review maintenance records</field>
+            <field name="description">Check the last service date and any previous reported issues.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_equipment_malfunction"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-history</field>
+        </record>
+        <record id="checklist_equipment_03" model="incident.investigation.checklist.item">
+            <field name="name">Interview last operator</field>
+            <field name="description">Get details on exactly what happened and if any warnings were shown.</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_equipment_malfunction"/>
+            <field name="category">witness</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-user-cog</field>
+        </record>
+        <record id="checklist_equipment_04" model="incident.investigation.checklist.item">
+            <field name="name">Check for operator training</field>
+            <field name="description">Verify if the person using the equipment was correctly trained.</field>
+            <field name="sequence">40</field>
+            <field name="template_id" ref="investigation_template_equipment_malfunction"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-certificate</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- NEAR MISS INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_nearmiss_01" model="incident.investigation.checklist.item">
+            <field name="name">Identify potential for injury</field>
+            <field name="description">Assess 'what could have happened' and the severity level if it had.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_near_miss"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-exclamation</field>
+        </record>
+        <record id="checklist_nearmiss_02" model="incident.investigation.checklist.item">
+            <field name="name">Interview person who reported</field>
+            <field name="description">Get a first-hand account of the circumstances of the near miss.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_near_miss"/>
+            <field name="category">witness</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-comment-alt</field>
+        </record>
+        <record id="checklist_nearmiss_03" model="incident.investigation.checklist.item">
+            <field name="name">Identify uncontrolled hazard</field>
+            <field name="description">Determine which safety barrier or control measure failed or was missing.</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_near_miss"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-search-minus</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- OCCUPATIONAL HEALTH INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_health_01" model="incident.investigation.checklist.item">
+            <field name="name">Determine exposure type</field>
+            <field name="description">Identify if it's chemical, noise, ergonomic, or biological exposure.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_occupational_health"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-stethoscope</field>
+        </record>
+        <record id="checklist_health_02" model="incident.investigation.checklist.item">
+            <field name="name">Review hygiene monitoring data</field>
+            <field name="description">Check if previous monitoring had flagged the exposure level as an issue.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_occupational_health"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-chart-line</field>
+        </record>
+        <record id="checklist_health_03" model="incident.investigation.checklist.item">
+            <field name="name">Analyze ergonomic setup</field>
+            <field name="description">If ergonomic, photograph and measure the workstation layout.</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_occupational_health"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">False</field>
+            <field name="icon">fa-chair</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- PARKING INCIDENT INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_parking_01" model="incident.investigation.checklist.item">
+            <field name="name">Locate vehicles involved</field>
+            <field name="description">Identify and photograph vehicles in their current parked positions.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_parking"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-parking</field>
+        </record>
+        <record id="checklist_parking_02" model="incident.investigation.checklist.item">
+            <field name="name">Check parking permits/credentials</field>
+            <field name="description">Verify if the vehicles had authorization to be in that specific zone.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_parking"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-id-badge</field>
+        </record>
+        <record id="checklist_parking_03" model="incident.investigation.checklist.item">
+            <field name="name">Review gate/barrier logs</field>
+            <field name="description">Track entry and exit times of the involved vehicles.</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_parking"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-door-closed</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- HIT AND RUN INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_hitrun_01" model="incident.investigation.checklist.item">
+            <field name="name">Secure debris for evidence</field>
+            <field name="description">Collect broken glass, paint chips, or parts that may identify the suspect vehicle.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_hit_and_run"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-car-crash</field>
+        </record>
+        <record id="checklist_hitrun_02" model="incident.investigation.checklist.item">
+            <field name="name">BOLO for suspect vehicle</field>
+            <field name="description">Issue a 'Be On the Look Out' to all gates and patrol units with a description.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_hit_and_run"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-bullhorn</field>
+        </record>
+        <record id="checklist_hitrun_03" model="incident.investigation.checklist.item">
+            <field name="name">Canvass for additional CCTV</field>
+            <field name="description">Check neighboring business cameras or municipal cameras for path of flight.</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_hit_and_run"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-search-plus</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- POLICY VIOLATION INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_policy_01" model="incident.investigation.checklist.item">
+            <field name="name">Reference the specific policy</field>
+            <field name="description">Attach or quote the exact section of the company policy that was allegedly violated.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_policy_violation"/>
+            <field name="category">documentation</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-book</field>
+        </record>
+        <record id="checklist_policy_02" model="incident.investigation.checklist.item">
+            <field name="name">Gather proof of policy awareness</field>
+            <field name="description">Verify if the individual signed an acknowledgment or attended training on this policy.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_policy_violation"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-file-signature</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- HARASSMENT INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_harassment_01" model="incident.investigation.checklist.item">
+            <field name="name">Interview complainant in private</field>
+            <field name="description">Ensure a safe, neutral, and confidential environment for the statement.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_harassment"/>
+            <field name="category">witness</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-user-lock</field>
+        </record>
+        <record id="checklist_harassment_02" model="incident.investigation.checklist.item">
+            <field name="name">Collect digital evidence</field>
+            <field name="description">Save emails, chat logs, or social media posts related to the complaint.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_harassment"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-envelope-open-text</field>
+        </record>
+        <record id="checklist_harassment_03" model="incident.investigation.checklist.item">
+            <field name="name">Interview the respondent</field>
+            <field name="description">Present the allegations clearly and allow for a full response.</field>
+            <field name="sequence">30</field>
+            <field name="template_id" ref="investigation_template_harassment"/>
+            <field name="category">witness</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-user-shield</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- FRAUD INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_fraud_01" model="incident.investigation.checklist.item">
+            <field name="name">Secure financial records</field>
+            <field name="description">Audit receipts, invoices, or bank logs relevant to the investigation.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_fraud"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-file-invoice-dollar</field>
+        </record>
+        <record id="checklist_fraud_02" model="incident.investigation.checklist.item">
+            <field name="name">Map the fraud scheme</field>
+            <field name="description">Trace the flow of funds or resources to identify the mechanism and the beneficiary.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_fraud"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-project-diagram</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- REGULATORY COMPLIANCE INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_regulatory_01" model="incident.investigation.checklist.item">
+            <field name="name">Identify the regulatory standard</field>
+            <field name="description">State the Law, Regulation, or ISO standard that is the focus of the audit.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_regulatory"/>
+            <field name="category">documentation</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-balance-scale</field>
+        </record>
+        <record id="checklist_regulatory_02" model="incident.investigation.checklist.item">
+            <field name="name">Verify permit/license validity</field>
+            <field name="description">Check if all required certifications are current and correctly displayed.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_regulatory"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-certificate</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- WATER DAMAGE INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_water_01" model="incident.investigation.checklist.item">
+            <field name="name">Stop the source of water</field>
+            <field name="description">Verify if the leak/flood was stopped and how (e.g., valve shut off).</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_water_damage"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-tint-slash</field>
+        </record>
+        <record id="checklist_water_02" model="incident.investigation.checklist.item">
+            <field name="name">Assess electrical hazards</field>
+            <field name="description">Check if water contacted power outlets, servers, or machinery.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_water_damage"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-bolt</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- POWER OUTAGE INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_power_01" model="incident.investigation.checklist.item">
+            <field name="name">Check backup generator status</field>
+            <field name="description">Confirm if generators kicked in and which critical systems are powered.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_power_outage"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-battery-full</field>
+        </record>
+        <record id="checklist_power_02" model="incident.investigation.checklist.item">
+            <field name="name">Identify scope of outage</field>
+            <field name="description">Determine if it's site-wide, building-specific, or a single circuit.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_power_outage"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-map</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- ELEVATOR INCIDENT INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_elevator_01" model="incident.investigation.checklist.item">
+            <field name="name">Confirm passenger safety</field>
+            <field name="description">Verify if anyone was trapped and how long it took to release them.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_elevator"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-user-check</field>
+        </record>
+        <record id="checklist_elevator_02" model="incident.investigation.checklist.item">
+            <field name="name">Review elevator communication log</field>
+            <field name="description">Check the emergency phone/intercom logs from the car.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_elevator"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-phone-volume</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- HVAC SYSTEM FAILURE INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_hvac_01" model="incident.investigation.checklist.item">
+            <field name="name">Record temperature at failure</field>
+            <field name="description">Note ambient temperature in sensitive areas (e.g., server rooms).</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_hvac"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-thermometer-half</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- PHISHING ATTACK INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_phishing_01" model="incident.investigation.checklist.item">
+            <field name="name">Isolate original email</field>
+            <field name="description">Extract headers and raw content of the phishing email.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_phishing"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-mail-bulk</field>
+        </record>
+        <record id="checklist_phishing_02" model="incident.investigation.checklist.item">
+            <field name="name">Scan for link/attachment clicks</field>
+            <field name="description">Check mail server logs to see which users interacted with the email.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_phishing"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-mouse-pointer</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- MALWARE INCIDENT INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_malware_01" model="incident.investigation.checklist.item">
+            <field name="name">Isolate infected system</field>
+            <field name="description">Disconnect the system from the network to prevent lateral movement.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_malware"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-network-wired</field>
+        </record>
+        <record id="checklist_malware_02" model="incident.investigation.checklist.item">
+            <field name="name">Identify malware strain</field>
+            <field name="description">Run analysis to identify the type of malware (ransomware, trojan, etc.).</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_malware"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-biohazard</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- NETWORK INTRUSION INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_intrusion_01" model="incident.investigation.checklist.item">
+            <field name="name">Review firewall logs</field>
+            <field name="description">Identify unauthorized IPs or unusual traffic patterns.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_network_intrusion"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-firewall</field>
+        </record>
+        <record id="checklist_intrusion_02" model="incident.investigation.checklist.item">
+            <field name="name">Check for data exfiltration</field>
+            <field name="description">Determine if large amounts of data were moved out of the network.</field>
+            <field name="sequence">20</field>
+            <field name="template_id" ref="investigation_template_network_intrusion"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-file-export</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- ENVIRONMENTAL SPILL INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_env_spill_01" model="incident.investigation.checklist.item">
+            <field name="name">Confirm containment measures</field>
+            <field name="description">Verify if personal were protected and the spill was stopped from entering drains.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_environmental_spill"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-contain</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- AIR QUALITY INCIDENT INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_air_01" model="incident.investigation.checklist.item">
+            <field name="name">Check HVAC and intake filters</field>
+            <field name="description">Determine if external pollutants were drawn into the building.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_air_quality"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-wind</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- NOISE COMPLAINT INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_noise_01" model="incident.investigation.checklist.item">
+            <field name="name">Measure decibel levels</field>
+            <field name="description">Use a sound level meter at the source and at the location of the complaint.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_noise"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-volume-up</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- CUSTOMER COMPLAINT INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_customer_01" model="incident.investigation.checklist.item">
+            <field name="name">Review interaction history</field>
+            <field name="description">Check previous logs or emails involving this specific customer.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_customer_complaint"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-history</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- VISITOR INCIDENT INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_visitor_01" model="incident.investigation.checklist.item">
+            <field name="name">Check visitor sign-in log</field>
+            <field name="description">Confirm the visitor was properly registered and accompanied if required.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_visitor"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-clipboard-list</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- LOST PROPERTY INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_lost_01" model="incident.investigation.checklist.item">
+            <field name="name">Secure the lost/found item</field>
+            <field name="description">If found, place the item in a secure locker and record the ID.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_lost_property"/>
+            <field name="category">initial</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-box-open</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- GUARD MISCONDUCT INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_guard_misconduct_01" model="incident.investigation.checklist.item">
+            <field name="name">Review shift logs and bodycam</field>
+            <field name="description">Examine the guard's own report vs other evidence (CCTV, Bodycam).</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_guard_misconduct"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-user-shield</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- SHIFT HANDOVER ISSUE INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_handover_01" model="incident.investigation.checklist.item">
+            <field name="name">Inspect handover logbook</field>
+            <field name="description">Verify if the specific issue was documented during the shift change.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_shift_handover"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-exchange-alt</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- COMMUNICATION BREAKDOWN INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_comm_01" model="incident.investigation.checklist.item">
+            <field name="name">Test communication equipment</field>
+            <field name="description">Perform radio checks and verify internet/phone connectivity.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_communication"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-wifi</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- EMERGENCY RESPONSE FAILURE INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_resp_fail_01" model="incident.investigation.checklist.item">
+            <field name="name">Compare response time vs SLA</field>
+            <field name="description">Analyze the time from alarm/notification to physical arrival.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_emergency_response"/>
+            <field name="category">analysis</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-stopwatch</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- SLA BREACH INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_sla_01" model="incident.investigation.checklist.item">
+            <field name="name">Identify target KPI</field>
+            <field name="description">Specify which contract KPI was breached (arrival time, report submisson, etc.).</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_sla_breach"/>
+            <field name="category">documentation</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-clock</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- CONTRACTOR SAFETY INCIDENT INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_contractor_01" model="incident.investigation.checklist.item">
+            <field name="name">Verify contractor RAMS</field>
+            <field name="description">Check Task Specific Risk Assessment and Method Statements.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_contractor_safety"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-clipboard-check</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- ALARM SYSTEM MALFUNCTION INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_alarm_fail_01" model="incident.investigation.checklist.item">
+            <field name="name">Download alarm panel history</field>
+            <field name="description">Review the internal memory of the alarm panel for error codes.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_alarm_malfunction"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-memory</field>
+        </record>
+
+        <!-- ========================================== -->
+        <!-- CCTV SYSTEM FAILURE INVESTIGATION CHECKLIST -->
+        <!-- ========================================== -->
+        <record id="checklist_cctv_fail_01" model="incident.investigation.checklist.item">
+            <field name="name">Check NVR/DVR recording status</field>
+            <field name="description">Verify if the storage was full, failing, or disconnected.</field>
+            <field name="sequence">10</field>
+            <field name="template_id" ref="investigation_template_cctv_failure"/>
+            <field name="category">evidence</field>
+            <field name="is_mandatory">True</field>
+            <field name="icon">fa-hdd</field>
+        </record>
+
+    </data>
+</odoo>

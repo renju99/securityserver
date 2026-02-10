@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Attendance Report PDF Template -->
+    <template id="attendance_report_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h2 class="text-center">
+                                    <strong>ATTENDANCE REPORT</strong>
+                                </h2>
+                                <h4 class="text-center text-muted">
+                                    <span t-field="doc.name"/>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <div class="row mb-3">
+                            <div class="col-12 text-center">
+                                <span class="badge badge-pill" 
+                                      t-att-class="{'badge-success': doc.state == 'checked_out',
+                                                    'badge-primary': doc.state == 'checked_in',
+                                                    'badge-secondary': doc.state == 'draft'}">
+                                    <t t-esc="doc.state.replace('_', ' ').upper()"/>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Attendance Information -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4><strong>Attendance Details</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="25%"><strong>Guard:</strong></td>
+                                        <td width="75%"><span t-field="doc.guard_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Site:</strong></td>
+                                        <td><span t-field="doc.site_id.name"/></td>
+                                    </tr>
+                                    <tr t-if="doc.shift_id">
+                                        <td><strong>Shift:</strong></td>
+                                        <td><span t-field="doc.shift_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Date:</strong></td>
+                                        <td><span t-field="doc.check_in" t-options='{"widget": "date"}'/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Check-in Information -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4><strong>Check-in Details</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="25%"><strong>Check-in Time:</strong></td>
+                                        <td width="75%"><span t-field="doc.check_in" t-options='{"widget": "datetime"}'/></td>
+                                    </tr>
+                                    <tr t-if="doc.checkin_method">
+                                        <td><strong>Check-in Method:</strong></td>
+                                        <td>
+                                            <span class="badge badge-info">
+                                                <t t-esc="doc.checkin_method.upper()"/>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="doc.checkin_latitude">
+                                        <td><strong>Check-in Location:</strong></td>
+                                        <td><t t-esc="doc.checkin_latitude"/>, <t t-esc="doc.checkin_longitude"/></td>
+                                    </tr>
+                                    <tr t-if="doc.checkin_address">
+                                        <td><strong>Check-in Address:</strong></td>
+                                        <td><span t-field="doc.checkin_address"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Check-out Information -->
+                        <div class="row mb-3" t-if="doc.check_out">
+                            <div class="col-12">
+                                <h4><strong>Check-out Details</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="25%"><strong>Check-out Time:</strong></td>
+                                        <td width="75%"><span t-field="doc.check_out" t-options='{"widget": "datetime"}'/></td>
+                                    </tr>
+                                    <tr t-if="doc.checkout_method">
+                                        <td><strong>Check-out Method:</strong></td>
+                                        <td>
+                                            <span class="badge badge-info">
+                                                <t t-esc="doc.checkout_method.upper()"/>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="doc.checkout_latitude">
+                                        <td><strong>Check-out Location:</strong></td>
+                                        <td><t t-esc="doc.checkout_latitude"/>, <t t-esc="doc.checkout_longitude"/></td>
+                                    </tr>
+                                    <tr t-if="doc.checkout_address">
+                                        <td><strong>Check-out Address:</strong></td>
+                                        <td><span t-field="doc.checkout_address"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Working Hours -->
+                        <div class="row mb-3" t-if="doc.worked_hours">
+                            <div class="col-12">
+                                <h4><strong>Working Hours</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="25%"><strong>Total Hours:</strong></td>
+                                        <td width="75%"><t t-esc="'%.2f hours' % doc.worked_hours"/></td>
+                                    </tr>
+                                    <tr t-if="doc.overtime_hours">
+                                        <td><strong>Overtime Hours:</strong></td>
+                                        <td><t t-esc="'%.2f hours' % doc.overtime_hours"/></td>
+                                    </tr>
+                                    <tr t-if="doc.break_duration">
+                                        <td><strong>Break Duration:</strong></td>
+                                        <td><t t-esc="'%.2f hours' % doc.break_duration"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Attendance Status -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4><strong>Status Information</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <tr t-if="doc.is_late">
+                                        <td width="25%"><strong>Late Arrival:</strong></td>
+                                        <td width="75%">
+                                            <span class="badge badge-warning">Yes</span>
+                                            <span t-if="doc.late_duration"> - <t t-esc="doc.late_duration"/> minutes late</span>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="doc.is_early_departure">
+                                        <td><strong>Early Departure:</strong></td>
+                                        <td>
+                                            <span class="badge badge-warning">Yes</span>
+                                            <span t-if="doc.early_departure_duration"> - <t t-esc="doc.early_departure_duration"/> minutes early</span>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="doc.is_absent">
+                                        <td><strong>Absent:</strong></td>
+                                        <td><span class="badge badge-danger">Yes</span></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Activities During Shift -->
+                        <div class="row mb-3" t-if="doc.tour_log_ids">
+                            <div class="col-12">
+                                <h4><strong>Tour Logs</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Tour</th>
+                                            <th>Start Time</th>
+                                            <th>End Time</th>
+                                            <th>Status</th>
+                                            <th>Completion</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="doc.tour_log_ids" t-as="log">
+                                            <td><span t-field="log.tour_id.name"/></td>
+                                            <td><span t-field="log.start_time" t-options='{"widget": "datetime"}'/></td>
+                                            <td><span t-field="log.end_time" t-options='{"widget": "datetime"}'/></td>
+                                            <td>
+                                                <span class="badge" 
+                                                      t-att-class="{'badge-success': log.status == 'completed',
+                                                                    'badge-primary': log.status == 'in_progress',
+                                                                    'badge-warning': log.status == 'incomplete'}">
+                                                    <t t-esc="log.status"/>
+                                                </span>
+                                            </td>
+                                            <td><t t-esc="'%.0f%%' % log.completion_percentage"/></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Incidents Reported -->
+                        <div class="row mb-3" t-if="doc.incident_ids">
+                            <div class="col-12">
+                                <h4><strong>Incidents Reported</strong></h4>
+                                <table class="table table-bordered table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Incident #</th>
+                                            <th>Title</th>
+                                            <th>Category</th>
+                                            <th>Severity</th>
+                                            <th>Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="doc.incident_ids" t-as="incident">
+                                            <td><span t-field="incident.name"/></td>
+                                            <td><span t-field="incident.title"/></td>
+                                            <td><span t-field="incident.category_id.name"/></td>
+                                            <td>
+                                                <span class="badge" 
+                                                      t-att-class="{'badge-danger': incident.severity in ['high', 'critical'],
+                                                                    'badge-warning': incident.severity == 'medium',
+                                                                    'badge-info': incident.severity == 'low'}">
+                                                    <t t-esc="incident.severity"/>
+                                                </span>
+                                            </td>
+                                            <td><span t-field="incident.incident_datetime" t-options='{"widget": "datetime"}'/></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="row mb-3" t-if="doc.notes">
+                            <div class="col-12">
+                                <h4><strong>Notes</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.notes"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer with signature line -->
+                        <div class="row mt-5">
+                            <div class="col-6">
+                                <p>__________________________<br/>
+                                   Guard Signature
+                                </p>
+                            </div>
+                            <div class="col-6">
+                                <p>__________________________<br/>
+                                   Supervisor Signature
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Action -->
+    <record id="action_report_attendance" model="ir.actions.report">
+        <field name="name">Attendance Report</field>
+        <field name="model">guard.attendance</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.attendance_report_pdf_template</field>
+        <field name="report_file">guardpro.attendance_report_pdf_template</field>
+        <field name="print_report_name">'Attendance_Report_%s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_guard_attendance"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>
+

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="lost_item_001" model="lost.found.item">
+            <field name="item_category">electronics</field>
+            <field name="description">Black Samsung smartphone with blue protective case, found near pool area</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="location_found">Swimming Pool - Changing Room 3</field>
+            <field name="found_date">2025-10-15 11:30:00</field>
+            <field name="guard_logged_by" ref="guard_sarah_johnson"/>
+            <field name="storage_location">Security Office - Shelf A1</field>
+        </record>
+
+        <record id="lost_item_002" model="lost.found.item">
+            <field name="item_category">wallet</field>
+            <field name="description">Brown leather wallet containing credit cards and ID documents</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="location_found">Parking Level 2 - Near Elevator B</field>
+            <field name="found_date">2025-10-15 09:15:00</field>
+            <field name="guard_logged_by" ref="guard_john_smith"/>
+            <field name="storage_location">Security Office - Safe</field>
+        </record>
+
+        <record id="lost_item_003" model="lost.found.item">
+            <field name="item_category">keys</field>
+            <field name="description">Set of house keys with Toyota key fob and blue keychain</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="location_found">Playground Area - Bench 3</field>
+            <field name="found_date">2025-10-14 15:45:00</field>
+            <field name="guard_logged_by" ref="guard_david_wilson"/>
+            <field name="storage_location">Security Office - Key Cabinet</field>
+        </record>
+
+        <record id="lost_item_004" model="lost.found.item">
+            <field name="item_category">clothing</field>
+            <field name="description">Children's red jacket - Size 8, Nike brand with name tag</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="location_found">Children's Play Area - Slide equipment</field>
+            <field name="found_date">2025-10-15 17:00:00</field>
+            <field name="guard_logged_by" ref="guard_emily_davis"/>
+            <field name="storage_location">Security Office - Lost and Found Box</field>
+        </record>
+    </data>
+</odoo>

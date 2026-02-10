@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- eLearning Tag Groups -->
+        <record id="elearning_tag_group_guardpro" model="slide.channel.tag.group">
+            <field name="name">GuardPro</field>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="elearning_tag_group_operations" model="slide.channel.tag.group">
+            <field name="name">Operations</field>
+            <field name="sequence">20</field>
+        </record>
+
+        <!-- eLearning Categories/Tags -->
+        <record id="elearning_category_guardpro" model="slide.channel.tag">
+            <field name="name">GuardPro Training</field>
+            <field name="group_id" ref="elearning_tag_group_guardpro"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="elearning_category_security" model="slide.channel.tag">
+            <field name="name">Security Operations</field>
+            <field name="group_id" ref="elearning_tag_group_operations"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <!-- Course 1: GuardPro Fundamentals -->
+        <record id="elearning_course_fundamentals" model="slide.channel">
+            <field name="name">GuardPro Fundamentals</field>
+            <field name="description">Comprehensive introduction to GuardPro Security Management System for all users.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">2</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_guardpro')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">basic</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">80</field>
+        </record>
+
+        <!-- Course 2: Security Guard Field Operations -->
+        <record id="elearning_course_guard_operations" model="slide.channel">
+            <field name="name">Security Guard Field Operations</field>
+            <field name="description">Essential field operations training for security guards including mobile app, incident reporting, and tours.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">3</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_guardpro'), ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">basic</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">80</field>
+        </record>
+
+        <!-- Course 3: Supervisor Operations Management -->
+        <record id="elearning_course_supervisor_ops" model="slide.channel">
+            <field name="name">Supervisor Operations Management</field>
+            <field name="description">Comprehensive training for site supervisors on shift management, incident investigation, and daily operations.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">4</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_guardpro'), ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">advanced</field>
+            <field name="is_mandatory_for_guards" eval="False"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">85</field>
+        </record>
+
+        <!-- Course 4: Basic Security Training -->
+        <record id="elearning_course_basic_security" model="slide.channel">
+            <field name="name">Basic Security Training</field>
+            <field name="description">Fundamental security principles, duties, and responsibilities for all security guards.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">3</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">basic</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">80</field>
+        </record>
+
+        <!-- Course 5: Emergency Response & Procedures -->
+        <record id="elearning_course_emergency_response" model="slide.channel">
+            <field name="name">Emergency Response &amp; Procedures</field>
+            <field name="description">Emergency protocols, evacuation procedures, and crisis management for security personnel.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">2.5</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">emergency</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">85</field>
+        </record>
+
+        <!-- Course 6: Fire Safety & Prevention -->
+        <record id="elearning_course_fire_safety" model="slide.channel">
+            <field name="name">Fire Safety &amp; Prevention</field>
+            <field name="description">Fire prevention, detection, and response training for security guards.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">2</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">safety</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">85</field>
+        </record>
+
+        <!-- Course 7: First Aid & CPR -->
+        <record id="elearning_course_first_aid" model="slide.channel">
+            <field name="name">First Aid &amp; CPR</field>
+            <field name="description">Basic first aid and CPR training for security personnel to handle medical emergencies.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">3</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">safety</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">24</field>
+            <field name="minimum_passing_score">85</field>
+        </record>
+
+        <!-- Course 8: Conflict Resolution & De-escalation -->
+        <record id="elearning_course_conflict_resolution" model="slide.channel">
+            <field name="name">Conflict Resolution &amp; De-escalation</field>
+            <field name="description">Techniques for managing conflicts, de-escalating situations, and maintaining professional composure.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">2</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">basic</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">80</field>
+        </record>
+
+        <!-- Course 9: Customer Service for Security Guards -->
+        <record id="elearning_course_customer_service" model="slide.channel">
+            <field name="name">Customer Service for Security Guards</field>
+            <field name="description">Professional customer service skills, communication, and public relations for security personnel.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">1.5</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">customer_service</field>
+            <field name="is_mandatory_for_guards" eval="False"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">75</field>
+        </record>
+
+        <!-- Course 10: Legal & Compliance Training -->
+        <record id="elearning_course_legal_compliance" model="slide.channel">
+            <field name="name">Legal &amp; Compliance Training</field>
+            <field name="description">Legal responsibilities, rights, and compliance requirements for security guards.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">2.5</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">legal</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">85</field>
+        </record>
+
+        <!-- Course 11: Patrol & Observation Techniques -->
+        <record id="elearning_course_patrol_techniques" model="slide.channel">
+            <field name="name">Patrol &amp; Observation Techniques</field>
+            <field name="description">Effective patrolling methods, observation skills, and security awareness for guards.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">2</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">basic</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">80</field>
+        </record>
+
+        <!-- Course 12: Report Writing & Documentation -->
+        <record id="elearning_course_report_writing" model="slide.channel">
+            <field name="name">Report Writing &amp; Documentation</field>
+            <field name="description">Professional report writing, incident documentation, and record-keeping for security personnel.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">1.5</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">basic</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">80</field>
+        </record>
+
+        <!-- Course 13: SIRA Compliance & Dubai Security Regulations -->
+        <record id="elearning_course_sira_compliance" model="slide.channel">
+            <field name="name">SIRA Compliance &amp; Dubai Security Regulations</field>
+            <field name="description">Comprehensive training on SIRA licensing requirements, UAE security laws, and Dubai-specific security regulations for professional guards.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">4</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">legal</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">90</field>
+        </record>
+
+        <!-- Course 14: UAE Culture & Professional Conduct -->
+        <record id="elearning_course_uae_culture" model="slide.channel">
+            <field name="name">UAE Culture &amp; Professional Conduct</field>
+            <field name="description">Cultural awareness training for Dubai-based security personnel including Islamic practices, Arabic language basics, and multicultural service excellence.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">3</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">customer_service</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">24</field>
+            <field name="minimum_passing_score">85</field>
+        </record>
+
+        <!-- Course 15: Dubai Security Operations & Site-Specific Procedures -->
+        <record id="elearning_course_dubai_operations" model="slide.channel">
+            <field name="name">Dubai Security Operations &amp; Site-Specific Procedures</field>
+            <field name="description">Site-specific security procedures for Dubai operations including mall security, residential communities, commercial buildings, events, and climate considerations.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">4.5</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">specialized</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">85</field>
+        </record>
+
+        <!-- Course 16: Advanced Security Operations & Technology -->
+        <record id="elearning_course_advanced_operations" model="slide.channel">
+            <field name="name">Advanced Security Operations &amp; Technology</field>
+            <field name="description">Advanced training in modern security technology including CCTV systems, access control, alarms, close protection, and cybersecurity for experienced guards.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">5</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">advanced</field>
+            <field name="is_mandatory_for_guards" eval="False"/>
+            <field name="certification_validity_months">24</field>
+            <field name="minimum_passing_score">85</field>
+        </record>
+
+        <!-- Course 17: UAE Security Guard Licensing Requirements -->
+        <record id="elearning_course_uae_licensing" model="slide.channel">
+            <field name="name">UAE Security Guard Licensing Requirements</field>
+            <field name="description">Comprehensive training on UAE security guard licensing, SIRA certification requirements, training mandates, and professional qualification standards.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">3.5</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">legal</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">85</field>
+        </record>
+
+        <!-- Course 18: Dubai Police Security Regulations -->
+        <record id="elearning_course_dubai_police_regs" model="slide.channel">
+            <field name="name">Dubai Police Security Regulations</field>
+            <field name="description">Detailed training on Dubai Police security directives, law enforcement coordination procedures, emergency reporting protocols, and police-guard collaboration standards.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">2.5</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">legal</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">85</field>
+        </record>
+
+        <!-- Course 19: UAE Labor Law for Security Personnel -->
+        <record id="elearning_course_uae_labor_law" model="slide.channel">
+            <field name="name">UAE Labor Law for Security Personnel</field>
+            <field name="description">Essential training on UAE Federal Labor Law, employment rights, working hours, leave entitlements, termination procedures, and labor dispute resolution for security guards.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">3</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">legal</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">24</field>
+            <field name="minimum_passing_score">80</field>
+        </record>
+
+        <!-- Course 20: UAE Penal Code & Security Responsibilities -->
+        <record id="elearning_course_uae_penal_code" model="slide.channel">
+            <field name="name">UAE Penal Code &amp; Security Responsibilities</field>
+            <field name="description">Comprehensive training on UAE Penal Code provisions relevant to security guards, criminal liabilities, evidence handling, arrest procedures, and legal boundaries of security authority.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">4</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">legal</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">90</field>
+        </record>
+
+        <!-- Course 21: UAE Commercial Security Standards -->
+        <record id="elearning_course_uae_commercial_security" model="slide.channel">
+            <field name="name">UAE Commercial Security Standards</field>
+            <field name="description">Specialized training on security standards for UAE commercial facilities including malls, offices, hotels, banks, and retail establishments with specific regulatory requirements.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">3.5</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">specialized</field>
+            <field name="is_mandatory_for_guards" eval="False"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">85</field>
+        </record>
+
+        <!-- Course 22: UAE Residential Security Regulations -->
+        <record id="elearning_course_uae_residential_security" model="slide.channel">
+            <field name="name">UAE Residential Security Regulations</field>
+            <field name="description">Comprehensive training on security standards for UAE residential communities, villas, apartments, and housing complexes including DMCC, Dubai Marina, and free zone residential regulations.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">3</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">specialized</field>
+            <field name="is_mandatory_for_guards" eval="False"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">85</field>
+        </record>
+
+    </data>
+</odoo>
+

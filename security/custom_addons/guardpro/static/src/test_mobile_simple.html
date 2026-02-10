@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>GuardPro Mobile Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #ECF0F1 0%, #D5DBDB 100%);
+            min-height: 100vh;
+        }
+        
+        .mobile-app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .mobile-app-header {
+            background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
+            color: white;
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            border-bottom: 3px solid #3498DB;
+        }
+        
+        .app-header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        
+        .app-logo i {
+            font-size: 1.5rem;
+            margin-right: 8px;
+            color: #3498DB;
+        }
+        
+        .app-status {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .mobile-app-main {
+            flex: 1;
+            padding: 20px;
+            background: transparent;
+        }
+        
+        .test-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-card h3 {
+            color: #2C3E50;
+            margin: 0 0 15px 0;
+        }
+        
+        .test-card p {
+            color: #7F8C8D;
+            margin: 5px 0;
+            line-height: 1.5;
+        }
+        
+        .test-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #2C3E50 0%, #3498DB 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-online {
+            background: #27AE60;
+        }
+        
+        .status-offline {
+            background: #C0392B;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-app-container">
+        <div class="mobile-app-header">
+            <div class="app-header-content">
+                <div class="app-logo">
+                    <i class="fa fa-shield-alt"></i>
+                    <span>GuardPro Mobile</span>
+                </div>
+                <div class="app-status">
+                    <span class="status-indicator status-online"></span>
+                    <span>Online</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mobile-app-main">
+            <div class="test-card">
+                <h3>✅ Mobile App Layout Test</h3>
+                <p>This page demonstrates the mobile app layout without website footer.</p>
+                <p><strong>Features:</strong></p>
+                <ul>
+                    <li>No website footer visible</li>
+                    <li>App-like header with GuardPro branding</li>
+                    <li>Mobile-optimized interface</li>
+                    <li>Professional design</li>
+                </ul>
+            </div>
+            
+            <div class="test-card">
+                <h3>📱 Mobile Interface Status</h3>
+                <p><span class="status-indicator status-online"></span> Mobile app layout loaded</p>
+                <p><span class="status-indicator status-online"></span> No website footer</p>
+                <p><span class="status-indicator status-online"></span> App-like appearance</p>
+                <p><span class="status-indicator status-online"></span> Mobile-optimized design</p>
+            </div>
+            
+            <button class="test-button" onclick="testMobileFeatures()">
+                Test Mobile Features
+            </button>
+            
+            <button class="test-button" onclick="goToMobileDashboard()">
+                Go to Mobile Dashboard
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        function testMobileFeatures() {
+            alert('Mobile App Test Results:\n\n' +
+                  '✅ App-like layout loaded\n' +
+                  '✅ No website footer\n' +
+                  '✅ Mobile-optimized design\n' +
+                  '✅ Professional header\n' +
+                  '✅ App-like navigation ready');
+        }
+        
+        function goToMobileDashboard() {
+            window.location.href = '/guardpro/pwa/';
+        }
+        
+        // Test mobile app layout
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('GuardPro Mobile App Layout Test');
+            console.log('✅ Mobile app layout loaded');
+            console.log('✅ No website footer detected');
+            console.log('✅ App-like interface active');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- SOP Report Action -->
+    <record id="action_report_sop" model="ir.actions.report">
+        <field name="name">Standard Operating Procedure</field>
+        <field name="model">knowledge.sop</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.report_sop_document</field>
+        <field name="report_file">guardpro.report_sop_document</field>
+        <field name="binding_model_id" ref="model_knowledge_sop"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'SOP-%s' % (object.code or object.name)</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <!-- SOP Report Template -->
+    <template id="report_sop_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <!-- Header -->
+                        <div class="text-center" style="border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
+                            <h2 style="margin: 0; color: #2c3e50;">
+                                <strong>STANDARD OPERATING PROCEDURE</strong>
+                            </h2>
+                            <h3 style="margin: 5px 0; color: #34495e;">
+                                <t t-esc="o.name"/>
+                            </h3>
+                        </div>
+
+                        <!-- Document Info Bar -->
+                        <div style="background-color: #ecf0f1; padding: 10px; margin-bottom: 15px; border-left: 4px solid #3498db;">
+                            <table style="width: 100%; font-size: 11px;">
+                                <tr>
+                                    <td style="width: 25%;"><strong>SOP Code:</strong> <t t-esc="o.code"/></td>
+                                    <td style="width: 25%;"><strong>Status:</strong> 
+                                        <span t-if="o.state == 'approved'" style="color: #27ae60; font-weight: bold;">APPROVED</span>
+                                        <span t-elif="o.state == 'review'" style="color: #f39c12; font-weight: bold;">UNDER REVIEW</span>
+                                        <span t-elif="o.state == 'draft'" style="color: #95a5a6; font-weight: bold;">DRAFT</span>
+                                        <span t-else="" style="color: #7f8c8d; font-weight: bold;">ARCHIVED</span>
+                                    </td>
+                                    <td style="width: 25%;"><strong>Risk Level:</strong> 
+                                        <span t-if="o.risk_level == 'critical'" style="color: #c0392b; font-weight: bold;">CRITICAL</span>
+                                        <span t-elif="o.risk_level == 'high'" style="color: #e74c3c; font-weight: bold;">HIGH</span>
+                                        <span t-elif="o.risk_level == 'medium'" style="color: #f39c12; font-weight: bold;">MEDIUM</span>
+                                        <span t-else="" style="color: #27ae60; font-weight: bold;">LOW</span>
+                                    </td>
+                                    <td style="width: 25%;"><strong>SIRA:</strong> 
+                                        <span t-if="o.is_sira_compliant" style="color: #27ae60; font-weight: bold;">✓ COMPLIANT</span>
+                                        <span t-else="">N/A</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Objective and Scope -->
+                        <div style="margin-bottom: 15px; page-break-inside: avoid;">
+                            <div t-if="o.objective" style="margin-bottom: 10px; page-break-inside: avoid;">
+                                <h4 style="background-color: #34495e; color: white; padding: 5px 10px; margin: 0; page-break-after: avoid;">
+                                    <i class="fa fa-bullseye"/> OBJECTIVE
+                                </h4>
+                                <div style="padding: 10px; border: 1px solid #bdc3c7; border-top: none;">
+                                    <p style="margin: 0; line-height: 1.6;"><t t-esc="o.objective"/></p>
+                                </div>
+                            </div>
+
+                            <div t-if="o.scope" style="margin-bottom: 10px; page-break-inside: avoid;">
+                                <h4 style="background-color: #34495e; color: white; padding: 5px 10px; margin: 0; page-break-after: avoid;">
+                                    <i class="fa fa-map-marker"/> SCOPE
+                                </h4>
+                                <div style="padding: 10px; border: 1px solid #bdc3c7; border-top: none;">
+                                    <p style="margin: 0; line-height: 1.6;"><t t-esc="o.scope"/></p>
+                                </div>
+                            </div>
+
+                            <!-- Additional Info -->
+                            <table style="width: 100%; font-size: 10px; margin-top: 10px;">
+                                <tr>
+                                    <td t-if="o.sira_category" style="width: 50%; padding: 5px;">
+                                        <strong>SIRA Category:</strong> 
+                                        <t t-if="o.sira_category == 'access_control'">Access Control</t>
+                                        <t t-elif="o.sira_category == 'patrol'">Patrol &amp; Monitoring</t>
+                                        <t t-elif="o.sira_category == 'incident'">Incident Response</t>
+                                        <t t-elif="o.sira_category == 'emergency'">Emergency Procedures</t>
+                                        <t t-elif="o.sira_category == 'reporting'">Reporting Requirements</t>
+                                        <t t-elif="o.sira_category == 'customer_service'">Customer Service</t>
+                                        <t t-elif="o.sira_category == 'equipment'">Equipment Handling</t>
+                                        <t t-elif="o.sira_category == 'communication'">Communication Protocols</t>
+                                    </td>
+                                    <td t-if="o.requires_training and o.training_duration" style="width: 50%; padding: 5px;">
+                                        <strong>Training Duration:</strong> <t t-esc="o.training_duration"/> hours
+                                    </td>
+                                </tr>
+                                <tr t-if="o.approved_by and o.approved_date">
+                                    <td style="padding: 5px;" colspan="2">
+                                        <strong>Approved By:</strong> <t t-esc="o.approved_by.name"/> on <t t-esc="o.approved_date"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Procedure Steps -->
+                        <div t-if="o.step_ids" style="margin-bottom: 15px; page-break-before: auto;">
+                            <h4 style="background-color: #2980b9; color: white; padding: 5px 10px; margin: 0; page-break-after: avoid;">
+                                <i class="fa fa-list-ol"/> PROCEDURE STEPS
+                            </h4>
+                            <div style="border: 1px solid #bdc3c7; border-top: none;">
+                                <t t-foreach="o.step_ids" t-as="step">
+                                    <div style="padding: 10px; border-bottom: 1px solid #ecf0f1; page-break-inside: avoid; page-break-after: auto;">
+                                        <!-- Step Header -->
+                                        <div style="background-color: #f8f9fa; padding: 8px; margin-bottom: 8px; border-left: 4px solid #3498db;">
+                                            <table style="width: 100%;">
+                                                <tr>
+                                                    <td style="width: 70%;">
+                                                        <strong style="font-size: 12px;">
+                                                            STEP <t t-esc="step.sequence"/>: <t t-esc="step.name"/>
+                                                        </strong>
+                                                    </td>
+                                                    <td style="width: 30%; text-align: right; font-size: 10px;">
+                                                        <span t-if="step.is_critical" style="background-color: #e74c3c; color: white; padding: 2px 8px; border-radius: 3px; font-weight: bold;">
+                                                            ⚠ CRITICAL
+                                                        </span>
+                                                        <span t-if="step.expected_duration" style="color: #7f8c8d; margin-left: 5px;">
+                                                            <i class="fa fa-clock-o"/> <t t-esc="int(step.expected_duration)"/> min
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+
+                                        <!-- Step Instructions -->
+                                        <div style="padding-left: 10px; font-size: 11px; line-height: 1.6;">
+                                            <t t-raw="step.description"/>
+                                        </div>
+
+                                        <!-- Safety Note -->
+                                        <div t-if="step.safety_note" style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 8px; margin-top: 8px; font-size: 10px;">
+                                            <strong style="color: #856404;"><i class="fa fa-warning"/> SAFETY NOTE:</strong>
+                                            <span style="color: #856404;"><t t-esc="step.safety_note"/></span>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Checklist -->
+                        <div t-if="o.checklist_ids" style="margin-bottom: 15px; page-break-before: auto;">
+                            <h4 style="background-color: #27ae60; color: white; padding: 5px 10px; margin: 0; page-break-after: avoid;">
+                                <i class="fa fa-check-square-o"/> CHECKLIST
+                            </h4>
+                            <table style="width: 100%; border: 1px solid #bdc3c7; border-top: none; font-size: 11px;">
+                                <thead style="background-color: #ecf0f1;">
+                                    <tr>
+                                        <th style="padding: 8px; border-bottom: 1px solid #bdc3c7; text-align: left; width: 5%;">☐</th>
+                                        <th style="padding: 8px; border-bottom: 1px solid #bdc3c7; text-align: left; width: 55%;">Checklist Item</th>
+                                        <th style="padding: 8px; border-bottom: 1px solid #bdc3c7; text-align: center; width: 20%;">Category</th>
+                                        <th style="padding: 8px; border-bottom: 1px solid #bdc3c7; text-align: center; width: 20%;">Mandatory</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="o.checklist_ids" t-as="item">
+                                        <tr style="border-bottom: 1px solid #ecf0f1;">
+                                            <td style="padding: 8px; text-align: center; font-size: 16px;">☐</td>
+                                            <td style="padding: 8px;"><t t-esc="item.name"/></td>
+                                            <td style="padding: 8px; text-align: center; text-transform: capitalize;">
+                                                <t t-esc="item.category.replace('_', ' ')"/>
+                                            </td>
+                                            <td style="padding: 8px; text-align: center;">
+                                                <span t-if="item.is_mandatory" style="color: #27ae60; font-weight: bold;">✓ YES</span>
+                                                <span t-else="" style="color: #95a5a6;">No</span>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Footer Info -->
+                        <div style="margin-top: 30px; padding-top: 10px; border-top: 2px solid #bdc3c7; font-size: 9px; color: #7f8c8d;">
+                            <table style="width: 100%;">
+                                <tr>
+                                    <td style="width: 50%;">
+                                        <strong>Document ID:</strong> <t t-esc="o.code or 'N/A'"/>
+                                    </td>
+                                    <td style="width: 50%; text-align: right;">
+                                        <strong>Print Date:</strong> <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="padding-top: 5px;">
+                                        <em>This is a controlled document. Printed copies are uncontrolled and may be outdated. Always verify you have the latest version.</em>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Compact SOP Report for Field Use -->
+    <record id="action_report_sop_compact" model="ir.actions.report">
+        <field name="name">SOP - Compact (Field Reference)</field>
+        <field name="model">knowledge.sop</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.report_sop_compact</field>
+        <field name="report_file">guardpro.report_sop_compact</field>
+        <field name="binding_model_id" ref="model_knowledge_sop"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'SOP-Compact-%s' % (object.code or object.name)</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <!-- Compact Template - Optimized for field use -->
+    <template id="report_sop_compact">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <div class="page" style="font-family: Arial, sans-serif; font-size: 10px;">
+                        <!-- Compact Header -->
+                        <div style="background-color: #2c3e50; color: white; padding: 8px; text-align: center; margin-bottom: 10px;">
+                            <h3 style="margin: 0; font-size: 14px;"><t t-esc="o.name"/></h3>
+                            <div style="font-size: 11px; margin-top: 3px;">
+                                <strong><t t-esc="o.code"/></strong>
+                                <span t-if="o.is_sira_compliant" style="margin-left: 10px; background-color: #27ae60; padding: 2px 6px; border-radius: 3px;">SIRA</span>
+                                <span t-if="o.risk_level == 'critical'" style="margin-left: 5px; background-color: #e74c3c; padding: 2px 6px; border-radius: 3px;">CRITICAL</span>
+                                <span t-elif="o.risk_level == 'high'" style="margin-left: 5px; background-color: #f39c12; padding: 2px 6px; border-radius: 3px;">HIGH RISK</span>
+                            </div>
+                        </div>
+
+                        <!-- Quick Info -->
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 9px;">
+                            <tr style="background-color: #ecf0f1;">
+                                <td style="padding: 4px; border: 1px solid #bdc3c7; width: 50%;"><strong>Objective:</strong></td>
+                                <td style="padding: 4px; border: 1px solid #bdc3c7; width: 50%;"><t t-esc="o.objective"/></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 4px; border: 1px solid #bdc3c7;"><strong>Scope:</strong></td>
+                                <td style="padding: 4px; border: 1px solid #bdc3c7;"><t t-esc="o.scope"/></td>
+                            </tr>
+                        </table>
+
+                        <!-- Steps - Compact Format -->
+                        <div t-if="o.step_ids" style="page-break-before: auto;">
+                            <h4 style="background-color: #34495e; color: white; padding: 4px 8px; margin: 0 0 5px 0; font-size: 11px; page-break-after: avoid;">
+                                STEPS
+                            </h4>
+                            <t t-foreach="o.step_ids" t-as="step">
+                                <div style="margin-bottom: 8px; padding: 6px; border: 1px solid #ddd; border-radius: 3px; page-break-inside: avoid; page-break-after: auto;">
+                                    <div style="background-color: #f8f9fa; padding: 4px; margin-bottom: 4px; font-weight: bold; font-size: 10px;">
+                                        <span style="background-color: #3498db; color: white; padding: 2px 6px; border-radius: 3px; margin-right: 5px;">
+                                            <t t-esc="step.sequence"/>
+                                        </span>
+                                        <t t-esc="step.name"/>
+                                        <span t-if="step.is_critical" style="float: right; color: #e74c3c; font-size: 9px;">⚠ CRITICAL</span>
+                                    </div>
+                                    <div style="font-size: 9px; line-height: 1.4; padding-left: 8px;">
+                                        <t t-raw="step.description"/>
+                                    </div>
+                                    <div t-if="step.safety_note" style="background-color: #fff3cd; padding: 4px; margin-top: 4px; font-size: 8px; border-left: 3px solid #ffc107;">
+                                        <strong>⚠ SAFETY:</strong> <t t-esc="step.safety_note"/>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+
+                        <!-- Checklist - Compact -->
+                        <div t-if="o.checklist_ids" style="margin-top: 10px; page-break-before: auto;">
+                            <h4 style="background-color: #27ae60; color: white; padding: 4px 8px; margin: 0 0 5px 0; font-size: 11px; page-break-after: avoid;">
+                                CHECKLIST
+                            </h4>
+                            <table style="width: 100%; font-size: 9px; border-collapse: collapse;">
+                                <t t-foreach="o.checklist_ids" t-as="item">
+                                    <tr style="border-bottom: 1px solid #ecf0f1;">
+                                        <td style="width: 5%; padding: 3px; text-align: center;">☐</td>
+                                        <td style="width: 75%; padding: 3px;"><t t-esc="item.name"/></td>
+                                        <td style="width: 20%; padding: 3px; text-align: right; font-size: 8px; color: #7f8c8d;">
+                                            <t t-esc="item.category.replace('_', ' ')"/>
+                                            <span t-if="item.is_mandatory" style="color: #e74c3c; margin-left: 3px;">*</span>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </table>
+                            <div style="font-size: 8px; color: #7f8c8d; margin-top: 3px; font-style: italic;">
+                                * = Mandatory item
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div style="margin-top: 15px; padding-top: 5px; border-top: 1px solid #bdc3c7; font-size: 8px; color: #95a5a6; text-align: center;">
+                            <t t-esc="o.code"/> | Printed: <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/> | For field reference only
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>
+

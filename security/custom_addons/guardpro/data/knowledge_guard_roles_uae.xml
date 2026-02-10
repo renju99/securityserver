@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- UAE/SIRA Guard Roles -->
+        
+        <record id="guard_role_sira_grade1" model="knowledge.guard.role">
+            <field name="name">SIRA Grade 1 - Security Guard</field>
+            <field name="code">SIRA-G1</field>
+            <field name="sira_level">grade1</field>
+            <field name="description">Entry-level security guard position. Responsible for basic security duties including access control, patrol, and monitoring. Must hold valid SIRA Grade 1 certification issued by Dubai Police.</field>
+        </record>
+        
+        <record id="guard_role_sira_grade2" model="knowledge.guard.role">
+            <field name="name">SIRA Grade 2 - Senior Security Guard</field>
+            <field name="code">SIRA-G2</field>
+            <field name="sira_level">grade2</field>
+            <field name="description">Senior-level security guard with advanced responsibilities. Handles complex security situations, leads small teams, and performs specialized duties. Must hold valid SIRA Grade 2 certification.</field>
+        </record>
+        
+        <record id="guard_role_sira_grade3" model="knowledge.guard.role">
+            <field name="name">SIRA Grade 3 - Security Supervisor</field>
+            <field name="code">SIRA-G3</field>
+            <field name="sira_level">grade3</field>
+            <field name="description">Security supervisor responsible for overseeing guard teams, shift management, and operational coordination. Must hold valid SIRA Grade 3 certification and demonstrate leadership capabilities.</field>
+        </record>
+        
+        <record id="guard_role_sira_grade4" model="knowledge.guard.role">
+            <field name="name">SIRA Grade 4 - Security Manager</field>
+            <field name="code">SIRA-G4</field>
+            <field name="sira_level">grade4</field>
+            <field name="description">Security manager overseeing entire security operations, client relationships, compliance, and strategic planning. Must hold valid SIRA Grade 4 certification.</field>
+        </record>
+        
+        <record id="guard_role_control_room" model="knowledge.guard.role">
+            <field name="name">Control Room Operator</field>
+            <field name="code">CTRL-OP</field>
+            <field name="sira_level">grade1</field>
+            <field name="description">Monitors CCTV, access control systems, and alarm systems. Coordinates with field guards and emergency services. Minimum SIRA Grade 1 required.</field>
+        </record>
+        
+        <record id="guard_role_reception" model="knowledge.guard.role">
+            <field name="name">Reception Security Officer</field>
+            <field name="code">RECV-SEC</field>
+            <field name="sira_level">grade1</field>
+            <field name="description">Front desk security officer managing visitor access, screening, and customer service. Minimum SIRA Grade 1 required.</field>
+        </record>
+        
+        <record id="guard_role_patrol" model="knowledge.guard.role">
+            <field name="name">Mobile Patrol Officer</field>
+            <field name="code">PATROL</field>
+            <field name="sira_level">grade1</field>
+            <field name="description">Conducts mobile patrols across multiple sites, responds to alarms, and performs security checks. Valid UAE driving license and SIRA Grade 1 required.</field>
+        </record>
+        
+        <record id="guard_role_events" model="knowledge.guard.role">
+            <field name="name">Events Security Officer</field>
+            <field name="code">EVENT-SEC</field>
+            <field name="sira_level">grade1</field>
+            <field name="description">Specializes in event security, crowd control, and VIP protection. SIRA Grade 1 minimum with additional event security training.</field>
+        </record>
+        
+        <record id="guard_role_fire_safety" model="knowledge.guard.role">
+            <field name="name">Fire &amp; Life Safety Officer</field>
+            <field name="code">FIRE-SAFE</field>
+            <field name="sira_level">grade2</field>
+            <field name="description">Specialized in fire safety systems, emergency evacuation, and life safety compliance. Requires SIRA Grade 2 and Civil Defense certification.</field>
+        </record>
+        
+        <record id="guard_role_industrial" model="knowledge.guard.role">
+            <field name="name">Industrial Security Officer</field>
+            <field name="code">IND-SEC</field>
+            <field name="sira_level">grade1</field>
+            <field name="description">Works in industrial facilities with specialized security needs. SIRA Grade 1 with HSE awareness training required.</field>
+        </record>
+        
+    </data>
+</odoo>
+

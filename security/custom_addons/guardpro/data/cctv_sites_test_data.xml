@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 
+        Minimal site data required for CCTV camera test data.
+        These sites are created if they don't already exist (noupdate="0").
+    -->
+    <data noupdate="0">
+        
+        <!-- Demo Client Company (if not exists) -->
+        <record id="client_nshama" model="res.partner">
+            <field name="name">NSHAMA</field>
+            <field name="is_company" eval="True"/>
+            <field name="company_type">company</field>
+            <field name="email">contact@nshama.ae</field>
+            <field name="phone">+971-4-123-4567</field>
+        </record>
+        
+        <!-- NSHAMA Town Square Site -->
+        <record id="site_nshama_town_square" model="client.site">
+            <field name="name">NSHAMA Town Square</field>
+            <field name="code">NSHAMA-TS-001</field>
+            <field name="client_id" ref="client_nshama"/>
+            <field name="city">Dubai</field>
+            <field name="country_id" ref="base.ae"/>
+            <field name="latitude" eval="24.9533"/>
+            <field name="longitude" eval="55.1653"/>
+            <field name="status">active</field>
+        </record>
+        
+        <!-- NSHAMA The Springs Site -->
+        <record id="site_nshama_springs" model="client.site">
+            <field name="name">NSHAMA The Springs</field>
+            <field name="code">NSHAMA-SP-002</field>
+            <field name="client_id" ref="client_nshama"/>
+            <field name="city">Dubai</field>
+            <field name="country_id" ref="base.ae"/>
+            <field name="latitude" eval="25.0733"/>
+            <field name="longitude" eval="55.1853"/>
+            <field name="status">active</field>
+        </record>
+        
+    </data>
+</odoo>
+

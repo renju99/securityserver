@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Communication Equipment -->
+        <record id="equipment_radio_001" model="guardpro.equipment">
+            <field name="name">Motorola Two-Way Radio #001</field>
+            <field name="code">RADIO-001</field>
+            <field name="serial_number">MTR-2024-001234</field>
+            <field name="category">radio</field>
+            <field name="description">Professional two-way radio with long-range capability</field>
+            <field name="manufacturer">Motorola</field>
+            <field name="model">CP200d</field>
+            <field name="status">assigned</field>
+            <field name="assigned_to" ref="guard_john_smith"/>
+            <field name="assignment_date" eval="(datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')"/>
+            <field name="assigned_site" ref="site_nshama_town_square"/>
+            <field name="purchase_date" eval="(datetime.now() - timedelta(days=730)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_cost">450.00</field>
+            <field name="warranty_expiry" eval="(datetime.now() + timedelta(days=365)).strftime('%Y-%m-%d')"/>
+            <field name="condition">good</field>
+            <field name="notes">Assigned to senior guard. Regular maintenance up to date.</field>
+        </record>
+
+        <record id="equipment_radio_002" model="guardpro.equipment">
+            <field name="name">Motorola Two-Way Radio #002</field>
+            <field name="code">RADIO-002</field>
+            <field name="serial_number">MTR-2024-001235</field>
+            <field name="category">radio</field>
+            <field name="description">Professional two-way radio with long-range capability</field>
+            <field name="manufacturer">Motorola</field>
+            <field name="model">CP200d</field>
+            <field name="status">assigned</field>
+            <field name="assigned_to" ref="guard_sarah_johnson"/>
+            <field name="assignment_date" eval="(datetime.now() - timedelta(days=180)).strftime('%Y-%m-%d')"/>
+            <field name="assigned_site" ref="site_nshama_springs"/>
+            <field name="purchase_date" eval="(datetime.now() - timedelta(days=730)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_cost">450.00</field>
+            <field name="warranty_expiry" eval="(datetime.now() + timedelta(days=365)).strftime('%Y-%m-%d')"/>
+            <field name="condition">good</field>
+            <field name="notes">Assigned to K9 unit.</field>
+        </record>
+
+        <record id="equipment_radio_003" model="guardpro.equipment">
+            <field name="name">Motorola Two-Way Radio #003</field>
+            <field name="code">RADIO-003</field>
+            <field name="serial_number">MTR-2024-001236</field>
+            <field name="category">radio</field>
+            <field name="manufacturer">Motorola</field>
+            <field name="model">CP200d</field>
+            <field name="status">maintenance</field>
+            <field name="purchase_date" eval="(datetime.now() - timedelta(days=730)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_cost">450.00</field>
+            <field name="condition">fair</field>
+            <field name="maintenance_interval">30</field>
+            <field name="last_maintenance" eval="(datetime.now() - timedelta(days=45)).strftime('%Y-%m-%d')"/>
+            <field name="notes">Battery replacement needed. In maintenance shop.</field>
+        </record>
+
+        <!-- Flashlights -->
+        <record id="equipment_flashlight_001" model="guardpro.equipment">
+            <field name="name">Tactical LED Flashlight #001</field>
+            <field name="code">FLASH-001</field>
+            <field name="serial_number">FL-2024-0011</field>
+            <field name="category">flashlight</field>
+            <field name="description">High-power tactical LED flashlight</field>
+            <field name="manufacturer">Streamlight</field>
+            <field name="model">Stinger DS LED HL</field>
+            <field name="status">assigned</field>
+            <field name="assigned_to" ref="guard_michael_brown"/>
+            <field name="assignment_date" eval="(datetime.now() - timedelta(days=180)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_date" eval="(datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_cost">120.00</field>
+            <field name="condition">excellent</field>
+            <field name="notes">Night shift guard. Includes rechargeable battery and charger.</field>
+        </record>
+
+        <record id="equipment_flashlight_002" model="guardpro.equipment">
+            <field name="name">Tactical LED Flashlight #002</field>
+            <field name="code">FLASH-002</field>
+            <field name="serial_number">FL-2024-0012</field>
+            <field name="category">flashlight</field>
+            <field name="manufacturer">Streamlight</field>
+            <field name="model">Stinger DS LED HL</field>
+            <field name="status">available</field>
+            <field name="purchase_date" eval="(datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_cost">120.00</field>
+            <field name="condition">excellent</field>
+            <field name="notes">Available for assignment.</field>
+        </record>
+
+        <!-- Vehicles -->
+        <record id="equipment_vehicle_001" model="guardpro.equipment">
+            <field name="name">Security Patrol Vehicle - Toyota Land Cruiser</field>
+            <field name="code">VEH-001</field>
+            <field name="serial_number">VIN-JTMHV05J704012345</field>
+            <field name="category">vehicle</field>
+            <field name="description">4x4 patrol vehicle for site security</field>
+            <field name="manufacturer">Toyota</field>
+            <field name="model">Land Cruiser 2024</field>
+            <field name="status">assigned</field>
+            <field name="assigned_site" ref="site_nshama_town_square"/>
+            <field name="assignment_date" eval="(datetime.now() - timedelta(days=180)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_date" eval="(datetime.now() - timedelta(days=180)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_cost">95000.00</field>
+            <field name="condition">excellent</field>
+            <field name="maintenance_interval">90</field>
+            <field name="last_maintenance" eval="(datetime.now() - timedelta(days=60)).strftime('%Y-%m-%d')"/>
+            <field name="next_maintenance" eval="(datetime.now() + timedelta(days=30)).strftime('%Y-%m-%d')"/>
+            <field name="notes">Primary patrol vehicle for Town Square. License plate: Dubai A-12345. Insurance valid until next year.</field>
+        </record>
+
+        <record id="equipment_vehicle_002" model="guardpro.equipment">
+            <field name="name">Security Patrol Vehicle - Nissan Patrol</field>
+            <field name="code">VEH-002</field>
+            <field name="serial_number">VIN-JNKCV51E73M012345</field>
+            <field name="category">vehicle</field>
+            <field name="description">4x4 patrol vehicle for site security</field>
+            <field name="manufacturer">Nissan</field>
+            <field name="model">Patrol 2023</field>
+            <field name="status">assigned</field>
+            <field name="assigned_site" ref="site_nshama_springs"/>
+            <field name="assignment_date" eval="(datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_date" eval="(datetime.now() - timedelta(days=550)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_cost">85000.00</field>
+            <field name="condition">good</field>
+            <field name="maintenance_interval">90</field>
+            <field name="last_maintenance" eval="(datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')"/>
+            <field name="next_maintenance" eval="(datetime.now() + timedelta(days=60)).strftime('%Y-%m-%d')"/>
+            <field name="notes">Primary patrol vehicle for Springs. License plate: Dubai B-67890. Regular maintenance up to date.</field>
+        </record>
+
+        <!-- Uniforms -->
+        <record id="equipment_uniform_001" model="guardpro.equipment">
+            <field name="name">Security Uniform Set - Size L</field>
+            <field name="code">UNIF-001</field>
+            <field name="category">uniform</field>
+            <field name="description">Complete security uniform set (shirt, pants, cap)</field>
+            <field name="status">assigned</field>
+            <field name="assigned_to" ref="guard_john_smith"/>
+            <field name="assignment_date" eval="(datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_date" eval="(datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_cost">150.00</field>
+            <field name="condition">good</field>
+            <field name="notes">Standard uniform. Includes 2 shirts, 2 pants, 1 cap, 1 jacket.</field>
+        </record>
+
+        <!-- ID Badges -->
+        <record id="equipment_badge_001" model="guardpro.equipment">
+            <field name="name">Security ID Badge - John Smith</field>
+            <field name="code">BADGE-GP-001</field>
+            <field name="serial_number">GP-001</field>
+            <field name="category">badge</field>
+            <field name="description">Official security guard ID badge with photo</field>
+            <field name="status">assigned</field>
+            <field name="assigned_to" ref="guard_john_smith"/>
+            <field name="assignment_date" eval="(datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_date" eval="(datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_cost">25.00</field>
+            <field name="condition">excellent</field>
+            <field name="notes">RFID-enabled access badge. Valid for all assigned sites.</field>
+        </record>
+
+        <!-- First Aid Kits -->
+        <record id="equipment_firstaid_001" model="guardpro.equipment">
+            <field name="name">Portable First Aid Kit #001</field>
+            <field name="code">FIRST-001</field>
+            <field name="category">first_aid</field>
+            <field name="description">Comprehensive portable first aid kit</field>
+            <field name="status">assigned</field>
+            <field name="assigned_site" ref="site_nshama_town_square"/>
+            <field name="assignment_date" eval="(datetime.now() - timedelta(days=180)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_date" eval="(datetime.now() - timedelta(days=180)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_cost">200.00</field>
+            <field name="condition">good</field>
+            <field name="maintenance_interval">30</field>
+            <field name="last_maintenance" eval="(datetime.now() - timedelta(days=15)).strftime('%Y-%m-%d')"/>
+            <field name="next_maintenance" eval="(datetime.now() + timedelta(days=15)).strftime('%Y-%m-%d')"/>
+            <field name="notes">Located in security office. Contents checked monthly and restocked as needed.</field>
+        </record>
+
+        <record id="equipment_firstaid_002" model="guardpro.equipment">
+            <field name="name">Portable First Aid Kit #002</field>
+            <field name="code">FIRST-002</field>
+            <field name="category">first_aid</field>
+            <field name="description">Comprehensive portable first aid kit</field>
+            <field name="status">assigned</field>
+            <field name="assigned_site" ref="site_nshama_springs"/>
+            <field name="assignment_date" eval="(datetime.now() - timedelta(days=180)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_date" eval="(datetime.now() - timedelta(days=180)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_cost">200.00</field>
+            <field name="condition">good</field>
+            <field name="maintenance_interval">30</field>
+            <field name="last_maintenance" eval="(datetime.now() - timedelta(days=20)).strftime('%Y-%m-%d')"/>
+            <field name="next_maintenance" eval="(datetime.now() + timedelta(days=10)).strftime('%Y-%m-%d')"/>
+            <field name="notes">Located in clubhouse security office.</field>
+        </record>
+
+        <!-- Safety Equipment -->
+        <record id="equipment_safety_001" model="guardpro.equipment">
+            <field name="name">High-Visibility Safety Vest</field>
+            <field name="code">VEST-001</field>
+            <field name="category">safety</field>
+            <field name="description">Reflective safety vest - Size L</field>
+            <field name="status">assigned</field>
+            <field name="assigned_to" ref="guard_michael_brown"/>
+            <field name="assignment_date" eval="(datetime.now() - timedelta(days=180)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_date" eval="(datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_cost">35.00</field>
+            <field name="condition">good</field>
+            <field name="notes">Required for night shift patrols.</field>
+        </record>
+
+        <!-- Technology/Devices -->
+        <record id="equipment_tablet_001" model="guardpro.equipment">
+            <field name="name">Samsung Tablet for Security Operations</field>
+            <field name="code">TAB-001</field>
+            <field name="serial_number">SM-T870-2024-001</field>
+            <field name="category">tech</field>
+            <field name="description">Tablet for mobile security operations and reporting</field>
+            <field name="manufacturer">Samsung</field>
+            <field name="model">Galaxy Tab S9</field>
+            <field name="status">assigned</field>
+            <field name="assigned_to" ref="guard_kevin_lee"/>
+            <field name="assignment_date" eval="(datetime.now() - timedelta(days=90)).strftime('%Y-%m-%d')"/>
+            <field name="assigned_site" ref="site_nshama_springs"/>
+            <field name="purchase_date" eval="(datetime.now() - timedelta(days=90)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_cost">650.00</field>
+            <field name="warranty_expiry" eval="(datetime.now() + timedelta(days=275)).strftime('%Y-%m-%d')"/>
+            <field name="condition">excellent</field>
+            <field name="notes">Used for CCTV monitoring and incident reporting. Includes protective case.</field>
+        </record>
+
+        <!-- Keys/Access Control -->
+        <record id="equipment_keys_001" model="guardpro.equipment">
+            <field name="name">Master Key Set - Town Square</field>
+            <field name="code">KEYS-TS-001</field>
+            <field name="category">keys</field>
+            <field name="description">Master key set for Town Square facilities</field>
+            <field name="status">assigned</field>
+            <field name="assigned_to" ref="guard_john_smith"/>
+            <field name="assigned_site" ref="site_nshama_town_square"/>
+            <field name="assignment_date" eval="(datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_date" eval="(datetime.now() - timedelta(days=730)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_cost">500.00</field>
+            <field name="condition">good</field>
+            <field name="notes">Complete master key set. Sign-out required. Contains 15 keys for various facilities.</field>
+        </record>
+
+        <!-- Damaged Equipment Example -->
+        <record id="equipment_radio_damaged" model="guardpro.equipment">
+            <field name="name">Motorola Two-Way Radio #010</field>
+            <field name="code">RADIO-010</field>
+            <field name="serial_number">MTR-2022-009876</field>
+            <field name="category">radio</field>
+            <field name="manufacturer">Motorola</field>
+            <field name="model">CP200d</field>
+            <field name="status">damaged</field>
+            <field name="purchase_date" eval="(datetime.now() - timedelta(days=1095)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_cost">450.00</field>
+            <field name="condition">poor</field>
+            <field name="notes">Water damage. Repair estimate pending. May need replacement.</field>
+        </record>
+
+        <!-- Lost Equipment Example -->
+        <record id="equipment_flashlight_lost" model="guardpro.equipment">
+            <field name="name">Tactical LED Flashlight #015</field>
+            <field name="code">FLASH-015</field>
+            <field name="serial_number">FL-2023-0015</field>
+            <field name="category">flashlight</field>
+            <field name="manufacturer">Streamlight</field>
+            <field name="model">Stinger DS LED HL</field>
+            <field name="status">lost</field>
+            <field name="purchase_date" eval="(datetime.now() - timedelta(days=547)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_cost">120.00</field>
+            <field name="condition">poor</field>
+            <field name="notes">Reported lost during shift. Investigation completed. Replacement ordered.</field>
+        </record>
+
+        <!-- Retired Equipment -->
+        <record id="equipment_radio_retired" model="guardpro.equipment">
+            <field name="name">Old Two-Way Radio #099</field>
+            <field name="code">RADIO-099</field>
+            <field name="serial_number">MTR-2018-099</field>
+            <field name="category">radio</field>
+            <field name="manufacturer">Motorola</field>
+            <field name="model">CP200</field>
+            <field name="status">retired</field>
+            <field name="purchase_date" eval="(datetime.now() - timedelta(days=2190)).strftime('%Y-%m-%d')"/>
+            <field name="purchase_cost">350.00</field>
+            <field name="condition">poor</field>
+            <field name="notes">Retired due to age and obsolescence. Replaced with newer model.</field>
+        </record>
+
+    </data>
+</odoo>
+

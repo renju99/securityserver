@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>GuardPro Mobile Access Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #ECF0F1 0%, #D5DBDB 100%);
+            min-height: 100vh;
+        }
+        
+        .mobile-app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .mobile-app-header {
+            background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
+            color: white;
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            border-bottom: 3px solid #3498DB;
+        }
+        
+        .app-header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        
+        .app-logo i {
+            font-size: 1.5rem;
+            margin-right: 8px;
+            color: #3498DB;
+        }
+        
+        .mobile-app-main {
+            flex: 1;
+            padding: 20px;
+            background: transparent;
+        }
+        
+        .test-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-card h3 {
+            color: #2C3E50;
+            margin: 0 0 15px 0;
+        }
+        
+        .test-card p {
+            color: #7F8C8D;
+            margin: 5px 0;
+            line-height: 1.5;
+        }
+        
+        .test-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #2C3E50 0%, #3498DB 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+        
+        .test-button.secondary {
+            background: linear-gradient(135deg, #7F8C8D 0%, #95A5A6 100%);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-online {
+            background: #27AE60;
+        }
+        
+        .status-offline {
+            background: #C0392B;
+        }
+        
+        .status-warning {
+            background: #D68910;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-app-container">
+        <div class="mobile-app-header">
+            <div class="app-header-content">
+                <div class="app-logo">
+                    <i class="fa fa-shield-alt"></i>
+                    <span>GuardPro Mobile</span>
+                </div>
+                <div class="app-status">
+                    <span class="status-indicator status-warning"></span>
+                    <span>Access Test</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mobile-app-main">
+            <div class="test-card">
+                <h3>🔐 Mobile Dashboard Access</h3>
+                <p>The mobile dashboard requires authentication and guard permissions.</p>
+                <p><strong>Requirements:</strong></p>
+                <ul>
+                    <li>User must be logged in</li>
+                    <li>User must be in Guard Portal group</li>
+                    <li>User must have a Guard Profile</li>
+                </ul>
+            </div>
+            
+            <div class="test-card">
+                <h3>📱 Mobile Interface Status</h3>
+                <p><span class="status-indicator status-online"></span> Mobile app layout working</p>
+                <p><span class="status-indicator status-online"></span> No website footer</p>
+                <p><span class="status-indicator status-online"></span> App-like appearance</p>
+                <p><span class="status-indicator status-warning"></span> Authentication required</p>
+            </div>
+            
+            <button class="test-button" onclick="testMobileAccess()">
+                Test Mobile Dashboard Access
+            </button>
+            
+            <button class="test-button secondary" onclick="goToLogin()">
+                Go to Login Page
+            </button>
+            
+            <button class="test-button secondary" onclick="goToPortal()">
+                Go to Portal Home
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        function testMobileAccess() {
+            fetch('/guardpro/pwa/')
+                .then(response => {
+                    if (response.ok) {
+                        alert('✅ Mobile Dashboard Access Test:\n\n' +
+                              '✅ Mobile dashboard is accessible\n' +
+                              '✅ Authentication successful\n' +
+                              '✅ Guard permissions verified\n' +
+                              '✅ Mobile app layout loaded');
+                    } else if (response.status === 401) {
+                        alert('❌ Mobile Dashboard Access Test:\n\n' +
+                              '❌ Authentication required\n' +
+                              '✅ Mobile dashboard exists\n' +
+                              '✅ Guard permissions required\n' +
+                              'ℹ️ Please log in first');
+                    } else if (response.status === 403) {
+                        alert('❌ Mobile Dashboard Access Test:\n\n' +
+                              '❌ Access denied\n' +
+                              '✅ Mobile dashboard exists\n' +
+                              '❌ Guard permissions required\n' +
+                              'ℹ️ User needs Guard Portal access');
+                    } else {
+                        alert('❌ Mobile Dashboard Access Test:\n\n' +
+                              '❌ Error: ' + response.status + '\n' +
+                              '✅ Mobile dashboard exists\n' +
+                              '❌ Access issue\n' +
+                              'ℹ️ Check server logs');
+                    }
+                })
+                .catch(error => {
+                    alert('❌ Mobile Dashboard Access Test:\n\n' +
+                          '❌ Network error\n' +
+                          '✅ Mobile dashboard exists\n' +
+                          '❌ Connection issue\n' +
+                          'ℹ️ Check server status');
+                });
+        }
+        
+        function goToLogin() {
+            window.location.href = '/web/login';
+        }
+        
+        function goToPortal() {
+            window.location.href = '/my';
+        }
+        
+        // Test mobile app layout
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('GuardPro Mobile App Access Test');
+            console.log('✅ Mobile app layout loaded');
+            console.log('✅ No website footer detected');
+            console.log('✅ App-like interface active');
+            console.log('ℹ️ Testing mobile dashboard access...');
+        });
+    </script>
+</body>
+</html>

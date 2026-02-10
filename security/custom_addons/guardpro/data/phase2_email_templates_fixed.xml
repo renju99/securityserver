@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- ============================================ -->
+        <!-- CRITICAL PRIORITY EMAIL TEMPLATES (3 items) -->
+        <!-- ============================================ -->
+        
+        <!-- 1. Geofence Violation Alert Email Template -->
+        <record id="email_template_geofence_violation_alert" model="mail.template">
+            <field name="name">Geofence Violation Alert</field>
+            <field name="model_id" ref="model_geofence_alert"/>
+            <field name="subject">🚨 URGENT: Geofence Violation - ${object.guard_id.name or ''} - ${object.site_id.name or ''}</field>
+            <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
+            <field name="email_to">${(object.shift_id.supervisor_id.email if object.shift_id and object.shift_id.supervisor_id else object.site_id.manager_id.email if object.site_id and object.site_id.manager_id else '')|safe}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto;">
+                    <div style="background-color: #d32f2f; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
+                        <h1 style="margin: 0;">🚨 GEOFENCE VIOLATION ALERT</h1>
+                        <p style="margin: 10px 0 0 0;">Immediate Action Required</p>
+                    </div>
+                    
+                    <div style="background-color: #ffffff; padding: 20px; border: 1px solid #ddd;">
+                        <p><strong>Supervisor,</strong></p>
+                        <p>This is an automated alert to notify you of a location compliance violation that requires your immediate attention.</p>
+                        
+                        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                            <tr>
+                                <th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;">Guard Name</th>
+                                <td style="padding: 10px; border: 1px solid #ddd;"><strong>${object.guard_id.name or 'N/A'}</strong></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;">Guard Phone</th>
+                                <td style="padding: 10px; border: 1px solid #ddd;">${object.guard_id.phone or object.guard_id.user_id.phone or 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;">Alert Type</th>
+                                <td style="padding: 10px; border: 1px solid #ddd; color: #d32f2f; font-weight: bold;">
+                                    ${dict(object._fields['alert_type'].selection).get(object.alert_type, 'N/A')}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;">Expected Site</th>
+                                <td style="padding: 10px; border: 1px solid #ddd;">${object.site_id.name if object.site_id else 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;">Alert Time</th>
+                                <td style="padding: 10px; border: 1px solid #ddd;">${format_datetime(object.alert_datetime, dt_format='medium', tz='UTC') if object.alert_datetime else 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;">Distance from Site</th>
+                                <td style="padding: 10px; border: 1px solid #ddd;">
+                                    <strong style="color: #d32f2f;">
+                                        % if object.distance_from_site:
+                                            ${'{:.2f}'.format(object.distance_from_site)} km
+                                        % else:
+                                            N/A
+                                        % endif
+                                    </strong>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <h3 style="color: #d32f2f;">Required Actions:</h3>
+                        <ol style="line-height: 1.8;">
+                            <li><strong>Contact the guard immediately</strong> to verify their location and situation</li>
+                            <li><strong>Document the explanation</strong> for the violation in the system</li>
+                            <li><strong>Update alert status</strong> once the situation is resolved</li>
+                            <li><strong>Report to management</strong> if this is a serious violation or safety concern</li>
+                        </ol>
+                        
+                        <div style="text-align: center; margin: 20px 0;">
+                            <a href="${object.get_portal_url() if hasattr(object, 'get_portal_url') else '#'}" 
+                               style="display: inline-block; padding: 12px 30px; background-color: #d32f2f; color: white; text-decoration: none; border-radius: 4px;">
+                                View Alert Details
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div style="background-color: #f5f5f5; padding: 15px; text-align: center; border-radius: 0 0 5px 5px;">
+                        <p style="margin: 0; font-size: 12px; color: #777;">GuardPro Security Management System</p>
+                        <p style="margin: 5px 0 0 0; font-size: 11px; color: #999;">Automated Geofence Monitoring Alert</p>
+                    </div>
+                </div>
+            </field>
+        </record>
+        
+    </data>
+</odoo>
+
+
+
+
+
+
+
+
+

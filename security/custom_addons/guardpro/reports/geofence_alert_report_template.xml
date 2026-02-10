@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Report Action Definition -->
+    <record id="action_geofence_alert_report" model="ir.actions.report">
+        <field name="name">Geofence Alert Report</field>
+        <field name="model">geofence.alert</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.report_geofence_alert_document</field>
+        <field name="report_file">guardpro.report_geofence_alert_document</field>
+        <field name="binding_model_id" ref="model_geofence_alert"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_us"/>
+    </record>
+    
+    <!-- Report Template -->
+    <template id="report_geofence_alert_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        
+                        <!-- Report Header -->
+                        <div class="row" style="border-bottom: 3px solid #d32f2f; padding-bottom: 15px; margin-bottom: 30px;">
+                            <div class="col-8">
+                                <h1 style="margin: 0; font-size: 28px; color: #d32f2f;">GEOFENCE VIOLATION REPORT</h1>
+                                <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Location Compliance Alert Documentation</p>
+                            </div>
+                            <div class="col-4 text-right">
+                                <p style="margin: 5px 0;"><strong>Alert ID:</strong> <t t-esc="o.id"/></p>
+                                <p style="margin: 5px 0;"><strong>Date:</strong> <t t-esc="format_datetime(o.alert_datetime) if o.alert_datetime else 'N/A'"/></p>
+                                <p style="margin: 5px 0;"><strong>Status:</strong> 
+                                    <span t-att-style="'color: %s; font-weight: bold;' % ('#4caf50' if o.status == 'resolved' else '#d32f2f')"
+                                          t-esc="dict(o._fields['status'].selection).get(o.status, '') if hasattr(o, '_fields') and 'status' in o._fields else ''"/>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Alert Summary Box -->
+                        <div style="background-color: #ffebee; border-left: 5px solid #d32f2f; padding: 20px; margin-bottom: 30px;">
+                            <h3 style="margin: 0 0 10px 0; color: #d32f2f;">⚠️ LOCATION COMPLIANCE VIOLATION</h3>
+                            <p style="margin: 0; font-size: 16px;">
+                                <strong>Alert Type:</strong> 
+                                <span style="color: #d32f2f;">
+                                    <t t-esc="dict(o._fields['alert_type'].selection).get(o.alert_type, 'N/A') if hasattr(o, '_fields') and 'alert_type' in o._fields else 'N/A'"/>
+                                </span>
+                            </p>
+                        </div>
+                        
+                        <!-- Guard Information -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f;">Guard Information</h2>
+                        <table class="table table-sm table-bordered" style="margin-bottom: 30px;">
+                            <tr>
+                                <th style="width: 30%; background-color: #f5f5f5;">Guard Name</th>
+                                <td><strong><t t-esc="o.guard_id.name if o.guard_id else 'N/A'"/></strong></td>
+                                <th style="background-color: #f5f5f5;">Guard ID</th>
+                                <td><t t-esc="o.guard_id.employee_number if o.guard_id and hasattr(o.guard_id, 'employee_number') else 'N/A'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Contact Number</th>
+                                <td><t t-esc="o.guard_id.phone if o.guard_id else 'N/A'"/></td>
+                                <th style="background-color: #f5f5f5;">Email</th>
+                                <td><t t-esc="o.guard_id.user_id.email if o.guard_id and o.guard_id.user_id else 'N/A'"/></td>
+                            </tr>
+                        </table>
+                        
+                        <!-- Shift and Site Information -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f;">Shift &amp; Location Details</h2>
+                        <table class="table table-sm table-bordered" style="margin-bottom: 30px;">
+                            <tr>
+                                <th style="width: 30%; background-color: #f5f5f5;">Expected Site</th>
+                                <td colspan="3"><strong><t t-esc="o.site_id.name if o.site_id else 'N/A'"/></strong></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Site Address</th>
+                                <td colspan="3">
+                                    <t t-if="o.site_id">
+                                        <t t-esc="o.site_id.street or ''"/>
+                                        <t t-if="o.site_id.street2">, <t t-esc="o.site_id.street2"/></t><br/>
+                                        <t t-esc="o.site_id.city or ''"/>, <t t-esc="o.site_id.state_id.name if o.site_id.state_id else ''"/> <t t-esc="o.site_id.zip or ''"/>
+                                    </t>
+                                    <t t-else="">N/A</t>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Shift Reference</th>
+                                <td><t t-esc="o.shift_id.name if o.shift_id else 'N/A'"/></td>
+                                <th style="background-color: #f5f5f5;">Shift Time</th>
+                                <td>
+                                    <t t-if="o.shift_id">
+                                        <t t-esc="format_time(o.shift_id.start_datetime) if o.shift_id.start_datetime else 'N/A'"/> - 
+                                        <t t-esc="format_time(o.shift_id.end_datetime) if o.shift_id.end_datetime else 'N/A'"/>
+                                    </t>
+                                    <t t-else="">N/A</t>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <!-- Alert Details -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f;">Alert Details</h2>
+                        <table class="table table-sm table-bordered" style="margin-bottom: 30px;">
+                            <tr>
+                                <th style="width: 30%; background-color: #f5f5f5;">Alert Date/Time</th>
+                                <td><strong style="color: #d32f2f;"><t t-esc="format_datetime(o.alert_datetime) if o.alert_datetime else 'N/A'"/></strong></td>
+                                <th style="background-color: #f5f5f5;">Alert Type</th>
+                                <td>
+                                    <span style="color: #d32f2f; font-weight: bold;">
+                                        <t t-esc="dict(o._fields['alert_type'].selection).get(o.alert_type, 'N/A') if hasattr(o, '_fields') and 'alert_type' in o._fields else 'N/A'"/>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Distance from Site</th>
+                                <td>
+                                    <strong style="color: #d32f2f; font-size: 16px;">
+                                        <t t-if="o.distance_from_site">
+                                            <t t-esc="'{:.2f}'.format(o.distance_from_site)"/> km
+                                        </t>
+                                        <t t-else="">N/A</t>
+                                    </strong>
+                                </td>
+                                <th style="background-color: #f5f5f5;">Geofence Radius</th>
+                                <td><t t-esc="o.site_id.geofence_radius if o.site_id and hasattr(o.site_id, 'geofence_radius') else 'N/A'"/> m</td>
+                            </tr>
+                        </table>
+                        
+                        <!-- GPS Location -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f;">GPS Location Data</h2>
+                        <table class="table table-sm table-bordered" style="margin-bottom: 30px;">
+                            <tr>
+                                <th style="width: 30%; background-color: #f5f5f5;">Guard's Location (GPS)</th>
+                                <td colspan="3">
+                                    <t t-if="o.latitude and o.longitude">
+                                        Latitude: <t t-esc="'{:.6f}'.format(o.latitude)"/>, 
+                                        Longitude: <t t-esc="'{:.6f}'.format(o.longitude)"/>
+                                    </t>
+                                    <t t-else="">Location data not available</t>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Map Link</th>
+                                <td colspan="3">
+                                    <t t-if="o.latitude and o.longitude">
+                                        <a t-att-href="'https://www.google.com/maps?q=%s,%s' % (o.latitude, o.longitude)" target="_blank">
+                                            View Location on Google Maps
+                                        </a>
+                                    </t>
+                                    <t t-else="">Map link not available</t>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <!-- Status and Resolution -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f;">Status &amp; Resolution</h2>
+                        <table class="table table-sm table-bordered" style="margin-bottom: 30px;">
+                            <tr>
+                                <th style="width: 30%; background-color: #f5f5f5;">Current Status</th>
+                                <td>
+                                    <span t-att-style="'padding: 5px 15px; border-radius: 4px; font-weight: bold; background-color: %s; color: white;' % ('#4caf50' if o.status == 'resolved' else '#d32f2f' if o.status == 'new' else '#ff9800')"
+                                          t-esc="dict(o._fields['status'].selection).get(o.status, 'N/A') if hasattr(o, '_fields') and 'status' in o._fields else 'N/A'"/>
+                                </td>
+                                <th style="background-color: #f5f5f5;">Notification Sent</th>
+                                <td><t t-esc="'Yes' if o.notification_sent else 'No'"/></td>
+                            </tr>
+                            <tr t-if="o.acknowledged_by">
+                                <th style="background-color: #f5f5f5;">Acknowledged By</th>
+                                <td><t t-esc="o.acknowledged_by.name if o.acknowledged_by else 'N/A'"/></td>
+                                <th style="background-color: #f5f5f5;">Acknowledgment Date</th>
+                                <td><t t-esc="format_datetime(o.acknowledged_date) if o.acknowledged_date else 'N/A'"/></td>
+                            </tr>
+                            <tr t-if="o.resolved_by">
+                                <th style="background-color: #f5f5f5;">Resolved By</th>
+                                <td><t t-esc="o.resolved_by.name if o.resolved_by else 'N/A'"/></td>
+                                <th style="background-color: #f5f5f5;">Resolution Date</th>
+                                <td><t t-esc="format_datetime(o.resolved_date) if o.resolved_date else 'N/A'"/></td>
+                            </tr>
+                        </table>
+                        
+                        <!-- Notes/Explanation -->
+                        <t t-if="o.notes">
+                            <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f;">Notes &amp; Explanation</h2>
+                            <div style="padding: 15px; background-color: #fafafa; border: 1px solid #ddd; margin-bottom: 30px;">
+                                <t t-esc="o.notes"/>
+                            </div>
+                        </t>
+                        
+                        <!-- Action Required (if not resolved) -->
+                        <t t-if="o.status != 'resolved'">
+                            <div style="background-color: #fff3e0; border-left: 5px solid #ff9800; padding: 20px; margin: 30px 0;">
+                                <h3 style="margin: 0 0 10px 0; color: #ff6f00;">⚠️ REQUIRED ACTIONS</h3>
+                                <ol style="margin: 10px 0; padding-left: 20px; line-height: 1.8;">
+                                    <li>Contact the guard immediately to verify their location and safety</li>
+                                    <li>Document the guard's explanation for being out of the geofence</li>
+                                    <li>Update the alert status in the system</li>
+                                    <li>If necessary, reassign the shift or send backup</li>
+                                    <li>Escalate to management if this is a recurring issue</li>
+                                </ol>
+                            </div>
+                        </t>
+                        
+                        <!-- Signatures -->
+                        <div class="row" style="margin-top: 60px; page-break-inside: avoid;">
+                            <div class="col-6">
+                                <div style="border-top: 2px solid #000; padding-top: 10px; margin-top: 50px;">
+                                    <p style="margin: 0;"><strong>Reviewed By:</strong></p>
+                                    <p style="margin: 5px 0;"><t t-esc="o.acknowledged_by.name if o.acknowledged_by else '_______________________________'"/></p>
+                                    <p style="margin: 5px 0;">Date: <t t-esc="format_date(o.acknowledged_date) if o.acknowledged_date else '__________'"/></p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div style="border-top: 2px solid #000; padding-top: 10px; margin-top: 50px;">
+                                    <p style="margin: 0;"><strong>Manager Approval:</strong></p>
+                                    <p style="margin: 5px 0;">_______________________________</p>
+                                    <p style="margin: 5px 0;">Date: __________</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    
+</odoo>
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="package_001" model="package.management">
+            <field name="package_type">parcel</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="recipient_name">Ahmed Ali</field>
+            <field name="unit_number">Tower A - 501</field>
+            <field name="received_date">2025-10-15 10:30:00</field>
+            <field name="received_by" ref="guard_john_smith"/>
+            <field name="courier">DHL Express</field>
+            <field name="tracking_number">DHL123456789</field>
+        </record>
+
+        <record id="package_002" model="package.management">
+            <field name="package_type">document</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="recipient_name">Sarah Hassan</field>
+            <field name="unit_number">Villa 12</field>
+            <field name="received_date">2025-10-15 14:20:00</field>
+            <field name="received_by" ref="guard_sarah_johnson"/>
+            <field name="courier">Aramex</field>
+        </record>
+
+        <record id="package_003" model="package.management">
+            <field name="package_type">grocery</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="recipient_name">Omar Khalid</field>
+            <field name="unit_number">Tower B - 203</field>
+            <field name="received_date">2025-10-15 16:45:00</field>
+            <field name="received_by" ref="guard_michael_brown"/>
+            <field name="courier">Instashop</field>
+            <field name="notes">Perishable items - requires refrigeration</field>
+        </record>
+    </data>
+</odoo>

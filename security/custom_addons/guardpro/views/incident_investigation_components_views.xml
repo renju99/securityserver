@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- TIMELINE VIEWS -->
+    <record id="view_incident_investigation_timeline_list" model="ir.ui.view">
+        <field name="name">incident.investigation.timeline.list</field>
+        <field name="model">incident.investigation.timeline</field>
+        <field name="arch" type="xml">
+            <list string="Investigation Timeline" sample="1" create="1" edit="1" delete="0">
+                <field name="timestamp" widget="datetime"/>
+                <field name="entry_type"/>
+                <field name="description"/>
+                <field name="user_id"/>
+                <field name="location" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- EVIDENCE VIEWS -->
+    <record id="view_incident_investigation_evidence_form" model="ir.ui.view">
+        <field name="name">incident.investigation.evidence.form</field>
+        <field name="model">incident.investigation.evidence</field>
+        <field name="arch" type="xml">
+            <form string="Evidence">
+                <header>
+                    <button name="action_analyze" string="Mark as Analyzed" type="object" invisible="status != 'collected'" class="btn-primary"/>
+                    <button name="action_store" string="Store" type="object" class="btn-secondary"/>
+                    <field name="status" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="evidence_number" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="investigation_id" options="{'no_create': True}"/>
+                            <field name="evidence_type"/>
+                            <field name="relevance"/>
+                        </group>
+                        <group>
+                            <field name="collection_date"/>
+                            <field name="collected_by_id"/>
+                            <field name="custodian_id"/>
+                            <field name="storage_location"/>
+                        </group>
+                    </group>
+                    <group string="Description">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Collection Details" name="collection">
+                            <group>
+                                <field name="collection_location"/>
+                                <field name="collection_method"/>
+                            </group>
+                        </page>
+                        <page string="Analysis" name="analysis" invisible="not analysis_required">
+                            <group>
+                                <field name="analysis_required"/>
+                                <field name="analysis_type"/>
+                                <field name="analyzed_by"/>
+                                <field name="analysis_date"/>
+                                <field name="analysis_results"/>
+                            </group>
+                        </page>
+                        <page string="Chain of Custody" name="custody">
+                            <field name="chain_of_custody_ids" nolabel="1">
+                                <list create="0" edit="0">
+                                    <field name="timestamp"/>
+                                    <field name="entry_type"/>
+                                    <field name="from_user_id"/>
+                                    <field name="to_user_id"/>
+                                    <field name="notes"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Attachments" name="attachments">
+                            <field name="attachment_ids" widget="many2many_binary" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_incident_investigation_evidence_list" model="ir.ui.view">
+        <field name="name">incident.investigation.evidence.list</field>
+        <field name="model">incident.investigation.evidence</field>
+        <field name="arch" type="xml">
+            <list string="Evidence" sample="1">
+                <field name="evidence_number"/>
+                <field name="evidence_type"/>
+                <field name="description"/>
+                <field name="collection_date"/>
+                <field name="relevance" widget="badge"/>
+                <field name="status" widget="badge"/>
+                <field name="custodian_id"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- WITNESS VIEWS -->
+    <record id="view_incident_investigation_witness_form" model="ir.ui.view">
+        <field name="name">incident.investigation.witness.form</field>
+        <field name="model">incident.investigation.witness</field>
+        <field name="arch" type="xml">
+            <form string="Witness Statement">
+                <header>
+                    <button name="action_verify_statement" string="Verify Statement" type="object" 
+                            invisible="statement_verified" class="btn-success"/>
+                    <button name="action_request_follow_up" string="Request Follow-up" type="object" class="btn-secondary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="witness_name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="investigation_id" options="{'no_create': True}"/>
+                            <field name="witness_type"/>
+                            <field name="position"/>
+                            <field name="company"/>
+                        </group>
+                        <group>
+                            <field name="interview_date"/>
+                            <field name="interviewer_id"/>
+                            <field name="interview_method"/>
+                            <field name="relevance"/>
+                        </group>
+                    </group>
+                    <group string="Contact Information">
+                        <field name="contact_info" nolabel="1"/>
+                    </group>
+                    <group string="Witness Statement">
+                        <field name="statement" nolabel="1"/>
+                    </group>
+                    <group>
+                        <group string="Verification">
+                            <field name="statement_verified"/>
+                            <field name="verification_date" readonly="1"/>
+                        </group>
+                        <group string="Assessment">
+                            <field name="credibility_assessment"/>
+                        </group>
+                    </group>
+                    <group string="Key Points">
+                        <field name="key_points" nolabel="1"/>
+                    </group>
+                    <group string="Follow-up" invisible="not follow_up_required">
+                        <field name="follow_up_required"/>
+                        <field name="follow_up_notes"/>
+                        <field name="follow_up_completed"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_incident_investigation_witness_list" model="ir.ui.view">
+        <field name="name">incident.investigation.witness.list</field>
+        <field name="model">incident.investigation.witness</field>
+        <field name="arch" type="xml">
+            <list string="Witnesses" sample="1">
+                <field name="witness_name"/>
+                <field name="witness_type"/>
+                <field name="interview_date"/>
+                <field name="interviewer_id"/>
+                <field name="relevance" widget="badge"/>
+                <field name="statement_verified" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FINDING VIEWS -->
+    <record id="view_incident_investigation_finding_form" model="ir.ui.view">
+        <field name="name">incident.investigation.finding.form</field>
+        <field name="model">incident.investigation.finding</field>
+        <field name="arch" type="xml">
+            <form string="Finding">
+                <header>
+                    <button name="action_confirm" string="Confirm" type="object" invisible="status != 'draft'" class="btn-primary"/>
+                    <button name="action_resolve" string="Resolve" type="object" class="btn-success"/>
+                    <field name="status" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="title"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="investigation_id" options="{'no_create': True}"/>
+                            <field name="finding_type"/>
+                            <field name="severity"/>
+                        </group>
+                        <group>
+                            <field name="action_required"/>
+                            <field name="responsible_party" invisible="not action_required"/>
+                            <field name="target_date" invisible="not action_required"/>
+                        </group>
+                    </group>
+                    <group string="Description">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                    <group string="Impact">
+                        <field name="impact_description" nolabel="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Analysis" name="analysis">
+                            <field name="analysis"/>
+                        </page>
+                        <page string="Recommendation" name="recommendation">
+                            <field name="recommendation"/>
+                        </page>
+                        <page string="Supporting Evidence" name="evidence">
+                            <field name="evidence_ids" widget="many2many_tags"/>
+                            <field name="witness_ids" widget="many2many_tags"/>
+                        </page>
+                        <page string="Resolution" name="resolution" invisible="status != 'resolved'">
+                            <field name="resolution_notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_incident_investigation_finding_list" model="ir.ui.view">
+        <field name="name">incident.investigation.finding.list</field>
+        <field name="model">incident.investigation.finding</field>
+        <field name="arch" type="xml">
+            <list string="Findings" sample="1">
+                <field name="sequence" widget="handle"/>
+                <field name="title"/>
+                <field name="finding_type"/>
+                <field name="severity" widget="badge"/>
+                <field name="action_required" widget="boolean_toggle"/>
+                <field name="status" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- TEMPLATE VIEWS -->
+    <record id="view_incident_investigation_template_form" model="ir.ui.view">
+        <field name="name">incident.investigation.template.form</field>
+        <field name="model">incident.investigation.template</field>
+        <field name="arch" type="xml">
+            <form string="Investigation Template">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_investigations" type="object" class="oe_stat_button" icon="fa-search">
+                            <field name="usage_count" widget="statinfo" string="Used"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <field name="investigation_type"/>
+                        <field name="active"/>
+                    </group>
+                    <group string="Description">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Templates" name="templates">
+                            <group string="Executive Summary">
+                                <field name="executive_summary_template" nolabel="1"/>
+                            </group>
+                            <group string="Findings">
+                                <field name="findings_template" nolabel="1"/>
+                            </group>
+                            <group string="Root Cause">
+                                <field name="root_cause_template" nolabel="1"/>
+                            </group>
+                            <group string="Recommendations">
+                                <field name="recommendations_template" nolabel="1"/>
+                            </group>
+                        </page>
+                        <page string="Report Structure" name="structure">
+                            <group>
+                                <field name="include_timeline"/>
+                                <field name="include_evidence_list"/>
+                                <field name="include_witness_statements"/>
+                                <field name="include_findings_detail"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_incident_investigation_template_list" model="ir.ui.view">
+        <field name="name">incident.investigation.template.list</field>
+        <field name="model">incident.investigation.template</field>
+        <field name="arch" type="xml">
+            <list string="Investigation Templates" sample="1">
+                <field name="name"/>
+                <field name="investigation_type"/>
+                <field name="usage_count"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Template Action & Menu -->
+    <record id="action_incident_investigation_template" model="ir.actions.act_window">
+        <field name="name">Investigation Templates</field>
+        <field name="res_model">incident.investigation.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create an investigation report template
+            </p>
+        </field>
+    </record>
+
+</odoo>
+

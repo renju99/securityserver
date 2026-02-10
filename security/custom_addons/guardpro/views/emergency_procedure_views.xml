@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Emergency Procedure List View -->
+    <record id="view_emergency_procedure_list" model="ir.ui.view">
+        <field name="name">emergency.procedure.list</field>
+        <field name="model">emergency.procedure</field>
+        <field name="arch" type="xml">
+            <list string="Emergency Procedures" decoration-muted="not active">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="emergency_type" widget="badge"/>
+                <field name="step_count"/>
+                <field name="critical_step_count"/>
+                <field name="execution_count"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Emergency Procedure Form View -->
+    <record id="view_emergency_procedure_form" model="ir.ui.view">
+        <field name="name">emergency.procedure.form</field>
+        <field name="model">emergency.procedure</field>
+        <field name="arch" type="xml">
+            <form string="Emergency Procedure">
+                <header>
+                    <button name="action_view_executions" 
+                            type="object" 
+                            string="Create Execution" 
+                            class="oe_highlight"
+                            help="Create a new emergency checklist execution from this procedure"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_executions" 
+                                type="object" 
+                                class="oe_stat_button" 
+                                icon="fa-history">
+                            <field name="execution_count" widget="statinfo" string="Executed"/>
+                        </button>
+                    </div>
+                    
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g., Fire Emergency Response Protocol"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="emergency_type"/>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="step_count"/>
+                            <field name="critical_step_count"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Description">
+                            <field name="description" widget="html"/>
+                        </page>
+                        
+                        <page string="Steps">
+                            <field name="step_ids">
+                                <list string="Procedure Steps" editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="critical" widget="boolean_toggle"/>
+                                    <field name="requires_photo" widget="boolean_toggle"/>
+                                    <field name="requires_confirmation" widget="boolean_toggle"/>
+                                    <field name="requires_supervisor" widget="boolean_toggle"/>
+                                    <field name="estimated_duration"/>
+                                </list>
+                            </field>
+                        </page>
+                        
+                        <page string="Site Assignment">
+                            <field name="site_ids" widget="many2many_tags"/>
+                            <div class="alert alert-info" role="alert">
+                                <i class="fa fa-info-circle" title="Information" aria-label="Information"/> 
+                                Leave empty to make this procedure available for all sites.
+                            </div>
+                        </page>
+                        
+                        <page string="Notifications">
+                            <group>
+                                <group>
+                                    <field name="auto_notify_authorities"/>
+                                    <field name="notify_phone" invisible="not auto_notify_authorities"/>
+                                    <field name="notify_email" invisible="not auto_notify_authorities"/>
+                                </group>
+                            </group>
+                            <group invisible="not auto_notify_authorities">
+                                <field name="notify_message" 
+                                       placeholder="Enter notification message template..." 
+                                       nolabel="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Emergency Checklist Execution List View -->
+    <record id="view_emergency_checklist_execution_list" model="ir.ui.view">
+        <field name="name">emergency.checklist.execution.list</field>
+        <field name="model">emergency.checklist.execution</field>
+        <field name="arch" type="xml">
+            <list string="Emergency Checklist Executions" 
+                  decoration-warning="status == 'in_progress'" 
+                  decoration-success="status == 'completed'"
+                  decoration-danger="status == 'abandoned'">
+                <field name="name"/>
+                <field name="procedure_id"/>
+                <field name="emergency_type" widget="badge"/>
+                <field name="guard_id"/>
+                <field name="site_id"/>
+                <field name="start_time"/>
+                <field name="duration"/>
+                <field name="completion_percentage" widget="progressbar"/>
+                <field name="status" 
+                       decoration-warning="status == 'in_progress'"
+                       decoration-success="status == 'completed'"
+                       decoration-danger="status == 'abandoned'"
+                       widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Emergency Checklist Execution Form View -->
+    <record id="view_emergency_checklist_execution_form" model="ir.ui.view">
+        <field name="name">emergency.checklist.execution.form</field>
+        <field name="model">emergency.checklist.execution</field>
+        <field name="arch" type="xml">
+            <form string="Emergency Checklist Execution">
+                <header>
+                    <button name="action_start" type="object" string="Start Procedure" 
+                            class="oe_highlight" invisible="status != 'draft'"/>
+                    <button name="action_complete" type="object" string="Complete" 
+                            class="oe_highlight" invisible="status != 'in_progress'"/>
+                    <button name="action_abandon" type="object" string="Abandon" 
+                            invisible="status not in ('draft', 'in_progress')"
+                            confirm="Are you sure you want to abandon this procedure?"/>
+                    <field name="status" widget="statusbar" 
+                           statusbar_visible="draft,in_progress,completed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group string="Procedure">
+                            <field name="procedure_id" readonly="status != 'draft'" options="{'no_create': True}"/>
+                            <field name="emergency_type"/>
+                            <field name="incident_id" readonly="status != 'draft'" options="{'no_create': True}"/>
+                            <field name="site_id"/>
+                        </group>
+                        <group string="Personnel">
+                            <field name="guard_id" readonly="status != 'draft'" options="{'no_create': True}"/>
+                            <field name="supervisor_id"/>
+                        </group>
+                        <group string="Timing">
+                            <field name="start_time"/>
+                            <field name="end_time"/>
+                            <field name="duration"/>
+                        </group>
+                        <group string="Progress">
+                            <field name="completion_percentage" widget="progressbar"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Checklist Steps">
+                            <field name="step_execution_ids">
+                                <list string="Steps" editable="bottom" 
+                                      decoration-success="completed" 
+                                      decoration-danger="critical and not completed">
+                                    <field name="sequence"/>
+                                    <field name="step_name"/>
+                                    <field name="critical" widget="boolean_toggle"/>
+                                    <field name="completed" widget="boolean_toggle"/>
+                                    <field name="photo" widget="image" options="{'size': [64, 64]}"/>
+                                    <field name="completion_time"/>
+                                    <field name="supervisor_approved" widget="boolean_toggle"/>
+                                    <field name="notes"/>
+                                    <button name="action_complete_step" type="object" 
+                                            string="Complete" icon="fa-check" 
+                                            invisible="completed"/>
+                                    <button name="action_supervisor_approve" type="object" 
+                                            string="Approve" icon="fa-thumbs-up" 
+                                            invisible="supervisor_approved"
+                                            groups="guardpro.group_guardpro_supervisor"/>
+                                </list>
+                            </field>
+                        </page>
+                        
+                        <page string="Notes &amp; Outcome">
+                            <group>
+                                <field name="notes" nolabel="1" placeholder="General notes..."/>
+                            </group>
+                            <separator string="Outcome"/>
+                            <group>
+                                <field name="outcome" nolabel="1" 
+                                       placeholder="Final outcome and resolution..."/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Emergency Checklist Execution Kanban View -->
+    <record id="view_emergency_checklist_execution_kanban" model="ir.ui.view">
+        <field name="name">emergency.checklist.execution.kanban</field>
+        <field name="model">emergency.checklist.execution</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="procedure_id"/>
+                <field name="guard_id"/>
+                <field name="completion_percentage"/>
+                <field name="status"/>
+                <field name="emergency_type"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="name"/>
+                                    </strong>
+                                    <div class="o_kanban_record_subtitle">
+                                        <field name="procedure_id"/>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_top_right">
+                                    <field name="emergency_type" widget="badge"/>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div>
+                                    <i class="fa fa-user" title="User" aria-label="User"/> <field name="guard_id"/>
+                                </div>
+                                <div class="mt-2">
+                                    <field name="completion_percentage" widget="progressbar"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Emergency Procedure Action -->
+    <record id="action_emergency_procedure" model="ir.actions.act_window">
+        <field name="name">Emergency Procedures</field>
+        <field name="res_model">emergency.procedure</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create an Emergency Procedure
+            </p>
+            <p>
+                Define step-by-step emergency response procedures to ensure proper handling of critical situations.
+            </p>
+        </field>
+    </record>
+
+    <!-- Emergency Checklist Execution Action -->
+    <record id="action_emergency_checklist_execution" model="ir.actions.act_window">
+        <field name="name">Emergency Checklist Executions</field>
+        <field name="res_model">emergency.checklist.execution</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Emergency Procedures Executed Yet
+            </p>
+            <p>
+                Emergency procedures will appear here when they are activated during incidents.
+            </p>
+        </field>
+    </record>
+
+</odoo>
+

@@ -1,0 +1,643 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- ================================================================ -->
+        <!-- MISSING EMAIL TEMPLATES - GuardPro Module                       -->
+        <!-- Created: November 2025                                          -->
+        <!-- ================================================================ -->
+        
+        <!-- 1. Visitor Arrival Notification to Host -->
+        <record id="email_template_visitor_arrival" model="mail.template">
+            <field name="name">Visitor Arrival Notification</field>
+            <field name="model_id" ref="model_visitor_management"/>
+            <field name="subject">Visitor Arrival: ${object.visitor_name} is here to see you</field>
+            <field name="email_from">${user.email_formatted}</field>
+            <field name="email_to">${object.host_email}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: #9c27b0;">👤 Visitor Arrival Notification</h2>
+                    
+                    <p>Hello ${object.host_name},</p>
+                    
+                    <div style="background: #f3e5f5; border-left: 4px solid #9c27b0; padding: 15px; margin: 20px 0;">
+                        <p style="margin: 0; font-size: 16px;">
+                            <strong>Your visitor has arrived at ${object.site_id.name}</strong>
+                        </p>
+                    </div>
+                    
+                    <h3>Visitor Information:</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; width: 30%;">Visitor Name:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.visitor_name}</td>
+                        </tr>
+                        % if object.company_name:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Company:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.company_name}</td>
+                        </tr>
+                        % endif
+                        % if object.phone:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Phone:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.phone}</td>
+                        </tr>
+                        % endif
+                        % if object.email:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Email:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.email}</td>
+                        </tr>
+                        % endif
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Check-in Time:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${format_datetime(object.check_in_time, dt_format='medium')}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Purpose:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.purpose or 'Not specified'}</td>
+                        </tr>
+                        % if object.badge_number:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Badge Number:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>${object.badge_number}</strong></td>
+                        </tr>
+                        % endif
+                    </table>
+                    
+                    % if object.expected_duration:
+                    <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0;">
+                        <p style="margin: 0;">
+                            <strong>Expected Duration:</strong> ${object.expected_duration} minutes
+                        </p>
+                    </div>
+                    % endif
+                    
+                    <div style="margin-top: 30px;">
+                        <p>Your visitor is waiting at the ${object.site_id.name} security desk.</p>
+                        <p>If you did not expect this visitor, please contact security immediately.</p>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
+                        <p style="margin: 0; color: #999; font-size: 12px;">
+                            This is an automated message from GuardPro Visitor Management System
+                        </p>
+                    </div>
+                </div>
+            </field>
+        </record>
+
+        <!-- 2. Credential Compliance Report -->
+        <record id="email_template_credential_compliance_report" model="mail.template">
+            <field name="name">Credential Compliance Report</field>
+            <field name="model_id" ref="base.model_res_users"/>
+            <field name="subject">⚠ Credential Compliance Report - Action Required</field>
+            <field name="email_from">${user.email_formatted}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: #f57c00;">⚠ Credential Compliance Alert</h2>
+                    
+                    <p>Hello,</p>
+                    
+                    <div style="background: #fff3e0; border-left: 4px solid #f57c00; padding: 15px; margin: 20px 0;">
+                        <p style="margin: 0; font-size: 16px;">
+                            <strong>Guards with expired or expiring credentials require immediate attention.</strong>
+                        </p>
+                    </div>
+                    
+                    <h3>Compliance Status:</h3>
+                    <div style="padding: 15px; background: #ffebee; border-left: 4px solid #d32f2f; margin: 20px 0;">
+                        <p style="margin: 0;">
+                            One or more guards have credentials that are expired or expiring soon. 
+                            These guards may not be eligible for shift assignments until compliance is restored.
+                        </p>
+                    </div>
+                    
+                    <h3>Required Actions:</h3>
+                    <ol style="line-height: 1.8;">
+                        <li>Review the credential status in the GuardPro system</li>
+                        <li>Identify all guards with expired or expiring credentials</li>
+                        <li>Contact affected guards to begin renewal process</li>
+                        <li>Schedule required training or testing</li>
+                        <li>Update guard status once compliance is restored</li>
+                    </ol>
+                    
+                    <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0;">
+                        <h3 style="margin-top: 0; color: #1976d2;">📊 Access the Report:</h3>
+                        <p style="margin-bottom: 0;">
+                            Please log in to GuardPro and navigate to <strong>Guards → Credentials → Compliance Report</strong> 
+                            for detailed information about all non-compliant credentials.
+                        </p>
+                    </div>
+                    
+                    <div style="background: #fff3e0; border: 2px solid #f57c00; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                        <p style="margin: 0;">
+                            <strong>⏰ IMPORTANT:</strong> Guards with expired credentials cannot be scheduled for shifts. 
+                            Immediate action is required to maintain operational capacity.
+                        </p>
+                    </div>
+                    
+                    <div style="margin-top: 30px;">
+                        <p>If you have any questions or need assistance, please contact your system administrator.</p>
+                        <p>Thank you for your prompt attention to this matter.</p>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
+                        <p style="margin: 0; color: #999; font-size: 12px;">
+                            This is an automated message from GuardPro Credential Management System
+                        </p>
+                    </div>
+                </div>
+            </field>
+        </record>
+
+        <!-- 3. Incident Escalation Notification -->
+        <record id="incident_escalation_email_template" model="mail.template">
+            <field name="name">Incident Escalation Notification</field>
+            <field name="model_id" ref="model_incident_escalation_log"/>
+            <field name="subject">🚨 Incident Escalated: ${object.incident_id.title} - ${object.severity.upper()}</field>
+            <field name="email_from">${user.email_formatted}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; padding: 20px; border: 2px solid #d32f2f;">
+                    <div style="background: #d32f2f; color: white; padding: 15px; margin: -20px -20px 20px -20px;">
+                        <h1 style="margin: 0; font-size: 24px;">🚨 INCIDENT ESCALATION</h1>
+                    </div>
+                    
+                    <p>Hello % if ctx.get('escalation_user'):${ctx.get('escalation_user').name}% endif,</p>
+                    
+                    <div style="background: #ffebee; border-left: 5px solid #d32f2f; padding: 20px; margin: 20px 0;">
+                        <h2 style="margin-top: 0; color: #d32f2f;">
+                            An incident has been escalated to you for immediate attention.
+                        </h2>
+                    </div>
+                    
+                    <h3>Incident Details:</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; width: 30%; background: #f5f5f5;">Incident Number:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.incident_id.name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; background: #f5f5f5;">Title:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>${object.incident_id.title}</strong></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; background: #f5f5f5;">Severity:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                <span style="padding: 5px 15px; background: 
+                                    % if object.severity == 'critical':
+                                        #d32f2f
+                                    % elif object.severity == 'high':
+                                        #f57c00
+                                    % elif object.severity == 'medium':
+                                        #fbc02d
+                                    % else:
+                                        #388e3c
+                                    % endif
+                                    ; color: white; border-radius: 3px; font-weight: bold;">
+                                    ${object.severity.upper()}
+                                </span>
+                            </td>
+                        </tr>
+                        % if object.incident_id.category_id:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; background: #f5f5f5;">Category:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.incident_id.category_id.name}</td>
+                        </tr>
+                        % endif
+                        % if object.incident_id.site_id:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; background: #f5f5f5;">Site:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.incident_id.site_id.name}</td>
+                        </tr>
+                        % endif
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; background: #f5f5f5;">Incident Date:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${format_datetime(object.incident_id.incident_datetime, dt_format='medium')}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; background: #f5f5f5;">Escalation Level:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>Level ${object.escalation_level}</strong></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; background: #f5f5f5;">Escalated By:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.escalated_by.name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; background: #f5f5f5;">Escalation Time:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${format_datetime(object.escalation_datetime, dt_format='medium')}</td>
+                        </tr>
+                    </table>
+                    
+                    % if object.incident_id.description:
+                    <h3 style="color: #d32f2f;">Incident Description:</h3>
+                    <div style="padding: 20px; background: white; border: 2px solid #d32f2f; border-radius: 5px; margin: 20px 0; font-size: 15px;">
+                        ${object.incident_id.description}
+                    </div>
+                    % endif
+                    
+                    % if object.escalation_reason:
+                    <h3 style="color: #f57c00;">Escalation Reason:</h3>
+                    <div style="padding: 15px; background: #fff3e0; border-left: 4px solid #f57c00; border-radius: 5px; margin: 20px 0;">
+                        ${object.escalation_reason}
+                    </div>
+                    % endif
+                    
+                    % if object.incident_id.immediate_actions:
+                    <h3>Actions Taken So Far:</h3>
+                    <div style="padding: 15px; background: #e8f5e9; border-left: 4px solid #4caf50; border-radius: 5px; margin: 20px 0;">
+                        ${object.incident_id.immediate_actions}
+                    </div>
+                    % endif
+                    
+                    <div style="background: #fff3e0; border: 2px solid #f57c00; padding: 20px; margin: 30px 0; border-radius: 5px;">
+                        <h3 style="margin-top: 0; color: #f57c00;">⚠ Required Actions:</h3>
+                        <ol style="margin-bottom: 0; line-height: 1.8;">
+                            <li>Review the complete incident details in GuardPro system immediately</li>
+                            <li>Assess the situation and determine appropriate response</li>
+                            <li>Take necessary corrective actions</li>
+                            <li>Update the incident status with your response</li>
+                            <li>Document all actions taken in the incident record</li>
+                        </ol>
+                    </div>
+                    
+                    % if object.sla_deadline:
+                    <div style="background: #ffebee; border: 2px solid #d32f2f; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                        <p style="margin: 0; color: #d32f2f;">
+                            <strong>⏰ SLA DEADLINE:</strong> Response required by ${format_datetime(object.sla_deadline, dt_format='medium')}
+                        </p>
+                    </div>
+                    % endif
+                    
+                    <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 30px 0;">
+                        <p style="margin: 0;"><strong>If this is a life-threatening emergency, call 911 immediately!</strong></p>
+                    </div>
+                    
+                    <div style="margin-top: 30px;">
+                        <p><strong>Access the incident:</strong> Log in to GuardPro and navigate to Incidents → ${object.incident_id.name}</p>
+                        <p>For urgent assistance, contact the Operations Center immediately.</p>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center; border-top: 3px solid #d32f2f;">
+                        <p style="margin: 0; color: #d32f2f; font-size: 14px; font-weight: bold;">
+                            URGENT - IMMEDIATE ATTENTION REQUIRED
+                        </p>
+                        <p style="margin: 5px 0 0 0; color: #999; font-size: 12px;">
+                            GuardPro Incident Escalation System<br/>
+                            Escalation ID: ${object.name}
+                        </p>
+                    </div>
+                </div>
+            </field>
+        </record>
+
+        <!-- 4. Visitor Pre-Registration Confirmation -->
+        <record id="email_template_visitor_pre_registration" model="mail.template">
+            <field name="name">Visitor Pre-Registration Confirmation</field>
+            <field name="model_id" ref="model_visitor_management"/>
+            <field name="subject">Visit Confirmed: ${object.site_id.name} on ${format_date(object.expected_arrival)}</field>
+            <field name="email_from">${user.email_formatted}</field>
+            <field name="email_to">${object.email}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: #4caf50;">✅ Visit Pre-Registration Confirmed</h2>
+                    
+                    <p>Hello ${object.visitor_name},</p>
+                    
+                    <p>Your visit to <strong>${object.site_id.name}</strong> has been pre-registered and confirmed.</p>
+                    
+                    <div style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; margin: 20px 0;">
+                        <h3 style="margin-top: 0; color: #2e7d32;">📅 Visit Details</h3>
+                        
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="padding: 8px 0; font-weight: bold; width: 40%;">Location:</td>
+                                <td style="padding: 8px 0;">${object.site_id.name}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 0; font-weight: bold;">Expected Arrival:</td>
+                                <td style="padding: 8px 0;">${format_datetime(object.expected_arrival, dt_format='medium')}</td>
+                            </tr>
+                            % if object.expected_duration:
+                            <tr>
+                                <td style="padding: 8px 0; font-weight: bold;">Duration:</td>
+                                <td style="padding: 8px 0;">${object.expected_duration} minutes</td>
+                            </tr>
+                            % endif
+                            <tr>
+                                <td style="padding: 8px 0; font-weight: bold;">Host:</td>
+                                <td style="padding: 8px 0;">${object.host_name}</td>
+                            </tr>
+                            % if object.purpose:
+                            <tr>
+                                <td style="padding: 8px 0; font-weight: bold;">Purpose:</td>
+                                <td style="padding: 8px 0;">${object.purpose}</td>
+                            </tr>
+                            % endif
+                            <tr>
+                                <td style="padding: 8px 0; font-weight: bold;">Registration Number:</td>
+                                <td style="padding: 8px 0;"><strong>${object.name}</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    % if object.site_id.address:
+                    <h3>Location Address:</h3>
+                    <div style="padding: 15px; background: #f5f5f5; border-radius: 5px; margin: 20px 0;">
+                        ${object.site_id.address}
+                    </div>
+                    % endif
+                    
+                    <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0;">
+                        <h3 style="margin-top: 0; color: #1976d2;">📌 Check-in Instructions:</h3>
+                        <ol style="margin-bottom: 0; line-height: 1.8;">
+                            <li>Arrive at the security desk at the main entrance</li>
+                            <li>Provide your name and registration number: <strong>${object.name}</strong></li>
+                            <li>Present a valid photo ID</li>
+                            <li>Security will issue you a visitor badge</li>
+                            <li>Wear the badge visibly at all times during your visit</li>
+                            <li>Return the badge to security when you leave</li>
+                        </ol>
+                    </div>
+                    
+                    % if object.parking_required:
+                    <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 15px; margin: 20px 0;">
+                        <p style="margin: 0;">
+                            <strong>🚗 Parking:</strong> Visitor parking has been arranged for you. 
+                            Please ask security for directions upon arrival.
+                        </p>
+                    </div>
+                    % endif
+                    
+                    <div style="margin-top: 30px;">
+                        <p>If you need to cancel or reschedule your visit, please contact your host ${object.host_name}% if object.host_email: at ${object.host_email}% endif.</p>
+                        <p>We look forward to your visit!</p>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
+                        <p style="margin: 0; color: #999; font-size: 12px;">
+                            This is an automated message from GuardPro Visitor Management System
+                        </p>
+                    </div>
+                </div>
+            </field>
+        </record>
+
+        <!-- 5. Key Overdue Reminder -->
+        <record id="email_template_key_overdue_reminder" model="mail.template">
+            <field name="name">Key Overdue Return Reminder</field>
+            <field name="model_id" ref="model_key_register"/>
+            <field name="subject">🔑 URGENT: Key Return Overdue - ${object.key_number}</field>
+            <field name="email_from">${user.email_formatted}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: #d32f2f;">🔑 URGENT: Key Return Overdue</h2>
+                    
+                    <div style="background: #ffebee; border: 2px solid #d32f2f; padding: 20px; margin: 20px 0; border-radius: 5px;">
+                        <h3 style="margin-top: 0; color: #d32f2f;">⚠ IMMEDIATE ACTION REQUIRED</h3>
+                        <p style="margin-bottom: 0; font-size: 16px;">
+                            A key issued to you is <strong>OVERDUE FOR RETURN</strong>. 
+                            Please return it to the security desk immediately.
+                        </p>
+                    </div>
+                    
+                    <h3>Key Information:</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; width: 30%;">Key Number:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong style="color: #d32f2f; font-size: 18px;">${object.key_number}</strong></td>
+                        </tr>
+                        % if object.description:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Description:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.description}</td>
+                        </tr>
+                        % endif
+                        % if object.location:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Authorized For:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.location}</td>
+                        </tr>
+                        % endif
+                        % if object.issue_date:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Issued On:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${format_datetime(object.issue_date, dt_format='medium')}</td>
+                        </tr>
+                        % endif
+                        % if object.expected_return_date:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Was Due:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                <strong style="color: #d32f2f;">${format_datetime(object.expected_return_date, dt_format='medium')}</strong>
+                            </td>
+                        </tr>
+                        % endif
+                    </table>
+                    
+                    <div style="background: #fff3e0; border-left: 4px solid #f57c00; padding: 15px; margin: 20px 0;">
+                        <h3 style="margin-top: 0; color: #f57c00;">📋 What You Need to Do:</h3>
+                        <ol style="margin-bottom: 0; line-height: 1.8;">
+                            <li>Return the key to the security desk immediately</li>
+                            <li>Ensure the key is properly signed back in</li>
+                            <li>If the key is lost or damaged, contact security immediately</li>
+                            <li>If you still need access, request a new temporary key issuance</li>
+                        </ol>
+                    </div>
+                    
+                    <div style="background: #ffebee; border: 2px solid #d32f2f; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                        <p style="margin: 0; color: #d32f2f;">
+                            <strong>⚠ WARNING:</strong> Failure to return keys on time may result in:
+                        </p>
+                        <ul style="line-height: 1.8;">
+                            <li>Suspension of key privileges</li>
+                            <li>Disciplinary action</li>
+                            <li>Cost recovery for lock replacement if key is lost</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0;">
+                        <p style="margin: 0;">
+                            <strong>📞 Need Help?</strong> If you have already returned this key or have any questions, 
+                            please contact the security desk immediately to resolve this matter.
+                        </p>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
+                        <p style="margin: 0; color: #999; font-size: 12px;">
+                            This is an automated reminder from GuardPro Key Management System
+                        </p>
+                    </div>
+                </div>
+            </field>
+        </record>
+
+        <!-- 6. Lost & Found Item Match Notification -->
+        <record id="email_template_lost_found_match" model="mail.template">
+            <field name="name">Lost &amp; Found Item Match Notification</field>
+            <field name="model_id" ref="model_lost_found_item"/>
+            <field name="subject">Item Found: ${object.item_description}</field>
+            <field name="email_from">${user.email_formatted}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: #4caf50;">🎉 Good News - Item Found!</h2>
+                    
+                    <div style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; margin: 20px 0;">
+                        <p style="margin: 0; font-size: 16px;">
+                            <strong>An item matching your description has been found and is being held at our Lost &amp; Found.</strong>
+                        </p>
+                    </div>
+                    
+                    <h3>Item Details:</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; width: 30%;">Item:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.item_description}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Category:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.category.replace('_', ' ').title()}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Found Location:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.found_location or 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Date Found:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${format_datetime(object.found_date, dt_format='medium')}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Reference Number:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>${object.name}</strong></td>
+                        </tr>
+                    </table>
+                    
+                    <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0;">
+                        <h3 style="margin-top: 0; color: #1976d2;">📍 How to Claim Your Item:</h3>
+                        <ol style="margin-bottom: 0; line-height: 1.8;">
+                            <li>Visit the security desk at <strong>${object.site_id.name}</strong></li>
+                            <li>Provide your reference number: <strong>${object.name}</strong></li>
+                            <li>Bring a valid photo ID for verification</li>
+                            <li>Be prepared to describe the item and provide proof of ownership</li>
+                            <li>Sign the claim form to receive your item</li>
+                        </ol>
+                    </div>
+                    
+                    % if object.hold_until_date:
+                    <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 15px; margin: 20px 0;">
+                        <p style="margin: 0;">
+                            <strong>⏰ IMPORTANT:</strong> Please claim your item by <strong>${format_date(object.hold_until_date)}</strong>. 
+                            After this date, unclaimed items may be donated or disposed of according to our policy.
+                        </p>
+                    </div>
+                    % endif
+                    
+                    <div style="margin-top: 30px;">
+                        <p>If this item does not belong to you, please disregard this message.</p>
+                        <p>If you have any questions, please contact our security desk.</p>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
+                        <p style="margin: 0; color: #999; font-size: 12px;">
+                            This is an automated message from GuardPro Lost &amp; Found Management System
+                        </p>
+                    </div>
+                </div>
+            </field>
+        </record>
+
+        <!-- 7. Equipment Maintenance Due Notification -->
+        <record id="email_template_equipment_maintenance_due" model="mail.template">
+            <field name="name">Equipment Maintenance Due Notification</field>
+            <field name="model_id" ref="model_guardpro_equipment"/>
+            <field name="subject">⚠ Maintenance Due: ${object.name} - ${object.equipment_type}</field>
+            <field name="email_from">${user.email_formatted}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: #f57c00;">⚠ Equipment Maintenance Due</h2>
+                    
+                    <div style="background: #fff3e0; border-left: 4px solid #f57c00; padding: 15px; margin: 20px 0;">
+                        <p style="margin: 0; font-size: 16px;">
+                            <strong>Equipment maintenance is due or overdue. Please schedule service immediately.</strong>
+                        </p>
+                    </div>
+                    
+                    <h3>Equipment Information:</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; width: 30%;">Equipment ID:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>${object.name}</strong></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Type:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.equipment_type.replace('_', ' ').title()}</td>
+                        </tr>
+                        % if object.serial_number:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Serial Number:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.serial_number}</td>
+                        </tr>
+                        % endif
+                        % if object.assigned_to:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Assigned To:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.assigned_to.name}</td>
+                        </tr>
+                        % endif
+                        % if object.site_id:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Location:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.site_id.name}</td>
+                        </tr>
+                        % endif
+                        % if object.last_maintenance_date:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Last Maintenance:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${format_date(object.last_maintenance_date)}</td>
+                        </tr>
+                        % endif
+                        % if object.next_maintenance_date:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Due Date:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                <strong style="color: #d32f2f;">${format_date(object.next_maintenance_date)}</strong>
+                            </td>
+                        </tr>
+                        % endif
+                    </table>
+                    
+                    <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0;">
+                        <h3 style="margin-top: 0; color: #1976d2;">📋 Required Actions:</h3>
+                        <ol style="margin-bottom: 0; line-height: 1.8;">
+                            <li>Schedule maintenance service immediately</li>
+                            <li>Remove equipment from service until maintenance is complete</li>
+                            <li>Update maintenance records in the system</li>
+                            <li>Return equipment to service only after inspection</li>
+                        </ol>
+                    </div>
+                    
+                    <div style="background: #ffebee; border: 2px solid #d32f2f; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                        <p style="margin: 0; color: #d32f2f;">
+                            <strong>⚠ SAFETY WARNING:</strong> Operating equipment beyond its maintenance schedule 
+                            may result in equipment failure, safety hazards, or compliance violations.
+                        </p>
+                    </div>
+                    
+                    <div style="margin-top: 30px;">
+                        <p>Please log in to GuardPro and update the maintenance status once service is completed.</p>
+                        <p>For assistance, contact the equipment manager.</p>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
+                        <p style="margin: 0; color: #999; font-size: 12px;">
+                            This is an automated message from GuardPro Equipment Management System
+                        </p>
+                    </div>
+                </div>
+            </field>
+        </record>
+
+    </data>
+</odoo>
+

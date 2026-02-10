@@ -1,0 +1,212 @@
+// GuardPro Main Styles - Enhanced Corporate Design
+
+// Corporate Neutral Color Palette
+$primary-color: #2C3E50;        // Deep Navy Blue
+$primary-light: #34495E;        // Slate Blue
+$secondary-color: #7F8C8D;      // Cool Gray
+$accent-color: #3498DB;         // Professional Blue
+$accent-light: #5DADE2;         // Light Blue
+
+// Status Colors - Muted & Professional
+$danger-color: #C0392B;         // Deep Red
+$success-color: #27AE60;        // Forest Green
+$warning-color: #D68910;        // Amber
+$info-color: #2980B9;           // Ocean Blue
+
+// Neutral Backgrounds
+$dark-bg: #1A252F;              // Deep Charcoal
+$light-bg: #ECF0F1;             // Soft White
+$card-bg: #FFFFFF;              // Pure White
+$border-color: #BDC3C7;         // Light Gray
+
+// Text Colors
+$text-primary: #2C3E50;         // Dark Slate
+$text-secondary: #7F8C8D;       // Gray
+$text-light: #95A5A6;           // Light Gray
+$text-white: #FFFFFF;
+
+// Dashboard Styles - Enhanced Corporate Design
+.o_guardpro_dashboard {
+    padding: 20px;
+    background: $light-bg;
+
+    .stat-card {
+        background: $card-bg;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba($border-color, 0.3);
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        h3 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+            background: linear-gradient(135deg, $primary-color, $accent-color);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        p {
+            color: $text-secondary;
+            margin: 8px 0 0 0;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            opacity: 0.15;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        &.primary {
+            border-left: 4px solid $primary-color;
+            .stat-icon { color: $primary-color; }
+        }
+
+        &.danger {
+            border-left: 4px solid $danger-color;
+            .stat-icon { color: $danger-color; }
+        }
+
+        &.success {
+            border-left: 4px solid $success-color;
+            .stat-icon { color: $success-color; }
+        }
+
+        &.warning {
+            border-left: 4px solid $warning-color;
+            .stat-icon { color: $warning-color; }
+        }
+
+        &.info {
+            border-left: 4px solid $info-color;
+            .stat-icon { color: $info-color; }
+        }
+    }
+
+    // Performance Metrics Cards
+    .performance-card {
+        background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
+        color: $text-white;
+        border: none;
+        
+        h3, p { color: $text-white; }
+        .stat-icon { color: rgba(255, 255, 255, 0.2); }
+    }
+}
+
+// Shift Calendar Styles
+.fc-event {
+    &.shift-scheduled {
+        background-color: $primary-color;
+    }
+
+    &.shift-in-progress {
+        background-color: $warning-color;
+    }
+
+    &.shift-completed {
+        background-color: $success-color;
+    }
+
+    &.shift-cancelled {
+        background-color: #9ca3af;
+        text-decoration: line-through;
+    }
+}
+
+// Incident Kanban Styles
+.o_kanban_record {
+    &.incident-critical {
+        border-left: 4px solid $danger-color;
+
+        .badge-critical {
+            background-color: $danger-color;
+        }
+    }
+
+    &.incident-high {
+        border-left: 4px solid $warning-color;
+    }
+}
+
+// Guard Profile Styles
+.guard-profile-card {
+    .oe_avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .badge-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: $primary-color;
+    }
+}
+
+// Checkpoint Map Styles
+.checkpoint-map {
+    height: 400px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+// Tour Progress
+.tour-progress {
+    .progress-bar {
+        transition: width 0.3s ease;
+    }
+
+    .checkpoint-list {
+        list-style: none;
+        padding: 0;
+
+        li {
+            padding: 10px;
+            border-bottom: 1px solid #e5e7eb;
+
+            &.scanned {
+                color: $success-color;
+
+                &::before {
+                    content: '✓ ';
+                    font-weight: bold;
+                }
+            }
+
+            &.pending {
+                color: #6b7280;
+            }
+        }
+    }
+}
+
+// Responsive
+@media (max-width: 768px) {
+    .o_guardpro_dashboard {
+        padding: 10px;
+
+        .stat-card {
+            margin-bottom: 15px;
+        }
+    }
+}
+
+

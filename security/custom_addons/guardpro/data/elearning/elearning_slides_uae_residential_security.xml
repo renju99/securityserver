@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- Course 22: UAE Residential Security Regulations - Slides -->
+
+        <!-- Module 1: Community and Villa Security -->
+        <record id="slide_uae_residential_m1_community_security" model="slide.slide">
+            <field name="name">Module 1: Residential Community and Villa Security</field>
+            <field name="channel_id" ref="elearning_course_uae_residential_security"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.67</field>
+            <field name="html_content">
+                &lt;h2&gt;Residential Community and Villa Security Standards in the UAE&lt;/h2&gt;
+                &lt;p&gt;Residential security in the UAE encompasses a wide range of communities from luxury villas to high-rise apartments. Security personnel must understand the unique challenges of protecting residential areas while respecting privacy and maintaining community standards.&lt;/p&gt;
+
+                &lt;h3&gt;Residential Security Challenges&lt;/h3&gt;
+                &lt;p&gt;Residential areas present distinct security considerations that differ from commercial environments:&lt;/p&gt;
+
+                &lt;h4&gt;Privacy vs. Security Balance&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Resident Privacy Rights:&lt;/strong&gt; Respect for personal living spaces and family life&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Community Standards:&lt;/strong&gt; Maintaining quality of life for all residents&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Family Protection:&lt;/strong&gt; Safeguarding children, elderly, and vulnerable residents&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Pet and Service Access:&lt;/strong&gt; Managing animal access and service provider entry&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Social Harmony:&lt;/strong&gt; Preventing conflicts while ensuring safety&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;24/7 Residential Security Needs&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Night Time Patrols:&lt;/strong&gt; Enhanced security during sleeping hours&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Early Morning Coverage:&lt;/strong&gt; Protection during transition periods&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Weekend Variations:&lt;/strong&gt; Different activity patterns on weekends&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Seasonal Changes:&lt;/strong&gt; Weather-related security adjustments&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;School Hours Security:&lt;/strong&gt; Protection during peak family movement times&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Access Control in Residential Communities&lt;/h3&gt;
+                &lt;p&gt;Residential access control must balance security with convenience and respect for residents' lifestyles:&lt;/p&gt;
+
+                &lt;h4&gt;Resident Access Management&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Digital Access Cards:&lt;/strong&gt; Secure entry systems with unique resident credentials&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Vehicle Sticker Systems:&lt;/strong&gt; Authorized vehicle identification and tracking&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Guest Registration:&lt;/strong&gt; Temporary access for visitors with resident approval&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Maid and Driver Access:&lt;/strong&gt; Controlled entry for household staff&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Access:&lt;/strong&gt; Unrestricted access for emergency services&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Visitor Management Procedures&lt;/h4&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Arrival Verification:&lt;/strong&gt; Confirm visitor identity and purpose&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resident Notification:&lt;/strong&gt; Contact resident for entry approval&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Authorization:&lt;/strong&gt; Issue temporary access credentials&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Vehicle Processing:&lt;/strong&gt; Register and direct visitor vehicles&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Entry Supervision:&lt;/strong&gt; Escort or monitor visitor movement&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Departure Processing:&lt;/strong&gt; Collect credentials and log exit&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h3&gt;Villa and Compound Security&lt;/h3&gt;
+                &lt;p&gt;Individual villa security requires specialized approaches due to isolated locations and valuable assets:&lt;/p&gt;
+
+                &lt;h4&gt;Perimeter Security Measures&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Boundary Patrols:&lt;/strong&gt; Regular inspection of perimeter fences and walls&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Gate Security:&lt;/strong&gt; Controlled access points with electronic locking&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Lighting Systems:&lt;/strong&gt; Adequate illumination of boundaries and pathways&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Surveillance Coverage:&lt;/strong&gt; CCTV monitoring of vulnerable areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Alarm Integration:&lt;/strong&gt; Connection to central monitoring systems&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Internal Security Protocols&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Key Management:&lt;/strong&gt; Secure distribution and tracking of access keys&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Cleaning Crew Control:&lt;/strong&gt; Supervised access for maintenance personnel&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Delivery Security:&lt;/strong&gt; Verification procedures for package and service deliveries&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Response:&lt;/strong&gt; Rapid response capabilities for villa emergencies&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Vacation Security:&lt;/strong&gt; Enhanced monitoring during resident absences&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Family and Child Safety&lt;/h3&gt;
+                &lt;p&gt;Protecting families and children is a paramount responsibility in residential security:&lt;/p&gt;
+
+                &lt;h4&gt;Child Safety Measures&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Pool Area Supervision:&lt;/strong&gt; Constant monitoring of swimming pools and water features&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Playground Security:&lt;/strong&gt; Regular inspection of children's play areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;School Bus Procedures:&lt;/strong&gt; Verification of authorized school transportation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Stranger Awareness:&lt;/strong&gt; Monitoring for unauthorized persons near children&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Missing Child Protocols:&lt;/strong&gt; Immediate response procedures for missing children&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Family Protection Standards&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Domestic Incident Response:&lt;/strong&gt; Professional handling of family disputes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Elderly Resident Support:&lt;/strong&gt; Special attention to senior citizen needs&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Medical Emergency Response:&lt;/strong&gt; Coordination with ambulance services&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Privacy Protection:&lt;/strong&gt; Respectful handling of sensitive family matters&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Community Support Services:&lt;/strong&gt; Connection to available social services&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Service Provider and Contractor Management&lt;/h3&gt;
+                &lt;p&gt;Residential communities frequently require access for various service providers and contractors:&lt;/p&gt;
+
+                &lt;h4&gt;Pre-Approval Procedures&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Company Verification:&lt;/strong&gt; Confirmation of legitimate business registration&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Insurance Validation:&lt;/strong&gt; Verification of liability and workers' compensation coverage&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Background Checks:&lt;/strong&gt; Criminal history verification for all workers&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Work Permits:&lt;/strong&gt; UAE work visa and labor card verification&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Reference Checks:&lt;/strong&gt; Previous client feedback and performance history&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;On-Site Supervision&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Work Area Control:&lt;/strong&gt; Designated work zones with minimal disruption&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Time Management:&lt;/strong&gt; Scheduled work hours with progress monitoring&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Equipment Security:&lt;/strong&gt; Protection of contractor tools and materials&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resident Communication:&lt;/strong&gt; Updates to affected residents about work progress&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Completion Verification:&lt;/strong&gt; Final inspection and resident approval&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Pet and Animal Management&lt;/h3&gt;
+                &lt;p&gt;Many residential communities have pets that require specific security considerations:&lt;/p&gt;
+
+                &lt;h4&gt;Pet Access Protocols&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Registration Requirements:&lt;/strong&gt; Mandatory pet registration with identification&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Vaccination Verification:&lt;/strong&gt; Proof of required veterinary vaccinations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Leash and Control Rules:&lt;/strong&gt; Pets must be controlled at all times&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Waste Management:&lt;/strong&gt; Proper disposal of pet waste&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Noise Control:&lt;/strong&gt; Prevention of excessive barking or disturbances&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Animal-Related Security Issues&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Stray Animal Control:&lt;/strong&gt; Removal of unauthorized animals from community&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Bite Incident Response:&lt;/strong&gt; Medical and reporting procedures for animal bites&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Pet Theft Prevention:&lt;/strong&gt; Security measures for valuable or pedigree animals&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Wildlife Encounters:&lt;/strong&gt; Management of encounters with desert wildlife&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Community Harmony Principle:&lt;/strong&gt; Residential security goes beyond protection to include maintaining quality of life, respecting privacy, and fostering a sense of community safety and well-being.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_uae_residential_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_uae_residential_security"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <record id="quiz_uae_residential_m1_q1" model="slide.question">
+            <field name="question">What is a key consideration in residential security that differs from commercial security?</field>
+            <field name="slide_id" ref="slide_uae_residential_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_uae_residential_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_residential_m1_q1"/>
+            <field name="text_value">Resident privacy and family protection</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_residential_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_residential_m1_q1"/>
+            <field name="text_value">High-value merchandise protection</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 2: High-Rise and Apartment Security -->
+        <record id="slide_uae_residential_m2_apartment_security" model="slide.slide">
+            <field name="name">Module 2: High-Rise Apartment and Building Security</field>
+            <field name="channel_id" ref="elearning_course_uae_residential_security"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.67</field>
+            <field name="html_content">
+                &lt;h2&gt;High-Rise Apartment and Building Security Standards&lt;/h2&gt;
+                &lt;p&gt;High-rise residential buildings present complex security challenges due to multiple floors, shared spaces, and large resident populations. Security personnel must coordinate comprehensive protection while managing daily building operations.&lt;/p&gt;
+
+                &lt;h3&gt;Building Access Control Systems&lt;/h3&gt;
+                &lt;p&gt;Modern high-rise buildings employ sophisticated access control systems to manage security and convenience:&lt;/p&gt;
+
+                &lt;h4&gt;Multi-Level Access Control&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Main Entrance Security:&lt;/strong&gt; Primary building access with multiple verification methods&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Floor-by-Floor Access:&lt;/strong&gt; Restricted elevator access to authorized floors&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Service Area Control:&lt;/strong&gt; Separate access for maintenance and service personnel&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Access:&lt;/strong&gt; Override systems for fire and emergency services&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Parking Integration:&lt;/strong&gt; Connected access between parking and building entry&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Digital Access Technologies&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Smart Card Systems:&lt;/strong&gt; Proximity cards with programmable access levels&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Mobile Access Apps:&lt;/strong&gt; Smartphone-based entry for residents&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Biometric Systems:&lt;/strong&gt; Fingerprint or facial recognition for enhanced security&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;PIN Code Access:&lt;/strong&gt; Numerical codes for temporary or guest access&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;QR Code Integration:&lt;/strong&gt; Quick access for delivery and service personnel&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Elevator and Vertical Transportation Security&lt;/h3&gt;
+                &lt;p&gt;Elevators are critical security components in high-rise buildings requiring specialized attention:&lt;/p&gt;
+
+                &lt;h4&gt;Elevator Security Measures&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Control Integration:&lt;/strong&gt; Card readers preventing unauthorized floor access&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;CCTV Coverage:&lt;/strong&gt; Cameras monitoring elevator lobbies and interiors&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Communication:&lt;/strong&gt; Intercom systems in all elevator cars&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Maintenance Access Control:&lt;/strong&gt; Restricted access for elevator technicians&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Fire Service Override:&lt;/strong&gt; Automatic return to ground floor during alarms&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Elevator Incident Response&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Entrapment Procedures:&lt;/strong&gt; Immediate response to stuck elevators&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Medical Emergencies:&lt;/strong&gt; Evacuation assistance for medical situations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Suspicious Activity:&lt;/strong&gt; Monitoring for unauthorized access attempts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Vandalism Prevention:&lt;/strong&gt; Regular inspection and maintenance&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;After-Hours Operation:&lt;/strong&gt; Special procedures for late-night elevator use&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Common Area Security&lt;/h3&gt;
+                &lt;p&gt;Shared spaces in high-rise buildings require comprehensive security coverage:&lt;/p&gt;
+
+                &lt;h4&gt;Lobby and Reception Security&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;24/7 Reception Coverage:&lt;/strong&gt; Constant monitoring of main entrance&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Visitor Management System:&lt;/strong&gt; Registration and access control for all visitors&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;CCTV Integration:&lt;/strong&gt; Comprehensive surveillance of public areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Package Management:&lt;/strong&gt; Secure handling of deliveries and mail&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Coordination:&lt;/strong&gt; Central point for building emergencies&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Amenity Area Protection&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Gym and Fitness Facilities:&lt;/strong&gt; Access control and equipment security&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Swimming Pool Safety:&lt;/strong&gt; Lifeguard coordination and supervision&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Children's Play Areas:&lt;/strong&gt; Age-appropriate security monitoring&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Business Centers:&lt;/strong&gt; Computer and office equipment protection&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Party Rooms and Lounges:&lt;/strong&gt; Event security and capacity management&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Parking and Garage Security&lt;/h3&gt;
+                &lt;p&gt;Underground and multi-level parking facilities require specialized security approaches:&lt;/p&gt;
+
+                &lt;h4&gt;Parking Access Control&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Automated Barriers:&lt;/strong&gt; Vehicle access control with license plate recognition&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Resident Parking Permits:&lt;/strong&gt; Designated spaces with access validation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Visitor Parking Management:&lt;/strong&gt; Temporary access for guests and deliveries&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Vehicle Access:&lt;/strong&gt; Priority access for emergency services&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Security Patrol Routes:&lt;/strong&gt; Regular inspection of all parking levels&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Parking Security Challenges&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Vehicle Theft Prevention:&lt;/strong&gt; Protection against vehicle break-ins and theft&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Vandalism Control:&lt;/strong&gt; Prevention of vehicle damage and graffiti&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Unauthorized Access:&lt;/strong&gt; Control of non-resident vehicle entry&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Lighting and Visibility:&lt;/strong&gt; Adequate illumination of all parking areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Response:&lt;/strong&gt; Rapid access for medical and fire emergencies&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Service and Maintenance Security&lt;/h3&gt;
+                &lt;p&gt;Building maintenance and service access requires careful management to maintain security:&lt;/p&gt;
+
+                &lt;h4&gt;Contractor Access Procedures&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Pre-Approval Process:&lt;/strong&gt; Company verification and insurance validation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Escorted Access:&lt;/strong&gt; Security personnel accompaniment during work&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Work Area Isolation:&lt;/strong&gt; Restricted access to work zones&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Key and Access Control:&lt;/strong&gt; Tracking of master keys and access cards&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Completion Verification:&lt;/strong&gt; Final inspection and access revocation&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Utility and Infrastructure Protection&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Electrical Room Security:&lt;/strong&gt; Controlled access to power distribution systems&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Water System Protection:&lt;/strong&gt; Safeguarding plumbing and water infrastructure&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;HVAC System Security:&lt;/strong&gt; Protection of air conditioning and ventilation systems&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication Infrastructure:&lt;/strong&gt; Security of internet and phone systems&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Fire Suppression Systems:&lt;/strong&gt; Protection of sprinkler and alarm systems&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Emergency Evacuation in High-Rise Buildings&lt;/h3&gt;
+                &lt;p&gt;High-rise buildings require sophisticated evacuation procedures due to height and complexity:&lt;/p&gt;
+
+                &lt;h4&gt;Evacuation Planning Considerations&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Vertical Evacuation:&lt;/strong&gt; Multi-floor coordination and stairwell management&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Elevator Restrictions:&lt;/strong&gt; Prohibition of elevator use during fire emergencies&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Assembly Area Management:&lt;/strong&gt; Safe gathering points away from building&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Disabled Resident Assistance:&lt;/strong&gt; Special procedures for mobility-impaired individuals&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication Systems:&lt;/strong&gt; Public address and mobile alert coordination&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Phased Evacuation Procedures&lt;/h4&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Initial Alert:&lt;/strong&gt; Activate building alarm and notification systems&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Zone Assessment:&lt;/strong&gt; Identify affected floors and safe evacuation routes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Priority Evacuation:&lt;/strong&gt; Remove residents from immediate danger zones first&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Floor-by-Floor Clearing:&lt;/strong&gt; Systematic evacuation starting from affected areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Assembly Point Management:&lt;/strong&gt; Account for all residents at designated safe areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Re-entry Coordination:&lt;/strong&gt; Controlled return to building when safe&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h3&gt;Technology Integration in High-Rise Security&lt;/h3&gt;
+                &lt;p&gt;Modern high-rise buildings utilize advanced technology for comprehensive security coverage:&lt;/p&gt;
+
+                &lt;h4&gt;Integrated Security Systems&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Building Management Systems:&lt;/strong&gt; Centralized control of all building systems&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;IP-Based CCTV Networks:&lt;/strong&gt; High-definition surveillance with remote monitoring&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Control Integration:&lt;/strong&gt; Unified credential system across all entry points&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Communication:&lt;/strong&gt; Mass notification and two-way communication systems&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Mobile Security Applications:&lt;/strong&gt; Real-time communication with security personnel&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Data Security and Privacy&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Resident Data Protection:&lt;/strong&gt; Secure handling of personal and access information&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;CCTV Privacy Compliance:&lt;/strong&gt; Adherence to privacy laws and regulations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Network Security:&lt;/strong&gt; Protection of building management and security systems&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Digital Forensics Capability:&lt;/strong&gt; Preservation of electronic evidence&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;High-Rise Security Principle:&lt;/strong&gt; Success in high-rise security depends on seamless integration of technology, procedures, and personnel working together to create a secure, comfortable living environment for all residents.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_uae_residential_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_uae_residential_security"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.08</field>
+        </record>
+
+        <record id="quiz_uae_residential_m2_q1" model="slide.question">
+            <field name="question">What is a critical security consideration in high-rise building elevators?</field>
+            <field name="slide_id" ref="slide_uae_residential_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_uae_residential_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_residential_m2_q1"/>
+            <field name="text_value">Floor-by-floor access control</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_uae_residential_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_uae_residential_m2_q1"/>
+            <field name="text_value">Elevator music selection</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Final Assessment -->
+        <record id="slide_uae_residential_final" model="slide.slide">
+            <field name="name">Final Assessment: UAE Residential Security Regulations</field>
+            <field name="channel_id" ref="elearning_course_uae_residential_security"/>
+            <field name="sequence">70</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.17</field>
+            <field name="html_content">
+                &lt;h2&gt;Final Examination: UAE Residential Security Regulations&lt;/h2&gt;
+                &lt;p&gt;&lt;strong&gt;Assessment Overview:&lt;/strong&gt;&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;30 multiple-choice questions&lt;/li&gt;
+                    &lt;li&gt;Covers community security, villa protection, and high-rise building security&lt;/li&gt;
+                    &lt;li&gt;85% passing score required&lt;/li&gt;
+                    &lt;li&gt;60 minutes time limit&lt;/li&gt;
+                    &lt;li&gt;Can retake once if needed&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;p&gt;&lt;strong&gt;Key Topics Covered:&lt;/strong&gt;&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Residential community access control&lt;/li&gt;
+                    &lt;li&gt;Villa and compound security standards&lt;/li&gt;
+                    &lt;li&gt;Family and child safety measures&lt;/li&gt;
+                    &lt;li&gt;High-rise building security protocols&lt;/li&gt;
+                    &lt;li&gt;Parking facility security&lt;/li&gt;
+                    &lt;li&gt;Emergency evacuation procedures&lt;/li&gt;
+                    &lt;li&gt;Service provider management&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;p&gt;Upon passing, you'll receive your UAE Residential Security Regulations certification, demonstrating your expertise in protecting residential communities in the UAE!&lt;/p&gt;
+            </field>
+        </record>
+
+    </data>
+</odoo>

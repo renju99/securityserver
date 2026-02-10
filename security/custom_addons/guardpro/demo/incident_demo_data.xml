@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- More Comprehensive Incident Reports -->
+        
+        <!-- Critical Incidents -->
+        <record id="incident_ts_critical_001" model="incident.report">
+            <field name="title">Medical Emergency - Slip and Fall</field>
+            <field name="guard_id" ref="guard_john_smith"/>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="shift_id" ref="shift_ts_past_1"/>
+            <field name="category_id" ref="incident_cat_medical"/>
+            <field name="severity">critical</field>
+            <field name="priority">3</field>
+            <field name="incident_datetime" eval="(datetime.now() - timedelta(days=7, hours=5)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="reported_datetime" eval="(datetime.now() - timedelta(days=7, hours=5) + timedelta(minutes=1)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="location">North Parking Structure - Level 2</field>
+            <field name="latitude">24.9548</field>
+            <field name="longitude">55.1645</field>
+            <field name="description">&lt;p&gt;Elderly female resident slipped on wet floor in parking structure. Victim appeared to have injured her hip and was unable to stand.&lt;/p&gt;
+&lt;p&gt;Emergency services contacted immediately. First aid provided while waiting for ambulance.&lt;/p&gt;</field>
+            <field name="persons_involved">Mrs. Sarah Hassan (65 years old), Resident of Tower B, Unit 302</field>
+            <field name="witnesses">Mr. Ahmed Ali (neighbor) - Contact: +971-50-123-4567</field>
+            <field name="immediate_actions">1. Called emergency services (999)
+2. Provided first aid and comfort to victim
+3. Secured area to prevent further accidents
+4. Notified site manager and family
+5. Documented incident with photos</field>
+            <field name="medical_required" eval="True"/>
+            <field name="ambulance_called" eval="True"/>
+            <field name="injuries" eval="True"/>
+            <field name="injury_details">Suspected hip fracture. Victim conscious and responsive but in significant pain.</field>
+            <field name="status">closed</field>
+            <field name="client_notified" eval="True"/>
+            <field name="client_notification_datetime" eval="(datetime.now() - timedelta(days=7, hours=4, minutes=30)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="reviewed_by" ref="base.user_admin"/>
+            <field name="review_datetime" eval="(datetime.now() - timedelta(days=6, hours=20)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="review_notes">Incident handled professionally. Guard response was exemplary. Maintenance has been notified to improve drainage and add warning signs in parking structure.</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('incident_tag_urgent'), ref('incident_tag_injury')])]"/>
+        </record>
+
+        <!-- High Severity Incidents -->
+        <record id="incident_ts_theft_001" model="incident.report">
+            <field name="title">Vehicle Theft Attempt</field>
+            <field name="guard_id" ref="guard_michael_brown"/>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="shift_id" ref="shift_ts_past_2"/>
+            <field name="category_id" ref="incident_cat_theft"/>
+            <field name="severity">high</field>
+            <field name="priority">2</field>
+            <field name="incident_datetime" eval="(datetime.now() - timedelta(days=6, hours=10)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="reported_datetime" eval="(datetime.now() - timedelta(days=6, hours=9, minutes=55)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="location">North Parking Structure - Level 3</field>
+            <field name="latitude">24.9548</field>
+            <field name="longitude">55.1645</field>
+            <field name="description">&lt;p&gt;During routine patrol at 02:15, observed two suspicious individuals attempting to break into a parked vehicle (Black Mercedes, Plate: ABC-12345).&lt;/p&gt;
+&lt;p&gt;Suspects fled upon seeing security guard approaching. Police were notified immediately.&lt;/p&gt;</field>
+            <field name="persons_involved">Two male suspects (both approximately 25-30 years old, wearing dark clothing)</field>
+            <field name="witnesses">Guard Michael Brown (first responder)</field>
+            <field name="immediate_actions">1. Approached suspects while calling for backup
+2. Suspects fled through stairwell exit
+3. Secured crime scene and vehicle
+4. Called police (999)
+5. Reviewed CCTV footage
+6. Contacted vehicle owner</field>
+            <field name="police_notified" eval="True"/>
+            <field name="police_report_number">DXB-2024-067834</field>
+            <field name="property_damage" eval="True"/>
+            <field name="damage_details">Minor scratches on driver's side door lock area from attempted break-in</field>
+            <field name="estimated_cost">500.00</field>
+            <field name="status">investigating</field>
+            <field name="client_notified" eval="True"/>
+            <field name="client_notification_datetime" eval="(datetime.now() - timedelta(days=6, hours=9)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="requires_followup" eval="True"/>
+            <field name="followup_notes">Police investigation ongoing. CCTV footage provided. Enhanced parking patrols implemented.</field>
+            <field name="reviewed_by" ref="base.user_admin"/>
+            <field name="review_datetime" eval="(datetime.now() - timedelta(days=5, hours=18)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="review_notes">Excellent response by guard. Quick action prevented vehicle theft. Police are using CCTV footage in investigation.</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('incident_tag_police'), ref('incident_tag_damage'), ref('incident_tag_followup')])]"/>
+        </record>
+
+        <record id="incident_sp_fire_001" model="incident.report">
+            <field name="title">Small Fire in Trash Container</field>
+            <field name="guard_id" ref="guard_sarah_johnson"/>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="shift_id" ref="shift_sp_past_1"/>
+            <field name="category_id" ref="incident_cat_fire"/>
+            <field name="severity">high</field>
+            <field name="priority">2</field>
+            <field name="incident_datetime" eval="(datetime.now() - timedelta(days=7, hours=5)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="reported_datetime" eval="(datetime.now() - timedelta(days=7, hours=4, minutes=58)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="location">Central Park Area - Near children's playground</field>
+            <field name="latitude">25.0728</field>
+            <field name="longitude">55.1845</field>
+            <field name="description">&lt;p&gt;Small fire discovered in outdoor trash container near park area. Fire appeared to be caused by improperly discarded cigarette or hot coals.&lt;/p&gt;
+&lt;p&gt;Fire extinguished immediately using portable fire extinguisher. No significant damage or injuries.&lt;/p&gt;</field>
+            <field name="persons_involved">None</field>
+            <field name="witnesses">Guard Sarah Johnson (first responder)</field>
+            <field name="immediate_actions">1. Used portable fire extinguisher to put out fire
+2. Called fire department to confirm no hidden hot spots
+3. Secured area and ventilated smoke
+4. Notified site manager
+5. Documented with photos</field>
+            <field name="fire_department" eval="True"/>
+            <field name="property_damage" eval="True"/>
+            <field name="damage_details">Trash container damaged by fire. Needs replacement. Minor scorching on nearby ground surface.</field>
+            <field name="estimated_cost">300.00</field>
+            <field name="status">resolved</field>
+            <field name="client_notified" eval="True"/>
+            <field name="client_notification_datetime" eval="(datetime.now() - timedelta(days=7, hours=4, minutes=30)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="reviewed_by" ref="base.user_admin"/>
+            <field name="review_datetime" eval="(datetime.now() - timedelta(days=6, hours=20)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="review_notes">Guard responded appropriately. Quick action prevented potential spread. Maintenance installing metal trash containers to reduce fire risk.</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('incident_tag_damage')])]"/>
+        </record>
+
+        <!-- Medium Severity Incidents -->
+        <record id="incident_ts_disturbance_001" model="incident.report">
+            <field name="title">Noise Complaint - Late Night Party</field>
+            <field name="guard_id" ref="guard_david_wilson"/>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="shift_id" ref="shift_ts_past_3"/>
+            <field name="category_id" ref="incident_cat_disturbance"/>
+            <field name="severity">medium</field>
+            <field name="priority">1</field>
+            <field name="incident_datetime" eval="(datetime.now() - timedelta(days=5, hours=3)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="reported_datetime" eval="(datetime.now() - timedelta(days=5, hours=2, minutes=50)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="location">Residential Tower A - Unit 1504</field>
+            <field name="description">&lt;p&gt;Multiple residents called security about excessive noise from party in Unit 1504. Loud music and voices disturbing neighbors after midnight.&lt;/p&gt;
+&lt;p&gt;Responded to complaints and spoke with residents hosting party. They agreed to reduce noise levels.&lt;/p&gt;</field>
+            <field name="persons_involved">Residents of Unit 1504 (Mr. Khalid Ahmed)</field>
+            <field name="witnesses">Multiple complainants from floors 14-16</field>
+            <field name="immediate_actions">1. Responded to noise complaints
+2. Spoke with residents hosting party
+3. Requested reduction of noise levels
+4. Documented incident
+5. Followed up after 30 minutes to verify compliance</field>
+            <field name="status">resolved</field>
+            <field name="client_notified" eval="True"/>
+            <field name="client_notification_datetime" eval="(datetime.now() - timedelta(days=4, hours=20)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="reviewed_by" ref="base.user_admin"/>
+            <field name="review_datetime" eval="(datetime.now() - timedelta(days=4, hours=18)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="review_notes">Issue resolved peacefully. Residents cooperative. Management team to send reminder about community noise policies.</field>
+        </record>
+
+        <record id="incident_sp_vandalism_001" model="incident.report">
+            <field name="title">Graffiti on Community Wall</field>
+            <field name="guard_id" ref="guard_lisa_thompson"/>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="shift_id" ref="shift_sp_past_2"/>
+            <field name="category_id" ref="incident_cat_vandalism"/>
+            <field name="severity">medium</field>
+            <field name="priority">1</field>
+            <field name="incident_datetime" eval="(datetime.now() - timedelta(days=6, hours=2)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="reported_datetime" eval="(datetime.now() - timedelta(days=6, hours=1, minutes=45)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="location">Perimeter wall near back gate</field>
+            <field name="latitude">25.0720</field>
+            <field name="longitude">55.1840</field>
+            <field name="description">&lt;p&gt;Graffiti discovered on exterior perimeter wall during evening patrol. Appears to be spray paint tags with no offensive content.&lt;/p&gt;
+&lt;p&gt;Area appears to be visible from service road. Likely occurred during early evening hours before patrol.&lt;/p&gt;</field>
+            <field name="persons_involved">Unknown vandals</field>
+            <field name="witnesses">None</field>
+            <field name="immediate_actions">1. Documented vandalism with photos
+2. Checked CCTV footage (limited coverage in this area)
+3. Notified maintenance team
+4. Increased patrol frequency in area
+5. Reported to management</field>
+            <field name="property_damage" eval="True"/>
+            <field name="damage_details">Spray paint graffiti on approximately 3 meter section of perimeter wall</field>
+            <field name="estimated_cost">200.00</field>
+            <field name="status">resolved</field>
+            <field name="requires_followup" eval="True"/>
+            <field name="followup_notes">Maintenance team cleaned graffiti. Recommendation to install additional lighting and CCTV coverage in this area.</field>
+            <field name="followup_completed" eval="True"/>
+            <field name="client_notified" eval="True"/>
+            <field name="reviewed_by" ref="base.user_admin"/>
+            <field name="review_datetime" eval="(datetime.now() - timedelta(days=5, hours=16)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="review_notes">Issue resolved. Maintenance completed cleanup. Security improvements recommended for this area.</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('incident_tag_damage'), ref('incident_tag_followup')])]"/>
+        </record>
+
+        <!-- Low Severity Incidents -->
+        <record id="incident_ts_equipment_001" model="incident.report">
+            <field name="title">CCTV Camera Malfunction</field>
+            <field name="guard_id" ref="guard_kevin_lee"/>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="category_id" ref="incident_cat_equipment"/>
+            <field name="severity">low</field>
+            <field name="priority">1</field>
+            <field name="incident_datetime" eval="(datetime.now() - timedelta(days=4, hours=6)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="reported_datetime" eval="(datetime.now() - timedelta(days=4, hours=6) + timedelta(minutes=1)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="location">Retail Area - Camera #12</field>
+            <field name="description">&lt;p&gt;CCTV Camera #12 covering retail plaza showing "No Signal" error on monitoring system.&lt;/p&gt;
+&lt;p&gt;Camera appears to be non-functional. Maintenance team notified for repair.&lt;/p&gt;</field>
+            <field name="immediate_actions">1. Documented camera issue
+2. Notified IT/Maintenance team
+3. Increased physical patrols in affected area until repair
+4. Logged in maintenance system</field>
+            <field name="status">resolved</field>
+            <field name="reviewed_by" ref="base.user_admin"/>
+            <field name="review_datetime" eval="(datetime.now() - timedelta(days=3, hours=18)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="review_notes">Camera repaired. Cable connection issue resolved by maintenance team.</field>
+        </record>
+
+        <record id="incident_sp_weather_001" model="incident.report">
+            <field name="title">Heavy Rain - Minor Flooding</field>
+            <field name="guard_id" ref="guard_robert_taylor"/>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="category_id" ref="incident_cat_weather"/>
+            <field name="severity">low</field>
+            <field name="priority">1</field>
+            <field name="incident_datetime" eval="(datetime.now() - timedelta(days=3, hours=8)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="reported_datetime" eval="(datetime.now() - timedelta(days=3, hours=7, minutes=55)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="location">Clubhouse - Front entrance area</field>
+            <field name="latitude">25.0740</field>
+            <field name="longitude">55.1860</field>
+            <field name="description">&lt;p&gt;Heavy rainfall caused minor water pooling at clubhouse entrance. Drainage system appears partially blocked.&lt;/p&gt;
+&lt;p&gt;No significant damage. Area cleared and maintenance notified for drain cleaning.&lt;/p&gt;</field>
+            <field name="immediate_actions">1. Placed warning signs
+2. Cleared visible debris from drains
+3. Notified maintenance team
+4. Monitored situation during rainfall</field>
+            <field name="property_damage" eval="False"/>
+            <field name="status">closed</field>
+            <field name="client_notified" eval="True"/>
+            <field name="reviewed_by" ref="base.user_admin"/>
+            <field name="review_datetime" eval="(datetime.now() - timedelta(days=2, hours=20)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="review_notes">Maintenance cleaned drains. No further issues.</field>
+        </record>
+
+        <!-- Recent Open Incident -->
+        <record id="incident_ts_suspicious_recent" model="incident.report">
+            <field name="title">Suspicious Vehicle in Parking Area</field>
+            <field name="guard_id" ref="guard_emily_davis"/>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="category_id" ref="incident_cat_suspicious"/>
+            <field name="severity">medium</field>
+            <field name="priority">2</field>
+            <field name="incident_datetime" eval="(datetime.now() - timedelta(hours=6)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="reported_datetime" eval="(datetime.now() - timedelta(hours=5, minutes=55)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="location">North Parking Structure - Level 1</field>
+            <field name="latitude">24.9548</field>
+            <field name="longitude">55.1645</field>
+            <field name="description">&lt;p&gt;Unfamiliar vehicle (white van, no company markings) parked in visitor area for extended period (4+ hours). Driver appears to be sitting in vehicle for prolonged time.&lt;/p&gt;
+&lt;p&gt;Guard approached vehicle to inquire. Driver claims to be waiting for friend but could not provide specific details.&lt;/p&gt;</field>
+            <field name="persons_involved">Unknown male driver (approx 35 years old)</field>
+            <field name="witnesses">Guard Emily Davis</field>
+            <field name="immediate_actions">1. Documented vehicle details and license plate
+2. Approached driver and requested identification
+3. Driver left premises after questioning
+4. Increased monitoring of parking areas
+5. Incident logged and photo evidence captured</field>
+            <field name="status">under_review</field>
+            <field name="requires_followup" eval="True"/>
+            <field name="followup_notes">Vehicle details logged in security database. Will monitor for return visits.</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('incident_tag_followup')])]"/>
+        </record>
+
+    </data>
+</odoo>
+

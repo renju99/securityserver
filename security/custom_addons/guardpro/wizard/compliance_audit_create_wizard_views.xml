@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Compliance Audit Create Wizard Form View -->
+    <record id="view_compliance_audit_create_wizard_form" model="ir.ui.view">
+        <field name="name">compliance.audit.create.wizard.form</field>
+        <field name="model">compliance.audit.create.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Create Audit from Template">
+                <group>
+                    <group>
+                        <field name="template_id" options="{'no_create': True, 'no_edit': True}"/>
+                        <field name="audit_type"/>
+                        <field name="audit_date"/>
+                    </group>
+                    <group>
+                        <field name="auditor_id"/>
+                        <field name="auditor_team_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <group>
+                    <group>
+                        <field name="site_id" invisible="audit_type != 'site'" required="audit_type == 'site'"/>
+                        <field name="guard_id" invisible="audit_type != 'guard'" required="audit_type == 'guard'"/>
+                        <field name="equipment_id" invisible="audit_type != 'equipment'" required="audit_type == 'equipment'"/>
+                    </group>
+                    <group>
+                        <field name="frequency"/>
+                        <field name="is_scheduled" widget="boolean_toggle"/>
+                        <field name="is_surprise" widget="boolean_toggle"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_create_audit" string="Create Audit" type="object" class="oe_highlight"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
+
+
+
+
+
+
+
+
+

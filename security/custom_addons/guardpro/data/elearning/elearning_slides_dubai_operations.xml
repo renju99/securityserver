@@ -1,0 +1,622 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- Module 1: Shopping Mall Security -->
+        <record id="slide_dubai_m1_mall" model="slide.slide">
+            <field name="name">Module 1: Shopping Mall Security in Dubai</field>
+            <field name="channel_id" ref="elearning_course_dubai_operations"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.6</field>
+            <field name="html_content">
+                &lt;h2&gt;Security Operations in Dubai Malls&lt;/h2&gt;
+                &lt;p&gt;Dubai is home to some of the world's largest and busiest shopping malls. Security operations require specialized knowledge and skills.&lt;/p&gt;
+                
+                &lt;h3&gt;Major Dubai Malls:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Dubai Mall (world's largest by total area)&lt;/li&gt;
+                    &lt;li&gt;Mall of the Emirates&lt;/li&gt;
+                    &lt;li&gt;Ibn Battuta Mall&lt;/li&gt;
+                    &lt;li&gt;Dubai Festival City Mall&lt;/li&gt;
+                    &lt;li&gt;City Centre Deira&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Mall Security Responsibilities:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Control:&lt;/strong&gt; Staff and VIP entrances&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Parking Management:&lt;/strong&gt; Monitor parking areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Loss Prevention:&lt;/strong&gt; Prevent theft and shoplifting&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Customer Safety:&lt;/strong&gt; Assist shoppers, lost children&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Patrol:&lt;/strong&gt; Regular rounds of all areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;CCTV Monitoring:&lt;/strong&gt; Active surveillance&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Response:&lt;/strong&gt; Fire, medical, evacuation&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Common Mall Incidents:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Shoplifting and theft&lt;/li&gt;
+                    &lt;li&gt;Lost children&lt;/li&gt;
+                    &lt;li&gt;Medical emergencies&lt;/li&gt;
+                    &lt;li&gt;Slip and fall accidents&lt;/li&gt;
+                    &lt;li&gt;Disputes between customers&lt;/li&gt;
+                    &lt;li&gt;Suspicious packages&lt;/li&gt;
+                    &lt;li&gt;Fire alarm activations&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Dress Code Enforcement:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Politely remind visitors of mall dress code&lt;/li&gt;
+                    &lt;li&gt;Modest clothing required (shoulders and knees covered)&lt;/li&gt;
+                    &lt;li&gt;No offensive language or images on clothing&lt;/li&gt;
+                    &lt;li&gt;Swimwear not permitted in public areas&lt;/li&gt;
+                    &lt;li&gt;Be respectful and professional when addressing violations&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Lost Child Protocol:&lt;/h3&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Stay with child, don't move from location&lt;/li&gt;
+                    &lt;li&gt;Radio security control immediately&lt;/li&gt;
+                    &lt;li&gt;Gather information: child's name, age, parent description&lt;/li&gt;
+                    &lt;li&gt;Keep child calm and comfortable&lt;/li&gt;
+                    &lt;li&gt;Security control makes announcement&lt;/li&gt;
+                    &lt;li&gt;Escort child to security office&lt;/li&gt;
+                    &lt;li&gt;Verify parent identity before release&lt;/li&gt;
+                    &lt;li&gt;Document incident&lt;/li&gt;
+                &lt;/ol&gt;
+                
+                &lt;h3&gt;Peak Periods and Special Events:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Dubai Shopping Festival (DSF):&lt;/strong&gt; January-February&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Dubai Summer Surprises (DSS):&lt;/strong&gt; July-August&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Eid Holidays:&lt;/strong&gt; Extremely busy periods&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Weekends:&lt;/strong&gt; Thursday-Saturday high traffic&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Evening Hours:&lt;/strong&gt; 6 PM - 11 PM busiest times&lt;/li&gt;
+                    &lt;li&gt;Extra security required during these periods&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Parking Area Security:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Monitor for suspicious activity&lt;/li&gt;
+                    &lt;li&gt;Assist with vehicle lockouts&lt;/li&gt;
+                    &lt;li&gt;Report abandoned vehicles&lt;/li&gt;
+                    &lt;li&gt;Prevent car break-ins&lt;/li&gt;
+                    &lt;li&gt;Manage traffic flow&lt;/li&gt;
+                    &lt;li&gt;Ensure emergency access lanes clear&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_dubai_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_dubai_operations"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_dubai_m1_q1" model="slide.question">
+            <field name="question">What is the world's largest shopping mall by total area?</field>
+            <field name="slide_id" ref="slide_dubai_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_dubai_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_dubai_m1_q1"/>
+            <field name="text_value">Dubai Mall</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_dubai_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_dubai_m1_q1"/>
+            <field name="text_value">Mall of the Emirates</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 2: Residential Community Security -->
+        <record id="slide_dubai_m2_residential" model="slide.slide">
+            <field name="name">Module 2: Residential Community Security</field>
+            <field name="channel_id" ref="elearning_course_dubai_operations"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.6</field>
+            <field name="html_content">
+                &lt;h2&gt;Securing Residential Communities in Dubai&lt;/h2&gt;
+                
+                &lt;h3&gt;Types of Residential Properties:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Gated Communities:&lt;/strong&gt; Emirates Hills, Arabian Ranches, Dubai Marina&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;High-rise Towers:&lt;/strong&gt; Downtown Dubai, JBR, Business Bay&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Villa Compounds:&lt;/strong&gt; Springs, Meadows, Motor City&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Apartment Complexes:&lt;/strong&gt; Various locations&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Gate/Reception Duties:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Resident Verification:&lt;/strong&gt; Check access cards/passes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Visitor Management:&lt;/strong&gt; Register visitors, issue temporary passes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Vehicle Registration:&lt;/strong&gt; Log vehicle details&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Delivery Coordination:&lt;/strong&gt; Manage deliveries and couriers&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Contractor Access:&lt;/strong&gt; Verify and escort contractors&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Package Handling:&lt;/strong&gt; Receive and log deliveries&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Domestic Worker Entry Procedures:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Verify domestic worker ID and sponsorship&lt;/li&gt;
+                    &lt;li&gt;Check authorization from sponsor/employer&lt;/li&gt;
+                    &lt;li&gt;Log entry and exit times&lt;/li&gt;
+                    &lt;li&gt;Be respectful and professional&lt;/li&gt;
+                    &lt;li&gt;Follow community-specific policies&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Patrol Responsibilities:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Regular patrols of common areas&lt;/li&gt;
+                    &lt;li&gt;Check perimeter fencing and gates&lt;/li&gt;
+                    &lt;li&gt;Monitor swimming pools and gyms&lt;/li&gt;
+                    &lt;li&gt;Inspect parking areas&lt;/li&gt;
+                    &lt;li&gt;Check exterior lighting&lt;/li&gt;
+                    &lt;li&gt;Report maintenance issues&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Common Residential Issues:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Noise complaints&lt;/li&gt;
+                    &lt;li&gt;Parking violations&lt;/li&gt;
+                    &lt;li&gt;Pool/facility rule violations&lt;/li&gt;
+                    &lt;li&gt;Lost access cards&lt;/li&gt;
+                    &lt;li&gt;Domestic disputes&lt;/li&gt;
+                    &lt;li&gt;Water leaks/maintenance emergencies&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Emergency Procedures:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Know all emergency exits and assembly points&lt;/li&gt;
+                    &lt;li&gt;Maintain emergency contact list&lt;/li&gt;
+                    &lt;li&gt;Fire alarm response protocol&lt;/li&gt;
+                    &lt;li&gt;Water/gas leak procedures&lt;/li&gt;
+                    &lt;li&gt;Medical emergency response&lt;/li&gt;
+                    &lt;li&gt;Coordinate with emergency services&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Privacy and Discretion:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Respect resident privacy at all times&lt;/li&gt;
+                    &lt;li&gt;Never discuss residents with others&lt;/li&gt;
+                    &lt;li&gt;Maintain confidentiality of resident information&lt;/li&gt;
+                    &lt;li&gt;Be discreet when dealing with sensitive issues&lt;/li&gt;
+                    &lt;li&gt;No photography of residents or properties&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_dubai_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_dubai_operations"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_dubai_m2_q1" model="slide.question">
+            <field name="question">When managing visitors in a residential community, what should you always do?</field>
+            <field name="slide_id" ref="slide_dubai_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_dubai_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_dubai_m2_q1"/>
+            <field name="text_value">Register visitors and issue temporary passes</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_dubai_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_dubai_m2_q1"/>
+            <field name="text_value">Allow everyone in without checking</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 3: Commercial Building Security -->
+        <record id="slide_dubai_m3_commercial" model="slide.slide">
+            <field name="name">Module 3: Commercial Building &amp; Office Tower Security</field>
+            <field name="channel_id" ref="elearning_course_dubai_operations"/>
+            <field name="sequence">30</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.6</field>
+            <field name="html_content">
+                &lt;h2&gt;Office Tower and Commercial Building Security&lt;/h2&gt;
+                
+                &lt;h3&gt;Major Business Districts in Dubai:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Downtown Dubai (Burj Khalifa area)&lt;/li&gt;
+                    &lt;li&gt;Business Bay&lt;/li&gt;
+                    &lt;li&gt;Dubai International Financial Centre (DIFC)&lt;/li&gt;
+                    &lt;li&gt;Dubai Media City&lt;/li&gt;
+                    &lt;li&gt;Dubai Internet City&lt;/li&gt;
+                    &lt;li&gt;Jumeirah Lakes Towers (JLT)&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Lobby Security Duties:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Control:&lt;/strong&gt; Employee and visitor badge verification&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Visitor Registration:&lt;/strong&gt; Check-in/check-out system&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Visitor Escorts:&lt;/strong&gt; To secured areas when required&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Package Screening:&lt;/strong&gt; X-ray and inspection&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Customer Service:&lt;/strong&gt; Directions and assistance&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;CCTV Monitoring:&lt;/strong&gt; Continuous surveillance&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Elevator and Access Control:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Monitor access card readers&lt;/li&gt;
+                    &lt;li&gt;Manage elevator access to secured floors&lt;/li&gt;
+                    &lt;li&gt;Escort unauthorized persons off premises&lt;/li&gt;
+                    &lt;li&gt;Respond to access control alarms&lt;/li&gt;
+                    &lt;li&gt;Verify after-hours access authorization&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;After-Hours Security:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Verify employee authorization for after-hours access&lt;/li&gt;
+                    &lt;li&gt;Log all after-hours entries and exits&lt;/li&gt;
+                    &lt;li&gt;Conduct regular patrol of all floors&lt;/li&gt;
+                    &lt;li&gt;Check all doors and windows&lt;/li&gt;
+                    &lt;li&gt;Verify equipment is powered down&lt;/li&gt;
+                    &lt;li&gt;Check for water leaks or maintenance issues&lt;/li&gt;
+                    &lt;li&gt;Respond to alarm activations&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;VIP and Executive Protection:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Maintain confidentiality of executive schedules&lt;/li&gt;
+                    &lt;li&gt;Screen visitors to executive floors&lt;/li&gt;
+                    &lt;li&gt;Coordinate with executive protection details&lt;/li&gt;
+                    &lt;li&gt;Secure elevator access during VIP arrivals&lt;/li&gt;
+                    &lt;li&gt;Be aware of potential threats&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Contractor and Vendor Management:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Verify contractor authorization&lt;/li&gt;
+                    &lt;li&gt;Check work permits and insurance&lt;/li&gt;
+                    &lt;li&gt;Escort to work areas&lt;/li&gt;
+                    &lt;li&gt;Monitor for safety compliance&lt;/li&gt;
+                    &lt;li&gt;Log entry and exit with equipment&lt;/li&gt;
+                    &lt;li&gt;Inspect work area after completion&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Business Continuity and Emergency:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Know building evacuation plan&lt;/li&gt;
+                    &lt;li&gt;Assembly point locations&lt;/li&gt;
+                    &lt;li&gt;Emergency contact procedures&lt;/li&gt;
+                    &lt;li&gt;Building systems shutdown procedures&lt;/li&gt;
+                    &lt;li&gt;Fire warden coordination&lt;/li&gt;
+                    &lt;li&gt;Emergency operations center location&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Cybersecurity Awareness:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Never leave workstations unattended and unlocked&lt;/li&gt;
+                    &lt;li&gt;Report suspicious persons near server rooms&lt;/li&gt;
+                    &lt;li&gt;Ensure visitors don't have unauthorized access to IT areas&lt;/li&gt;
+                    &lt;li&gt;Report any USB devices or equipment left behind&lt;/li&gt;
+                    &lt;li&gt;Secure disposal of documents&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_dubai_m3_quiz" model="slide.slide">
+            <field name="name">Module 3: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_dubai_operations"/>
+            <field name="sequence">31</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_dubai_m3_q1" model="slide.question">
+            <field name="question">What is DIFC?</field>
+            <field name="slide_id" ref="slide_dubai_m3_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_dubai_m3_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_dubai_m3_q1"/>
+            <field name="text_value">Dubai International Financial Centre</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_dubai_m3_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_dubai_m3_q1"/>
+            <field name="text_value">Dubai Indoor Football Centre</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 4: Event Security -->
+        <record id="slide_dubai_m4_events" model="slide.slide">
+            <field name="name">Module 4: Event Security in Dubai</field>
+            <field name="channel_id" ref="elearning_course_dubai_operations"/>
+            <field name="sequence">40</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.6</field>
+            <field name="html_content">
+                &lt;h2&gt;Security for Events and Gatherings&lt;/h2&gt;
+                
+                &lt;h3&gt;Major Event Venues in Dubai:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Dubai World Trade Centre&lt;/li&gt;
+                    &lt;li&gt;Dubai International Convention &amp; Exhibition Centre&lt;/li&gt;
+                    &lt;li&gt;Coca-Cola Arena&lt;/li&gt;
+                    &lt;li&gt;Dubai Opera&lt;/li&gt;
+                    &lt;li&gt;Hotels and beach venues&lt;/li&gt;
+                    &lt;li&gt;Outdoor festival sites&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Types of Events:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Trade Shows &amp; Exhibitions:&lt;/strong&gt; GITEX, Arab Health, etc.&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Concerts &amp; Performances:&lt;/strong&gt; International artists&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Sports Events:&lt;/strong&gt; Dubai Marathon, tennis, golf&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Festivals:&lt;/strong&gt; Food festivals, cultural events&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Corporate Events:&lt;/strong&gt; Conferences, gala dinners&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Weddings:&lt;/strong&gt; Large-scale celebrations&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Pre-Event Security Planning:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Site survey and risk assessment&lt;/li&gt;
+                    &lt;li&gt;Review event layout and floor plan&lt;/li&gt;
+                    &lt;li&gt;Identify emergency exits and evacuation routes&lt;/li&gt;
+                    &lt;li&gt;Coordinate with Dubai Police if required&lt;/li&gt;
+                    &lt;li&gt;Arrange medical standby if needed&lt;/li&gt;
+                    &lt;li&gt;Brief security team on specific threats&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Event Security Duties:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Perimeter Control:&lt;/strong&gt; Secure event boundaries&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Entry Screening:&lt;/strong&gt; Ticket verification, bag checks&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Crowd Management:&lt;/strong&gt; Control flow and prevent crowding&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;VIP Protection:&lt;/strong&gt; Secure VIP areas and movements&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Parking Management:&lt;/strong&gt; Direct and secure parking&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Patrol:&lt;/strong&gt; Regular monitoring of all areas&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Crowd Management Techniques:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Use barriers and rope lines effectively&lt;/li&gt;
+                    &lt;li&gt;Manage entry and exit flows&lt;/li&gt;
+                    &lt;li&gt;Prevent bottlenecks at key points&lt;/li&gt;
+                    &lt;li&gt;Monitor crowd density&lt;/li&gt;
+                    &lt;li&gt;Identify and prevent crowd surges&lt;/li&gt;
+                    &lt;li&gt;Clear communication with crowd&lt;/li&gt;
+                    &lt;li&gt;Coordinate with team via radio&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Prohibited Items at Events:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Weapons of any kind&lt;/li&gt;
+                    &lt;li&gt;Illegal substances&lt;/li&gt;
+                    &lt;li&gt;Alcohol (unless licensed event)&lt;/li&gt;
+                    &lt;li&gt;Outside food and beverages (venue policy)&lt;/li&gt;
+                    &lt;li&gt;Professional cameras (without authorization)&lt;/li&gt;
+                    &lt;li&gt;Laser pointers&lt;/li&gt;
+                    &lt;li&gt;Large bags or backpacks&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Emergency Evacuation Procedures:&lt;/h3&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Remain calm and professional&lt;/li&gt;
+                    &lt;li&gt;Follow venue emergency plan&lt;/li&gt;
+                    &lt;li&gt;Direct crowds to nearest safe exit&lt;/li&gt;
+                    &lt;li&gt;Prevent panic and stampede&lt;/li&gt;
+                    &lt;li&gt;Assist persons with disabilities&lt;/li&gt;
+                    &lt;li&gt;Guide to assembly points&lt;/li&gt;
+                    &lt;li&gt;Account for all personnel&lt;/li&gt;
+                    &lt;li&gt;Coordinate with emergency services&lt;/li&gt;
+                &lt;/ol&gt;
+                
+                &lt;h3&gt;Post-Event Security:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Manage orderly departure&lt;/li&gt;
+                    &lt;li&gt;Secure venue after crowd disperses&lt;/li&gt;
+                    &lt;li&gt;Check for left-behind items&lt;/li&gt;
+                    &lt;li&gt;Report lost and found items&lt;/li&gt;
+                    &lt;li&gt;Complete incident reports&lt;/li&gt;
+                    &lt;li&gt;Debrief with security team&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_dubai_m4_quiz" model="slide.slide">
+            <field name="name">Module 4: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_dubai_operations"/>
+            <field name="sequence">41</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_dubai_m4_q1" model="slide.question">
+            <field name="question">What is the most important crowd management technique?</field>
+            <field name="slide_id" ref="slide_dubai_m4_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_dubai_m4_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_dubai_m4_q1"/>
+            <field name="text_value">Prevent bottlenecks and monitor crowd density</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_dubai_m4_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_dubai_m4_q1"/>
+            <field name="text_value">Let people go wherever they want</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 5: Dubai Climate and Seasonal Considerations -->
+        <record id="slide_dubai_m5_climate" model="slide.slide">
+            <field name="name">Module 5: Dubai Climate &amp; Seasonal Considerations</field>
+            <field name="channel_id" ref="elearning_course_dubai_operations"/>
+            <field name="sequence">50</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.4</field>
+            <field name="html_content">
+                &lt;h2&gt;Working in Dubai's Climate&lt;/h2&gt;
+                
+                &lt;h3&gt;Dubai Weather Overview:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Summer (May-October):&lt;/strong&gt; Extremely hot, 40-48°C (104-118°F)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Winter (November-April):&lt;/strong&gt; Mild, pleasant, 14-25°C (57-77°F)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Humidity:&lt;/strong&gt; High, especially in summer (60-90%)&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Rainfall:&lt;/strong&gt; Minimal, mostly December-March&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Sandstorms:&lt;/strong&gt; Occasional, more common in spring&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Heat Safety for Outdoor Security:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Hydration:&lt;/strong&gt; Drink water every 15-20 minutes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Shade:&lt;/strong&gt; Take breaks in shaded areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Uniform:&lt;/strong&gt; Light-colored, breathable fabric&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Sun Protection:&lt;/strong&gt; Wear cap, sunglasses if permitted&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Rotation:&lt;/strong&gt; Rotate outdoor posts more frequently in summer&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Monitor:&lt;/strong&gt; Watch for signs of heat exhaustion&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Signs of Heat Exhaustion:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Heavy sweating&lt;/li&gt;
+                    &lt;li&gt;Weakness or fatigue&lt;/li&gt;
+                    &lt;li&gt;Dizziness or fainting&lt;/li&gt;
+                    &lt;li&gt;Headache&lt;/li&gt;
+                    &lt;li&gt;Nausea or vomiting&lt;/li&gt;
+                    &lt;li&gt;Muscle cramps&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Action:&lt;/strong&gt; Move to cool area, drink water, seek medical help&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Sandstorm Procedures:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Close all windows and doors&lt;/li&gt;
+                    &lt;li&gt;Secure loose outdoor items&lt;/li&gt;
+                    &lt;li&gt;Advise people to stay indoors&lt;/li&gt;
+                    &lt;li&gt;Reduce outdoor patrols&lt;/li&gt;
+                    &lt;li&gt;Monitor for visibility hazards&lt;/li&gt;
+                    &lt;li&gt;Check HVAC systems after storm passes&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Midday Break (Summer):&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;UAE labor law: Outdoor work prohibited 12:30 PM - 3:00 PM (June 15 - Sep 15)&lt;/li&gt;
+                    &lt;li&gt;Applies to outdoor workers during hottest hours&lt;/li&gt;
+                    &lt;li&gt;Security operations may be exempt but take precautions&lt;/li&gt;
+                    &lt;li&gt;Employers must provide shaded rest areas&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Ramadan Considerations:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Working hours may be reduced (2 hours less per day)&lt;/li&gt;
+                    &lt;li&gt;Fasting guards need extra hydration after sunset&lt;/li&gt;
+                    &lt;li&gt;Be understanding of colleagues who are fasting&lt;/li&gt;
+                    &lt;li&gt;Schedule rotations considerately&lt;/li&gt;
+                    &lt;li&gt;Evening hours busier (Iftar time around sunset)&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_dubai_m5_quiz" model="slide.slide">
+            <field name="name">Module 5: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_dubai_operations"/>
+            <field name="sequence">51</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_dubai_m5_q1" model="slide.question">
+            <field name="question">During Dubai summer, what is the prohibited outdoor work period?</field>
+            <field name="slide_id" ref="slide_dubai_m5_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_dubai_m5_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_dubai_m5_q1"/>
+            <field name="text_value">12:30 PM to 3:00 PM (June 15 - September 15)</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_dubai_m5_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_dubai_m5_q1"/>
+            <field name="text_value">10:00 AM to 2:00 PM</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Final Assessment -->
+        <record id="slide_dubai_final" model="slide.slide">
+            <field name="name">Final Assessment: Dubai Security Operations</field>
+            <field name="channel_id" ref="elearning_course_dubai_operations"/>
+            <field name="sequence">60</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.3</field>
+        </record>
+
+        <record id="quiz_dubai_final_q1" model="slide.question">
+            <field name="question">What is the world's largest shopping mall located in Dubai?</field>
+            <field name="slide_id" ref="slide_dubai_final"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_dubai_final_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_dubai_final_q1"/>
+            <field name="text_value">Dubai Mall</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_dubai_final_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_dubai_final_q1"/>
+            <field name="text_value">Ibn Battuta Mall</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_dubai_final_q2" model="slide.question">
+            <field name="question">What should you always do when managing visitors in a residential community?</field>
+            <field name="slide_id" ref="slide_dubai_final"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_dubai_final_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_dubai_final_q2"/>
+            <field name="text_value">Register visitors, verify authorization, and issue temporary passes</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_dubai_final_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_dubai_final_q2"/>
+            <field name="text_value">Let them in without checking</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_dubai_final_q3" model="slide.question">
+            <field name="question">During summer in Dubai, what is the most important safety precaution for outdoor security?</field>
+            <field name="slide_id" ref="slide_dubai_final"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="quiz_dubai_final_q3_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_dubai_final_q3"/>
+            <field name="text_value">Regular hydration every 15-20 minutes</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_dubai_final_q3_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_dubai_final_q3"/>
+            <field name="text_value">Wearing heavy clothing</field>
+            <field name="is_correct">False</field>
+        </record>
+
+    </data>
+</odoo>
+
+
+
+
+
+
+
+
+
+

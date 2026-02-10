@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- ================================================================ -->
+        <!-- EMAIL TEMPLATE FIXES - Re-enable disabled templates with fixes  -->
+        <!-- Created: November 2025                                          -->
+        <!-- ================================================================ -->
+        
+        <!-- 1. SLA Breach Alert - FIXED -->
+        <record id="email_template_sla_breach" model="mail.template">
+            <field name="name">SLA Performance Breach Alert</field>
+            <field name="model_id" ref="model_sla_definition"/>
+            <field name="subject">⚠ SLA Breach Alert: ${object.name or 'SLA Definition'} - ${object.site_id.name if object.site_id else 'Site'}</field>
+            <field name="email_from">${(user.email_formatted or user.email or '')|safe}</field>
+            <field name="email_to">${(object.site_id.client_id.email if object.site_id and object.site_id.client_id else '')|safe}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: #f57c00;">⚠ SLA Performance Alert</h2>
+                    
+                    <p>Dear ${object.site_id.client_id.name if object.site_id and object.site_id.client_id else 'Valued Client'},</p>
+                    
+                    <div style="background: #fff3e0; border-left: 4px solid #f57c00; padding: 15px; margin: 20px 0;">
+                        <p style="margin: 0; font-size: 16px;">
+                            <strong>An SLA metric has fallen below the agreed threshold.</strong>
+                        </p>
+                    </div>
+                    
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; width: 30%;">SLA Agreement:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.name or 'N/A'}</td>
+                        </tr>
+                        % if object.site_id:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Site:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.site_id.name}</td>
+                        </tr>
+                        % endif
+                        % if hasattr(object, 'start_date') and hasattr(object, 'end_date'):
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Period:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                ${format_date(object.start_date) if object.start_date else 'N/A'} to ${format_date(object.end_date) if object.end_date else 'N/A'}
+                            </td>
+                        </tr>
+                        % endif
+                    </table>
+                    
+                    % if hasattr(object, 'kpi_ids') and object.kpi_ids:
+                    <h3>Performance Metrics:</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        % for kpi in object.kpi_ids:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; width: 40%;">${kpi.metric_name if hasattr(kpi, 'metric_name') else 'Metric'}:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                % if hasattr(kpi, 'actual_value') and hasattr(kpi, 'target_value'):
+                                <strong style="color: ${'#d32f2f' if kpi.actual_value &lt; kpi.target_value else '#4caf50'};">
+                                    ${kpi.actual_value}%
+                                </strong>
+                                / Target: ${kpi.target_value}%
+                                % else:
+                                N/A
+                                % endif
+                            </td>
+                        </tr>
+                        % endfor
+                    </table>
+                    % endif
+                    
+                    % if hasattr(object, 'breach_notes') and object.breach_notes:
+                    <h3>Breach Details:</h3>
+                    <div style="padding: 15px; background: #ffebee; border-radius: 5px; margin: 20px 0;">
+                        ${object.breach_notes}
+                    </div>
+                    % endif
+                    
+                    <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0;">
+                        <h3 style="margin-top: 0; color: #1976d2;">Corrective Actions:</h3>
+                        <p style="margin-bottom: 0;">
+                            Our team is working to address this performance issue. We will provide a detailed action plan within 24 hours.
+                        </p>
+                    </div>
+                    
+                    <div style="margin-top: 30px;">
+                        <p>If you have any concerns or questions, please contact your account manager immediately.</p>
+                        <p>Thank you for your understanding.</p>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
+                        <p style="margin: 0; color: #999; font-size: 12px;">
+                            This is an automated message from GuardPro SLA Management System<br/>
+                            Report Reference: ${object.name or 'N/A'}
+                        </p>
+                    </div>
+                </div>
+            </field>
+        </record>
+
+        <!-- 2. Key Overdue Return Notification - FIXED -->
+        <record id="email_template_key_overdue" model="mail.template">
+            <field name="name">Overdue Key Return Notification</field>
+            <field name="model_id" ref="model_key_register"/>
+            <field name="subject">⚠ Overdue Key Return: ${object.key_number or 'Key'}</field>
+            <field name="email_from">${(user.email_formatted or user.email or '')|safe}</field>
+            <field name="email_to">${(object.current_holder_id.email if object.current_holder_id and hasattr(object.current_holder_id, 'email') else object.current_holder_email if hasattr(object, 'current_holder_email') else '')|safe}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: #f57c00;">🔑 Overdue Key Return Notice</h2>
+                    
+                    <div style="background: #fff3e0; border-left: 4px solid #f57c00; padding: 15px; margin: 20px 0;">
+                        <p style="margin: 0; font-size: 16px;">
+                            <strong>A key assigned to you is overdue for return.</strong>
+                        </p>
+                    </div>
+                    
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; width: 30%;">Key Number:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;"><strong>${object.key_number or 'N/A'}</strong></td>
+                        </tr>
+                        % if hasattr(object, 'description') and object.description:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Description:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.description}</td>
+                        </tr>
+                        % endif
+                        % if hasattr(object, 'site_id') and object.site_id:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Site:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.site_id.name}</td>
+                        </tr>
+                        % endif
+                        % if hasattr(object, 'location') and object.location:
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Authorized For:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.location}</td>
+                        </tr>
+                        % endif
+                    </table>
+                    
+                    <div style="background: #ffebee; border: 2px solid #d32f2f; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                        <h3 style="margin-top: 0; color: #d32f2f;">⏰ Overdue Information:</h3>
+                        <p style="margin-bottom: 0;">
+                            This key is overdue for return. Please return it to the security desk immediately to avoid further penalties.
+                        </p>
+                    </div>
+                    
+                    <div style="margin-top: 30px;">
+                        <p><strong>Action Required:</strong></p>
+                        <ul>
+                            <li>Return the key to the designated key storage location</li>
+                            <li>Ensure the key is properly signed back in</li>
+                            <li>Contact security if the key is lost or damaged</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0;">
+                        <p style="margin: 0;">
+                            If you have already returned this key, please disregard this message and contact security to update the system.
+                        </p>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
+                        <p style="margin: 0; color: #999; font-size: 12px;">
+                            This is an automated message from GuardPro Key Management System
+                        </p>
+                    </div>
+                </div>
+            </field>
+        </record>
+        
+    </data>
+</odoo>
+

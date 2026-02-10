@@ -1,0 +1,588 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Performance Criteria Views -->
+    <record id="view_guard_performance_criteria_tree" model="ir.ui.view">
+        <field name="name">guard.performance.criteria.tree</field>
+        <field name="model">guard.performance.criteria</field>
+        <field name="arch" type="xml">
+            <list string="Performance Criteria" default_order="sequence">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="weight" sum="Total Weight"/>
+                <field name="calculation_method"/>
+                <field name="min_score"/>
+                <field name="max_score"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_guard_performance_criteria_form" model="ir.ui.view">
+        <field name="name">guard.performance.criteria.form</field>
+        <field name="model">guard.performance.criteria</field>
+        <field name="arch" type="xml">
+            <form string="Performance Criteria">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="calculation_method"/>
+                        </group>
+                        <group>
+                            <field name="weight"/>
+                            <field name="min_score"/>
+                            <field name="max_score"/>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="description" placeholder="Detailed description of the criteria..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_guard_performance_criteria" model="ir.actions.act_window">
+        <field name="name">Performance Criteria</field>
+        <field name="res_model">guard.performance.criteria</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first performance criteria
+            </p>
+            <p>
+                Define the criteria used to evaluate guard performance.
+            </p>
+        </field>
+    </record>
+
+    <!-- Performance Metric Views -->
+    <record id="view_guard_performance_metric_tree" model="ir.ui.view">
+        <field name="name">guard.performance.metric.tree</field>
+        <field name="model">guard.performance.metric</field>
+        <field name="arch" type="xml">
+            <list string="Performance Metrics" default_order="period_start desc">
+                <field name="guard_id"/>
+                <field name="criteria_id"/>
+                <field name="criteria_code"/>
+                <field name="period_start"/>
+                <field name="period_end"/>
+                <field name="score" decoration-success="score &gt;= 80" decoration-warning="score &gt;= 60 and score &lt; 80" decoration-danger="score &lt; 60"/>
+                <field name="weighted_score"/>
+                <field name="reviewer_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_guard_performance_metric_form" model="ir.ui.view">
+        <field name="name">guard.performance.metric.form</field>
+        <field name="model">guard.performance.metric</field>
+        <field name="arch" type="xml">
+            <form string="Performance Metric">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="guard_id"/>
+                            <field name="criteria_id"/>
+                            <field name="criteria_code" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="period_start"/>
+                            <field name="period_end"/>
+                            <field name="reviewer_id"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="score" widget="gauge" options="{'max_value': 100}"/>
+                            <field name="weighted_score"/>
+                            <field name="manual_adjustment"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="calculation_details" placeholder="Calculation details..."/>
+                    </group>
+                    <group>
+                        <field name="notes" placeholder="Additional notes..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_guard_performance_metric_search" model="ir.ui.view">
+        <field name="name">guard.performance.metric.search</field>
+        <field name="model">guard.performance.metric</field>
+        <field name="arch" type="xml">
+            <search string="Performance Metrics">
+                <field name="guard_id"/>
+                <field name="criteria_id"/>
+                <filter string="High Score" name="high_score" domain="[('score', '&gt;=', 80)]"/>
+                <filter string="Low Score" name="low_score" domain="[('score', '&lt;', 60)]"/>
+                <separator/>
+                <filter string="Current Month" name="current_month" domain="[
+                    ('period_start', '&gt;=', context_today() + relativedelta(day=1)),
+                    ('period_start', '&lt;', context_today() + relativedelta(months=1, day=1))
+                ]"/>
+                <filter string="Last Month" name="last_month" domain="[
+                    ('period_start', '&gt;=', context_today() + relativedelta(months=-1, day=1)),
+                    ('period_start', '&lt;', context_today() + relativedelta(day=1))
+                ]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Guard" name="group_guard" context="{'group_by': 'guard_id'}"/>
+                    <filter string="Criteria" name="group_criteria" context="{'group_by': 'criteria_id'}"/>
+                    <filter string="Period" name="group_period" context="{'group_by': 'period_start'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_guard_performance_metric_graph" model="ir.ui.view">
+        <field name="name">guard.performance.metric.graph</field>
+        <field name="model">guard.performance.metric</field>
+        <field name="arch" type="xml">
+            <graph string="Performance Trends" type="line">
+                <field name="period_start"/>
+                <field name="score" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_guard_performance_metric_pivot" model="ir.ui.view">
+        <field name="name">guard.performance.metric.pivot</field>
+        <field name="model">guard.performance.metric</field>
+        <field name="arch" type="xml">
+            <pivot string="Performance Analysis">
+                <field name="guard_id" type="row"/>
+                <field name="criteria_id" type="col"/>
+                <field name="score" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_guard_performance_metric" model="ir.actions.act_window">
+        <field name="name">Performance Metrics</field>
+        <field name="res_model">guard.performance.metric</field>
+        <field name="view_mode">list,form,graph,pivot</field>
+        <field name="context">{'search_default_current_month': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No performance metrics yet
+            </p>
+            <p>
+                Performance metrics are automatically calculated during reviews.
+            </p>
+        </field>
+    </record>
+
+    <!-- Performance Review Views -->
+    <record id="view_guard_performance_review_tree" model="ir.ui.view">
+        <field name="name">guard.performance.review.tree</field>
+        <field name="model">guard.performance.review</field>
+        <field name="arch" type="xml">
+            <list string="Performance Reviews" default_order="review_date desc">
+                <field name="name"/>
+                <field name="guard_id"/>
+                <field name="review_period"/>
+                <field name="period_start"/>
+                <field name="period_end"/>
+                <field name="overall_score" decoration-success="overall_score &gt;= 80" decoration-warning="overall_score &gt;= 60 and overall_score &lt; 80" decoration-danger="overall_score &lt; 60"/>
+                <field name="performance_grade" widget="badge" decoration-success="performance_grade == 'excellent'" decoration-info="performance_grade == 'good'" decoration-warning="performance_grade == 'satisfactory'" decoration-danger="performance_grade in ['needs_improvement', 'unsatisfactory']"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-warning="state == 'in_progress'" decoration-success="state in ['completed', 'approved']"/>
+                <field name="reviewer_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_guard_performance_review_form" model="ir.ui.view">
+        <field name="name">guard.performance.review.form</field>
+        <field name="model">guard.performance.review</field>
+        <field name="arch" type="xml">
+            <form string="Performance Review">
+                <header>
+                    <button name="action_start_review" string="Start Review" type="object" invisible="state != 'draft'" class="oe_highlight"/>
+                    <button name="action_calculate_metrics" string="Calculate Metrics" type="object" invisible="state not in ['draft', 'in_progress']" class="btn-secondary"/>
+                    <button name="action_complete_review" string="Complete" type="object" invisible="state != 'in_progress'" class="oe_highlight"/>
+                    <button name="action_approve_review" string="Approve" type="object" invisible="state != 'completed'" class="oe_highlight" groups="guardpro.group_guardpro_manager"/>
+                    <button name="action_cancel_review" string="Cancel" type="object" invisible="state in ['approved', 'cancelled']"/>
+                    <button name="action_reset_to_draft" string="Reset to Draft" type="object" invisible="state != 'cancelled'" groups="guardpro.group_guardpro_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,completed,approved"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_guard_acknowledge" type="object" class="oe_stat_button" icon="fa-check-circle" invisible="guard_acknowledged or state != 'approved'">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Acknowledge</span>
+                            </div>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Approved" bg_color="text-bg-success" invisible="state != 'approved'"/>
+                    <widget name="web_ribbon" title="Cancelled" bg_color="text-bg-danger" invisible="state != 'cancelled'"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="guard_id" readonly="state != 'draft'"/>
+                            <field name="review_period" readonly="state != 'draft'"/>
+                            <field name="review_date"/>
+                        </group>
+                        <group>
+                            <field name="period_start" readonly="state != 'draft'"/>
+                            <field name="period_end" readonly="state != 'draft'"/>
+                            <field name="reviewer_id"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="overall_score" widget="percentpie"/>
+                            <field name="performance_grade" widget="badge"/>
+                        </group>
+                        <group invisible="state != 'approved'">
+                            <field name="approver_id"/>
+                            <field name="approved_date"/>
+                            <field name="guard_acknowledged"/>
+                            <field name="guard_acknowledged_date" invisible="not guard_acknowledged"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Performance Metrics" name="metrics">
+                            <group>
+                                <group string="Key Metrics">
+                                    <field name="punctuality_score" widget="gauge" options="{'max_value': 100}"/>
+                                    <field name="tour_completion_score" widget="gauge" options="{'max_value': 100}"/>
+                                    <field name="incident_response_score" widget="gauge" options="{'max_value': 100}"/>
+                                </group>
+                                <group string="Additional Metrics">
+                                    <field name="client_satisfaction_score" widget="gauge" options="{'max_value': 100}"/>
+                                    <field name="shift_adherence_score" widget="gauge" options="{'max_value': 100}"/>
+                                </group>
+                            </group>
+                            <field name="metric_ids" readonly="1">
+                                <list string="Detailed Metrics">
+                                    <field name="criteria_id"/>
+                                    <field name="score"/>
+                                    <field name="weighted_score"/>
+                                    <field name="calculation_details"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Review Details" name="review_details">
+                            <group>
+                                <field name="strengths" placeholder="Key strengths demonstrated during the review period..."/>
+                                <field name="areas_for_improvement" placeholder="Areas where improvement is needed..."/>
+                                <field name="goals" placeholder="Goals and objectives for the next review period..."/>
+                                <field name="action_plan" placeholder="Specific actions to improve performance..."/>
+                            </group>
+                        </page>
+                        <page string="Reviewer Notes" name="notes">
+                            <group>
+                                <field name="reviewer_notes" placeholder="Internal reviewer notes..."/>
+                                <field name="guard_comments" placeholder="Comments from the guard..."/>
+                            </group>
+                        </page>
+                        <page string="Recommendation" name="recommendation">
+                            <group>
+                                <field name="recommendation" widget="radio"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_guard_performance_review_kanban" model="ir.ui.view">
+        <field name="name">guard.performance.review.kanban</field>
+        <field name="model">guard.performance.review</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" default_group_by="state">
+                <field name="name"/>
+                <field name="guard_id"/>
+                <field name="review_period"/>
+                <field name="overall_score"/>
+                <field name="performance_grade"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_content">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="guard_id"/>
+                                    </strong>
+                                    <div class="o_kanban_record_subtitle">
+                                        <field name="name"/>
+                                    </div>
+                                </div>
+                                <span class="float-end">
+                                    <field name="performance_grade" widget="badge"/>
+                                </span>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div>
+                                    <i class="fa fa-calendar" title="Review Period"/> <field name="review_period"/>
+                                </div>
+                                <div>
+                                    <i class="fa fa-star" title="Score"/> Score: <field name="overall_score"/> / 100
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left">
+                                    <field name="reviewer_id" widget="many2one_avatar_user"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_guard_performance_review_search" model="ir.ui.view">
+        <field name="name">guard.performance.review.search</field>
+        <field name="model">guard.performance.review</field>
+        <field name="arch" type="xml">
+            <search string="Performance Reviews">
+                <field name="name"/>
+                <field name="guard_id"/>
+                <field name="reviewer_id"/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="In Progress" name="in_progress" domain="[('state', '=', 'in_progress')]"/>
+                <filter string="Completed" name="completed" domain="[('state', '=', 'completed')]"/>
+                <filter string="Approved" name="approved" domain="[('state', '=', 'approved')]"/>
+                <separator/>
+                <filter string="Excellent" name="excellent" domain="[('performance_grade', '=', 'excellent')]"/>
+                <filter string="Good" name="good" domain="[('performance_grade', '=', 'good')]"/>
+                <filter string="Needs Improvement" name="needs_improvement" domain="[('performance_grade', 'in', ['needs_improvement', 'unsatisfactory'])]"/>
+                <separator/>
+                <filter string="Monthly Reviews" name="monthly" domain="[('review_period', '=', 'monthly')]"/>
+                <filter string="Annual Reviews" name="annual" domain="[('review_period', '=', 'annual')]"/>
+                <separator/>
+                <filter string="My Reviews" name="my_reviews" domain="[('reviewer_id', '=', uid)]"/>
+                <separator/>
+                <filter string="This Month" name="this_month" domain="[
+                    ('review_date', '&gt;=', context_today() + relativedelta(day=1)),
+                    ('review_date', '&lt;', context_today() + relativedelta(months=1, day=1))
+                ]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Guard" name="group_guard" context="{'group_by': 'guard_id'}"/>
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Grade" name="group_grade" context="{'group_by': 'performance_grade'}"/>
+                    <filter string="Review Period" name="group_period" context="{'group_by': 'review_period'}"/>
+                    <filter string="Reviewer" name="group_reviewer" context="{'group_by': 'reviewer_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_guard_performance_review_calendar" model="ir.ui.view">
+        <field name="name">guard.performance.review.calendar</field>
+        <field name="model">guard.performance.review</field>
+        <field name="arch" type="xml">
+            <calendar string="Performance Reviews" date_start="review_date" color="performance_grade" mode="month">
+                <field name="guard_id"/>
+                <field name="overall_score"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="action_guard_performance_review" model="ir.actions.act_window">
+        <field name="name">Performance Reviews</field>
+        <field name="res_model">guard.performance.review</field>
+        <field name="view_mode">kanban,list,form,calendar,graph,pivot</field>
+        <field name="context">{'search_default_this_month': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first performance review
+            </p>
+            <p>
+                Evaluate guard performance with comprehensive reviews.
+            </p>
+        </field>
+    </record>
+
+    <!-- Performance Badge Views -->
+    <record id="view_guard_performance_badge_tree" model="ir.ui.view">
+        <field name="name">guard.performance.badge.tree</field>
+        <field name="model">guard.performance.badge</field>
+        <field name="arch" type="xml">
+            <list string="Performance Badges" default_order="earned_date desc">
+                <field name="name"/>
+                <field name="badge_type"/>
+                <field name="guard_id"/>
+                <field name="earned_date"/>
+                <field name="icon" invisible="1"/>
+                <field name="color" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_guard_performance_badge_form" model="ir.ui.view">
+        <field name="name">guard.performance.badge.form</field>
+        <field name="model">guard.performance.badge</field>
+        <field name="arch" type="xml">
+            <form string="Performance Badge">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="badge_type"/>
+                            <field name="guard_id"/>
+                            <field name="earned_date"/>
+                        </group>
+                        <group>
+                            <field name="icon"/>
+                            <field name="color" widget="color"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="description" placeholder="Badge description..."/>
+                        <field name="criteria_met" placeholder="Criteria that were met to earn this badge..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_guard_performance_badge_kanban" model="ir.ui.view">
+        <field name="name">guard.performance.badge.kanban</field>
+        <field name="model">guard.performance.badge</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <field name="badge_type"/>
+                <field name="guard_id"/>
+                <field name="icon"/>
+                <field name="color"/>
+                <field name="earned_date"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click" style="text-align: center; padding: 20px;">
+                            <div>
+                                <i t-att-class="'fa ' + record.icon.raw_value + ' fa-5x'" t-att-style="'color: ' + record.color.raw_value" t-att-title="record.name.raw_value"/>
+                            </div>
+                            <div class="mt-3">
+                                <strong><field name="name"/></strong>
+                            </div>
+                            <div class="mt-2">
+                                <field name="guard_id"/>
+                            </div>
+                            <div class="text-muted mt-1">
+                                <i class="fa fa-calendar" title="Earned Date"/> <field name="earned_date"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_guard_performance_badge_search" model="ir.ui.view">
+        <field name="name">guard.performance.badge.search</field>
+        <field name="model">guard.performance.badge</field>
+        <field name="arch" type="xml">
+            <search string="Performance Badges">
+                <field name="name"/>
+                <field name="guard_id"/>
+                <filter string="This Year" name="this_year" domain="[
+                    ('earned_date', '&gt;=', context_today() + relativedelta(month=1, day=1))
+                ]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Guard" name="group_guard" context="{'group_by': 'guard_id'}"/>
+                    <filter string="Badge Type" name="group_type" context="{'group_by': 'badge_type'}"/>
+                    <filter string="Earned Date" name="group_date" context="{'group_by': 'earned_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_guard_performance_badge" model="ir.actions.act_window">
+        <field name="name">Performance Badges</field>
+        <field name="res_model">guard.performance.badge</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{'search_default_this_year': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No badges earned yet
+            </p>
+            <p>
+                Badges are awarded for exceptional performance.
+            </p>
+        </field>
+    </record>
+
+    <!-- Add Performance tab to Guard Profile -->
+    <record id="view_guard_profile_form_performance" model="ir.ui.view">
+        <field name="name">guard.profile.form.performance</field>
+        <field name="model">guard.profile</field>
+        <field name="inherit_id" ref="guardpro.view_guard_profile_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="%(action_guard_performance_review)d" type="action" class="oe_stat_button" icon="fa-star" context="{'search_default_guard_id': id}">
+                    <field name="current_performance_score" widget="statinfo" string="Performance"/>
+                </button>
+                <button name="%(action_guard_performance_badge)d" type="action" class="oe_stat_button" icon="fa-trophy" context="{'search_default_guard_id': id}">
+                    <field name="badge_count" widget="statinfo" string="Badges"/>
+                </button>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Performance" name="performance">
+                    <group>
+                        <group string="Current Performance">
+                            <field name="current_performance_score" widget="percentpie"/>
+                            <field name="performance_rating" widget="badge"/>
+                            <field name="last_review_date"/>
+                        </group>
+                    </group>
+                    <group string="Recent Reviews">
+                        <field name="performance_review_ids" nolabel="1">
+                            <list string="Reviews">
+                                <field name="name"/>
+                                <field name="review_period"/>
+                                <field name="review_date"/>
+                                <field name="overall_score"/>
+                                <field name="performance_grade" widget="badge"/>
+                                <field name="state" widget="badge"/>
+                            </list>
+                        </field>
+                    </group>
+                    <group string="Badges Earned">
+                        <field name="performance_badge_ids" nolabel="1">
+                            <kanban>
+                                <field name="name"/>
+                                <field name="icon"/>
+                                <field name="color"/>
+                                <field name="earned_date"/>
+                                <templates>
+                                    <t t-name="card">
+                                        <div style="text-align: center; padding: 10px;">
+                                            <i t-att-class="'fa ' + record.icon.raw_value + ' fa-3x'" t-att-style="'color: ' + record.color.raw_value" t-att-title="record.name.raw_value"/>
+                                            <div class="mt-2"><strong><field name="name"/></strong></div>
+                                            <div class="text-muted"><field name="earned_date"/></div>
+                                        </div>
+                                    </t>
+                                </templates>
+                            </kanban>
+                        </field>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
+

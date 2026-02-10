@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Guard Location History List View -->
+        <record id="view_guard_location_history_list" model="ir.ui.view">
+            <field name="name">guard.location.history.list</field>
+            <field name="model">guard.location.history</field>
+            <field name="arch" type="xml">
+                <list string="Location History" default_order="timestamp desc">
+                    <field name="guard_id"/>
+                    <field name="timestamp"/>
+                    <field name="latitude"/>
+                    <field name="longitude"/>
+                    <field name="site_id"/>
+                    <field name="shift_id"/>
+                    <field name="accuracy"/>
+                    <field name="speed"/>
+                    <field name="is_archived" invisible="1"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Guard Location History Form View -->
+        <record id="view_guard_location_history_form" model="ir.ui.view">
+            <field name="name">guard.location.history.form</field>
+            <field name="model">guard.location.history</field>
+            <field name="arch" type="xml">
+                <form string="Location History">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="guard_id"/>
+                                <field name="timestamp"/>
+                                <field name="site_id"/>
+                                <field name="shift_id"/>
+                                <field name="tour_log_id"/>
+                            </group>
+                            <group>
+                                <field name="latitude"/>
+                                <field name="longitude"/>
+                                <field name="accuracy"/>
+                                <field name="altitude"/>
+                                <field name="speed"/>
+                                <field name="heading"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="battery_level"/>
+                                <field name="is_manual"/>
+                                <field name="is_archived"/>
+                                <field name="archived_date" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="notes"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Guard Location History Search View -->
+        <record id="view_guard_location_history_search" model="ir.ui.view">
+            <field name="name">guard.location.history.search</field>
+            <field name="model">guard.location.history</field>
+            <field name="arch" type="xml">
+                <search string="Search Location History">
+                    <field name="guard_id"/>
+                    <field name="site_id"/>
+                    <field name="shift_id"/>
+                    <field name="timestamp"/>
+                    <filter string="Today" name="today"
+                            domain="[('timestamp', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))),
+                                     ('timestamp', '&lt;=', datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]"/>
+                    <filter string="This Week" name="this_week"
+                            domain="[('timestamp', '&gt;=', datetime.datetime.combine(context_today() - relativedelta(weeks=1), datetime.time(0,0,0)))]"/>
+                    <filter string="This Month" name="this_month"
+                            domain="[('timestamp', '&gt;=', datetime.datetime.combine(context_today() + relativedelta(day=1), datetime.time(0,0,0)))]"/>
+                    <filter string="Manual Updates" name="manual_updates"
+                            domain="[('is_manual', '=', True)]"/>
+                    <filter string="Archived" name="archived"
+                            domain="[('is_archived', '=', True)]"/>
+                    <filter string="Active" name="active"
+                            domain="[('is_archived', '=', False)]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Guard" name="group_by_guard" context="{'group_by': 'guard_id'}"/>
+                        <filter string="Site" name="group_by_site" context="{'group_by': 'site_id'}"/>
+                        <filter string="Shift" name="group_by_shift" context="{'group_by': 'shift_id'}"/>
+                        <filter string="Date" name="group_by_date" context="{'group_by': 'timestamp:day'}"/>
+                        <filter string="Archived Status" name="group_by_archived" context="{'group_by': 'is_archived'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Guard Location History Action -->
+        <record id="action_guard_location_history" model="ir.actions.act_window">
+            <field name="name">Guard Location History</field>
+            <field name="res_model">guard.location.history</field>
+            <field name="view_mode">list,form</field>
+            <field name="context">{'search_default_today': 1, 'search_default_active': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No location history found
+                </p>
+                <p>
+                    Location history is automatically created when guards update their GPS location.
+                </p>
+            </field>
+        </record>
+
+    </data>
+</odoo>
+

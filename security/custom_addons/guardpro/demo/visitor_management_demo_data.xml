@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="visitor_001" model="visitor.management">
+            <field name="name">John Doe</field>
+            <field name="visitor_type">visitor</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="visit_date">2025-10-16</field>
+            <field name="host_name">Ahmed Ali - Unit 501</field>
+            <field name="visit_purpose">meeting</field>
+            <field name="mobile_number">+971-50-123-4567</field>
+        </record>
+
+        <record id="visitor_002" model="visitor.management">
+            <field name="name">Sarah Wilson</field>
+            <field name="visitor_type">contractor</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="visit_date">2025-10-16</field>
+            <field name="host_name">Maintenance Department</field>
+            <field name="visit_purpose">maintenance</field>
+            <field name="company">CoolAir Services</field>
+            <field name="mobile_number">+971-4-555-1234</field>
+        </record>
+
+        <record id="visitor_003" model="visitor.management">
+            <field name="name">Mohammed Hassan</field>
+            <field name="visitor_type">delivery</field>
+            <field name="site_id" ref="site_nshama_springs"/>
+            <field name="visit_date">2025-10-17</field>
+            <field name="host_name">Reception Desk</field>
+            <field name="visit_purpose">delivery</field>
+            <field name="company">DHL Express</field>
+        </record>
+
+        <record id="visitor_004" model="visitor.management">
+            <field name="name">Lisa Anderson</field>
+            <field name="visitor_type">visitor</field>
+            <field name="site_id" ref="site_nshama_town_square"/>
+            <field name="visit_date">2025-10-15</field>
+            <field name="host_name">Omar Khalid - Unit 203</field>
+            <field name="visit_purpose">other</field>
+            <field name="mobile_number">+971-50-987-6543</field>
+        </record>
+    </data>
+</odoo>

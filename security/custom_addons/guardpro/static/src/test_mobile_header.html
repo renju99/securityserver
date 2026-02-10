@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <title>GuardPro Mobile Header Test</title>
+    <link rel="stylesheet" href="/guardpro/static/pwa/css/guardpro.css">
+    <link rel="stylesheet" href="/guardpro/static/src/css/mobile_pwa.css">
+    <link rel="stylesheet" href="/guardpro/static/pwa/fonts/css/fontawesome-all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+        
+        .test-content {
+            padding: 1rem;
+            margin-top: 80px;
+        }
+        
+        .test-section {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .screen-size {
+            position: fixed;
+            top: 80px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 1001;
+        }
+    </style>
+</head>
+<body>
+    <div class="screen-size" id="screenSize"></div>
+    
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="#" class="header-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </a>
+                <div class="header-title">
+                    <h1>GuardPro Mobile</h1>
+                    <p>Your Command Center</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="guard-profile">
+                    <span class="guard-name">Hello, John!</span>
+                    <div class="guard-badge">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-container">
+        <div class="test-content">
+            <div class="test-section">
+                <h2>Header Layout Test</h2>
+                <p>This page tests the mobile header layout and responsiveness. The header should:</p>
+                <ul>
+                    <li>Stay fixed at the top</li>
+                    <li>Not overflow horizontally</li>
+                    <li>Display all elements properly</li>
+                    <li>Adapt to different screen sizes</li>
+                </ul>
+            </div>
+            
+            <div class="test-section">
+                <h3>Quick Actions Test</h3>
+                <div class="quick-actions">
+                    <button id="btn-checkin">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Check In</span>
+                    </button>
+                    <button id="btn-checkout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Check Out</span>
+                    </button>
+                    <button id="btn-report-incident">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Report Incident</span>
+                    </button>
+                    <button id="btn-panic">
+                        <i class="fas fa-bell"></i>
+                        <span>PANIC</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="test-section">
+                <h3>Stats Grid Test</h3>
+                <div class="stats-grid">
+                    <div class="stat-box success">
+                        <div class="stat-box-value">5</div>
+                        <div class="stat-box-label">Shifts Today</div>
+                    </div>
+                    <div class="stat-box warning">
+                        <div class="stat-box-value">3</div>
+                        <div class="stat-box-label">Pending Tasks</div>
+                    </div>
+                    <div class="stat-box info">
+                        <div class="stat-box-value">2</div>
+                        <div class="stat-box-label">Active Tours</div>
+                    </div>
+                    <div class="stat-box danger">
+                        <div class="stat-box-value">0</div>
+                        <div class="stat-box-label">Incidents</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="test-section">
+                <h3>Responsive Test</h3>
+                <p>Resize your browser window to test different screen sizes:</p>
+                <ul>
+                    <li>Desktop: > 768px</li>
+                    <li>Tablet: 640px - 768px</li>
+                    <li>Mobile: 480px - 640px</li>
+                    <li>Small Mobile: < 480px</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Update screen size display
+        function updateScreenSize() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            document.getElementById('screenSize').textContent = `${width}x${height}`;
+        }
+        
+        window.addEventListener('resize', updateScreenSize);
+        updateScreenSize();
+        
+        // Add some interactivity
+        document.querySelectorAll('.quick-actions button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert(`Clicked: ${this.querySelector('span').textContent}`);
+            });
+        });
+    </script>
+</body>
+</html>

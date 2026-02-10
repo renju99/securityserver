@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="scan_001" model="checkpoint.scan">
+            <field name="guard_id" ref="guard_john_smith"/>
+            <field name="checkpoint_id" ref="checkpoint_ts_office_building"/>
+            <field name="scan_time">2025-10-15 09:00:00</field>
+            <field name="scan_type">qr</field>
+            <field name="scan_data">QR-TS-005</field>
+        </record>
+    </data>
+</odoo>

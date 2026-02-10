@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- SLA KPI Template List View (for use in One2many) -->
+    <record id="view_sla_kpi_template_list" model="ir.ui.view">
+        <field name="name">sla.kpi.template.list</field>
+        <field name="model">sla.kpi.template</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="kpi_type"/>
+                <field name="target_value"/>
+                <field name="unit"/>
+                <field name="target_direction"/>
+                <field name="measurement_period"/>
+                <field name="warning_threshold"/>
+                <field name="critical_threshold"/>
+                <field name="weight"/>
+                <field name="penalty_applicable" widget="boolean_toggle"/>
+                <field name="penalty_amount" optional="hide"/>
+                <field name="active" widget="boolean_toggle" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- SLA KPI Template Form View (for use in One2many) -->
+    <record id="view_sla_kpi_template_form" model="ir.ui.view">
+        <field name="name">sla.kpi.template.form</field>
+        <field name="model">sla.kpi.template</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                        <field name="sequence"/>
+                        <field name="name"/>
+                        <field name="kpi_type"/>
+                        <field name="description" placeholder="Describe how this KPI is measured..."/>
+                    </group>
+                    <group>
+                        <field name="target_value"/>
+                        <field name="unit"/>
+                        <field name="target_direction"/>
+                        <field name="measurement_period"/>
+                    </group>
+                </group>
+                <group>
+                    <group string="Thresholds">
+                        <field name="warning_threshold"/>
+                        <field name="critical_threshold"/>
+                        <field name="weight"/>
+                    </group>
+                    <group string="Penalties">
+                        <field name="penalty_applicable" widget="boolean_toggle"/>
+                        <field name="penalty_amount" invisible="not penalty_applicable"/>
+                    </group>
+                </group>
+                <group>
+                    <field name="active" widget="boolean_toggle"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <!-- SLA Template Form View -->
+    <record id="view_sla_template_form" model="ir.ui.view">
+        <field name="name">sla.template.form</field>
+        <field name="model">sla.template</field>
+        <field name="arch" type="xml">
+            <form string="SLA Template">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_create_sla_from_template" type="object"
+                                class="oe_stat_button" icon="fa-plus-circle">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Create SLA</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" icon="fa-tachometer" readonly="1">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="kpi_count"/></span>
+                                <span class="o_stat_text">KPIs</span>
+                            </div>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" 
+                            invisible="active"/>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="sequence"/>
+                            <field name="industry"/>
+                            <field name="service_level"/>
+                        </group>
+                        <group>
+                            <field name="default_contract_duration"/>
+                            <field name="penalty_applicable" widget="boolean_toggle"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description" placeholder="Describe this SLA template and when it should be used..."/>
+                        </page>
+                        <page string="KPI Templates">
+                            <field name="kpi_template_ids" context="{'tree_view_ref': 'guardpro.view_sla_kpi_template_list', 'form_view_ref': 'guardpro.view_sla_kpi_template_form'}"/>
+                        </page>
+                        <page string="Implementation Notes">
+                            <field name="notes" placeholder="Notes for implementing this template..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- SLA Template List View -->
+    <record id="view_sla_template_list" model="ir.ui.view">
+        <field name="name">sla.template.list</field>
+        <field name="model">sla.template</field>
+        <field name="arch" type="xml">
+            <list string="SLA Templates" sample="1">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="industry"/>
+                <field name="service_level" widget="badge"
+                       decoration-info="service_level == 'basic'"
+                       decoration-success="service_level == 'standard'"
+                       decoration-warning="service_level == 'premium'"
+                       decoration-danger="service_level == 'enterprise'"/>
+                <field name="kpi_count"/>
+                <field name="default_contract_duration"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- SLA Template Kanban View -->
+    <record id="view_sla_template_kanban" model="ir.ui.view">
+        <field name="name">sla.template.kanban</field>
+        <field name="model">sla.template</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1">
+                <field name="name"/>
+                <field name="industry"/>
+                <field name="service_level"/>
+                <field name="kpi_count"/>
+                <field name="description"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="name"/>
+                                    </strong>
+                                    <div class="o_kanban_record_subtitle text-muted">
+                                        <t t-if="record.industry.value">
+                                            <field name="industry"/>
+                                        </t>
+                                    </div>
+                                </div>
+                                <span class="badge rounded-pill" 
+                                      t-att-class="{
+                                          'basic': 'text-bg-info',
+                                          'standard': 'text-bg-success',
+                                          'premium': 'text-bg-warning',
+                                          'enterprise': 'text-bg-danger'
+                                      }[record.service_level.raw_value]">
+                                    <field name="service_level"/>
+                                </span>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <i class="fa fa-tachometer me-1"/>
+                                        <field name="kpi_count"/> KPIs
+                                    </div>
+                                    <div class="col-6">
+                                        <i class="fa fa-calendar me-1"/>
+                                        <field name="default_contract_duration"/> months
+                                    </div>
+                                </div>
+                                <div class="text-muted small" t-if="record.description.raw_value">
+                                    <field name="description" widget="html"/>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_bottom mt-2">
+                                <button type="object" name="action_create_sla_from_template"
+                                        class="btn btn-primary btn-sm">
+                                    <i class="fa fa-plus"/> Use Template
+                                </button>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- SLA Template Search View -->
+    <record id="view_sla_template_search" model="ir.ui.view">
+        <field name="name">sla.template.search</field>
+        <field name="model">sla.template</field>
+        <field name="arch" type="xml">
+            <search string="Search SLA Templates">
+                <field name="name"/>
+                <field name="industry"/>
+                <field name="service_level"/>
+                <separator/>
+                <filter string="Basic" name="basic" domain="[('service_level', '=', 'basic')]"/>
+                <filter string="Standard" name="standard" domain="[('service_level', '=', 'standard')]"/>
+                <filter string="Premium" name="premium" domain="[('service_level', '=', 'premium')]"/>
+                <filter string="Enterprise" name="enterprise" domain="[('service_level', '=', 'enterprise')]"/>
+                <separator/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Industry" name="group_industry" context="{'group_by': 'industry'}"/>
+                    <filter string="Service Level" name="group_service_level" context="{'group_by': 'service_level'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- SLA Template Action -->
+    <record id="action_sla_template" model="ir.actions.act_window">
+        <field name="name">SLA Templates</field>
+        <field name="res_model">sla.template</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first SLA Template
+            </p>
+            <p>
+                SLA templates help you quickly set up Service Level Agreements
+                with pre-configured KPIs for different service levels and industries.
+            </p>
+        </field>
+    </record>
+
+    <!-- Update SLA Definition Form to include new features -->
+    <record id="view_sla_definition_form_enhanced" model="ir.ui.view">
+        <field name="name">sla.definition.form.enhanced</field>
+        <field name="model">sla.definition</field>
+        <field name="inherit_id" ref="guardpro.view_sla_definition_form"/>
+        <field name="arch" type="xml">
+            <!-- Add button for audits -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_audits" type="object"
+                        class="oe_stat_button" icon="fa-clipboard-check"
+                        invisible="audit_count == 0">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value"><field name="audit_count"/></span>
+                        <span class="o_stat_text">Audits</span>
+                    </div>
+                </button>
+                <button name="action_quick_add_kpi" type="object"
+                        class="oe_stat_button" icon="fa-plus-square"
+                        invisible="state != 'draft'">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">Quick Add KPI</span>
+                    </div>
+                </button>
+            </xpath>
+            
+            <!-- Add template field -->
+            <xpath expr="//field[@name='contract_reference']" position="after">
+                <field name="template_id" readonly="1"/>
+            </xpath>
+            
+            <!-- Add audit metrics -->
+            <xpath expr="//field[@name='current_compliance']" position="after">
+                <field name="avg_audit_score" invisible="audit_count == 0"/>
+            </xpath>
+            
+            <!-- Add audit tab -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Compliance Audits" invisible="audit_count == 0">
+                    <field name="audit_ids">
+                        <list>
+                            <field name="name"/>
+                            <field name="audit_type"/>
+                            <field name="audit_date"/>
+                            <field name="compliance_score" widget="progressbar"/>
+                            <field name="rating" widget="badge"
+                                   decoration-success="rating == 'excellent'"
+                                   decoration-info="rating == 'good'"
+                                   decoration-warning="rating == 'satisfactory'"
+                                   decoration-danger="rating in ['needs_improvement', 'unsatisfactory']"/>
+                            <field name="state" widget="badge"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
+
+
+
+
+
+

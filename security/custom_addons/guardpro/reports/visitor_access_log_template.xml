@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="action_visitor_access_log_report" model="ir.actions.report">
+        <field name="name">Visitor Access Log</field>
+        <field name="model">visitor.management</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.report_visitor_access_log_document</field>
+        <field name="report_file">guardpro.report_visitor_access_log_document</field>
+        <field name="binding_model_id" ref="model_visitor_management"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_us"/>
+    </record>
+    
+    <template id="report_visitor_access_log_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h1 style="color: #795548;">VISITOR ACCESS LOG</h1>
+                        <table class="table table-sm table-bordered">
+                            <tr>
+                                <th style="width: 30%; background-color: #f5f5f5;">Visitor Name</th>
+                                <td><strong><t t-esc="o.visitor_name or 'N/A'"/></strong></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Company</th>
+                                <td><t t-esc="o.visitor_company or 'N/A'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Check-In Time</th>
+                                <td><strong style="color: #4caf50;"><t t-esc="format_datetime(o.check_in_time) if o.check_in_time else 'N/A'"/></strong></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Check-Out Time</th>
+                                <td><strong style="color: #ff9800;"><t t-esc="format_datetime(o.check_out_time) if o.check_out_time else 'Not checked out'"/></strong></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Host</th>
+                                <td><t t-esc="o.host_name or 'N/A'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Purpose</th>
+                                <td><t t-esc="o.purpose_of_visit or 'N/A'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Badge Number</th>
+                                <td><t t-esc="o.badge_number or 'N/A'"/></td>
+                            </tr>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    
+</odoo>
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Report Action Definition -->
+    <record id="action_training_certificate_report" model="ir.actions.report">
+        <field name="name">Training Course Certificate</field>
+        <field name="model">slide.channel.partner</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.report_training_certificate_document</field>
+        <field name="report_file">guardpro.report_training_certificate_document</field>
+        <field name="binding_model_id" ref="website_slides.model_slide_channel_partner"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_us"/>
+    </record>
+    
+    <!-- Certificate Template -->
+    <template id="report_training_certificate_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <div class="page" style="font-family: Arial, sans-serif; position: relative; height: 100%; border: 15px solid #2196f3; padding: 40px;">
+                    
+                    <!-- Decorative Border Pattern -->
+                    <div style="position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px; border: 2px solid #4caf50; pointer-events: none;"></div>
+                    
+                    <!-- Certificate Header -->
+                    <div style="text-align: center; margin-bottom: 40px; position: relative; z-index: 1;">
+                        <h1 style="font-size: 48px; color: #2196f3; margin: 20px 0 10px 0; font-family: Georgia, serif; letter-spacing: 2px;">
+                            CERTIFICATE
+                        </h1>
+                        <h2 style="font-size: 32px; color: #4caf50; margin: 0; font-family: Georgia, serif;">
+                            OF COMPLETION
+                        </h2>
+                        <div style="width: 200px; height: 3px; background-color: #ff9800; margin: 20px auto;"></div>
+                    </div>
+                    
+                    <!-- Presented To -->
+                    <div style="text-align: center; margin: 40px 0;">
+                        <p style="font-size: 18px; color: #666; margin: 0; font-style: italic;">This is to certify that</p>
+                        <h2 style="font-size: 42px; color: #000; margin: 20px 0; font-family: Georgia, serif; border-bottom: 2px solid #333; display: inline-block; padding: 10px 40px;">
+                            <t t-esc="o.partner_id.name if o.partner_id else 'Participant Name'"/>
+                        </h2>
+                    </div>
+                    
+                    <!-- Course Details -->
+                    <div style="text-align: center; margin: 30px 0;">
+                        <p style="font-size: 18px; color: #666; margin: 0;">has successfully completed the training course</p>
+                        <h3 style="font-size: 32px; color: #2196f3; margin: 20px 0; font-family: Georgia, serif;">
+                            <t t-esc="o.channel_id.name if o.channel_id else 'Course Name'"/>
+                        </h3>
+                        
+                        <t t-if="o.channel_id and o.channel_id.description">
+                            <p style="font-size: 14px; color: #666; max-width: 600px; margin: 20px auto; line-height: 1.6;">
+                                <t t-esc="o.channel_id.description[:200] if len(o.channel_id.description) &gt; 200 else o.channel_id.description"/>
+                                <t t-if="len(o.channel_id.description) &gt; 200">...</t>
+                            </p>
+                        </t>
+                    </div>
+                    
+                    <!-- Achievement Details -->
+                    <div style="text-align: center; margin: 40px 0;">
+                        <table style="margin: 0 auto; border-collapse: collapse;">
+                            <tr>
+                                <td style="padding: 10px 30px; text-align: right; color: #666; font-size: 14px;">Completion Date:</td>
+                                <td style="padding: 10px 30px; text-align: left; font-weight: bold; font-size: 16px;">
+                                    <t t-esc="format_date(o.completed_at) if hasattr(o, 'completed_at') and o.completed_at else format_date(o.write_date) if o.write_date else 'N/A'"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px 30px; text-align: right; color: #666; font-size: 14px;">Duration:</td>
+                                <td style="padding: 10px 30px; text-align: left; font-weight: bold; font-size: 16px;">
+                                    <t t-if="o.channel_id and hasattr(o.channel_id, 'slide_ids')">
+                                        <t t-esc="len(o.channel_id.slide_ids)"/> Lessons
+                                    </t>
+                                    <t t-else="">Self-Paced</t>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px 30px; text-align: right; color: #666; font-size: 14px;">Certificate ID:</td>
+                                <td style="padding: 10px 30px; text-align: left; font-weight: bold; font-size: 16px;">
+                                    <t t-esc="'CERT-' + str(o.id).zfill(6)"/>
+                                </td>
+                            </tr>
+                            <tr t-if="hasattr(o, 'completion') and o.completion == 100">
+                                <td style="padding: 10px 30px; text-align: right; color: #666; font-size: 14px;">Achievement:</td>
+                                <td style="padding: 10px 30px; text-align: left;">
+                                    <span style="background-color: #4caf50; color: white; padding: 5px 20px; border-radius: 20px; font-weight: bold; font-size: 14px;">
+                                        100% Complete
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <!-- Achievement Badge -->
+                    <div style="text-align: center; margin: 30px 0;">
+                        <div style="display: inline-block; width: 100px; height: 100px; border-radius: 50%; background-color: #4caf50; color: white; line-height: 100px; font-size: 48px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+                            ✓
+                        </div>
+                    </div>
+                    
+                    <!-- Signatures -->
+                    <div style="margin-top: 60px;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="width: 50%; text-align: center; padding: 20px;">
+                                    <div style="border-top: 2px solid #000; padding-top: 10px; margin: 40px 60px 0 60px;">
+                                        <p style="margin: 5px 0; font-weight: bold; font-size: 16px;">Training Coordinator</p>
+                                        <p style="margin: 5px 0; color: #666; font-size: 12px;">GuardPro Training Department</p>
+                                    </div>
+                                </td>
+                                <td style="width: 50%; text-align: center; padding: 20px;">
+                                    <div style="border-top: 2px solid #000; padding-top: 10px; margin: 40px 60px 0 60px;">
+                                        <p style="margin: 5px 0; font-weight: bold; font-size: 16px;">Director of Operations</p>
+                                        <p style="margin: 5px 0; color: #666; font-size: 12px;">GuardPro Security Management</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <!-- Official Seal/Stamp Area -->
+                    <div style="position: absolute; bottom: 80px; left: 80px;">
+                        <div style="width: 120px; height: 120px; border: 3px solid #2196f3; border-radius: 50%; display: flex; align-items: center; justify-content: center; background-color: rgba(33, 150, 243, 0.1);">
+                            <div style="text-align: center;">
+                                <p style="margin: 0; font-size: 10px; color: #2196f3; font-weight: bold;">OFFICIAL</p>
+                                <p style="margin: 5px 0; font-size: 24px; color: #2196f3;">★</p>
+                                <p style="margin: 0; font-size: 10px; color: #2196f3; font-weight: bold;">GUARDPRO</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Certificate Validation -->
+                    <div style="position: absolute; bottom: 40px; right: 80px; text-align: right;">
+                        <p style="margin: 0; font-size: 10px; color: #999;">Valid Certificate</p>
+                        <p style="margin: 5px 0; font-size: 12px; color: #666;">
+                            Issued: <t t-esc="format_date(o.create_date) if o.create_date else 'N/A'"/>
+                        </p>
+                        <t t-if="o.channel_id and hasattr(o.channel_id, 'validity_months') and o.channel_id.validity_months">
+                            <p style="margin: 5px 0; font-size: 10px; color: #ff9800; font-weight: bold;">
+                                Valid for <t t-esc="o.channel_id.validity_months"/> months
+                            </p>
+                        </t>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); text-align: center; width: 80%;">
+                        <p style="margin: 0; font-size: 11px; color: #999; border-top: 1px solid #ddd; padding-top: 10px;">
+                            GuardPro Security Management | Professional Training &amp; Development Program<br/>
+                            <span style="font-size: 9px;">This certificate verifies completion of the specified training course and commitment to professional excellence</span>
+                        </p>
+                    </div>
+                    
+                </div>
+            </t>
+        </t>
+    </template>
+    
+</odoo>
+
+
+
+
+
+
+
+
+
+

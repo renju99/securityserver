@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Knowledge Categories -->
+        <record id="knowledge_category_uae_regulations" model="knowledge.category">
+            <field name="name">UAE Security Regulations</field>
+            <field name="color">1</field>
+        </record>
+        
+        <record id="knowledge_category_sira" model="knowledge.category">
+            <field name="name">SIRA Certifications</field>
+            <field name="color">2</field>
+        </record>
+        
+        <record id="knowledge_category_access_control" model="knowledge.category">
+            <field name="name">Access Control</field>
+            <field name="color">3</field>
+        </record>
+        
+        <record id="knowledge_category_patrol" model="knowledge.category">
+            <field name="name">Patrol &amp; Monitoring</field>
+            <field name="color">4</field>
+        </record>
+        
+        <record id="knowledge_category_incident_response" model="knowledge.category">
+            <field name="name">Incident Response</field>
+            <field name="color">5</field>
+        </record>
+        
+        <record id="knowledge_category_emergency" model="knowledge.category">
+            <field name="name">Emergency Procedures</field>
+            <field name="color">6</field>
+        </record>
+        
+        <record id="knowledge_category_customer_service" model="knowledge.category">
+            <field name="name">Customer Service</field>
+            <field name="color">7</field>
+        </record>
+        
+        <record id="knowledge_category_reporting" model="knowledge.category">
+            <field name="name">Reporting &amp; Documentation</field>
+            <field name="color">8</field>
+        </record>
+        
+        <record id="knowledge_category_safety" model="knowledge.category">
+            <field name="name">Health &amp; Safety</field>
+            <field name="color">9</field>
+        </record>
+        
+        <record id="knowledge_category_equipment" model="knowledge.category">
+            <field name="name">Equipment &amp; Technology</field>
+            <field name="color">10</field>
+        </record>
+        
+        <!-- Knowledge Tags -->
+        <record id="knowledge_tag_sira_mandatory" model="knowledge.tag">
+            <field name="name">SIRA Mandatory</field>
+            <field name="color">1</field>
+        </record>
+        
+        <record id="knowledge_tag_uae_law" model="knowledge.tag">
+            <field name="name">UAE Law</field>
+            <field name="color">2</field>
+        </record>
+        
+        <record id="knowledge_tag_best_practice" model="knowledge.tag">
+            <field name="name">Best Practice</field>
+            <field name="color">3</field>
+        </record>
+        
+        <record id="knowledge_tag_emergency" model="knowledge.tag">
+            <field name="name">Emergency</field>
+            <field name="color">4</field>
+        </record>
+        
+        <record id="knowledge_tag_fire_safety" model="knowledge.tag">
+            <field name="name">Fire Safety</field>
+            <field name="color">5</field>
+        </record>
+        
+        <record id="knowledge_tag_first_aid" model="knowledge.tag">
+            <field name="name">First Aid</field>
+            <field name="color">6</field>
+        </record>
+        
+        <record id="knowledge_tag_training_required" model="knowledge.tag">
+            <field name="name">Training Required</field>
+            <field name="color">7</field>
+        </record>
+        
+        <record id="knowledge_tag_high_risk" model="knowledge.tag">
+            <field name="name">High Risk</field>
+            <field name="color">8</field>
+        </record>
+        
+        <record id="knowledge_tag_critical" model="knowledge.tag">
+            <field name="name">Critical</field>
+            <field name="color">9</field>
+        </record>
+        
+        <!-- Guard Roles -->
+        <record id="guard_role_security_guard" model="knowledge.guard.role">
+            <field name="name">Security Guard</field>
+            <field name="code">SG</field>
+            <field name="description">Basic security guard role - entry level position</field>
+            <field name="sira_level">grade1</field>
+        </record>
+        
+        <record id="guard_role_senior_guard" model="knowledge.guard.role">
+            <field name="name">Senior Security Guard</field>
+            <field name="code">SSG</field>
+            <field name="description">Experienced guard with additional responsibilities</field>
+            <field name="sira_level">grade2</field>
+        </record>
+        
+        <record id="guard_role_supervisor" model="knowledge.guard.role">
+            <field name="name">Security Supervisor</field>
+            <field name="code">SS</field>
+            <field name="description">Supervises security guards and ensures compliance</field>
+            <field name="sira_level">grade3</field>
+        </record>
+        
+        <record id="guard_role_manager" model="knowledge.guard.role">
+            <field name="name">Security Manager</field>
+            <field name="code">SM</field>
+            <field name="description">Manages overall security operations</field>
+            <field name="sira_level">grade4</field>
+        </record>
+        
+        <record id="guard_role_control_room" model="knowledge.guard.role">
+            <field name="name">Control Room Operator</field>
+            <field name="code">CRO</field>
+            <field name="description">Monitors CCTV and manages communications</field>
+            <field name="sira_level">other</field>
+        </record>
+        
+        <record id="guard_role_mobile_patrol" model="knowledge.guard.role">
+            <field name="name">Mobile Patrol Officer</field>
+            <field name="code">MPO</field>
+            <field name="description">Conducts mobile patrols across multiple sites</field>
+            <field name="sira_level">grade2</field>
+        </record>
+        
+    </data>
+</odoo>
+

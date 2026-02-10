@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Bulk Shift Operation Wizard Form -->
+    <record id="view_bulk_shift_operation_wizard_form" model="ir.ui.view">
+        <field name="name">bulk.shift.operation.wizard.form</field>
+        <field name="model">bulk.shift.operation.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Bulk Shift Operations">
+                <group>
+                    <field name="shift_ids" invisible="1"/>
+                    <field name="shift_count"/>
+                    <field name="operation_type" widget="radio"/>
+                </group>
+                
+                <group invisible="operation_type != 'reschedule'">
+                    <field name="date_offset_days" 
+                           placeholder="e.g., 7 for one week forward, -3 for 3 days backward"/>
+                </group>
+                
+                <group invisible="operation_type != 'assign'">
+                    <field name="guard_id" options="{'no_create': True}"/>
+                </group>
+                
+                <group invisible="operation_type != 'cancel'">
+                    <field name="cancellation_reason" placeholder="Explain why these shifts are being cancelled..."/>
+                </group>
+                
+                <group invisible="operation_type != 'copy'">
+                    <field name="copy_start_date"/>
+                </group>
+                
+                <group invisible="operation_type in ['unassign']">
+                    <field name="send_notifications"/>
+                </group>
+                
+                <footer>
+                    <button name="action_execute" string="Execute" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Bulk Equipment Operation Wizard Form -->
+    <record id="view_bulk_equipment_operation_wizard_form" model="ir.ui.view">
+        <field name="name">bulk.equipment.operation.wizard.form</field>
+        <field name="model">bulk.equipment.operation.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Bulk Equipment Operations">
+                <group>
+                    <field name="equipment_ids" invisible="1"/>
+                    <field name="equipment_count"/>
+                    <field name="operation_type" widget="radio"/>
+                </group>
+                
+                <group invisible="operation_type != 'assign'">
+                    <field name="guard_id" options="{'no_create': True}"/>
+                </group>
+                
+                <group invisible="operation_type != 'maintenance'">
+                    <field name="maintenance_date"/>
+                    <field name="maintenance_notes" placeholder="Maintenance details..."/>
+                </group>
+                
+                <footer>
+                    <button name="action_execute" string="Execute" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_bulk_shift_operation_wizard" model="ir.actions.act_window">
+        <field name="name">Bulk Shift Operations</field>
+        <field name="res_model">bulk.shift.operation.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_guard_shift"/>
+        <field name="binding_view_types">list</field>
+    </record>
+
+    <record id="action_bulk_equipment_operation_wizard" model="ir.actions.act_window">
+        <field name="name">Bulk Equipment Operations</field>
+        <field name="res_model">bulk.equipment.operation.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_guardpro_equipment"/>
+        <field name="binding_view_types">list</field>
+    </record>
+
+</odoo>
+

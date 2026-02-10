@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="action_package_delivery_summary_report" model="ir.actions.report">
+        <field name="name">Package Delivery Summary</field>
+        <field name="model">package.management</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.report_package_delivery_summary_document</field>
+        <field name="report_file">guardpro.report_package_delivery_summary_document</field>
+        <field name="binding_model_id" ref="model_package_management"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_us"/>
+    </record>
+    
+    <template id="report_package_delivery_summary_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h1 style="color: #ff9800;">PACKAGE DELIVERY SUMMARY</h1>
+                        <table class="table table-sm table-bordered">
+                            <tr>
+                                <th style="width: 30%; background-color: #f5f5f5;">Package Reference</th>
+                                <td><strong><t t-esc="o.name or 'N/A'"/></strong></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Recipient</th>
+                                <td><t t-esc="o.recipient_name or 'N/A'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Courier</th>
+                                <td><t t-esc="o.courier or 'N/A'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Received Date</th>
+                                <td><t t-esc="format_datetime(o.received_date) if o.received_date else 'N/A'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Collected Date</th>
+                                <td><t t-esc="format_datetime(o.pickup_date) if o.pickup_date else 'Not collected'"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f5f5f5;">Status</th>
+                                <td>
+                                    <span t-att-style="'padding: 5px 15px; border-radius: 4px; font-weight: bold; color: white; background-color: %s;' % ('#4caf50' if o.state == 'collected' else '#ff9800')"
+                                          t-esc="dict(o._fields['state'].selection).get(o.state, 'N/A')"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    
+</odoo>
+

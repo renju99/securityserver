@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="1"><!-- ============================================ -->
+        <!-- CRITICAL PRIORITY EMAIL TEMPLATES (3 items) -->
+        <!-- ============================================ -->
+        
+        <!-- 1. Geofence Violation Alert Email Template -->
+        <record id="email_template_geofence_violation_alert" model="mail.template">
+            <field name="name">Geofence Violation Alert</field>
+            <field name="model_id" ref="model_geofence_alert"/>
+            <field name="subject">🚨 URGENT: Geofence Violation - ${object.guard_id.name or ''} - ${object.site_id.name or ''}</field>
+            <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
+            <field name="email_to">${(object.shift_id.supervisor_id.email if object.shift_id and object.shift_id.supervisor_id else object.site_id.manager_id.email if object.site_id and object.site_id.manager_id else '')|safe}</field>
+            <field name="body_html" type="html">
+
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Geofence Violation Alert&lt;/title&gt;
+&lt;/head&gt;
+&lt;body style="margin: 0; padding: 0; font-family: Arial, sans-serif; line-height: 1.6; color: #333;"&gt;
+    &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f4f4f4;"&gt;
+        &lt;tr&gt;
+            &lt;td align="center" style="padding: 20px 0;"&gt;
+                &lt;table cellpadding="0" cellspacing="0" border="0" width="600" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"&gt;
+                    
+                    &lt;!-- Header --&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #d32f2f; color: white; padding: 30px 20px; text-align: center;"&gt;
+                            &lt;h1 style="margin: 0; font-size: 28px; font-weight: bold;"&gt;🚨 GEOFENCE VIOLATION ALERT&lt;/h1&gt;
+                            &lt;p style="margin: 10px 0 0 0; font-size: 14px;"&gt;Immediate Action Required&lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    
+                    &lt;!-- Alert Banner --&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 0 30px;"&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%"&gt;
+                                &lt;tr&gt;
+                                    &lt;td style="background-color: #ffebee; border-left: 4px solid #d32f2f; padding: 15px; margin: 20px 0;"&gt;
+                                        &lt;p style="margin: 0; color: #d32f2f; font-weight: bold;"&gt;
+                                            ⚠️ URGENT NOTIFICATION: A geofence violation has been detected for one of your guards.
+                                        &lt;/p&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    
+                    &lt;!-- Content --&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 30px;"&gt;
+                            &lt;p style="margin: 0 0 20px 0;"&gt;&lt;strong&gt;Supervisor,&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p style="margin: 0 0 20px 0;"&gt;This is an automated alert to notify you of a location compliance violation that requires your immediate attention.&lt;/p&gt;
+                            
+                            &lt;!-- Details Table --&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; margin: 20px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 2px solid #ddd; width: 40%;"&gt;Guard Name&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;&lt;strong&gt;${object.guard_id.name or 'N/A'}&lt;/strong&gt;&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 2px solid #ddd;"&gt;Guard Phone&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.guard_id.phone or object.guard_id.user_id.phone or 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 2px solid #ddd;"&gt;Alert Type&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd; color: #d32f2f; font-weight: bold;"&gt;
+                                        ${dict(object._fields['alert_type'].selection).get(object.alert_type, 'N/A')}
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 2px solid #ddd;"&gt;Expected Site&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.site_id.name if object.site_id else 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 2px solid #ddd;"&gt;Alert Time&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${format_datetime(object.alert_datetime, dt_format='medium', tz='UTC') if object.alert_datetime else 'N/A'}&lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 2px solid #ddd;"&gt;Distance from Site&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;
+                                        &lt;strong style="color: #d32f2f;"&gt;
+                                            % if object.distance_from_site:
+                                                ${'{:.2f}'.format(object.distance_from_site)} km
+                                            % else:
+                                                N/A
+                                            % endif
+                                        &lt;/strong&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                                &lt;tr&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 2px solid #ddd;"&gt;Current Location&lt;/th&gt;
+                                    &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;
+                                        % if object.latitude and object.longitude:
+                                            Lat: ${'{:.6f}'.format(object.latitude)}, Lon: ${'{:.6f}'.format(object.longitude)}&lt;br/&gt;
+                                            &lt;a href="https://www.google.com/maps?q=${object.latitude},${object.longitude}" 
+                                               style="color: #0288d1; text-decoration: underline;" target="_blank"&gt;
+                                                📍 View on Google Maps
+                                            &lt;/a&gt;
+                                        % else:
+                                            Location data not available
+                                        % endif
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;!-- Required Actions --&gt;
+                            &lt;h3 style="margin: 30px 0 15px 0; color: #d32f2f;"&gt;Required Actions:&lt;/h3&gt;
+                            &lt;ol style="margin: 0; padding-left: 20px; line-height: 1.8;"&gt;
+                                &lt;li&gt;&lt;strong&gt;Contact the guard immediately&lt;/strong&gt; to verify their location and situation&lt;/li&gt;
+                                &lt;li&gt;&lt;strong&gt;Document the explanation&lt;/strong&gt; for the violation in the system&lt;/li&gt;
+                                &lt;li&gt;&lt;strong&gt;Update alert status&lt;/strong&gt; once the situation is resolved&lt;/li&gt;
+                                &lt;li&gt;&lt;strong&gt;Report to management&lt;/strong&gt; if this is a serious violation or safety concern&lt;/li&gt;
+                            &lt;/ol&gt;
+                            
+                            &lt;!-- Action Button --&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 30px 0;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td align="center"&gt;
+                                        &lt;a href="${object.get_portal_url() if hasattr(object, 'get_portal_url') else '#'}" 
+                                           style="display: inline-block; padding: 14px 40px; background-color: #d32f2f; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px;"&gt;
+                                            View Alert Details
+                                        &lt;/a&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;!-- Important Notice --&gt;
+                            &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 20px;"&gt;
+                                &lt;tr&gt;
+                                    &lt;td style="background-color: #fff3cd; border-left: 4px solid #ff9800; padding: 15px;"&gt;
+                                        &lt;p style="margin: 0;"&gt;&lt;strong&gt;⚠️ Important:&lt;/strong&gt; This alert was automatically generated based on GPS location data. 
+                                        Please investigate promptly to ensure guard safety and compliance.&lt;/p&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            &lt;/table&gt;
+                            
+                            &lt;!-- Contact Info --&gt;
+                            &lt;p style="margin: 30px 0 10px 0;"&gt;&lt;strong&gt;Need Assistance?&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p style="margin: 0;"&gt;Contact Security Operations: 
+                                &lt;a href="tel:${object.company_id.phone or ''}" style="color: #0288d1;"&gt;${object.company_id.phone or 'N/A'}&lt;/a&gt;
+                            &lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    
+                    &lt;!-- Footer --&gt;
+                    &lt;tr&gt;
+                        &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
+                            &lt;p style="margin: 0 0 5px 0;"&gt;&lt;strong&gt;GuardPro Security Management System&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p style="margin: 0 0 5px 0;"&gt;Automated Geofence Monitoring Alert&lt;/p&gt;
+                            &lt;p style="margin: 10px 0 0 0; font-size: 10px; color: #999;"&gt;
+                                This is an automated security alert. Please do not reply to this email.&lt;br/&gt;
+                                For support, contact your system administrator.
+                            &lt;/p&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    
+                &lt;/table&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+            </field>
+        </record>
+        
+        </data>
+</odoo>

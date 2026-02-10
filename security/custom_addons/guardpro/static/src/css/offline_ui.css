@@ -1,0 +1,352 @@
+/**
+ * GuardPro Offline UI Styles
+ * Styles for offline mode indicators and notifications
+ */
+
+/* Offline Banner */
+.offline-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    color: white;
+    text-align: center;
+    padding: 0.75rem;
+    z-index: 10000;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    animation: slideDown 0.3s ease-out;
+}
+
+.offline-banner i {
+    margin-right: 0.5rem;
+    animation: pulse 2s infinite;
+}
+
+/* Offline Indicators on Cards */
+.offline-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.offline-indicator i {
+    font-size: 0.875rem;
+}
+
+/* Sync Status Badge */
+.sync-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.sync-status-badge.synced {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.sync-status-badge.pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.sync-status-badge.syncing {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3B82F6;
+}
+
+.sync-status-badge.syncing i {
+    animation: spin 1s linear infinite;
+}
+
+.sync-status-badge.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+/* Sync Progress Indicator */
+.sync-progress-indicator {
+    position: fixed;
+    bottom: 80px;
+    left: 1rem;
+    background: rgba(59, 130, 246, 0.95);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    z-index: 999;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    animation: slideInLeft 0.3s ease-out;
+}
+
+.sync-progress-indicator i {
+    font-size: 1.25rem;
+    animation: spin 1s linear infinite;
+}
+
+.sync-progress-text {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* Conflict Badge */
+.conflict-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.conflict-badge i {
+    font-size: 0.875rem;
+}
+
+/* Offline Form Indicator */
+.form-offline-indicator {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid #f59e0b;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.form-offline-indicator i {
+    color: #f59e0b;
+    font-size: 1.5rem;
+}
+
+.form-offline-indicator-text {
+    flex: 1;
+}
+
+.form-offline-indicator-text strong {
+    display: block;
+    color: #f59e0b;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.form-offline-indicator-text span {
+    color: #78716c;
+    font-size: 0.875rem;
+}
+
+/* Network Status Indicator (Bottom Right) */
+.network-status-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 9999;
+    transition: all 0.3s ease;
+}
+
+.network-status-indicator.online {
+    background: #10b981;
+}
+
+.network-status-indicator.offline {
+    background: #f59e0b;
+    animation: pulse 2s infinite;
+}
+
+/* Queue Counter */
+.queue-counter {
+    position: fixed;
+    bottom: 80px;
+    left: 1rem;
+    background: rgba(59, 130, 246, 0.95);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    z-index: 999;
+    font-size: 0.875rem;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.queue-counter:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.queue-counter i {
+    font-size: 1rem;
+}
+
+.queue-count {
+    background: rgba(255, 255, 255, 0.3);
+    padding: 0.125rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+}
+
+/* Animations */
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Offline List Items */
+.list-item.offline {
+    position: relative;
+    border-left: 3px solid #f59e0b;
+}
+
+.list-item.offline::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(245, 158, 11, 0.03);
+    pointer-events: none;
+}
+
+/* Sync Button */
+.btn-sync {
+    position: fixed;
+    bottom: 160px;
+    right: 1.25rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 998;
+}
+
+.btn-sync:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.5);
+}
+
+.btn-sync i {
+    font-size: 1.5rem;
+}
+
+.btn-sync.syncing i {
+    animation: spin 1s linear infinite;
+}
+
+.btn-sync.disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    .offline-banner {
+        font-size: 0.875rem;
+        padding: 0.5rem;
+    }
+    
+    .sync-progress-indicator {
+        left: 0.5rem;
+        right: 0.5rem;
+        bottom: 70px;
+    }
+    
+    .queue-counter {
+        left: 0.5rem;
+        bottom: 70px;
+    }
+    
+    .btn-sync {
+        bottom: 140px;
+        right: 1rem;
+        width: 3rem;
+        height: 3rem;
+    }
+    
+    .btn-sync i {
+        font-size: 1.25rem;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .offline-banner {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+    
+    .form-offline-indicator {
+        background: rgba(245, 158, 11, 0.15);
+        border-color: #d97706;
+    }
+    
+    .form-offline-indicator-text span {
+        color: #a8a29e;
+    }
+}
+

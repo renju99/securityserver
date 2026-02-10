@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Shift Swap Request PDF Report Template -->
+    <template id="shift_swap_request_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h2>Shift Swap Request</h2>
+                            </div>
+                        </div>
+
+                        <!-- Reference and Status -->
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <h4>Reference: <span t-field="o.name"/></h4>
+                            </div>
+                            <div class="col-6 text-end">
+                                <h5>
+                                    Status: 
+                                    <t t-if="o.status == 'draft'">
+                                        <span class="badge bg-secondary">Draft</span>
+                                    </t>
+                                    <t t-elif="o.status == 'pending'">
+                                        <span class="badge bg-info">Pending Guard Approval</span>
+                                    </t>
+                                    <t t-elif="o.status == 'accepted'">
+                                        <span class="badge bg-success">Accepted by Guard</span>
+                                    </t>
+                                    <t t-elif="o.status == 'approved'">
+                                        <span class="badge bg-success">Approved by Supervisor</span>
+                                    </t>
+                                    <t t-elif="o.status == 'completed'">
+                                        <span class="badge bg-primary">Completed</span>
+                                    </t>
+                                    <t t-elif="o.status == 'rejected'">
+                                        <span class="badge bg-danger">Rejected</span>
+                                    </t>
+                                    <t t-elif="o.status == 'cancelled'">
+                                        <span class="badge bg-warning">Cancelled</span>
+                                    </t>
+                                </h5>
+                            </div>
+                        </div>
+
+                        <!-- Guards Involved -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Guards Involved</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Requesting Guard:</strong></td>
+                                        <td t-field="o.requesting_guard_id.name"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Target Guard:</strong></td>
+                                        <td t-field="o.target_guard_id.name"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Request Date:</strong></td>
+                                        <td t-field="o.create_date"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Shift to Swap -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Shift to be Swapped</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Shift:</strong></td>
+                                        <td t-field="o.shift_id.name"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Site:</strong></td>
+                                        <td t-field="o.shift_id.site_id.name"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Start Time:</strong></td>
+                                        <td t-field="o.shift_id.start_datetime"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>End Time:</strong></td>
+                                        <td t-field="o.shift_id.end_datetime"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Originally Assigned To:</strong></td>
+                                        <td t-field="o.requesting_guard_id.name"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Compensation Shift (if applicable) -->
+                        <div class="row mt-3" t-if="o.compensation_shift_id">
+                            <div class="col-12">
+                                <h5>Compensation Shift (In Return)</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Shift:</strong></td>
+                                        <td t-field="o.compensation_shift_id.name"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Site:</strong></td>
+                                        <td t-field="o.compensation_shift_id.site_id.name"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Start Time:</strong></td>
+                                        <td t-field="o.compensation_shift_id.start_datetime"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>End Time:</strong></td>
+                                        <td t-field="o.compensation_shift_id.end_datetime"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Originally Assigned To:</strong></td>
+                                        <td t-field="o.target_guard_id.name"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Reason for Swap -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Reason for Swap Request</h5>
+                                <p t-field="o.reason"/>
+                            </div>
+                        </div>
+
+                        <!-- Guard Response -->
+                        <div class="row mt-3" t-if="o.guard_response">
+                            <div class="col-12">
+                                <h5>Guard Response</h5>
+                                <p t-field="o.guard_response"/>
+                            </div>
+                        </div>
+
+                        <!-- Supervisor Decision -->
+                        <div class="row mt-3" t-if="o.supervisor_notes">
+                            <div class="col-12">
+                                <h5>Supervisor Notes</h5>
+                                <p t-field="o.supervisor_notes"/>
+                            </div>
+                        </div>
+
+                        <!-- Approval Timeline -->
+                        <div class="row mt-3" t-if="o.status in ['approved', 'completed']">
+                            <div class="col-12">
+                                <h5>Approval Timeline</h5>
+                                <table class="table table-bordered">
+                                    <tr t-if="o.guard_response_date">
+                                        <td width="30%"><strong>Guard Accepted:</strong></td>
+                                        <td t-field="o.guard_response_date"/>
+                                    </tr>
+                                    <tr t-if="o.supervisor_decision_date">
+                                        <td><strong>Supervisor Approved:</strong></td>
+                                        <td t-field="o.supervisor_decision_date"/>
+                                    </tr>
+                                    <tr t-if="o.approved_by">
+                                        <td><strong>Approved By:</strong></td>
+                                        <td t-field="o.approved_by.name"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Rejection Info -->
+                        <div class="row mt-3" t-if="o.status == 'rejected'">
+                            <div class="col-12">
+                                <div class="alert alert-danger">
+                                    <h5>Request Rejected</h5>
+                                    <p t-if="o.rejection_reason" t-field="o.rejection_reason"/>
+                                    <p t-if="o.rejected_by">Rejected by: <span t-field="o.rejected_by.name"/></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Important Notes -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <strong>Important:</strong>
+                                    <ul class="mb-0">
+                                        <li>Both guards must acknowledge and sign this swap agreement</li>
+                                        <li>Supervisor approval is required before the swap is finalized</li>
+                                        <li>Guards remain responsible for their swapped shifts</li>
+                                        <li>This swap affects payroll and attendance records</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Signature Section -->
+                        <div class="row mt-5">
+                            <div class="col-4">
+                                <div class="border-top pt-2">
+                                    <p><strong>Requesting Guard:</strong></p>
+                                    <p t-field="o.requesting_guard_id.name"></p>
+                                    <p>Signature: ___________________</p>
+                                    <p>Date: ___________________</p>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="border-top pt-2">
+                                    <p><strong>Target Guard:</strong></p>
+                                    <p t-field="o.target_guard_id.name"></p>
+                                    <p>Signature: ___________________</p>
+                                    <p>Date: ___________________</p>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="border-top pt-2">
+                                    <p><strong>Supervisor Approval:</strong></p>
+                                    <p t-if="o.approved_by" t-field="o.approved_by.name"/>
+                                    <p>Signature: ___________________</p>
+                                    <p>Date: ___________________</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="row mt-5">
+                            <div class="col-12 text-center text-muted">
+                                <small>
+                                    Shift Swap Request - Official HR Document
+                                    <br/>
+                                    This document must be signed by all parties and retained for records
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Definition -->
+    <record id="action_report_shift_swap_request" model="ir.actions.report">
+        <field name="name">Shift Swap Request</field>
+        <field name="model">shift.swap.request</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.shift_swap_request_report_template</field>
+        <field name="report_file">guardpro.shift_swap_request_report_template</field>
+        <field name="binding_model_id" ref="model_shift_swap_request"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Shift_Swap_%s' % (object.name)</field>
+    </record>
+</odoo>
+

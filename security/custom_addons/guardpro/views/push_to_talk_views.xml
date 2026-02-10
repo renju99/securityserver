@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Push-to-Talk Channel Views -->
+    
+    <!-- Channel List View -->
+    <record id="view_push_to_talk_channel_tree" model="ir.ui.view">
+        <field name="name">push.to.talk.channel.tree</field>
+        <field name="model">push.to.talk.channel</field>
+        <field name="arch" type="xml">
+            <list string="Push-to-Talk Channels" decoration-info="active == True" decoration-muted="active == False">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="channel_type"/>
+                <field name="site_id"/>
+                <field name="active"/>
+                <field name="is_public"/>
+                <field name="active_members_count"/>
+                <field name="last_message_time"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Channel Form View -->
+    <record id="view_push_to_talk_channel_form" model="ir.ui.view">
+        <field name="name">push.to.talk.channel.form</field>
+        <field name="model">push.to.talk.channel</field>
+        <field name="arch" type="xml">
+            <form string="Push-to-Talk Channel">
+                <header>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object" 
+                                class="oe_stat_button" icon="fa-toggle-on"
+                                invisible="not active">
+                            <field name="active" widget="boolean_button" options="{'terminology': 'active'}"/>
+                        </button>
+                        <button name="toggle_active" type="object" 
+                                class="oe_stat_button" icon="fa-toggle-off"
+                                invisible="active">
+                            <field name="active" widget="boolean_button" options="{'terminology': 'active'}"/>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code" readonly="id"/>
+                            <field name="channel_type"/>
+                            <field name="site_id"/>
+                        </group>
+                        <group>
+                            <field name="active"/>
+                            <field name="is_public"/>
+                            <field name="max_duration_seconds"/>
+                            <field name="active_members_count"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description" placeholder="Enter channel description..."/>
+                        </page>
+                        <page string="Members">
+                            <field name="member_ids" widget="many2many_tags" options="{'no_create': True}">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="employee_id"/>
+                                    <field name="user_id"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Supervisors">
+                            <field name="supervisor_ids" widget="many2many_tags" options="{'no_create': True}">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="email"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Voice Messages">
+                            <field name="voice_message_ids" readonly="1">
+                                <list>
+                                    <field name="sender_guard_id"/>
+                                    <field name="duration_seconds"/>
+                                    <field name="is_urgent"/>
+                                    <field name="created_at"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Channel Search View -->
+    <record id="view_push_to_talk_channel_search" model="ir.ui.view">
+        <field name="name">push.to.talk.channel.search</field>
+        <field name="model">push.to.talk.channel</field>
+        <field name="arch" type="xml">
+            <search string="Push-to-Talk Channels">
+                <field name="name" string="Channel Name"/>
+                <field name="code" string="Channel Code"/>
+                <field name="site_id"/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Inactive" name="inactive" domain="[('active', '=', False)]"/>
+                <filter string="Public" name="public" domain="[('is_public', '=', True)]"/>
+                <filter string="Site Channels" name="site" domain="[('channel_type', '=', 'site')]"/>
+                <filter string="Team Channels" name="team" domain="[('channel_type', '=', 'team')]"/>
+                <filter string="Emergency Channels" name="emergency" domain="[('channel_type', '=', 'emergency')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Channel Type" name="group_type" context="{'group_by': 'channel_type'}"/>
+                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Active Status" name="group_active" context="{'group_by': 'active'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Channel Kanban View -->
+    <record id="view_push_to_talk_channel_kanban" model="ir.ui.view">
+        <field name="name">push.to.talk.channel.kanban</field>
+        <field name="model">push.to.talk.channel</field>
+        <field name="arch" type="xml">
+            <kanban string="Push-to-Talk Channels" class="o_kanban_dashboard">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="channel_type"/>
+                <field name="active"/>
+                <field name="active_members_count"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_card oe_kanban_global_click">
+                            <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="name"/>
+                                        </strong>
+                                        <div class="o_kanban_record_subtitle">
+                                            <span><field name="code"/></span>
+                                            <span class="badge badge-info"><field name="channel_type"/></span>
+                                        </div>
+                                    </div>
+                                    <div class="o_kanban_record_top_right">
+                                        <field name="active" widget="boolean_toggle"/>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <i class="fa fa-users" title="Active Members"/> <field name="active_members_count"/> active
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    
+    <!-- Channel Action -->
+    <record id="action_push_to_talk_channel" model="ir.actions.act_window">
+        <field name="name">Push-to-Talk Channels</field>
+        <field name="res_model">push.to.talk.channel</field>
+        <field name="view_mode">list,form,kanban</field>
+        <field name="search_view_id" ref="view_push_to_talk_channel_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new push-to-talk channel
+            </p>
+            <p>
+                Push-to-talk channels allow guards to communicate via voice messages like walkie-talkies.
+                Create channels for different sites, teams, or purposes.
+            </p>
+        </field>
+    </record>
+    
+    <!-- Push-to-Talk Message Views -->
+    
+    <!-- Message List View -->
+    <record id="view_push_to_talk_message_tree" model="ir.ui.view">
+        <field name="name">push.to.talk.message.tree</field>
+        <field name="model">push.to.talk.message</field>
+        <field name="arch" type="xml">
+            <list string="Push-to-Talk Messages" decoration-warning="is_urgent == True">
+                <field name="channel_id"/>
+                <field name="sender_guard_id"/>
+                <field name="duration_seconds"/>
+                <field name="file_size"/>
+                <field name="is_urgent"/>
+                <field name="created_at"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Message Form View -->
+    <record id="view_push_to_talk_message_form" model="ir.ui.view">
+        <field name="name">push.to.talk.message.form</field>
+        <field name="model">push.to.talk.message</field>
+        <field name="arch" type="xml">
+            <form string="Push-to-Talk Message" create="0" edit="0">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="channel_id" readonly="1"/>
+                            <field name="sender_guard_id" readonly="1"/>
+                            <field name="sender_user_id" readonly="1"/>
+                            <field name="created_at" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="duration_seconds" readonly="1"/>
+                            <field name="file_size" readonly="1"/>
+                            <field name="is_urgent" readonly="1"/>
+                            <field name="location_latitude" readonly="1"/>
+                            <field name="location_longitude" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="audio_data" widget="binary" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="played_by_ids" readonly="1" widget="many2many_tags"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Message Search View -->
+    <record id="view_push_to_talk_message_search" model="ir.ui.view">
+        <field name="name">push.to.talk.message.search</field>
+        <field name="model">push.to.talk.message</field>
+        <field name="arch" type="xml">
+            <search string="Push-to-Talk Messages">
+                <field name="channel_id"/>
+                <field name="sender_guard_id"/>
+                <filter string="Urgent" name="urgent" domain="[('is_urgent', '=', True)]"/>
+                <filter string="Today" name="today" domain="[('created_at', '>=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Channel" name="group_channel" context="{'group_by': 'channel_id'}"/>
+                    <filter string="Sender" name="group_sender" context="{'group_by': 'sender_guard_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'created_at'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Message Action -->
+    <record id="action_push_to_talk_message" model="ir.actions.act_window">
+        <field name="name">Push-to-Talk Messages</field>
+        <field name="res_model">push.to.talk.message</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_push_to_talk_message_search"/>
+        <field name="domain">[]</field>
+        <field name="context">{'search_default_today': 1}</field>
+    </record>
+    
+    <!-- Push-to-Talk Widget Action (for guards to use) -->
+    <record id="action_push_to_talk_widget" model="ir.actions.client">
+        <field name="name">Push-to-Talk</field>
+        <field name="tag">push_to_talk_widget</field>
+    </record>
+
+</odoo>

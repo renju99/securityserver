@@ -1,0 +1,1516 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ================================================================ -->
+        <!-- SIMPLIFIED RECORD RULES BASED ON USER SITE ASSIGNMENT           -->
+        <!-- ================================================================ -->
+        <!-- 
+            Access Control Strategy:
+            - Administrator: All sites (no restrictions)
+            - Client User: Sites assigned via user.site_ids (read-only)
+            - Guard Portal: Sites assigned via user.site_ids (limited write)
+            - Manager: Sites assigned via user.site_ids (full write/create/delete access - higher than supervisor)
+            - Supervisor: Sites assigned via user.site_ids (read-only, limited write where specified)
+            
+            Note: Manager group implies Supervisor group, so managers inherit supervisor permissions
+            but have additional write/create/delete permissions on records at their assigned sites.
+        -->
+
+        <!-- ================================================================ -->
+        <!-- CLIENT.SITE RECORD RULES                                          -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Sites -->
+        <record id="rule_client_site_admin" model="ir.rule">
+            <field name="name">Administrator: All Sites</field>
+            <field name="model_id" ref="model_client_site"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Client User, Guard Portal, Supervisor: Assigned Sites Only (Read Only) -->
+        <record id="rule_client_site_assigned" model="ir.rule">
+            <field name="name">Non-Admin/Non-Manager: Assigned Sites Only</field>
+            <field name="model_id" ref="model_client_site"/>
+            <field name="domain_force">[('id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Manager: Full Access to Assigned Sites -->
+        <record id="rule_client_site_manager" model="ir.rule">
+            <field name="name">Manager: Full Access to Assigned Sites</field>
+            <field name="model_id" ref="model_client_site"/>
+            <field name="domain_force">[('id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- GUARD.PROFILE RECORD RULES                                        -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Guards -->
+        <record id="rule_guard_profile_admin" model="ir.rule">
+            <field name="name">Administrator: All Guards</field>
+            <field name="model_id" ref="model_guard_profile"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Users: Read Guard Profiles at Assigned Sites or Own Profile -->
+        <record id="rule_guard_profile_guard_user_read" model="ir.rule">
+            <field name="name">Guard Users: Read Guard Profiles at Assigned Sites or Own Profile</field>
+            <field name="model_id" ref="model_guard_profile"/>
+            <field name="domain_force">['|', ('site_ids', 'in', user.site_ids.ids), ('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Guard Users: Write Own Profile Only -->
+        <record id="rule_guard_profile_guard_user_write" model="ir.rule">
+            <field name="name">Guard Users: Write Own Profile Only</field>
+            <field name="model_id" ref="model_guard_profile"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Client User, Supervisor: Guards at Assigned Sites (Read Only) -->
+        <record id="rule_guard_profile_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Guards at Assigned Sites</field>
+            <field name="model_id" ref="model_guard_profile"/>
+            <field name="domain_force">[('site_ids', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Manager: Full Access to Guards at Assigned Sites -->
+        <record id="rule_guard_profile_manager" model="ir.rule">
+            <field name="name">Manager: Full Access to Guards at Assigned Sites</field>
+            <field name="model_id" ref="model_guard_profile"/>
+            <field name="domain_force">[('site_ids', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- GUARD.SHIFT RECORD RULES                                          -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Shifts -->
+        <record id="rule_guard_shift_admin" model="ir.rule">
+            <field name="name">Administrator: All Shifts</field>
+            <field name="model_id" ref="model_guard_shift"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal: All Shifts at Assigned Sites -->
+        <record id="rule_guard_shift_guard_portal" model="ir.rule">
+            <field name="name">Guard Portal: All Shifts at Assigned Sites</field>
+            <field name="model_id" ref="model_guard_shift"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Client User, Supervisor: Shifts at Assigned Sites (Read Only) -->
+        <record id="rule_guard_shift_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Shifts at Assigned Sites</field>
+            <field name="model_id" ref="model_guard_shift"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Manager: Full Access to Shifts at Assigned Sites -->
+        <record id="rule_guard_shift_manager" model="ir.rule">
+            <field name="name">Manager: Full Access to Shifts at Assigned Sites</field>
+            <field name="model_id" ref="model_guard_shift"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- INCIDENT.REPORT RECORD RULES                                      -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Incidents -->
+        <record id="rule_incident_report_admin" model="ir.rule">
+            <field name="name">Administrator: All Incidents</field>
+            <field name="model_id" ref="model_incident_report"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal: All Incidents at Assigned Sites -->
+        <record id="rule_incident_report_guard_portal" model="ir.rule">
+            <field name="name">Guard Portal: All Incidents at Assigned Sites</field>
+            <field name="model_id" ref="model_incident_report"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Client User, Supervisor: Incidents at Assigned Sites (Read Only) -->
+        <record id="rule_incident_report_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Incidents at Assigned Sites</field>
+            <field name="model_id" ref="model_incident_report"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Manager: Full Access to Incidents at Assigned Sites -->
+        <record id="rule_incident_report_manager" model="ir.rule">
+            <field name="name">Manager: Full Access to Incidents at Assigned Sites</field>
+            <field name="model_id" ref="model_incident_report"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- SECURITY.TOUR RECORD RULES                                        -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Tours -->
+        <record id="rule_security_tour_admin" model="ir.rule">
+            <field name="name">Administrator: All Tours</field>
+            <field name="model_id" ref="model_security_tour"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal, Client User, Supervisor: Tours at Assigned Sites (Read Only) -->
+        <record id="rule_security_tour_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin/Non-Manager: Tours at Assigned Sites</field>
+            <field name="model_id" ref="model_security_tour"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Manager: Full Access to Tours at Assigned Sites -->
+        <record id="rule_security_tour_manager" model="ir.rule">
+            <field name="name">Manager: Full Access to Tours at Assigned Sites</field>
+            <field name="model_id" ref="model_security_tour"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- CHECKPOINT RECORD RULES                                           -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Checkpoints -->
+        <record id="rule_checkpoint_admin" model="ir.rule">
+            <field name="name">Administrator: All Checkpoints</field>
+            <field name="model_id" ref="model_checkpoint"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal, Client User, Supervisor: Checkpoints at Assigned Sites (Read Only) -->
+        <record id="rule_checkpoint_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin/Non-Manager: Checkpoints at Assigned Sites</field>
+            <field name="model_id" ref="model_checkpoint"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Manager: Full Access to Checkpoints at Assigned Sites -->
+        <record id="rule_checkpoint_manager" model="ir.rule">
+            <field name="name">Manager: Full Access to Checkpoints at Assigned Sites</field>
+            <field name="model_id" ref="model_checkpoint"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- CHECKPOINT.SCAN RECORD RULES                                      -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Scans -->
+        <record id="rule_checkpoint_scan_admin" model="ir.rule">
+            <field name="name">Administrator: All Scans</field>
+            <field name="model_id" ref="model_checkpoint_scan"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal: Own Scans or Scans at Assigned Sites -->
+        <record id="rule_checkpoint_scan_guard_portal" model="ir.rule">
+            <field name="name">Guard Portal: Own Scans or at Assigned Sites</field>
+            <field name="model_id" ref="model_checkpoint_scan"/>
+            <field name="domain_force">['|', ('guard_id.user_id', '=', user.id), ('checkpoint_id.site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Client User, Supervisor: Scans at Assigned Sites (Read Only) -->
+        <record id="rule_checkpoint_scan_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Scans at Assigned Sites</field>
+            <field name="model_id" ref="model_checkpoint_scan"/>
+            <field name="domain_force">[('checkpoint_id.site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Manager: Full Access to Scans at Assigned Sites -->
+        <record id="rule_checkpoint_scan_manager" model="ir.rule">
+            <field name="name">Manager: Full Access to Scans at Assigned Sites</field>
+            <field name="model_id" ref="model_checkpoint_scan"/>
+            <field name="domain_force">[('checkpoint_id.site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- TOUR.LOG RECORD RULES                                             -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Tour Logs -->
+        <record id="rule_tour_log_admin" model="ir.rule">
+            <field name="name">Administrator: All Tour Logs</field>
+            <field name="model_id" ref="model_tour_log"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal: Own Tour Logs or Tour Logs at Assigned Sites -->
+        <record id="rule_tour_log_guard_portal" model="ir.rule">
+            <field name="name">Guard Portal: Own Tour Logs or at Assigned Sites</field>
+            <field name="model_id" ref="model_tour_log"/>
+            <field name="domain_force">['|', ('guard_id.user_id', '=', user.id), ('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Client User, Supervisor: Tour Logs at Assigned Sites (Read Only) -->
+        <record id="rule_tour_log_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Tour Logs at Assigned Sites</field>
+            <field name="model_id" ref="model_tour_log"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Manager: Full Access to Tour Logs at Assigned Sites -->
+        <record id="rule_tour_log_manager" model="ir.rule">
+            <field name="name">Manager: Full Access to Tour Logs at Assigned Sites</field>
+            <field name="model_id" ref="model_tour_log"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- GUARD.ATTENDANCE RECORD RULES                                     -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Attendance -->
+        <record id="rule_guard_attendance_admin" model="ir.rule">
+            <field name="name">Administrator: All Attendance</field>
+            <field name="model_id" ref="model_guard_attendance"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal: All Attendance at Assigned Sites (Write only own records) -->
+        <record id="rule_guard_attendance_guard_portal_read" model="ir.rule">
+            <field name="name">Guard Portal: Read All Attendance at Assigned Sites</field>
+            <field name="model_id" ref="model_guard_attendance"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Guard Portal: Write/Create Own Attendance Only -->
+        <record id="rule_guard_attendance_guard_portal_write" model="ir.rule">
+            <field name="name">Guard Portal: Write Own Attendance Only</field>
+            <field name="model_id" ref="model_guard_attendance"/>
+            <field name="domain_force">[('guard_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Client User, Supervisor: Attendance at Assigned Sites (Read Only) -->
+        <record id="rule_guard_attendance_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Attendance at Assigned Sites</field>
+            <field name="model_id" ref="model_guard_attendance"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Manager: Full Access to Attendance at Assigned Sites -->
+        <record id="rule_guard_attendance_manager" model="ir.rule">
+            <field name="name">Manager: Full Access to Attendance at Assigned Sites</field>
+            <field name="model_id" ref="model_guard_attendance"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- GUARDPRO.EQUIPMENT RECORD RULES                                   -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Equipment -->
+        <record id="rule_equipment_admin" model="ir.rule">
+            <field name="name">Administrator: All Equipment</field>
+            <field name="model_id" ref="model_guardpro_equipment"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal: Equipment at Assigned Sites or Assigned to User -->
+        <record id="rule_equipment_guard_portal" model="ir.rule">
+            <field name="name">Guard Portal: Assigned Equipment or at Assigned Sites</field>
+            <field name="model_id" ref="model_guardpro_equipment"/>
+            <field name="domain_force">['|', '|', ('assigned_to.user_id', '=', user.id), ('assigned_site', 'in', user.site_ids.ids), ('assigned_site', '=', False)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Client User, Supervisor: Equipment at Assigned Sites (Read Only) -->
+        <record id="rule_equipment_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Equipment at Assigned Sites</field>
+            <field name="model_id" ref="model_guardpro_equipment"/>
+            <field name="domain_force">['|', ('assigned_site', 'in', user.site_ids.ids), ('assigned_site', '=', False)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Manager: Full Access to Equipment at Assigned Sites -->
+        <record id="rule_equipment_manager" model="ir.rule">
+            <field name="name">Manager: Full Access to Equipment at Assigned Sites</field>
+            <field name="model_id" ref="model_guardpro_equipment"/>
+            <field name="domain_force">['|', ('assigned_site', 'in', user.site_ids.ids), ('assigned_site', '=', False)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- GUARD.SKILL RECORD RULES                                          -->
+        <!-- ================================================================ -->
+        
+        <!-- All Users: All Skills (Read Only for Portal Users) -->
+        <record id="rule_guard_skill_all" model="ir.rule">
+            <field name="name">All Users: All Skills</field>
+            <field name="model_id" ref="model_guard_skill"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_admin'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- GUARD.TRAINING RECORD RULES                                       -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Training -->
+        <record id="rule_guard_training_admin" model="ir.rule">
+            <field name="name">Administrator: All Training</field>
+            <field name="model_id" ref="model_guard_training"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal: Own Training -->
+        <record id="rule_guard_training_guard_portal" model="ir.rule">
+            <field name="name">Guard Portal: Own Training</field>
+            <field name="model_id" ref="model_guard_training"/>
+            <field name="domain_force">[('guard_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Client User, Manager, Supervisor: Training of Guards at Assigned Sites -->
+        <record id="rule_guard_training_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin/Non-Guard: Training of Guards at Assigned Sites</field>
+            <field name="model_id" ref="model_guard_training"/>
+            <field name="domain_force">[('guard_id.site_ids', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- EQUIPMENT.ASSIGNMENT.LOG RECORD RULES                             -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Equipment Assignments -->
+        <record id="rule_equipment_assignment_log_admin" model="ir.rule">
+            <field name="name">Administrator: All Equipment Assignments</field>
+            <field name="model_id" ref="model_equipment_assignment_log"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal: Own Equipment Assignments -->
+        <record id="rule_equipment_assignment_log_guard_portal" model="ir.rule">
+            <field name="name">Guard Portal: Own Equipment Assignments</field>
+            <field name="model_id" ref="model_equipment_assignment_log"/>
+            <field name="domain_force">[('guard_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Client User, Manager, Supervisor: Equipment Assignments at Assigned Sites -->
+        <record id="rule_equipment_assignment_log_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin/Non-Guard: Equipment Assignments at Assigned Sites</field>
+            <field name="model_id" ref="model_equipment_assignment_log"/>
+            <field name="domain_force">['|', ('equipment_id.assigned_site', 'in', user.site_ids.ids), ('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- EQUIPMENT.MAINTENANCE.LOG RECORD RULES                            -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Equipment Maintenance -->
+        <record id="rule_equipment_maintenance_log_admin" model="ir.rule">
+            <field name="name">Administrator: All Equipment Maintenance</field>
+            <field name="model_id" ref="model_equipment_maintenance_log"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal: Equipment Maintenance for Own Equipment -->
+        <record id="rule_equipment_maintenance_log_guard_portal" model="ir.rule">
+            <field name="name">Guard Portal: Equipment Maintenance for Own Equipment</field>
+            <field name="model_id" ref="model_equipment_maintenance_log"/>
+            <field name="domain_force">[('equipment_id.assigned_to.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Client User, Manager, Supervisor: Equipment Maintenance at Assigned Sites -->
+        <record id="rule_equipment_maintenance_log_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin/Non-Guard: Equipment Maintenance at Assigned Sites</field>
+            <field name="model_id" ref="model_equipment_maintenance_log"/>
+            <field name="domain_force">[('equipment_id.assigned_site', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- INCIDENT.CATEGORY AND INCIDENT.TAG RECORD RULES                  -->
+        <!-- ================================================================ -->
+        
+        <!-- All Users: All Categories and Tags (Read Only) -->
+        <record id="rule_incident_category_all" model="ir.rule">
+            <field name="name">All Users: All Incident Categories</field>
+            <field name="model_id" ref="model_incident_category"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_admin'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_incident_tag_all" model="ir.rule">
+            <field name="name">All Users: All Incident Tags</field>
+            <field name="model_id" ref="model_incident_tag"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_admin'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- VISITOR.MANAGEMENT RECORD RULES                                   -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Visitors -->
+        <record id="rule_visitor_management_admin" model="ir.rule">
+            <field name="name">Administrator: All Visitors</field>
+            <field name="model_id" ref="model_visitor_management"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal, Client User, Manager, Supervisor: Visitors at Assigned Sites -->
+        <record id="rule_visitor_management_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Visitors at Assigned Sites</field>
+            <field name="model_id" ref="model_visitor_management"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- VISITOR.WATCHLIST RECORD RULES                                    -->
+        <!-- ================================================================ -->
+        
+        <!-- All Users: All Watchlist Entries (Read Only for Guards) -->
+        <record id="rule_visitor_watchlist_all" model="ir.rule">
+            <field name="name">All Users: All Visitor Watchlist</field>
+            <field name="model_id" ref="model_visitor_watchlist"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_admin'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- PACKAGE.MANAGEMENT RECORD RULES                                   -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Packages -->
+        <record id="rule_package_management_admin" model="ir.rule">
+            <field name="name">Administrator: All Packages</field>
+            <field name="model_id" ref="model_package_management"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal, Client User, Manager, Supervisor: Packages at Assigned Sites -->
+        <record id="rule_package_management_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Packages at Assigned Sites</field>
+            <field name="model_id" ref="model_package_management"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- LOST.FOUND.ITEM RECORD RULES                                      -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Lost &amp; Found Items -->
+        <record id="rule_lost_found_item_admin" model="ir.rule">
+            <field name="name">Administrator: All Lost &amp; Found Items</field>
+            <field name="model_id" ref="model_lost_found_item"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal, Client User, Manager, Supervisor: Lost &amp; Found at Assigned Sites -->
+        <record id="rule_lost_found_item_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Lost &amp; Found at Assigned Sites</field>
+            <field name="model_id" ref="model_lost_found_item"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- KEY.REGISTER RECORD RULES                                         -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Keys -->
+        <record id="rule_key_register_admin" model="ir.rule">
+            <field name="name">Administrator: All Keys</field>
+            <field name="model_id" ref="model_key_register"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal, Client User, Manager, Supervisor: Keys at Assigned Sites -->
+        <record id="rule_key_register_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Keys at Assigned Sites</field>
+            <field name="model_id" ref="model_key_register"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- KEY.TRANSACTION RECORD RULES                                      -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Key Transactions -->
+        <record id="rule_key_transaction_admin" model="ir.rule">
+            <field name="name">Administrator: All Key Transactions</field>
+            <field name="model_id" ref="model_key_transaction"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal, Client User, Manager, Supervisor: Key Transactions at Assigned Sites -->
+        <record id="rule_key_transaction_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Key Transactions at Assigned Sites</field>
+            <field name="model_id" ref="model_key_transaction"/>
+            <field name="domain_force">[('key_id.site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- GUARD.TASK RECORD RULES                                           -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Tasks -->
+        <record id="rule_guard_task_admin" model="ir.rule">
+            <field name="name">Administrator: All Guard Tasks</field>
+            <field name="model_id" ref="model_guard_task"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal: Tasks at Assigned Sites -->
+        <record id="rule_guard_task_guard_portal" model="ir.rule">
+            <field name="name">Guard Portal: Tasks at Assigned Sites</field>
+            <field name="model_id" ref="model_guard_task"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Client User, Supervisor: Tasks at Assigned Sites (Read Only) -->
+        <record id="rule_guard_task_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Tasks at Assigned Sites</field>
+            <field name="model_id" ref="model_guard_task"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Manager: Full Access to Tasks at Assigned Sites -->
+        <record id="rule_guard_task_manager" model="ir.rule">
+            <field name="name">Manager: Full Access to Tasks at Assigned Sites</field>
+            <field name="model_id" ref="model_guard_task"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- GUARD.TASK.CHECKLIST RECORD RULES                                 -->
+        <!-- ================================================================ -->
+        
+        <!-- All Users: Checklist items via parent task's site -->
+        <record id="rule_guard_task_checklist_all" model="ir.rule">
+            <field name="name">All Users: Task Checklist via Parent Task</field>
+            <field name="model_id" ref="model_guard_task_checklist"/>
+            <field name="domain_force">['|', ('task_id.site_id', 'in', user.site_ids.ids), ('task_id', '=', False)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_admin'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- GUARD.TASK.TEMPLATE RECORD RULES                                  -->
+        <!-- ================================================================ -->
+        
+        <!-- All Users: All Task Templates (Read Only for Guards) -->
+        <record id="rule_guard_task_template_all" model="ir.rule">
+            <field name="name">All Users: All Task Templates</field>
+            <field name="model_id" ref="model_guard_task_template"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_admin'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- DAILY.ACTIVITY.REPORT RECORD RULES                                -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All DARs -->
+        <record id="rule_daily_activity_report_admin" model="ir.rule">
+            <field name="name">Administrator: All Daily Activity Reports</field>
+            <field name="model_id" ref="model_daily_activity_report"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal, Client User, Manager, Supervisor: DARs at Assigned Sites -->
+        <record id="rule_daily_activity_report_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Daily Activity Reports at Assigned Sites</field>
+            <field name="model_id" ref="model_daily_activity_report"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- COMPLIANCE.AUDIT RECORD RULES                                     -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Audits -->
+        <record id="rule_compliance_audit_admin" model="ir.rule">
+            <field name="name">Administrator: All Compliance Audits</field>
+            <field name="model_id" ref="model_compliance_audit"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal, Client User, Manager, Supervisor: Audits at Assigned Sites -->
+        <record id="rule_compliance_audit_assigned_sites" model="ir.rule">
+            <field name="name">Portal/Client: Compliance Audits at Assigned Sites</field>
+            <field name="model_id" ref="model_compliance_audit"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Managers and Supervisors: manage audits for assigned sites or as auditor -->
+        <record id="rule_compliance_audit_editable_management" model="ir.rule">
+            <field name="name">Management: Manage Assigned Compliance Audits</field>
+            <field name="model_id" ref="model_compliance_audit"/>
+            <field name="domain_force">['|', '|', ('auditor_id', '=', user.id), ('auditor_team_ids', 'in', user.id), ('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Guards: update audits when explicitly assigned as auditor -->
+        <record id="rule_compliance_audit_editable_guard" model="ir.rule">
+            <field name="name">Guards: Update Assigned Compliance Audits</field>
+            <field name="model_id" ref="model_compliance_audit"/>
+            <field name="domain_force">['|', ('auditor_id', '=', user.id), ('auditor_team_ids', 'in', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- COMPLIANCE.AUDIT.ITEM RECORD RULES                                -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrators: All audit items (unrestricted) -->
+        <record id="rule_compliance_audit_item_admin" model="ir.rule">
+            <field name="name">Administrators: All Audit Items</field>
+            <field name="model_id" ref="model_compliance_audit_item"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+        
+        <!-- Managers and Supervisors: All audit items (unrestricted) -->
+        <record id="rule_compliance_audit_item_manager_supervisor" model="ir.rule">
+            <field name="name">Managers and Supervisors: All Audit Items</field>
+            <field name="model_id" ref="model_compliance_audit_item"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+        
+        <!-- Guards and Clients: Audit items via parent audit's site -->
+        <record id="rule_compliance_audit_item_site_based" model="ir.rule">
+            <field name="name">Portal/Client: Audit Items via Site</field>
+            <field name="model_id" ref="model_compliance_audit_item"/>
+            <field name="domain_force">['|', '|', ('audit_id.site_id', 'in', user.site_ids.ids), ('audit_id.site_id', '=', False), ('audit_id', '=', False)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Guards: manage checklist items for assigned audits -->
+        <record id="rule_compliance_audit_item_editable_guard" model="ir.rule">
+            <field name="name">Guards: Update Assigned Audit Items</field>
+            <field name="model_id" ref="model_compliance_audit_item"/>
+            <field name="domain_force">['|', ('audit_id.auditor_id', '=', user.id), ('audit_id.auditor_team_ids', 'in', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- COMPLIANCE.CORRECTIVE.ACTION RECORD RULES                         -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Corrective Actions -->
+        <record id="rule_compliance_corrective_action_admin" model="ir.rule">
+            <field name="name">Administrator: All Corrective Actions</field>
+            <field name="model_id" ref="model_compliance_corrective_action"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal, Client User, Manager, Supervisor: Corrective Actions via audit's site -->
+        <record id="rule_compliance_corrective_action_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Corrective Actions via Audit</field>
+            <field name="model_id" ref="model_compliance_corrective_action"/>
+            <field name="domain_force">[('audit_id.site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- EMERGENCY.BROADCAST RECORD RULES                                  -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Emergency Broadcasts -->
+        <record id="rule_emergency_broadcast_admin" model="ir.rule">
+            <field name="name">Administrator: All Emergency Broadcasts</field>
+            <field name="model_id" ref="model_emergency_broadcast"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal: Broadcasts for Assigned Sites or All Guards -->
+        <record id="rule_emergency_broadcast_guard_portal" model="ir.rule">
+            <field name="name">Guard Portal: Relevant Emergency Broadcasts</field>
+            <field name="model_id" ref="model_emergency_broadcast"/>
+            <field name="domain_force">['|', '|', ('site_id', 'in', user.site_ids.ids), ('site_id', '=', False), ('broadcast_type', '=', 'all')]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Client User, Manager, Supervisor: Broadcasts at Assigned Sites -->
+        <record id="rule_emergency_broadcast_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin/Non-Guard: Emergency Broadcasts at Assigned Sites</field>
+            <field name="model_id" ref="model_emergency_broadcast"/>
+            <field name="domain_force">['|', ('site_id', 'in', user.site_ids.ids), ('site_id', '=', False)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- EMERGENCY.BROADCAST.ACKNOWLEDGMENT RECORD RULES                   -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Acknowledgments -->
+        <record id="rule_emergency_broadcast_acknowledgment_admin" model="ir.rule">
+            <field name="name">Administrator: All Broadcast Acknowledgments</field>
+            <field name="model_id" ref="model_emergency_broadcast_acknowledgment"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal: Own Acknowledgments -->
+        <record id="rule_emergency_broadcast_acknowledgment_guard_portal" model="ir.rule">
+            <field name="name">Guard Portal: Own Broadcast Acknowledgments</field>
+            <field name="model_id" ref="model_emergency_broadcast_acknowledgment"/>
+            <field name="domain_force">[('guard_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Client User, Manager, Supervisor: Acknowledgments via broadcast's site -->
+        <record id="rule_emergency_broadcast_acknowledgment_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin/Non-Guard: Broadcast Acknowledgments at Sites</field>
+            <field name="model_id" ref="model_emergency_broadcast_acknowledgment"/>
+            <field name="domain_force">['|', ('broadcast_id.site_id', 'in', user.site_ids.ids), ('broadcast_id.site_id', '=', False)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- GEOFENCE.ALERT RECORD RULES                                       -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Geofence Alerts -->
+        <record id="rule_geofence_alert_admin" model="ir.rule">
+            <field name="name">Administrator: All Geofence Alerts</field>
+            <field name="model_id" ref="model_geofence_alert"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal: Own Geofence Alerts -->
+        <record id="rule_geofence_alert_guard_portal" model="ir.rule">
+            <field name="name">Guard Portal: Own Geofence Alerts</field>
+            <field name="model_id" ref="model_geofence_alert"/>
+            <field name="domain_force">[('guard_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Client User, Supervisor: Geofence Alerts at Assigned Sites (Read Only) -->
+        <record id="rule_geofence_alert_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Geofence Alerts at Assigned Sites</field>
+            <field name="model_id" ref="model_geofence_alert"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Manager: Full Access to Geofence Alerts at Assigned Sites -->
+        <record id="rule_geofence_alert_manager" model="ir.rule">
+            <field name="name">Manager: Full Access to Geofence Alerts at Assigned Sites</field>
+            <field name="model_id" ref="model_geofence_alert"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- GUARD.LOCATION.HISTORY RECORD RULES                               -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Location History -->
+        <record id="rule_guard_location_history_admin" model="ir.rule">
+            <field name="name">Administrator: All Location History</field>
+            <field name="model_id" ref="model_guard_location_history"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal: Own Location History -->
+        <record id="rule_guard_location_history_guard_portal" model="ir.rule">
+            <field name="name">Guard Portal: Own Location History</field>
+            <field name="model_id" ref="model_guard_location_history"/>
+            <field name="domain_force">[('guard_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Client User, Supervisor: Location History at Assigned Sites (Read Only) -->
+        <record id="rule_guard_location_history_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Location History at Assigned Sites</field>
+            <field name="model_id" ref="model_guard_location_history"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Manager: Full Access to Location History at Assigned Sites -->
+        <record id="rule_guard_location_history_manager" model="ir.rule">
+            <field name="name">Manager: Full Access to Location History at Assigned Sites</field>
+            <field name="model_id" ref="model_guard_location_history"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- SHIFT.SWAP.REQUEST RECORD RULES                                   -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Shift Swap Requests -->
+        <record id="rule_shift_swap_request_admin" model="ir.rule">
+            <field name="name">Administrator: All Shift Swap Requests</field>
+            <field name="model_id" ref="model_shift_swap_request"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal: Own Shift Swap Requests or Requests at Assigned Sites -->
+        <record id="rule_shift_swap_request_guard_portal" model="ir.rule">
+            <field name="name">Guard Portal: Shift Swap Requests at Assigned Sites</field>
+            <field name="model_id" ref="model_shift_swap_request"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Client User, Supervisor: Shift Swap Requests at Assigned Sites (Read Only) -->
+        <record id="rule_shift_swap_request_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Shift Swap Requests at Assigned Sites</field>
+            <field name="model_id" ref="model_shift_swap_request"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Manager: Full Access to Shift Swap Requests at Assigned Sites -->
+        <record id="rule_shift_swap_request_manager" model="ir.rule">
+            <field name="name">Manager: Full Access to Shift Swap Requests at Assigned Sites</field>
+            <field name="model_id" ref="model_shift_swap_request"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- CLIENT.FEEDBACK RECORD RULES                                      -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Feedback -->
+        <record id="rule_client_feedback_admin" model="ir.rule">
+            <field name="name">Administrator: All Client Feedback</field>
+            <field name="model_id" ref="model_client_feedback"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal: Feedback at Assigned Sites (Read Only) -->
+        <record id="rule_client_feedback_guard_portal" model="ir.rule">
+            <field name="name">Guard Portal: Client Feedback at Assigned Sites</field>
+            <field name="model_id" ref="model_client_feedback"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Client User, Manager, Supervisor: Feedback at Assigned Sites -->
+        <record id="rule_client_feedback_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin/Non-Guard: Client Feedback at Assigned Sites</field>
+            <field name="model_id" ref="model_client_feedback"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- SHIFT.TEMPLATE RECORD RULES                                       -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Shift Templates -->
+        <record id="rule_shift_template_admin" model="ir.rule">
+            <field name="name">Administrator: All Shift Templates</field>
+            <field name="model_id" ref="model_shift_template"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal, Client User, Manager, Supervisor: Templates at Assigned Sites -->
+        <record id="rule_shift_template_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Shift Templates at Assigned Sites</field>
+            <field name="model_id" ref="model_shift_template"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- EMERGENCY.PROCEDURE RECORD RULES                                  -->
+        <!-- ================================================================ -->
+        
+        <!-- All Users: All Emergency Procedures (Read Only for Guards) -->
+        <record id="rule_emergency_procedure_all" model="ir.rule">
+            <field name="name">All Users: All Emergency Procedures</field>
+            <field name="model_id" ref="model_emergency_procedure"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_admin'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- EMERGENCY.PROCEDURE.STEP RECORD RULES                             -->
+        <!-- ================================================================ -->
+        
+        <!-- All Users: All Procedure Steps (Read Only for Guards) -->
+        <record id="rule_emergency_procedure_step_all" model="ir.rule">
+            <field name="name">All Users: All Emergency Procedure Steps</field>
+            <field name="model_id" ref="model_emergency_procedure_step"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_admin'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- EMERGENCY.CHECKLIST.EXECUTION RECORD RULES                        -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Checklist Executions -->
+        <record id="rule_emergency_checklist_execution_admin" model="ir.rule">
+            <field name="name">Administrator: All Emergency Checklist Executions</field>
+            <field name="model_id" ref="model_emergency_checklist_execution"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal, Client User, Manager, Supervisor: Executions at Assigned Sites -->
+        <record id="rule_emergency_checklist_execution_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Emergency Checklist Executions at Sites</field>
+            <field name="model_id" ref="model_emergency_checklist_execution"/>
+            <field name="domain_force">['|', ('site_id', 'in', user.site_ids.ids), ('site_id', '=', False)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- EMERGENCY.CHECKLIST.STEP.EXECUTION RECORD RULES                  -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Emergency Step Executions -->
+        <record id="rule_emergency_checklist_step_execution_admin" model="ir.rule">
+            <field name="name">Administrator: All Emergency Step Executions</field>
+            <field name="model_id" ref="model_emergency_checklist_step_execution"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        
+        <!-- Non-Admin Users: Step Executions via Parent Execution -->
+        <record id="rule_emergency_checklist_step_execution_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Emergency Step Executions at Sites</field>
+            <field name="model_id" ref="model_emergency_checklist_step_execution"/>
+            <field name="domain_force">['|', ('execution_id.site_id', 'in', user.site_ids.ids), ('execution_id.site_id', '=', False)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- SLA.DEFINITION RECORD RULES                                       -->
+        <!-- ================================================================ -->
+        
+        <!-- All Users: All SLA Definitions (Read Only for Guards) -->
+        <record id="rule_sla_definition_all" model="ir.rule">
+            <field name="name">All Users: All SLA Definitions</field>
+            <field name="model_id" ref="model_sla_definition"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_admin'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- SLA.KPI RECORD RULES                                              -->
+        <!-- ================================================================ -->
+        
+        <!-- All Users: All SLA KPIs (Read Only for Guards) -->
+        <record id="rule_sla_kpi_all" model="ir.rule">
+            <field name="name">All Users: All SLA KPIs</field>
+            <field name="model_id" ref="model_sla_kpi"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_admin'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- SLA.PERFORMANCE RECORD RULES                                      -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All SLA Performance -->
+        <record id="rule_sla_performance_admin" model="ir.rule">
+            <field name="name">Administrator: All SLA Performance</field>
+            <field name="model_id" ref="model_sla_performance"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal, Client User, Manager, Supervisor: SLA Performance at Assigned Sites -->
+        <record id="rule_sla_performance_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: SLA Performance at Assigned Sites</field>
+            <field name="model_id" ref="model_sla_performance"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- COMPLIANCE.AUDIT.TEMPLATE RECORD RULES                            -->
+        <!-- ================================================================ -->
+        
+        <!-- All Users: All Audit Templates (Read Only for Guards and Clients) -->
+        <record id="rule_compliance_audit_template_all" model="ir.rule">
+            <field name="name">All Users: All Compliance Audit Templates</field>
+            <field name="model_id" ref="model_compliance_audit_template"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_admin'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- COMPLIANCE.AUDIT.TEMPLATE.ITEM RECORD RULES                       -->
+        <!-- ================================================================ -->
+        
+        <!-- All Users: All Template Items (Read Only for Guards and Clients) -->
+        <record id="rule_compliance_audit_template_item_all" model="ir.rule">
+            <field name="name">All Users: All Audit Template Items</field>
+            <field name="model_id" ref="model_compliance_audit_template_item"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_admin'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- GUARDPRO.ANALYTICS.DASHBOARD RECORD RULES                         -->
+        <!-- ================================================================ -->
+        
+        <!-- Administrator: All Dashboards -->
+        <record id="rule_guardpro_analytics_dashboard_admin" model="ir.rule">
+            <field name="name">Administrator: All Analytics Dashboards</field>
+            <field name="model_id" ref="model_guardpro_analytics_dashboard"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Guard Portal, Client User, Manager, Supervisor: Own Dashboard Only -->
+        <record id="rule_guardpro_analytics_dashboard_own" model="ir.rule">
+            <field name="name">Non-Admin: Own Analytics Dashboard</field>
+            <field name="model_id" ref="model_guardpro_analytics_dashboard"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

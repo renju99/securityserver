@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Demo Client Company -->
+        <record id="client_nshama" model="res.partner">
+            <field name="name">NSHAMA</field>
+            <field name="is_company" eval="True"/>
+            <field name="company_type">company</field>
+            <field name="email">contact@nshama.ae</field>
+            <field name="phone">+971-4-123-4567</field>
+            <field name="website">https://www.nshama.ae</field>
+            <field name="street">Dubai Investment Park 1</field>
+            <field name="city">Dubai</field>
+            <field name="zip">12345</field>
+            <field name="country_id" ref="base.ae"/>
+            <field name="comment">Premium real estate development company specializing in integrated communities.</field>
+        </record>
+        
+        <!-- NSHAMA Site 1: Town Square -->
+        <record id="site_nshama_town_square" model="client.site">
+            <field name="name">NSHAMA Town Square</field>
+            <field name="code">NSHAMA-TS-001</field>
+            <field name="client_id" ref="client_nshama"/>
+            <field name="street">Town Square Dubai</field>
+            <field name="city">Dubai</field>
+            <field name="zip">12345</field>
+            <field name="country_id" ref="base.ae"/>
+            <field name="latitude">24.9533</field>
+            <field name="longitude">55.1653</field>
+            <field name="status">active</field>
+            <field name="geofence_enabled" eval="True"/>
+            <field name="geofence_type">circle</field>
+            <field name="geofence_radius">2000.0</field>
+            <field name="site_manager">Ahmed Al-Rashid</field>
+            <field name="site_phone">+971-4-987-6543</field>
+            <field name="site_email">security@nshama-townsqaure.ae</field>
+            <field name="emergency_contact">Security Control Room</field>
+            <field name="emergency_phone">+971-4-987-6544</field>
+            <field name="contract_start" eval="(datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')"/>
+            <field name="contract_end" eval="(datetime.now() + timedelta(days=1095)).strftime('%Y-%m-%d')"/>
+            <field name="guards_required" eval="3"/>
+            <field name="armed_required" eval="False"/>
+            <field name="access_instructions">Main entrance via Town Square Boulevard. Security office located at Gate 1.</field>
+            <field name="parking_instructions">Visitor parking available at designated areas. Staff parking at rear entrance.</field>
+            <field name="special_instructions">24/7 security coverage required. Regular patrols of common areas and facilities.</field>
+            <field name="notes">Premium residential community with retail and commercial components. High visibility security required.</field>
+        </record>
+        
+        <!-- NSHAMA Site 2: The Springs -->
+        <record id="site_nshama_springs" model="client.site">
+            <field name="name">NSHAMA The Springs</field>
+            <field name="code">NSHAMA-SP-002</field>
+            <field name="client_id" ref="client_nshama"/>
+            <field name="street">The Springs Dubai</field>
+            <field name="city">Dubai</field>
+            <field name="zip">12346</field>
+            <field name="country_id" ref="base.ae"/>
+            <field name="latitude">25.0733</field>
+            <field name="longitude">55.1853</field>
+            <field name="status">active</field>
+            <field name="geofence_enabled" eval="True"/>
+            <field name="geofence_type">circle</field>
+            <field name="geofence_radius">1500.0</field>
+            <field name="site_manager">Fatima Al-Zahra</field>
+            <field name="site_phone">+971-4-876-5432</field>
+            <field name="site_email">security@nshama-springs.ae</field>
+            <field name="emergency_contact">Security Control Room</field>
+            <field name="emergency_phone">+971-4-876-5433</field>
+            <field name="contract_start" eval="(datetime.now() - timedelta(days=180)).strftime('%Y-%m-%d')"/>
+            <field name="contract_end" eval="(datetime.now() + timedelta(days=1275)).strftime('%Y-%m-%d')"/>
+            <field name="guards_required" eval="2"/>
+            <field name="armed_required" eval="False"/>
+            <field name="access_instructions">Main entrance via Springs Boulevard. Security checkpoint at community entrance.</field>
+            <field name="parking_instructions">Resident parking only. Visitor parking at community center.</field>
+            <field name="special_instructions">Gated community with controlled access. Regular security patrols of residential areas.</field>
+            <field name="notes">Family-oriented residential community with recreational facilities. Focus on resident safety and community security.</field>
+        </record>
+        
+    </data>
+</odoo>

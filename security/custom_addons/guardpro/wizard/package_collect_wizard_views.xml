@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Package Collection Wizard Form View -->
+    <record id="view_package_collect_wizard_form" model="ir.ui.view">
+        <field name="name">package.collect.wizard.form</field>
+        <field name="model">package.collect.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Collect Package">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="package_id" readonly="1" options="{'no_open': True}"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group string="Package Information">
+                            <field name="recipient_name"/>
+                            <field name="package_type"/>
+                            <field name="tracking_number"/>
+                            <field name="received_date"/>
+                        </group>
+                        <group string="Guard Information">
+                            <field name="guard_id" required="1" options="{'no_create': True}"/>
+                            <field name="signature_date"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <!-- Collector Information Tab -->
+                        <page string="Collector Information" name="collector_info">
+                            <group>
+                                <group>
+                                    <field name="collector_name" required="1"/>
+                                    <field name="collector_phone"/>
+                                    <field name="collector_email" widget="email"/>
+                                </group>
+                                <group>
+                                    <field name="relationship_to_recipient" required="1"/>
+                                    <field name="verify_recipient_match" readonly="1"/>
+                                </group>
+                            </group>
+                            
+                            <group string="Collector Photo (Optional)">
+                                <field name="collector_photo" widget="image" options="{'size': [200, 200]}"/>
+                            </group>
+                        </page>
+                        
+                        <!-- ID Verification Tab -->
+                        <page string="ID Verification" name="id_verification">
+                            <group>
+                                <group>
+                                    <field name="id_verified"/>
+                                    <field name="id_type" required="id_verified"/>
+                                    <field name="id_number" required="id_verified"/>
+                                </group>
+                                <group>
+                                    <field name="authorization_letter" widget="binary" filename="authorization_letter_filename"/>
+                                    <field name="authorization_letter_filename" invisible="1"/>
+                                </group>
+                            </group>
+                            
+                            <group string="ID Photo/Scan">
+                                <field name="id_photo" widget="image" options="{'size': [400, 300]}"/>
+                                <p class="text-muted">
+                                    Upload a clear photo or scan of the collector's identification document.
+                                </p>
+                            </group>
+                            
+                            <div class="alert alert-info" role="alert" invisible="id_verified">
+                                <strong>ID Verification Recommended:</strong>
+                                For security purposes, please verify the collector's identification,
+                                especially if they are not the original recipient.
+                            </div>
+                        </page>
+                        
+                        <!-- Signature Tab -->
+                        <page string="Signature" name="signature">
+                            <group>
+                                <field name="signature" widget="signature" required="1" options="{'full_name': 'collector_name'}"/>
+                            </group>
+                            
+                            <div class="alert alert-warning" role="alert">
+                                <strong>Signature Required:</strong>
+                                The collector must sign to acknowledge receipt of the package.
+                                Use a touchscreen to draw the signature or upload a scanned signature image.
+                            </div>
+                        </page>
+                        
+                        <!-- Package Condition Tab -->
+                        <page string="Package Condition" name="package_condition">
+                            <group>
+                                <group>
+                                    <field name="package_condition" required="1"/>
+                                    <field name="condition_notes" placeholder="Describe any damage or issues..."/>
+                                </group>
+                                <group>
+                                    <field name="condition_photo" widget="image" options="{'size': [400, 300]}"/>
+                                    <p class="text-muted">
+                                        Take a photo showing the package condition, especially if damaged.
+                                    </p>
+                                </group>
+                            </group>
+                            
+                            <div class="alert alert-danger" role="alert" invisible="package_condition == 'good'">
+                                <strong>Package Issue Detected:</strong>
+                                Please document the condition with detailed notes and photos.
+                                This will be recorded in the package history.
+                            </div>
+                        </page>
+                        
+                        <!-- Additional Notes Tab -->
+                        <page string="Notes" name="notes">
+                            <group>
+                                <field name="notes" placeholder="Any additional notes about the collection..."/>
+                            </group>
+                            
+                            <group string="Notifications">
+                                <field name="send_confirmation_email"/>
+                                <field name="send_confirmation_sms"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <footer>
+                    <button name="action_collect_package" 
+                            string="Confirm Collection" 
+                            type="object" 
+                            class="btn-primary"
+                            data-hotkey="q"/>
+                    <button string="Cancel" 
+                            class="btn-secondary" 
+                            special="cancel"
+                            data-hotkey="z"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Action for Package Collection Wizard -->
+    <record id="action_package_collect_wizard" model="ir.actions.act_window">
+        <field name="name">Collect Package</field>
+        <field name="res_model">package.collect.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_package_management"/>
+        <field name="binding_type">action</field>
+    </record>
+</odoo>
+
+
+
+
+
+
+
+
+
+

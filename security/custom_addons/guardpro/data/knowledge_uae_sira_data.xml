@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- ============================================ -->
+        <!-- SIRA-Based Guard Roles -->
+        <!-- ============================================ -->
+        
+        <record id="guard_role_grade1" model="knowledge.guard.role">
+            <field name="name">Security Guard - Grade 1</field>
+            <field name="code">SIRA-G1</field>
+            <field name="sira_level">grade1</field>
+            <field name="description">Entry-level security guard position. Responsible for basic security duties including access control, patrol, and incident reporting.</field>
+        </record>
+        
+        <record id="guard_role_grade2" model="knowledge.guard.role">
+            <field name="name">Senior Security Guard - Grade 2</field>
+            <field name="code">SIRA-G2</field>
+            <field name="sira_level">grade2</field>
+            <field name="description">Experienced security guard with advanced responsibilities. May handle complex situations, train junior guards, and lead small teams.</field>
+        </record>
+        
+        <record id="guard_role_grade3" model="knowledge.guard.role">
+            <field name="name">Security Supervisor - Grade 3</field>
+            <field name="code">SIRA-G3</field>
+            <field name="sira_level">grade3</field>
+            <field name="description">Supervisory role overseeing security operations. Responsible for shift management, quality control, and incident coordination.</field>
+        </record>
+        
+        <record id="guard_role_grade4" model="knowledge.guard.role">
+            <field name="name">Security Manager - Grade 4</field>
+            <field name="code">SIRA-G4</field>
+            <field name="sira_level">grade4</field>
+            <field name="description">Senior management role responsible for strategic planning, client relations, compliance, and overall security operations management.</field>
+        </record>
+        
+        <record id="guard_role_control_room" model="knowledge.guard.role">
+            <field name="name">Control Room Operator</field>
+            <field name="code">CRO</field>
+            <field name="sira_level">other</field>
+            <field name="description">Specialized role for monitoring CCTV, access control systems, and coordinating security responses from central control room.</field>
+        </record>
+        
+        <!-- ============================================ -->
+        <!-- Knowledge Categories -->
+        <!-- ============================================ -->
+        
+        <record id="category_uae_regulations" model="knowledge.category">
+            <field name="name">UAE Regulations &amp; Laws</field>
+            <field name="color">1</field>
+        </record>
+        
+        <record id="category_sira_standards" model="knowledge.category">
+            <field name="name">SIRA Standards &amp; Certifications</field>
+            <field name="color">2</field>
+        </record>
+        
+        <record id="category_emergency_procedures" model="knowledge.category">
+            <field name="name">Emergency Response Procedures</field>
+            <field name="color">3</field>
+        </record>
+        
+        <record id="category_access_control" model="knowledge.category">
+            <field name="name">Access Control &amp; Security Screening</field>
+            <field name="color">4</field>
+        </record>
+        
+        <record id="category_patrol_operations" model="knowledge.category">
+            <field name="name">Patrol &amp; Monitoring Operations</field>
+            <field name="color">5</field>
+        </record>
+        
+        <record id="category_customer_service" model="knowledge.category">
+            <field name="name">Customer Service Excellence</field>
+            <field name="color">6</field>
+        </record>
+        
+        <record id="category_health_safety" model="knowledge.category">
+            <field name="name">Health &amp; Safety</field>
+            <field name="color">7</field>
+        </record>
+        
+        <record id="category_incident_reporting" model="knowledge.category">
+            <field name="name">Incident Management &amp; Reporting</field>
+            <field name="color">8</field>
+        </record>
+        
+        <!-- ============================================ -->
+        <!-- Knowledge Tags -->
+        <!-- ============================================ -->
+        
+        <record id="tag_mandatory" model="knowledge.tag">
+            <field name="name">Mandatory</field>
+            <field name="color">1</field>
+        </record>
+        
+        <record id="tag_sira_certified" model="knowledge.tag">
+            <field name="name">SIRA Certified</field>
+            <field name="color">2</field>
+        </record>
+        
+        <record id="tag_emergency" model="knowledge.tag">
+            <field name="name">Emergency</field>
+            <field name="color">3</field>
+        </record>
+        
+        <record id="tag_fire_safety" model="knowledge.tag">
+            <field name="name">Fire Safety</field>
+            <field name="color">4</field>
+        </record>
+        
+        <record id="tag_first_aid" model="knowledge.tag">
+            <field name="name">First Aid</field>
+            <field name="color">5</field>
+        </record>
+        
+        <record id="tag_dubai_specific" model="knowledge.tag">
+            <field name="name">Dubai Specific</field>
+            <field name="color">6</field>
+        </record>
+        
+        <record id="tag_abu_dhabi_specific" model="knowledge.tag">
+            <field name="name">Abu Dhabi Specific</field>
+            <field name="color">7</field>
+        </record>
+        
+        <!-- ============================================ -->
+        <!-- KNOWLEDGE ARTICLES - SIRA Standards -->
+        <!-- ============================================ -->
+        
+        <record id="article_sira_overview" model="knowledge.article">
+            <field name="name">SIRA Certification Overview - Security Guard Requirements</field>
+            <field name="article_type">sira</field>
+            <field name="category_id" ref="category_sira_standards"/>
+            <field name="is_sira_requirement" eval="True"/>
+            <field name="is_uae_standard" eval="True"/>
+            <field name="sira_reference">SIRA-REG-2023</field>
+            <field name="compliance_level">mandatory</field>
+            <field name="access_level">all</field>
+            <field name="is_published" eval="True"/>
+            <field name="acknowledgment_required" eval="True"/>
+            <field name="sequence">10</field>
+            <field name="version">1.0</field>
+            <field name="summary">Comprehensive overview of SIRA (Security Industry Regulatory Agency) certification requirements for security guards in the UAE.</field>
+            <field name="content"><![CDATA[
+                <h2>About SIRA (Security Industry Regulatory Agency)</h2>
+                <p>SIRA is the regulatory body overseeing the private security industry in Dubai, UAE. All security personnel operating in Dubai must comply with SIRA standards and regulations.</p>
+                
+                <h3>SIRA Grade System</h3>
+                <ul>
+                    <li><strong>Grade 1 - Security Guard:</strong> Entry-level position for basic security duties</li>
+                    <li><strong>Grade 2 - Senior Security Guard:</strong> Experienced guards with additional responsibilities</li>
+                    <li><strong>Grade 3 - Security Supervisor:</strong> Supervisory role managing teams and operations</li>
+                    <li><strong>Grade 4 - Security Manager:</strong> Senior management overseeing security operations</li>
+                </ul>
+                
+                <h3>Certification Requirements</h3>
+                <p>To obtain SIRA certification, guards must:</p>
+                <ol>
+                    <li>Complete approved security training courses (minimum 40 hours for Grade 1)</li>
+                    <li>Pass SIRA written and practical examinations</li>
+                    <li>Undergo background verification and security clearance</li>
+                    <li>Obtain medical fitness certificate</li>
+                    <li>Register with SIRA and obtain security guard permit</li>
+                </ol>
+                
+                <h3>Code of Conduct</h3>
+                <p>All SIRA-certified guards must adhere to:</p>
+                <ul>
+                    <li>Professional appearance and behavior at all times</li>
+                    <li>Respect for laws, regulations, and client policies</li>
+                    <li>Confidentiality of sensitive information</li>
+                    <li>Non-discrimination and cultural sensitivity</li>
+                    <li>Zero tolerance for corruption or unethical behavior</li>
+                </ul>
+                
+                <h3>Renewal Requirements</h3>
+                <p>SIRA permits must be renewed every 2 years. Renewal requires:</p>
+                <ul>
+                    <li>Updated medical fitness certificate</li>
+                    <li>Completion of refresher training (minimum 8 hours)</li>
+                    <li>Clean disciplinary record</li>
+                    <li>Payment of renewal fees</li>
+                </ul>
+                
+                <div class="alert alert-warning">
+                    <strong>Important:</strong> Operating as a security guard without valid SIRA certification is illegal and may result in fines and deportation.
+                </div>
+            ]]></field>
+        </record>
+        
+        <record id="article_sira_uniform_standards" model="knowledge.article">
+            <field name="name">SIRA Uniform and Appearance Standards</field>
+            <field name="article_type">regulation</field>
+            <field name="category_id" ref="category_sira_standards"/>
+            <field name="is_sira_requirement" eval="True"/>
+            <field name="sira_reference">SIRA-STD-UNIFORM-2023</field>
+            <field name="compliance_level">mandatory</field>
+            <field name="access_level">all</field>
+            <field name="is_published" eval="True"/>
+            <field name="acknowledgment_required" eval="True"/>
+            <field name="sequence">20</field>
+            <field name="summary">Standards for security guard uniforms and professional appearance as per SIRA regulations.</field>
+            <field name="content"><![CDATA[
+                <h2>SIRA Uniform Standards</h2>
+                
+                <h3>Approved Uniform Colors</h3>
+                <p>SIRA-approved uniforms must be in the following colors only:</p>
+                <ul>
+                    <li>Black</li>
+                    <li>Dark Navy Blue</li>
+                    <li>Dark Grey</li>
+                </ul>
+                <p><strong>Note:</strong> Khaki, green, or camouflage patterns are strictly prohibited as they resemble police or military uniforms.</p>
+                
+                <h3>Mandatory Uniform Components</h3>
+                <ol>
+                    <li><strong>SIRA Badge:</strong> Visible on left chest or shoulder (company logo on right)</li>
+                    <li><strong>Name Tag:</strong> Clear identification with guard's name and company</li>
+                    <li><strong>Company Logo:</strong> Properly positioned and authorized by SIRA</li>
+                    <li><strong>Uniform Shirt/Jacket:</strong> Clean, pressed, and in good condition</li>
+                    <li><strong>Uniform Trousers:</strong> Matching color, proper fit</li>
+                    <li><strong>Black Safety Shoes:</strong> Polished, closed-toe, slip-resistant</li>
+                    <li><strong>Belt:</strong> Black leather or synthetic, with standard buckle</li>
+                </ol>
+                
+                <h3>Personal Grooming Standards</h3>
+                <ul>
+                    <li><strong>Hair:</strong> Neat, clean, and professional. Long hair must be tied back.</li>
+                    <li><strong>Facial Hair:</strong> Well-groomed mustache/beard permitted. No unkempt appearance.</li>
+                    <li><strong>Nails:</strong> Clean and trimmed</li>
+                    <li><strong>Personal Hygiene:</strong> Daily shower, deodorant, fresh breath</li>
+                    <li><strong>Jewelry:</strong> Minimal and professional (wedding ring, watch only)</li>
+                </ul>
+                
+                <h3>Equipment Carriage</h3>
+                <p>Authorized equipment must be carried in designated pouches/holders:</p>
+                <ul>
+                    <li>Flashlight (right side)</li>
+                    <li>Radio (left side or chest)</li>
+                    <li>Notebook and pen</li>
+                    <li>Mobile device (if authorized)</li>
+                </ul>
+                
+                <div class="alert alert-danger">
+                    <strong>Prohibited:</strong> Wearing uniforms that resemble police, military, or civil defense is a criminal offense under UAE Federal Law.
+                </div>
+            ]]></field>
+        </record>
+        
+        <!-- ============================================ -->
+        <!-- KNOWLEDGE ARTICLES - UAE Regulations -->
+        <!-- ============================================ -->
+        
+        <record id="article_uae_labor_law" model="knowledge.article">
+            <field name="name">UAE Labor Law - Rights and Responsibilities for Security Guards</field>
+            <field name="article_type">regulation</field>
+            <field name="category_id" ref="category_uae_regulations"/>
+            <field name="is_uae_standard" eval="True"/>
+            <field name="compliance_level">mandatory</field>
+            <field name="access_level">all</field>
+            <field name="is_published" eval="True"/>
+            <field name="sequence">30</field>
+            <field name="summary">Key provisions of UAE Federal Labor Law relevant to security personnel.</field>
+            <field name="content"><![CDATA[
+                <h2>UAE Labor Law - Key Provisions for Security Guards</h2>
+                
+                <h3>Working Hours</h3>
+                <ul>
+                    <li><strong>Standard:</strong> Maximum 8 hours per day, 48 hours per week</li>
+                    <li><strong>Ramadan:</strong> Reduced to 6 hours per day for Muslims</li>
+                    <li><strong>Overtime:</strong> Must be compensated at 125% of hourly rate (150% for night shifts)</li>
+                    <li><strong>Rest Periods:</strong> Minimum 1-hour break after 5 consecutive hours</li>
+                </ul>
+                
+                <h3>Leave Entitlements</h3>
+                <ul>
+                    <li><strong>Annual Leave:</strong> 30 days per year (after 1 year of service)</li>
+                    <li><strong>Sick Leave:</strong> 90 days per year (full pay for first 15 days, half pay for next 30 days)</li>
+                    <li><strong>Public Holidays:</strong> All UAE national and Islamic holidays (paid)</li>
+                </ul>
+                
+                <h3>End of Service Benefits</h3>
+                <p>Gratuity calculation based on years of service:</p>
+                <ul>
+                    <li>Less than 1 year: No gratuity</li>
+                    <li>1-5 years: 21 days basic salary per year</li>
+                    <li>More than 5 years: 30 days basic salary per year</li>
+                </ul>
+                
+                <h3>Guard Rights</h3>
+                <ul>
+                    <li>Written employment contract in Arabic (translated copy acceptable)</li>
+                    <li>Safe working environment and proper equipment</li>
+                    <li>Medical insurance as per Dubai regulations</li>
+                    <li>Salary payment by 10th of each month</li>
+                    <li>Passport retention by employee (employer cannot hold passport)</li>
+                </ul>
+                
+                <div class="alert alert-info">
+                    <strong>Know Your Rights:</strong> Contact the Ministry of Human Resources and Emiratisation (MOHRE) for any labor disputes or concerns.
+                </div>
+            ]]></field>
+        </record>
+        
+        <record id="article_uae_emergency_numbers" model="knowledge.article">
+            <field name="name">UAE Emergency Contact Numbers - Essential Directory</field>
+            <field name="article_type">guide</field>
+            <field name="category_id" ref="category_emergency_procedures"/>
+            <field name="is_uae_standard" eval="True"/>
+            <field name="compliance_level">mandatory</field>
+            <field name="access_level">all</field>
+            <field name="is_published" eval="True"/>
+            <field name="acknowledgment_required" eval="True"/>
+            <field name="sequence">40</field>
+            <field name="summary">Complete directory of emergency contact numbers in the UAE.</field>
+            <field name="content"><![CDATA[
+                <h2>UAE Emergency Contact Numbers</h2>
+                
+                <h3>Primary Emergency Services</h3>
+                <table class="table table-bordered">
+                    <tr>
+                        <td><strong>Police Emergency</strong></td>
+                        <td><h4 style="color: red;">999</h4></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ambulance / Medical Emergency</strong></td>
+                        <td><h4 style="color: red;">998</h4></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fire Department / Civil Defense</strong></td>
+                        <td><h4 style="color: red;">997</h4></td>
+                    </tr>
+                </table>
+                
+                <h3>Dubai-Specific Numbers</h3>
+                <ul>
+                    <li><strong>Dubai Police Non-Emergency:</strong> 901</li>
+                    <li><strong>Dubai Municipality:</strong> 800 900</li>
+                    <li><strong>Dubai Electricity &amp; Water (DEWA):</strong> 991</li>
+                    <li><strong>Traffic Accidents (No Injuries):</strong> 999</li>
+                    <li><strong>Coast Guard:</strong> 996</li>
+                </ul>
+                
+                <h3>Abu Dhabi-Specific Numbers</h3>
+                <ul>
+                    <li><strong>Abu Dhabi Police Non-Emergency:</strong> 02 4461461</li>
+                    <li><strong>ADDC (Electricity/Water):</strong> 800 555</li>
+                    <li><strong>Abu Dhabi Municipality:</strong> 800 900</li>
+                </ul>
+                
+                <h3>Other Important Numbers</h3>
+                <ul>
+                    <li><strong>Poison Control Center:</strong> 800 424</li>
+                    <li><strong>Ministry of Health Hotline:</strong> 800 11111</li>
+                    <li><strong>Child Safety Department:</strong> 800 988</li>
+                    <li><strong>Anti-Narcotics:</strong> 800 77</li>
+                    <li><strong>Consular Services:</strong> Contact guard supervisor for embassy numbers</li>
+                </ul>
+                
+                <div class="alert alert-warning">
+                    <strong>Remember:</strong> Always inform your supervisor immediately after calling emergency services. Provide accurate location details in English and Arabic if possible.
+                </div>
+            ]]></field>
+        </record>
+        
+    </data>
+</odoo>
+

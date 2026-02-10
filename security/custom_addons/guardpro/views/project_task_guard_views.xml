@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    
+    <!-- Guard Task Form View (extends project.task) -->
+    <record id="view_guard_task_form" model="ir.ui.view">
+        <field name="name">guard.task.form</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            
+            <!-- Add is_guard_task field -->
+            <field name="name" position="after">
+                <field name="is_guard_task" invisible="1"/>
+            </field>
+            
+            <!-- Add Guard Task specific buttons in header -->
+            <xpath expr="//header" position="inside">
+                <button name="action_guard_task_complete" 
+                        string="Complete Task" 
+                        type="object" 
+                        class="btn-success"
+                        invisible="not is_guard_task or stage_id and stage_id.fold"
+                        confirm="Mark this task as completed?"/>
+                <button name="action_view_shift" 
+                        string="View Shift" 
+                        type="object" 
+                        class="btn-secondary"
+                        invisible="not is_guard_task or not shift_id"/>
+                <button name="action_view_site" 
+                        string="View Site" 
+                        type="object" 
+                        class="btn-secondary"
+                        invisible="not is_guard_task or not site_id"/>
+            </xpath>
+            
+            <!-- Add Guard-specific fields after project_id -->
+            <xpath expr="//field[@name='project_id']" position="after">
+                <field name="task_type" invisible="not is_guard_task"/>
+                <field name="site_id" invisible="not is_guard_task" required="is_guard_task"/>
+                <field name="assigned_guard_id" invisible="not is_guard_task"/>
+                <field name="shift_id" invisible="not is_guard_task"/>
+                <field name="task_template_id" invisible="not is_guard_task" readonly="1"/>
+            </xpath>
+            
+            <!-- Add Guard Task notebook page -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Guard Task Details" invisible="not is_guard_task">
+                    <group>
+                        <group string="Completion Details">
+                            <field name="completed_date" readonly="1"/>
+                            <field name="completed_by_user" readonly="1"/>
+                            <field name="completion_notes" placeholder="Add completion notes..."/>
+                        </group>
+                        <group string="Checklist Progress">
+                            <field name="checklist_completion_percentage" widget="progressbar"/>
+                            <label for="completed_checklist_items"/>
+                            <div>
+                                <field name="completed_checklist_items" class="oe_inline"/> / 
+                                <field name="total_checklist_items" class="oe_inline"/> items completed
+                            </div>
+                        </group>
+                    </group>
+                    
+                    <group string="Completion Photos">
+                        <field name="completion_photo" widget="image" class="oe_avatar" nolabel="1"/>
+                        <field name="completion_photo_2" widget="image" class="oe_avatar" nolabel="1"/>
+                        <field name="completion_photo_3" widget="image" class="oe_avatar" nolabel="1"/>
+                    </group>
+                    
+                    <separator string="Task Checklist"/>
+                    <field name="checklist_ids" nolabel="1">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="completed" widget="boolean_toggle"/>
+                            <field name="name"/>
+                            <field name="mandatory" widget="boolean_toggle"/>
+                            <field name="notes"/>
+                            <field name="completed_date" readonly="1"/>
+                            <field name="completed_by" readonly="1"/>
+                            <button name="toggle_completed" 
+                                    type="object" 
+                                    icon="fa-check-square-o" 
+                                    title="Toggle Complete"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+            
+        </field>
+    </record>
+
+    <!-- Guard Task Kanban View -->
+    <record id="view_guard_task_kanban" model="ir.ui.view">
+        <field name="name">guard.task.kanban</field>
+        <field name="model">project.task</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_id" class="o_kanban_small_column" on_create="quick_create">
+                <field name="is_guard_task"/>
+                <field name="task_type"/>
+                <field name="site_id"/>
+                <field name="assigned_guard_id"/>
+                <field name="priority"/>
+                <field name="date_deadline"/>
+                <field name="stage_id"/>
+                <field name="checklist_completion_percentage"/>
+                <field name="color"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="{{!selection_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click">
+                            <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title"><field name="name"/></strong>
+                                        <div class="o_kanban_record_subtitle text-muted">
+                                            <field name="site_id" invisible="not is_guard_task"/>
+                                        </div>
+                                    </div>
+                                    <div class="o_dropdown_kanban dropdown" groups="base.group_user">
+                                        <a class="dropdown-toggle o-no-caret btn" role="button" data-bs-toggle="dropdown" href="#" aria-label="Dropdown menu" title="Dropdown menu">
+                                            <span class="fa fa-ellipsis-v"/>
+                                        </a>
+                                        <div class="dropdown-menu" role="menu">
+                                            <a role="menuitem" type="edit" class="dropdown-item">Edit</a>
+                                            <a role="menuitem" type="delete" class="dropdown-item">Delete</a>
+                                            <div role="separator" class="dropdown-divider"/>
+                                            <div role="separator" class="dropdown-item-text">Color</div>
+                                            <ul class="oe_kanban_colorpicker" data-field="color"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="o_kanban_record_body" invisible="not is_guard_task">
+                                    <field name="task_type" widget="badge"/>
+                                    <div t-if="record.assigned_guard_id.raw_value">
+                                        <i class="fa fa-user" title="User" aria-label="User"/> <field name="assigned_guard_id"/>
+                                    </div>
+                                    <div t-if="record.checklist_completion_percentage.raw_value &gt; 0">
+                                        <field name="checklist_completion_percentage" widget="progressbar" title="Checklist Progress"/>
+                                    </div>
+                                </div>
+                                
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <field name="priority" widget="priority"/>
+                                        <field name="activity_ids" widget="kanban_activity"/>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field name="date_deadline" widget="date"/>
+                                        <field name="user_ids" widget="many2many_avatar_user"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="oe_clear"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Guard Task List View -->
+    <record id="view_guard_task_list" model="ir.ui.view">
+        <field name="name">guard.task.list</field>
+        <field name="model">project.task</field>
+        <field name="arch" type="xml">
+            <list string="Guard Tasks" default_order="date_deadline,priority desc">
+                <field name="is_guard_task" column_invisible="True"/>
+                <field name="priority" widget="priority" nolabel="1"/>
+                <field name="name"/>
+                <field name="task_type" optional="show"/>
+                <field name="site_id"/>
+                <field name="assigned_guard_id"/>
+                <field name="shift_id" optional="hide"/>
+                <field name="date_deadline"/>
+                <field name="stage_id"/>
+                <field name="checklist_completion_percentage" widget="progressbar" optional="show"/>
+                <field name="user_ids" widget="many2many_avatar_user" optional="show"/>
+                <field name="activity_ids" widget="list_activity"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Guard Task Calendar View -->
+    <record id="view_guard_task_calendar" model="ir.ui.view">
+        <field name="name">guard.task.calendar</field>
+        <field name="model">project.task</field>
+        <field name="arch" type="xml">
+            <calendar string="Guard Tasks" date_start="date_deadline" color="site_id" mode="month">
+                <field name="name"/>
+                <field name="site_id"/>
+                <field name="assigned_guard_id"/>
+                <field name="task_type"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Guard Task Search View -->
+    <record id="view_guard_task_search" model="ir.ui.view">
+        <field name="name">guard.task.search</field>
+        <field name="model">project.task</field>
+        <field name="arch" type="xml">
+            <search string="Guard Tasks">
+                <field name="name" string="Task"/>
+                <field name="site_id"/>
+                <field name="assigned_guard_id"/>
+                <field name="task_type"/>
+                <field name="shift_id"/>
+                
+                <filter name="my_tasks" string="My Tasks" 
+                        domain="[('user_ids', 'in', [uid])]"/>
+                <filter name="guard_tasks_only" string="Guard Tasks" 
+                        domain="[('is_guard_task', '=', True)]"/>
+                <filter name="overdue" string="Overdue" 
+                        domain="[('date_deadline', '&lt;', context_today()), ('stage_id.fold', '=', False)]"/>
+                <filter name="today" string="Due Today" 
+                        domain="[('date_deadline', '=', context_today())]"/>
+                
+                <separator/>
+                <filter name="high_priority" string="High Priority" 
+                        domain="[('priority', 'in', ['2', '3'])]"/>
+                <filter name="with_checklist" string="With Checklist" 
+                        domain="[('total_checklist_items', '&gt;', 0)]"/>
+                
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter name="group_site" string="Site" context="{'group_by': 'site_id'}"/>
+                    <filter name="group_guard" string="Guard" context="{'group_by': 'assigned_guard_id'}"/>
+                    <filter name="group_type" string="Task Type" context="{'group_by': 'task_type'}"/>
+                    <filter name="group_stage" string="Stage" context="{'group_by': 'stage_id'}"/>
+                    <filter name="group_deadline" string="Deadline" context="{'group_by': 'date_deadline'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Guard Operations Project Action -->
+    <record id="action_guard_task_project" model="ir.actions.act_window">
+        <field name="name">Guard Tasks</field>
+        <field name="res_model">project.task</field>
+        <field name="view_mode">kanban,list,form,calendar,pivot,graph</field>
+        <field name="domain">[('is_guard_task', '=', True)]</field>
+        <field name="context">{
+            'default_is_guard_task': True,
+            'search_default_guard_tasks_only': 1,
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first guard task
+            </p>
+            <p>
+                Guard tasks help you manage security duties, post orders, and patrols.
+            </p>
+        </field>
+    </record>
+
+    <!-- Guard Task Template List View -->
+    <record id="view_guard_task_template_list" model="ir.ui.view">
+        <field name="name">guard.task.template.list</field>
+        <field name="model">guard.task.template</field>
+        <field name="arch" type="xml">
+            <list string="Task Templates">
+                <field name="name"/>
+                <field name="task_type"/>
+                <field name="priority" widget="priority"/>
+                <field name="site_ids" widget="many2many_tags" optional="show"/>
+                <field name="estimated_duration" optional="show"/>
+                <button name="action_create_task" 
+                        type="object" 
+                        string="Create Task" 
+                        class="btn-primary"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Guard Task Template Form View -->
+    <record id="view_guard_task_template_form" model="ir.ui.view">
+        <field name="name">guard.task.template.form</field>
+        <field name="model">guard.task.template</field>
+        <field name="arch" type="xml">
+            <form string="Task Template">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_create_task" 
+                                type="object" 
+                                string="Create Task" 
+                                class="oe_stat_button" 
+                                icon="fa-plus"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="task_type"/>
+                            <field name="priority" widget="priority"/>
+                        </group>
+                        <group>
+                            <field name="site_ids" widget="many2many_tags"/>
+                            <field name="estimated_duration"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="description" placeholder="Task description..."/>
+                    </group>
+                    <notebook>
+                        <page string="Checklist Template">
+                            <field name="checklist_template_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="mandatory"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Task Template Action -->
+    <record id="action_guard_task_template" model="ir.actions.act_window">
+        <field name="name">Task Templates</field>
+        <field name="res_model">guard.task.template</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Guard Task Creation Wizard View -->
+    <record id="view_guard_task_create_wizard_form" model="ir.ui.view">
+        <field name="name">guard.task.create.wizard.project.form</field>
+        <field name="model">guard.task.create.wizard.project</field>
+        <field name="arch" type="xml">
+            <form string="Create Guard Task">
+                <group>
+                    <field name="template_id"/>
+                </group>
+                <group>
+                    <group>
+                        <field name="name"/>
+                        <field name="task_type"/>
+                        <field name="priority" widget="priority"/>
+                    </group>
+                    <group>
+                        <field name="site_id"/>
+                        <field name="assigned_guard_id"/>
+                        <field name="shift_id"/>
+                        <field name="date_deadline"/>
+                    </group>
+                </group>
+                <group>
+                    <field name="description" placeholder="Task description..."/>
+                </group>
+                <group>
+                    <field name="project_id" readonly="1"/>
+                    <field name="create_checklist" invisible="not template_id"/>
+                </group>
+                <footer>
+                    <button string="Create Task" name="action_create_task" type="object" class="btn-primary"/>
+                    <button string="Create &amp; New" name="action_create_and_new" type="object" class="btn-secondary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>
+

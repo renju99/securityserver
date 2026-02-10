@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Client Feedback PDF Report Template -->
+    <template id="client_feedback_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h2>Client Feedback Report</h2>
+                                <h4 t-field="o.site_id.name"/>
+                            </div>
+                        </div>
+
+                        <!-- Reference and Rating -->
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <h4>Reference: <span t-field="o.name"/></h4>
+                            </div>
+                            <div class="col-6 text-end">
+                                <h5>
+                                    Type: 
+                                    <t t-if="o.feedback_type == 'positive'">
+                                        <span class="badge bg-success">Positive</span>
+                                    </t>
+                                    <t t-elif="o.feedback_type == 'negative'">
+                                        <span class="badge bg-danger">Negative</span>
+                                    </t>
+                                    <t t-elif="o.feedback_type == 'neutral'">
+                                        <span class="badge bg-secondary">Neutral</span>
+                                    </t>
+                                    <t t-elif="o.feedback_type == 'suggestion'">
+                                        <span class="badge bg-info">Suggestion</span>
+                                    </t>
+                                </h5>
+                            </div>
+                        </div>
+
+                        <!-- Overall Rating -->
+                        <div class="row mt-3" t-if="o.overall_rating">
+                            <div class="col-12 text-center">
+                                <h3>
+                                    Overall Rating: 
+                                    <t t-if="o.overall_rating &gt;= 4">
+                                        <span class="badge bg-success" style="font-size: 1.5em;">
+                                            <span t-field="o.overall_rating"/> / 5
+                                        </span>
+                                    </t>
+                                    <t t-elif="o.overall_rating &gt;= 3">
+                                        <span class="badge bg-info" style="font-size: 1.5em;">
+                                            <span t-field="o.overall_rating"/> / 5
+                                        </span>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="badge bg-warning" style="font-size: 1.5em;">
+                                            <span t-field="o.overall_rating"/> / 5
+                                        </span>
+                                    </t>
+                                </h3>
+                            </div>
+                        </div>
+
+                        <!-- Feedback Source -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Feedback From</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Source:</strong></td>
+                                        <td>
+                                            <span t-if="o.feedback_source == 'client'">Client/Management</span>
+                                            <span t-if="o.feedback_source == 'resident'">Resident/Tenant</span>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="o.client_id">
+                                        <td><strong>Client:</strong></td>
+                                        <td t-field="o.client_id.name"/>
+                                    </tr>
+                                    <tr t-if="o.resident_id">
+                                        <td><strong>Resident:</strong></td>
+                                        <td t-field="o.resident_id.name"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Site:</strong></td>
+                                        <td t-field="o.site_id.name"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Feedback Date:</strong></td>
+                                        <td t-field="o.feedback_date"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Service Details -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Service Details</h5>
+                                <table class="table table-bordered">
+                                    <tr t-if="o.guard_id">
+                                        <td width="30%"><strong>Guard:</strong></td>
+                                        <td t-field="o.guard_id.name"/>
+                                    </tr>
+                                    <tr t-if="o.shift_id">
+                                        <td><strong>Shift:</strong></td>
+                                        <td t-field="o.shift_id.name"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Category Ratings -->
+                        <div class="row mt-3" t-if="o.professionalism_rating or o.punctuality_rating or o.communication_rating or o.appearance_rating">
+                            <div class="col-12">
+                                <h5>Category Ratings</h5>
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr class="table-active">
+                                            <th>Category</th>
+                                            <th style="width: 150px;">Rating</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-if="o.professionalism_rating">
+                                            <td>Professionalism</td>
+                                            <td>
+                                                <span t-field="o.professionalism_rating"/> / 5
+                                            </td>
+                                        </tr>
+                                        <tr t-if="o.punctuality_rating">
+                                            <td>Punctuality</td>
+                                            <td>
+                                                <span t-field="o.punctuality_rating"/> / 5
+                                            </td>
+                                        </tr>
+                                        <tr t-if="o.communication_rating">
+                                            <td>Communication</td>
+                                            <td>
+                                                <span t-field="o.communication_rating"/> / 5
+                                            </td>
+                                        </tr>
+                                        <tr t-if="o.appearance_rating">
+                                            <td>Appearance</td>
+                                            <td>
+                                                <span t-field="o.appearance_rating"/> / 5
+                                            </td>
+                                        </tr>
+                                        <tr t-if="o.responsiveness_rating">
+                                            <td>Responsiveness</td>
+                                            <td>
+                                                <span t-field="o.responsiveness_rating"/> / 5
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Feedback Comments -->
+                        <div class="row mt-3" t-if="o.comments">
+                            <div class="col-12">
+                                <h5>Comments</h5>
+                                <p t-field="o.comments"/>
+                            </div>
+                        </div>
+
+                        <!-- Suggestions -->
+                        <div class="row mt-3" t-if="o.suggestions">
+                            <div class="col-12">
+                                <h5>Suggestions for Improvement</h5>
+                                <p t-field="o.suggestions"/>
+                            </div>
+                        </div>
+
+                        <!-- Action Taken -->
+                        <div class="row mt-3" t-if="o.action_taken">
+                            <div class="col-12">
+                                <h5>Action Taken</h5>
+                                <p t-field="o.action_taken"/>
+                            </div>
+                        </div>
+
+                        <!-- Follow-up Required -->
+                        <div class="row mt-3" t-if="o.follow_up_required">
+                            <div class="col-12">
+                                <div class="alert alert-warning">
+                                    <strong>Follow-up Required:</strong> Yes
+                                    <p t-if="o.follow_up_notes" t-field="o.follow_up_notes"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thank You Note -->
+                        <div class="row mt-5">
+                            <div class="col-12 text-center">
+                                <div class="border p-3">
+                                    <h5>Thank You for Your Feedback!</h5>
+                                    <p>Your feedback helps us improve our security services and better serve your needs.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Signature Section -->
+                        <div class="row mt-5">
+                            <div class="col-6">
+                                <div class="border-top pt-2">
+                                    <p><strong>Submitted By:</strong></p>
+                                    <p t-if="o.client_id" t-field="o.client_id.name"/>
+                                    <p t-if="o.resident_id" t-field="o.resident_id.name"/>
+                                    <p>Date: <span t-field="o.feedback_date"/></p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border-top pt-2">
+                                    <p><strong>Reviewed By:</strong></p>
+                                    <p>Management</p>
+                                    <p>Date: ___________________</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="row mt-5">
+                            <div class="col-12 text-center text-muted">
+                                <small>
+                                    Client Feedback Report - Quality Assurance
+                                    <br/>
+                                    Your satisfaction is our priority
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Definition -->
+    <record id="action_report_client_feedback" model="ir.actions.report">
+        <field name="name">Feedback Report</field>
+        <field name="model">client.feedback</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.client_feedback_report_template</field>
+        <field name="report_file">guardpro.client_feedback_report_template</field>
+        <field name="binding_model_id" ref="model_client_feedback"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Feedback_%s' % (object.name)</field>
+    </record>
+</odoo>
+

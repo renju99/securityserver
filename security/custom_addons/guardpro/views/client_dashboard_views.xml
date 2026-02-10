@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Client Dashboard Form View -->
+    <record id="view_client_dashboard_form" model="ir.ui.view">
+        <field name="name">client.dashboard.form</field>
+        <field name="model">client.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="Client Dashboard">
+                <header>
+                    <button name="action_refresh_dashboard" string="Refresh" type="object" class="btn-primary"/>
+                    <button name="action_show_incident_details" string="Show All Incidents" type="object" class="btn-secondary"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="client_id"/>
+                            <field name="site_id" 
+                                   placeholder="All Sites" 
+                                   domain="[('client_id', '=', client_id)]"
+                                   context="{'default_client_id': client_id}"/>
+                        </group>
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Service Overview">
+                        <group>
+                            <label for="total_shifts" string="Shifts"/>
+                            <div class="o_row">
+                                <button name="action_view_shifts" type="object" class="oe_link">
+                                    <field name="total_shifts" class="oe_inline"/>
+                                </button>
+                                <span>shifts scheduled</span>
+                            </div>
+                            <field name="completed_shifts"/>
+                            <field name="missed_shifts"/>
+                            <field name="shift_completion_rate" widget="progressbar"/>
+                        </group>
+                        <group>
+                            <field name="active_guards"/>
+                            <field name="total_hours_worked"/>
+                            <field name="average_guard_rating" widget="priority"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Incidents &amp; Security">
+                        <group>
+                            <label for="total_incidents" string="Incidents"/>
+                            <div class="o_row">
+                                <button name="action_view_incidents" type="object" class="oe_link">
+                                    <field name="total_incidents" class="oe_inline"/>
+                                </button>
+                                <span>total incidents</span>
+                            </div>
+                            <field name="critical_incidents"/>
+                            <field name="resolved_incidents"/>
+                            <field name="incident_resolution_rate" widget="progressbar"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Tours &amp; Checkpoints">
+                        <group>
+                            <field name="total_tours"/>
+                            <field name="checkpoints_scanned"/>
+                            <field name="checkpoint_completion_rate" widget="progressbar"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Client Dashboard Action -->
+    <record id="action_client_dashboard" model="ir.actions.act_window">
+        <field name="name">Client Dashboard</field>
+        <field name="res_model">client.dashboard</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+    <!-- Add Dashboard Button to Client Site -->
+    <record id="view_client_site_form_dashboard" model="ir.ui.view">
+        <field name="name">client.site.form.dashboard</field>
+        <field name="model">client.site</field>
+        <field name="inherit_id" ref="guardpro.view_client_site_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_dashboard" 
+                        type="object" 
+                        class="oe_stat_button" 
+                        icon="fa-dashboard"
+                        groups="guardpro.group_guardpro_client_user,guardpro.group_guardpro_manager">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">View</span>
+                        <span class="o_stat_text">Dashboard</span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
+

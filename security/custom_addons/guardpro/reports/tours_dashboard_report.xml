@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_tours_dashboard_pdf" name="GuardPro Tours Dashboard Report">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <style>
+                        /* Tours Dashboard styling for PDF - A4 Optimized */
+                        :root {
+                            --primary-color: #3498db;
+                            --success-color: #2ecc71;
+                            --warning-color: #f1c40f;
+                            --danger-color: #e74c3c;
+                            --info-color: #3498db;
+                            --dark-color: #2c3e50;
+                            --light-color: #f8f9fa;
+                            --border-color: #dee2e6;
+                        }
+                        
+                        .dashboard-container {
+                            padding: 0;
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                            background: #ffffff;
+                        }
+                        
+                        .report-meta {
+                            font-size: 9px;
+                            color: #666;
+                            margin-bottom: 15px;
+                            text-align: right;
+                        }
+                        
+                        /* KPI Cards */
+                        .kpi-grid {
+                            text-align: center;
+                            margin: 0 -4px 15px -4px;
+                        }
+                        .kpi-card {
+                            display: inline-block;
+                            width: 23%;
+                            background: white;
+                            border: 1px solid #dee2e6;
+                            border-radius: 6px;
+                            padding: 10px;
+                            margin: 0 4px 8px 4px;
+                            vertical-align: top;
+                            text-align: left;
+                        }
+                        .kpi-label {
+                            color: #7f8c8d;
+                            font-size: 10px;
+                            margin-bottom: 2px;
+                            font-weight: 600;
+                            text-transform: uppercase;
+                        }
+                        .kpi-value {
+                            font-size: 20px;
+                            font-weight: 700;
+                            color: #2c3e50;
+                        }
+                        
+                        /* Tables and Charts */
+                        .section-header {
+                            background: #f8f9fa;
+                            border-left: 4px solid #3498db;
+                            padding: 8px 12px;
+                            margin: 20px 0 10px 0;
+                            font-size: 14px;
+                            font-weight: 600;
+                            color: #2c3e50;
+                        }
+                        
+                        .chart-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            font-size: 10px;
+                            margin-bottom: 15px;
+                        }
+                        .chart-table th {
+                            background: #f8f9fa;
+                            padding: 8px;
+                            text-align: left;
+                            border: 1px solid #dee2e6;
+                            font-weight: 600;
+                        }
+                        .chart-table td {
+                            padding: 6px 8px;
+                            border: 1px solid #dee2e6;
+                        }
+                        
+                        .data-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            font-size: 10px;
+                            margin-bottom: 20px;
+                        }
+                        .data-table th {
+                            background: #3498db;
+                            color: white;
+                            padding: 8px;
+                            text-align: left;
+                            font-weight: 600;
+                        }
+                        .data-table td {
+                            padding: 6px 8px;
+                            border-bottom: 1px solid #dee2e6;
+                        }
+                        .data-table tr:nth-child(even) {
+                            background: #fafafa;
+                        }
+                    </style>
+                    
+                    <t t-set="filter_params" t-value="{}"/>
+                    <t t-if="context and context.get('filter_params')">
+                        <t t-set="filter_params" t-value="context['filter_params']"/>
+                    </t>
+                    <t t-elif="data and data.get('filters')">
+                        <t t-set="filter_params" t-value="data['filters']"/>
+                    </t>
+                    
+                    <!-- Call method to get report data -->
+                    <t t-set="report_data" t-value="docs[0].get_report_data(filter_params) if docs and len(docs) > 0 else env['guardpro.tours.dashboard'].get_report_data(filter_params)"/>
+                    
+                    <div class="dashboard-container" style="padding: 10px;">
+                        <!-- Updated Header with Inline Styles for maximum compatibility -->
+                        <div style="text-align: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 3px solid #3498db;">
+                            <h1 style="color: #2c3e50; margin: 0 0 5px 0; font-size: 26px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                                Tours Analytics Report
+                            </h1>
+                            <div style="color: #7f8c8d; font-size: 11px; font-weight: 500;">
+                                Comprehensive Guard Performance &amp; Tour Compliance Overview
+                            </div>
+                        </div>
+                        
+                        <div style="font-size: 9px; color: #666; margin-bottom: 15px; text-align: right; border-top: 1px solid #eee; padding-top: 5px;">
+                            <strong>Generated on:</strong> <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M:%S')"/> by <t t-esc="env.user.name"/><br/>
+                            <strong>Report Period:</strong> <t t-esc="filter_params.get('date_from', 'Start')"/> to <t t-esc="filter_params.get('date_to', 'End')"/>
+                        </div>
+                        
+                        <!-- KPIs Section -->
+                        <div class="section-header">Key Performance Indicators</div>
+                        <t t-if="report_data.get('kpis')">
+                            <div class="kpi-grid">
+                                <t t-foreach="report_data['kpis']" t-as="kpi">
+                                    <div class="kpi-card">
+                                        <div class="kpi-label"><t t-esc="kpi.get('name')"/></div>
+                                        <div class="kpi-value">
+                                            <t t-esc="kpi.get('value')"/><t t-esc="kpi.get('suffix', '')"/>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+                        
+                        <!-- Filter Info -->
+                        <t t-if="report_data.get('filters') and (report_data['filters'].get('site_names') or report_data['filters'].get('guard_names'))">
+                            <div style="background: #eef7fd; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 10px;">
+                                <strong>Filters Applied:</strong>
+                                <t t-if="report_data['filters'].get('site_names')">
+                                    <br/><strong>Sites:</strong> <t t-esc="', '.join(report_data['filters']['site_names'])"/>
+                                </t>
+                                <t t-if="report_data['filters'].get('guard_names')">
+                                    <br/><strong>Guards:</strong> <t t-esc="', '.join(report_data['filters']['guard_names'])"/>
+                                </t>
+                            </div>
+                        </t>
+                        
+                        <!-- Charts Section (as tables in PDF) -->
+                        <t t-if="report_data.get('charts')">
+                            <t t-foreach="report_data['charts']" t-as="chart">
+                                <div style="page-break-inside: avoid;">
+                                    <div class="section-header"><t t-esc="chart.get('title')"/></div>
+                                    <table class="chart-table">
+                                        <thead>
+                                            <tr>
+                                                <th width="70%">Category</th>
+                                                <th width="30%">Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="range(len(chart.get('labels', [])))" t-as="i">
+                                                <tr>
+                                                    <td><t t-esc="chart['labels'][i]"/></td>
+                                                    <td><t t-esc="chart['datasets'][0]['data'][i]"/></td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </t>
+                        </t>
+                        
+                        <!-- Tables Section -->
+                        <t t-if="report_data.get('tables')">
+                            <t t-foreach="report_data['tables']" t-as="table">
+                                <div style="page-break-inside: avoid;">
+                                    <div class="section-header"><t t-esc="table.get('title')"/></div>
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <t t-foreach="table.get('columns', [])" t-as="col">
+                                                    <th><t t-esc="col"/></th>
+                                                </t>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="table.get('rows', [])" t-as="row">
+                                                <tr>
+                                                    <t t-foreach="row" t-as="cell">
+                                                        <td><t t-esc="cell"/></td>
+                                                    </t>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </t>
+                        </t>
+                        
+                        <div class="footer" style="border-top: 1px solid #eee; padding-top: 10px; font-size: 8px; color: #999; text-align: center; margin-top: 30px;">
+                            GuardPro Security Suite - Tours Dashboard Analytics. Confidential Report.
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_tours_dashboard" model="ir.actions.report">
+        <field name="name">Tours Dashboard Report</field>
+        <field name="model">guardpro.tours.dashboard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.report_tours_dashboard_pdf</field>
+        <field name="print_report_name">'Tours Analytics - %s' % (context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d'))</field>
+        <field name="binding_model_id" ref="model_guardpro_tours_dashboard"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+</odoo>

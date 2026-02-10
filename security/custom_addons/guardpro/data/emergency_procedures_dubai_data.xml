@@ -1,0 +1,1242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- =================================================================== -->
+        <!-- FIRE EMERGENCY PROCEDURES - Dubai Civil Defense Standards -->
+        <!-- =================================================================== -->
+        
+        <record id="emergency_procedure_fire_building" model="emergency.procedure">
+            <field name="name">Building Fire Emergency Response - Dubai</field>
+            <field name="sequence">10</field>
+            <field name="emergency_type">fire</field>
+            <field name="description"><![CDATA[
+                <h3>Fire Emergency Response Protocol</h3>
+                <p>This procedure is aligned with Dubai Civil Defense regulations and UAE Fire and Life Safety Code.</p>
+                <h4>When to Use:</h4>
+                <ul>
+                    <li>Smoke detected in building</li>
+                    <li>Fire alarm activated</li>
+                    <li>Visible flames or fire</li>
+                    <li>Smell of burning materials</li>
+                </ul>
+                <h4>Key Contacts:</h4>
+                <ul>
+                    <li>Dubai Civil Defense: 997</li>
+                    <li>Emergency Police: 999</li>
+                    <li>Ambulance: 998</li>
+                </ul>
+            ]]></field>
+            <field name="auto_notify_authorities" eval="True"/>
+            <field name="notify_phone">997</field>
+            <field name="notify_email">emergency@dubaipolice.gov.ae</field>
+            <field name="notify_message">FIRE EMERGENCY - Immediate Response Required
+Location: [SITE_NAME]
+Address: [SITE_ADDRESS]
+Reported By: [GUARD_NAME]
+Time: [TIMESTAMP]
+
+Please respond immediately.</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Fire Emergency Steps -->
+        <record id="fire_step_01" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_fire_building"/>
+            <field name="sequence">10</field>
+            <field name="name">IMMEDIATELY SOUND THE FIRE ALARM - Press nearest fire alarm call point</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Critical Action:</strong> Break the glass on the nearest fire alarm call point and activate the alarm.</p>
+                <p>Location of fire alarm points should be known from your site orientation.</p>
+            ]]></field>
+            <field name="requires_photo" eval="True"/>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">1</field>
+            <field name="safety_warning">Do not delay - every second counts in fire emergencies</field>
+        </record>
+
+        <record id="fire_step_02" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_fire_building"/>
+            <field name="sequence">20</field>
+            <field name="name">CALL DUBAI CIVIL DEFENSE - Dial 997 immediately</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Information to Provide:</strong></p>
+                <ul>
+                    <li>Your exact location and address</li>
+                    <li>Nature of fire (building, vehicle, electrical, etc.)</li>
+                    <li>Floor/area affected</li>
+                    <li>Number of people potentially affected</li>
+                    <li>Any hazardous materials present</li>
+                    <li>Your callback number</li>
+                </ul>
+                <p>Speak clearly and do not hang up until told to do so.</p>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">2</field>
+            <field name="safety_warning">Provide accurate location information - delays in locating can be fatal</field>
+        </record>
+
+        <record id="fire_step_03" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_fire_building"/>
+            <field name="sequence">30</field>
+            <field name="name">ATTEMPT FIRE SUPPRESSION (ONLY IF SAFE) - Use nearest fire extinguisher if fire is small and contained</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>PASS Method for Fire Extinguisher Use:</strong></p>
+                <ul>
+                    <li><strong>P</strong>ull the pin</li>
+                    <li><strong>A</strong>im at the base of the fire</li>
+                    <li><strong>S</strong>queeze the handle</li>
+                    <li><strong>S</strong>weep from side to side</li>
+                </ul>
+                <p><strong>ONLY attempt if:</strong></p>
+                <ul>
+                    <li>Fire is small (size of wastebasket or smaller)</li>
+                    <li>You have a clear escape route</li>
+                    <li>You are trained in extinguisher use</li>
+                    <li>The fire is not spreading rapidly</li>
+                </ul>
+                <p><strong style="color: red;">If any doubt - EVACUATE IMMEDIATELY</strong></p>
+            ]]></field>
+            <field name="requires_photo" eval="True"/>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="False"/>
+            <field name="estimated_duration">3</field>
+            <field name="safety_warning">NEVER risk your life - if fire is large or spreading, evacuate immediately. Do not fight electrical fires with water extinguishers.</field>
+        </record>
+
+        <record id="fire_step_04" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_fire_building"/>
+            <field name="sequence">40</field>
+            <field name="name">INITIATE EVACUATION - Begin organized evacuation of all personnel</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Evacuation Procedure:</strong></p>
+                <ul>
+                    <li>Announce evacuation clearly and calmly</li>
+                    <li>Direct people to nearest safe exit</li>
+                    <li>Check all rooms and areas systematically</li>
+                    <li>Assist elderly, disabled, or injured persons</li>
+                    <li>Close all doors and windows (do not lock)</li>
+                    <li>Do NOT use elevators - use stairs only</li>
+                    <li>Feel doors before opening - if hot, use alternate route</li>
+                </ul>
+                <p><strong>Stay Low:</strong> If smoke present, stay low to ground where air is clearer.</p>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">10</field>
+            <field name="safety_warning">Never use elevators during fire. Smoke inhalation is the leading cause of fire deaths.</field>
+        </record>
+
+        <record id="fire_step_05" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_fire_building"/>
+            <field name="sequence">50</field>
+            <field name="name">ASSEMBLY POINT - Direct all evacuees to designated assembly point</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>At Assembly Point:</strong></p>
+                <ul>
+                    <li>Keep people at safe distance (minimum 50 meters from building)</li>
+                    <li>Conduct headcount of all personnel</li>
+                    <li>Report any missing persons to Civil Defense upon arrival</li>
+                    <li>Do not allow anyone to re-enter building</li>
+                    <li>Keep access routes clear for emergency vehicles</li>
+                </ul>
+            ]]></field>
+            <field name="requires_photo" eval="True"/>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">5</field>
+            <field name="safety_warning">Do not allow anyone to return to building until Civil Defense declares it safe</field>
+        </record>
+
+        <record id="fire_step_06" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_fire_building"/>
+            <field name="sequence">60</field>
+            <field name="name">SECURE THE AREA - Establish perimeter and control access</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Site Security Actions:</strong></p>
+                <ul>
+                    <li>Establish security cordon around affected area</li>
+                    <li>Direct emergency vehicles to fire location</li>
+                    <li>Keep bystanders and unauthorized persons away</li>
+                    <li>Document all personnel entering/exiting area</li>
+                    <li>Protect property from looting if safe to do so</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="False"/>
+            <field name="estimated_duration">15</field>
+            <field name="safety_warning">Maintain safe distance - buildings can collapse even after fire is suppressed</field>
+        </record>
+
+        <record id="fire_step_07" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_fire_building"/>
+            <field name="sequence">70</field>
+            <field name="name">COORDINATE WITH CIVIL DEFENSE - Brief emergency responders upon arrival</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Information to Provide:</strong></p>
+                <ul>
+                    <li>Location and extent of fire</li>
+                    <li>Building layout and access points</li>
+                    <li>Location of hazardous materials</li>
+                    <li>Number of people evacuated and any missing persons</li>
+                    <li>Actions already taken</li>
+                    <li>Location of fire fighting equipment and shutoffs</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="requires_supervisor" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">5</field>
+        </record>
+
+        <record id="fire_step_08" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_fire_building"/>
+            <field name="sequence">80</field>
+            <field name="name">DOCUMENT INCIDENT - Take photos and detailed notes of incident</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Documentation Required:</strong></p>
+                <ul>
+                    <li>Photos of affected areas (once safe to do so)</li>
+                    <li>Timeline of events</li>
+                    <li>List of evacuees</li>
+                    <li>Actions taken</li>
+                    <li>Damage assessment</li>
+                    <li>Names of emergency responders</li>
+                </ul>
+            ]]></field>
+            <field name="requires_photo" eval="True"/>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="False"/>
+            <field name="estimated_duration">20</field>
+        </record>
+
+        <!-- =================================================================== -->
+        <!-- MEDICAL EMERGENCY PROCEDURES - Dubai Health Authority Standards -->
+        <!-- =================================================================== -->
+        
+        <record id="emergency_procedure_medical" model="emergency.procedure">
+            <field name="name">Medical Emergency Response - Dubai</field>
+            <field name="sequence">20</field>
+            <field name="emergency_type">medical</field>
+            <field name="description"><![CDATA[
+                <h3>Medical Emergency Response Protocol</h3>
+                <p>Aligned with Dubai Health Authority (DHA) emergency medical services guidelines.</p>
+                <h4>When to Use:</h4>
+                <ul>
+                    <li>Person unconscious or unresponsive</li>
+                    <li>Difficulty breathing or chest pain</li>
+                    <li>Severe bleeding or trauma</li>
+                    <li>Suspected stroke or heart attack</li>
+                    <li>Severe allergic reaction</li>
+                    <li>Poisoning or overdose</li>
+                </ul>
+                <h4>Emergency Contacts:</h4>
+                <ul>
+                    <li>Dubai Ambulance: 998 or 999</li>
+                    <li>Dubai Health Authority: 800-342</li>
+                </ul>
+            ]]></field>
+            <field name="auto_notify_authorities" eval="True"/>
+            <field name="notify_phone">998</field>
+            <field name="notify_email">emergency@dha.gov.ae</field>
+            <field name="notify_message">MEDICAL EMERGENCY - Ambulance Required
+Location: [SITE_NAME]
+Address: [SITE_ADDRESS]
+Nature: [EMERGENCY_TYPE]
+Patient Condition: [DESCRIPTION]
+Reported By: [GUARD_NAME]
+Time: [TIMESTAMP]</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Medical Emergency Steps -->
+        <record id="medical_step_01" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_medical"/>
+            <field name="sequence">10</field>
+            <field name="name">ASSESS THE SCENE - Ensure scene is safe before approaching patient</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Safety First:</strong></p>
+                <ul>
+                    <li>Check for hazards (fire, chemicals, traffic, unstable structures)</li>
+                    <li>Ensure your own safety</li>
+                    <li>Use PPE if available (gloves, mask)</li>
+                    <li>Do not move patient unless immediate danger</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">1</field>
+            <field name="safety_warning">Never put yourself in danger - you cannot help if you become a victim</field>
+        </record>
+
+        <record id="medical_step_02" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_medical"/>
+            <field name="sequence">20</field>
+            <field name="name">CALL FOR AMBULANCE - Dial 998 or 999 immediately</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Information to Provide:</strong></p>
+                <ul>
+                    <li>Exact location with landmarks</li>
+                    <li>Nature of medical emergency</li>
+                    <li>Number of patients</li>
+                    <li>Patient's condition and consciousness level</li>
+                    <li>Any known allergies or medical conditions</li>
+                    <li>Your callback number</li>
+                </ul>
+                <p><strong>Stay on the line</strong> - Dispatcher may provide first aid instructions.</p>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">2</field>
+            <field name="safety_warning">Accurate information saves lives - be calm and clear</field>
+        </record>
+
+        <record id="medical_step_03" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_medical"/>
+            <field name="sequence">30</field>
+            <field name="name">CHECK RESPONSIVENESS - Assess patient's level of consciousness</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>AVPU Assessment:</strong></p>
+                <ul>
+                    <li><strong>A</strong>lert - Patient is awake and aware</li>
+                    <li><strong>V</strong>oice - Patient responds to voice</li>
+                    <li><strong>P</strong>ain - Patient responds only to painful stimuli</li>
+                    <li><strong>U</strong>nresponsive - No response</li>
+                </ul>
+                <p>Gently tap shoulder and ask loudly: "Are you okay?"</p>
+                <p>Note the response level for ambulance crew.</p>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">1</field>
+        </record>
+
+        <record id="medical_step_04" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_medical"/>
+            <field name="sequence">40</field>
+            <field name="name">CHECK ABC - Airway, Breathing, Circulation</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Primary Survey:</strong></p>
+                <ul>
+                    <li><strong>A</strong>irway - Is airway clear? Any obstruction?</li>
+                    <li><strong>B</strong>reathing - Is patient breathing? Rate and depth?</li>
+                    <li><strong>C</strong>irculation - Check pulse. Any severe bleeding?</li>
+                </ul>
+                <p><strong>If not breathing:</strong> Begin CPR if trained (30 compressions, 2 breaths)</p>
+                <p><strong>If severe bleeding:</strong> Apply direct pressure with clean cloth</p>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">2</field>
+            <field name="safety_warning">If patient is not breathing and you are CPR trained, start immediately - do not wait for ambulance</field>
+        </record>
+
+        <record id="medical_step_05" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_medical"/>
+            <field name="sequence">50</field>
+            <field name="name">POSITION PATIENT - Place in recovery position if unconscious but breathing</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Recovery Position (if unconscious but breathing):</strong></p>
+                <ul>
+                    <li>Place patient on their side</li>
+                    <li>Head tilted back to keep airway open</li>
+                    <li>Top arm and leg bent for stability</li>
+                    <li>Monitor breathing continuously</li>
+                </ul>
+                <p><strong>DO NOT MOVE if suspected spinal injury</strong></p>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="False"/>
+            <field name="estimated_duration">2</field>
+            <field name="safety_warning">Do not move patient if spinal injury suspected (fall, vehicle accident, head trauma)</field>
+        </record>
+
+        <record id="medical_step_06" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_medical"/>
+            <field name="sequence">60</field>
+            <field name="name">CONTROL BLEEDING - Apply pressure to any wounds</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Bleeding Control:</strong></p>
+                <ul>
+                    <li>Use clean cloth or gauze</li>
+                    <li>Apply firm, direct pressure</li>
+                    <li>Elevate injured area if possible</li>
+                    <li>Do not remove cloth if soaked - add more on top</li>
+                    <li>Use pressure points if direct pressure insufficient</li>
+                </ul>
+                <p><strong>Wear gloves</strong> to protect from bloodborne pathogens.</p>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="False"/>
+            <field name="estimated_duration">5</field>
+            <field name="safety_warning">Always use gloves or barrier when dealing with blood. Risk of HIV, Hepatitis.</field>
+        </record>
+
+        <record id="medical_step_07" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_medical"/>
+            <field name="sequence">70</field>
+            <field name="name">COMFORT AND REASSURE - Keep patient calm and warm</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Patient Care:</strong></p>
+                <ul>
+                    <li>Speak calmly and reassuringly</li>
+                    <li>Explain that help is coming</li>
+                    <li>Cover with blanket to prevent shock</li>
+                    <li>Do not give food or water</li>
+                    <li>Loosen tight clothing</li>
+                    <li>Monitor vital signs</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="False"/>
+            <field name="estimated_duration">10</field>
+        </record>
+
+        <record id="medical_step_08" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_medical"/>
+            <field name="sequence">80</field>
+            <field name="name">PREPARE FOR AMBULANCE - Clear access and gather patient information</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Preparation:</strong></p>
+                <ul>
+                    <li>Send someone to guide ambulance to location</li>
+                    <li>Clear path to patient</li>
+                    <li>Gather patient's medications if available</li>
+                    <li>Prepare patient's ID and medical records</li>
+                    <li>Note time of incident and actions taken</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="False"/>
+            <field name="estimated_duration">5</field>
+        </record>
+
+        <record id="medical_step_09" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_medical"/>
+            <field name="sequence">90</field>
+            <field name="name">HANDOVER TO PARAMEDICS - Brief ambulance crew on patient condition and actions taken</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Information to Provide:</strong></p>
+                <ul>
+                    <li>What happened and when</li>
+                    <li>Patient's condition when found</li>
+                    <li>Changes in condition</li>
+                    <li>First aid provided</li>
+                    <li>Known allergies or medical conditions</li>
+                    <li>Medications taken</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">3</field>
+        </record>
+
+        <!-- =================================================================== -->
+        <!-- SECURITY BREACH PROCEDURES - SIRA Standards -->
+        <!-- =================================================================== -->
+        
+        <record id="emergency_procedure_security_breach" model="emergency.procedure">
+            <field name="name">Security Breach Response - Dubai/SIRA</field>
+            <field name="sequence">30</field>
+            <field name="emergency_type">security</field>
+            <field name="description"><![CDATA[
+                <h3>Security Breach Response Protocol</h3>
+                <p>Aligned with SIRA (Security Industry Regulatory Agency) requirements for Dubai security operations.</p>
+                <h4>When to Use:</h4>
+                <ul>
+                    <li>Unauthorized entry or trespassing</li>
+                    <li>Burglary or theft in progress</li>
+                    <li>Vandalism or property damage</li>
+                    <li>Suspicious persons or activities</li>
+                    <li>Breach of perimeter security</li>
+                    <li>Armed intruder</li>
+                </ul>
+                <h4>Emergency Contacts:</h4>
+                <ul>
+                    <li>Dubai Police: 999</li>
+                    <li>Police Emergency: 901 (Police Patrol)</li>
+                    <li>SIRA: +971 4 320 7777</li>
+                </ul>
+            ]]></field>
+            <field name="auto_notify_authorities" eval="True"/>
+            <field name="notify_phone">999</field>
+            <field name="notify_email">emergency@dubaipolice.gov.ae</field>
+            <field name="notify_message">SECURITY BREACH - Police Response Required
+Location: [SITE_NAME]
+Address: [SITE_ADDRESS]
+Nature: [BREACH_TYPE]
+Suspect Description: [DESCRIPTION]
+Reported By: [GUARD_NAME]
+Time: [TIMESTAMP]</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Security Breach Steps -->
+        <record id="security_step_01" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_security_breach"/>
+            <field name="sequence">10</field>
+            <field name="name">OBSERVE AND ASSESS - Evaluate the security breach from safe position</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Initial Assessment:</strong></p>
+                <ul>
+                    <li>Nature and severity of breach</li>
+                    <li>Number of perpetrators</li>
+                    <li>Weapons visible?</li>
+                    <li>Location and movement of suspects</li>
+                    <li>Potential danger to personnel</li>
+                    <li>Exit routes being used</li>
+                </ul>
+                <p><strong>DO NOT CONFRONT</strong> armed or violent individuals.</p>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">2</field>
+            <field name="safety_warning">Your safety is priority - observe from safe distance, do not engage armed suspects</field>
+        </record>
+
+        <record id="security_step_02" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_security_breach"/>
+            <field name="sequence">20</field>
+            <field name="name">CALL DUBAI POLICE - Dial 999 immediately</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Information to Report:</strong></p>
+                <ul>
+                    <li>Exact location and address</li>
+                    <li>Type of security breach (burglary, trespass, etc.)</li>
+                    <li>Number of suspects and descriptions</li>
+                    <li>Whether armed</li>
+                    <li>Direction of travel/escape</li>
+                    <li>Vehicle descriptions if applicable</li>
+                    <li>Any injuries or hostages</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">2</field>
+        </record>
+
+        <record id="security_step_03" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_security_breach"/>
+            <field name="sequence">30</field>
+            <field name="name">ACTIVATE ALARM SYSTEMS - Trigger building security alarms</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Alarm Activation:</strong></p>
+                <ul>
+                    <li>Activate main security alarm</li>
+                    <li>Trigger panic button if available</li>
+                    <li>Lock down access control systems</li>
+                    <li>Activate CCTV recording</li>
+                    <li>Sound evacuation alarm if necessary</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">1</field>
+        </record>
+
+        <record id="security_step_04" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_security_breach"/>
+            <field name="sequence">40</field>
+            <field name="name">SECURE OCCUPANTS - Move personnel to safe areas</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>If Armed Intruder - RUN, HIDE, FIGHT:</strong></p>
+                <ul>
+                    <li><strong>RUN:</strong> Evacuate if safe escape route available</li>
+                    <li><strong>HIDE:</strong> Lock and barricade in secure room if cannot escape</li>
+                    <li><strong>FIGHT:</strong> As absolute last resort if life in immediate danger</li>
+                </ul>
+                <p><strong>For Other Breaches:</strong></p>
+                <ul>
+                    <li>Move personnel away from breach area</li>
+                    <li>Lock doors and secure rooms</li>
+                    <li>Account for all personnel</li>
+                    <li>Keep people calm and quiet</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">5</field>
+            <field name="safety_warning">Life safety is paramount - evacuate or hide, do not confront armed suspects</field>
+        </record>
+
+        <record id="security_step_05" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_security_breach"/>
+            <field name="sequence">50</field>
+            <field name="name">DOCUMENT SUSPECTS - Obtain detailed descriptions and photos if safe</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Suspect Description:</strong></p>
+                <ul>
+                    <li>Number of suspects</li>
+                    <li>Gender, age, height, build</li>
+                    <li>Clothing description</li>
+                    <li>Distinctive features (scars, tattoos, etc.)</li>
+                    <li>Weapons or tools carried</li>
+                    <li>Direction of travel</li>
+                    <li>Vehicle details (make, model, color, plate number)</li>
+                </ul>
+                <p>Take photos/video from SAFE DISTANCE if possible.</p>
+            ]]></field>
+            <field name="requires_photo" eval="True"/>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="False"/>
+            <field name="estimated_duration">3</field>
+            <field name="safety_warning">Only document if it can be done safely - do not risk confrontation</field>
+        </record>
+
+        <record id="security_step_06" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_security_breach"/>
+            <field name="sequence">60</field>
+            <field name="name">PRESERVE EVIDENCE - Secure the scene for police investigation</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Evidence Preservation:</strong></p>
+                <ul>
+                    <li>Do not touch or move anything</li>
+                    <li>Secure area with barrier tape if available</li>
+                    <li>Prevent unauthorized access</li>
+                    <li>Note position of items</li>
+                    <li>Secure CCTV footage</li>
+                    <li>Document scene with photos</li>
+                    <li>List of potential witnesses</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="False"/>
+            <field name="estimated_duration">10</field>
+        </record>
+
+        <record id="security_step_07" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_security_breach"/>
+            <field name="sequence">70</field>
+            <field name="name">COORDINATE WITH POLICE - Brief responding officers upon arrival</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Information for Police:</strong></p>
+                <ul>
+                    <li>What happened - timeline of events</li>
+                    <li>Suspect descriptions and direction</li>
+                    <li>Property stolen or damaged</li>
+                    <li>Witness information</li>
+                    <li>CCTV footage available</li>
+                    <li>Building layout and access points</li>
+                    <li>Actions taken by security</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="requires_supervisor" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">10</field>
+        </record>
+
+        <record id="security_step_08" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_security_breach"/>
+            <field name="sequence">80</field>
+            <field name="name">INCIDENT REPORT - Complete detailed incident documentation</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Report Must Include:</strong></p>
+                <ul>
+                    <li>Date, time, and location</li>
+                    <li>Detailed narrative of incident</li>
+                    <li>Suspect descriptions</li>
+                    <li>Property involved</li>
+                    <li>Witnesses</li>
+                    <li>Actions taken</li>
+                    <li>Police case number</li>
+                    <li>Photos and evidence</li>
+                    <li>SIRA notification if required</li>
+                </ul>
+            ]]></field>
+            <field name="requires_photo" eval="True"/>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="requires_supervisor" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">30</field>
+        </record>
+
+        <!-- =================================================================== -->
+        <!-- EVACUATION PROCEDURES - Dubai Civil Defense Standards -->
+        <!-- =================================================================== -->
+        
+        <record id="emergency_procedure_evacuation" model="emergency.procedure">
+            <field name="name">Building Evacuation Protocol - Dubai</field>
+            <field name="sequence">40</field>
+            <field name="emergency_type">evacuation</field>
+            <field name="description"><![CDATA[
+                <h3>Building Evacuation Protocol</h3>
+                <p>General evacuation procedure for all emergency types requiring building evacuation.</p>
+                <h4>When to Use:</h4>
+                <ul>
+                    <li>Fire alarm activation</li>
+                    <li>Gas leak</li>
+                    <li>Bomb threat</li>
+                    <li>Structural damage</li>
+                    <li>Chemical spill</li>
+                    <li>Any emergency requiring immediate evacuation</li>
+                </ul>
+            ]]></field>
+            <field name="auto_notify_authorities" eval="False"/>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Evacuation Steps -->
+        <record id="evac_step_01" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_evacuation"/>
+            <field name="sequence">10</field>
+            <field name="name">SOUND EVACUATION ALARM - Activate building alarm system</field>
+            <field name="instruction_details"><![CDATA[
+                <p>Activate the building evacuation alarm using designated alarm points.</p>
+                <p>If alarm system unavailable, announce evacuation loudly and clearly.</p>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">1</field>
+        </record>
+
+        <record id="evac_step_02" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_evacuation"/>
+            <field name="sequence">20</field>
+            <field name="name">ANNOUNCE EVACUATION - Make clear announcement to all occupants</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Announcement Message:</strong></p>
+                <p>"Attention all personnel. This is an emergency evacuation. Please evacuate the building immediately using the nearest safe exit. Do not use elevators. Proceed calmly to the assembly point."</p>
+                <p>Repeat announcement multiple times in English and Arabic.</p>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">2</field>
+        </record>
+
+        <record id="evac_step_03" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_evacuation"/>
+            <field name="sequence">30</field>
+            <field name="name">SYSTEMATIC FLOOR SWEEP - Check all areas for remaining occupants</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Room Clearing Procedure:</strong></p>
+                <ul>
+                    <li>Check all offices, restrooms, storage rooms</li>
+                    <li>Open doors and announce: "Emergency evacuation!"</li>
+                    <li>Check behind doors and under desks</li>
+                    <li>Mark checked rooms (chalk mark on door if available)</li>
+                    <li>Do not lock doors</li>
+                    <li>Check stairwells for stragglers</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">10</field>
+            <field name="safety_warning">Do not spend excessive time searching if life-threatening situation - your safety first</field>
+        </record>
+
+        <record id="evac_step_04" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_evacuation"/>
+            <field name="sequence">40</field>
+            <field name="name">ASSIST VULNERABLE PERSONS - Help elderly, disabled, or injured to evacuate</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Assistance Priorities:</strong></p>
+                <ul>
+                    <li>Identify persons needing assistance</li>
+                    <li>Wheelchair users - assist to stairwell, request help</li>
+                    <li>Visually impaired - guide by arm, describe route</li>
+                    <li>Injured - support as needed, get help if severe</li>
+                    <li>Pregnant women and elderly - offer assistance</li>
+                    <li>Children - keep together, calm and guide</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="False"/>
+            <field name="estimated_duration">10</field>
+        </record>
+
+        <record id="evac_step_05" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_evacuation"/>
+            <field name="sequence">50</field>
+            <field name="name">DIRECT TO EXITS - Guide evacuees to nearest safe exit</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Exit Guidance:</strong></p>
+                <ul>
+                    <li>Direct to nearest safe exit</li>
+                    <li>Use stairs ONLY - never elevators</li>
+                    <li>Stay to right to allow emergency personnel up</li>
+                    <li>If exit blocked, use alternate route</li>
+                    <li>Move quickly but do not run</li>
+                    <li>Keep talking to calm people</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">10</field>
+        </record>
+
+        <record id="evac_step_06" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_evacuation"/>
+            <field name="sequence">60</field>
+            <field name="name">ASSEMBLY POINT - Direct all evacuees to designated meeting point</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Assembly Point Procedures:</strong></p>
+                <ul>
+                    <li>Direct evacuees to designated assembly point</li>
+                    <li>Keep minimum 50 meters from building</li>
+                    <li>Keep roads clear for emergency vehicles</li>
+                    <li>Organize evacuees by department/floor</li>
+                    <li>Begin headcount</li>
+                    <li>Do not allow re-entry</li>
+                </ul>
+            ]]></field>
+            <field name="requires_photo" eval="True"/>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">10</field>
+        </record>
+
+        <record id="evac_step_07" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_evacuation"/>
+            <field name="sequence">70</field>
+            <field name="name">CONDUCT HEADCOUNT - Account for all personnel</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Headcount Procedure:</strong></p>
+                <ul>
+                    <li>Use sign-in sheets or employee roster</li>
+                    <li>Check against visitor log</li>
+                    <li>Identify any missing persons</li>
+                    <li>Note last known location of missing persons</li>
+                    <li>Report missing persons to emergency services immediately</li>
+                    <li>Do NOT send anyone back to search</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="requires_supervisor" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">15</field>
+        </record>
+
+        <record id="evac_step_08" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_evacuation"/>
+            <field name="sequence">80</field>
+            <field name="name">REPORT STATUS - Brief emergency responders on evacuation status</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Status Report:</strong></p>
+                <ul>
+                    <li>Total number evacuated</li>
+                    <li>Any missing persons and last known locations</li>
+                    <li>Areas checked</li>
+                    <li>Any injuries requiring medical attention</li>
+                    <li>Unusual observations during evacuation</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">5</field>
+        </record>
+
+        <!-- =================================================================== -->
+        <!-- NATURAL DISASTER - Earthquake/Storm -->
+        <!-- =================================================================== -->
+        
+        <record id="emergency_procedure_earthquake" model="emergency.procedure">
+            <field name="name">Earthquake/Seismic Event Response - Dubai</field>
+            <field name="sequence">50</field>
+            <field name="emergency_type">natural</field>
+            <field name="description"><![CDATA[
+                <h3>Earthquake/Seismic Event Response</h3>
+                <p>Response procedures for earthquake or major seismic activity.</p>
+                <h4>When to Use:</h4>
+                <ul>
+                    <li>Ground shaking/tremors felt</li>
+                    <li>Earthquake warning issued</li>
+                    <li>Structural damage from seismic activity</li>
+                </ul>
+                <p>While earthquakes are rare in Dubai, the UAE is in a seismically active region and proper response procedures are essential.</p>
+            ]]></field>
+            <field name="auto_notify_authorities" eval="False"/>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Earthquake Response Steps -->
+        <record id="earthquake_step_01" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_earthquake"/>
+            <field name="sequence">10</field>
+            <field name="name">DROP, COVER, AND HOLD ON - Immediate protective action during shaking</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>During Shaking - DO NOT RUN OUTSIDE:</strong></p>
+                <ul>
+                    <li><strong>DROP</strong> to hands and knees</li>
+                    <li><strong>COVER</strong> head and neck under sturdy desk/table</li>
+                    <li><strong>HOLD ON</strong> to shelter and be ready to move with it</li>
+                </ul>
+                <p><strong>If No Shelter:</strong></p>
+                <ul>
+                    <li>Stay away from windows, glass, and heavy objects</li>
+                    <li>Cover head and neck with arms</li>
+                    <li>Move to interior wall if possible</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">2</field>
+            <field name="safety_warning">DO NOT run outside during shaking - most injuries occur from falling debris at exits</field>
+        </record>
+
+        <record id="earthquake_step_02" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_earthquake"/>
+            <field name="sequence">20</field>
+            <field name="name">WAIT FOR SHAKING TO STOP - Remain in protective position until movement ceases</field>
+            <field name="instruction_details"><![CDATA[
+                <p>Stay in protected position until shaking completely stops.</p>
+                <p>Be prepared for aftershocks - they may occur minutes to hours after main shock.</p>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">5</field>
+        </record>
+
+        <record id="earthquake_step_03" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_earthquake"/>
+            <field name="sequence">30</field>
+            <field name="name">ASSESS IMMEDIATE HAZARDS - Check for injuries and immediate dangers</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Safety Assessment:</strong></p>
+                <ul>
+                    <li>Check yourself for injuries</li>
+                    <li>Check others nearby</li>
+                    <li>Look for fire or smell of gas</li>
+                    <li>Check for structural damage</li>
+                    <li>Identify blocked exits</li>
+                    <li>Note fallen objects and debris</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">3</field>
+        </record>
+
+        <record id="earthquake_step_04" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_earthquake"/>
+            <field name="sequence">40</field>
+            <field name="name">EVACUATE IF NECESSARY - Exit building if structural damage or hazards present</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Evacuate if:</strong></p>
+                <ul>
+                    <li>Visible structural damage (cracks, collapse)</li>
+                    <li>Gas leak detected</li>
+                    <li>Fire or smoke</li>
+                    <li>Building alarm activated</li>
+                    <li>Ordered by authorities</li>
+                </ul>
+                <p><strong>During Evacuation:</strong></p>
+                <ul>
+                    <li>Use stairs only - no elevators</li>
+                    <li>Watch for falling debris</li>
+                    <li>Stay away from walls and windows</li>
+                    <li>Be prepared to drop and cover if aftershock occurs</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">10</field>
+            <field name="safety_warning">Watch for falling debris, broken glass, and downed power lines during evacuation</field>
+        </record>
+
+        <record id="earthquake_step_05" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_earthquake"/>
+            <field name="sequence">50</field>
+            <field name="name">CALL FOR HELP - Contact emergency services if injuries or major damage</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Emergency Numbers:</strong></p>
+                <ul>
+                    <li>Police: 999</li>
+                    <li>Ambulance: 998</li>
+                    <li>Civil Defense: 997</li>
+                </ul>
+                <p>Report injuries, fires, gas leaks, or structural damage.</p>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="False"/>
+            <field name="estimated_duration">3</field>
+        </record>
+
+        <!-- =================================================================== -->
+        <!-- CHEMICAL SPILL PROCEDURES -->
+        <!-- =================================================================== -->
+        
+        <record id="emergency_procedure_chemical_spill" model="emergency.procedure">
+            <field name="name">Chemical Spill Response - Dubai</field>
+            <field name="sequence">60</field>
+            <field name="emergency_type">chemical</field>
+            <field name="description"><![CDATA[
+                <h3>Chemical Spill Emergency Response</h3>
+                <p>Response procedures for hazardous material spills and chemical emergencies.</p>
+                <h4>When to Use:</h4>
+                <ul>
+                    <li>Chemical spill or leak</li>
+                    <li>Unknown substance release</li>
+                    <li>Toxic fumes or vapors</li>
+                    <li>Hazardous material exposure</li>
+                </ul>
+                <h4>Emergency Contacts:</h4>
+                <ul>
+                    <li>Civil Defense: 997</li>
+                    <li>Dubai Municipality: 800-900</li>
+                    <li>Poison Control: 800-POISON</li>
+                </ul>
+            ]]></field>
+            <field name="auto_notify_authorities" eval="True"/>
+            <field name="notify_phone">997</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Chemical Spill Steps -->
+        <record id="chemical_step_01" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_chemical_spill"/>
+            <field name="sequence">10</field>
+            <field name="name">EVACUATE IMMEDIATE AREA - Clear area around spill</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Immediate Actions:</strong></p>
+                <ul>
+                    <li>Move away from spill</li>
+                    <li>Do not walk through spilled material</li>
+                    <li>Evacuate immediate area</li>
+                    <li>Close doors to contain if safe to do so</li>
+                    <li>Warn others in vicinity</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">2</field>
+            <field name="safety_warning">Do not touch or smell unknown substances - many are hazardous by skin contact or inhalation</field>
+        </record>
+
+        <record id="chemical_step_02" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_chemical_spill"/>
+            <field name="sequence">20</field>
+            <field name="name">CALL CIVIL DEFENSE - Report hazmat incident (997)</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Information to Provide:</strong></p>
+                <ul>
+                    <li>Location of spill</li>
+                    <li>Type of chemical (if known)</li>
+                    <li>Amount spilled</li>
+                    <li>Any injuries or exposures</li>
+                    <li>Whether contained or spreading</li>
+                    <li>Ventilation status</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">3</field>
+        </record>
+
+        <record id="chemical_step_03" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_chemical_spill"/>
+            <field name="sequence">30</field>
+            <field name="name">ISOLATE AREA - Prevent access to contaminated zone</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Containment Actions:</strong></p>
+                <ul>
+                    <li>Secure area with barriers</li>
+                    <li>Post warning signs</li>
+                    <li>Shut off ventilation if spreading fumes</li>
+                    <li>Close doors and windows</li>
+                    <li>Prevent ignition sources if flammable</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">5</field>
+        </record>
+
+        <record id="chemical_step_04" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_chemical_spill"/>
+            <field name="sequence">40</field>
+            <field name="name">IDENTIFY EXPOSED PERSONS - Check for anyone contaminated</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>For Exposed Persons:</strong></p>
+                <ul>
+                    <li>Move to fresh air immediately</li>
+                    <li>Remove contaminated clothing</li>
+                    <li>Flush affected skin with water for 15 minutes</li>
+                    <li>If eyes exposed, flush with water for 15 minutes</li>
+                    <li>Do not rub eyes or skin</li>
+                    <li>Seek medical attention</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">15</field>
+            <field name="safety_warning">Always flush chemical exposures with copious water - 15 minutes minimum</field>
+        </record>
+
+        <record id="chemical_step_05" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_chemical_spill"/>
+            <field name="sequence">50</field>
+            <field name="name">OBTAIN SDS - Locate Safety Data Sheet for chemical</field>
+            <field name="instruction_details"><![CDATA[
+                <p>If chemical is known, obtain the Safety Data Sheet (SDS/MSDS) to provide to emergency responders.</p>
+                <p><strong>SDS Contains:</strong></p>
+                <ul>
+                    <li>Chemical hazards</li>
+                    <li>First aid measures</li>
+                    <li>Firefighting measures</li>
+                    <li>Spill cleanup procedures</li>
+                    <li>PPE requirements</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="False"/>
+            <field name="estimated_duration">5</field>
+        </record>
+
+        <!-- =================================================================== -->
+        <!-- POWER OUTAGE PROCEDURES -->
+        <!-- =================================================================== -->
+        
+        <record id="emergency_procedure_power_outage" model="emergency.procedure">
+            <field name="name">Power Outage Response - Dubai</field>
+            <field name="sequence">70</field>
+            <field name="emergency_type">power</field>
+            <field name="description"><![CDATA[
+                <h3>Power Outage Emergency Response</h3>
+                <p>Procedures for managing facility during electrical power failure.</p>
+                <h4>When to Use:</h4>
+                <ul>
+                    <li>Complete power failure</li>
+                    <li>Partial power outage</li>
+                    <li>Emergency lighting activation</li>
+                </ul>
+                <h4>Contact:</h4>
+                <ul>
+                    <li>DEWA (Dubai Electricity and Water Authority): 991</li>
+                    <li>DEWA Emergency: 04-601-9999</li>
+                </ul>
+            ]]></field>
+            <field name="auto_notify_authorities" eval="False"/>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Power Outage Steps -->
+        <record id="power_step_01" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_power_outage"/>
+            <field name="sequence">10</field>
+            <field name="name">ASSESS SITUATION - Determine scope of power failure</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Initial Assessment:</strong></p>
+                <ul>
+                    <li>Is outage affecting entire building or just areas?</li>
+                    <li>Are neighboring buildings affected?</li>
+                    <li>Is emergency lighting functioning?</li>
+                    <li>Are backup generators activated?</li>
+                    <li>Time of outage</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">2</field>
+        </record>
+
+        <record id="power_step_02" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_power_outage"/>
+            <field name="sequence">20</field>
+            <field name="name">NOTIFY DEWA - Report power outage to utility company</field>
+            <field name="instruction_details"><![CDATA[
+                <p>Call DEWA: 991 or 04-601-9999</p>
+                <p><strong>Information to Provide:</strong></p>
+                <ul>
+                    <li>Location and account number</li>
+                    <li>Scope of outage</li>
+                    <li>Time of failure</li>
+                    <li>Any unusual circumstances</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">3</field>
+        </record>
+
+        <record id="power_step_03" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_power_outage"/>
+            <field name="sequence">30</field>
+            <field name="name">ACTIVATE EMERGENCY LIGHTING - Deploy flashlights and emergency lights</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Lighting Actions:</strong></p>
+                <ul>
+                    <li>Verify emergency lights are functioning</li>
+                    <li>Distribute flashlights to guards</li>
+                    <li>Place lights in critical areas (exits, stairs)</li>
+                    <li>Check backup generator</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">5</field>
+        </record>
+
+        <record id="power_step_04" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_power_outage"/>
+            <field name="sequence">40</field>
+            <field name="name">SECURE BUILDING - Check security systems and access control</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Security Measures:</strong></p>
+                <ul>
+                    <li>Check status of electronic locks</li>
+                    <li>Verify alarm systems on battery backup</li>
+                    <li>Manually secure any failed access points</li>
+                    <li>Increase physical patrols</li>
+                    <li>Monitor for unauthorized entry</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="True"/>
+            <field name="estimated_duration">10</field>
+            <field name="safety_warning">Security systems may fail during power outages - compensate with increased physical security</field>
+        </record>
+
+        <record id="power_step_05" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_power_outage"/>
+            <field name="sequence">50</field>
+            <field name="name">ASSIST TRAPPED PERSONS - Check for people stuck in elevators</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Elevator Emergency:</strong></p>
+                <ul>
+                    <li>Use elevator phone/intercom if functioning</li>
+                    <li>Reassure trapped persons</li>
+                    <li>Do not attempt manual rescue</li>
+                    <li>Call elevator maintenance company</li>
+                    <li>Call 999 if persons in distress or medical emergency</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="False"/>
+            <field name="estimated_duration">15</field>
+        </record>
+
+        <record id="power_step_06" model="emergency.procedure.step">
+            <field name="procedure_id" ref="emergency_procedure_power_outage"/>
+            <field name="sequence">60</field>
+            <field name="name">MONITOR CRITICAL SYSTEMS - Check status of essential equipment</field>
+            <field name="instruction_details"><![CDATA[
+                <p><strong>Systems to Monitor:</strong></p>
+                <ul>
+                    <li>Fire alarm system</li>
+                    <li>HVAC (especially in server rooms)</li>
+                    <li>Refrigeration (if applicable)</li>
+                    <li>Water pumps</li>
+                    <li>Communication systems</li>
+                    <li>Medical equipment</li>
+                </ul>
+            ]]></field>
+            <field name="requires_confirmation" eval="True"/>
+            <field name="critical" eval="False"/>
+            <field name="estimated_duration">10</field>
+        </record>
+
+    </data>
+</odoo>
+
+
+
+
+
+
+
+
+
+

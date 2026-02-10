@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Investigation Form View -->
+    <record id="view_incident_investigation_form" model="ir.ui.view">
+        <field name="name">incident.investigation.form</field>
+        <field name="model">incident.investigation</field>
+        <field name="arch" type="xml">
+            <form string="Investigation">
+                <header>
+                    <button name="action_start_investigation" string="Start Investigation" type="object" 
+                            invisible="status != 'draft'" class="btn-primary"/>
+                    <button name="action_collect_evidence" string="Collect Evidence" type="object" 
+                            invisible="status not in ['active']" class="btn-secondary"/>
+                    <button name="action_analyze" string="Analyze" type="object" 
+                            invisible="status not in ['active', 'evidence_collection']" class="btn-secondary"/>
+                    <button name="action_write_report" string="Write Report" type="object" 
+                            invisible="status not in ['evidence_collection', 'analysis']" class="btn-secondary"/>
+                    <button name="action_submit_for_review" string="Submit for Review" type="object" 
+                            invisible="status != 'report_writing'" class="btn-warning"/>
+                    <button name="action_approve" string="Approve" type="object" 
+                            invisible="status != 'review'" class="btn-success" 
+                            groups="guardpro.group_guardpro_manager"/>
+                    <button name="action_request_revision" string="Request Revision" type="object" 
+                            invisible="status != 'review'" class="btn-secondary" 
+                            groups="guardpro.group_guardpro_manager"/>
+                    <button name="action_suspend" string="Suspend" type="object" 
+                            invisible="status in ['draft', 'completed', 'closed', 'suspended']" class="btn-secondary"/>
+                    <button name="action_resume" string="Resume" type="object" 
+                            invisible="status != 'suspended'" class="btn-primary"/>
+                    <button name="action_close" string="Close" type="object" 
+                            invisible="status != 'completed'" class="btn-secondary" 
+                            groups="guardpro.group_guardpro_manager"/>
+                    <field name="status" widget="statusbar" statusbar_visible="draft,active,evidence_collection,analysis,report_writing,review,completed"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Confidential" bg_color="text-bg-danger" invisible="not is_confidential"/>
+                    <widget name="web_ribbon" title="Overdue" bg_color="text-bg-warning" invisible="not is_overdue"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_checklist" type="object" class="oe_stat_button" icon="fa-check-square">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="checklist_completed_count"/> / <field name="checklist_count"/>
+                                </span>
+                                <span class="o_stat_text">Checklist</span>
+                            </div>
+                        </button>
+                        <button name="action_view_timeline" type="object" class="oe_stat_button" icon="fa-history">
+                            <field name="timeline_count" widget="statinfo" string="Timeline"/>
+                        </button>
+                        <button name="action_view_evidence" type="object" class="oe_stat_button" icon="fa-briefcase">
+                            <field name="evidence_count" widget="statinfo" string="Evidence"/>
+                        </button>
+                        <button name="action_view_witnesses" type="object" class="oe_stat_button" icon="fa-users">
+                            <field name="witness_count" widget="statinfo" string="Witnesses"/>
+                        </button>
+                        <button name="action_view_findings" type="object" class="oe_stat_button" icon="fa-search">
+                            <field name="finding_count" widget="statinfo" string="Findings"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" string="Investigation Number"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                        <label for="title" string="Investigation Title"/>
+                        <h2><field name="title" placeholder="Investigation title..."/></h2>
+                    </div>
+                    <group>
+                        <group string="Template">
+                            <field name="template_id" options="{'no_create': True}" placeholder="Select an investigation template..."/>
+                        </group>
+                        <group string="Checklist Progress" invisible="not template_id">
+                            <field name="checklist_progress" widget="progressbar"/>
+                            <label for="checklist_mandatory_incomplete"/>
+                            <div>
+                                <field name="checklist_mandatory_incomplete" class="oe_inline"/>
+                                <span class="oe_inline"> mandatory items incomplete</span>
+                            </div>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Incident Information">
+                            <field name="incident_id" options="{'no_create': True}"/>
+                            <field name="incident_name" readonly="1"/>
+                            <field name="incident_severity" readonly="1"/>
+                            <field name="site_id" readonly="1"/>
+                        </group>
+                        <group string="Investigation Details">
+                            <field name="investigation_type"/>
+                            <field name="priority" widget="priority"/>
+                            <field name="progress" widget="progressbar"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Team">
+                            <field name="lead_investigator_id" options="{'no_create': True}"/>
+                            <field name="investigator_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                        </group>
+                        <group string="Timeline">
+                            <field name="start_date"/>
+                            <field name="target_completion_date"/>
+                            <field name="actual_completion_date" readonly="1"/>
+                            <field name="duration_days" readonly="1"/>
+                            <field name="is_overdue" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Investigation Scope" name="scope">
+                            <field name="description" placeholder="Describe what is being investigated and why..."/>
+                        </page>
+                        <page string="Checklist" name="checklist" invisible="not template_id">
+                            <field name="checklist_ids">
+                                <list string="Investigation Checklist" editable="bottom" decoration-success="completed" decoration-muted="completed">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="checklist_item_id" column_invisible="1"/>
+                                    <field name="icon" column_invisible="1"/>
+                                    <field name="name" decoration-bf="is_mandatory"/>
+                                    <field name="category" optional="show"/>
+                                    <field name="is_mandatory" optional="hide"/>
+                                    <field name="completed" widget="boolean_toggle"/>
+                                    <field name="completed_by" optional="hide" readonly="1"/>
+                                    <field name="completed_date" optional="hide" readonly="1"/>
+                                    <field name="photo_count" string="Photos" optional="show"/>
+                                    <field name="attachment_count" optional="hide"/>
+                                    <field name="notes" optional="hide"/>
+                                    <button name="action_open_item" type="object" string="" icon="fa-camera" 
+                                            title="Add Photos/Notes" class="btn-info"/>
+                                    <button name="action_toggle_complete" type="object" string="" icon="fa-check-square" 
+                                            title="Mark Complete" invisible="completed" class="btn-success"/>
+                                    <button name="action_toggle_complete" type="object" string="" icon="fa-undo" 
+                                            title="Mark Incomplete" invisible="not completed" class="btn-secondary"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Executive Summary" name="executive_summary" invisible="status in ['draft', 'active', 'evidence_collection']">
+                            <field name="executive_summary" placeholder="Brief overview of investigation findings..."/>
+                        </page>
+                        <page string="Detailed Findings" name="findings" invisible="status in ['draft', 'active', 'evidence_collection']">
+                            <field name="detailed_findings" placeholder="Complete investigation findings and analysis..."/>
+                        </page>
+                        <page string="Root Cause Analysis" name="root_cause" invisible="status in ['draft', 'active', 'evidence_collection']">
+                            <field name="root_cause" placeholder="Identified root causes..."/>
+                        </page>
+                        <page string="Recommendations" name="recommendations" invisible="status in ['draft', 'active', 'evidence_collection']">
+                            <field name="recommendations" placeholder="Recommended actions to prevent recurrence..."/>
+                        </page>
+                        <page string="Corrective Actions" name="corrective_actions" invisible="status in ['draft', 'active', 'evidence_collection']">
+                            <group>
+                                <field name="corrective_actions" nolabel="1" placeholder="Actions to be taken to address findings..."/>
+                            </group>
+                            <group>
+                                <field name="preventive_actions" nolabel="1" placeholder="Actions to prevent similar incidents..."/>
+                            </group>
+                        </page>
+                        <page string="Review &amp; Approval" name="review" invisible="status not in ['review', 'completed', 'closed']">
+                            <group>
+                                <group string="Review">
+                                    <field name="reviewed_by_id" readonly="1"/>
+                                    <field name="review_date" readonly="1"/>
+                                    <field name="review_notes"/>
+                                </group>
+                                <group string="Approval">
+                                    <field name="approved_by_id" readonly="1"/>
+                                    <field name="approval_date" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Confidentiality" name="confidentiality">
+                            <group>
+                                <field name="is_confidential"/>
+                                <field name="confidentiality_reason" invisible="not is_confidential" placeholder="Reason for confidentiality..."/>
+                            </group>
+                        </page>
+                        <page string="Template &amp; Tags" name="template">
+                            <group>
+                                <button name="action_regenerate_checklist" string="Regenerate Checklist from Template" type="object" 
+                                        class="btn-warning" icon="fa-refresh" 
+                                        invisible="not template_id"
+                                        confirm="This will replace all existing checklist items with fresh items from the template. Any progress or notes will be lost. Are you sure?"/>
+                            </group>
+                            <group>
+                                <field name="tag_ids" widget="many2many_tags"/>
+                            </group>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Internal notes..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Investigation List View -->
+    <record id="view_incident_investigation_list" model="ir.ui.view">
+        <field name="name">incident.investigation.list</field>
+        <field name="model">incident.investigation</field>
+        <field name="arch" type="xml">
+            <list string="Investigations" sample="1" decoration-danger="is_overdue">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="incident_name"/>
+                <field name="investigation_type"/>
+                <field name="lead_investigator_id"/>
+                <field name="start_date"/>
+                <field name="target_completion_date"/>
+                <field name="duration_days"/>
+                <field name="progress" widget="progressbar"/>
+                <field name="status" widget="badge" 
+                       decoration-success="status == 'completed'"
+                       decoration-warning="status == 'review'"
+                       decoration-info="status in ['active', 'evidence_collection', 'analysis']"/>
+                <field name="priority" widget="priority" optional="hide"/>
+                <field name="is_overdue" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Investigation Kanban View -->
+    <record id="view_incident_investigation_kanban" model="ir.ui.view">
+        <field name="name">incident.investigation.kanban</field>
+        <field name="model">incident.investigation</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1" default_group_by="status">
+                <field name="color"/>
+                <field name="priority"/>
+                <field name="is_overdue"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_global_click">
+                            <div class="o_kanban_record_top mb16">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title"><field name="name"/></strong>
+                                    <div class="o_kanban_record_subtitle"><field name="title"/></div>
+                                </div>
+                                <span t-if="record.priority.raw_value == '3'" class="badge rounded-pill text-bg-danger">URGENT</span>
+                                <span t-if="record.is_overdue.raw_value" class="badge rounded-pill text-bg-warning">OVERDUE</span>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <field name="incident_name"/>
+                                <div class="row mt-2">
+                                    <div class="col-6">
+                                        <strong>Lead:</strong> <field name="lead_investigator_id"/>
+                                    </div>
+                                    <div class="col-6">
+                                        <strong>Type:</strong> <field name="investigation_type"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <field name="progress" widget="progressbar"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left">
+                                    <field name="start_date" widget="date"/>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <span class="badge rounded-pill text-bg-primary"><field name="evidence_count"/> evidence</span>
+                                    <span class="badge rounded-pill text-bg-info"><field name="witness_count"/> witnesses</span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Investigation Search View -->
+    <record id="view_incident_investigation_search" model="ir.ui.view">
+        <field name="name">incident.investigation.search</field>
+        <field name="model">incident.investigation</field>
+        <field name="arch" type="xml">
+            <search string="Investigations">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="incident_id"/>
+                <field name="lead_investigator_id"/>
+                <field name="site_id"/>
+                <filter string="Active" name="active" domain="[('status', 'in', ['active', 'evidence_collection', 'analysis', 'report_writing', 'review'])]"/>
+                <filter string="Overdue" name="overdue" domain="[('is_overdue', '=', True)]"/>
+                <separator/>
+                <filter string="My Investigations" name="my" domain="[('lead_investigator_id', '=', uid)]"/>
+                <separator/>
+                <filter string="Draft" name="draft" domain="[('status', '=', 'draft')]"/>
+                <filter string="In Progress" name="in_progress" domain="[('status', 'in', ['active', 'evidence_collection', 'analysis', 'report_writing'])]"/>
+                <filter string="Under Review" name="review" domain="[('status', '=', 'review')]"/>
+                <filter string="Completed" name="completed" domain="[('status', '=', 'completed')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
+                    <filter string="Type" name="group_type" context="{'group_by': 'investigation_type'}"/>
+                    <filter string="Lead Investigator" name="group_lead" context="{'group_by': 'lead_investigator_id'}"/>
+                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Investigation Action -->
+    <record id="action_incident_investigation" model="ir.actions.act_window">
+        <field name="name">Investigations</field>
+        <field name="res_model">incident.investigation</field>
+        <field name="view_mode">kanban,list,form,pivot,graph</field>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first investigation
+            </p>
+            <p>
+                Manage formal investigations with structured workflows, evidence collection, witness statements, and comprehensive reporting.
+            </p>
+        </field>
+    </record>
+
+</odoo>
+

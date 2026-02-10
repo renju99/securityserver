@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- SLA KPI Action -->
+    <record id="action_sla_kpi" model="ir.actions.act_window">
+        <field name="name">SLA KPIs</field>
+        <field name="res_model">sla.kpi</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- SLA Performance Action -->
+    <record id="action_sla_performance" model="ir.actions.act_window">
+        <field name="name">SLA Performance</field>
+        <field name="res_model">sla.performance</field>
+        <field name="view_mode">pivot,graph,list,form</field>
+        <field name="context">{'search_default_this_month': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No performance data yet
+            </p>
+            <p>
+                Performance data is automatically calculated based on actual
+                operations and compared against SLA targets.
+            </p>
+        </field>
+    </record>
+
+    <!-- SLA Definition Form View -->
+    <record id="view_sla_definition_form" model="ir.ui.view">
+        <field name="name">sla.definition.form</field>
+        <field name="model">sla.definition</field>
+        <field name="arch" type="xml">
+            <form string="SLA Definition">
+                <header>
+                    <button name="action_activate" string="Activate" type="object"
+                            class="oe_highlight"
+                            invisible="state != 'draft'"/>
+                    <button name="action_view_performance" string="View Performance" type="object"
+                            icon="fa-line-chart"
+                            invisible="state != 'active'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,active"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(action_sla_performance)d" type="action"
+                                class="oe_stat_button" icon="fa-line-chart"
+                                context="{'search_default_sla_id': id}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="current_compliance" widget="float"/>%
+                                </span>
+                                <span class="o_stat_text">Compliance</span>
+                            </div>
+                        </button>
+                        <button name="%(action_sla_kpi)d" type="action"
+                                class="oe_stat_button" icon="fa-tachometer"
+                                context="{'search_default_sla_id': id}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="kpi_count"/></span>
+                                <span class="o_stat_text">KPIs</span>
+                            </div>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="client_id" options="{'no_create': True}"/>
+                            <field name="contract_reference"/>
+                        </group>
+                        <group>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <field name="renewal_date"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="site_ids" widget="many2many_tags"/>
+                    </group>
+                    <notebook>
+                        <page string="KPIs">
+                            <field name="kpi_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="kpi_type"/>
+                                    <field name="target_value"/>
+                                    <field name="unit"/>
+                                    <field name="target_direction"/>
+                                    <field name="measurement_period"/>
+                                    <field name="weight"/>
+                                    <field name="penalty_applicable" widget="boolean_toggle"/>
+                                    <field name="penalty_amount" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Penalty Terms" invisible="not penalty_applicable">
+                            <group>
+                                <field name="penalty_applicable" widget="boolean_toggle"/>
+                                <field name="penalty_notes" placeholder="Describe penalty structure and terms..."/>
+                            </group>
+                        </page>
+                        <page string="Notes">
+                            <field name="notes" placeholder="Additional SLA terms and conditions..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- SLA Definition List View -->
+    <record id="view_sla_definition_list" model="ir.ui.view">
+        <field name="name">sla.definition.list</field>
+        <field name="model">sla.definition</field>
+        <field name="arch" type="xml">
+            <list string="SLA Definitions" sample="1">
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="start_date"/>
+                <field name="end_date" optional="show"/>
+                <field name="kpi_count"/>
+                <field name="current_compliance" widget="progressbar" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'active'"
+                       decoration-muted="state in ['draft', 'expired']"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- SLA Definition Kanban View -->
+    <record id="view_sla_definition_kanban" model="ir.ui.view">
+        <field name="name">sla.definition.kanban</field>
+        <field name="model">sla.definition</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1">
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="current_compliance"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="name"/>
+                                    </strong>
+                                    <div class="o_kanban_record_subtitle text-muted">
+                                        <field name="client_id"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <field name="current_compliance" widget="progressbar"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- SLA Definition Action -->
+    <record id="action_sla_definition" model="ir.actions.act_window">
+        <field name="name">SLA Definitions</field>
+        <field name="res_model">sla.definition</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first SLA
+            </p>
+            <p>
+                Define Service Level Agreements with measurable KPIs and track
+                compliance to ensure client expectations are met.
+            </p>
+        </field>
+    </record>
+
+    <!-- SLA Performance Form View -->
+    <record id="view_sla_performance_form" model="ir.ui.view">
+        <field name="name">sla.performance.form</field>
+        <field name="model">sla.performance</field>
+        <field name="arch" type="xml">
+            <form string="SLA Performance">
+                <sheet>
+                    <widget name="web_ribbon" title="Achieved" bg_color="text-bg-success"
+                            invisible="not achieved"/>
+                    <widget name="web_ribbon" title="Critical" bg_color="text-bg-danger"
+                            invisible="status != 'critical'"/>
+                    <group>
+                        <group>
+                            <field name="sla_id"/>
+                            <field name="kpi_id"/>
+                            <field name="site_id"/>
+                        </group>
+                        <group>
+                            <field name="period_start"/>
+                            <field name="period_end"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="target_value"/>
+                            <field name="actual_value"/>
+                        </group>
+                        <group>
+                            <field name="performance_percentage" widget="progressbar"/>
+                            <field name="variance"/>
+                            <field name="achieved" widget="boolean_toggle"/>
+                            <field name="status" widget="badge"
+                                   decoration-success="status == 'excellent'"
+                                   decoration-info="status == 'good'"
+                                   decoration-warning="status == 'warning'"
+                                   decoration-danger="status in ['critical', 'failed']"/>
+                        </group>
+                    </group>
+                    <group invisible="not penalty_incurred">
+                        <group>
+                            <field name="penalty_incurred" widget="boolean_toggle"/>
+                            <field name="penalty_amount"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="notes" placeholder="Additional notes about this performance period..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- SLA Performance List View -->
+    <record id="view_sla_performance_list" model="ir.ui.view">
+        <field name="name">sla.performance.list</field>
+        <field name="model">sla.performance</field>
+        <field name="arch" type="xml">
+            <list string="SLA Performance" sample="1">
+                <field name="sla_id"/>
+                <field name="kpi_id"/>
+                <field name="site_id" optional="show"/>
+                <field name="period_start"/>
+                <field name="period_end"/>
+                <field name="target_value"/>
+                <field name="actual_value"/>
+                <field name="performance_percentage" widget="progressbar"/>
+                <field name="achieved" widget="boolean_toggle"/>
+                <field name="status" widget="badge"
+                       decoration-success="status == 'excellent'"
+                       decoration-info="status == 'good'"
+                       decoration-warning="status == 'warning'"
+                       decoration-danger="status in ['critical', 'failed']"/>
+                <field name="penalty_incurred" widget="boolean_toggle" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- SLA Performance Pivot View -->
+    <record id="view_sla_performance_pivot" model="ir.ui.view">
+        <field name="name">sla.performance.pivot</field>
+        <field name="model">sla.performance</field>
+        <field name="arch" type="xml">
+            <pivot string="SLA Performance Analysis" sample="1">
+                <field name="kpi_id" type="row"/>
+                <field name="period_start" interval="month" type="col"/>
+                <field name="performance_percentage" type="measure"/>
+                <field name="actual_value" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- SLA Performance Graph View -->
+    <record id="view_sla_performance_graph" model="ir.ui.view">
+        <field name="name">sla.performance.graph</field>
+        <field name="model">sla.performance</field>
+        <field name="arch" type="xml">
+            <graph string="SLA Performance Trend" sample="1" type="line">
+                <field name="period_start" interval="month"/>
+                <field name="performance_percentage" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- SLA Performance Search View -->
+    <record id="view_sla_performance_search" model="ir.ui.view">
+        <field name="name">sla.performance.search</field>
+        <field name="model">sla.performance</field>
+        <field name="arch" type="xml">
+            <search string="Search SLA Performance">
+                <field name="sla_id"/>
+                <field name="kpi_id"/>
+                <field name="site_id"/>
+                <separator/>
+                <filter string="Achieved" name="achieved" domain="[('achieved', '=', True)]"/>
+                <filter string="Not Achieved" name="not_achieved" domain="[('achieved', '=', False)]"/>
+                <filter string="Critical" name="critical" domain="[('status', '=', 'critical')]"/>
+                <filter string="Penalty Incurred" name="penalty" domain="[('penalty_incurred', '=', True)]"/>
+                <separator/>
+                <filter string="This Month" name="this_month"
+                        domain="[('period_start', '&gt;=', context_today() + relativedelta(day=1))]"/>
+                <filter string="Last Month" name="last_month"
+                        domain="[('period_start', '&gt;=', context_today() + relativedelta(months=-1, day=1)),
+                                 ('period_end', '&lt;', context_today() + relativedelta(day=1))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="SLA" name="group_sla" context="{'group_by': 'sla_id'}"/>
+                    <filter string="KPI" name="group_kpi" context="{'group_by': 'kpi_id'}"/>
+                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
+                    <filter string="Period Start" name="group_period" context="{'group_by': 'period_start'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+</odoo>
+

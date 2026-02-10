@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    
+    <!-- Guard Equipment Tree View (extends maintenance.equipment) -->
+    <record id="view_guard_equipment_list" model="ir.ui.view">
+        <field name="name">guard.equipment.list</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="arch" type="xml">
+            <list string="Guard Equipment" default_order="name">
+                <field name="name"/>
+                <field name="equipment_category"/>
+                <field name="assigned_guard_id"/>
+                <field name="assigned_site_id"/>
+                <field name="maintenance_team_id"/>
+                <field name="period"/>
+                <field name="next_action_date"/>
+                <field name="activity_ids" widget="list_activity"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Guard Equipment Form View (extends maintenance.equipment) -->
+    <record id="view_guard_equipment_form" model="ir.ui.view">
+        <field name="name">guard.equipment.form</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="inherit_id" ref="maintenance.hr_equipment_view_form"/>
+        <field name="arch" type="xml">
+            
+            <!-- Add is_guard_equipment field after name -->
+            <field name="name" position="after">
+                <field name="is_guard_equipment" invisible="1"/>
+            </field>
+            
+            <!-- Add Guard Equipment section after technician_user_id -->
+            <xpath expr="//field[@name='technician_user_id']" position="after">
+                <field name="equipment_category" 
+                       required="is_guard_equipment"
+                       invisible="not is_guard_equipment"/>
+            </xpath>
+            
+            <!-- Add Guard Assignment section in a new page -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Guard Assignment" invisible="not is_guard_equipment">
+                    <group>
+                        <group string="Current Assignment">
+                            <field name="assigned_guard_id"/>
+                            <field name="assigned_site_id"/>
+                            <field name="assignment_date"/>
+                            <field name="condition"/>
+                        </group>
+                        <group string="Identification">
+                            <field name="barcode"/>
+                            <field name="rfid_tag"/>
+                            <field name="nfc_tag"/>
+                            <field name="storage_location"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Calibration" invisible="not requires_calibration">
+                            <field name="requires_calibration"/>
+                            <field name="last_calibration_date" invisible="not requires_calibration"/>
+                            <field name="next_calibration_date" invisible="not requires_calibration"/>
+                            <field name="calibration_interval_days" invisible="not requires_calibration"/>
+                        </group>
+                        <group string="Photo">
+                            <field name="equipment_photo" widget="image" class="oe_avatar"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="assignment_count" invisible="1"/>
+                        <button name="action_view_assignment_history" 
+                                type="object" 
+                                string="View Assignment History" 
+                                class="oe_stat_button"
+                                icon="fa-history"
+                                invisible="assignment_count == 0"/>
+                    </group>
+                </page>
+            </xpath>
+            
+            <!-- Add buttons in header -->
+            <xpath expr="//header" position="inside">
+                <button name="action_assign_to_guard" 
+                        string="Assign to Guard" 
+                        type="object" 
+                        class="btn-primary"
+                        invisible="not is_guard_equipment or assigned_guard_id"/>
+                <button name="action_assign_to_guard" 
+                        string="Transfer to Guard" 
+                        type="object" 
+                        class="btn-secondary"
+                        invisible="not is_guard_equipment or not assigned_guard_id"/>
+                <button name="action_return_equipment" 
+                        string="Return Equipment" 
+                        type="object" 
+                        class="btn-secondary"
+                        invisible="not is_guard_equipment or not assigned_guard_id"
+                        confirm="Are you sure you want to return this equipment?"/>
+            </xpath>
+            
+        </field>
+    </record>
+
+    <!-- Guard Equipment Kanban View -->
+    <record id="view_guard_equipment_kanban" model="ir.ui.view">
+        <field name="name">guard.equipment.kanban</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" default_order="name">
+                <field name="name"/>
+                <field name="equipment_category"/>
+                <field name="assigned_guard_id"/>
+                <field name="assigned_site_id"/>
+                <field name="condition"/>
+                <field name="is_guard_equipment"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title"><field name="name"/></strong>
+                                </div>
+                                <span class="float-end badge rounded-pill" 
+                                      t-att-class="record.condition.raw_value === 'excellent' ? 'text-bg-success' : record.condition.raw_value === 'good' ? 'text-bg-info' : 'text-bg-warning'">
+                                    <field name="condition"/>
+                                </span>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <field name="equipment_category"/>
+                                <div t-if="record.assigned_guard_id.raw_value">
+                                    <i class="fa fa-user" title="User" aria-label="User"/> <field name="assigned_guard_id"/>
+                                </div>
+                                <div t-if="record.assigned_site_id.raw_value">
+                                    <i class="fa fa-map-marker" title="Location" aria-label="Location"/> <field name="assigned_site_id"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Guard Equipment Assignment History Tree View -->
+    <record id="view_guard_equipment_assignment_history_list" model="ir.ui.view">
+        <field name="name">guard.equipment.assignment.history.list</field>
+        <field name="model">guard.equipment.assignment.history</field>
+        <field name="arch" type="xml">
+            <list string="Assignment History" default_order="assignment_date desc">
+                <field name="assignment_date"/>
+                <field name="guard_id"/>
+                <field name="site_id"/>
+                <field name="action_type"/>
+                <field name="condition_at_assignment"/>
+                <field name="return_date"/>
+                <field name="condition_at_return"/>
+                <field name="duration_days"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Guard Equipment Assignment History Form View -->
+    <record id="view_guard_equipment_assignment_history_form" model="ir.ui.view">
+        <field name="name">guard.equipment.assignment.history.form</field>
+        <field name="model">guard.equipment.assignment.history</field>
+        <field name="arch" type="xml">
+            <form string="Assignment History">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="equipment_id"/>
+                            <field name="guard_id"/>
+                            <field name="site_id"/>
+                            <field name="action_type"/>
+                        </group>
+                        <group>
+                            <field name="assignment_date"/>
+                            <field name="return_date"/>
+                            <field name="duration_days"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="condition_at_assignment"/>
+                        </group>
+                        <group>
+                            <field name="condition_at_return"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="notes" placeholder="Additional notes..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Guard Equipment Assignment Wizard -->
+    <record id="view_guard_equipment_assignment_wizard" model="ir.ui.view">
+        <field name="name">guard.equipment.assignment.wizard.form</field>
+        <field name="model">guard.equipment.assignment.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Assign Equipment to Guard">
+                <group>
+                    <field name="equipment_id"/>
+                    <field name="action_type" invisible="1"/>
+                </group>
+                <group string="Current Assignment" invisible="action_type == 'new_assignment'">
+                    <field name="current_guard_id"/>
+                    <field name="current_site_id"/>
+                </group>
+                <group string="New Assignment">
+                    <group>
+                        <field name="new_guard_id"/>
+                        <field name="new_site_id"/>
+                    </group>
+                    <group>
+                        <field name="assignment_date"/>
+                        <field name="condition"/>
+                    </group>
+                </group>
+                <group>
+                    <field name="notes" placeholder="Additional notes..."/>
+                </group>
+                <footer>
+                    <button string="Assign" name="action_confirm_assignment" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Guard Equipment Action -->
+    <record id="action_guard_equipment" model="ir.actions.act_window">
+        <field name="name">Guard Equipment</field>
+        <field name="res_model">maintenance.equipment</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('is_guard_equipment', '=', True)]</field>
+        <field name="context">{'default_is_guard_equipment': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add your first piece of guard equipment
+            </p>
+            <p>
+                Track and manage security equipment assigned to guards and sites.
+            </p>
+        </field>
+    </record>
+
+    <!-- Guard Equipment Assignment History Action -->
+    <record id="action_guard_equipment_assignment_history" model="ir.actions.act_window">
+        <field name="name">Equipment Assignment History</field>
+        <field name="res_model">guard.equipment.assignment.history</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>
+

@@ -1,0 +1,11 @@
+{
+    "android": {
+        "release": {
+            "keystore": "/home/azureuser/berkeley-release.keystore",
+            "storePassword": "berkeley123",
+            "alias": "berkeley-attendance",
+            "password": "berkeley123",
+            "keystoreType": ""
+        }
+    }
+}

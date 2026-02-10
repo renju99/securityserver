@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- SLA Management PDF Report Template -->
+    <template id="sla_management_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h2>SLA Performance Report</h2>
+                                <h4 t-field="o.sla_id.name"/>
+                            </div>
+                        </div>
+
+                        <!-- Period Information -->
+                        <div class="row mb-3">
+                            <div class="col-12 text-center">
+                                <h5>
+                                    Reporting Period: 
+                                    <span t-field="o.period_start"/> to <span t-field="o.period_end"/>
+                                </h5>
+                            </div>
+                        </div>
+
+                        <!-- Overall Compliance -->
+                        <div class="row mt-3">
+                            <div class="col-12 text-center">
+                                <h3>
+                                    Overall Compliance: 
+                                    <t t-if="o.overall_compliance &gt;= 95">
+                                        <span class="badge bg-success" style="font-size: 1.5em;">
+                                            <span t-field="o.overall_compliance"/>%
+                                        </span>
+                                    </t>
+                                    <t t-elif="o.overall_compliance &gt;= 85">
+                                        <span class="badge bg-info" style="font-size: 1.5em;">
+                                            <span t-field="o.overall_compliance"/>%
+                                        </span>
+                                    </t>
+                                    <t t-elif="o.overall_compliance &gt;= 75">
+                                        <span class="badge bg-warning" style="font-size: 1.5em;">
+                                            <span t-field="o.overall_compliance"/>%
+                                        </span>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="badge bg-danger" style="font-size: 1.5em;">
+                                            <span t-field="o.overall_compliance"/>%
+                                        </span>
+                                    </t>
+                                </h3>
+                            </div>
+                        </div>
+
+                        <!-- SLA Information -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5>SLA Details</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Client:</strong></td>
+                                        <td t-field="o.sla_id.client_id.name"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Contract Reference:</strong></td>
+                                        <td t-field="o.sla_id.contract_reference"/>
+                                    </tr>
+                                    <tr t-if="o.site_id">
+                                        <td><strong>Site:</strong></td>
+                                        <td t-field="o.site_id.name"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Report Generated:</strong></td>
+                                        <td t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- KPI Performance -->
+                        <div class="row mt-4" t-if="o.kpi_result_ids">
+                            <div class="col-12">
+                                <h5>KPI Performance Metrics</h5>
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr class="table-active">
+                                            <th>KPI</th>
+                                            <th>Target</th>
+                                            <th>Actual</th>
+                                            <th>Achievement %</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="o.kpi_result_ids" t-as="kpi">
+                                            <tr>
+                                                <td t-field="kpi.kpi_id.name"/>
+                                                <td>
+                                                    <span t-field="kpi.target_value"/>
+                                                    <span t-field="kpi.kpi_id.unit"/>
+                                                </td>
+                                                <td>
+                                                    <span t-field="kpi.actual_value"/>
+                                                    <span t-field="kpi.kpi_id.unit"/>
+                                                </td>
+                                                <td>
+                                                    <span t-field="kpi.achievement_percentage"/>%
+                                                </td>
+                                                <td>
+                                                    <t t-if="kpi.is_met">
+                                                        <span class="badge bg-success">Met</span>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="badge bg-danger">Not Met</span>
+                                                    </t>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Breaches -->
+                        <div class="row mt-3" t-if="o.breach_count &gt; 0">
+                            <div class="col-12">
+                                <h5 class="text-danger">
+                                    SLA Breaches: <span t-field="o.breach_count"/>
+                                </h5>
+                                <div class="alert alert-danger">
+                                    <p t-if="o.breach_details" t-field="o.breach_details"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Performance Summary -->
+                        <div class="row mt-3" t-if="o.performance_summary">
+                            <div class="col-12">
+                                <h5>Performance Summary</h5>
+                                <p t-field="o.performance_summary"/>
+                            </div>
+                        </div>
+
+                        <!-- Recommendations -->
+                        <div class="row mt-3" t-if="o.recommendations">
+                            <div class="col-12">
+                                <h5>Recommendations</h5>
+                                <p t-field="o.recommendations"/>
+                            </div>
+                        </div>
+
+                        <!-- Penalties (if applicable) -->
+                        <div class="row mt-3" t-if="o.penalty_amount &gt; 0">
+                            <div class="col-12">
+                                <div class="alert alert-warning">
+                                    <h5>Penalty Applied</h5>
+                                    <p>
+                                        <strong>Amount:</strong> 
+                                        <span t-field="o.penalty_amount"/>
+                                        <span t-field="o.currency_id.symbol"/>
+                                    </p>
+                                    <p t-if="o.penalty_reason">
+                                        <strong>Reason:</strong> 
+                                        <span t-field="o.penalty_reason"/>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="row mt-3" t-if="o.notes">
+                            <div class="col-12">
+                                <strong>Additional Notes:</strong>
+                                <p t-field="o.notes"/>
+                            </div>
+                        </div>
+
+                        <!-- Signature Section -->
+                        <div class="row mt-5">
+                            <div class="col-6">
+                                <div class="border-top pt-2">
+                                    <p><strong>Prepared By:</strong></p>
+                                    <p>Security Operations</p>
+                                    <p>Date: <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d')"/></p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border-top pt-2">
+                                    <p><strong>Client Acknowledgment:</strong></p>
+                                    <p>Signature: ___________________</p>
+                                    <p>Date: ___________________</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="row mt-5">
+                            <div class="col-12 text-center text-muted">
+                                <small>
+                                    SLA Performance Report - Confidential
+                                    <br/>
+                                    This report is subject to the terms of the service level agreement
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Definition -->
+    <record id="action_report_sla_management" model="ir.actions.report">
+        <field name="name">SLA Performance Report</field>
+        <field name="model">sla.performance</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.sla_management_report_template</field>
+        <field name="report_file">guardpro.sla_management_report_template</field>
+        <field name="binding_model_id" ref="model_sla_performance"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'SLA_Report_%s_%s' % (object.sla_id.name, object.period_start)</field>
+    </record>
+</odoo>
+

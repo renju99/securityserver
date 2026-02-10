@@ -1,0 +1,715 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Course 4: Basic Security Training - Slides -->
+        
+        <!-- Module 1: Introduction to Security Operations -->
+        <record id="slide_basic_security_m1_intro" model="slide.slide">
+            <field name="name">Module 1: Introduction to Security Operations</field>
+            <field name="channel_id" ref="elearning_course_basic_security"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.83</field>
+            <field name="html_content">
+                &lt;h2&gt;The Foundations of Professional Security Operations&lt;/h2&gt;
+                &lt;p&gt;Security operations form the backbone of modern society, providing essential protection for people, property, and assets. As a security professional, you play a critical role in maintaining safety and preventing crime. This comprehensive module establishes the fundamental principles that guide all security activities.&lt;/p&gt;
+
+                &lt;h3&gt;The Strategic Role of Security in Modern Society&lt;/h3&gt;
+                &lt;p&gt;Security is not just about preventing crime—it's about creating environments where people can live, work, and conduct business with confidence. Security professionals serve as the first line of defense against threats while maintaining the delicate balance between protection and individual freedoms.&lt;/p&gt;
+
+                &lt;h4&gt;Societal Impact of Security Operations&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Crime Prevention:&lt;/strong&gt; Visible security presence deters criminal activity and reduces victimization rates&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Public Safety:&lt;/strong&gt; Rapid response to emergencies saves lives and minimizes harm&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Property Protection:&lt;/strong&gt; Safeguarding assets worth billions in commercial and residential value&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Economic Stability:&lt;/strong&gt; Creating safe environments that support business growth and tourism&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Community Confidence:&lt;/strong&gt; Building trust in institutions and public spaces&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Preparedness:&lt;/strong&gt; Coordinating response efforts during crises and disasters&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;The Professional Security Guard: Role Definition and Scope&lt;/h3&gt;
+                &lt;p&gt;A security guard is a trained professional who provides protective services through a combination of preventive measures, vigilant observation, and appropriate response to security concerns. Unlike law enforcement officers, security guards operate within defined contractual boundaries while maintaining high professional standards.&lt;/p&gt;
+
+                &lt;h4&gt;Core Functions and Responsibilities&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Preventive Security&lt;/dt&gt;
+                    &lt;dd&gt;Implementing measures to deter criminal activity and unauthorized access through visible presence and proactive patrols&lt;/dd&gt;
+                    &lt;dt&gt;Access Control&lt;/dt&gt;
+                    &lt;dd&gt;Managing entry and exit points, verifying authorization, and maintaining secure perimeter boundaries&lt;/dd&gt;
+                    &lt;dt&gt;Observation and Monitoring&lt;/dt&gt;
+                    &lt;dd&gt;Maintaining constant awareness of surroundings, identifying suspicious activities, and documenting observations&lt;/dd&gt;
+                    &lt;dt&gt;Incident Response&lt;/dt&gt;
+                    &lt;dd&gt;Assessing situations, providing immediate assistance, and coordinating with emergency services when needed&lt;/dd&gt;
+                    &lt;dt&gt;Communication and Reporting&lt;/dt&gt;
+                    &lt;dd&gt;Maintaining clear communication channels and providing comprehensive documentation of all security-related activities&lt;/dd&gt;
+                    &lt;dt&gt;Customer Service Excellence&lt;/dt&gt;
+                    &lt;dd&gt;Providing professional assistance to clients, visitors, and staff while maintaining security protocols&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Specialized Security Functions&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Static Guarding:&lt;/strong&gt; Fixed post security at entrances, lobbies, or specific locations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Mobile Patrolling:&lt;/strong&gt; Vehicle or foot patrols covering multiple areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Event Security:&lt;/strong&gt; Crowd management and access control for special events&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Concierge Services:&lt;/strong&gt; Reception and visitor management services&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Response:&lt;/strong&gt; Coordinated action during security incidents&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;VIP Protection:&lt;/strong&gt; Close protection for high-value individuals&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;The Psychology of Security: Understanding Human Behavior&lt;/h3&gt;
+                &lt;p&gt;Effective security operations require understanding human psychology—both criminal behavior patterns and the psychology of compliance and cooperation.&lt;/p&gt;
+
+                &lt;h4&gt;Criminology Fundamentals&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Crime Prevention Theory:&lt;/strong&gt; Understanding rational choice theory and situational crime prevention&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Target Selection Factors:&lt;/strong&gt; How criminals choose victims and opportunities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Risk Assessment:&lt;/strong&gt; Evaluating vulnerability factors in people and property&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Behavioral Indicators:&lt;/strong&gt; Recognizing signs of suspicious or criminal intent&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Environmental Criminology:&lt;/strong&gt; How physical environments influence criminal behavior&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Human Behavior and Compliance&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Authority and Obedience:&lt;/strong&gt; Understanding how people respond to security directives&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Social Proof Principles:&lt;/strong&gt; Using visible security measures to influence behavior&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication Psychology:&lt;/strong&gt; Effective verbal and non-verbal security interactions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;De-escalation Techniques:&lt;/strong&gt; Managing conflict through psychological awareness&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Trust Building:&lt;/strong&gt; Establishing credibility and cooperation with the public&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Professional Ethics and Code of Conduct&lt;/h3&gt;
+                &lt;p&gt;Security professionals are held to the highest ethical standards, as they are entrusted with significant authority and access to sensitive information. Professional ethics form the foundation of trustworthy security operations.&lt;/p&gt;
+
+                &lt;h4&gt;Core Ethical Principles&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Integrity&lt;/dt&gt;
+                    &lt;dd&gt;Honest, ethical behavior in all professional activities, maintaining truthfulness and avoiding deception&lt;/dd&gt;
+                    &lt;dt&gt;Objectivity&lt;/dt&gt;
+                    &lt;dd&gt;Impartial decision-making based on facts rather than personal bias, prejudice, or favoritism&lt;/dd&gt;
+                    &lt;dt&gt;Professionalism&lt;/dt&gt;
+                    &lt;dd&gt;Maintaining high standards of conduct, appearance, and competence in all security activities&lt;/dd&gt;
+                    &lt;dt&gt;Respect for Rights&lt;/dt&gt;
+                    &lt;dd&gt;Honoring individual rights, dignity, and privacy while fulfilling security responsibilities&lt;/dd&gt;
+                    &lt;dt&gt;Confidentiality&lt;/dt&gt;
+                    &lt;dd&gt;Protecting sensitive information and maintaining discretion about security matters&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Ethical Decision-Making Framework&lt;/h4&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Assess the Situation:&lt;/strong&gt; Gather facts and understand all perspectives&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Identify Ethical Issues:&lt;/strong&gt; Determine what principles are involved&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Consider Alternatives:&lt;/strong&gt; Evaluate different courses of action&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Apply Ethical Standards:&lt;/strong&gt; Choose the action that best upholds professional ethics&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Document Decisions:&lt;/strong&gt; Record reasoning for accountability and learning&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h3&gt;Legal Authority and Professional Boundaries&lt;/h3&gt;
+                &lt;p&gt;Security guards operate within carefully defined legal boundaries that distinguish their role from law enforcement while providing necessary authority to perform security functions.&lt;/p&gt;
+
+                &lt;h4&gt;Permitted Authority&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Property Protection:&lt;/strong&gt; Reasonable force to protect people and property&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Control:&lt;/strong&gt; Regulate entry and exit according to client instructions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Citizen's Arrest:&lt;/strong&gt; Detain individuals for police arrival in specific circumstances&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Assistance:&lt;/strong&gt; Provide immediate help and coordinate emergency response&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Evidence Preservation:&lt;/strong&gt; Secure scenes and protect potential evidence&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Legal Limitations&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;No General Arrest Powers:&lt;/strong&gt; Cannot arrest without specific legal authority&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;No Search Warrants:&lt;/strong&gt; Cannot conduct searches without consent or legal authority&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;No Interrogation Rights:&lt;/strong&gt; Cannot question individuals about criminal activities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Limited Use of Force:&lt;/strong&gt; Only reasonable and necessary force is permitted&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;No Legal Enforcement:&lt;/strong&gt; Cannot issue citations or enforce general laws&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;The Security Professional's Mindset&lt;/h3&gt;
+                &lt;p&gt;Successful security operations require developing the right professional mindset—a combination of vigilance, professionalism, and situational awareness that guides all security activities.&lt;/p&gt;
+
+                &lt;h4&gt;Key Mental Attributes&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Situational Awareness:&lt;/strong&gt; Constant monitoring of surroundings and potential threats&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Proactive Thinking:&lt;/strong&gt; Anticipating problems before they occur&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Critical Assessment:&lt;/strong&gt; Evaluating situations objectively and making sound decisions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Professional Detachment:&lt;/strong&gt; Maintaining composure during stressful situations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Continuous Learning:&lt;/strong&gt; Staying current with security trends and best practices&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Ethical Courage:&lt;/strong&gt; Doing the right thing even when it's difficult&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Professional Development Principles&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Continuous Education:&lt;/strong&gt; Regular training and skill development&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Performance Standards:&lt;/strong&gt; Maintaining high professional competence&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Quality Assurance:&lt;/strong&gt; Regular evaluation and improvement&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Professional Networking:&lt;/strong&gt; Learning from peers and industry experts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Ethical Leadership:&lt;/strong&gt; Setting examples for colleagues and the public&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Practice Exercise:&lt;/strong&gt; Reflect on your personal understanding of security operations. Identify three key principles that you believe are most important for security professionals and explain why they matter in maintaining effective security.&lt;/p&gt;
+            </field>
+        </record>
+
+        <!-- Module 1 Quiz -->
+        <record id="slide_basic_security_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_basic_security"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_basic_security_m1_q1" model="slide.question">
+            <field name="question">What is the PRIMARY role of a security guard?</field>
+            <field name="slide_id" ref="slide_basic_security_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_basic_security_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_m1_q1"/>
+            <field name="text_value">To protect people, property, and assets</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_basic_security_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_m1_q1"/>
+            <field name="text_value">To enforce all laws like police officers</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_basic_security_m1_q1_a3" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_m1_q1"/>
+            <field name="text_value">To provide cleaning services</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_basic_security_m1_q2" model="slide.question">
+            <field name="question">Which of the following is a core responsibility of a security guard?</field>
+            <field name="slide_id" ref="slide_basic_security_m1_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_basic_security_m1_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_m1_q2"/>
+            <field name="text_value">Observation and reporting</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_basic_security_m1_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_m1_q2"/>
+            <field name="text_value">Making arrests without cause</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_basic_security_m1_q3" model="slide.question">
+            <field name="question">Which ethical principle requires impartial decision-making based on facts?</field>
+            <field name="slide_id" ref="slide_basic_security_m1_quiz"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="quiz_basic_security_m1_q3_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_m1_q3"/>
+            <field name="text_value">Objectivity</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_basic_security_m1_q3_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_m1_q3"/>
+            <field name="text_value">Integrity</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_basic_security_m1_q3_a3" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_m1_q3"/>
+            <field name="text_value">Professionalism</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_basic_security_m1_q4" model="slide.question">
+            <field name="question">Security guards are permitted to conduct searches without consent in which situation?</field>
+            <field name="slide_id" ref="slide_basic_security_m1_quiz"/>
+            <field name="sequence">4</field>
+        </record>
+        <record id="quiz_basic_security_m1_q4_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_m1_q4"/>
+            <field name="text_value">Never - searches require consent or legal authority</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_basic_security_m1_q4_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_m1_q4"/>
+            <field name="text_value">Whenever they suspect criminal activity</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_basic_security_m1_q4_a3" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_m1_q4"/>
+            <field name="text_value">Only during emergency situations</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 2: Access Control Fundamentals -->
+        <record id="slide_basic_security_m2_access" model="slide.slide">
+            <field name="name">Module 2: Access Control Fundamentals</field>
+            <field name="channel_id" ref="elearning_course_basic_security"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">1.0</field>
+            <field name="html_content">
+                &lt;h2&gt;Mastering Access Control: The Foundation of Physical Security&lt;/h2&gt;
+                &lt;p&gt;Access control is the cornerstone of physical security operations, serving as the primary mechanism for protecting people, property, and information from unauthorized access. This comprehensive module explores the principles, methods, and best practices that ensure effective access management.&lt;/p&gt;
+
+                &lt;h3&gt;The Strategic Importance of Access Control&lt;/h3&gt;
+                &lt;p&gt;Effective access control serves multiple critical security functions that protect organizations from both external and internal threats:&lt;/p&gt;
+
+                &lt;h4&gt;Security Objectives&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Theft Prevention:&lt;/strong&gt; Blocking unauthorized access to valuable assets and sensitive areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Crime Deterrence:&lt;/strong&gt; Creating visible barriers that discourage criminal activity&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Incident Response:&lt;/strong&gt; Controlling access during emergencies and security events&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Evidence Protection:&lt;/strong&gt; Maintaining chain of custody for investigations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Privacy Protection:&lt;/strong&gt; Safeguarding sensitive information and restricted areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Regulatory Compliance:&lt;/strong&gt; Meeting legal requirements for access restrictions&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Business Impact&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Loss Prevention:&lt;/strong&gt; Reducing financial losses from theft and damage&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Insurance Benefits:&lt;/strong&gt; Lowering insurance premiums through proven security measures&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Operational Continuity:&lt;/strong&gt; Maintaining business operations during security incidents&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Stakeholder Confidence:&lt;/strong&gt; Building trust with employees, clients, and partners&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;The Access Control Framework&lt;/h3&gt;
+                &lt;p&gt;Access control operates through a systematic four-step process that ensures comprehensive security while maintaining operational efficiency:&lt;/p&gt;
+
+                &lt;h4&gt;Step 1: Identification - Establishing Identity&lt;/h4&gt;
+                &lt;p&gt;The identification phase establishes who the individual claims to be through various verification methods:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Visual Recognition:&lt;/strong&gt; Familiar face recognition for regular personnel&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Document Verification:&lt;/strong&gt; Checking official identification cards and documents&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Biometric Confirmation:&lt;/strong&gt; Using fingerprints, facial recognition, or iris scans&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Digital Authentication:&lt;/strong&gt; RFID cards, smart cards, or mobile credentials&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Pattern Recognition:&lt;/strong&gt; Recognizing behavioral patterns of authorized individuals&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Step 2: Authentication - Validating Credentials&lt;/h4&gt;
+                &lt;p&gt;Authentication confirms that the presented credentials are genuine and currently valid:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Credential Integrity:&lt;/strong&gt; Checking for signs of tampering or alteration&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Expiration Verification:&lt;/strong&gt; Ensuring credentials haven't expired&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Database Validation:&lt;/strong&gt; Cross-referencing with access control systems&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Multi-Factor Verification:&lt;/strong&gt; Combining multiple authentication methods&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Real-Time Status:&lt;/strong&gt; Checking for revoked or suspended access rights&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Step 3: Authorization - Determining Access Rights&lt;/h4&gt;
+                &lt;p&gt;Authorization evaluates whether the authenticated individual has permission for the requested access:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Role-Based Access:&lt;/strong&gt; Permissions based on job function and responsibilities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Time-Based Restrictions:&lt;/strong&gt; Access limited to specific hours or days&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Location-Based Control:&lt;/strong&gt; Access restricted to authorized areas only&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Purpose Limitation:&lt;/strong&gt; Access granted for specific business purposes&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Escort Requirements:&lt;/strong&gt; Mandatory accompaniment for certain areas&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Step 4: Accountability - Recording and Monitoring&lt;/h4&gt;
+                &lt;p&gt;Accountability ensures all access activities are documented and auditable:&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Logging:&lt;/strong&gt; Recording all entry and exit activities with timestamps&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Audit Trails:&lt;/strong&gt; Maintaining comprehensive records for investigations&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Real-Time Monitoring:&lt;/strong&gt; Live surveillance of access activities&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Exception Reporting:&lt;/strong&gt; Automated alerts for unusual access patterns&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Performance Tracking:&lt;/strong&gt; Monitoring compliance with access policies&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Access Control Technology and Methods&lt;/h3&gt;
+                &lt;p&gt;Modern access control employs various technologies and methods, each suited to different security requirements and operational environments:&lt;/p&gt;
+
+                &lt;h4&gt;Physical Access Control Methods&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Manual Verification&lt;/dt&gt;
+                    &lt;dd&gt;Visual inspection of identification documents and personal recognition&lt;/dd&gt;
+                    &lt;dt&gt;Mechanical Locks&lt;/dt&gt;
+                    &lt;dd&gt;Traditional key-based systems with master key hierarchies&lt;/dd&gt;
+                    &lt;dt&gt;Electronic Card Systems&lt;/dt&gt;
+                    &lt;dd&gt;Proximity cards and smart cards with programmable access levels&lt;/dd&gt;
+                    &lt;dt&gt;Biometric Systems&lt;/dt&gt;
+                    &lt;dd&gt;Fingerprint, facial recognition, and iris scanning technologies&lt;/dd&gt;
+                    &lt;dt&gt;PIN/Keypad Systems&lt;/dt&gt;
+                    &lt;dd&gt;Numerical codes with time-based or usage-limited access&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Advanced Access Control Technologies&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Mobile Access Solutions:&lt;/strong&gt; Smartphone-based credentials with GPS validation&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Cloud-Based Systems:&lt;/strong&gt; Remote management and real-time updates&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Integration Platforms:&lt;/strong&gt; Unified systems connecting multiple access points&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Video Analytics:&lt;/strong&gt; AI-powered monitoring and automated alerts&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;IoT Sensors:&lt;/strong&gt; Environmental monitoring and automated responses&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Common Access Control Vulnerabilities and Countermeasures&lt;/h3&gt;
+                &lt;p&gt;Understanding and addressing common security weaknesses is essential for effective access control implementation:&lt;/p&gt;
+
+                &lt;h4&gt;Physical Security Weaknesses&lt;/h4&gt;
+                &lt;dl&gt;
+                    &lt;dt&gt;Tailgating/Piggybacking&lt;/dt&gt;
+                    &lt;dd&gt;Unauthorized individuals following authorized personnel through access points&lt;/dd&gt;
+                    &lt;dt&gt;Propped Doors&lt;/dt&gt;
+                    &lt;dd&gt;Secured doors held open, bypassing access controls&lt;/dd&gt;
+                    &lt;dt&gt;Key Compromise&lt;/dt&gt;
+                    &lt;dd&gt;Lost, stolen, or duplicated physical keys&lt;/dd&gt;
+                    &lt;dt&gt;Credential Sharing&lt;/dt&gt;
+                    &lt;dd&gt;Authorized users sharing access with unauthorized individuals&lt;/dd&gt;
+                &lt;/dl&gt;
+
+                &lt;h4&gt;Countermeasures and Best Practices&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Tailgating Prevention:&lt;/strong&gt; Mantraps, turnstiles, and security education&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Door Security:&lt;/strong&gt; Automatic closing mechanisms and monitoring&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Key Management:&lt;/strong&gt; Regular key audits and electronic alternatives&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Reviews:&lt;/strong&gt; Regular audits of access permissions and usage&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Security Awareness:&lt;/strong&gt; Training programs on access control procedures&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Technology Integration:&lt;/strong&gt; Automated monitoring and alert systems&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Special Access Scenarios&lt;/h3&gt;
+                &lt;p&gt;Different situations require tailored access control approaches to balance security with operational needs:&lt;/p&gt;
+
+                &lt;h4&gt;Visitor and Contractor Access&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Pre-Registration Process:&lt;/strong&gt; Advance approval and background verification&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Temporary Credentials:&lt;/strong&gt; Time-limited access cards or escort requirements&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Escort Procedures:&lt;/strong&gt; Mandatory accompaniment by authorized personnel&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Activity Logging:&lt;/strong&gt; Detailed records of areas accessed and activities performed&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Post-Visit Procedures:&lt;/strong&gt; Credential collection and access revocation&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Emergency Access Protocols&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Override Systems:&lt;/strong&gt; Fail-safe access during power failures&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;First Responder Access:&lt;/strong&gt; Immediate entry for emergency services&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Crisis Access Procedures:&lt;/strong&gt; Rapid entry protocols during emergencies&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Evacuation Considerations:&lt;/strong&gt; Access control during building evacuation&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;After-Hours and Restricted Access&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Authorized Personnel Lists:&lt;/strong&gt; Pre-approved individuals for after-hours access&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Dual Authorization:&lt;/strong&gt; Two-person rule for sensitive areas&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Remote Monitoring:&lt;/strong&gt; Video surveillance and alarm monitoring&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Logging:&lt;/strong&gt; Comprehensive audit trails for all after-hours activities&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Access Control Administration and Maintenance&lt;/h3&gt;
+                &lt;p&gt;Effective access control requires ongoing administration and system maintenance to ensure continued reliability and security:&lt;/p&gt;
+
+                &lt;h4&gt;System Administration&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;User Account Management:&lt;/strong&gt; Adding, modifying, and removing access permissions&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Credential Issuance:&lt;/strong&gt; Secure distribution of access cards and devices&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Level Configuration:&lt;/strong&gt; Setting appropriate permission hierarchies&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;System Backup Procedures:&lt;/strong&gt; Regular data backup and recovery testing&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Emergency Access Planning:&lt;/strong&gt; Backup procedures for system failures&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Regular Maintenance Activities&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Hardware Inspections:&lt;/strong&gt; Regular checks of card readers, locks, and sensors&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Software Updates:&lt;/strong&gt; Security patches and system upgrades&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Battery Testing:&lt;/strong&gt; Emergency power backup system verification&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Calibration Checks:&lt;/strong&gt; Biometric system accuracy testing&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Performance Monitoring:&lt;/strong&gt; System reliability and response time tracking&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Legal and Regulatory Compliance&lt;/h3&gt;
+                &lt;p&gt;Access control systems must comply with various legal and regulatory requirements:&lt;/p&gt;
+
+                &lt;h4&gt;Privacy Law Compliance&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Data Protection Regulations:&lt;/strong&gt; Proper handling of personal access data&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Surveillance Limitations:&lt;/strong&gt; Legal boundaries for video monitoring&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Information Security:&lt;/strong&gt; Protection of biometric and access data&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Consent Requirements:&lt;/strong&gt; Proper authorization for data collection&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Industry-Specific Requirements&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Healthcare Facilities:&lt;/strong&gt; HIPAA compliance for medical access systems&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Financial Institutions:&lt;/strong&gt; Enhanced security for banking and finance&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Government Buildings:&lt;/strong&gt; National security standards and protocols&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Critical Infrastructure:&lt;/strong&gt; Special requirements for utilities and transportation&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Professional Access Control Skills&lt;/h3&gt;
+                &lt;p&gt;Mastering access control requires both technical knowledge and interpersonal skills:&lt;/p&gt;
+
+                &lt;h4&gt;Technical Competencies&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;System Operation:&lt;/strong&gt; Proficiency with access control hardware and software&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Troubleshooting Skills:&lt;/strong&gt; Problem-solving for technical issues&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Database Management:&lt;/strong&gt; Maintaining accurate access records&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Integration Knowledge:&lt;/strong&gt; Understanding system interconnections&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h4&gt;Interpersonal Skills&lt;/h4&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication Excellence:&lt;/strong&gt; Clear instructions and professional interaction&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Conflict Resolution:&lt;/strong&gt; Managing access disputes calmly and fairly&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Customer Service Orientation:&lt;/strong&gt; Balancing security with positive user experience&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Decision-Making Ability:&lt;/strong&gt; Quick assessment of access requests and situations&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;p&gt;&lt;strong&gt;Practice Exercise:&lt;/strong&gt; Evaluate your current access control procedures. Identify three areas where you can improve security effectiveness while maintaining operational efficiency. Consider how you would handle a situation where an authorized employee wants to bring in an unannounced visitor.&lt;/p&gt;
+            </field>
+        </record>
+
+        <!-- Module 2 Quiz -->
+        <record id="slide_basic_security_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_basic_security"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_basic_security_m2_q1" model="slide.question">
+            <field name="question">What are the four key principles of access control?</field>
+            <field name="slide_id" ref="slide_basic_security_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_basic_security_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_m2_q1"/>
+            <field name="text_value">Identification, Authentication, Authorization, Accountability</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_basic_security_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_m2_q1"/>
+            <field name="text_value">Speed, Efficiency, Convenience, Flexibility</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_basic_security_m2_q2" model="slide.question">
+            <field name="question">What is "tailgating" in access control?</field>
+            <field name="slide_id" ref="slide_basic_security_m2_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_basic_security_m2_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_m2_q2"/>
+            <field name="text_value">Following a vehicle too closely in a parking lot</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_basic_security_m2_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_m2_q2"/>
+            <field name="text_value">Unauthorized persons following authorized ones through secure doors</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <!-- Module 3: Communication & Professionalism -->
+        <record id="slide_basic_security_m3_comm" model="slide.slide">
+            <field name="name">Module 3: Communication &amp; Professionalism</field>
+            <field name="channel_id" ref="elearning_course_basic_security"/>
+            <field name="sequence">30</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Professional Communication Skills&lt;/h2&gt;
+                &lt;p&gt;Effective communication is essential for success as a security professional.&lt;/p&gt;
+                
+                &lt;h3&gt;Verbal Communication:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Speak clearly and confidently&lt;/li&gt;
+                    &lt;li&gt;Use professional language - avoid slang&lt;/li&gt;
+                    &lt;li&gt;Listen actively and attentively&lt;/li&gt;
+                    &lt;li&gt;Remain calm and respectful, even under pressure&lt;/li&gt;
+                    &lt;li&gt;Ask clarifying questions when needed&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Non-Verbal Communication:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Maintain professional body language&lt;/li&gt;
+                    &lt;li&gt;Make appropriate eye contact&lt;/li&gt;
+                    &lt;li&gt;Be aware of personal space&lt;/li&gt;
+                    &lt;li&gt;Present a neat, professional appearance&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Radio Communication:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Use clear, concise language&lt;/li&gt;
+                    &lt;li&gt;Follow radio protocols and codes&lt;/li&gt;
+                    &lt;li&gt;Identify yourself before transmitting&lt;/li&gt;
+                    &lt;li&gt;Keep transmissions brief and relevant&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Dealing with Difficult People:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Stay calm and professional&lt;/li&gt;
+                    &lt;li&gt;Listen to concerns without interrupting&lt;/li&gt;
+                    &lt;li&gt;Show empathy and understanding&lt;/li&gt;
+                    &lt;li&gt;Explain rules and policies clearly&lt;/li&gt;
+                    &lt;li&gt;Know when to escalate to supervisors&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <!-- Module 3 Quiz -->
+        <record id="slide_basic_security_m3_quiz" model="slide.slide">
+            <field name="name">Module 3: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_basic_security"/>
+            <field name="sequence">31</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_basic_security_m3_q1" model="slide.question">
+            <field name="question">What should you do when dealing with an upset visitor?</field>
+            <field name="slide_id" ref="slide_basic_security_m3_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_basic_security_m3_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_m3_q1"/>
+            <field name="text_value">Argue back to defend your position</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_basic_security_m3_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_m3_q1"/>
+            <field name="text_value">Stay calm, listen to concerns, and show empathy</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <!-- Module 4: Observation & Reporting -->
+        <record id="slide_basic_security_m4_observation" model="slide.slide">
+            <field name="name">Module 4: Observation &amp; Reporting</field>
+            <field name="channel_id" ref="elearning_course_basic_security"/>
+            <field name="sequence">40</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Observation &amp; Reporting Skills&lt;/h2&gt;
+                &lt;p&gt;Learn to observe effectively and document incidents accurately.&lt;/p&gt;
+                
+                &lt;h3&gt;The 5 W's of Reporting:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Who:&lt;/strong&gt; Who was involved?&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;What:&lt;/strong&gt; What happened?&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;When:&lt;/strong&gt; What time did it occur?&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Where:&lt;/strong&gt; What was the exact location?&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Why:&lt;/strong&gt; Why did it happen (if known)?&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Effective Observation Techniques:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Stay alert and focused&lt;/li&gt;
+                    &lt;li&gt;Use all your senses&lt;/li&gt;
+                    &lt;li&gt;Look for patterns and anomalies&lt;/li&gt;
+                    &lt;li&gt;Remember important details&lt;/li&gt;
+                    &lt;li&gt;Take notes immediately&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;h3&gt;Report Writing Guidelines:&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Write reports as soon as possible&lt;/li&gt;
+                    &lt;li&gt;Be factual and objective&lt;/li&gt;
+                    &lt;li&gt;Include all relevant details&lt;/li&gt;
+                    &lt;li&gt;Use clear, simple language&lt;/li&gt;
+                    &lt;li&gt;Avoid opinions and assumptions&lt;/li&gt;
+                    &lt;li&gt;Review and proofread before submitting&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <!-- Module 4 Quiz -->
+        <record id="slide_basic_security_m4_quiz" model="slide.slide">
+            <field name="name">Module 4: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_basic_security"/>
+            <field name="sequence">41</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_basic_security_m4_q1" model="slide.question">
+            <field name="question">What are the "5 W's" of reporting?</field>
+            <field name="slide_id" ref="slide_basic_security_m4_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_basic_security_m4_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_m4_q1"/>
+            <field name="text_value">Who, What, When, Where, Why</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_basic_security_m4_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_m4_q1"/>
+            <field name="text_value">Work, Wait, Walk, Watch, Write</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Final Assessment -->
+        <record id="slide_basic_security_final" model="slide.slide">
+            <field name="name">Final Assessment: Basic Security Training</field>
+            <field name="channel_id" ref="elearning_course_basic_security"/>
+            <field name="sequence">50</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.3</field>
+        </record>
+
+        <record id="quiz_basic_security_final_q1" model="slide.question">
+            <field name="question">A security guard's PRIMARY responsibility is to:</field>
+            <field name="slide_id" ref="slide_basic_security_final"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_basic_security_final_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_final_q1"/>
+            <field name="text_value">Protect people, property, and assets</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_basic_security_final_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_final_q1"/>
+            <field name="text_value">Make as many arrests as possible</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_basic_security_final_q2" model="slide.question">
+            <field name="question">When writing an incident report, you should:</field>
+            <field name="slide_id" ref="slide_basic_security_final"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_basic_security_final_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_final_q2"/>
+            <field name="text_value">Include your personal opinions about what happened</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_basic_security_final_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_final_q2"/>
+            <field name="text_value">Be factual, objective, and include all relevant details</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <record id="quiz_basic_security_final_q3" model="slide.question">
+            <field name="question">Professional appearance and demeanor are:</field>
+            <field name="slide_id" ref="slide_basic_security_final"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="quiz_basic_security_final_q3_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_final_q3"/>
+            <field name="text_value">Optional for experienced guards</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_basic_security_final_q3_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_basic_security_final_q3"/>
+            <field name="text_value">Essential professional standards for all security guards</field>
+            <field name="is_correct">True</field>
+        </record>
+
+    </data>
+</odoo>
+
+
+
+
+
+
+
+
+
+

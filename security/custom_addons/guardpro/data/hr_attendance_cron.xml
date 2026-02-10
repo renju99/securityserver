@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Cron: Check for No-Shows (every 30 minutes) -->
+        <record id="ir_cron_check_shift_no_shows" model="ir.cron">
+            <field name="name">Guard: Check for No-Shows</field>
+            <field name="model_id" ref="model_guard_shift_plan"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_check_no_shows()</field>
+            <field name="interval_number">30</field>
+            <field name="interval_type">minutes</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Cron: Auto-Generate Shifts from Templates (daily at 3 AM) -->
+        <record id="ir_cron_auto_generate_shifts" model="ir.cron">
+            <field name="name">Guard: Auto-Generate Shifts from Templates</field>
+            <field name="model_id" ref="model_guard_shift_template"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_generate_shifts()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).replace(hour=3, minute=0, second=0)"/>
+            <field name="active" eval="True"/>
+        </record>
+
+    </data>
+</odoo>
+

@@ -1,0 +1,857 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Daily Activity Report PDF Template - Enhanced Version -->
+    <template id="daily_activity_report_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <style>
+                            /* Enhanced DAR PDF Styling */
+                            
+                            /* Page Break Controls */
+                            .page-break-before {
+                                page-break-before: always;
+                            }
+                            .page-break-after {
+                                page-break-after: always;
+                            }
+                            .page-break-avoid {
+                                page-break-inside: avoid;
+                            }
+                            .section-header {
+                                page-break-after: avoid;
+                            }
+                            .enhanced-table {
+                                page-break-inside: auto;
+                            }
+                            .enhanced-table thead {
+                                display: table-header-group;
+                            }
+                            .enhanced-table tr {
+                                page-break-inside: avoid;
+                                page-break-after: auto;
+                            }
+                            .info-card {
+                                page-break-inside: avoid;
+                            }
+                            .notes-section {
+                                page-break-inside: avoid;
+                            }
+                            .signature-section {
+                                page-break-inside: avoid;
+                            }
+                            
+                            .dar-header {
+                                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                color: white;
+                                padding: 25px;
+                                border-radius: 8px;
+                                margin-bottom: 20px;
+                                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                                page-break-inside: avoid;
+                            }
+                            .dar-header h2 {
+                                margin: 0;
+                                font-size: 28px;
+                                font-weight: 700;
+                                letter-spacing: 1px;
+                            }
+                            .dar-header .subtitle {
+                                font-size: 16px;
+                                opacity: 0.95;
+                                margin-top: 8px;
+                            }
+                            .info-card {
+                                background: #f8f9fa;
+                                border-left: 4px solid #667eea;
+                                padding: 15px;
+                                margin-bottom: 15px;
+                                border-radius: 4px;
+                            }
+                            .info-card h5 {
+                                color: #667eea;
+                                font-weight: 600;
+                                margin-bottom: 10px;
+                                font-size: 16px;
+                            }
+                            .stats-grid {
+                                display: table;
+                                width: 100%;
+                                border-collapse: separate;
+                                border-spacing: 10px;
+                                page-break-inside: avoid;
+                            }
+                            .stat-box {
+                                display: table-cell;
+                                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                color: white;
+                                padding: 20px;
+                                border-radius: 8px;
+                                text-align: center;
+                                width: 16.66%;
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                                page-break-inside: avoid;
+                            }
+                            .stat-box .number {
+                                font-size: 32px;
+                                font-weight: 700;
+                                display: block;
+                                margin-bottom: 5px;
+                            }
+                            .stat-box .label {
+                                font-size: 12px;
+                                opacity: 0.9;
+                                text-transform: uppercase;
+                                letter-spacing: 0.5px;
+                            }
+                            .section-header {
+                                background: #667eea;
+                                color: white;
+                                padding: 12px 15px;
+                                border-radius: 5px;
+                                margin-top: 25px;
+                                margin-bottom: 15px;
+                                font-weight: 600;
+                                font-size: 16px;
+                                page-break-after: avoid;
+                                page-break-inside: avoid;
+                            }
+                            .section-header i {
+                                margin-right: 8px;
+                            }
+                            /* Keep section header with its content */
+                            .section-wrapper {
+                                page-break-inside: avoid;
+                            }
+                            .enhanced-table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin-bottom: 20px;
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                            }
+                            .enhanced-table thead {
+                                background: #667eea;
+                                color: white;
+                            }
+                            .enhanced-table th {
+                                padding: 12px;
+                                text-align: left;
+                                font-weight: 600;
+                                font-size: 13px;
+                                text-transform: uppercase;
+                                letter-spacing: 0.5px;
+                            }
+                            .enhanced-table td {
+                                padding: 10px 12px;
+                                border-bottom: 1px solid #e9ecef;
+                                font-size: 13px;
+                            }
+                            .enhanced-table tbody tr:hover {
+                                background: #f8f9fa;
+                            }
+                            .enhanced-table tbody tr:last-child td {
+                                border-bottom: none;
+                            }
+                            .badge-custom {
+                                padding: 5px 12px;
+                                border-radius: 12px;
+                                font-size: 11px;
+                                font-weight: 600;
+                                text-transform: uppercase;
+                                letter-spacing: 0.5px;
+                            }
+                            .badge-critical { background: #dc3545; color: white; }
+                            .badge-high { background: #fd7e14; color: white; }
+                            .badge-medium { background: #ffc107; color: #212529; }
+                            .badge-low { background: #17a2b8; color: white; }
+                            .badge-info { background: #0dcaf0; color: #212529; }
+                            .badge-success-custom { background: #198754; color: white; }
+                            .badge-warning-custom { background: #ffc107; color: #212529; }
+                            .badge-secondary-custom { background: #6c757d; color: white; }
+                            .notes-section {
+                                background: #fff8dc;
+                                border: 2px solid #ffc107;
+                                border-radius: 6px;
+                                padding: 15px;
+                                margin: 15px 0;
+                            }
+                            .notes-section h5 {
+                                color: #856404;
+                                font-weight: 600;
+                                margin-bottom: 10px;
+                            }
+                            .signature-section {
+                                margin-top: 40px;
+                                padding-top: 30px;
+                                border-top: 2px solid #dee2e6;
+                            }
+                            .signature-box {
+                                text-align: center;
+                                padding: 20px;
+                                border: 2px dashed #dee2e6;
+                                border-radius: 6px;
+                                min-height: 100px;
+                            }
+                            .signature-box .line {
+                                border-bottom: 2px solid #212529;
+                                width: 200px;
+                                margin: 0 auto 10px;
+                                padding-top: 60px;
+                            }
+                            .attachment-grid {
+                                display: table;
+                                width: 100%;
+                                border-collapse: separate;
+                                border-spacing: 10px;
+                                page-break-inside: avoid;
+                            }
+                            .attachment-item {
+                                display: table-cell;
+                                width: 33.33%;
+                                text-align: center;
+                                page-break-inside: avoid;
+                            }
+                            .attachment-item img {
+                                max-width: 100%;
+                                max-height: 250px;
+                                border: 2px solid #dee2e6;
+                                border-radius: 6px;
+                                margin-bottom: 8px;
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                            }
+                            .attachment-item .caption {
+                                font-size: 11px;
+                                color: #6c757d;
+                                margin-top: 5px;
+                            }
+                            .status-badge-container {
+                                text-align: right;
+                                margin-bottom: 15px;
+                            }
+                            .empty-section {
+                                text-align: center;
+                                padding: 30px;
+                                color: #6c757d;
+                                font-style: italic;
+                                background: #f8f9fa;
+                                border-radius: 6px;
+                                margin: 10px 0;
+                            }
+                            .info-grid {
+                                display: table;
+                                width: 100%;
+                            }
+                            .info-row {
+                                display: table-row;
+                            }
+                            .info-label {
+                                display: table-cell;
+                                font-weight: 600;
+                                padding: 8px 12px;
+                                width: 30%;
+                                background: #f8f9fa;
+                                border: 1px solid #dee2e6;
+                            }
+                            .info-value {
+                                display: table-cell;
+                                padding: 8px 12px;
+                                border: 1px solid #dee2e6;
+                                border-left: none;
+                            }
+                            .report-footer {
+                                margin-top: 30px;
+                                padding-top: 20px;
+                                border-top: 1px solid #dee2e6;
+                                text-align: center;
+                                color: #6c757d;
+                                font-size: 11px;
+                            }
+                        </style>
+
+                        <!-- Enhanced Header -->
+                        <div class="dar-header">
+                            <div style="display: table; width: 100%;">
+                                <div style="display: table-cell; vertical-align: middle;">
+                                    <h2>DAILY ACTIVITY REPORT (DAR)</h2>
+                                    <div class="subtitle">
+                                        <strong><span t-field="doc.name"/></strong>
+                                    </div>
+                                </div>
+                                <div class="status-badge-container" style="display: table-cell; vertical-align: middle; text-align: right;">
+                                    <span class="badge-custom" 
+                                          t-att-style="'background: %s; color: white;' % ('#198754' if doc.state == 'sent' else '#0dcaf0' if doc.state == 'approved' else '#ffc107' if doc.state == 'submitted' else '#6c757d' if doc.state == 'draft' else '#dc3545')">
+                                        <t t-esc="doc.state.replace('_', ' ').upper()"/>
+                                    </span>
+                                    <br t-if="doc.sent_to_client"/>
+                                    <span class="badge-custom badge-success-custom" t-if="doc.sent_to_client" style="margin-top: 8px; display: inline-block;">
+                                        SENT TO CLIENT
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Report Information Card -->
+                        <div class="info-card">
+                            <h5>REPORT INFORMATION</h5>
+                            <div class="info-grid">
+                                <div class="info-row">
+                                    <div class="info-label">Site:</div>
+                                    <div class="info-value"><strong><span t-field="doc.site_id.name"/></strong></div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Client:</div>
+                                    <div class="info-value"><span t-field="doc.site_id.client_id.name"/></div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Report Date:</div>
+                                    <div class="info-value">
+                                        <strong><span t-field="doc.report_date" t-options='{"widget": "date", "format": "EEEE, MMMM d, yyyy"}'/></strong>
+                                    </div>
+                                </div>
+                                <div class="info-row" t-if="doc.shift_id">
+                                    <div class="info-label">Shift:</div>
+                                    <div class="info-value"><span t-field="doc.shift_id.name"/></div>
+                                </div>
+                                <div class="info-row" t-if="doc.weather_conditions">
+                                    <div class="info-label">Weather Conditions:</div>
+                                    <div class="info-value"><span t-field="doc.weather_conditions"/></div>
+                                </div>
+                                <div class="info-row" t-if="doc.site_id.address">
+                                    <div class="info-label">Site Address:</div>
+                                    <div class="info-value"><span t-field="doc.site_id.address"/></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Summary Statistics Dashboard -->
+                        <div class="section-header">
+                            SUMMARY STATISTICS
+                        </div>
+                        <div class="stats-grid" style="margin-bottom: 25px;">
+                            <div class="stat-box">
+                                <span class="number"><t t-esc="doc.total_incidents"/></span>
+                                <span class="label">Total Incidents</span>
+                            </div>
+                            <div class="stat-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);" t-if="doc.critical_incidents > 0">
+                                <span class="number"><t t-esc="doc.critical_incidents"/></span>
+                                <span class="label">Critical</span>
+                            </div>
+                            <div class="stat-box" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                <span class="number"><t t-esc="doc.tours_completed"/></span>
+                                <span class="label">Tours Done</span>
+                            </div>
+                            <div class="stat-box" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                                <span class="number"><t t-esc="doc.visitor_count"/></span>
+                                <span class="label">Visitors</span>
+                            </div>
+                            <div class="stat-box" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                                <span class="number"><t t-esc="doc.guards_on_duty_count"/></span>
+                                <span class="label">Guards</span>
+                            </div>
+                            <div class="stat-box" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+                                <span class="number"><t t-esc="doc.task_completed_count"/>/<t t-esc="doc.task_count"/></span>
+                                <span class="label">Tasks Done</span>
+                            </div>
+                        </div>
+
+                        <!-- Incidents Section -->
+                        <t t-if="doc.incident_ids">
+                            <div class="section-header">
+                                INCIDENTS REPORTED (<t t-esc="len(doc.incident_ids)"/>)
+                            </div>
+                            <table class="enhanced-table">
+                                <thead>
+                                    <tr>
+                                        <th width="12%">Reference</th>
+                                        <th width="25%">Title</th>
+                                        <th width="15%">Category</th>
+                                        <th width="12%">Severity</th>
+                                        <th width="10%">Time</th>
+                                        <th width="13%">Reported By</th>
+                                        <th width="13%">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="doc.incident_ids" t-as="incident">
+                                        <td><strong><span t-field="incident.name"/></strong></td>
+                                        <td><span t-field="incident.title"/></td>
+                                        <td><span t-field="incident.category_id.name"/></td>
+                                        <td>
+                                            <span class="badge-custom" 
+                                                  t-att-class="{'badge-critical': incident.severity == 'critical',
+                                                                'badge-high': incident.severity == 'high',
+                                                                'badge-medium': incident.severity == 'medium',
+                                                                'badge-low': incident.severity == 'low'}">
+                                                <t t-esc="incident.severity.upper()"/>
+                                            </span>
+                                        </td>
+                                        <td><span t-field="incident.incident_datetime" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                        <td><span t-field="incident.guard_id.name"/></td>
+                                        <td><span t-field="incident.status"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+                        <t t-else="">
+                            <div class="section-header">
+                                INCIDENTS REPORTED (0)
+                            </div>
+                            <div class="empty-section">
+                                No incidents reported during this period
+                            </div>
+                        </t>
+
+                        <!-- Security Tours Section -->
+                        <t t-if="doc.tour_log_ids">
+                            <div class="section-header">
+                                SECURITY PATROL TOURS (<t t-esc="len(doc.tour_log_ids)"/>)
+                            </div>
+                            <table class="enhanced-table">
+                                <thead>
+                                    <tr>
+                                        <th width="12%">Reference</th>
+                                        <th width="20%">Tour Name</th>
+                                        <th width="15%">Guard</th>
+                                        <th width="10%">Start</th>
+                                        <th width="10%">End</th>
+                                        <th width="10%">Duration</th>
+                                        <th width="13%">Checkpoints</th>
+                                        <th width="10%">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="doc.tour_log_ids" t-as="tour">
+                                        <td><strong><span t-field="tour.name"/></strong></td>
+                                        <td><span t-field="tour.tour_id.name"/></td>
+                                        <td><span t-field="tour.guard_id.name"/></td>
+                                        <td><span t-field="tour.start_time" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                        <td><span t-field="tour.end_time" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                        <td><t t-if="tour.duration"><t t-esc="'%.0f min' % tour.duration"/></t></td>
+                                        <td><t t-esc="len(tour.scan_ids)"/> / <t t-esc="len(tour.tour_id.checkpoint_ids)"/> scanned</td>
+                                        <td>
+                                            <span class="badge-custom" 
+                                                  t-att-class="{'badge-success-custom': tour.status == 'completed',
+                                                                'badge-info': tour.status == 'in_progress',
+                                                                'badge-warning-custom': tour.status == 'incomplete'}">
+                                                <t t-esc="tour.status"/>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+                        <t t-else="">
+                            <div class="section-header">
+                                SECURITY PATROL TOURS (0)
+                            </div>
+                            <div class="empty-section">
+                                No patrol tours logged during this period
+                            </div>
+                        </t>
+
+                        <!-- Visitors Section -->
+                        <t t-if="doc.visitor_ids">
+                            <div class="section-header">
+                                VISITOR LOG (<t t-esc="len(doc.visitor_ids)"/>)
+                            </div>
+                            <table class="enhanced-table">
+                                <thead>
+                                    <tr>
+                                        <th width="18%">Visitor Name</th>
+                                        <th width="10%">Type</th>
+                                        <th width="15%">Company</th>
+                                        <th width="15%">Host</th>
+                                        <th width="10%">Check-In</th>
+                                        <th width="10%">Check-Out</th>
+                                        <th width="10%">Duration</th>
+                                        <th width="12%">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="doc.visitor_ids" t-as="visitor">
+                                        <td><strong><span t-field="visitor.name"/></strong></td>
+                                        <td><span t-field="visitor.visitor_type"/></td>
+                                        <td><span t-field="visitor.company"/></td>
+                                        <td><span t-field="visitor.host_name"/></td>
+                                        <td><span t-field="visitor.checkin_time" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                        <td><span t-field="visitor.checkout_time" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                        <td>
+                                            <t t-if="visitor.visit_duration">
+                                                <t t-esc="'%.1f hrs' % visitor.visit_duration"/>
+                                            </t>
+                                        </td>
+                                        <td><span t-field="visitor.state"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+                        <t t-else="">
+                            <div class="section-header">
+                                VISITOR LOG (0)
+                            </div>
+                            <div class="empty-section">
+                                No visitors logged during this period
+                            </div>
+                        </t>
+
+                        <!-- Guard Attendance Section -->
+                        <t t-if="doc.attendance_ids">
+                            <div class="section-header">
+                                GUARD ATTENDANCE RECORD (<t t-esc="len(doc.attendance_ids)"/>)
+                            </div>
+                            <table class="enhanced-table">
+                                <thead>
+                                    <tr>
+                                        <th width="20%">Guard Name</th>
+                                        <th width="12%">Badge No.</th>
+                                        <th width="12%">Check-In</th>
+                                        <th width="12%">Check-Out</th>
+                                        <th width="10%">Hours</th>
+                                        <th width="12%">Shift</th>
+                                        <th width="10%">Status</th>
+                                        <th width="12%">Location</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="doc.attendance_ids" t-as="attendance">
+                                        <td><strong><span t-field="attendance.guard_id.name"/></strong></td>
+                                        <td><span t-field="attendance.guard_id.badge_number"/></td>
+                                        <td><span t-field="attendance.checkin_time" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                        <td><span t-field="attendance.checkout_time" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                        <td><t t-esc="'%.1f' % attendance.hours_worked"/></td>
+                                        <td><span t-field="attendance.shift_id.name"/></td>
+                                        <td>
+                                            <span class="badge-custom" 
+                                                  t-att-class="{'badge-success-custom': attendance.status == 'completed',
+                                                                'badge-info': attendance.status == 'ongoing'}">
+                                                <t t-esc="attendance.status"/>
+                                            </span>
+                                        </td>
+                                        <td><span t-field="attendance.checkin_location"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+                        <t t-else="">
+                            <div class="section-header">
+                                GUARD ATTENDANCE RECORD (0)
+                            </div>
+                            <div class="empty-section">
+                                No attendance records for this period
+                            </div>
+                        </t>
+
+                        <!-- Tasks Section -->
+                        <t t-if="doc.task_ids">
+                            <div class="section-header">
+                                TASKS &amp; ASSIGNMENTS (<t t-esc="len(doc.task_ids)"/>)
+                            </div>
+                            <table class="enhanced-table">
+                                <thead>
+                                    <tr>
+                                        <th width="25%">Task Description</th>
+                                        <th width="12%">Type</th>
+                                        <th width="12%">Priority</th>
+                                        <th width="15%">Assigned To</th>
+                                        <th width="10%">Due</th>
+                                        <th width="10%">Completed</th>
+                                        <th width="8%">Progress</th>
+                                        <th width="8%">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="doc.task_ids" t-as="task">
+                                        <td><strong><span t-field="task.name"/></strong></td>
+                                        <td><span t-field="task.task_type"/></td>
+                                        <td>
+                                            <span class="badge-custom" 
+                                                  t-att-class="{'badge-critical': task.priority == 'urgent',
+                                                                'badge-high': task.priority == 'high',
+                                                                'badge-medium': task.priority == 'normal',
+                                                                'badge-low': task.priority == 'low'}">
+                                                <t t-esc="task.priority or 'Normal'"/>
+                                            </span>
+                                        </td>
+                                        <td><span t-field="task.assigned_to.name"/></td>
+                                        <td><span t-field="task.due_date" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                        <td><span t-field="task.completed_date" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                        <td><t t-if="task.progress_percentage"><t t-esc="'%d%%' % task.progress_percentage"/></t></td>
+                                        <td>
+                                            <span class="badge-custom" 
+                                                  t-att-class="{'badge-success-custom': task.state == 'completed',
+                                                                'badge-warning-custom': task.state == 'in_progress',
+                                                                'badge-secondary-custom': task.state == 'pending'}">
+                                                <t t-esc="task.state"/>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+                        <t t-else="">
+                            <div class="section-header">
+                                TASKS &amp; ASSIGNMENTS (0)
+                            </div>
+                            <div class="empty-section">
+                                No tasks recorded for this period
+                            </div>
+                        </t>
+
+                        <!-- Packages Section -->
+                        <t t-if="doc.package_ids">
+                            <div class="section-header">
+                                PACKAGE MANAGEMENT (<t t-esc="len(doc.package_ids)"/>)
+                            </div>
+                            <table class="enhanced-table">
+                                <thead>
+                                    <tr>
+                                        <th width="12%">Reference</th>
+                                        <th width="12%">Type</th>
+                                        <th width="15%">Courier</th>
+                                        <th width="15%">Recipient</th>
+                                        <th width="10%">Received</th>
+                                        <th width="10%">Collected</th>
+                                        <th width="13%">Received By</th>
+                                        <th width="13%">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="doc.package_ids" t-as="package">
+                                        <td><strong><span t-field="package.name"/></strong></td>
+                                        <td><span t-field="package.package_type"/></td>
+                                        <td><span t-field="package.courier_company"/></td>
+                                        <td><span t-field="package.recipient_name"/></td>
+                                        <td><span t-field="package.received_date" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                        <td><span t-field="package.collected_date" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                        <td><span t-field="package.received_by.name"/></td>
+                                        <td>
+                                            <span class="badge-custom" 
+                                                  t-att-class="{'badge-success-custom': package.state == 'collected',
+                                                                'badge-warning-custom': package.state == 'pending_collection',
+                                                                'badge-info': package.state == 'received'}">
+                                                <t t-esc="package.state"/>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+                        <t t-else="">
+                            <div class="section-header">
+                                PACKAGE MANAGEMENT (0)
+                            </div>
+                            <div class="empty-section">
+                                No packages received during this period
+                            </div>
+                        </t>
+
+                        <!-- Lost &amp; Found Section -->
+                        <t t-if="doc.lost_found_ids">
+                            <div class="section-header">
+                                LOST &amp; FOUND ITEMS (<t t-esc="len(doc.lost_found_ids)"/>)
+                            </div>
+                            <table class="enhanced-table">
+                                <thead>
+                                    <tr>
+                                        <th width="12%">Reference</th>
+                                        <th width="15%">Category</th>
+                                        <th width="28%">Description</th>
+                                        <th width="12%">Location</th>
+                                        <th width="12%">Found By</th>
+                                        <th width="10%">Found Date</th>
+                                        <th width="11%">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="doc.lost_found_ids" t-as="item">
+                                        <td><strong><span t-field="item.name"/></strong></td>
+                                        <td><span t-field="item.item_category"/></td>
+                                        <td><span t-field="item.description"/></td>
+                                        <td><span t-field="item.found_location"/></td>
+                                        <td><span t-field="item.found_by.name"/></td>
+                                        <td><span t-field="item.found_date" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                        <td>
+                                            <span class="badge-custom" 
+                                                  t-att-class="{'badge-success-custom': item.state == 'claimed',
+                                                                'badge-warning-custom': item.state == 'stored',
+                                                                'badge-info': item.state == 'found'}">
+                                                <t t-esc="item.state"/>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+                        <t t-else="">
+                            <div class="section-header">
+                                LOST &amp; FOUND ITEMS (0)
+                            </div>
+                            <div class="empty-section">
+                                No lost &amp; found items logged during this period
+                            </div>
+                        </t>
+
+                        <!-- Special Notes Section -->
+                        <t t-if="doc.special_notes">
+                            <div class="section-header">
+                                SPECIAL NOTES &amp; OBSERVATIONS
+                            </div>
+                            <div class="notes-section">
+                                <span t-field="doc.special_notes"/>
+                            </div>
+                        </t>
+
+                        <!-- Handover Notes Section -->
+                        <t t-if="doc.handover_notes">
+                            <div class="section-header">
+                                SHIFT HANDOVER NOTES
+                            </div>
+                            <div class="notes-section">
+                                <span t-field="doc.handover_notes"/>
+                            </div>
+                        </t>
+
+                        <!-- Attachments Section -->
+                        <t t-if="doc.attachment_ids">
+                            <div class="section-header">
+                                ATTACHMENTS &amp; PHOTOS (<t t-esc="len(doc.attachment_ids)"/>)
+                            </div>
+                            <div style="margin: 15px 0;">
+                                <t t-set="image_attachments" t-value="doc.attachment_ids.filtered(lambda a: a.mimetype and a.mimetype.startswith('image/'))"/>
+                                <t t-if="image_attachments">
+                                    <div class="attachment-grid">
+                                        <t t-foreach="image_attachments[:6]" t-as="attachment">
+                                            <div class="attachment-item">
+                                                <img t-att-src="'data:%s;base64,%s' % (attachment.mimetype, attachment.datas.decode('utf-8'))" 
+                                                     t-att-alt="attachment.name"/>
+                                                <div class="caption"><t t-esc="attachment.name"/></div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                                <t t-set="document_attachments" t-value="doc.attachment_ids.filtered(lambda a: not (a.mimetype and a.mimetype.startswith('image/')))"/>
+                                <t t-if="document_attachments">
+                                    <div style="margin-top: 15px;">
+                                        <h5 style="font-size: 14px; font-weight: 600; margin-bottom: 10px;">Document Attachments:</h5>
+                                        <ul style="margin: 0; padding-left: 20px;">
+                                            <t t-foreach="document_attachments" t-as="doc_attachment">
+                                                <li style="margin-bottom: 5px;">
+                                                    <strong><t t-esc="doc_attachment.name"/></strong>
+                                                    <span style="color: #6c757d; font-size: 11px;">
+                                                        (<t t-esc="'%.1f KB' % (doc_attachment.file_size / 1024) if doc_attachment.file_size else 'N/A'"/>)
+                                                    </span>
+                                                </li>
+                                            </t>
+                                        </ul>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+
+                        <!-- Review Information -->
+                        <t t-if="doc.state in ['approved', 'sent', 'submitted']">
+                            <div class="section-header">
+                                REVIEW &amp; APPROVAL INFORMATION
+                            </div>
+                            <div class="info-card" style="background: #e7f3ff; border-left-color: #0dcaf0;">
+                                <div class="info-grid">
+                                    <div class="info-row" t-if="doc.submitted_by">
+                                        <div class="info-label">Submitted By:</div>
+                                        <div class="info-value">
+                                            <strong><span t-field="doc.submitted_by.name"/></strong>
+                                            <t t-if="doc.submitted_by.badge_number">
+                                                (Badge: <span t-field="doc.submitted_by.badge_number"/>)
+                                            </t>
+                                        </div>
+                                    </div>
+                                    <div class="info-row" t-if="doc.submitted_date">
+                                        <div class="info-label">Submission Date/Time:</div>
+                                        <div class="info-value">
+                                            <span t-field="doc.submitted_date" t-options='{"widget": "datetime", "format": "EEEE, MMMM d, yyyy HH:mm"}'/>
+                                        </div>
+                                    </div>
+                                    <div class="info-row" t-if="doc.reviewed_by">
+                                        <div class="info-label">Reviewed By:</div>
+                                        <div class="info-value"><strong><span t-field="doc.reviewed_by.name"/></strong></div>
+                                    </div>
+                                    <div class="info-row" t-if="doc.reviewed_date">
+                                        <div class="info-label">Review Date/Time:</div>
+                                        <div class="info-value">
+                                            <span t-field="doc.reviewed_date" t-options='{"widget": "datetime", "format": "EEEE, MMMM d, yyyy HH:mm"}'/>
+                                        </div>
+                                    </div>
+                                    <div class="info-row" t-if="doc.review_notes">
+                                        <div class="info-label">Review Notes:</div>
+                                        <div class="info-value"><span t-field="doc.review_notes"/></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- Signature Section -->
+                        <div class="signature-section">
+                            <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 20px;">
+                                <div style="display: table-cell; width: 50%;">
+                                    <div class="signature-box">
+                                        <div class="line"></div>
+                                        <strong>Prepared By</strong><br/>
+                                        <t t-if="doc.submitted_by">
+                                            <span t-field="doc.submitted_by.name"/><br/>
+                                            <span style="font-size: 11px; color: #6c757d;">
+                                                <span t-field="doc.submitted_date" t-options='{"widget": "date"}'/>
+                                            </span>
+                                        </t>
+                                    </div>
+                                </div>
+                                <div style="display: table-cell; width: 50%;">
+                                    <div class="signature-box">
+                                        <div class="line"></div>
+                                        <strong>Reviewed &amp; Approved By</strong><br/>
+                                        <t t-if="doc.reviewed_by">
+                                            <span t-field="doc.reviewed_by.name"/><br/>
+                                            <span style="font-size: 11px; color: #6c757d;">
+                                                <span t-field="doc.reviewed_date" t-options='{"widget": "date"}'/>
+                                            </span>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Report Footer -->
+                        <div class="report-footer">
+                            <div style="border-top: 2px solid #667eea; padding-top: 15px; margin-top: 20px;">
+                                <p style="margin: 5px 0;">
+                                    <strong>Report Reference:</strong> <span t-field="doc.name"/> | 
+                                    <strong>Site:</strong> <span t-field="doc.site_id.name"/> | 
+                                    <strong>Date:</strong> <span t-field="doc.report_date" t-options='{"widget": "date"}'/>
+                                </p>
+                                <p style="margin: 5px 0;">
+                                    Generated on <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%B %d, %Y at %H:%M:%S')"/>
+                                </p>
+                                <p style="margin: 5px 0; font-style: italic;">
+                                    This is a computer-generated document. For questions or clarifications, please contact the security operations team.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Action -->
+    <record id="action_daily_activity_report_pdf" model="ir.actions.report">
+        <field name="name">Daily Activity Report</field>
+        <field name="model">daily.activity.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.daily_activity_report_pdf_template</field>
+        <field name="report_file">guardpro.daily_activity_report_pdf_template</field>
+        <field name="print_report_name">'DAR_%s_%s' % (object.site_id.name, object.report_date)</field>
+        <field name="binding_model_id" ref="model_daily_activity_report"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>
+
+

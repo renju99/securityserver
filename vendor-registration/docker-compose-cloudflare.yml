@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  form-backend:
+    build: .
+    container_name: vendor-form-backend
+    ports:
+      - "127.0.0.1:3001:3000"  # Only bind to localhost, not all interfaces
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - CORS_ORIGIN=*
+    volumes:
+      - ./uploads:/app/uploads
+      - ./data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - vendor-form-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: vendor-form-nginx
+    # Expose on localhost so guardpro cloudflared (network_mode: host) can access it
+    ports:
+      - "127.0.0.1:9000:80"
+    volumes:
+      - ./nginx-docker.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx-logs:/var/log/nginx
+    depends_on:
+      - form-backend
+    restart: unless-stopped
+    networks:
+      - vendor-form-network
+
+networks:
+  vendor-form-network:
+    driver: bridge
+
+

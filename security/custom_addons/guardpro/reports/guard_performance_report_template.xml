@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Guard Performance PDF Report Template -->
+    <template id="guard_performance_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        
+                        <!-- Header -->
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h2>Guard Performance Review</h2>
+                            </div>
+                        </div>
+
+                        <!-- Guard Information -->
+                        <div class="row mt-3">
+                            <div class="col-6">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><strong>Guard Name:</strong></td>
+                                        <td t-field="o.guard_id.name"/>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Employee ID:</strong></td>
+                                        <td t-field="o.guard_id.employee_id"/>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><strong>Review Period:</strong></td>
+                                        <td>
+                                            <span t-field="o.period_start"/> to 
+                                            <span t-field="o.period_end"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Reviewer:</strong></td>
+                                        <td t-field="o.reviewer_id.name"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Overall Score -->
+                        <div class="row mt-3">
+                            <div class="col-12 text-center">
+                                <h3>
+                                    Overall Score: 
+                                    <t t-if="o.overall_score &gt;= 90">
+                                        <span class="badge bg-success" style="font-size: 1.5em;">
+                                            <span t-field="o.overall_score"/>%
+                                        </span>
+                                    </t>
+                                    <t t-elif="o.overall_score &gt;= 75">
+                                        <span class="badge bg-info" style="font-size: 1.5em;">
+                                            <span t-field="o.overall_score"/>%
+                                        </span>
+                                    </t>
+                                    <t t-elif="o.overall_score &gt;= 60">
+                                        <span class="badge bg-warning" style="font-size: 1.5em;">
+                                            <span t-field="o.overall_score"/>%
+                                        </span>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="badge bg-danger" style="font-size: 1.5em;">
+                                            <span t-field="o.overall_score"/>%
+                                        </span>
+                                    </t>
+                                </h3>
+                                <p t-if="o.rating">
+                                    <strong>Rating:</strong>
+                                    <span t-field="o.rating"/>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Performance Metrics -->
+                        <div class="row mt-4" t-if="o.metric_ids">
+                            <div class="col-12">
+                                <h5>Performance Metrics</h5>
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr class="table-active">
+                                            <th>Criteria</th>
+                                            <th>Weight</th>
+                                            <th>Score</th>
+                                            <th>Weighted Score</th>
+                                            <th>Comments</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="o.metric_ids" t-as="metric">
+                                            <tr>
+                                                <td t-field="metric.criteria_id.name"/>
+                                                <td>
+                                                    <span t-field="metric.criteria_id.weight"/>%
+                                                </td>
+                                                <td>
+                                                    <span t-field="metric.score"/>
+                                                </td>
+                                                <td>
+                                                    <span t-field="metric.weighted_score"/>
+                                                </td>
+                                                <td t-field="metric.comments"/>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Strengths -->
+                        <div class="row mt-3" t-if="o.strengths">
+                            <div class="col-12">
+                                <h5>Strengths</h5>
+                                <p t-field="o.strengths"/>
+                            </div>
+                        </div>
+
+                        <!-- Areas for Improvement -->
+                        <div class="row mt-3" t-if="o.areas_for_improvement">
+                            <div class="col-12">
+                                <h5>Areas for Improvement</h5>
+                                <p t-field="o.areas_for_improvement"/>
+                            </div>
+                        </div>
+
+                        <!-- Goals -->
+                        <div class="row mt-3" t-if="o.goals">
+                            <div class="col-12">
+                                <h5>Goals for Next Review Period</h5>
+                                <p t-field="o.goals"/>
+                            </div>
+                        </div>
+
+                        <!-- Training Recommendations -->
+                        <div class="row mt-3" t-if="o.training_recommendations">
+                            <div class="col-12">
+                                <h5>Training Recommendations</h5>
+                                <p t-field="o.training_recommendations"/>
+                            </div>
+                        </div>
+
+                        <!-- Signature Section -->
+                        <div class="row mt-5">
+                            <div class="col-6">
+                                <div class="border-top pt-2">
+                                    <p><strong>Reviewer:</strong></p>
+                                    <p t-field="o.reviewer_id.name"></p>
+                                    <p>Date: <span t-field="o.review_date"/></p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border-top pt-2">
+                                    <p><strong>Guard Acknowledgment:</strong></p>
+                                    <p t-field="o.guard_id.name"></p>
+                                    <p>Signature: ___________________</p>
+                                    <p>Date: ___________________</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="row mt-5">
+                            <div class="col-12 text-center text-muted">
+                                <small>
+                                    Performance Review - Confidential HR Document
+                                    <br/>
+                                    This document is for internal use only
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Definition -->
+    <record id="action_report_guard_performance" model="ir.actions.report">
+        <field name="name">Performance Review</field>
+        <field name="model">guard.performance.review</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.guard_performance_report_template</field>
+        <field name="report_file">guardpro.guard_performance_report_template</field>
+        <field name="binding_model_id" ref="model_guard_performance_review"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Performance_Review_%s_%s' % (object.guard_id.name, object.period_start)</field>
+    </record>
+</odoo>
+

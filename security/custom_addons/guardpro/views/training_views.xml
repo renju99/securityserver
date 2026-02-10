@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Training Course List View -->
+    <record id="view_training_course_list" model="ir.ui.view">
+        <field name="name">training.course.list</field>
+        <field name="model">training.course</field>
+        <field name="arch" type="xml">
+            <list string="Training Courses" decoration-muted="not active">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="category_id"/>
+                <field name="level" widget="badge"/>
+                <field name="duration_hours"/>
+                <field name="is_mandatory" widget="boolean"/>
+                <field name="enrollment_count"/>
+                <field name="completion_count"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Training Course Form View -->
+    <record id="view_training_course_form" model="ir.ui.view">
+        <field name="name">training.course.form</field>
+        <field name="model">training.course</field>
+        <field name="arch" type="xml">
+            <form string="Training Course">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button type="object" 
+                                name="action_view_enrollments"
+                                class="oe_stat_button" 
+                                icon="fa-users">
+                            <field name="enrollment_count" widget="statinfo" string="Enrolled"/>
+                        </button>
+                    </div>
+                    
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g., Security Guard Basics"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="category_id"/>
+                            <field name="level"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group>
+                            <field name="duration_hours" widget="float_time"/>
+                            <field name="is_mandatory"/>
+                            <field name="validity_months"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Description">
+                            <field name="description" widget="html"/>
+                        </page>
+                        
+                        <page string="Lessons">
+                            <field name="lesson_ids">
+                                <list string="Lessons" editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="lesson_type"/>
+                                    <field name="duration_minutes"/>
+                                </list>
+                            </field>
+                        </page>
+                        
+                        <page string="Quizzes">
+                            <field name="quiz_ids">
+                                <list string="Quizzes">
+                                    <field name="name"/>
+                                    <field name="passing_score"/>
+                                    <field name="time_limit_minutes"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Training Enrollment List View -->
+    <record id="view_training_enrollment_list" model="ir.ui.view">
+        <field name="name">training.enrollment.list</field>
+        <field name="model">training.enrollment</field>
+        <field name="arch" type="xml">
+            <list string="Training Enrollments" 
+                  decoration-success="status == 'completed'"
+                  decoration-warning="status == 'in_progress'">
+                <field name="guard_id"/>
+                <field name="course_id"/>
+                <field name="enroll_date"/>
+                <field name="completion_date"/>
+                <field name="progress_percentage" widget="progressbar"/>
+                <field name="quiz_score"/>
+                <field name="status" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_training_course" model="ir.actions.act_window">
+        <field name="name">Training Courses</field>
+        <field name="res_model">training.course</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_training_enrollment" model="ir.actions.act_window">
+        <field name="name">Training Enrollments</field>
+        <field name="res_model">training.enrollment</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menus (now defined in guardpro_menus.xml) -->
+    <!--
+    <menuitem id="menu_training_root" 
+              name="Training" 
+              parent="guardpro.menu_guardpro_root" 
+              sequence="70"/>
+    
+    <menuitem id="menu_training_course" 
+              name="Courses" 
+              parent="menu_training_root" 
+              action="action_training_course" 
+              sequence="10"/>
+    
+    <menuitem id="menu_training_enrollment" 
+              name="Enrollments" 
+              parent="menu_training_root" 
+              action="action_training_enrollment" 
+              sequence="20"/>
+    -->
+
+</odoo>

@@ -1,0 +1,612 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- ========================================== -->
+        <!-- SECURITY INCIDENT INVESTIGATION TEMPLATES -->
+        <!-- ========================================== -->
+        
+        <!-- 1. Theft Investigation Template -->
+        <record id="investigation_template_theft" model="incident.investigation.template">
+            <field name="name">Theft Investigation</field>
+            <field name="investigation_type">detailed</field>
+            <field name="icon">fa-user-secret</field>
+            <field name="color">1</field>
+            <field name="description">Comprehensive investigation template for theft incidents including property theft, shoplifting, and employee theft</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 2. Trespassing Investigation Template -->
+        <record id="investigation_template_trespassing" model="incident.investigation.template">
+            <field name="name">Trespassing Investigation</field>
+            <field name="investigation_type">routine</field>
+            <field name="icon">fa-ban</field>
+            <field name="color">2</field>
+            <field name="description">Investigation template for unauthorized entry and trespassing incidents</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+        </record>
+        
+        <!-- 3. Vandalism Investigation Template -->
+        <record id="investigation_template_vandalism" model="incident.investigation.template">
+            <field name="name">Vandalism Investigation</field>
+            <field name="investigation_type">detailed</field>
+            <field name="icon">fa-hammer</field>
+            <field name="color">3</field>
+            <field name="description">Investigation template for property damage and vandalism incidents</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+        </record>
+        
+        <!-- 4. Assault Investigation Template -->
+        <record id="investigation_template_assault" model="incident.investigation.template">
+            <field name="name">Assault Investigation</field>
+            <field name="investigation_type">formal</field>
+            <field name="icon">fa-exclamation-triangle</field>
+            <field name="color">1</field>
+            <field name="description">Formal investigation template for assault and physical altercation incidents</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 5. Suspicious Activity Investigation -->
+        <record id="investigation_template_suspicious" model="incident.investigation.template">
+            <field name="name">Suspicious Activity Investigation</field>
+            <field name="investigation_type">routine</field>
+            <field name="icon">fa-eye</field>
+            <field name="color">9</field>
+            <field name="description">Investigation template for suspicious persons or activities</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+        </record>
+        
+        <!-- ========================================== -->
+        <!-- EMERGENCY INCIDENT INVESTIGATION TEMPLATES -->
+        <!-- ========================================== -->
+        
+        <!-- 6. Fire Emergency Investigation -->
+        <record id="investigation_template_fire" model="incident.investigation.template">
+            <field name="name">Fire Emergency Investigation</field>
+            <field name="investigation_type">root_cause</field>
+            <field name="icon">fa-fire</field>
+            <field name="color">1</field>
+            <field name="description">Root cause analysis for fire emergencies and fire alarm activations</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 7. Medical Emergency Investigation -->
+        <record id="investigation_template_medical" model="incident.investigation.template">
+            <field name="name">Medical Emergency Investigation</field>
+            <field name="investigation_type">detailed</field>
+            <field name="icon">fa-ambulance</field>
+            <field name="color">1</field>
+            <field name="description">Investigation template for medical emergencies and health incidents</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+        </record>
+        
+        <!-- 8. Evacuation Investigation -->
+        <record id="investigation_template_evacuation" model="incident.investigation.template">
+            <field name="name">Evacuation Investigation</field>
+            <field name="investigation_type">detailed</field>
+            <field name="icon">fa-sign-out</field>
+            <field name="color">9</field>
+            <field name="description">Investigation template for building evacuations and emergency drills</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+        </record>
+        
+        <!-- 9. Bomb Threat Investigation -->
+        <record id="investigation_template_bomb_threat" model="incident.investigation.template">
+            <field name="name">Bomb Threat Investigation</field>
+            <field name="investigation_type">formal</field>
+            <field name="icon">fa-bomb</field>
+            <field name="color">1</field>
+            <field name="description">Formal investigation for bomb threats and suspicious packages</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 10. Hazmat Incident Investigation -->
+        <record id="investigation_template_hazmat" model="incident.investigation.template">
+            <field name="name">Hazmat Incident Investigation</field>
+            <field name="investigation_type">root_cause</field>
+            <field name="icon">fa-flask</field>
+            <field name="color">1</field>
+            <field name="description">Investigation template for hazardous materials incidents and chemical spills</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- ========================================== -->
+        <!-- WORKPLACE INCIDENT INVESTIGATION TEMPLATES -->
+        <!-- ========================================== -->
+        
+        <!-- 11. Workplace Injury Investigation -->
+        <record id="investigation_template_workplace_injury" model="incident.investigation.template">
+            <field name="name">Workplace Injury Investigation</field>
+            <field name="investigation_type">root_cause</field>
+            <field name="icon">fa-medkit</field>
+            <field name="color">2</field>
+            <field name="description">Root cause analysis for workplace injuries and accidents</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 12. Slip, Trip, and Fall Investigation -->
+        <record id="investigation_template_slip_trip_fall" model="incident.investigation.template">
+            <field name="name">Slip, Trip, and Fall Investigation</field>
+            <field name="investigation_type">detailed</field>
+            <field name="icon">fa-warning</field>
+            <field name="color">9</field>
+            <field name="description">Investigation template for slip, trip, and fall incidents</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+        </record>
+        
+        <!-- 13. Equipment Malfunction Investigation -->
+        <record id="investigation_template_equipment_malfunction" model="incident.investigation.template">
+            <field name="name">Equipment Malfunction Investigation</field>
+            <field name="investigation_type">root_cause</field>
+            <field name="icon">fa-cog</field>
+            <field name="color">3</field>
+            <field name="description">Root cause analysis for equipment failures and malfunctions</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">False</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 14. Near Miss Investigation -->
+        <record id="investigation_template_near_miss" model="incident.investigation.template">
+            <field name="name">Near Miss Investigation</field>
+            <field name="investigation_type">detailed</field>
+            <field name="icon">fa-shield</field>
+            <field name="color">9</field>
+            <field name="description">Investigation template for near miss incidents and close calls</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+        </record>
+        
+        <!-- 15. Occupational Health Incident -->
+        <record id="investigation_template_occupational_health" model="incident.investigation.template">
+            <field name="name">Occupational Health Incident</field>
+            <field name="investigation_type">detailed</field>
+            <field name="icon">fa-heartbeat</field>
+            <field name="color">2</field>
+            <field name="description">Investigation template for occupational health issues and exposure incidents</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+        </record>
+        
+        <!-- ========================================== -->
+        <!-- VEHICLE INCIDENT INVESTIGATION TEMPLATES -->
+        <!-- ========================================== -->
+        
+        <!-- 16. Vehicle Accident Investigation -->
+        <record id="investigation_template_vehicle_accident" model="incident.investigation.template">
+            <field name="name">Vehicle Accident Investigation</field>
+            <field name="investigation_type">detailed</field>
+            <field name="icon">fa-car</field>
+            <field name="color">1</field>
+            <field name="description">Investigation template for vehicle accidents and collisions</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 17. Parking Incident Investigation -->
+        <record id="investigation_template_parking" model="incident.investigation.template">
+            <field name="name">Parking Incident Investigation</field>
+            <field name="investigation_type">routine</field>
+            <field name="icon">fa-parking</field>
+            <field name="color">3</field>
+            <field name="description">Investigation template for parking lot incidents and vehicle damage</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+        </record>
+        
+        <!-- 18. Hit and Run Investigation -->
+        <record id="investigation_template_hit_and_run" model="incident.investigation.template">
+            <field name="name">Hit and Run Investigation</field>
+            <field name="investigation_type">formal</field>
+            <field name="icon">fa-car-crash</field>
+            <field name="color">1</field>
+            <field name="description">Formal investigation for hit and run incidents</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- ========================================== -->
+        <!-- COMPLIANCE INVESTIGATION TEMPLATES -->
+        <!-- ========================================== -->
+        
+        <!-- 19. Policy Violation Investigation -->
+        <record id="investigation_template_policy_violation" model="incident.investigation.template">
+            <field name="name">Policy Violation Investigation</field>
+            <field name="investigation_type">compliance</field>
+            <field name="icon">fa-gavel</field>
+            <field name="color">2</field>
+            <field name="description">Compliance investigation for policy and procedure violations</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 20. Harassment Investigation -->
+        <record id="investigation_template_harassment" model="incident.investigation.template">
+            <field name="name">Harassment Investigation</field>
+            <field name="investigation_type">formal</field>
+            <field name="icon">fa-user-times</field>
+            <field name="color">1</field>
+            <field name="description">Formal investigation for harassment and discrimination complaints</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 21. Fraud Investigation -->
+        <record id="investigation_template_fraud" model="incident.investigation.template">
+            <field name="name">Fraud Investigation</field>
+            <field name="investigation_type">formal</field>
+            <field name="icon">fa-money-bill-wave</field>
+            <field name="color">1</field>
+            <field name="description">Formal investigation for fraud, embezzlement, and financial misconduct</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 22. Data Breach Investigation -->
+        <record id="investigation_template_data_breach" model="incident.investigation.template">
+            <field name="name">Data Breach Investigation</field>
+            <field name="investigation_type">formal</field>
+            <field name="icon">fa-database</field>
+            <field name="color">1</field>
+            <field name="description">Investigation template for data breaches and information security incidents</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 23. Regulatory Compliance Investigation -->
+        <record id="investigation_template_regulatory" model="incident.investigation.template">
+            <field name="name">Regulatory Compliance Investigation</field>
+            <field name="investigation_type">compliance</field>
+            <field name="icon">fa-balance-scale</field>
+            <field name="color">2</field>
+            <field name="description">Investigation template for regulatory compliance violations</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- ========================================== -->
+        <!-- PROPERTY & FACILITY INVESTIGATION TEMPLATES -->
+        <!-- ========================================== -->
+        
+        <!-- 24. Water Damage Investigation -->
+        <record id="investigation_template_water_damage" model="incident.investigation.template">
+            <field name="name">Water Damage Investigation</field>
+            <field name="investigation_type">root_cause</field>
+            <field name="icon">fa-tint</field>
+            <field name="color">3</field>
+            <field name="description">Root cause analysis for water damage and flooding incidents</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">False</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 25. Power Outage Investigation -->
+        <record id="investigation_template_power_outage" model="incident.investigation.template">
+            <field name="name">Power Outage Investigation</field>
+            <field name="investigation_type">root_cause</field>
+            <field name="icon">fa-bolt</field>
+            <field name="color">9</field>
+            <field name="description">Investigation template for power outages and electrical failures</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">False</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 26. Elevator Incident Investigation -->
+        <record id="investigation_template_elevator" model="incident.investigation.template">
+            <field name="name">Elevator Incident Investigation</field>
+            <field name="investigation_type">detailed</field>
+            <field name="icon">fa-arrows-alt-v</field>
+            <field name="color">2</field>
+            <field name="description">Investigation template for elevator malfunctions and entrapments</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+        </record>
+        
+        <!-- 27. HVAC System Failure Investigation -->
+        <record id="investigation_template_hvac" model="incident.investigation.template">
+            <field name="name">HVAC System Failure Investigation</field>
+            <field name="investigation_type">root_cause</field>
+            <field name="icon">fa-fan</field>
+            <field name="color">3</field>
+            <field name="description">Root cause analysis for HVAC system failures</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">False</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 28. Access Control Breach Investigation -->
+        <record id="investigation_template_access_control" model="incident.investigation.template">
+            <field name="name">Access Control Breach Investigation</field>
+            <field name="investigation_type">detailed</field>
+            <field name="icon">fa-key</field>
+            <field name="color">2</field>
+            <field name="description">Investigation template for access control system breaches and unauthorized access</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+        </record>
+        
+        <!-- ========================================== -->
+        <!-- CYBERSECURITY INVESTIGATION TEMPLATES -->
+        <!-- ========================================== -->
+        
+        <!-- 29. Phishing Attack Investigation -->
+        <record id="investigation_template_phishing" model="incident.investigation.template">
+            <field name="name">Phishing Attack Investigation</field>
+            <field name="investigation_type">formal</field>
+            <field name="icon">fa-fish</field>
+            <field name="color">1</field>
+            <field name="description">Investigation template for phishing attacks and social engineering</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 30. Malware Incident Investigation -->
+        <record id="investigation_template_malware" model="incident.investigation.template">
+            <field name="name">Malware Incident Investigation</field>
+            <field name="investigation_type">formal</field>
+            <field name="icon">fa-bug</field>
+            <field name="color">1</field>
+            <field name="description">Investigation template for malware infections and virus outbreaks</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">False</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 31. Network Intrusion Investigation -->
+        <record id="investigation_template_network_intrusion" model="incident.investigation.template">
+            <field name="name">Network Intrusion Investigation</field>
+            <field name="investigation_type">formal</field>
+            <field name="icon">fa-network-wired</field>
+            <field name="color">1</field>
+            <field name="description">Formal investigation for network intrusions and cyber attacks</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">False</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- ========================================== -->
+        <!-- ENVIRONMENTAL INVESTIGATION TEMPLATES -->
+        <!-- ========================================== -->
+        
+        <!-- 32. Environmental Spill Investigation -->
+        <record id="investigation_template_environmental_spill" model="incident.investigation.template">
+            <field name="name">Environmental Spill Investigation</field>
+            <field name="investigation_type">root_cause</field>
+            <field name="icon">fa-leaf</field>
+            <field name="color">10</field>
+            <field name="description">Root cause analysis for environmental spills and contamination</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 33. Air Quality Incident Investigation -->
+        <record id="investigation_template_air_quality" model="incident.investigation.template">
+            <field name="name">Air Quality Incident Investigation</field>
+            <field name="investigation_type">detailed</field>
+            <field name="icon">fa-wind</field>
+            <field name="color">3</field>
+            <field name="description">Investigation template for air quality issues and ventilation problems</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+        </record>
+        
+        <!-- 34. Noise Complaint Investigation -->
+        <record id="investigation_template_noise" model="incident.investigation.template">
+            <field name="name">Noise Complaint Investigation</field>
+            <field name="investigation_type">routine</field>
+            <field name="icon">fa-volume-up</field>
+            <field name="color">9</field>
+            <field name="description">Investigation template for noise complaints and disturbances</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+        </record>
+        
+        <!-- ========================================== -->
+        <!-- CUSTOMER/VISITOR INVESTIGATION TEMPLATES -->
+        <!-- ========================================== -->
+        
+        <!-- 35. Customer Complaint Investigation -->
+        <record id="investigation_template_customer_complaint" model="incident.investigation.template">
+            <field name="name">Customer Complaint Investigation</field>
+            <field name="investigation_type">detailed</field>
+            <field name="icon">fa-comment-dots</field>
+            <field name="color">9</field>
+            <field name="description">Investigation template for customer complaints and service issues</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+        </record>
+        
+        <!-- 36. Visitor Incident Investigation -->
+        <record id="investigation_template_visitor" model="incident.investigation.template">
+            <field name="name">Visitor Incident Investigation</field>
+            <field name="investigation_type">routine</field>
+            <field name="icon">fa-user-check</field>
+            <field name="color">3</field>
+            <field name="description">Investigation template for incidents involving visitors and guests</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+        </record>
+        
+        <!-- 37. Lost Property Investigation -->
+        <record id="investigation_template_lost_property" model="incident.investigation.template">
+            <field name="name">Lost Property Investigation</field>
+            <field name="investigation_type">routine</field>
+            <field name="icon">fa-search</field>
+            <field name="color">3</field>
+            <field name="description">Investigation template for lost and found property incidents</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+        </record>
+        
+        <!-- ========================================== -->
+        <!-- OPERATIONAL INVESTIGATION TEMPLATES -->
+        <!-- ========================================== -->
+        
+        <!-- 38. Guard Misconduct Investigation -->
+        <record id="investigation_template_guard_misconduct" model="incident.investigation.template">
+            <field name="name">Guard Misconduct Investigation</field>
+            <field name="investigation_type">internal</field>
+            <field name="icon">fa-user-shield</field>
+            <field name="color">2</field>
+            <field name="description">Internal investigation for security guard misconduct and performance issues</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 39. Shift Handover Issue Investigation -->
+        <record id="investigation_template_shift_handover" model="incident.investigation.template">
+            <field name="name">Shift Handover Issue Investigation</field>
+            <field name="investigation_type">routine</field>
+            <field name="icon">fa-exchange-alt</field>
+            <field name="color">9</field>
+            <field name="description">Investigation template for shift handover problems and communication failures</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+        </record>
+        
+        <!-- 40. Communication Breakdown Investigation -->
+        <record id="investigation_template_communication" model="incident.investigation.template">
+            <field name="name">Communication Breakdown Investigation</field>
+            <field name="investigation_type">detailed</field>
+            <field name="icon">fa-phone-slash</field>
+            <field name="color">2</field>
+            <field name="description">Investigation template for communication failures and radio system issues</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+        </record>
+        
+        <!-- 41. Emergency Response Failure Investigation -->
+        <record id="investigation_template_emergency_response" model="incident.investigation.template">
+            <field name="name">Emergency Response Failure Investigation</field>
+            <field name="investigation_type">root_cause</field>
+            <field name="icon">fa-siren</field>
+            <field name="color">1</field>
+            <field name="description">Root cause analysis for emergency response failures and delayed responses</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 42. SLA Breach Investigation -->
+        <record id="investigation_template_sla_breach" model="incident.investigation.template">
+            <field name="name">SLA Breach Investigation</field>
+            <field name="investigation_type">detailed</field>
+            <field name="icon">fa-clock</field>
+            <field name="color">2</field>
+            <field name="description">Investigation template for service level agreement breaches</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 43. Contractor Safety Incident Investigation -->
+        <record id="investigation_template_contractor_safety" model="incident.investigation.template">
+            <field name="name">Contractor Safety Incident Investigation</field>
+            <field name="investigation_type">detailed</field>
+            <field name="icon">fa-hard-hat</field>
+            <field name="color">2</field>
+            <field name="description">Investigation template for contractor-related safety incidents</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">True</field>
+        </record>
+        
+        <!-- 44. Alarm System Malfunction Investigation -->
+        <record id="investigation_template_alarm_malfunction" model="incident.investigation.template">
+            <field name="name">Alarm System Malfunction Investigation</field>
+            <field name="investigation_type">root_cause</field>
+            <field name="icon">fa-bell</field>
+            <field name="color">9</field>
+            <field name="description">Root cause analysis for alarm system failures and false alarms</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">False</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+        <!-- 45. CCTV System Failure Investigation -->
+        <record id="investigation_template_cctv_failure" model="incident.investigation.template">
+            <field name="name">CCTV System Failure Investigation</field>
+            <field name="investigation_type">root_cause</field>
+            <field name="icon">fa-video</field>
+            <field name="color">2</field>
+            <field name="description">Investigation template for CCTV camera and recording system failures</field>
+            <field name="include_timeline">True</field>
+            <field name="include_evidence_list">True</field>
+            <field name="include_witness_statements">False</field>
+            <field name="include_findings_detail">True</field>
+        </record>
+        
+    </data>
+</odoo>

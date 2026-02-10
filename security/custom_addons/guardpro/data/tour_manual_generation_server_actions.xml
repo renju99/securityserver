@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- ================================================================ -->
+        <!-- MANUAL TOUR GENERATION SERVER ACTIONS                           -->
+        <!-- ================================================================ -->
+        
+        <!-- Manual Tour Generation Server Action -->
+        <record id="action_manual_generate_tour" model="ir.actions.server">
+            <field name="name">Manual Generate Tour</field>
+            <field name="model_id" ref="model_security_tour"/>
+            <field name="binding_model_id" ref="model_security_tour"/>
+            <field name="binding_view_types">list,form</field>
+            <field name="state">code</field>
+            <field name="code">
+# Check if tour is active
+if record.status != 'active':
+    raise UserError(_('Cannot generate tour for inactive tour!'))
+
+# Open the manual generation wizard
+action = record.action_manual_generate_tour()
+            </field>
+        </record>
+        
+        <!-- Manual Tour Generation for Multiple Tours -->
+        <record id="action_manual_generate_multiple_tours" model="ir.actions.server">
+            <field name="name">Manual Generate Multiple Tours</field>
+            <field name="model_id" ref="model_security_tour"/>
+            <field name="binding_model_id" ref="model_security_tour"/>
+            <field name="binding_view_types">list</field>
+            <field name="state">code</field>
+            <field name="code">
+# Filter active tours
+active_tours = records.filtered(lambda r: r.status == 'active')
+if not active_tours:
+    raise UserError(_('No active tours selected!'))
+
+if len(active_tours) == 1:
+    # Single tour - open wizard
+    action = active_tours[0].action_manual_generate_tour()
+else:
+    # Multiple tours - show selection dialog
+    action = {
+        'name': _('Select Tour for Manual Generation'),
+        'type': 'ir.actions.act_window',
+        'res_model': 'security.tour',
+        'view_mode': 'list,form',
+        'domain': [('id', 'in', active_tours.ids)],
+        'context': {
+            'default_status': 'active',
+            'create': False,
+            'edit': False
+        }
+    }
+            </field>
+        </record>
+        
+    </data>
+</odoo>

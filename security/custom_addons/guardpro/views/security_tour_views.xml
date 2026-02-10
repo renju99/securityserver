@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_security_tour_list" model="ir.ui.view">
+            <field name="name">security.tour.list</field>
+            <field name="model">security.tour</field>
+            <field name="arch" type="xml">
+                <list string="Security Tours">
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="site_id"/>
+                    <field name="total_checkpoints"/>
+                    <field name="estimated_duration" widget="float_time"/>
+                    <field name="status" widget="badge"/>
+                    <field name="completion_rate" widget="percentage" optional="hide"/>
+                    <button name="action_manual_generate_tour" string="Manual Generate" type="object" 
+                            class="oe_highlight" invisible="status != 'active'" 
+                            icon="fa-play" help="Generate this tour manually for a specific guard"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_security_tour_form" model="ir.ui.view">
+            <field name="name">security.tour.form</field>
+            <field name="model">security.tour</field>
+            <field name="arch" type="xml">
+                <form string="Security Tour">
+                    <header>
+                        <button name="action_activate" string="Activate" type="object" invisible="status == 'active'"/>
+                        <button name="action_deactivate" string="Deactivate" type="object" invisible="status != 'active'"/>
+                        <button name="action_manual_generate_tour" string="Manual Generate Tour" type="object" 
+                                class="oe_highlight" invisible="status != 'active'" 
+                                icon="fa-play" help="Generate this tour manually for a specific guard"/>
+                        <field name="status" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box">
+                            <button name="action_view_logs" type="object" class="oe_stat_button" icon="fa-history">
+                                <field name="total_tours" widget="statinfo" string="Tours"/>
+                            </button>
+                            <button name="action_manual_generate_tour" type="object" class="oe_stat_button" icon="fa-play" 
+                                    invisible="status != 'active'" help="Generate this tour manually">
+                                <div class="o_field_widget o_stat_info">
+                                    <span class="o_stat_text">Manual Generate</span>
+                                </div>
+                            </button>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="code"/>
+                                <field name="site_id"/>
+                                <field name="building_id"/>
+                                <field name="floor_id"/>
+                                <field name="area_id"/>
+                            </group>
+                            <group>
+                                <field name="estimated_duration" widget="float_time"/>
+                                <field name="frequency"/>
+                                <field name="completion_rate" widget="percentage"/>
+                                <field name="average_duration" widget="float_time"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="description"/>
+                        </group>
+                        <notebook>
+                            <page string="Checkpoints">
+                                <field name="checkpoint_ids">
+                                    <list>
+                                        <field name="name"/>
+                                        <field name="code"/>
+                                        <field name="scan_type"/>
+                                        <field name="requires_photo"/>
+                                        <field name="requires_note"/>
+                                    </list>
+                                </field>
+                            </page>
+                            <page string="Requirements">
+                                <group>
+                                    <field name="requires_supervisor"/>
+                                    <field name="requires_photos"/>
+                                    <field name="requires_notes"/>
+                                </group>
+                                <group string="GPS Configuration for Virtual Checkpoints">
+                                    <field name="use_tour_tolerance"/>
+                                    <field name="gps_tolerance" invisible="not use_tour_tolerance" required="use_tour_tolerance"/>
+                                </group>
+                            </page>
+                            <page string="Instructions">
+                                <field name="instructions" widget="html"/>
+                                <field name="special_requirements" widget="text"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_security_tour" model="ir.actions.act_window">
+            <field name="name">Security Tours</field>
+            <field name="res_model">security.tour</field>
+            <field name="view_mode">list,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create a new security tour
+                </p>
+                <p>
+                    Define patrol routes and checkpoints for your security guards.
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>
+
