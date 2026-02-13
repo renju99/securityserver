@@ -320,12 +320,28 @@ function EmployeeView() {
     targetSocket.on('check_out_success', handleCheckOutSuccess);
     targetSocket.on('error', handleError);
 
+    targetSocket.on('connect_error', (err) => {
+      console.error('Connection Error:', err.message);
+      if (err.message === 'Authentication error' || err.message === 'jwt expired') {
+        // Prevent infinite alert loop if already disconnected
+        if (targetSocket.connected) targetSocket.disconnect();
+
+        // Only alert once
+        if (!window.hasShownAuthAlert) {
+          window.hasShownAuthAlert = true;
+          alert('Session expired. Please log in again.');
+          handleLogout();
+        }
+      }
+    });
+
     return () => {
       targetSocket.off('connect', handleConnect);
       targetSocket.off('disconnect', handleDisconnect);
       targetSocket.off('check_in_success', handleCheckInSuccess);
       targetSocket.off('check_out_success', handleCheckOutSuccess);
       targetSocket.off('error', handleError);
+      targetSocket.off('connect_error');
     };
   }, [staffId, token]);
 

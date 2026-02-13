@@ -11,10 +11,16 @@
                             class="oe_highlight"
                             invisible="watchlist_checked or state == 'denied'"/>
                     <button name="action_checkin" string="Check In" type="object"
-                            class="oe_highlight"
+                            class="oe_highlight btn-lg d-md-none"
+                            invisible="state != 'pre_registered' or watchlist_hit"/>
+                    <button name="action_checkin" string="Check In" type="object"
+                            class="oe_highlight d-none d-md-inline-block"
                             invisible="state != 'pre_registered' or watchlist_hit"/>
                     <button name="action_checkout" string="Check Out" type="object"
-                            class="oe_highlight"
+                            class="oe_highlight btn-lg d-md-none"
+                            invisible="state != 'checked_in'"/>
+                    <button name="action_checkout" string="Check Out" type="object"
+                            class="oe_highlight d-none d-md-inline-block"
                             invisible="state != 'checked_in'"/>
                     <button name="action_notify_host" string="Notify Host" type="object"
                             invisible="host_notified or not host_email"/>
@@ -29,6 +35,16 @@
                            statusbar_visible="pre_registered,checked_in,checked_out"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box d-flex justify-content-center mb-3 d-lg-none" name="button_box_custom">
+                        <button name="action_save_and_continue" string="SAVE" type="object" 
+                                class="btn-primary oe_highlight w-50 me-2 py-2 fw-bold text-uppercase"
+                                invisible="id"/>
+                        <button name="action_save_and_continue" string="SAVED" type="object" 
+                                class="btn-secondary w-50 me-2 py-2 fw-bold text-uppercase"
+                                invisible="not id"/>
+                        <button name="action_discard_changes" string="BACK" type="object"
+                                class="btn-secondary w-50 py-2 fw-bold text-uppercase"/>
+                    </div>
                     <widget name="web_ribbon" title="VIP" bg_color="text-bg-warning"
                             invisible="not is_vip"/>
                     <widget name="web_ribbon" title="Watchlist Hit" bg_color="text-bg-danger"
@@ -47,7 +63,7 @@
                             <field name="site_id" options="{'no_create': True}"/>
                             <field name="visit_date"/>
                             <field name="visit_purpose"/>
-                            <field name="expected_duration"/>
+                            <field name="host_name"/>
                             <field name="is_vip" invisible="1"/>
                             <field name="is_overdue_checkout" invisible="1"/>
                         </group>
@@ -57,6 +73,11 @@
                             <group>
                                 <group>
                                     <field name="id_type"/>
+                                    <button name="action_read_emirates_id" 
+                                            string="Read Emirates ID" 
+                                            type="object" 
+                                            class="btn-secondary read_emirates_id_btn mb-2" 
+                                            invisible="id_type != 'emirates_id'"/>
                                     <field name="id_number"/>
                                     <field name="id_photo" widget="image" options="{'size': [200, 200]}"/>
                                 </group>
@@ -65,15 +86,13 @@
                                     <field name="nationality"/>
                                     <field name="date_of_birth"/>
                                     <field name="gender"/>
-                                    <field name="visitor_photo" widget="image" options="{'size': [200, 200]}"/>
                                 </group>
                             </group>
                         </page>
                         <page string="Host Information">
                             <group>
                                 <group>
-                                    <field name="host_name"/>
-                                    <field name="host_phone"/>
+                            <field name="host_phone"/>
                                     <field name="host_email"/>
                                     <field name="host_department"/>
                                 </group>
@@ -133,6 +152,10 @@
                                     <field name="checkout_time"/>
                                     <field name="guard_checkout_id"/>
                                     <field name="actual_duration"/>
+                                </group>
+                                <group string="Visit Info">
+                                    <field name="site_id" options="{'no_create': True}"/>
+                                    <field name="expected_duration"/>
                                 </group>
                             </group>
                             <group>
@@ -227,6 +250,14 @@
                                     </div>
                                     <div class="col-12">
                                         <i class="fa fa-calendar" title="Date" aria-label="Date"/> <field name="visit_date"/>
+                                    </div>
+                                    <div class="col-12 mt-2">
+                                        <button name="action_checkin" type="object" string="CHECK IN"
+                                                class="btn btn-primary btn-sm w-100 fw-bold"
+                                                invisible="state != 'pre_registered' or watchlist_hit"/>
+                                        <button name="action_checkout" type="object" string="CHECK OUT"
+                                                class="btn btn-success btn-sm w-100 fw-bold"
+                                                invisible="state != 'checked_in'"/>
                                     </div>
                                 </div>
                             </div>

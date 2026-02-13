@@ -259,7 +259,7 @@ app.post('/auth/login', async (req, res) => {
         const token = jwt.sign(
             { id: user.id, staffId: user.staff_id, role: user.role_name, siteId: user.site_id },
             JWT_SECRET,
-            { expiresIn: '8h' }
+            { expiresIn: '365d' }
         );
 
         res.json({
@@ -779,6 +779,149 @@ app.get('/hr/alerts', authenticateToken, authorizeRole(['HR Admin', 'Site Superv
         res.status(500).json({ error: 'Database error' });
     }
 });
+
+// HR API: Get Route Tracking Data
+app.get('/hr/route-tracking', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
+    const { staffId, startDate, endDate } = req.query;
+
+    if (!staffId || !startDate || !endDate) {
+        return res.status(400).json({ error: 'staffId, startDate, and endDate are required' });
+    }
+
+    try {
+        const empQuery = `
+            SELECT e.id, e.staff_id, e.first_name, e.last_name, e.site_id, s.name as site_name
+            FROM employees e
+            LEFT JOIN sites s ON e.site_id = s.id
+            WHERE e.staff_id = $1
+        `;
+        const empResult = await pool.query(empQuery, [staffId]);
+
+        if (empResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Employee not found' });
+        }
+
+        const employee = empResult.rows[0];
+
+        if (req.user.role === 'Site Supervisor' && employee.site_id !== req.user.siteId) {
+            return res.status(403).json({ error: 'Access denied to this employee' });
+        }
+
+        const locationQuery = `
+            SELECT 
+                ST_Y(current_coords::geometry) as latitude,
+                ST_X(current_coords::geometry) as longitude,
+                timestamp
+            FROM live_logs
+            WHERE employee_id = $1
+                AND timestamp >= $2
+                AND timestamp <= $3
+            ORDER BY timestamp ASC
+        `;
+
+        const locationResult = await pool.query(locationQuery, [
+            employee.id,
+            startDate,
+            endDate
+        ]);
+
+        let locations = locationResult.rows;
+        const totalPoints = locations.length;
+
+        // Backend Sampling to prevent Network Error / Timeout
+        // If more than 3000 points, take every Nth point
+        if (totalPoints > 3000) {
+            const samplingFactor = Math.ceil(totalPoints / 3000);
+            locations = locations.filter((_, index) => index % samplingFactor === 0 || index === totalPoints - 1);
+        }
+
+        res.json({
+            employee: {
+                staffId: employee.staff_id,
+                firstName: employee.first_name,
+                lastName: employee.last_name,
+                siteName: employee.site_name
+            },
+            locations: locations,
+            totalPoints: totalPoints,
+            sampled: totalPoints > 3000
+        });
+    } catch (err) {
+        console.error('Route tracking error:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.get('/hr/idle-report', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
+    const { staffId, startDate, endDate, thresholdMins } = req.query;
+    const threshold = parseInt(thresholdMins) || 30;
+
+    if (!staffId || !startDate || !endDate) {
+        return res.status(400).json({ error: 'staffId, startDate, and endDate are required' });
+    }
+
+    try {
+        const empQuery = `SELECT id, staff_id, first_name, last_name FROM employees WHERE staff_id = $1`;
+        const empResult = await pool.query(empQuery, [staffId]);
+        if (empResult.rows.length === 0) return res.status(404).json({ error: 'Employee not found' });
+        const employee = empResult.rows[0];
+
+        const locationQuery = `
+            SELECT ST_Y(current_coords::geometry) as lat, ST_X(current_coords::geometry) as lng, timestamp
+            FROM live_logs WHERE employee_id = $1 AND timestamp >= $2 AND timestamp <= $3 ORDER BY timestamp ASC
+        `;
+        const locationResult = await pool.query(locationQuery, [employee.id, startDate, endDate]);
+        const rows = locationResult.rows;
+
+        // Server-side Idle Detection Logic
+        const idleSpots = [];
+        if (rows.length >= 2) {
+            let currentGroup = [rows[0]];
+            const thresholdMs = threshold * 60 * 1000;
+
+            const getDist = (p1, p2) => {
+                const R = 6371e3;
+                const f1 = p1.lat * Math.PI / 180;
+                const f2 = p2.lat * Math.PI / 180;
+                const df = (p2.lat - p1.lat) * Math.PI / 180;
+                const dl = (p2.lng - p1.lng) * Math.PI / 180;
+                const a = Math.sin(df / 2) * Math.sin(df / 2) + Math.cos(f1) * Math.cos(f2) * Math.sin(dl / 2) * Math.sin(dl / 2);
+                return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            };
+
+            for (let i = 1; i < rows.length; i++) {
+                const dist = getDist(currentGroup[0], rows[i]);
+                if (dist < 30) {
+                    currentGroup.push(rows[i]);
+                } else {
+                    const duration = new Date(currentGroup[currentGroup.length - 1].timestamp) - new Date(currentGroup[0].timestamp);
+                    if (duration >= thresholdMs) {
+                        idleSpots.push({
+                            lat: currentGroup[0].lat, lng: currentGroup[0].lng,
+                            duration: Math.round(duration / 60000),
+                            startTime: currentGroup[0].timestamp, endTime: currentGroup[currentGroup.length - 1].timestamp
+                        });
+                    }
+                    currentGroup = [rows[i]];
+                }
+            }
+            const duration = new Date(currentGroup[currentGroup.length - 1].timestamp) - new Date(currentGroup[0].timestamp);
+            if (duration >= thresholdMs) {
+                idleSpots.push({
+                    lat: currentGroup[0].lat, lng: currentGroup[0].lng,
+                    duration: Math.round(duration / 60000),
+                    startTime: currentGroup[0].timestamp, endTime: currentGroup[currentGroup.length - 1].timestamp
+                });
+            }
+        }
+
+        res.json({ employee: { firstName: employee.first_name, lastName: employee.last_name, staffId: employee.staff_id }, idleSpots });
+    } catch (err) {
+        console.error('Idle report error:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
 
 // Socket.io Middleware: Authenticate
 io.use((socket, next) => {

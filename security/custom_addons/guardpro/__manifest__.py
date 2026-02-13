@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Sentry - Security Guard Management',
-    'version': '18.0.1.0.9',
+    'version': '18.0.1.1.10',
     'category': 'Services/Security',
     'summary': 'Win premium guard contracts with an Odoo-native suite for mobile patrols, SLA automation, client portals, and analytics.',
     'description': """
@@ -413,6 +413,7 @@ Support & Roadmap
             'guardpro/static/src/js/guardpro_tours_dashboard.js',
             'guardpro/static/src/js/push_to_talk.js',  # Push-to-Talk widget
             'guardpro/static/src/js/biometric_capture.js',  # Biometric capture for mobile
+            'guardpro/static/src/js/eid_reader_core_v7.js',  # Emirates ID toolkit integration (V5.1 - Final - Renamed)
             'guardpro/static/src/xml/dashboard_templates.xml',
             'guardpro/static/src/xml/dashboard_refresh_template.xml',
             'guardpro/static/src/xml/checkpoint_map_creator.xml',

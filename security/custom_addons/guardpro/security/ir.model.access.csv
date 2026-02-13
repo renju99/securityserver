@@ -9,6 +9,7 @@ access_guard_profile_client_user,guard.profile.client.user,model_guard_profile,g
 access_guard_profile_supervisor,guard.profile.supervisor,model_guard_profile,group_guardpro_supervisor,1,1,0,0
 access_guard_profile_manager,guard.profile.manager,model_guard_profile,group_guardpro_manager,1,1,1,1
 access_guard_profile_admin,guard.profile.admin,model_guard_profile,group_guardpro_admin,1,1,1,1
+access_guard_profile_reception,guard.profile.reception,model_guard_profile,group_guardpro_reception,1,0,0,0
 access_guard_skill_guard_portal,guard.skill.guard.portal,model_guard_skill,group_guardpro_guard_portal,1,0,0,0
 access_guard_skill_client_user,guard.skill.client.user,model_guard_skill,group_guardpro_client_user,1,0,0,0
 access_guard_skill_supervisor,guard.skill.supervisor,model_guard_skill,group_guardpro_supervisor,1,1,0,0
@@ -49,6 +50,7 @@ access_client_site_client_user,client.site.client.user,model_client_site,group_g
 access_client_site_supervisor,client.site.supervisor,model_client_site,group_guardpro_supervisor,1,1,0,0
 access_client_site_manager,client.site.manager,model_client_site,group_guardpro_manager,1,1,1,1
 access_client_site_admin,client.site.admin,model_client_site,group_guardpro_admin,1,1,1,1
+access_client_site_reception,client.site.reception,model_client_site,group_guardpro_reception,1,0,0,0
 access_security_tour_guard_portal,security.tour.guard.portal,model_security_tour,group_guardpro_guard_portal,1,0,0,0
 access_security_tour_client_user,security.tour.client.user,model_security_tour,group_guardpro_client_user,1,0,0,0
 access_security_tour_supervisor,security.tour.supervisor,model_security_tour,group_guardpro_supervisor,1,1,0,0

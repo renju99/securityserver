@@ -7,6 +7,8 @@ import { LoadingSpinner, TableSkeleton } from './components/LoadingSpinner';
 import AnalyticsCard from './components/AnalyticsCard';
 import FilterPanel from './components/FilterPanel';
 import ReportsView from './components/ReportsView';
+import RouteTrackingView, { RoutePolyline } from './components/RouteTrackingView';
+import IdleReportingView from './components/IdleReportingView';
 import { exportToCSV, formatDataForExport, formatSitesForExport } from './utils/exportUtils';
 import './App.css';
 
@@ -77,6 +79,11 @@ const HRDashboard = () => {
     const [allPermissions, setAllPermissions] = useState([]);
     const [isEditingPermissions, setIsEditingPermissions] = useState(false);
     const [tempPermissions, setTempPermissions] = useState([]);
+
+    // Route Tracking
+    const [routeData, setRouteData] = useState(null);
+    const [idleThreshold, setIdleThreshold] = useState(30);
+    const [idleSpots, setIdleSpots] = useState([]);
 
     // Toast notifications
     const [toasts, setToasts] = useState([]);
@@ -790,6 +797,22 @@ const HRDashboard = () => {
                                     onClick={() => setActiveTab('reports')}
                                 >
                                     Reports
+                                </button>
+                            )}
+                            {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
+                                <button
+                                    className={`tab-btn ${activeTab === 'route_tracking' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('route_tracking')}
+                                >
+                                    Route Tracking
+                                </button>
+                            )}
+                            {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
+                                <button
+                                    className={`tab-btn ${activeTab === 'idle_reporting' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('idle_reporting')}
+                                >
+                                    Idle Reporting
                                 </button>
                             )}
                             {(user.role === 'HR Admin') && (
@@ -1636,6 +1659,126 @@ const HRDashboard = () => {
                                 showToast={showToast}
                             />
                         </div>
+                    ) : activeTab === 'route_tracking' ? (
+                        <>
+                            <aside className="sidebar">
+                                <RouteTrackingView
+                                    user={user}
+                                    employees={employees}
+                                    onMapUpdate={(center, zoom) => {
+                                        setMapCenter(center);
+                                        setZoom(zoom);
+                                    }}
+                                    routeData={routeData}
+                                    onRouteDataChange={setRouteData}
+                                    idleThreshold={idleThreshold}
+                                    setIdleThreshold={setIdleThreshold}
+                                    showToast={showToast}
+                                    googleMapsApiKey={GOOGLE_MAPS_API_KEY}
+                                />
+                            </aside>
+                            <main className="map-container">
+                                <Map
+                                    mapId="route-tracking-map"
+                                    center={mapCenter}
+                                    zoom={zoom}
+                                    gestureHandling="greedy"
+                                    disableDefaultUI={false}
+                                    onCenterChanged={(e) => setMapCenter(e.detail.center)}
+                                    onZoomChanged={(e) => setZoom(e.detail.zoom)}
+                                >
+                                    {/* Render route polyline if route data exists */}
+                                    {routeData && <RoutePolyline routeData={routeData} idleThreshold={idleThreshold} />}
+
+                                    {/* Render site markers */}
+                                    {sites.map(site => {
+                                        if (!site.latitude || !site.longitude) return null;
+                                        return (
+                                            <Marker
+                                                key={`site-${site.id}`}
+                                                position={{ lat: parseFloat(site.latitude), lng: parseFloat(site.longitude) }}
+                                                icon={{
+                                                    path: window.google.maps.SymbolPath.CIRCLE,
+                                                    scale: 10,
+                                                    fillColor: '#f59e0b',
+                                                    fillOpacity: 0.6,
+                                                    strokeColor: '#ffffff',
+                                                    strokeWeight: 2
+                                                }}
+                                                title={site.name}
+                                            />
+                                        );
+                                    })}
+                                </Map>
+                            </main>
+                        </>
+                    ) : activeTab === 'idle_reporting' ? (
+                        <>
+                            <aside className="sidebar">
+                                <IdleReportingView
+                                    user={user}
+                                    employees={employees}
+                                    onMapUpdate={(center, zoom) => {
+                                        setMapCenter(center);
+                                        setZoom(zoom);
+                                    }}
+                                    idleSpots={idleSpots}
+                                    onIdleSpotsChange={setIdleSpots}
+                                    showToast={showToast}
+                                    googleMapsApiKey={GOOGLE_MAPS_API_KEY}
+                                />
+                            </aside>
+                            <main className="map-container">
+                                <Map
+                                    mapId="idle-reporting-map"
+                                    center={mapCenter}
+                                    zoom={zoom}
+                                    gestureHandling="greedy"
+                                    disableDefaultUI={false}
+                                    onCenterChanged={(e) => setMapCenter(e.detail.center)}
+                                    onZoomChanged={(e) => setZoom(e.detail.zoom)}
+                                >
+                                    {/* Render Idle Spots Markers */}
+                                    {idleSpots.map((spot, index) => (
+                                        <Marker
+                                            key={`idle-${index}`}
+                                            position={{ lat: parseFloat(spot.lat), lng: parseFloat(spot.lng) }}
+                                            icon={{
+                                                path: window.google?.maps?.SymbolPath?.CIRCLE ?? 0,
+                                                scale: 25,
+                                                fillColor: '#f59e0b',
+                                                fillOpacity: 0.3,
+                                                strokeColor: '#f59e0b',
+                                                strokeWeight: 2,
+                                                strokeOpacity: 0.8
+                                            }}
+                                            zIndex={4500}
+                                            title={`Stayed here for ${spot.duration} minutes\nFrom: ${new Date(spot.startTime).toLocaleTimeString()}\nTo: ${new Date(spot.endTime).toLocaleTimeString()}`}
+                                        />
+                                    ))}
+
+                                    {/* Render site markers */}
+                                    {sites.map(site => {
+                                        if (!site.latitude || !site.longitude) return null;
+                                        return (
+                                            <Marker
+                                                key={`site-${site.id}`}
+                                                position={{ lat: parseFloat(site.latitude), lng: parseFloat(site.longitude) }}
+                                                icon={{
+                                                    path: window.google?.maps?.SymbolPath?.CIRCLE ?? 0,
+                                                    scale: 10,
+                                                    fillColor: '#f59e0b',
+                                                    fillOpacity: 0.6,
+                                                    strokeColor: '#ffffff',
+                                                    strokeWeight: 2
+                                                }}
+                                                title={site.name}
+                                            />
+                                        );
+                                    })}
+                                </Map>
+                            </main>
+                        </>
                     ) : activeTab === 'access_roles' ? (
                         <div className="management-view">
                             <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '2rem', height: '100%', alignItems: 'start' }}>

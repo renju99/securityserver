@@ -80,7 +80,7 @@ class VisitorManagement(models.Model):
     site_id = fields.Many2one(
         'client.site',
         string='Site',
-        required=True,
+        required=False,
         tracking=True,
         index=True,
         ondelete='cascade',
@@ -654,6 +654,41 @@ class VisitorManagement(models.Model):
             'badge_returned': True,
             'badge_return_date': fields.Datetime.now()
         })
+        return True
+
+    def action_save_and_continue(self):
+        """Action for the Save button on the form.
+        Clicking a type='object' button automatically saves the record.
+        Returns a notification to the user.
+        """
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Success'),
+                'message': _('Visitor record has been saved successfully.'),
+                'sticky': False,
+                'type': 'success',
+                'next': {'type': 'ir.actions.act_window_close'} if self.env.context.get('close_on_save') else None,
+            }
+        }
+
+    def action_discard_changes(self):
+        """Action for the Discard button on the form.
+        Redirects back to the list view, effectively abandoning unsaved changes.
+        """
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'visitor.management',
+            'view_mode': 'list',
+            'target': 'current',
+        }
+
+    def action_read_emirates_id(self):
+        """
+        Placeholder for Emirates ID reading.
+        The actual logic is handled in JavaScript (emirates_id_reader.js)
+        """
         return True
 
 
