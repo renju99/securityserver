@@ -3,16 +3,19 @@
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 
-console.log("[EmiratesIDReader] V7.1 (Robust Handshake) initialized");
+console.log("[EmiratesIDReader] V7.4 (Edge Resilience) initialized");
 
 // Utility to handle Emirates ID Toolkit Service communication
 export const EmiratesIDReader = {
-    // Discovery parameters
+    // Discovery parameters - Prioritize Local IP
     PORTS: [9004, 9005, 9020],
-    HOSTNAMES: ["toolkitagent.emiratesid.ae", "toolkitagent.mohre.gov.ae", "127.0.0.1", "localhost"],
+    HOSTNAMES: ["127.0.0.1", "localhost", "toolkitagent.emiratesid.ae", "toolkitagent.mohre.gov.ae"],
 
-    // Corrected configuration Base64 (vg_connection_timeout=60, log_level=INFO, read_publicdata_offline=true)
+    // Stable configuration Base64
     TOOLKIT_CONFIG: "dmdfY29ubmVjdGlvbl90aW1lb3V0ID0gNjAKbG9nX2xldmVsID0gIklORk8iCnJlYWRfcHVibGljZGF0YV9vZmZsaW5lID0gdHJ1ZQo=",
+
+    // Static Chrome-like User Agent to avoid Toolkit side-effects on Edge
+    STATIC_UA: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 
     connect: function () {
         return new Promise((resolve, reject) => {
@@ -23,7 +26,9 @@ export const EmiratesIDReader = {
             const tryNext = () => {
                 if (finished) return;
                 if (hostIndex >= this.HOSTNAMES.length) {
-                    return reject(_t("Could not connect to Emirates ID Toolkit Service. Please ensure the agent is running."));
+                    let msg = _t("Could not connect to Emirates ID Toolkit Service.");
+                    msg += "\n\n" + _t("TIP: If you are using Microsoft Edge, please visit https://127.0.0.1:9004 in a new tab, click 'Advanced' -> 'Proceed', then return here and refresh.");
+                    return reject(msg);
                 }
 
                 const host = this.HOSTNAMES[hostIndex];
@@ -44,7 +49,7 @@ export const EmiratesIDReader = {
                     socket.onopen = socket.onerror = socket.onmessage = null;
                     socket.close();
                     iterate();
-                }, 2000);
+                }, 1500);
 
                 socket.onopen = () => {
                     if (finished) return (socket.close());
@@ -79,7 +84,7 @@ export const EmiratesIDReader = {
     },
 
     readCard: async function () {
-        console.log("[EmiratesIDReader] Handshake Sequence V7.1 Start");
+        console.log("[EmiratesIDReader] Handshake Sequence V7.4 Start");
         let socket;
         try {
             socket = await this.connect();
@@ -116,6 +121,22 @@ export const EmiratesIDReader = {
                         const errorCode = res.error_code || res.error || "";
                         const errorMsg = res.error_message || res.message || res.description || "";
 
+                        // Special Fallback for Edge Error 290
+                        if (errorCode == 290 && lastReq.cmd == 54) {
+                            console.warn("[EmiratesIDReader] Auto-Detect Failed (290). Falling back to List Readers...");
+                            sendReq({ "cmd": 20, "service_context": serviceContext });
+                            return;
+                        }
+
+                        if (errorCode == 290 && lastReq.cmd == 20) {
+                            console.warn("[EmiratesIDReader] List Readers Failed (290). Attempting direct connect guess...");
+                            // Try common ICA/ICA Toolkit reader name pattern
+                            selectedReader = "SCM Microsystems Inc. SCR3310 USB Smart Card Reader 0";
+                            sendReq({ "cmd": 4, "service_context": serviceContext, "smartcard_reader": selectedReader });
+                            return;
+                        }
+
+                        // Hardware Busy Retry
                         if (errorCode == 53 && retryCount < 3 && lastReq) {
                             retryCount++;
                             console.warn(`[EmiratesIDReader] Hardware Busy (53). Retry ${retryCount}/3 in 1s...`);
@@ -136,10 +157,12 @@ export const EmiratesIDReader = {
                         return reject(finalMsg);
                     }
 
+                    // Handshake Flow (V7.4: 1 -> 54 -> 4 -> 19 -> 6)
                     if (!serviceContext && res.service_context) {
                         serviceContext = res.service_context;
-                        console.log("[EmiratesIDReader] Step 1 OK. Listing readers...");
-                        sendReq({ "cmd": 20, "service_context": serviceContext });
+                        console.log("[EmiratesIDReader] Step 1 OK. Detecting reader with card...");
+                        // Use cmd 54 (Find with Card) as primary to avoid cmd 20 issues on Edge
+                        sendReq({ "cmd": 54, "service_context": serviceContext });
                     }
                     else if (serviceContext && !selectedReader && (res.smartcard_readers || res.smartcard_reader)) {
                         selectedReader = (res.smartcard_readers || res.smartcard_reader).split(',')[0];
@@ -179,12 +202,12 @@ export const EmiratesIDReader = {
             };
 
             socket.onerror = (err) => {
-                console.error("[EmiratesIDReader] Runtime error:", err);
-                reject(_t("Service connection lost."));
+                console.error("[EmiratesIDReader] Socket Error (Likely Certificate):", err);
+                reject(_t("Connection lost. Please visit https://127.0.0.1:9004 to accept the certificate and try again."));
             };
 
-            const shortUA = navigator.userAgent.split(' ')[0] || "Browser";
-            sendReq({ "cmd": 1, "config_params": this.TOOLKIT_CONFIG, "user_agent": shortUA });
+            // Start Handshake
+            sendReq({ "cmd": 1, "config_params": this.TOOLKIT_CONFIG, "user_agent": this.STATIC_UA });
         });
     }
 };
@@ -211,26 +234,38 @@ export const emiratesIDReaderService = {
                 if (res.toolkit_response) {
                     const parser = new DOMParser();
                     const xml = parser.parseFromString(res.toolkit_response, "text/xml");
-                    const getTag = (t) => xml.getElementsByTagName(t)[0]?.textContent || "";
+
+                    const getTag = (tags) => {
+                        const tagList = Array.isArray(tags) ? tags : [tags];
+                        for (const t of tagList) {
+                            const val = (xml.getElementsByTagName(t)[0] || xml.querySelector(t))?.textContent;
+                            if (val) return val.trim();
+                        }
+                        return "";
+                    };
+
                     const fD = (s) => {
                         if (!s) return "";
                         const p = s.split(/[-/]/);
-                        return (p.length === 3) ? (p[0].length === 4 ? p.join('-') : `${p[2]}-${p[1]}-${p[0]}`) : s;
+                        if (p.length === 3) {
+                            return (p[0].length === 4 ? p.join('-') : `${p[2]}-${p[1]}-${p[0]}`);
+                        }
+                        return s;
                     };
 
                     data = {
-                        CardNumber: getTag("IdNumber") || getTag("CardNumber") || getTag("idNumber"),
-                        FullNameEnglish: getTag("FullNameEnglish"),
-                        FullNameArabic: getTag("FullNameArabic"),
-                        NationalityEnglish: getTag("NationalityEnglish"),
-                        DateOfBirth: fD(getTag("DateOfBirth")),
-                        Gender: getTag("Gender"),
-                        Photography: getTag("Photography") || getTag("CardHolderPhoto"),
-                        ExpiryDate: fD(getTag("ExpiryDate")),
-                        IssueDate: fD(getTag("IssueDate")),
-                        PassportNumber: getTag("PassportNumber"),
-                        Occupation: getTag("OccupationEnglish") || getTag("Occupation"),
-                        VisaNumber: getTag("VisaNumber")
+                        CardNumber: getTag(["IdNumber", "CardNumber", "idNumber"]),
+                        FullNameEnglish: getTag(["FullNameEnglish", "fullNameEnglish"]),
+                        FullNameArabic: getTag(["FullNameArabic", "fullNameArabic"]),
+                        NationalityEnglish: getTag(["NationalityEnglish", "nationalityEnglish"]),
+                        DateOfBirth: fD(getTag(["DateOfBirth", "dateOfBirth"])),
+                        Gender: getTag(["Gender", "gender"]),
+                        Photography: getTag(["Photography", "CardHolderPhoto", "photography"]),
+                        ExpiryDate: fD(getTag(["ExpiryDate", "expiryDate"])),
+                        IssueDate: fD(getTag(["IssueDate", "issueDate"])),
+                        PassportNumber: getTag(["PassportNumber", "passportNumber"]),
+                        Occupation: getTag(["OccupationEnglish", "Occupation", "occupation"]),
+                        VisaNumber: getTag(["VisaNumber", "visaNumber"])
                     };
                 }
 
@@ -250,11 +285,18 @@ export const emiratesIDReaderService = {
 
                 for (const [field, val] of Object.entries(mappings)) {
                     if (!val) continue;
-                    await new Promise(r => setTimeout(r, 50));
-                    const input = document.querySelector(`[name="${field}"] input, [name="${field}"] select, [name="${field}"] textarea`);
+                    await new Promise(r => setTimeout(r, 60));
+
+                    let input = document.querySelector(`[name="${field}"] input, [name="${field}"] select, [name="${field}"] textarea`);
+                    if (!input) input = document.querySelector(`.o_field_widget[name="${field}"] input, .o_field_widget[name="${field}"] select`);
+
                     if (input) {
                         if (input.tagName === 'SELECT') {
-                            const opt = Array.from(input.options).find(o => o.value === val || o.value === `"${val}"` || o.text.toLowerCase() === val.toLowerCase());
+                            const opt = Array.from(input.options).find(o =>
+                                o.value === val ||
+                                o.value === `"${val}"` ||
+                                o.text.toLowerCase() === val.toString().toLowerCase()
+                            );
                             if (opt) input.value = opt.value;
                         } else {
                             input.value = val.toString().trim();
