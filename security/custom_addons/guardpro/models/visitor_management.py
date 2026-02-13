@@ -75,6 +75,28 @@ class VisitorManagement(models.Model):
         ('male', 'Male'),
         ('female', 'Female')
     ], string='Gender', help='Gender (from Emirates ID)')
+    
+    # New Emirates ID Fields
+    id_expiry_date = fields.Date(
+        string='ID Expiry Date',
+        help='Identification expiry date (from Emirates ID)'
+    )
+    id_issue_date = fields.Date(
+        string='ID Issue Date',
+        help='Identification issue date (from Emirates ID)'
+    )
+    passport_number = fields.Char(
+        string='Passport Number',
+        help='Passport number (from Emirates ID)'
+    )
+    occupation = fields.Char(
+        string='Occupation',
+        help='Occupation (from Emirates ID)'
+    )
+    visa_number = fields.Char(
+        string='Visa Number',
+        help='Visa number (from Emirates ID)'
+    )
 
     # Visit Details
     site_id = fields.Many2one(

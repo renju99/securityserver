@@ -71,7 +71,7 @@
                     <notebook>
                         <page string="Identification">
                             <group>
-                                <group>
+                                <group string="ID Details">
                                     <field name="id_type"/>
                                     <button name="action_read_emirates_id" 
                                             string="Read Emirates ID" 
@@ -79,13 +79,24 @@
                                             class="btn-secondary read_emirates_id_btn mb-2" 
                                             invisible="id_type != 'emirates_id'"/>
                                     <field name="id_number"/>
-                                    <field name="id_photo" widget="image" options="{'size': [200, 200]}"/>
+                                    <field name="id_expiry_date"/>
+                                    <field name="id_issue_date"/>
                                 </group>
-                                <group>
+                                <group string="Personal Details">
                                     <field name="name_arabic"/>
                                     <field name="nationality"/>
                                     <field name="date_of_birth"/>
                                     <field name="gender"/>
+                                    <field name="occupation"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Additional Info">
+                                    <field name="passport_number"/>
+                                    <field name="visa_number"/>
+                                </group>
+                                <group string="Identification Scan">
+                                    <field name="id_photo" widget="image" options="{'size': [200, 200]}"/>
                                 </group>
                             </group>
                         </page>

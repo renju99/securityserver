@@ -3,7 +3,7 @@
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 
-console.log("[EmiratesIDReader] V5.1 (Subprotocol + Sequence) initialized");
+console.log("[EmiratesIDReader] V7.1 (Robust Handshake) initialized");
 
 // Utility to handle Emirates ID Toolkit Service communication
 export const EmiratesIDReader = {
@@ -11,13 +11,9 @@ export const EmiratesIDReader = {
     PORTS: [9004, 9005, 9020],
     HOSTNAMES: ["toolkitagent.emiratesid.ae", "toolkitagent.mohre.gov.ae", "127.0.0.1", "localhost"],
 
-    // Toolkit config as per reference (log_level=INFO, read_publicdata_offline=true)
-    // btoa('vg_connection_timeout = 60 \nlog_level = "INFO" \nlog_performance_time = true \nread_publicdata_offline = true \n')
-    TOOLKIT_CONFIG: "dmdfY29ubmVjdGlvbl90aW1lb3V0ID0gNjAgCmxvZ19sZXZlbCA9ICJJTkZPIiAKbG9nX3BlcmZvcm1hbmNlX3RpbWUgPSB0cnVlIApyZWFkX3B1YmxpY2RhdGFfb2ZmbGluZSA9IHRydWUgCg==",
+    // Corrected configuration Base64 (vg_connection_timeout=60, log_level=INFO, read_publicdata_offline=true)
+    TOOLKIT_CONFIG: "dmdfY29ubmVjdGlvbl90aW1lb3V0ID0gNjAKbG9nX2xldmVsID0gIklORk8iCnJlYWRfcHVibGljZGF0YV9vZmZsaW5lID0gdHJ1ZQo=",
 
-    /**
-     * Attempts to connect to the toolkit service sequentially
-     */
     connect: function () {
         return new Promise((resolve, reject) => {
             let hostIndex = 0;
@@ -27,7 +23,7 @@ export const EmiratesIDReader = {
             const tryNext = () => {
                 if (finished) return;
                 if (hostIndex >= this.HOSTNAMES.length) {
-                    return reject(_t("Could not connect to Emirates ID Toolkit Service. Please ensure the ICA EIDA Toolkit agent is running."));
+                    return reject(_t("Could not connect to Emirates ID Toolkit Service. Please ensure the agent is running."));
                 }
 
                 const host = this.HOSTNAMES[hostIndex];
@@ -38,7 +34,6 @@ export const EmiratesIDReader = {
 
                 let socket;
                 try {
-                    // CRITICAL: EIDA Toolkit requires 'eida-toolkit' subprotocol
                     socket = new WebSocket(wsUrl, 'eida-toolkit');
                 } catch (e) {
                     return iterate();
@@ -83,11 +78,8 @@ export const EmiratesIDReader = {
         });
     },
 
-    /**
-     * Read data from Emirates ID card using the optimized 4-5 step handshake
-     */
     readCard: async function () {
-        console.log("[EmiratesIDReader] Handshake Sequence V5.1 Start");
+        console.log("[EmiratesIDReader] Handshake Sequence V7.1 Start");
         let socket;
         try {
             socket = await this.connect();
@@ -98,17 +90,20 @@ export const EmiratesIDReader = {
         let serviceContext = null;
         let cardContext = null;
         let selectedReader = null;
+        let retryCount = 0;
         let sequenceCounter = 0;
+        let lastReq = null;
 
         return new Promise((resolve, reject) => {
             const sendReq = (payload) => {
                 sequenceCounter++;
                 payload.sequence = sequenceCounter;
+                lastReq = { ...payload };
                 console.log(`[EmiratesIDReader] SEND (cmd ${payload.cmd}, seq ${payload.sequence}):`, payload);
                 if (socket.readyState === WebSocket.OPEN) {
                     socket.send(JSON.stringify(payload));
                 } else {
-                    reject(_t("Communication link broken. ReadyState: ") + socket.readyState);
+                    reject(_t("Communication link broken."));
                 }
             };
 
@@ -118,96 +113,92 @@ export const EmiratesIDReader = {
                     console.log(`[EmiratesIDReader] RECV (seq ${res.sequence}):`, res);
 
                     if (res.status === "fail" || res.error) {
-                        return reject(res.description || res.message || _t("Toolkit Error Code: ") + (res.error || res.status));
+                        const errorCode = res.error_code || res.error || "";
+                        const errorMsg = res.error_message || res.message || res.description || "";
+
+                        if (errorCode == 53 && retryCount < 3 && lastReq) {
+                            retryCount++;
+                            console.warn(`[EmiratesIDReader] Hardware Busy (53). Retry ${retryCount}/3 in 1s...`);
+                            setTimeout(() => {
+                                sendReq({ ...lastReq, sequence: undefined });
+                            }, 1000);
+                            return;
+                        }
+
+                        let finalMsg = errorMsg || _t("Toolkit Error Code: ") + (errorCode || res.status);
+                        if (errorCode == 53) {
+                            finalMsg = _t("Please ensure your Emirates ID is correctly inserted and try again.");
+                        } else if (errorCode == 54) {
+                            finalMsg = _t("No card reader detected. Check your hardware connection.");
+                        }
+
+                        console.error(`[EmiratesIDReader] Handshake failed: ${finalMsg}`);
+                        return reject(finalMsg);
                     }
 
-                    // Handshake Steps
                     if (!serviceContext && res.service_context) {
-                        // Step 1: Context established
                         serviceContext = res.service_context;
-                        console.log("[EmiratesIDReader] Step 1 OK. Finding reader with EID card...");
-                        sendReq({ "cmd": 54, "service_context": serviceContext });
+                        console.log("[EmiratesIDReader] Step 1 OK. Listing readers...");
+                        sendReq({ "cmd": 20, "service_context": serviceContext });
                     }
-                    else if (serviceContext && !selectedReader && (res.smartcard_reader || res.smartcard_readers)) {
-                        // Step 2: Reader found
-                        selectedReader = res.smartcard_reader || (res.smartcard_readers && res.smartcard_readers.split(',')[0]);
-                        if (!selectedReader) return reject(_t("No Emirates ID card detected. Please insert your card."));
+                    else if (serviceContext && !selectedReader && (res.smartcard_readers || res.smartcard_reader)) {
+                        selectedReader = (res.smartcard_readers || res.smartcard_reader).split(',')[0];
+                        if (!selectedReader) return reject(_t("No reader found."));
                         console.log(`[EmiratesIDReader] Step 2 OK (${selectedReader}). Connecting...`);
                         sendReq({ "cmd": 4, "service_context": serviceContext, "smartcard_reader": selectedReader });
                     }
                     else if (serviceContext && !cardContext && res.card_context && !res.interface_type) {
-                        // Step 3: Reader connected
                         cardContext = res.card_context;
                         console.log("[EmiratesIDReader] Step 3 OK. Checking interface...");
                         sendReq({ "cmd": 19, "service_context": serviceContext, "card_context": cardContext });
                     }
                     else if (res.interface_type) {
-                        // Step 4: Interface check done
-                        console.log(`[EmiratesIDReader] Step 4 OK (Interface: ${res.interface_type}). Reading data...`);
+                        console.log(`[EmiratesIDReader] Step 4 OK (${res.interface_type}). Reading data...`);
                         sendReq({
                             "cmd": 6,
                             "service_context": serviceContext,
                             "card_context": cardContext,
+                            "is_v2": true,
+                            "read_publicdata": true,
                             "read_photography": true,
-                            "read_non_modifiable_data": true,
-                            "read_modifiable_data": true,
-                            "request_id": btoa(Math.random().toString()).substring(0, 10),
-                            "signature_image": false,
-                            "address": true
+                            "request_id": btoa(Math.random().toString()).substring(0, 10)
                         });
                     }
-                    else if (res.id_number || (res.Body && res.Body.PublicData) || res.nonModifiablePublicData || res.toolkit_response) {
-                        // Step 5: Data Received
+                    else if (res.id_number || res.toolkit_response || res.Body || res.payload) {
                         console.log("[EmiratesIDReader] Step 5 OK: Data Received successfully.");
                         resolve(res);
-                        // Final Cleanup
                         sendReq({ "cmd": 5, "service_context": serviceContext, "card_context": cardContext });
                         sendReq({ "cmd": 2, "service_context": serviceContext });
-                        setTimeout(() => socket.close(), 500);
+                        setTimeout(() => socket.close(), 1000);
                     }
                 } catch (e) {
                     console.error("[EmiratesIDReader] Protocol error:", e);
-                    reject(_t("Protocol synchronization failed."));
+                    reject(_t("Data processing failed."));
                     socket.close();
                 }
             };
 
             socket.onerror = (err) => {
-                console.error("[EmiratesIDReader] Socket runtime error:", err);
-                reject(_t("Emirates ID Service connection lost."));
+                console.error("[EmiratesIDReader] Runtime error:", err);
+                reject(_t("Service connection lost."));
             };
 
-            socket.onclose = (event) => {
-                console.warn("[EmiratesIDReader] WebSocket closed:", event.code, event.reason);
-                if (!event.wasClean) {
-                    reject(_t("Connection closed unexpectedly by toolkit agent."));
-                }
-            };
-
-            // Start Handshake with Config
             const shortUA = navigator.userAgent.split(' ')[0] || "Browser";
             sendReq({ "cmd": 1, "config_params": this.TOOLKIT_CONFIG, "user_agent": shortUA });
         });
     }
 };
 
-// Register as an Odoo Service to ensure it loads with the framework
 export const emiratesIDReaderService = {
     start() {
-        console.log("[EmiratesIDReader] Service V5.1 active.");
+        console.log("[EmiratesIDReader] Service active.");
 
         document.addEventListener('click', async (ev) => {
-            const target = ev.target;
-            const btn = target.closest('.read_emirates_id_btn');
-
+            const btn = ev.target.closest('.read_emirates_id_btn');
             if (!btn || btn.disabled) return;
 
-            console.log("[V5.1] Handshake triggered!");
             ev.preventDefault();
             ev.stopPropagation();
-
-            // Confirmation alert
-            // if (!window.confirm("Read Emirates ID now?")) return;
 
             const originalText = btn.innerText;
             btn.innerText = _t("READING...");
@@ -215,113 +206,75 @@ export const emiratesIDReaderService = {
 
             try {
                 const res = await EmiratesIDReader.readCard();
-
-                // Flexible data extraction (JSON vs XML)
-                let data = res.Body?.PublicData || res.nonModifiablePublicData || res.payload || res;
-                let nonMod = data.NonModifiableData || res.nonModifiablePublicData || data;
+                let data = res.Body || res.PublicData || res.nonModifiablePublicData || res.payload || res;
 
                 if (res.toolkit_response) {
-                    console.log("[EmiratesIDReader] Parsing XML response...");
-                    try {
-                        const parser = new DOMParser();
-                        const xmlDoc = parser.parseFromString(res.toolkit_response, "text/xml");
-                        const getTag = (tag) => xmlDoc.getElementsByTagName(tag)[0]?.textContent || "";
+                    const parser = new DOMParser();
+                    const xml = parser.parseFromString(res.toolkit_response, "text/xml");
+                    const getTag = (t) => xml.getElementsByTagName(t)[0]?.textContent || "";
+                    const fD = (s) => {
+                        if (!s) return "";
+                        const p = s.split(/[-/]/);
+                        return (p.length === 3) ? (p[0].length === 4 ? p.join('-') : `${p[2]}-${p[1]}-${p[0]}`) : s;
+                    };
 
-                        data = {
-                            CardNumber: getTag("IdNumber") || getTag("CardNumber") || getTag("idNumber"),
-                            FullNameEnglish: getTag("FullNameEnglish"),
-                            FullNameArabic: getTag("FullNameArabic"),
-                            NationalityEnglish: getTag("NationalityEnglish"),
-                            DateOfBirth: getTag("DateOfBirth"),
-                            Gender: getTag("Gender"),
-                            CardHolderPhoto: getTag("Photography") || getTag("CardHolderPhoto") || getTag("photography")
-                        };
-                        nonMod = data;
-                        console.log("[EmiratesIDReader] XML Data Extracted:", data);
-                    } catch (xmlErr) {
-                        console.error("[EmiratesIDReader] XML Parse Error:", xmlErr);
-                    }
+                    data = {
+                        CardNumber: getTag("IdNumber") || getTag("CardNumber") || getTag("idNumber"),
+                        FullNameEnglish: getTag("FullNameEnglish"),
+                        FullNameArabic: getTag("FullNameArabic"),
+                        NationalityEnglish: getTag("NationalityEnglish"),
+                        DateOfBirth: fD(getTag("DateOfBirth")),
+                        Gender: getTag("Gender"),
+                        Photography: getTag("Photography") || getTag("CardHolderPhoto"),
+                        ExpiryDate: fD(getTag("ExpiryDate")),
+                        IssueDate: fD(getTag("IssueDate")),
+                        PassportNumber: getTag("PassportNumber"),
+                        Occupation: getTag("OccupationEnglish") || getTag("Occupation"),
+                        VisaNumber: getTag("VisaNumber")
+                    };
                 }
 
                 const mappings = {
-                    'name': nonMod.FullNameEnglish || nonMod.fullNameEnglish || data.FullNameEnglish || data.fullNameEnglish,
-                    'id_number': data.CardNumber || nonMod.IdNumber || nonMod.idNumber || data.id_number,
-                    'nationality': nonMod.NationalityEnglish || nonMod.nationalityEnglish || data.NationalityEnglish,
-                    'date_of_birth': nonMod.DateOfBirth || nonMod.dateOfBirth || data.DateOfBirth,
-                    'gender': (nonMod.Gender || nonMod.gender || "").toLowerCase().includes('m') ? 'male' : 'female',
-                    'name_arabic': nonMod.FullNameArabic || nonMod.fullNameArabic || data.FullNameArabic,
+                    'name': data.FullNameEnglish || data.fullNameEnglish,
+                    'id_number': data.CardNumber || data.IdNumber || data.id_number,
+                    'nationality': data.NationalityEnglish || data.nationalityEnglish,
+                    'date_of_birth': data.DateOfBirth || data.dateOfBirth,
+                    'gender': (data.Gender || "").toLowerCase().includes('m') ? 'male' : 'female',
+                    'name_arabic': data.FullNameArabic || data.fullNameArabic,
+                    'id_expiry_date': data.ExpiryDate,
+                    'id_issue_date': data.IssueDate,
+                    'passport_number': data.PassportNumber,
+                    'occupation': data.Occupation,
+                    'visa_number': data.VisaNumber
                 };
 
-                console.log("[EmiratesIDReader] Populating fields:", mappings);
-
-                // Serialized Field Updates to avoid clashing with Odoo's Owl lifecycle
-                const fieldEntries = Object.entries(mappings);
-                for (const [field, val] of fieldEntries) {
-                    await new Promise(r => setTimeout(r, 100)); // 100ms gap
-
-                    let input = document.querySelector(`[name="${field}"] select, [name="${field}"] textarea, [name="${field}"] input:not([type="hidden"]), [name="${field}"] input[type="text"]`);
-                    if (!input) input = document.querySelector(`[name="${field}"] input`);
-
-                    if (input && val) {
-                        try {
-                            const cleanVal = val.toString().replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
-                            console.log(`[EmiratesIDReader] Updating ${field} (<${input.tagName}>) to "${cleanVal}"`);
-
-                            if (input.tagName === 'SELECT') {
-                                // Log available options for debugging
-                                const availableOptions = Array.from(input.options).map(o => o.value);
-                                console.log(`[EmiratesIDReader] Selection field ${field} options:`, availableOptions);
-
-                                // For Selection fields, try to find the option matching the value
-                                const quotedVal = `"${cleanVal}"`;
-                                const optionIndex = Array.from(input.options).findIndex(opt =>
-                                    opt.value === cleanVal ||
-                                    opt.value === quotedVal ||
-                                    opt.text.toLowerCase() === cleanVal.toLowerCase()
-                                );
-
-                                if (optionIndex !== -1) {
-                                    const actualValue = input.options[optionIndex].value;
-                                    input.value = actualValue;
-                                    input.selectedIndex = optionIndex;
-
-                                    // Trigger both events for Selection fields in Owl
-                                    input.dispatchEvent(new Event('input', { bubbles: true }));
-                                    input.dispatchEvent(new Event('change', { bubbles: true }));
-                                    console.log(`[EmiratesIDReader] Selection refined for ${field}: ${actualValue} (Index: ${optionIndex})`);
-                                } else {
-                                    console.warn(`[EmiratesIDReader] Value "${cleanVal}" (or "${quotedVal}") not in [${availableOptions.join(', ')}] for ${field}`);
-                                }
-                            } else {
-                                input.value = cleanVal;
-                                input.dispatchEvent(new Event('input', { bubbles: true }));
-                                input.dispatchEvent(new Event('change', { bubbles: true }));
-                            }
-                        } catch (e) {
-                            console.error(`[EmiratesIDReader] Failed to update ${field}:`, e);
+                for (const [field, val] of Object.entries(mappings)) {
+                    if (!val) continue;
+                    await new Promise(r => setTimeout(r, 50));
+                    const input = document.querySelector(`[name="${field}"] input, [name="${field}"] select, [name="${field}"] textarea`);
+                    if (input) {
+                        if (input.tagName === 'SELECT') {
+                            const opt = Array.from(input.options).find(o => o.value === val || o.value === `"${val}"` || o.text.toLowerCase() === val.toLowerCase());
+                            if (opt) input.value = opt.value;
+                        } else {
+                            input.value = val.toString().trim();
                         }
+                        input.dispatchEvent(new Event('input', { bubbles: true }));
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
                     }
                 }
 
-                // Photo Handling (Only update ID Photo as per user request)
-                const photo = data.CardHolderPhoto || data.Photography || data.photography;
-                if (photo) {
-                    console.log("[EmiratesIDReader] Updating ID photo...");
-                    const fieldName = 'id_photo';
-                    const img = document.querySelector(`[name="${fieldName}"] img`);
-                    if (img) img.src = `data:image/png;base64,${photo}`;
-
-                    const hiddenInput = document.querySelector(`[name="${fieldName}"] input[type="hidden"]`);
-                    if (hiddenInput) {
-                        hiddenInput.value = photo;
-                    }
+                if (data.Photography) {
+                    const img = document.querySelector(`[name="id_photo"] img`);
+                    if (img) img.src = `data:image/png;base64,${data.Photography}`;
+                    const hidden = document.querySelector(`[name="id_photo"] input[type="hidden"]`);
+                    if (hidden) hidden.value = data.Photography;
                 }
 
                 window.alert(_t("Identity data synchronized successfully!"));
-
-            } catch (error) {
-                console.error("[EmiratesIDReader] Handshake Failed:", error);
-                window.alert(_t("Integration Error: ") + error);
+            } catch (err) {
+                console.error("[EmiratesIDReader] Error:", err);
+                window.alert(_t("Integration Error: ") + err);
             } finally {
                 btn.innerText = originalText;
                 btn.disabled = false;
@@ -331,6 +284,4 @@ export const emiratesIDReaderService = {
 };
 
 registry.category("services").add("emirates_id_reader", emiratesIDReaderService);
-
-// Also make available for console debugging
 window.EmiratesIDReader = EmiratesIDReader;
