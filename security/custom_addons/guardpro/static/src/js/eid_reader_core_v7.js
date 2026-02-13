@@ -273,17 +273,24 @@ export const emiratesIDReaderService = {
                                 console.log(`[EmiratesIDReader] Selection field ${field} options:`, availableOptions);
 
                                 // For Selection fields, try to find the option matching the value
-                                const optionIndex = Array.from(input.options).findIndex(opt => opt.value === cleanVal);
+                                const quotedVal = `"${cleanVal}"`;
+                                const optionIndex = Array.from(input.options).findIndex(opt =>
+                                    opt.value === cleanVal ||
+                                    opt.value === quotedVal ||
+                                    opt.text.toLowerCase() === cleanVal.toLowerCase()
+                                );
+
                                 if (optionIndex !== -1) {
-                                    input.value = cleanVal;
+                                    const actualValue = input.options[optionIndex].value;
+                                    input.value = actualValue;
                                     input.selectedIndex = optionIndex;
 
                                     // Trigger both events for Selection fields in Owl
                                     input.dispatchEvent(new Event('input', { bubbles: true }));
                                     input.dispatchEvent(new Event('change', { bubbles: true }));
-                                    console.log(`[EmiratesIDReader] Selection refined for ${field}: ${cleanVal} (Index: ${optionIndex})`);
+                                    console.log(`[EmiratesIDReader] Selection refined for ${field}: ${actualValue} (Index: ${optionIndex})`);
                                 } else {
-                                    console.warn(`[EmiratesIDReader] Value "${cleanVal}" not in [${availableOptions.join(', ')}] for ${field}`);
+                                    console.warn(`[EmiratesIDReader] Value "${cleanVal}" (or "${quotedVal}") not in [${availableOptions.join(', ')}] for ${field}`);
                                 }
                             } else {
                                 input.value = cleanVal;
