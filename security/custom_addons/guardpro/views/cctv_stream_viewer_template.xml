@@ -144,24 +144,28 @@
                                                             }
                                                             
                                                             // Show error message in the container
-                                                            var existingError = img.parentNode.querySelector('.alert-danger');
-                                                            if (!existingError) {
-                                                                var errorMsg = document.createElement('div');
-                                                                errorMsg.className = 'alert alert-danger mt-2';
-                                                                errorMsg.innerHTML = '&lt;strong&gt;Stream Error:&lt;/strong&gt; Unable to load camera stream. &lt;br/&gt;' +
-                                                                    '&lt;small&gt;URL: ' + streamUrl + '&lt;/small&gt;&lt;br/&gt;' +
-                                                                    '&lt;small&gt;Check browser console (F12) for detailed error information.&lt;/small&gt;' +
-                                                                    '&lt;br/&gt;&lt;small&gt;Possible causes: Camera offline, incorrect URL, authentication failed, or network issue.&lt;/small&gt;';
-                                                                img.parentNode.appendChild(errorMsg);
+                                                            if (img.parentNode) {
+                                                                var existingError = img.parentNode.querySelector('.alert-danger');
+                                                                if (!existingError) {
+                                                                    var errorMsg = document.createElement('div');
+                                                                    errorMsg.className = 'alert alert-danger mt-2';
+                                                                    errorMsg.innerHTML = '&lt;strong&gt;Stream Error:&lt;/strong&gt; Unable to load camera stream. &lt;br/&gt;' +
+                                                                        '&lt;small&gt;URL: ' + streamUrl + '&lt;/small&gt;&lt;br/&gt;' +
+                                                                        '&lt;small&gt;Check browser console (F12) for detailed error information.&lt;/small&gt;' +
+                                                                        '&lt;br/&gt;&lt;small&gt;Possible causes: Camera offline, incorrect URL, authentication failed, or network issue.&lt;/small&gt;';
+                                                                    img.parentNode.appendChild(errorMsg);
+                                                                }
                                                             }
                                                         });
                                                         
                                                         img.addEventListener('load', function() {
                                                             console.log('Image/MJPEG stream loaded successfully');
                                                             // Remove any error messages if image loads
-                                                            var errorMsg = img.parentNode.querySelector('.alert-danger');
-                                                            if (errorMsg) {
-                                                                errorMsg.remove();
+                                                            if (img.parentNode) {
+                                                                var errorMsg = img.parentNode.querySelector('.alert-danger');
+                                                                if (errorMsg) {
+                                                                    errorMsg.remove();
+                                                                }
                                                             }
                                                         });
                                                     }

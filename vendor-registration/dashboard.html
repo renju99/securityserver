@@ -217,6 +217,37 @@
             border-bottom: 2px solid var(--border);
         }
 
+        th.sortable {
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+        }
+
+        th.sortable:hover {
+            background: #f1f3f5;
+            color: var(--primary);
+        }
+
+        th.sortable::after {
+            content: '↕';
+            position: absolute;
+            right: 8px;
+            font-size: 10px;
+            opacity: 0.3;
+        }
+
+        th.sort-asc::after {
+            content: '↑';
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        th.sort-desc::after {
+            content: '↓';
+            opacity: 1;
+            color: var(--primary);
+        }
+
         td {
             padding: 16px;
             font-size: 14px;
@@ -404,11 +435,11 @@
             <table id="submissionsTable">
                 <thead>
                     <tr>
-                        <th style="width: 25%;">Company Name</th>
-                        <th>Services / Tags</th>
-                        <th>Country</th>
-                        <th>Emirate</th>
-                        <th>Date Submitted</th>
+                        <th style="width: 25%;" class="sortable" onclick="handleSort('companyName')" id="th-companyName">Company Name</th>
+                        <th class="sortable" onclick="handleSort('tags')" id="th-tags">Services / Tags</th>
+                        <th class="sortable" onclick="handleSort('country')" id="th-country">Country</th>
+                        <th class="sortable" onclick="handleSort('emirates')" id="th-emirates">Emirate</th>
+                        <th class="sortable sort-desc" onclick="handleSort('timestamp')" id="th-timestamp">Date Submitted</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -425,6 +456,8 @@
 
     <script>
         let allSubmissions = [];
+        let currentSortField = 'timestamp';
+        let currentSortOrder = 'desc';
 
         document.addEventListener('DOMContentLoaded', () => {
             if (!localStorage.getItem('vendor_auth')) {
@@ -531,24 +564,69 @@
             });
         }
 
+        function handleSort(field) {
+            if (currentSortField === field) {
+                currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortField = field;
+                currentSortOrder = 'asc';
+            }
+
+            // Update UI headers
+            document.querySelectorAll('th.sortable').forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+            });
+            const activeHeader = document.getElementById(`th-${field}`);
+            if (activeHeader) {
+                activeHeader.classList.add(currentSortOrder === 'asc' ? 'sort-asc' : 'sort-desc');
+            }
+
+            applyFilters();
+        }
+
         function applyFilters() {
             const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
             const emirate = document.getElementById('emirateFilter').value;
 
-            const filtered = allSubmissions.filter(s => {
-                const allTags = [
-                    ...(s.materialsSupply || []),
-                    ...(s.amcServices || []),
-                    ...(s.manpowerSupply || []),
-                    s.otherServices || ''
-                ].join(' ').toLowerCase();
+            let filtered = allSubmissions.filter(s => {
+                const materials = s.materialsSupply || [];
+                const amc = s.amcServices || [];
+                const manpower = s.manpowerSupply || [];
+                const other = s.otherServices || '';
+                
+                const allTagsStr = [...materials, ...amc, ...manpower, other].join(' ').toLowerCase();
 
                 const searchMatch = s.companyName.toLowerCase().includes(searchTerm) ||
-                    allTags.includes(searchTerm);
+                    allTagsStr.includes(searchTerm);
 
                 const matchesEmirate = emirate === 'all' || s.emirates === emirate;
 
                 return searchMatch && matchesEmirate;
+            });
+
+            // Sort filtered results
+            filtered.sort((a, b) => {
+                let valA, valB;
+
+                if (currentSortField === 'tags') {
+                    valA = [...(a.materialsSupply || []), ...(a.amcServices || []), ...(a.manpowerSupply || []), a.otherServices || ''].join(' ');
+                    valB = [...(b.materialsSupply || []), ...(b.amcServices || []), ...(b.manpowerSupply || []), b.otherServices || ''].join(' ');
+                } else {
+                    valA = a[currentSortField] || '';
+                    valB = b[currentSortField] || '';
+                }
+
+                if (typeof valA === 'string') valA = valA.toLowerCase();
+                if (typeof valB === 'string') valB = valB.toLowerCase();
+
+                if (currentSortField === 'timestamp') {
+                    valA = new Date(valA).getTime() || 0;
+                    valB = new Date(valB).getTime() || 0;
+                }
+
+                if (valA < valB) return currentSortOrder === 'asc' ? -1 : 1;
+                if (valA > valB) return currentSortOrder === 'asc' ? 1 : -1;
+                return 0;
             });
 
             displaySubmissions(filtered);

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Sentry - Security Guard Management',
-    'version': '18.0.1.1.10',
+    'version': '18.0.1.1.14',
     'category': 'Services/Security',
     'summary': 'Win premium guard contracts with an Odoo-native suite for mobile patrols, SLA automation, client portals, and analytics.',
     'description': """
@@ -180,7 +180,8 @@ Support & Roadmap
         'data/elearning/elearning_slides_legal_compliance.xml',
         'data/elearning/elearning_slides_patrol_techniques.xml',
         'data/elearning/elearning_slides_report_writing.xml',
-        'data/elearning/guard_training_courses_data.xml',
+        # 'data/elearning/guard_training_courses_data.xml',
+        'data/elearning/guard_training_content_fill.xml',
         
         # Dubai & SIRA Specific Training Content
         'data/elearning/elearning_slides_sira_compliance.xml',

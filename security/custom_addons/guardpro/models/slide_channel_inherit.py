@@ -120,9 +120,11 @@ class SlideChannel(models.Model):
                 warning_date = fields.Datetime.now() + timedelta(days=30)
                 
                 for enrollment in completed_enrollments:
-                    completion_slide = enrollment.partner_id.slide_partner_ids.filtered(
-                        lambda sp: sp.channel_id == record and sp.completed
-                    ).sorted('write_date', reverse=True)
+                    completion_slide = self.env['slide.slide.partner'].search([
+                        ('partner_id', '=', enrollment.partner_id.id),
+                        ('channel_id', '=', record.id),
+                        ('completed', '=', True)
+                    ]).sorted('write_date', reverse=True)
                     
                     if completion_slide:
                         completion_date = completion_slide[0].write_date

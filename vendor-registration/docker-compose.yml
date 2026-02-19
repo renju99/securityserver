@@ -20,24 +20,23 @@ services:
       - ./data:/app/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
     networks:
       - vendor-form-network
-      - security_odoo-network
-
+      - web-proxy-net
   # Note: If you have an existing nginx-proxy, you can either:
   # 1. Use the existing proxy and configure it to route supplier.proptechme.com to form-backend:3000
   # 2. Or expose the backend on a different port and configure your existing nginx-proxy
-  
+
   # Option: Expose backend for external nginx-proxy integration
   # form-backend port is exposed internally for nginx-proxy to access
 
 networks:
   vendor-form-network:
     driver: bridge
-  security_odoo-network:
+  web-proxy-net:
     external: true

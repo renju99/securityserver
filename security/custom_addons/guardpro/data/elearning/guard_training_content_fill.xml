@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ============================================== -->
+        <!-- Content for Basic Security Training (Health & Safety) -->
+        <!-- ============================================== -->
+        <record id="slide_hs_workplace_safety" model="slide.slide">
+            <field name="name">Workplace Safety Fundamentals</field>
+            <field name="channel_id" ref="guardpro.elearning_course_basic_security"/>
+            <field name="slide_category">article</field>
+            <field name="sequence">10</field>
+            <field name="is_published" eval="True"/>
+            <field name="description">
+                <![CDATA[
+                <h2>Safety in the Workplace</h2>
+                <p>Security guards are often the first to identify safety hazards.</p>
+                <h3>Common Hazards:</h3>
+                <ul>
+                    <li>Slips, trips, and falls (wet floors, uneven surfaces).</li>
+                    <li>Electrical hazards (exposed wires, overloaded circuits).</li>
+                    <li>Chemical hazards (improperly stored cleaning agents).</li>
+                    <li>Blocked emergency exits or fire equipment.</li>
+                </ul>
+                ]]>
+            </field>
+        </record>
+
+        <record id="slide_hs_ppe" model="slide.slide">
+            <field name="name">Personal Protective Equipment (PPE)</field>
+            <field name="channel_id" ref="guardpro.elearning_course_basic_security"/>
+            <field name="slide_category">article</field>
+            <field name="sequence">11</field>
+            <field name="is_published" eval="True"/>
+            <field name="description">
+                <![CDATA[
+                <h2>Using PPE Correctly</h2>
+                <p>Protecting yourself is the first step in protecting others.</p>
+                <ul>
+                    <li><strong>High-Visibility Vests:</strong> Essential for traffic control and patrol.</li>
+                    <li><strong>Safety Footwear:</strong> Slip-resistant and toe-protection shoes.</li>
+                    <li><strong>Gloves:</strong> For handling unknown objects or potential biohazards.</li>
+                    <li><strong>Eye/Ear Protection:</strong> In industrial or construction environments.</li>
+                </ul>
+                ]]>
+            </field>
+        </record>
+
+        <!-- ============================================== -->
+        <!-- Content for Customer Service for Security Guards -->
+        <!-- ============================================== -->
+        <record id="slide_cs_professionalism_fill" model="slide.slide">
+            <field name="name">The Professional Security Image</field>
+            <field name="channel_id" ref="guardpro.elearning_course_customer_service"/>
+            <field name="slide_category">article</field>
+            <field name="sequence">1</field>
+            <field name="is_published" eval="True"/>
+            <field name="description">
+                <![CDATA[
+                <h2>First Impressions Matter</h2>
+                <p>Security officers are often the first face a visitor sees.</p>
+                <ul>
+                    <li><strong>Uniform:</strong> Clean, pressed, and properly worn.</li>
+                    <li><strong>Appearance:</strong> Well-groomed and alert posture.</li>
+                    <li><strong>Greeting:</strong> Friendly, firm, and professional.</li>
+                    <li><strong>Attitude:</strong> Helpful rather than authoritative ("How can I help you?" vs "What do you want?").</li>
+                </ul>
+                ]]>
+            </field>
+        </record>
+
+        <record id="slide_cs_communication_fill" model="slide.slide">
+            <field name="name">Effective Communication Skills</field>
+            <field name="channel_id" ref="guardpro.elearning_course_customer_service"/>
+            <field name="slide_category">article</field>
+            <field name="sequence">2</field>
+            <field name="is_published" eval="True"/>
+            <field name="description">
+                <![CDATA[
+                <h2>Communication is Key</h2>
+                <p>Clear communication prevents misunderstandings and conflicts.</p>
+                <ul>
+                    <li><strong>Active Listening:</strong> Focus on the speaker, don't interrupt.</li>
+                    <li><strong>Clarity:</strong> Give clear, concise directions.</li>
+                    <li><strong>Non-Verbal Cues:</strong> Maintain eye contact and open body language.</li>
+                    <li><strong>Tone:</strong> Keep your voice calm and steady, even under pressure.</li>
+                </ul>
+                ]]>
+            </field>
+        </record>
+
+        <!-- ============================================== -->
+        <!-- Content for Legal & Compliance Training -->
+        <!-- ============================================== -->
+        <record id="slide_legal_authority_fill" model="slide.slide">
+            <field name="name">Authority and Jurisdiction</field>
+            <field name="channel_id" ref="guardpro.elearning_course_legal_compliance"/>
+            <field name="slide_category">article</field>
+            <field name="sequence">1</field>
+            <field name="is_published" eval="True"/>
+            <field name="description">
+                <![CDATA[
+                <h2>Understanding Your Authority</h2>
+                <p>Private security guards have different powers than police officers.</p>
+                <h3>Key Distinctions:</h3>
+                <ul>
+                    <li><strong>Private Property:</strong> Your authority comes from the property owner.</li>
+                    <li><strong>Citizen's Arrest:</strong> Understanding the limited scope of arrest powers.</li>
+                    <li><strong>Use of Force:</strong> Only reasonable and necessary force for self-defense or defense of others.</li>
+                    <li><strong>Search and Seizure:</strong> Limitations on searching persons or bags without consent.</li>
+                </ul>
+                ]]>
+            </field>
+        </record>
+
+        <record id="slide_legal_reports_fill" model="slide.slide">
+            <field name="name">Legal Incident Documentation</field>
+            <field name="channel_id" ref="guardpro.elearning_course_legal_compliance"/>
+            <field name="slide_category">article</field>
+            <field name="sequence">2</field>
+            <field name="is_published" eval="True"/>
+            <field name="description">
+                <![CDATA[
+                <h2>Writing for the Courtroom</h2>
+                <p>Your reports are legal documents that may be used in court.</p>
+                <ul>
+                    <li><strong>Fact-Based:</strong> Record only what you saw, heard, and did (Who, What, When, Where).</li>
+                    <li><strong>Objective:</strong> Avoid opinions, emotions, or assumptions.</li>
+                    <li><strong>Chronological:</strong> Record events in the exact order they happened.</li>
+                    <li><strong>Preservation:</strong> Protect evidence and the scene until police arrival.</li>
+                </ul>
+                ]]>
+            </field>
+        </record>
+
+    </data>
+</odoo>

@@ -708,6 +708,332 @@
             </field>
         </record>
 
+        <!-- Final Assessment Questions: Module 1 -->
+        <record id="quiz_final_q1" model="slide.question">
+            <field name="question">What is the primary function of GuardPro?</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_final_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q1"/>
+            <field name="text_value">Social media marketing</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_final_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q1"/>
+            <field name="text_value">Security operations management</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <record id="quiz_final_q2" model="slide.question">
+            <field name="question">GuardPro is built on which technology platform?</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_final_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q2"/>
+            <field name="text_value">Wordpress</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_final_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q2"/>
+            <field name="text_value">Odoo 18</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <!-- Final Assessment Questions: Module 2 -->
+        <record id="quiz_final_q3" model="slide.question">
+            <field name="question">Where is the primary navigation for all GuardPro modules located?</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="quiz_final_q3_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q3"/>
+            <field name="text_value">Top header exclusively</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_final_q3_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q3"/>
+            <field name="text_value">Left sidebar menu</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <record id="quiz_final_q4" model="slide.question">
+            <field name="question">Which view type is best for visual card-based workflow management?</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">4</field>
+        </record>
+        <record id="quiz_final_q4_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q4"/>
+            <field name="text_value">List View</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_final_q4_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q4"/>
+            <field name="text_value">Kanban View</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <record id="quiz_final_q5" model="slide.question">
+            <field name="question">What is a best practice for logging into GuardPro safely?</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">5</field>
+        </record>
+        <record id="quiz_final_q5_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q5"/>
+            <field name="text_value">Share credentials with your team lead only</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_final_q5_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q5"/>
+            <field name="text_value">Ensure you are using the official URL and use a strong password</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <record id="quiz_final_q6" model="slide.question">
+            <field name="question">Which keyboard shortcut is commonly used for searching across multiple fields?</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">6</field>
+        </record>
+        <record id="quiz_final_q6_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q6"/>
+            <field name="text_value">Ctrl + P</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_final_q6_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q6"/>
+            <field name="text_value">Ctrl + F</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <!-- Final Assessment Questions: Module 3 -->
+        <record id="quiz_final_q7" model="slide.question">
+            <field name="question">Which user role typically has view-only access for strategic oversight?</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">7</field>
+        </record>
+        <record id="quiz_final_q7_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q7"/>
+            <field name="text_value">Administrator</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_final_q7_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q7"/>
+            <field name="text_value">Client</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <record id="quiz_final_q8" model="slide.question">
+            <field name="question">Who is responsible for daily site operations and guard management?</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">8</field>
+        </record>
+        <record id="quiz_final_q8_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q8"/>
+            <field name="text_value">Security Guard</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_final_q8_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q8"/>
+            <field name="text_value">Site Supervisor</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <record id="quiz_final_q9" model="slide.question">
+            <field name="question">The Administrator role in GuardPro has:</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">9</field>
+        </record>
+        <record id="quiz_final_q9_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q9"/>
+            <field name="text_value">Full system access and configuration power</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_final_q9_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q9"/>
+            <field name="text_value">Only access to incident reporting</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Final Assessment Questions: Module 4 -->
+        <record id="quiz_final_q10" model="slide.question">
+            <field name="question">Which dashboard component shows real-time incident tracking with status updates?</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">10</field>
+        </record>
+        <record id="quiz_final_q10_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q10"/>
+            <field name="text_value">Stats Banner</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_final_q10_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q10"/>
+            <field name="text_value">Today's Operations Panel</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <record id="quiz_final_q11" model="slide.question">
+            <field name="question">What information is NOT typically found in the Dashboard Stats Banner?</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">11</field>
+        </record>
+        <record id="quiz_final_q11_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q11"/>
+            <field name="text_value">Number of Active Guards</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_final_q11_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q11"/>
+            <field name="text_value">Detailed guard payroll records</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <record id="quiz_final_q12" model="slide.question">
+            <field name="question">Dashboard quick actions allow you to:</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">12</field>
+        </record>
+        <record id="quiz_final_q12_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q12"/>
+            <field name="text_value">Rapidly report incidents and clock in/out</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_final_q12_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q12"/>
+            <field name="text_value">Access deep system architecture settings</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_final_q13" model="slide.question">
+            <field name="question">The Site Coverage Overview provides a visual representation of:</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">13</field>
+        </record>
+        <record id="quiz_final_q13_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q13"/>
+            <field name="text_value">Guard locations on a map</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_final_q13_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q13"/>
+            <field name="text_value">Client billing history</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Final Assessment Questions: Module 5 -->
+        <record id="quiz_final_q14" model="slide.question">
+            <field name="question">What is the first step in creating a new record in GuardPro?</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">14</field>
+        </record>
+        <record id="quiz_final_q14_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q14"/>
+            <field name="text_value">Click the Save button</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_final_q14_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q14"/>
+            <field name="text_value">Navigate to the relevant module via the sidebar</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <record id="quiz_final_q15" model="slide.question">
+            <field name="question">When reporting an incident, it is most important to:</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">15</field>
+        </record>
+        <record id="quiz_final_q15_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q15"/>
+            <field name="text_value">Limit details to save space</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_final_q15_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q15"/>
+            <field name="text_value">Provide accurate, factual, and complete information</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <record id="quiz_final_q16" model="slide.question">
+            <field name="question">Which of the following is a role-specific operation for a Site Supervisor?</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">16</field>
+        </record>
+        <record id="quiz_final_q16_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q16"/>
+            <field name="text_value">Managing guard shifts and reviewing incident reports</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_final_q16_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q16"/>
+            <field name="text_value">Performing front-line gate access control only</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_final_q17" model="slide.question">
+            <field name="question">Exporting data from GuardPro allows you to save records as:</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">17</field>
+        </record>
+        <record id="quiz_final_q17_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q17"/>
+            <field name="text_value">Excel (.xlsx) or CSV files</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_final_q17_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q17"/>
+            <field name="text_value">Plain text files only</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_final_q18" model="slide.question">
+            <field name="question">Data integrity in GuardPro is maintained by:</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">18</field>
+        </record>
+        <record id="quiz_final_q18_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q18"/>
+            <field name="text_value">Sharing accounts to ensure coverage</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_final_q18_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q18"/>
+            <field name="text_value">Never sharing credentials and updating records in real-time</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <!-- Final Assessment Questions: Module 6 -->
+        <record id="quiz_final_q19" model="slide.question">
+            <field name="question">Where is the best place to start when seeking help with GuardPro?</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">19</field>
+        </record>
+        <record id="quiz_final_q19_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q19"/>
+            <field name="text_value">Calling emergency services</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_final_q19_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q19"/>
+            <field name="text_value">Self-help resources like documentation and FAQs</field>
+            <field name="is_correct">True</field>
+        </record>
+
+        <record id="quiz_final_q20" model="slide.question">
+            <field name="question">If you encounter a system error, you should:</field>
+            <field name="slide_id" ref="slide_fundamentals_final"/>
+            <field name="sequence">20</field>
+        </record>
+        <record id="quiz_final_q20_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q20"/>
+            <field name="text_value">Ignore it unless it stops you from working</field>
+            <field name="is_correct">False</field>
+        </record>
+        <record id="quiz_final_q20_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_final_q20"/>
+            <field name="text_value">Report it through the proper channels provided by documentation</field>
+            <field name="is_correct">True</field>
+        </record>
+
     </data>
 </odoo>
 
