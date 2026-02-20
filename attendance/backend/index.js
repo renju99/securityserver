@@ -199,6 +199,19 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
     return d;
 };
 
+// Ray-casting algorithm to check if a point is inside a polygon
+const isPointInPolygon = (lat, lng, polygon) => {
+    let inside = false;
+    const x = lng, y = lat;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const xi = polygon[i].lng, yi = polygon[i].lat;
+        const xj = polygon[j].lng, yj = polygon[j].lat;
+        const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+    }
+    return inside;
+};
+
 // Debug endpoint for remote Android logging
 app.post('/debug/log', (req, res) => {
     console.log(`[PHONE_LOG] ${req.body.tag}: ${req.body.msg}`);
@@ -780,6 +793,118 @@ app.get('/hr/alerts', authenticateToken, authorizeRole(['HR Admin', 'Site Superv
     }
 });
 
+// HR API: Get Location Logs (live_logs) with filtering and pagination
+app.get('/hr/location-logs', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
+    const { staffId, startDate, endDate, page = 1, limit = 100 } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const params = [];
+    const conditions = [];
+    let idx = 1;
+
+    if (req.user.role === 'Site Supervisor') {
+        conditions.push(`e.site_id = $${idx++}`);
+        params.push(req.user.siteId);
+    }
+
+    if (staffId) {
+        conditions.push(`e.staff_id ILIKE $${idx++}`);
+        params.push(`%${staffId}%`);
+    }
+    if (startDate) {
+        conditions.push(`ll.timestamp >= $${idx++}`);
+        params.push(startDate);
+    }
+    if (endDate) {
+        conditions.push(`ll.timestamp <= $${idx++}`);
+        params.push(endDate);
+    }
+
+    const where = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
+
+    try {
+        const countRes = await pool.query(
+            `SELECT COUNT(*) FROM live_logs ll JOIN employees e ON ll.employee_id = e.id ${where}`,
+            params
+        );
+        const total = parseInt(countRes.rows[0].count);
+
+        const result = await pool.query(
+            `SELECT ll.id,
+                    e.staff_id, e.first_name, e.last_name,
+                    ST_Y(ll.current_coords::geometry) as latitude,
+                    ST_X(ll.current_coords::geometry) as longitude,
+                    ll.timestamp
+             FROM live_logs ll
+             JOIN employees e ON ll.employee_id = e.id
+             ${where}
+             ORDER BY ll.timestamp DESC
+             LIMIT $${idx++} OFFSET $${idx++}`,
+            [...params, parseInt(limit), offset]
+        );
+
+        res.json({
+            logs: result.rows,
+            total,
+            page: parseInt(page),
+            totalPages: Math.ceil(total / parseInt(limit))
+        });
+    } catch (err) {
+        console.error('Error fetching location logs:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// HR API: Delete a single location log entry
+app.delete('/hr/location-logs/:id', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await pool.query('DELETE FROM live_logs WHERE id = $1 RETURNING id', [id]);
+        if (result.rows.length === 0) return res.status(404).json({ error: 'Log not found' });
+        res.json({ message: 'Log deleted' });
+    } catch (err) {
+        console.error('Error deleting location log:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// HR API: Bulk delete location logs (by employee and/or date range)
+app.delete('/hr/location-logs', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
+    const { staffId, startDate, endDate, ids } = req.body;
+
+    try {
+        // Delete by explicit ID list
+        if (ids && Array.isArray(ids) && ids.length > 0) {
+            await pool.query('DELETE FROM live_logs WHERE id = ANY($1)', [ids]);
+            return res.json({ message: `${ids.length} log(s) deleted` });
+        }
+
+        const conditions = [];
+        const params = [];
+        let idx = 1;
+
+        if (staffId) {
+            const empRes = await pool.query('SELECT id FROM employees WHERE staff_id ILIKE $1', [`%${staffId}%`]);
+            const empIds = empRes.rows.map(r => r.id);
+            if (empIds.length === 0) return res.json({ message: '0 logs deleted' });
+            conditions.push(`employee_id = ANY($${idx++})`);
+            params.push(empIds);
+        }
+        if (startDate) { conditions.push(`timestamp >= $${idx++}`); params.push(startDate); }
+        if (endDate) { conditions.push(`timestamp <= $${idx++}`); params.push(endDate); }
+
+        if (conditions.length === 0) return res.status(400).json({ error: 'Provide at least one filter for bulk delete' });
+
+        const result = await pool.query(
+            `DELETE FROM live_logs WHERE ${conditions.join(' AND ')}`,
+            params
+        );
+        res.json({ message: `${result.rowCount} log(s) deleted` });
+    } catch (err) {
+        console.error('Error bulk-deleting location logs:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
 // HR API: Get Route Tracking Data
 app.get('/hr/route-tracking', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
     const { staffId, startDate, endDate } = req.query;
@@ -1023,9 +1148,63 @@ app.post('/location/update', authenticateToken, async (req, res) => {
                 [internalId, lng, lat]
             );
 
-            // 3. Simple Geofence Check (logic extracted from socket handler)
-            // (We could refactor this into a helper, but for now we keep it robust for this endpoint)
-            // ... (Geofence logic if needed here as per requirements)
+            // 3. Geofence Check (mirrors socket handler logic)
+            const { site_lat: siteLat, site_lon: siteLon, radius_meters: radiusMeters, site_name: siteName,
+                geofence_type: geofenceType, geofence_data: geofenceData, geofence_enabled: geofenceEnabled,
+                start_time: startTime, end_time: endTime, site_id: siteId } = emp;
+
+            if (siteId && startTime && endTime && geofenceEnabled !== false) {
+                const now = new Date();
+                const currentTimeVal = now.getHours() * 60 + now.getMinutes();
+                const [startH, startM] = startTime.split(':').map(Number);
+                const [endH, endM] = endTime.split(':').map(Number);
+                const startTimeVal = startH * 60 + startM;
+                const endTimeVal = endH * 60 + endM;
+
+                let isShiftTime = false;
+                if (endTimeVal < startTimeVal) {
+                    isShiftTime = (currentTimeVal >= startTimeVal) || (currentTimeVal <= endTimeVal);
+                } else {
+                    isShiftTime = (currentTimeVal >= startTimeVal) && (currentTimeVal <= endTimeVal);
+                }
+
+                if (isShiftTime) {
+                    let isOutside = false;
+                    let distance = 0;
+                    const allowedRadius = radiusMeters || 100;
+
+                    if (geofenceType === 'POLYGON' && geofenceData && Array.isArray(geofenceData)) {
+                        const inside = isPointInPolygon(lat, lng, geofenceData);
+                        if (!inside) {
+                            isOutside = true;
+                            if (siteLat && siteLon) distance = calculateDistance(lat, lng, siteLat, siteLon);
+                        }
+                    } else if (siteLat && siteLon) {
+                        distance = calculateDistance(lat, lng, siteLat, siteLon);
+                        if (distance > allowedRadius) isOutside = true;
+                    }
+
+                    if (isOutside) {
+                        console.log(`[TWA] Geofence Alert: ${employeeId} is outside site ${siteName}`);
+                        const recentAlert = await pool.query(
+                            "SELECT id FROM geo_fence_alerts WHERE employee_id = $1 AND created_at > NOW() - INTERVAL '10 minutes'",
+                            [internalId]
+                        );
+                        if (recentAlert.rows.length === 0) {
+                            const message = geofenceType === 'POLYGON'
+                                ? `User outside designated site polygon (${siteName}) during shift hours.`
+                                : `User outside designated site (${siteName}) during shift hours. Distance: ${Math.round(distance)}m`;
+                            const alertRes = await pool.query(
+                                `INSERT INTO geo_fence_alerts (employee_id, site_id, latitude, longitude, message) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+                                [internalId, siteId, lat, lng, message]
+                            );
+                            const alertData = { ...alertRes.rows[0], staff_id: employeeId, site_name: siteName };
+                            io.to('hr-dashboard').emit('geo_fence_alert', alertData);
+                            io.to(`hr-site:${siteId}`).emit('geo_fence_alert', alertData);
+                        }
+                    }
+                }
+            }
         }
 
         res.status(200).json({ status: 'ok' });
