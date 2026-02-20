@@ -576,7 +576,7 @@
                                                     <t t-if="table.get('rows') and len(table.get('rows', [])) > 0">
                                                         <t t-foreach="table.get('rows', [])" t-as="row">
                                                             <tr>
-                                                                <t t-foreach="row" t-as="cell">
+                                                                <t t-foreach="row.get('data', [])" t-as="cell">
                                                                     <td><t t-esc="cell or ''"/></td>
                                                                 </t>
                                                             </tr>

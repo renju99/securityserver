@@ -8,7 +8,7 @@ class GPSTracker {
         this.intervalId = null;
         this.currentPosition = null;
         this.tracking = false;
-        this.updateInterval = 300000; // 5 minutes (300000ms) - battery efficient
+        this.updateInterval = 60000; // 1 minute (60000ms) - responsive tracking
         this.isUpdating = false; // Prevent concurrent updates
         this.lastUpdateTime = 0; // Track last update timestamp
         this.options = {
@@ -32,10 +32,10 @@ class GPSTracker {
         this.checkPermission().then((hasPermission) => {
             if (hasPermission) {
                 this.tracking = true;
-                
+
                 // Get initial position
                 this.updatePosition();
-                
+
                 // Set up interval for continuous updates
                 // Note: Actual server updates are rate-limited to MIN_UPDATE_INTERVAL in updateServer()
                 this.intervalId = setInterval(() => {
@@ -44,14 +44,14 @@ class GPSTracker {
 
                 const intervalMinutes = Math.floor(this.updateInterval / 60000);
                 console.debug(`[GPS Tracker] Tracking started with ${intervalMinutes} minute interval`);
-                
-                this.showNotification('GPS Tracking Enabled', 
-                    `Location will be updated every ${intervalMinutes} minutes. Your location is being tracked.`, 
+
+                this.showNotification('GPS Tracking Enabled',
+                    `Location will be updated every ${intervalMinutes} minutes. Your location is being tracked.`,
                     'success');
             } else {
                 console.warn('[GPS Tracker] Cannot start tracking - permission not granted');
-                this.showNotification('GPS Permission Required', 
-                    'Please grant location permission to enable GPS tracking. Check your browser settings.', 
+                this.showNotification('GPS Permission Required',
+                    'Please grant location permission to enable GPS tracking. Check your browser settings.',
                     'warning');
             }
         });
@@ -71,14 +71,14 @@ class GPSTracker {
 
             const result = await navigator.permissions.query({ name: 'geolocation' });
             console.debug('[GPS Tracker] Permission status:', result.state);
-            
+
             if (result.state === 'denied') {
-                this.showNotification('GPS Permission Denied', 
-                    'Location access is blocked. Please enable it in your browser settings.', 
+                this.showNotification('GPS Permission Denied',
+                    'Location access is blocked. Please enable it in your browser settings.',
                     'error');
                 return false;
             }
-            
+
             return result.state === 'granted' || result.state === 'prompt';
         } catch (error) {
             console.error('[GPS Tracker] Error checking permission:', error);
@@ -95,7 +95,7 @@ class GPSTracker {
             detail: { title, message, type }
         });
         window.dispatchEvent(event);
-        
+
         // Only log errors and warnings to console to reduce noise
         // Info and success messages are shown via UI notifications only
         if (type === 'error') {
@@ -125,12 +125,12 @@ class GPSTracker {
         if (newInterval === this.updateInterval) {
             return; // No change needed
         }
-        
+
         const oldInterval = this.updateInterval;
         this.updateInterval = newInterval;
-        
-        console.debug(`[GPS Tracker] GPS interval changed: ${oldInterval/1000}s → ${newInterval/1000}s`);
-        
+
+        console.debug(`[GPS Tracker] GPS interval changed: ${oldInterval / 1000}s → ${newInterval / 1000}s`);
+
         // Restart tracking with new interval if currently tracking
         if (this.tracking) {
             this.stopTracking();
@@ -147,7 +147,7 @@ class GPSTracker {
         // Temporarily bypass rate limiting by resetting last update time
         const previousTime = this.lastUpdateTime;
         this.lastUpdateTime = 0;
-        
+
         // Get position and update server
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -157,16 +157,16 @@ class GPSTracker {
                     accuracy: position.coords.accuracy,
                     timestamp: new Date(position.timestamp)
                 };
-                
+
                 // Force server update
                 this.updateServer(this.currentPosition);
-                
+
                 // Trigger custom event
                 const event = new CustomEvent('gps-update', {
                     detail: this.currentPosition
                 });
                 window.dispatchEvent(event);
-                
+
                 console.debug('[GPS Tracker] Force update completed');
             },
             (error) => {
@@ -177,7 +177,7 @@ class GPSTracker {
             this.options
         );
     }
-    
+
     /**
      * Update position using getCurrentPosition
      * Includes concurrency control to prevent overlapping updates
@@ -256,7 +256,7 @@ class GPSTracker {
      */
     onError(error) {
         let errorMessage = '';
-        
+
         switch (error.code) {
             case error.PERMISSION_DENIED:
                 errorMessage = 'Location permission denied. Please enable location access in your browser settings.';
@@ -270,14 +270,14 @@ class GPSTracker {
             default:
                 errorMessage = `GPS error: ${error.message}`;
         }
-        
+
         console.error('[GPS Tracker] Error:', errorMessage);
-        
+
         // Show notification for permission errors
         if (error.code === error.PERMISSION_DENIED) {
             this.showNotification('GPS Permission Required', errorMessage, 'error');
         }
-        
+
         const event = new CustomEvent('gps-error', {
             detail: { code: error.code, message: errorMessage }
         });
@@ -306,7 +306,7 @@ class GPSTracker {
                 longitude: position.longitude,
                 accuracy: position.accuracy
             });
-            
+
             const response = await fetch('/guardpro/api/location/update', {
                 method: 'POST',
                 headers: {
@@ -326,10 +326,10 @@ class GPSTracker {
                 console.error('[GPS Tracker] Server returned error status:', response.status);
                 // Reset last update time on error so we can retry
                 this.lastUpdateTime = 0;
-                
+
                 // Trigger error event
                 const event = new CustomEvent('gps-server-error', {
-                    detail: { 
+                    detail: {
                         status: response.status,
                         message: 'Server returned error status'
                     }
@@ -337,15 +337,15 @@ class GPSTracker {
                 window.dispatchEvent(event);
                 return;
             }
-            
+
             // Check if response has content before parsing JSON
             const responseText = await response.text();
             if (!responseText || responseText.trim() === '') {
                 console.error('[GPS Tracker] Server returned empty response');
                 this.lastUpdateTime = 0;
-                
+
                 const event = new CustomEvent('gps-server-error', {
-                    detail: { 
+                    detail: {
                         error: 'Empty response',
                         details: 'Server returned no data. Please check your session or contact administrator.'
                     }
@@ -353,7 +353,7 @@ class GPSTracker {
                 window.dispatchEvent(event);
                 return;
             }
-            
+
             let data;
             try {
                 data = JSON.parse(responseText);
@@ -361,9 +361,9 @@ class GPSTracker {
                 console.error('[GPS Tracker] Failed to parse server response:', parseError);
                 console.error('[GPS Tracker] Response text:', responseText.substring(0, 200));
                 this.lastUpdateTime = 0;
-                
+
                 const event = new CustomEvent('gps-server-error', {
-                    detail: { 
+                    detail: {
                         error: 'Invalid response',
                         details: 'Server returned malformed data. Your session may have expired.'
                     }
@@ -372,20 +372,20 @@ class GPSTracker {
                 return;
             }
             console.debug('[GPS Tracker] Server response:', data);
-            
+
             if (data.result && data.result.error) {
                 console.error('[GPS Tracker] Server returned error:', data.result.error);
                 console.error('[GPS Tracker] Error details:', data.result.details || 'No details provided');
-                
+
                 // Trigger error event with details
                 const event = new CustomEvent('gps-server-error', {
-                    detail: { 
+                    detail: {
                         error: data.result.error,
                         details: data.result.details
                     }
                 });
                 window.dispatchEvent(event);
-                
+
                 // Don't reset lastUpdateTime if it's a guard profile issue
                 // (to avoid hammering server with failed requests)
                 if (data.result.error.includes('Guard profile not found')) {
@@ -395,12 +395,12 @@ class GPSTracker {
                 }
             } else if (data.result && data.result.success) {
                 console.debug('[GPS Tracker] Location update successful:', data.result.guard_name);
-                
+
                 // Show subtle notification on successful update
-                this.showNotification('Location Updated', 
-                    `GPS location saved at ${new Date().toLocaleTimeString()}`, 
+                this.showNotification('Location Updated',
+                    `GPS location saved at ${new Date().toLocaleTimeString()}`,
                     'success');
-                
+
                 // Trigger success event
                 const event = new CustomEvent('gps-server-success', {
                     detail: data.result
@@ -411,10 +411,10 @@ class GPSTracker {
             console.error('[GPS Tracker] Error updating server:', error);
             // Reset last update time on error so we can retry
             this.lastUpdateTime = 0;
-            
+
             // Trigger error event
             const event = new CustomEvent('gps-server-error', {
-                detail: { 
+                detail: {
                     error: error.message,
                     details: 'Network or server error'
                 }
@@ -434,8 +434,8 @@ class GPSTracker {
         const Δλ = (lon2 - lon1) * Math.PI / 180;
 
         const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                  Math.cos(φ1) * Math.cos(φ2) *
-                  Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         return R * c; // Distance in meters

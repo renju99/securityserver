@@ -960,55 +960,61 @@ class MobileAPIController(http.Controller):
             }
 
     @http.route('/guardpro/api/location/update', type='json', auth='user', methods=['POST'], csrf=False)
-    def update_location(self, latitude, longitude, accuracy=None):
-        """Update guard's current GPS location."""
+    def update_location(self, latitude, longitude, accuracy=None, speed=None, heading=None, 
+                       battery_level=None, device_id=None, device_info=None, **kwargs):
+        """Update guard's current GPS location with extended device telemetry."""
         # Log the request for debugging
         _logger.info(
-            '[GPS] Location update request from user %s (ID: %s) - lat: %s, lon: %s, accuracy: %s',
+            '[GPS] Location update from %s (ID: %s) - lat: %s, lon: %s, acc: %s, bat: %s',
             request.env.user.name,
             request.env.user.id,
             latitude,
             longitude,
-            accuracy
+            accuracy,
+            battery_level
         )
         
-        # Use sudo() to allow guards to access and update their own profile regardless of site assignment
+        # Use sudo() to allow guards to access and update their own profile
         guard = request.env['guard.profile'].sudo().search([
             ('user_id', '=', request.env.user.id)
         ], limit=1)
         
         if not guard:
-            _logger.warning(
-                '[GPS] Guard profile not found for user %s (ID: %s)',
-                request.env.user.name,
-                request.env.user.id
-            )
-            return {
-                'error': 'Guard profile not found',
-                'details': 'No guard profile linked to your user account. Contact your administrator.'
-            }
+            _logger.warning('[GPS] Guard profile not found for user %s', request.env.user.name)
+            return {'error': 'Guard profile not found'}
         
         try:
-            _logger.info('[GPS] Updating location for guard %s (ID: %s)', guard.name, guard.id)
-            guard.update_location(latitude, longitude, accuracy=accuracy)
-            _logger.info('[GPS] Location update successful for guard %s', guard.name)
+            # Prepare update values for guard profile
+            update_vals = {}
+            if device_id:
+                update_vals['device_id'] = device_id
+            if device_info:
+                update_vals['device_model'] = device_info
+            
+            # Update device info if provided
+            if update_vals:
+                guard.write(update_vals)
+
+            # Call model update_location with all telemetry
+            # The model's update_location accepts **kwargs and passes them to _save_location_history
+            guard.update_location(
+                latitude, 
+                longitude, 
+                accuracy=accuracy,
+                speed=speed,
+                heading=heading,
+                battery_level=battery_level,
+                device_info=device_info
+            )
+            
             return {
                 'success': True,
                 'guard_id': guard.id,
-                'guard_name': guard.name,
                 'timestamp': fields.Datetime.now().isoformat()
             }
         except Exception as e:
-            _logger.error(
-                '[GPS] Location update failed for guard %s: %s',
-                guard.name if guard else 'Unknown',
-                str(e),
-                exc_info=True
-            )
-            return {
-                'error': str(e),
-                'details': 'Failed to update location. Please try again.'
-            }
+            _logger.error('[GPS] Update failed: %s', str(e), exc_info=True)
+            return {'error': str(e)}
 
     @http.route('/guardpro/api/stats/dashboard', type='json', auth='user', methods=['POST'], csrf=False)
     def get_dashboard_stats(self, guard_id=None):

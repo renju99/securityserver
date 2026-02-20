@@ -234,7 +234,7 @@
                     <div class="row g-3">
                         <t t-foreach="state.data.charts" t-as="chart" t-key="chart_index">
                             <div t-attf-class="col-lg-{{ chart_index % 3 === 0 ? '12' : '6' }} col-md-6">
-                                <ChartWidget data="chart"/>
+                                <ChartWidget data="chart" onChartClick.bind="onChartClick"/>
                             </div>
                         </t>
                     </div>
@@ -245,7 +245,7 @@
                     <div class="row g-3">
                         <t t-foreach="state.data.tables" t-as="table" t-key="table_index">
                             <div class="col-lg-12">
-                                <TableWidget data="table"/>
+                                <TableWidget data="table" onRowClick.bind="onTableRowClick"/>
                             </div>
                         </t>
                     </div>
@@ -333,8 +333,8 @@
                         <tbody>
                             <t t-if="props.data.rows.length > 0">
                                 <t t-foreach="props.data.rows" t-as="row" t-key="row_index">
-                                    <tr>
-                                        <t t-foreach="row" t-as="cell" t-key="cell_index">
+                                    <tr t-on-click="() => this.onRowClick(row)" t-att-class="props.data.res_model ? 'cursor-pointer' : ''">
+                                        <t t-foreach="row.data" t-as="cell" t-key="cell_index">
                                             <td class="text-nowrap">
                                                 <t t-esc="cell"/>
                                             </td>

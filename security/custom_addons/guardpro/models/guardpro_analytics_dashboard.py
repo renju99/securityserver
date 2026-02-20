@@ -115,8 +115,8 @@ class GuardProAnalyticsDashboard(models.Model):
         if site_filter:
             site_domain = self.env['client.site'].search(site_filter).ids
         elif site_ids:
-            # Filter out -1 (force empty placeholder) and only use valid site IDs
-            site_domain = [sid for sid in site_ids if sid > 0]
+            # Use provided site IDs directly, including -1 if present for force-empty
+            site_domain = site_ids
         
         _logger.info(f"KPI Data - Site Domain: {site_domain}, Site IDs from filter: {site_ids}")
         
@@ -385,8 +385,8 @@ class GuardProAnalyticsDashboard(models.Model):
         if site_filter:
             site_domain = self.env['client.site'].search(site_filter).ids
         elif site_ids:
-            # Filter out -1 (force empty placeholder) and only use valid site IDs
-            site_domain = [sid for sid in site_ids if sid > 0]
+            # Use provided site IDs directly, including -1 if present for force-empty
+            site_domain = site_ids
         else:
             site_domain = []
         
@@ -417,6 +417,9 @@ class GuardProAnalyticsDashboard(models.Model):
             'type': 'pie',
             'title': _('Incidents by Severity (This Month)'),
             'labels': [_('Low'), _('Medium'), _('High'), _('Critical')],
+            'keys': ['low', 'medium', 'high', 'critical'],  # Keys for drill-down
+            'action_model': 'incident.report',
+            'action_domain_field': 'severity',
             'datasets': [{
                 'label': _('Incidents'),
                 'data': [
@@ -473,6 +476,9 @@ class GuardProAnalyticsDashboard(models.Model):
                 _('Scheduled'), _('Confirmed'), _('In Progress'),
                 _('Completed'), _('Cancelled'), _('No Show')
             ],
+            'keys': ['scheduled', 'confirmed', 'in_progress', 'completed', 'cancelled', 'no_show'], # Keys for drill-down
+            'action_model': 'guard.shift',
+            'action_domain_field': 'status',
             'datasets': [{
                 'label': _('Shifts'),
                 'data': [
@@ -504,6 +510,7 @@ class GuardProAnalyticsDashboard(models.Model):
         # Chart 3: Monthly Incident Trends (Line Chart - Last 6 Months)
         months_data = []
         labels = []
+        date_keys = []
         for i in range(5, -1, -1):
             month_date = today - timedelta(days=30 * i)
             month_start_iter = month_date.replace(day=1)
@@ -531,11 +538,18 @@ class GuardProAnalyticsDashboard(models.Model):
             incident_count = self.env['incident.report'].search_count(month_incident_domain)
             months_data.append(incident_count)
             labels.append(month_start_iter.strftime('%B %Y'))
+            date_keys.append({
+                'start': month_start_iter.strftime('%Y-%m-%d'),
+                'end': month_end_iter.strftime('%Y-%m-%d')
+            })
         
         incident_trend_chart = {
             'type': 'line',
             'title': _('Incident Trends (Last 6 Months)'),
             'labels': labels,
+            'keys': date_keys, # Keys for drill-down
+            'action_model': 'incident.report',
+            'action_type': 'date_range',
             'datasets': [{
                 'label': _('Incidents'),
                 'data': months_data,
@@ -569,6 +583,7 @@ class GuardProAnalyticsDashboard(models.Model):
         
         task_labels = []
         task_counts = []
+        task_keys = []
         for task_data in task_type_data:
             if task_data['task_type']:
                 task_labels.append(
@@ -576,12 +591,16 @@ class GuardProAnalyticsDashboard(models.Model):
                         'task_type'
                     ].selection).get(task_data['task_type'], task_data['task_type'])
                 )
+                task_keys.append(task_data['task_type'])
                 task_counts.append(task_data['task_type_count'])
         
         task_completion_chart = {
             'type': 'bar',
             'title': _('Tasks Completed by Type'),
             'labels': task_labels,
+            'keys': task_keys, # Keys for drill-down
+            'action_model': 'guard.task',
+            'action_domain_field': 'task_type',
             'datasets': [{
                 'label': _('Tasks Completed'),
                 'data': task_counts,
@@ -652,8 +671,8 @@ class GuardProAnalyticsDashboard(models.Model):
         if site_filter:
             site_domain = self.env['client.site'].search(site_filter).ids
         elif site_ids:
-            # Filter out -1 (force empty placeholder) and only use valid site IDs
-            site_domain = [sid for sid in site_ids if sid > 0]
+            # Use provided site IDs directly, including -1 if present for force-empty
+            site_domain = site_ids
         else:
             site_domain = []
         
@@ -674,8 +693,18 @@ class GuardProAnalyticsDashboard(models.Model):
             incident_domain, limit=10, order='incident_datetime desc'
         )
         
+        # Determine table title based on date range
+        if date_from:
+            table_title = _('Recent Incidents (%s to %s)') % (
+                date_from.strftime('%Y-%m-%d'),
+                date_to.strftime('%Y-%m-%d') if date_to else _('Present')
+            )
+        else:
+            table_title = _('Recent Incidents (Last 7 Days)')
+
         incidents_table = {
-            'title': _('Recent Incidents (Last 7 Days)'),
+            'title': table_title,
+            'res_model': 'incident.report',
             'columns': [
                 _('Incident #'),
                 _('Title'),
@@ -684,15 +713,18 @@ class GuardProAnalyticsDashboard(models.Model):
                 _('Date'),
                 _('Status')
             ],
-            'rows': [[
-                incident.name,
-                incident.title,
-                incident.site_id.name,
-                dict(incident._fields['severity'].selection)[incident.severity],
-                self._convert_to_user_tz(incident.incident_datetime).strftime('%Y-%m-%d %H:%M')
-                if incident.incident_datetime else '',
-                dict(incident._fields['status'].selection)[incident.status],
-            ] for incident in recent_incidents]
+            'rows': [{
+                'id': incident.id,
+                'data': [
+                    incident.name,
+                    incident.title,
+                    incident.site_id.name,
+                    dict(incident._fields['severity'].selection)[incident.severity],
+                    self._convert_to_user_tz(incident.incident_datetime).strftime('%Y-%m-%d %H:%M')
+                    if incident.incident_datetime else '',
+                    dict(incident._fields['status'].selection)[incident.status],
+                ]
+            } for incident in recent_incidents]
         }
         
         # Overdue Tasks
@@ -713,6 +745,7 @@ class GuardProAnalyticsDashboard(models.Model):
         
         overdue_tasks_table = {
             'title': _('Overdue Tasks'),
+            'res_model': 'guard.task',
             'columns': [
                 _('Task'),
                 _('Assigned To'),
@@ -721,14 +754,17 @@ class GuardProAnalyticsDashboard(models.Model):
                 _('Priority'),
                 _('Status')
             ],
-            'rows': [[
-                task.name,
-                task.assigned_to.name if task.assigned_to else _('Unassigned'),
-                task.site_id.name,
-                self._convert_to_user_tz(task.due_date).strftime('%Y-%m-%d %H:%M') if task.due_date else '',
-                dict(task._fields['priority'].selection)[task.priority],
-                dict(task._fields['state'].selection)[task.state],
-            ] for task in overdue_tasks]
+            'rows': [{
+                'id': task.id,
+                'data': [
+                    task.name,
+                    task.assigned_to.name if task.assigned_to else _('Unassigned'),
+                    task.site_id.name,
+                    self._convert_to_user_tz(task.due_date).strftime('%Y-%m-%d %H:%M') if task.due_date else '',
+                    dict(task._fields['priority'].selection)[task.priority],
+                    dict(task._fields['state'].selection)[task.state],
+                ]
+            } for task in overdue_tasks]
         }
         
         # Active Shifts Today
@@ -752,6 +788,7 @@ class GuardProAnalyticsDashboard(models.Model):
         
         active_shifts_table = {
             'title': _('Active Shifts Today'),
+            'res_model': 'guard.shift',
             'columns': [
                 _('Guard'),
                 _('Site'),
@@ -760,16 +797,19 @@ class GuardProAnalyticsDashboard(models.Model):
                 _('Type'),
                 _('Status')
             ],
-            'rows': [[
-                shift.guard_id.name,
-                shift.site_id.name,
-                self._convert_to_user_tz(shift.start_datetime).strftime('%H:%M')
-                if shift.start_datetime else '',
-                self._convert_to_user_tz(shift.end_datetime).strftime('%H:%M')
-                if shift.end_datetime else '',
-                dict(shift._fields['shift_type'].selection)[shift.shift_type],
-                dict(shift._fields['status'].selection)[shift.status],
-            ] for shift in active_shifts_today]
+            'rows': [{
+                'id': shift.id,
+                'data': [
+                    shift.guard_id.name,
+                    shift.site_id.name,
+                    self._convert_to_user_tz(shift.start_datetime).strftime('%H:%M')
+                    if shift.start_datetime else '',
+                    self._convert_to_user_tz(shift.end_datetime).strftime('%H:%M')
+                    if shift.end_datetime else '',
+                    dict(shift._fields['shift_type'].selection)[shift.shift_type],
+                    dict(shift._fields['status'].selection)[shift.status],
+                ]
+            } for shift in active_shifts_today]
         }
 
         return [incidents_table, overdue_tasks_table, active_shifts_table]
@@ -777,19 +817,7 @@ class GuardProAnalyticsDashboard(models.Model):
     def _sanitize_site_filters(
         self, site_ids=None, client_ids=None, enforce_limits=False, assigned_site_ids=None
     ):
-        """
-        Sanitize requested site filters to ensure users only access allowed sites.
-
-        Args:
-            site_ids (list): Sites requested directly via filters.
-            client_ids (list): Clients provided in filters (used to derive sites).
-            enforce_limits (bool): Whether the current user must be restricted to assignments.
-            assigned_site_ids (list): Sites linked to the current user.
-
-        Returns:
-            tuple(list, str or None, bool): (sanitized site IDs, optional error message,
-            force_empty flag signalling that filters yield no accessible sites).
-        """
+        """Sanitize site filters."""
         site_ids = site_ids or []
         client_ids = client_ids or []
         assigned_site_ids = assigned_site_ids or []
@@ -797,28 +825,41 @@ class GuardProAnalyticsDashboard(models.Model):
         sanitized_sites = set(site_ids)
         force_empty = False
 
+        _logger.info(f"Sanitizing Sites - Initial: {site_ids}, Clients: {client_ids}")
+
         if client_ids:
             client_site_ids = self.env['client.site'].search([
                 ('client_id', 'in', client_ids)
             ]).ids
             client_site_ids = set(client_site_ids)
+            _logger.info(f"Sanitizing Sites - Client Sites: {client_site_ids}")
             sanitized_sites = (sanitized_sites & client_site_ids) if sanitized_sites else client_site_ids
 
         if enforce_limits:
             assigned_set = set(assigned_site_ids)
+            _logger.info(f"Sanitizing Sites - Enforcing Limits. Assigned: {assigned_set}")
             if not assigned_set:
+                _logger.warning("Sanitizing Sites - User has no assigned sites!")
                 return [], _('No sites are assigned to your user. Please contact your administrator.'), False
+            
             if sanitized_sites:
+                before_intersection = set(sanitized_sites)
                 sanitized_sites &= assigned_set
+                _logger.info(f"Sanitizing Sites - Intersection: {before_intersection} & {assigned_set} = {sanitized_sites}")
             elif not filter_requested:
                 sanitized_sites = assigned_set
+                _logger.info("Sanitizing Sites - Using all assigned sites.")
             else:
+                _logger.info("Sanitizing Sites - Filter requested but yields no assigned sites.")
                 force_empty = True
 
         if filter_requested and not sanitized_sites:
+            _logger.info("Sanitizing Sites - Final check: Filter was requested but resulting site list is empty.")
             force_empty = True
 
-        return sorted(sanitized_sites), None, force_empty
+        result = sorted(sanitized_sites)
+        _logger.info(f"Sanitizing Sites - Result: {result}, force_empty: {force_empty}")
+        return result, None, force_empty
 
     def _sanitize_guard_filters(self, guard_ids=None, allowed_site_ids=None):
         """
@@ -856,12 +897,17 @@ class GuardProAnalyticsDashboard(models.Model):
             filter_params = dict(filter_params or {})
             context = context or {}
             
-            # Extract filter parameters
+            # Extract filter parameters and ensure they are integers for set operations
+            def sanitize_ids(ids):
+                if not ids: return []
+                if isinstance(ids, (int, str)): ids = [ids]
+                return [int(i) for i in ids if i and str(i).lstrip('-').isdigit()]
+
             date_from = filter_params.get('date_from')
             date_to = filter_params.get('date_to')
-            site_ids = filter_params.get('site_ids', [])
-            guard_ids = filter_params.get('guard_ids', [])
-            client_ids = filter_params.get('client_ids', [])
+            site_ids = sanitize_ids(filter_params.get('site_ids', []))
+            guard_ids = sanitize_ids(filter_params.get('guard_ids', []))
+            client_ids = sanitize_ids(filter_params.get('client_ids', []))
             
             # Convert date strings to date objects if provided
             if date_from:
@@ -890,11 +936,14 @@ class GuardProAnalyticsDashboard(models.Model):
         # Build filter domains
         user = self.env.user
         guard_domain = []
-        enforce_site_limits = (
+        is_admin = user.has_group('guardpro.group_guardpro_admin') or user.has_group('base.group_system')
+        enforce_site_limits = not is_admin and (
             user.has_group('guardpro.group_guardpro_client_user') or
-            user.has_group('guardpro.group_guardpro_supervisor')
+            user.has_group('guardpro.group_guardpro_supervisor') or
+            user.has_group('guardpro.group_guardpro_manager')
         )
         assigned_site_ids = user.site_ids.ids
+        _logger.info(f"Dashboard Data Request - User: {user.name}, is_admin: {is_admin}, enforce_limits: {enforce_site_limits}")
 
         sanitized_sites, site_error, force_empty_sites = self._sanitize_site_filters(
             site_ids=site_ids,
@@ -966,115 +1015,275 @@ class GuardProAnalyticsDashboard(models.Model):
             }
 
     # Action methods for KPI drill-down
-    def action_view_guards(self):
+    @api.model
+    def action_view_guards(self, filter_params=None):
         """Navigate to guards list."""
+        filter_params = filter_params or {}
+        site_ids = filter_params.get('site_ids', [])
+        
+        domain = [('status', '=', 'active')]
+        if site_ids:
+            domain += [('site_ids', 'in', site_ids)]
+            
         return {
             'type': 'ir.actions.act_window',
             'name': _('Active Guards'),
             'res_model': 'guard.profile',
             'view_mode': 'list,form',
-            'domain': [('status', '=', 'active')],
+            'views': [[False, 'list'], [False, 'form']],
+            'domain': domain,
             'context': {'create': False},
+            'target': 'current',
         }
 
-    def action_view_shifts_today(self):
+    @api.model
+    def action_view_shifts_today(self, filter_params=None):
         """Navigate to today's shifts."""
+        filter_params = filter_params or {}
         today = fields.Date.today()
+        if filter_params.get('date_to'):
+            today = fields.Date.from_string(filter_params['date_to'])
+            
         today_start = fields.Datetime.to_datetime(today)
         today_end = today_start + timedelta(days=1)
+        
+        site_ids = filter_params.get('site_ids', [])
+        guard_ids = filter_params.get('guard_ids', [])
+        
+        domain = [
+            ('start_datetime', '>=', today_start),
+            ('start_datetime', '<', today_end),
+            ('status', 'in', ['scheduled', 'confirmed', 'in_progress'])
+        ]
+        
+        if site_ids:
+            domain += [('site_id', 'in', site_ids)]
+        if guard_ids:
+            domain += [('guard_id', 'in', guard_ids)]
+            
         return {
             'type': 'ir.actions.act_window',
             'name': _('Active Shifts Today'),
             'res_model': 'guard.shift',
             'view_mode': 'list,form,calendar',
-            'domain': [
-                ('start_datetime', '>=', today_start),
-                ('start_datetime', '<', today_end),
-                ('status', 'in', ['scheduled', 'confirmed', 'in_progress'])
-            ],
+            'views': [[False, 'list'], [False, 'form'], [False, 'calendar']],
+            'domain': domain,
+            'target': 'current',
         }
 
-    def action_view_incidents(self):
+    @api.model
+    def action_view_incidents(self, filter_params=None):
         """Navigate to incidents this month."""
-        month_start = fields.Date.today().replace(day=1)
+        filter_params = filter_params or {}
+        date_from = filter_params.get('date_from')
+        date_to = filter_params.get('date_to')
+        
+        if date_from:
+            start_date = fields.Datetime.to_datetime(date_from)
+        else:
+            start_date = fields.Datetime.to_datetime(fields.Date.today().replace(day=1))
+            
+        if date_to:
+            end_date = fields.Datetime.to_datetime(date_to) + timedelta(days=1)
+        else:
+            end_date = fields.Datetime.now()
+            
+        site_ids = filter_params.get('site_ids', [])
+        guard_ids = filter_params.get('guard_ids', [])
+        
+        domain = [
+            ('incident_datetime', '>=', start_date),
+            ('incident_datetime', '<', end_date)
+        ]
+        
+        if site_ids:
+            domain += [('site_id', 'in', site_ids)]
+        if guard_ids:
+            domain += [('guard_id', 'in', guard_ids)]
+            
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Incidents This Month'),
+            'name': _('Incidents'),
             'res_model': 'incident.report',
             'view_mode': 'list,form',
-            'domain': [
-                ('incident_datetime', '>=', month_start),
-                ('incident_datetime', '<=', fields.Date.today())
-            ],
+            'views': [[False, 'list'], [False, 'form']],
+            'domain': domain,
+            'target': 'current',
         }
 
-    def action_view_tasks(self):
+    @api.model
+    def action_view_tasks(self, filter_params=None):
         """Navigate to completed tasks."""
-        month_start = fields.Date.today().replace(day=1)
+        filter_params = filter_params or {}
+        date_from = filter_params.get('date_from')
+        date_to = filter_params.get('date_to')
+        
+        if date_from:
+            start_date = date_from
+        else:
+            start_date = fields.Date.today().replace(day=1)
+            
+        if date_to:
+            end_date = date_to
+        else:
+            end_date = fields.Date.today()
+            
+        site_ids = filter_params.get('site_ids', [])
+        guard_ids = filter_params.get('guard_ids', [])
+        
+        domain = [
+            ('state', '=', 'completed'),
+            ('completed_date', '>=', start_date),
+            ('completed_date', '<=', end_date)
+        ]
+        
+        if site_ids:
+            domain += [('site_id', 'in', site_ids)]
+        if guard_ids:
+            domain += [('assigned_to', 'in', guard_ids)] # Task uses assigned_to
+            
         return {
             'type': 'ir.actions.act_window',
             'name': _('Completed Tasks'),
             'res_model': 'guard.task',
             'view_mode': 'list,form',
-            'domain': [
-                ('state', '=', 'completed'),
-                ('completed_date', '>=', month_start),
-                ('completed_date', '<=', fields.Date.today())
-            ],
+            'views': [[False, 'list'], [False, 'form']],
+            'domain': domain,
+            'target': 'current',
         }
 
-    def action_view_visitors(self):
+    @api.model
+    def action_view_visitors(self, filter_params=None):
         """Navigate to today's visitors."""
-        today = fields.Date.today()
-        today_start = fields.Datetime.to_datetime(today)
-        today_end = today_start + timedelta(days=1)
+        filter_params = filter_params or {}
+        date_from = filter_params.get('date_from')
+        date_to = filter_params.get('date_to')
+        
+        if date_from:
+            start_date = fields.Datetime.to_datetime(date_from)
+        else:
+            start_date = fields.Datetime.to_datetime(fields.Date.today())
+            
+        if date_to:
+            end_date = fields.Datetime.to_datetime(date_to) + timedelta(days=1)
+        else:
+            end_date = start_date + timedelta(days=1)
+            
+        site_ids = filter_params.get('site_ids', [])
+        
+        domain = [
+            ('checkin_time', '>=', start_date),
+            ('checkin_time', '<', end_date)
+        ]
+        
+        if site_ids:
+            domain += [('site_id', 'in', site_ids)]
+            
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Visitors Today'),
+            'name': _('Visitors'),
             'res_model': 'visitor.management',
             'view_mode': 'list,form',
-            'domain': [
-                ('checkin_time', '>=', today_start),
-                ('checkin_time', '<', today_end)
-            ],
+            'views': [[False, 'list'], [False, 'form']],
+            'domain': domain,
+            'target': 'current',
         }
 
-    def action_view_packages(self):
+    @api.model
+    def action_view_packages(self, filter_params=None):
         """Navigate to pending packages."""
+        filter_params = filter_params or {}
+        site_ids = filter_params.get('site_ids', [])
+        
+        domain = [('state', 'in', ['received', 'notified'])]
+        if site_ids:
+            domain += [('site_id', 'in', site_ids)]
+            
         return {
             'type': 'ir.actions.act_window',
             'name': _('Pending Packages'),
             'res_model': 'package.management',
             'view_mode': 'list,form',
-            'domain': [('state', 'in', ['received', 'notified'])],
+            'views': [[False, 'list'], [False, 'form']],
+            'domain': domain,
+            'target': 'current',
         }
 
-    def action_view_tours(self):
+    @api.model
+    def action_view_tours(self, filter_params=None):
         """Navigate to tour logs."""
-        month_start = fields.Date.today().replace(day=1)
+        filter_params = filter_params or {}
+        date_from = filter_params.get('date_from')
+        date_to = filter_params.get('date_to')
+        
+        if date_from:
+            start_date = fields.Datetime.to_datetime(date_from)
+        else:
+            start_date = fields.Datetime.to_datetime(fields.Date.today().replace(day=1))
+            
+        if date_to:
+            end_date = fields.Datetime.to_datetime(date_to) + timedelta(days=1)
+        else:
+            end_date = fields.Datetime.now()
+            
+        site_ids = filter_params.get('site_ids', [])
+        guard_ids = filter_params.get('guard_ids', [])
+        
+        domain = [
+            ('start_time', '>=', start_date),
+            ('start_time', '<', end_date)
+        ]
+        
+        if site_ids:
+            domain += [('site_id', 'in', site_ids)]
+        if guard_ids:
+            domain += [('guard_id', 'in', guard_ids)]
+            
         return {
             'type': 'ir.actions.act_window',
             'name': _('Tour Logs'),
             'res_model': 'tour.log',
             'view_mode': 'list,form',
-            'domain': [
-                ('start_time', '>=', month_start),
-                ('start_time', '<=', fields.Date.today())
-            ],
+            'views': [[False, 'list'], [False, 'form']],
+            'domain': domain,
+            'target': 'current',
         }
 
-    def action_view_sla(self):
+    @api.model
+    def action_view_sla(self, filter_params=None):
         """Navigate to SLA records."""
-        month_start = fields.Date.today().replace(day=1)
+        filter_params = filter_params or {}
+        date_from = filter_params.get('date_from')
+        date_to = filter_params.get('date_to')
+        
+        if date_from:
+            start_date = fields.Datetime.to_datetime(date_from)
+        else:
+            start_date = fields.Datetime.to_datetime(fields.Date.today().replace(day=1))
+            
+        if date_to:
+            end_date = fields.Datetime.to_datetime(date_to) + timedelta(days=1)
+        else:
+            end_date = fields.Datetime.now()
+            
+        site_ids = filter_params.get('site_ids', [])
+        
+        domain = [
+            ('period_start', '>=', start_date),
+            ('period_start', '<', end_date)
+        ]
+        
+        if site_ids:
+            domain += [('site_id', 'in', site_ids)]
+            
         return {
             'type': 'ir.actions.act_window',
             'name': _('SLA Performance Records'),
             'res_model': 'sla.performance',
             'view_mode': 'list,form',
-            'domain': [
-                ('period_start', '>=', month_start),
-                ('period_start', '<=', fields.Date.today())
-            ],
+            'views': [[False, 'list'], [False, 'form']],
+            'domain': domain,
+            'target': 'current',
         }
 
     @api.model

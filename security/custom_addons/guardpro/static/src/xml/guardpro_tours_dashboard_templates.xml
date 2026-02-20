@@ -281,8 +281,8 @@
                                             <tbody>
                                                 <t t-if="table.rows and table.rows.length > 0">
                                                     <t t-foreach="table.rows" t-as="row" t-key="row_index">
-                                                        <tr>
-                                                            <t t-foreach="row" t-as="cell" t-key="cell_index">
+                                                        <tr t-on-click="() => this.onRowClick(table.res_model, row.id)" t-att-class="table.res_model ? 'cursor-pointer' : ''">
+                                                            <t t-foreach="row.data" t-as="cell" t-key="cell_index">
                                                                 <td class="text-nowrap"><t t-esc="cell"/></td>
                                                             </t>
                                                         </tr>

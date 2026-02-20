@@ -17,12 +17,12 @@ class GuardProAnalyticsDashboard extends Component {
             console.warn("User service not available, will use fallback for PDF export");
         }
         this.chartInstances = {}; // Store chart instances to destroy them later
-        
+
         // Initialize filters with defaults
         const today = new Date();
         const last30Days = new Date();
         last30Days.setDate(today.getDate() - 30);
-        
+
         this.state = useState({
             kpis: [],
             charts: [],
@@ -68,17 +68,17 @@ class GuardProAnalyticsDashboard extends Component {
         // Wait for Chart.js to be available (Odoo's bundle makes it global)
         let attempts = 0;
         const maxAttempts = 50; // 5 seconds max wait
-        
+
         while (typeof window.Chart === 'undefined' && attempts < maxAttempts) {
             await new Promise(resolve => setTimeout(resolve, 100));
             attempts++;
         }
-        
+
         if (typeof window.Chart === 'undefined') {
             console.error('Chart.js library failed to load after waiting');
             throw new Error('Chart.js library not available');
         }
-        
+
         // Make Chart available in current scope
         if (typeof Chart === 'undefined') {
             window.Chart = window.Chart;
@@ -99,7 +99,7 @@ class GuardProAnalyticsDashboard extends Component {
 
             // Get or create dashboard - ensure we have at least one dashboard record
             let dashboard = [];
-            
+
             // Try to get current user's dashboard first
             dashboard = await this.orm.searchRead(
                 'guardpro.analytics.dashboard',
@@ -107,7 +107,7 @@ class GuardProAnalyticsDashboard extends Component {
                 ['id'],
                 { limit: 1 }
             );
-            
+
             // If no dashboard exists, create one
             let dashboardId;
             if (!dashboard || dashboard.length === 0) {
@@ -122,7 +122,7 @@ class GuardProAnalyticsDashboard extends Component {
             } else {
                 dashboardId = dashboard[0].id;
             }
-            
+
             // Get site names for display in PDF
             let siteNames = [];
             if (filterParams.site_ids && filterParams.site_ids.length > 0) {
@@ -137,7 +137,7 @@ class GuardProAnalyticsDashboard extends Component {
                     console.warn("Could not fetch site names:", e);
                 }
             }
-            
+
             // Store filter params in dashboard record for PDF generation
             await this.orm.write(
                 'guardpro.analytics.dashboard',
@@ -147,7 +147,7 @@ class GuardProAnalyticsDashboard extends Component {
                     date_to: filterParams.date_to
                 }
             );
-            
+
             // Call the report action with proper data structure
             // Pass filters via context which is accessible in QWeb templates
             const reportAction = {
@@ -171,7 +171,7 @@ class GuardProAnalyticsDashboard extends Component {
                     }
                 }
             };
-            
+
             await this.action.doAction(reportAction);
         } catch (error) {
             console.error("Error exporting PDF:", error);
@@ -247,7 +247,7 @@ class GuardProAnalyticsDashboard extends Component {
                     console.error("Error searching guards with active filter:", e);
                 }
             }
-            
+
             // Process guards to ensure site_ids is an array
             if (guards) {
                 guards = guards.map(guard => ({
@@ -255,7 +255,7 @@ class GuardProAnalyticsDashboard extends Component {
                     site_ids: Array.isArray(guard.site_ids) ? guard.site_ids : []
                 }));
             }
-            
+
             const processedGuards = guards || [];
             console.log("Loaded guards:", processedGuards.length, processedGuards);
             if (processedGuards.length > 0) {
@@ -279,7 +279,7 @@ class GuardProAnalyticsDashboard extends Component {
                     console.error("Alternative search failed:", e);
                 }
             }
-            
+
             // Force reactivity update by reassigning
             this.state.filterOptions = {
                 ...this.state.filterOptions,
@@ -305,7 +305,7 @@ class GuardProAnalyticsDashboard extends Component {
             if (processedClients.length === 0) {
                 console.warn("WARNING: No clients loaded. Check database and access rights.");
             }
-            
+
             // Force reactivity update by reassigning
             this.state.filterOptions = {
                 ...this.state.filterOptions,
@@ -321,7 +321,7 @@ class GuardProAnalyticsDashboard extends Component {
     async loadData() {
         this.state.loading = true;
         this.state.error = null;
-        
+
         try {
             const filterParams = {
                 date_from: this.state.filters.date_from,
@@ -337,11 +337,11 @@ class GuardProAnalyticsDashboard extends Component {
                 'get_dashboard_data',
                 [null, {}, filterParams]
             );
-            
+
             this.state.kpis = data.kpis || [];
             this.state.charts = data.charts || [];
             this.state.tables = data.tables || [];
-            
+
             // Check for backend errors
             if (data.error) {
                 console.error("Backend error:", data.error);
@@ -366,12 +366,12 @@ class GuardProAnalyticsDashboard extends Component {
 
     onFilterChange(filterName, value) {
         this.state.filters[filterName] = value;
-        
+
         if (filterName === 'period' && value !== 'custom') {
             const today = new Date();
             let dateFrom = new Date();
-            
-            switch(value) {
+
+            switch (value) {
                 case 'today':
                     dateFrom = new Date(today);
                     this.state.filters.date_to = dateFrom.toISOString().split('T')[0];
@@ -405,7 +405,7 @@ class GuardProAnalyticsDashboard extends Component {
                     break;
             }
         }
-        
+
         this.loadData();
     }
 
@@ -421,14 +421,14 @@ class GuardProAnalyticsDashboard extends Component {
             .filter(id => id && id !== '' && !isNaN(id))
             .map(id => parseInt(id));
         this.state.filters[filterName] = filteredIds.length > 0 ? filteredIds : [];
-        
+
         // Cascading filter: if sites are selected, filter guards to those sites
         if (filterName === 'site_ids') {
             if (filteredIds.length > 0) {
                 this.updateGuardsBySites(filteredIds);
                 // Clear guard filter if selected guards don't match filtered guards
                 const filteredGuardIds = (this.state.filterOptions.guards || []).map(g => g.id);
-                this.state.filters.guard_ids = this.state.filters.guard_ids.filter(id => 
+                this.state.filters.guard_ids = this.state.filters.guard_ids.filter(id =>
                     filteredGuardIds.includes(id)
                 );
             } else {
@@ -436,10 +436,10 @@ class GuardProAnalyticsDashboard extends Component {
                 this.state.filterOptions.guards = this.state.filterOptions.allGuards || [];
             }
         }
-        
+
         this.loadData();
     }
-    
+
     updateGuardsBySites(siteIds) {
         // Filter guards to only show those assigned to selected sites
         const allGuards = this.state.filterOptions.allGuards || [];
@@ -458,7 +458,7 @@ class GuardProAnalyticsDashboard extends Component {
         const today = new Date();
         const last30Days = new Date();
         last30Days.setDate(today.getDate() - 30);
-        
+
         this.state.filters = {
             date_from: last30Days.toISOString().split('T')[0],
             date_to: today.toISOString().split('T')[0],
@@ -467,18 +467,18 @@ class GuardProAnalyticsDashboard extends Component {
             client_ids: [],
             period: 'last_30_days'
         };
-        
+
         // Reset guard options to show all guards
         this.state.filterOptions.guards = this.state.filterOptions.allGuards || [];
-        
+
         this.loadData();
     }
 
     hasActiveFilters() {
         return this.state.filters.site_ids.length > 0 ||
-               this.state.filters.guard_ids.length > 0 ||
-               this.state.filters.client_ids.length > 0 ||
-               this.state.filters.period !== 'last_30_days';
+            this.state.filters.guard_ids.length > 0 ||
+            this.state.filters.client_ids.length > 0 ||
+            this.state.filters.period !== 'last_30_days';
     }
 
     renderAllCharts() {
@@ -493,7 +493,7 @@ class GuardProAnalyticsDashboard extends Component {
             }
         });
         this.chartInstances = {};
-        
+
         // Render charts immediately
         let renderedCount = 0;
         this.state.charts.forEach((chartData, index) => {
@@ -501,11 +501,11 @@ class GuardProAnalyticsDashboard extends Component {
                 renderedCount++;
             }
         });
-        
+
         // If some charts failed, retry with increasing delays
         if (renderedCount < this.state.charts.length) {
             console.log(`Only ${renderedCount} of ${this.state.charts.length} charts rendered. Retrying...`);
-            
+
             // First retry after 300ms
             setTimeout(() => {
                 this.state.charts.forEach((chartData, index) => {
@@ -514,7 +514,7 @@ class GuardProAnalyticsDashboard extends Component {
                     }
                 });
             }, 300);
-            
+
             // Second retry after 600ms
             setTimeout(() => {
                 this.state.charts.forEach((chartData, index) => {
@@ -524,6 +524,62 @@ class GuardProAnalyticsDashboard extends Component {
                 });
             }, 600);
         }
+    }
+
+    async onChartClick(chartIndex) {
+        const chart = this.chartInstances[chartIndex];
+        const chartData = this.state.charts[chartIndex];
+        if (!chart || !chartData || !chartData.action_model) return;
+
+        // Get the clicked element
+        const activePoints = chart.getElementsAtEventForMode(this.lastEvent, 'nearest', { intersect: true }, true);
+        if (activePoints.length > 0) {
+            const pointIndex = activePoints[0].index;
+            const label = chartData.labels[pointIndex];
+            const key = chartData.keys ? chartData.keys[pointIndex] : label;
+
+            let domain = [];
+            if (chartData.action_type === 'date_range' && typeof key === 'object') {
+                domain = [
+                    ['incident_datetime', '>=', key.start + ' 00:00:00'],
+                    ['incident_datetime', '<=', key.end + ' 23:59:59']
+                ];
+            } else {
+                const field = chartData.action_domain_field || 'status';
+                domain = [[field, '=', key]];
+            }
+
+            // Apply active filters to the drill-down
+            if (this.state.filters.site_ids.length > 0) {
+                domain.push(['site_id', 'in', this.state.filters.site_ids]);
+            }
+            if (this.state.filters.guard_ids.length > 0) {
+                domain.push(['guard_id', 'in', this.state.filters.guard_ids]);
+            }
+
+            this.action.doAction({
+                name: chartData.title,
+                type: 'ir.actions.act_window',
+                res_model: chartData.action_model,
+                view_mode: 'list,form',
+                views: [[false, 'list'], [false, 'form']],
+                domain: domain,
+                target: 'current'
+            });
+        }
+    }
+
+    onRowClick(tableIndex, row) {
+        const table = this.state.tables[tableIndex];
+        if (!table || !table.res_model || !row.id) return;
+
+        this.action.doAction({
+            type: 'ir.actions.act_window',
+            res_model: table.res_model,
+            res_id: row.id,
+            views: [[false, 'form']],
+            target: 'current'
+        });
     }
 
     renderChart(index, chartData) {
@@ -540,14 +596,20 @@ class GuardProAnalyticsDashboard extends Component {
         }
 
         const ctx = canvas.getContext('2d');
-        
-        // Ensure Chart.js is loaded (check both window.Chart and global Chart)
+
+        // Ensure Chart.js is loaded
         const ChartLib = window.Chart || (typeof Chart !== 'undefined' ? Chart : null);
         if (!ChartLib) {
             console.error('Chart.js library not loaded');
             return false;
         }
-        
+
+        // Store last click event for drill-down
+        canvas.onclick = (evt) => {
+            this.lastEvent = evt;
+            this.onChartClick(index);
+        };
+
         // Store chart instance
         try {
             const ChartLib = window.Chart || Chart;
@@ -582,14 +644,23 @@ class GuardProAnalyticsDashboard extends Component {
 
     async onKPIClick(actionName) {
         if (!actionName) return;
-        
+
         try {
+            const filterParams = {
+                date_from: this.state.filters.date_from,
+                date_to: this.state.filters.date_to,
+                site_ids: this.state.filters.site_ids,
+                guard_ids: this.state.filters.guard_ids,
+                client_ids: this.state.filters.client_ids,
+                period: this.state.filters.period
+            };
+
             const action = await this.orm.call(
                 'guardpro.analytics.dashboard',
                 actionName,
-                []
+                [filterParams]
             );
-            
+
             if (action && action.type) {
                 this.action.doAction(action);
             }
@@ -602,7 +673,7 @@ class GuardProAnalyticsDashboard extends Component {
         await this.loadData();
         if (!this.state.loading) {
             setTimeout(() => {
-            this.renderAllCharts();
+                this.renderAllCharts();
             }, 100);
         }
     }

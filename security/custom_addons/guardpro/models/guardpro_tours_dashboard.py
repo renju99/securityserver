@@ -113,7 +113,10 @@ class GuardProToursDashboard(models.Model):
         if site_filter:
             site_domain = self.env['client.site'].search(site_filter).ids
         elif site_ids:
-            site_domain = [sid for sid in site_ids if sid > 0]
+            # Use provided site IDs directly, including -1 if present for force-empty
+            site_domain = site_ids
+        else:
+            site_domain = []
         
         # Build tour domain
         month_start_dt = fields.Datetime.to_datetime(month_start)
@@ -304,7 +307,8 @@ class GuardProToursDashboard(models.Model):
         if site_filter:
             site_domain = self.env['client.site'].search(site_filter).ids
         elif site_ids:
-            site_domain = [sid for sid in site_ids if sid > 0]
+            # Use provided site IDs directly, including -1 if present for force-empty
+            site_domain = site_ids
         else:
             site_domain = []
         
@@ -331,6 +335,9 @@ class GuardProToursDashboard(models.Model):
             'type': 'pie',
             'title': _('Tour Status Distribution'),
             'labels': [_('Completed'), _('In Progress'), _('Cancelled'), _('Scheduled')],
+            'keys': ['completed', 'in_progress', 'cancelled', 'scheduled'], # Drill-down keys
+            'action_model': 'tour.log',
+            'action_domain_field': 'status',
             'datasets': [{
                 'label': _('Tours'),
                 'data': [
@@ -352,6 +359,7 @@ class GuardProToursDashboard(models.Model):
         # Chart 2: Daily Tour Completion Trend (Last 30 Days)
         daily_data = []
         daily_labels = []
+        date_keys = []
         for i in range(29, -1, -1):
             day = today - timedelta(days=i)
             day_start = fields.Datetime.to_datetime(day)
@@ -370,11 +378,18 @@ class GuardProToursDashboard(models.Model):
             count = self.env['tour.log'].search_count(day_domain)
             daily_data.append(count)
             daily_labels.append(day.strftime('%m/%d'))
+            date_keys.append({
+                'start': day_start.strftime('%Y-%m-%d %H:%M:%S'),
+                'end': day_end.strftime('%Y-%m-%d %H:%M:%S')
+            })
         
         tour_trend_chart = {
             'type': 'line',
             'title': _('Daily Tour Completions (Last 30 Days)'),
             'labels': daily_labels,
+            'keys': date_keys, # Drill-down keys
+            'action_model': 'tour.log',
+            'action_type': 'date_range',
             'datasets': [{
                 'label': _('Completed Tours'),
                 'data': daily_data,
@@ -403,6 +418,7 @@ class GuardProToursDashboard(models.Model):
         
         site_labels = []
         site_durations = []
+        site_keys = []
         for site in sites:
             site_tours = self.env['tour.log'].search([
                 ('site_id', '=', site.id),
@@ -415,11 +431,15 @@ class GuardProToursDashboard(models.Model):
                 avg_duration = sum(site_tours.mapped('duration')) / len(site_tours)
                 site_labels.append(site.name)
                 site_durations.append(round(avg_duration, 1))
-        
+                site_keys.append(site.id)
+
         duration_by_site_chart = {
             'type': 'bar',
             'title': _('Average Tour Duration by Site (minutes)'),
             'labels': site_labels,
+            'keys': site_keys, # Drill-down keys
+            'action_model': 'tour.log',
+            'action_domain_field': 'site_id',
             'datasets': [{
                 'label': _('Avg Duration (min)'),
                 'data': site_durations,
@@ -447,6 +467,7 @@ class GuardProToursDashboard(models.Model):
         
         guard_labels = []
         guard_compliance = []
+        guard_keys = []
         for guard in guards:
             guard_tours = self.env['tour.log'].search([
                 ('guard_id', '=', guard.id),
@@ -460,11 +481,15 @@ class GuardProToursDashboard(models.Model):
                 compliance = (total_scanned / expected_checkpoints * 100) if expected_checkpoints > 0 else 0
                 guard_labels.append(guard.name)
                 guard_compliance.append(round(compliance, 1))
+                guard_keys.append(guard.id)
         
         guard_compliance_chart = {
             'type': 'bar',
             'title': _('Checkpoint Compliance by Guard (%)'),
             'labels': guard_labels,
+            'keys': guard_keys, # Drill-down keys
+            'action_model': 'tour.log',
+            'action_domain_field': 'guard_id',
             'datasets': [{
                 'label': _('Compliance %'),
                 'data': guard_compliance,
@@ -498,7 +523,8 @@ class GuardProToursDashboard(models.Model):
         if site_filter:
             site_domain = self.env['client.site'].search(site_filter).ids
         elif site_ids:
-            site_domain = [sid for sid in site_ids if sid > 0]
+            # Use provided site IDs directly, including -1 if present for force-empty
+            site_domain = site_ids
         else:
             site_domain = []
         
@@ -519,6 +545,7 @@ class GuardProToursDashboard(models.Model):
         
         recent_tours_table = {
             'title': _('Recent Completed Tours'),
+            'res_model': 'tour.log',
             'columns': [
                 _('Tour #'),
                 _('Guard'),
@@ -528,16 +555,19 @@ class GuardProToursDashboard(models.Model):
                 _('Checkpoints'),
                 _('Compliance %')
             ],
-            'rows': [[
-                tour.name,
-                tour.guard_id.name,
-                tour.site_id.name,
-                self._convert_to_user_tz(tour.start_time).strftime('%Y-%m-%d %H:%M')
-                if tour.start_time else '',
-                round(tour.duration, 1),
-                f"{tour.scanned_checkpoints}/{tour.expected_checkpoints}",
-                round((tour.scanned_checkpoints / tour.expected_checkpoints * 100) if tour.expected_checkpoints > 0 else 0, 1)
-            ] for tour in recent_tours]
+            'rows': [{
+                'id': tour.id,
+                'data': [
+                    tour.name,
+                    tour.guard_id.name,
+                    tour.site_id.name,
+                    self._convert_to_user_tz(tour.start_time).strftime('%Y-%m-%d %H:%M')
+                    if tour.start_time else '',
+                    round(tour.duration, 1),
+                    f"{tour.scanned_checkpoints}/{tour.expected_checkpoints}",
+                    round((tour.scanned_checkpoints / tour.expected_checkpoints * 100) if tour.expected_checkpoints > 0 else 0, 1)
+                ]
+            } for tour in recent_tours]
         }
         
         # In Progress Tours
@@ -555,6 +585,7 @@ class GuardProToursDashboard(models.Model):
         
         in_progress_table = {
             'title': _('Tours In Progress'),
+            'res_model': 'tour.log',
             'columns': [
                 _('Tour #'),
                 _('Guard'),
@@ -563,15 +594,18 @@ class GuardProToursDashboard(models.Model):
                 _('Checkpoints'),
                 _('Progress %')
             ],
-            'rows': [[
-                tour.name,
-                tour.guard_id.name,
-                tour.site_id.name,
-                self._convert_to_user_tz(tour.start_time).strftime('%Y-%m-%d %H:%M')
-                if tour.start_time else '',
-                f"{tour.scanned_checkpoints}/{tour.expected_checkpoints}",
-                round((tour.scanned_checkpoints / tour.expected_checkpoints * 100) if tour.expected_checkpoints > 0 else 0, 1)
-            ] for tour in in_progress_tours]
+            'rows': [{
+                'id': tour.id,
+                'data': [
+                    tour.name,
+                    tour.guard_id.name,
+                    tour.site_id.name,
+                    self._convert_to_user_tz(tour.start_time).strftime('%Y-%m-%d %H:%M')
+                    if tour.start_time else '',
+                    f"{tour.scanned_checkpoints}/{tour.expected_checkpoints}",
+                    round((tour.scanned_checkpoints / tour.expected_checkpoints * 100) if tour.expected_checkpoints > 0 else 0, 1)
+                ]
+            } for tour in in_progress_tours]
         }
         
         # Overdue Tours
@@ -590,6 +624,7 @@ class GuardProToursDashboard(models.Model):
         
         overdue_table = {
             'title': _('Overdue Tours'),
+            'res_model': 'tour.log',
             'columns': [
                 _('Tour #'),
                 _('Guard'),
@@ -598,21 +633,25 @@ class GuardProToursDashboard(models.Model):
                 _('Expected End'),
                 _('Status')
             ],
-            'rows': [[
-                tour.name,
-                tour.guard_id.name,
-                tour.site_id.name,
-                self._convert_to_user_tz(tour.start_time).strftime('%Y-%m-%d %H:%M')
-                if tour.start_time else '',
-                self._convert_to_user_tz(tour.scheduled_end_time).strftime('%Y-%m-%d %H:%M')
-                if tour.scheduled_end_time else '',
-                dict(tour._fields['status'].selection)[tour.status],
-            ] for tour in overdue_tours]
+            'rows': [{
+                'id': tour.id,
+                'data': [
+                    tour.name,
+                    tour.guard_id.name,
+                    tour.site_id.name,
+                    self._convert_to_user_tz(tour.start_time).strftime('%Y-%m-%d %H:%M')
+                    if tour.start_time else '',
+                    self._convert_to_user_tz(tour.scheduled_end_time).strftime('%Y-%m-%d %H:%M')
+                    if tour.scheduled_end_time else '',
+                    dict(tour._fields['status'].selection)[tour.status],
+                ]
+            } for tour in overdue_tours]
         }
 
         return [recent_tours_table, in_progress_table, overdue_table]
 
-    # Action methods for KPI cards
+    # Action methods for KPI cards (Must be @api.model for RPC access)
+    @api.model
     def action_view_all_tours(self):
         """View all tours."""
         return {
@@ -620,10 +659,13 @@ class GuardProToursDashboard(models.Model):
             'name': _('All Tours'),
             'res_model': 'tour.log',
             'view_mode': 'tree,form',
+            'views': [[False, 'list'], [False, 'form']],
+            'target': 'current',
             'domain': [],
             'context': {'create': False}
         }
 
+    @api.model
     def action_view_completed_tours(self):
         """View completed tours."""
         return {
@@ -631,10 +673,13 @@ class GuardProToursDashboard(models.Model):
             'name': _('Completed Tours'),
             'res_model': 'tour.log',
             'view_mode': 'tree,form',
+            'views': [[False, 'list'], [False, 'form']],
+            'target': 'current',
             'domain': [('status', '=', 'completed')],
             'context': {'create': False}
         }
 
+    @api.model
     def action_view_tours_today(self):
         """View tours today."""
         today_start = fields.Datetime.to_datetime(fields.Date.today())
@@ -644,6 +689,8 @@ class GuardProToursDashboard(models.Model):
             'name': _('Tours Today'),
             'res_model': 'tour.log',
             'view_mode': 'tree,form',
+            'views': [[False, 'list'], [False, 'form']],
+            'target': 'current',
             'domain': [
                 ('start_time', '>=', today_start),
                 ('start_time', '<', today_end)
@@ -651,6 +698,7 @@ class GuardProToursDashboard(models.Model):
             'context': {'create': False}
         }
 
+    @api.model
     def action_view_in_progress_tours(self):
         """View in progress tours."""
         return {
@@ -658,10 +706,13 @@ class GuardProToursDashboard(models.Model):
             'name': _('In Progress Tours'),
             'res_model': 'tour.log',
             'view_mode': 'tree,form',
+            'views': [[False, 'list'], [False, 'form']],
+            'target': 'current',
             'domain': [('status', '=', 'in_progress')],
             'context': {'create': False}
         }
 
+    @api.model
     def action_view_checkpoint_scans(self):
         """View checkpoint scans."""
         return {
@@ -669,22 +720,129 @@ class GuardProToursDashboard(models.Model):
             'name': _('Checkpoint Scans'),
             'res_model': 'checkpoint.scan',
             'view_mode': 'tree,form',
+            'views': [[False, 'list'], [False, 'form']],
+            'target': 'current',
             'domain': [],
             'context': {'create': False}
         }
 
+    def _sanitize_site_filters(
+        self, site_ids=None, client_ids=None, enforce_limits=False, assigned_site_ids=None
+    ):
+        """Sanitize site filters."""
+        site_ids = site_ids or []
+        client_ids = client_ids or []
+        assigned_site_ids = assigned_site_ids or []
+        filter_requested = bool(site_ids or client_ids)
+        sanitized_sites = set(site_ids)
+        force_empty = False
+
+        if client_ids:
+            client_site_ids = self.env['client.site'].search([
+                ('client_id', 'in', client_ids)
+            ]).ids
+            client_site_ids = set(client_site_ids)
+            sanitized_sites = (sanitized_sites & client_site_ids) if sanitized_sites else client_site_ids
+
+        if enforce_limits:
+            assigned_set = set(assigned_site_ids)
+            if not assigned_set:
+                return [], _('No sites are assigned to your user. Please contact your administrator.'), False
+            
+            if sanitized_sites:
+                sanitized_sites &= assigned_set
+            elif not filter_requested:
+                sanitized_sites = assigned_set
+            else:
+                force_empty = True
+
+        if filter_requested and not sanitized_sites:
+            force_empty = True
+
+        return sorted(sanitized_sites), None, force_empty
+
+    def _sanitize_guard_filters(self, guard_ids=None, allowed_site_ids=None):
+        """Ensure guard filters are limited to allowed sites."""
+        guard_ids = guard_ids or []
+        allowed_site_ids = allowed_site_ids or []
+        if not guard_ids or not allowed_site_ids:
+            return []
+        return self.env['guard.profile'].search([
+            ('id', 'in', guard_ids),
+            ('site_ids', 'in', allowed_site_ids)
+        ]).ids
+
     @api.model
     def get_dashboard_data(self, dashboard_id=None, context=None, filter_params=None):
-        """
-        Public method to get dashboard data with filters.
-        Called from JavaScript frontend.
-        """
-        filter_params = filter_params or {}
-        return {
-            'kpis': self._get_kpi_data(filter_params),
-            'charts': self._get_chart_data(filter_params),
-            'tables': self._get_table_data(filter_params),
-        }
+        """API method for fetching dashboard data with security sanitization."""
+        try:
+            # Handle parameters
+            if not filter_params and context:
+                filter_params = context.get('filter_params', {}) or {}
+            filter_params = dict(filter_params or {})
+            
+            # Helper to sanitize IDs
+            def sanitize_ids(ids):
+                if not ids: return []
+                if isinstance(ids, (int, str)): ids = [ids]
+                return [int(i) for i in ids if i and str(i).lstrip('-').isdigit()]
+
+            date_from = filter_params.get('date_from')
+            date_to = filter_params.get('date_to')
+            site_ids = sanitize_ids(filter_params.get('site_ids', []))
+            guard_ids = sanitize_ids(filter_params.get('guard_ids', []))
+            client_ids = sanitize_ids(filter_params.get('client_ids', []))
+            
+            # Convert dates
+            if date_from and isinstance(date_from, str):
+                date_from = fields.Date.from_string(date_from)
+            if date_to and isinstance(date_to, str):
+                date_to = fields.Date.from_string(date_to)
+            
+            # Security limits
+            user = self.env.user
+            is_admin = user.has_group('guardpro.group_guardpro_admin') or user.has_group('base.group_system')
+            enforce_site_limits = not is_admin and (
+                user.has_group('guardpro.group_guardpro_client_user') or
+                user.has_group('guardpro.group_guardpro_supervisor') or
+                user.has_group('guardpro.group_guardpro_manager')
+            )
+            assigned_site_ids = user.site_ids.ids
+            
+            # Sanitize sites
+            sanitized_sites, site_error, force_empty = self._sanitize_site_filters(
+                site_ids=site_ids,
+                client_ids=client_ids,
+                enforce_limits=enforce_site_limits,
+                assigned_site_ids=assigned_site_ids
+            )
+            if site_error:
+                return {'kpis': [], 'charts': [], 'tables': [], 'error': site_error}
+            
+            # Site results
+            site_ids = sanitized_sites
+            filter_context = {
+                'date_from': date_from,
+                'date_to': date_to,
+                'site_ids': [-1] if force_empty else site_ids,
+                'guard_ids': guard_ids,
+            }
+
+            # Sanitize guards if sites are limited
+            if enforce_site_limits and guard_ids:
+                filter_context['guard_ids'] = self._sanitize_guard_filters(
+                    guard_ids=guard_ids,
+                    allowed_site_ids=site_ids or assigned_site_ids
+                )
+
+            return {
+                'kpis': self._get_kpi_data(filter_context),
+                'charts': self._get_chart_data(filter_context),
+                'tables': self._get_table_data(filter_context),
+            }
+        except Exception as e:
+            _logger.error(f"Error computing tours dashboard data: {e}", exc_info=True)
+            return {'kpis': [], 'charts': [], 'tables': [], 'error': str(e)}
 
     @api.model
     def get_report_data(self, filter_params=None):

@@ -10,11 +10,11 @@
             
             <div class="guardpro-mobile">
                 <!-- Mobile Header -->
-                <div class="guardpro-mobile-header bg-primary text-white py-3 shadow-sm">
+                <div class="guardpro-mobile-header text-white py-3 shadow-sm" style="background-color: #1B365D;">
                     <div class="container-fluid">
                         <div class="d-flex justify-content-between align-items-center">
                             <h1 class="h4 mb-0 fw-bold">
-                                <i class="fa fa-shield-alt me-2"/>Sentry
+                                <i class="fa fa-shield-alt me-2" style="color: #F7941D;"/>Berkeley Guard
                             </h1>
                             <t t-if="guard and guard != False">
                                 <span class="small">
@@ -529,7 +529,7 @@
     </template>
 
     <!-- Mobile Dashboard -->
-    <template id="mobile_dashboard" name="Sentry Mobile Dashboard">
+    <template id="mobile_dashboard" name="Berkeley Guard Mobile Dashboard">
         <t t-call="guardpro.mobile_base">
             <div class="container-fluid p-3">
                 <!-- Location Permission Banner -->

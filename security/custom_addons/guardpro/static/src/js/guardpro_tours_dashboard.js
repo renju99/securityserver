@@ -332,6 +332,8 @@ class GuardProToursDashboard extends Component {
         const ChartLib = window.Chart || (typeof Chart !== 'undefined' ? Chart : null);
         if (!ChartLib) return false;
 
+        const self = this;
+
         try {
             this.chartInstances[index] = new ChartLib(ctx, {
                 type: chartData.type,
@@ -342,6 +344,15 @@ class GuardProToursDashboard extends Component {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    onClick: (e, elements) => {
+                        if (elements && elements.length > 0) {
+                            const dataIndex = elements[0].index;
+                            self.onChartClick(chartData, dataIndex);
+                        }
+                    },
+                    onHover: (event, chartElement) => {
+                        event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+                    },
                     plugins: {
                         legend: { position: 'top' }
                     },
@@ -355,6 +366,56 @@ class GuardProToursDashboard extends Component {
             console.error(`Error rendering chart ${index}:`, e);
             return false;
         }
+    }
+
+    async onChartClick(chartData, index) {
+        if (!chartData.action_model) return;
+
+        let domain = [];
+
+        // Add existing filters to domain
+        if (this.state.filters.site_ids.length > 0) {
+            domain.push(['site_id', 'in', this.state.filters.site_ids]);
+        }
+        if (this.state.filters.guard_ids.length > 0) {
+            domain.push(['guard_id', 'in', this.state.filters.guard_ids]);
+        }
+
+        // Add chart-specific drill-down domain
+        if (chartData.action_type === 'date_range' && chartData.keys && chartData.keys[index]) {
+            // For date range charts (Trend Line)
+            const dateRange = chartData.keys[index];
+            if (dateRange && dateRange.start && dateRange.end) {
+                domain.push(['start_time', '>=', dateRange.start]);
+                domain.push(['start_time', '<=', dateRange.end]);
+            }
+        } else if (chartData.action_domain_field && chartData.keys && chartData.keys[index] !== undefined) {
+            // For categorical charts (Pie, Doughnut, Bar)
+            domain.push([chartData.action_domain_field, '=', chartData.keys[index]]);
+        }
+
+        // Execute action
+        this.action.doAction({
+            type: 'ir.actions.act_window',
+            res_model: chartData.action_model,
+            view_mode: 'list,form',
+            views: [[false, 'list'], [false, 'form']],
+            target: 'current',
+            domain: domain,
+            name: `${chartData.title} - ${chartData.labels[index]}`
+        });
+    }
+
+    onRowClick(resModel, resId) {
+        if (!resModel || !resId) return;
+
+        this.action.doAction({
+            type: 'ir.actions.act_window',
+            res_model: resModel,
+            res_id: resId,
+            views: [[false, 'form']],
+            target: 'current'
+        });
     }
 
     async onKPIClick(actionName) {

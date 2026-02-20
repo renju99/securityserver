@@ -53,7 +53,8 @@ export class KPICardWidget extends Component {
 export class ChartWidget extends Component {
     static template = "guardpro.ChartWidget";
     static props = {
-        data: Object
+        data: Object,
+        onChartClick: { type: Function, optional: true }
     };
 
     setup() {
@@ -76,12 +77,12 @@ export class ChartWidget extends Component {
         // Wait for Chart.js to be available (Odoo's bundle makes it global)
         let attempts = 0;
         const maxAttempts = 50; // 5 seconds max wait
-        
+
         while (typeof window.Chart === 'undefined' && attempts < maxAttempts) {
             await new Promise(resolve => setTimeout(resolve, 100));
             attempts++;
         }
-        
+
         if (typeof window.Chart === 'undefined') {
             console.error('Chart.js library failed to load after waiting');
             throw new Error('Chart.js library not available');
@@ -90,21 +91,22 @@ export class ChartWidget extends Component {
 
     renderChart() {
         if (!this.chartRef.el) return;
-        
+
         const ctx = this.chartRef.el.getContext('2d');
-        
+
         // Ensure Chart.js is loaded
         const ChartLib = window.Chart || (typeof Chart !== 'undefined' ? Chart : null);
         if (!ChartLib) {
             console.error('Chart.js library not loaded');
             return;
         }
-        
+
         // Destroy existing chart if any
         if (this.chartInstance) {
             this.chartInstance.destroy();
         }
 
+        const self = this;
         // Create new chart
         this.chartInstance = new ChartLib(ctx, {
             type: this.props.data.type,
@@ -115,6 +117,15 @@ export class ChartWidget extends Component {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (e, elements) => {
+                    if (elements && elements.length > 0 && self.props.onChartClick) {
+                        const index = elements[0].index;
+                        self.props.onChartClick(self.props.data, index);
+                    }
+                },
+                onHover: (event, chartElement) => {
+                    event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+                },
                 plugins: {
                     legend: {
                         position: 'top',
@@ -156,8 +167,15 @@ export class ChartWidget extends Component {
 export class TableWidget extends Component {
     static template = "guardpro.TableWidget";
     static props = {
-        data: Object
+        data: Object,
+        onRowClick: { type: Function, optional: true }
     };
+
+    onRowClick(row) {
+        if (this.props.onRowClick && this.props.data.res_model && row.id) {
+            this.props.onRowClick(this.props.data.res_model, row.id);
+        }
+    }
 }
 
 /**
@@ -170,12 +188,12 @@ export class GuardProAnalyticsDashboard extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
-        
+
         // Initialize filters with defaults
         const today = new Date();
         const last30Days = new Date();
         last30Days.setDate(today.getDate() - 30);
-        
+
         this.state = useState({
             data: {
                 kpis: [],
@@ -245,7 +263,7 @@ export class GuardProAnalyticsDashboard extends Component {
     async loadDashboardData() {
         this.state.loading = true;
         this.state.error = null;
-        
+
         try {
             const filterParams = {
                 date_from: this.state.filters.date_from,
@@ -262,7 +280,7 @@ export class GuardProAnalyticsDashboard extends Component {
                 [],
                 { filter_params: filterParams }
             );
-            
+
             this.state.data = data;
         } catch (error) {
             console.error("Error loading dashboard data:", error);
@@ -274,13 +292,13 @@ export class GuardProAnalyticsDashboard extends Component {
 
     onFilterChange(filterName, value) {
         this.state.filters[filterName] = value;
-        
+
         // Auto-update date range based on period selection
         if (filterName === 'period' && value !== 'custom') {
             const today = new Date();
             let dateFrom = new Date();
-            
-            switch(value) {
+
+            switch (value) {
                 case 'today':
                     dateFrom = new Date(today);
                     break;
@@ -313,7 +331,7 @@ export class GuardProAnalyticsDashboard extends Component {
                     break;
             }
         }
-        
+
         // Reload dashboard data with new filters
         this.loadDashboardData();
     }
@@ -330,7 +348,7 @@ export class GuardProAnalyticsDashboard extends Component {
         const filteredIds = selectedIds
             .filter(id => id && id !== '' && !isNaN(id))
             .map(id => parseInt(id));
-        
+
         // If no specific selection, clear the filter
         this.state.filters[filterName] = filteredIds.length > 0 ? filteredIds : [];
         this.loadDashboardData();
@@ -340,7 +358,7 @@ export class GuardProAnalyticsDashboard extends Component {
         const today = new Date();
         const last30Days = new Date();
         last30Days.setDate(today.getDate() - 30);
-        
+
         this.state.filters = {
             date_from: last30Days.toISOString().split('T')[0],
             date_to: today.toISOString().split('T')[0],
@@ -349,15 +367,15 @@ export class GuardProAnalyticsDashboard extends Component {
             client_ids: [],
             period: 'last_30_days'
         };
-        
+
         this.loadDashboardData();
     }
 
     hasActiveFilters() {
         return this.state.filters.site_ids.length > 0 ||
-               this.state.filters.guard_ids.length > 0 ||
-               this.state.filters.client_ids.length > 0 ||
-               this.state.filters.period !== 'last_30_days';
+            this.state.filters.guard_ids.length > 0 ||
+            this.state.filters.client_ids.length > 0 ||
+            this.state.filters.period !== 'last_30_days';
     }
 
     async onRefresh() {
@@ -371,13 +389,113 @@ export class GuardProAnalyticsDashboard extends Component {
                 actionName,
                 [[]]
             );
-            
+
             if (action) {
                 this.action.doAction(action);
             }
         } catch (error) {
             console.error("Error executing action:", error);
         }
+    }
+
+    async onChartClick(chartData, index) {
+        if (!chartData.action_model) return;
+
+        let domain = [];
+
+        // Add existing filters to domain
+        if (this.state.filters.site_ids.length > 0) {
+            domain.push(['site_id', 'in', this.state.filters.site_ids]);
+        }
+        if (this.state.filters.guard_ids.length > 0) {
+            domain.push(['guard_id', 'in', this.state.filters.guard_ids]);
+        }
+
+        // Add chart-specific drill-down domain
+        if (chartData.action_type === 'date_range' && chartData.keys && chartData.keys[index]) {
+            // For date range charts (Trend Line)
+            const dateRange = chartData.keys[index];
+            if (dateRange && dateRange.start && dateRange.end) {
+                domain.push(['incident_datetime', '>=', dateRange.start]);
+                domain.push(['incident_datetime', '<=', dateRange.end]);
+            }
+        } else if (chartData.action_domain_field && chartData.keys && chartData.keys[index] !== undefined) {
+            // For categorical charts (Pie, Doughnut, Bar)
+            domain.push([chartData.action_domain_field, '=', chartData.keys[index]]);
+        }
+
+        // Execute action
+        this.action.doAction({
+            type: 'ir.actions.act_window',
+            res_model: chartData.action_model,
+            view_mode: 'list,form',
+            views: [[false, 'list'], [false, 'form']],
+            target: 'current',
+            domain: domain,
+            name: `${chartData.title} - ${chartData.labels[index]}`
+        });
+    }
+
+    onTableRowClick(resModel, resId) {
+        if (!resModel || !resId) return;
+
+        this.action.doAction({
+            type: 'ir.actions.act_window',
+            res_model: resModel,
+            res_id: resId,
+            views: [[false, 'form']],
+            target: 'current'
+        });
+    }
+
+    async onChartClick(chartData, index) {
+        if (!chartData.action_model) return;
+
+        let domain = [];
+
+        // Add existing filters to domain
+        if (this.state.filters.site_ids.length > 0) {
+            domain.push(['site_id', 'in', this.state.filters.site_ids]);
+        }
+        if (this.state.filters.guard_ids.length > 0) {
+            domain.push(['guard_id', 'in', this.state.filters.guard_ids]);
+        }
+
+        // Add chart-specific drill-down domain
+        if (chartData.action_type === 'date_range' && chartData.keys && chartData.keys[index]) {
+            // For date range charts (Trend Line)
+            const dateRange = chartData.keys[index];
+            if (dateRange && dateRange.start && dateRange.end) {
+                domain.push(['incident_datetime', '>=', dateRange.start]);
+                domain.push(['incident_datetime', '<=', dateRange.end]);
+            }
+        } else if (chartData.action_domain_field && chartData.keys && chartData.keys[index] !== undefined) {
+            // For categorical charts (Pie, Doughnut, Bar)
+            domain.push([chartData.action_domain_field, '=', chartData.keys[index]]);
+        }
+
+        // Execute action
+        this.action.doAction({
+            type: 'ir.actions.act_window',
+            res_model: chartData.action_model,
+            view_mode: 'list,form',
+            views: [[false, 'list'], [false, 'form']],
+            target: 'current',
+            domain: domain,
+            name: `${chartData.title} - ${chartData.labels[index]}`
+        });
+    }
+
+    onTableRowClick(resModel, resId) {
+        if (!resModel || !resId) return;
+
+        this.action.doAction({
+            type: 'ir.actions.act_window',
+            res_model: resModel,
+            res_id: resId,
+            views: [[false, 'form']],
+            target: 'current'
+        });
     }
 
     willUnmount() {
