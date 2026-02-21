@@ -768,25 +768,92 @@ app.put('/hr/shifts/:id', authenticateToken, authorizeRole(['HR Admin']), async 
     }
 });
 
-// HR API: Get Alerts
+// HR API: Get Alerts (paginated, filterable)
 app.get('/hr/alerts', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
+    const { staffId, siteId: filterSiteId, status, startDate, endDate, page = 1, limit = 50 } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
     try {
-        let query = `
+        const conditions = [];
+        const params = [];
+        let idx = 1;
+
+        // Site Supervisor: locked to their own site via employee's site
+        if (req.user.role === 'Site Supervisor') {
+            conditions.push(`e.site_id = $${idx++}`);
+            params.push(req.user.siteId);
+        } else if (filterSiteId) {
+            conditions.push(`a.site_id = $${idx++}`);
+            params.push(filterSiteId);
+        }
+
+        if (staffId) {
+            conditions.push(`e.staff_id ILIKE $${idx++}`);
+            params.push(`%${staffId}%`);
+        }
+
+        if (status) {
+            conditions.push(`a.status = $${idx++}`);
+            params.push(status);
+        }
+
+        if (startDate) {
+            conditions.push(`a.created_at >= $${idx++}`);
+            params.push(startDate);
+        }
+
+        if (endDate) {
+            conditions.push(`a.created_at <= $${idx++}`);
+            params.push(endDate);
+        }
+
+        const where = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
+
+        const query = `
             SELECT a.*, e.staff_id, e.first_name, e.last_name, s.name as site_name
             FROM geo_fence_alerts a
             JOIN employees e ON a.employee_id = e.id
             LEFT JOIN sites s ON a.site_id = s.id
+            ${where}
+            ORDER BY a.created_at DESC
+            LIMIT $${idx++} OFFSET $${idx++}
         `;
-        const params = [];
+        params.push(parseInt(limit), offset);
 
-        if (req.user.role === 'Site Supervisor') {
-            query += ' WHERE e.site_id = $1';
-            params.push(req.user.siteId);
-        }
+        const countQuery = `
+            SELECT COUNT(*) FROM geo_fence_alerts a
+            JOIN employees e ON a.employee_id = e.id
+            LEFT JOIN sites s ON a.site_id = s.id
+            ${where}
+        `;
+        const countParams = params.slice(0, -2); // exclude limit/offset
 
-        query += ' ORDER BY a.created_at DESC LIMIT 100';
-        const result = await pool.query(query, params);
-        res.json(result.rows);
+        const [result, countRes] = await Promise.all([
+            pool.query(query, params),
+            pool.query(countQuery, countParams)
+        ]);
+
+        res.json({
+            alerts: result.rows,
+            total: parseInt(countRes.rows[0].count),
+            page: parseInt(page),
+            totalPages: Math.ceil(parseInt(countRes.rows[0].count) / parseInt(limit))
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// HR API: Resolve a geo-fence alert
+app.patch('/hr/alerts/:id/resolve', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await pool.query(
+            `UPDATE geo_fence_alerts SET status = 'resolved' WHERE id = $1 RETURNING *`,
+            [id]
+        );
+        if (result.rows.length === 0) return res.status(404).json({ error: 'Alert not found' });
+        res.json(result.rows[0]);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Database error' });
@@ -1148,27 +1215,29 @@ app.post('/location/update', authenticateToken, async (req, res) => {
                 [internalId, lng, lat]
             );
 
-            // 3. Geofence Check (mirrors socket handler logic)
+            // 3. Geofence Check
             const { site_lat: siteLat, site_lon: siteLon, radius_meters: radiusMeters, site_name: siteName,
                 geofence_type: geofenceType, geofence_data: geofenceData, geofence_enabled: geofenceEnabled,
                 start_time: startTime, end_time: endTime, site_id: siteId } = emp;
 
-            if (siteId && startTime && endTime && geofenceEnabled !== false) {
-                const now = new Date();
-                const currentTimeVal = now.getHours() * 60 + now.getMinutes();
-                const [startH, startM] = startTime.split(':').map(Number);
-                const [endH, endM] = endTime.split(':').map(Number);
-                const startTimeVal = startH * 60 + startM;
-                const endTimeVal = endH * 60 + endM;
-
-                let isShiftTime = false;
-                if (endTimeVal < startTimeVal) {
-                    isShiftTime = (currentTimeVal >= startTimeVal) || (currentTimeVal <= endTimeVal);
-                } else {
-                    isShiftTime = (currentTimeVal >= startTimeVal) && (currentTimeVal <= endTimeVal);
+            if (siteId && geofenceEnabled !== false) {
+                // If shift is assigned, only alert during shift window; otherwise alert anytime
+                let checkGeo = true;
+                if (startTime && endTime) {
+                    const now = new Date();
+                    const currentTimeVal = now.getHours() * 60 + now.getMinutes();
+                    const [startH, startM] = startTime.split(':').map(Number);
+                    const [endH, endM] = endTime.split(':').map(Number);
+                    const startTimeVal = startH * 60 + startM;
+                    const endTimeVal = endH * 60 + endM;
+                    if (endTimeVal < startTimeVal) {
+                        checkGeo = (currentTimeVal >= startTimeVal) || (currentTimeVal <= endTimeVal);
+                    } else {
+                        checkGeo = (currentTimeVal >= startTimeVal) && (currentTimeVal <= endTimeVal);
+                    }
                 }
 
-                if (isShiftTime) {
+                if (checkGeo) {
                     let isOutside = false;
                     let distance = 0;
                     const allowedRadius = radiusMeters || 100;
@@ -1191,9 +1260,10 @@ app.post('/location/update', authenticateToken, async (req, res) => {
                             [internalId]
                         );
                         if (recentAlert.rows.length === 0) {
+                            const context = startTime ? 'during shift hours' : 'while on duty';
                             const message = geofenceType === 'POLYGON'
-                                ? `User outside designated site polygon (${siteName}) during shift hours.`
-                                : `User outside designated site (${siteName}) during shift hours. Distance: ${Math.round(distance)}m`;
+                                ? `${employeeId} outside designated polygon (${siteName}) ${context}.`
+                                : `${employeeId} outside site (${siteName}) ${context}. Distance: ${Math.round(distance)}m`;
                             const alertRes = await pool.query(
                                 `INSERT INTO geo_fence_alerts (employee_id, site_id, latitude, longitude, message) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
                                 [internalId, siteId, lat, lng, message]
@@ -1279,72 +1349,59 @@ io.on('connection', (socket) => {
                 );
 
                 // 5. GEO FENCING CHECK
-                if (siteId && startTime && endTime && geofenceEnabled !== false) {
-                    const now = new Date();
-                    const hours = now.getHours();
-                    const minutes = now.getMinutes();
-                    const currentTimeVal = hours * 60 + minutes;
-
-                    // Parse Shift Times (HH:mm:ss)
-                    const [startH, startM] = startTime.split(':').map(Number);
-                    const [endH, endM] = endTime.split(':').map(Number);
-                    const startTimeVal = startH * 60 + startM;
-                    const endTimeVal = endH * 60 + endM;
-
-                    // Check if current time is within shift time
-                    let isShiftTime = false;
-                    if (endTimeVal < startTimeVal) { // Night shift (crosses midnight)
-                        isShiftTime = (currentTimeVal >= startTimeVal) || (currentTimeVal <= endTimeVal);
-                    } else {
-                        isShiftTime = (currentTimeVal >= startTimeVal) && (currentTimeVal <= endTimeVal);
+                if (siteId && geofenceEnabled !== false) {
+                    // If shift assigned, only alert during shift window; otherwise alert anytime
+                    let checkGeo = true;
+                    if (startTime && endTime) {
+                        const now = new Date();
+                        const currentTimeVal = now.getHours() * 60 + now.getMinutes();
+                        const [startH, startM] = startTime.split(':').map(Number);
+                        const [endH, endM] = endTime.split(':').map(Number);
+                        const startTimeVal = startH * 60 + startM;
+                        const endTimeVal = endH * 60 + endM;
+                        if (endTimeVal < startTimeVal) {
+                            checkGeo = (currentTimeVal >= startTimeVal) || (currentTimeVal <= endTimeVal);
+                        } else {
+                            checkGeo = (currentTimeVal >= startTimeVal) && (currentTimeVal <= endTimeVal);
+                        }
                     }
 
-                    if (isShiftTime) {
+                    if (checkGeo) {
                         let isOutside = false;
                         let distance = 0;
                         let allowedRadius = radiusMeters || 100;
 
                         if (geofenceType === 'POLYGON' && geofenceData && Array.isArray(geofenceData)) {
-                            // Check if point in polygon
                             const inside = isPointInPolygon(latitude, longitude, geofenceData);
                             if (!inside) {
                                 isOutside = true;
-                                // Calculate distance to centroid or arbitrary point for message
-                                // For now simple distance to site center if available, otherwise 0
                                 if (siteLat && siteLon) {
                                     distance = calculateDistance(latitude, longitude, siteLat, siteLon);
                                 }
                             }
                         } else if (siteLat && siteLon) {
-                            // Standard Circle Geofence
-                            distance = calculateDistance(latitude, longitude, siteLat, siteLon); // meters
+                            distance = calculateDistance(latitude, longitude, siteLat, siteLon);
                             if (distance > allowedRadius) {
                                 isOutside = true;
                             }
                         }
 
                         if (isOutside) {
-                            // OUTSIDE GEO FENCE
                             console.log(`Geofence Alert: ${employeeId} is outside site ${siteName}`);
-
-                            // Throttling: Check if alert recently created (e.g., last 10 mins)
                             const recentAlert = await pool.query(
                                 "SELECT id FROM geo_fence_alerts WHERE employee_id = $1 AND created_at > NOW() - INTERVAL '10 minutes'",
                                 [internalId]
                             );
-
                             if (recentAlert.rows.length === 0) {
+                                const context = startTime ? 'during shift hours' : 'while on duty';
                                 const message = geofenceType === 'POLYGON'
-                                    ? `User outside designated site polygon (${siteName}) during shift hours.`
-                                    : `User outside designated site (${siteName}) during shift hours. Distance: ${Math.round(distance)}m`;
-
+                                    ? `${employeeId} outside designated polygon (${siteName}) ${context}.`
+                                    : `${employeeId} outside site (${siteName}) ${context}. Distance: ${Math.round(distance)}m`;
                                 const alertRes = await pool.query(
                                     `INSERT INTO geo_fence_alerts (employee_id, site_id, latitude, longitude, message) 
                                      VALUES ($1, $2, $3, $4, $5) RETURNING *`,
                                     [internalId, siteId, latitude, longitude, message]
                                 );
-
-                                // Emit Alert
                                 const alertData = {
                                     ...alertRes.rows[0],
                                     staff_id: employeeId,

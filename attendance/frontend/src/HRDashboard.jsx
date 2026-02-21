@@ -107,6 +107,18 @@ const HRDashboard = () => {
     const [socketStatus, setSocketStatus] = useState('connecting');
     const [lastHeartbeat, setLastHeartbeat] = useState(null);
 
+    // Geo Fence Alerts tab state
+    const [gfPage, setGfPage] = useState(1);
+    const [gfTotal, setGfTotal] = useState(0);
+    const [gfTotalPages, setGfTotalPages] = useState(1);
+    const [gfLoading, setGfLoading] = useState(false);
+    const [gfSearch, setGfSearch] = useState('');
+    const [gfSiteFilter, setGfSiteFilter] = useState('');
+    const [gfStatusFilter, setGfStatusFilter] = useState('');
+    const [gfStartDate, setGfStartDate] = useState('');
+    const [gfEndDate, setGfEndDate] = useState('');
+    const GF_LIMIT = 50;
+
     // Filters
     const [selectedRoles, setSelectedRoles] = useState([]);
     const [selectedSites, setSelectedSites] = useState([]);
@@ -315,7 +327,17 @@ const HRDashboard = () => {
         }
 
         if (user.role === 'HR Admin' || user.role === 'Site Supervisor') {
-            fetch('/api/hr/alerts', { headers }).then(res => res.json()).then(setGeoFenceAlerts);
+            fetch('/api/hr/alerts?limit=50', { headers })
+                .then(res => res.json())
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        setGeoFenceAlerts(data); // legacy fallback
+                    } else if (data?.alerts) {
+                        setGeoFenceAlerts(data.alerts);
+                        setGfTotal(data.total || 0);
+                        setGfTotalPages(data.totalPages || 1);
+                    }
+                });
         }
 
         fetch('/api/hr/attendance', { headers })
@@ -753,11 +775,17 @@ const HRDashboard = () => {
         <div className="hr-dashboard">
             <APIProvider apiKey={GOOGLE_MAPS_API_KEY} libraries={['places', 'drawing', 'geometry']}>
                 <header className="dashboard-header">
+                    {/* Brand */}
                     <div className="header-left">
-                        <div className="berkeley-logo-small" style={{ color: 'white', marginBottom: '0.2rem', fontSize: '1.5rem' }}>Berkeley Workforce 360</div>
-                        <p style={{ margin: 0, opacity: 0.8, fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem' }}>Dashboard</p>
-                        <p>{user.role} {user.siteName ? `| ${user.siteName}` : (user.siteId ? `| Site #${user.siteId}` : '| Global Access')}</p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                            <span className="header-brand-title">Berkeley Workforce 360</span>
+                            <span className="header-brand-sub">
+                                {user.role}{user.siteName ? ` · ${user.siteName}` : (user.siteId ? ` · Site #${user.siteId}` : ' · Global')}
+                            </span>
+                        </div>
                     </div>
+
+                    {/* Stats + Nav + Logout */}
                     <div className="header-stats">
                         <div className="stat-card">
                             <span className="stat-label">Total Staff</span>
@@ -770,84 +798,95 @@ const HRDashboard = () => {
                         <div className="stat-card socket-status-card">
                             <span className="stat-label">Live Stream</span>
                             <span className={`stat-value socket-${socketStatus}`}>
-                                {socketStatus === 'connected' ? '● Online' : '○ Offline'}
+                                {socketStatus === 'connected' ? '● Live' : '○ Off'}
                             </span>
-                            {lastHeartbeat && <small className="last-heartbeat">Last Update: {lastHeartbeat}</small>}
+                            {lastHeartbeat && <small className="last-heartbeat">{lastHeartbeat}</small>}
                         </div>
-                        <div className="tab-switcher">
-                            <button
-                                className={`tab-btn ${activeTab === 'map' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('map')}
-                            >
-                                Live Map
-                            </button>
-                            {user.role === 'HR Admin' && (
-                                <button
-                                    className={`tab-btn ${activeTab === 'staff' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('staff')}
-                                >
-                                    Staff Management
-                                </button>
-                            )}
-                            {user.role === 'HR Admin' && (
-                                <button
-                                    className={`tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('analytics')}
-                                >
-                                    Analytics
-                                </button>
-                            )}
-                            {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
-                                <button
-                                    className={`tab-btn ${activeTab === 'attendance' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('attendance')}
-                                >
-                                    Attendance Logs
-                                </button>
-                            )}
-                            {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
-                                <button
-                                    className={`tab-btn ${activeTab === 'reports' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('reports')}
-                                >
-                                    Reports
-                                </button>
-                            )}
-                            {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
-                                <button
-                                    className={`tab-btn ${activeTab === 'route_tracking' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('route_tracking')}
-                                >
-                                    Route Tracking
-                                </button>
-                            )}
-                            {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
-                                <button
-                                    className={`tab-btn ${activeTab === 'idle_reporting' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('idle_reporting')}
-                                >
-                                    Idle Reporting
-                                </button>
-                            )}
-                            {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
-                                <button
-                                    className={`tab-btn ${activeTab === 'location_logs' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('location_logs')}
-                                >
-                                    📍 Location Logs
-                                </button>
-                            )}
-                            {(user.role === 'HR Admin') && (
-                                <button
-                                    className={`tab-btn ${activeTab === 'access_roles' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('access_roles')}
-                                >
-                                    Access Roles
-                                </button>
-                            )}
-                        </div>
-                        <button onClick={handleLogout} className="btn-logout">Logout</button>
                     </div>
+
+                    {/* Navigation */}
+                    <div className="tab-switcher">
+                        <button
+                            className={`tab-btn ${activeTab === 'map' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('map')}
+                        >
+                            Live Map
+                        </button>
+                        {user.role === 'HR Admin' && (
+                            <button
+                                className={`tab-btn ${activeTab === 'staff' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('staff')}
+                            >
+                                Staff
+                            </button>
+                        )}
+                        {user.role === 'HR Admin' && (
+                            <button
+                                className={`tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('analytics')}
+                            >
+                                Analytics
+                            </button>
+                        )}
+                        {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
+                            <button
+                                className={`tab-btn ${activeTab === 'attendance' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('attendance')}
+                            >
+                                Attendance
+                            </button>
+                        )}
+                        {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
+                            <button
+                                className={`tab-btn ${activeTab === 'reports' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('reports')}
+                            >
+                                Reports
+                            </button>
+                        )}
+                        {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
+                            <button
+                                className={`tab-btn ${activeTab === 'route_tracking' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('route_tracking')}
+                            >
+                                Routes
+                            </button>
+                        )}
+                        {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
+                            <button
+                                className={`tab-btn ${activeTab === 'idle_reporting' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('idle_reporting')}
+                            >
+                                Idle
+                            </button>
+                        )}
+                        {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
+                            <button
+                                className={`tab-btn ${activeTab === 'location_logs' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('location_logs')}
+                            >
+                                Loc. Logs
+                            </button>
+                        )}
+                        {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
+                            <button
+                                className={`tab-btn ${activeTab === 'geo_fence_alerts' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('geo_fence_alerts')}
+                            >
+                                ⚠ Geo Alerts{geoFenceAlerts.length > 0 ? ` (${gfTotal || geoFenceAlerts.length})` : ''}
+                            </button>
+                        )}
+                        {(user.role === 'HR Admin') && (
+                            <button
+                                className={`tab-btn ${activeTab === 'access_roles' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('access_roles')}
+                            >
+                                Access
+                            </button>
+                        )}
+                    </div>
+
+                    <button onClick={handleLogout} className="btn-logout">Logout</button>
                 </header>
 
                 <div className="dashboard-layout">
@@ -1699,6 +1738,33 @@ const HRDashboard = () => {
                             showToast={showToast}
                             confirmDialog={confirmDialog}
                             setConfirmDialog={setConfirmDialog}
+                        />
+                    ) : activeTab === 'geo_fence_alerts' ? (
+                        <GeoFenceAlertsView
+                            user={user}
+                            sites={sites}
+                            geoFenceAlerts={geoFenceAlerts}
+                            setGeoFenceAlerts={setGeoFenceAlerts}
+                            gfPage={gfPage}
+                            setGfPage={setGfPage}
+                            gfTotal={gfTotal}
+                            setGfTotal={setGfTotal}
+                            gfTotalPages={gfTotalPages}
+                            setGfTotalPages={setGfTotalPages}
+                            gfLoading={gfLoading}
+                            setGfLoading={setGfLoading}
+                            gfSearch={gfSearch}
+                            setGfSearch={setGfSearch}
+                            gfSiteFilter={gfSiteFilter}
+                            setGfSiteFilter={setGfSiteFilter}
+                            gfStatusFilter={gfStatusFilter}
+                            setGfStatusFilter={setGfStatusFilter}
+                            gfStartDate={gfStartDate}
+                            setGfStartDate={setGfStartDate}
+                            gfEndDate={gfEndDate}
+                            setGfEndDate={setGfEndDate}
+                            GF_LIMIT={GF_LIMIT}
+                            showToast={showToast}
                         />
                     ) : activeTab === 'reports' ? (
                         <div className="management-view">
@@ -3064,4 +3130,317 @@ const LocationLogsView = ({
     );
 };
 
+// ── Geo Fence Alerts View ──────────────────────────────────────────────────
+const GeoFenceAlertsView = ({
+    user, sites,
+    geoFenceAlerts, setGeoFenceAlerts,
+    gfPage, setGfPage,
+    gfTotal, setGfTotal,
+    gfTotalPages, setGfTotalPages,
+    gfLoading, setGfLoading,
+    gfSearch, setGfSearch,
+    gfSiteFilter, setGfSiteFilter,
+    gfStatusFilter, setGfStatusFilter,
+    gfStartDate, setGfStartDate,
+    gfEndDate, setGfEndDate,
+    GF_LIMIT, showToast
+}) => {
+    const headers = { Authorization: `Bearer ${localStorage.getItem('hr_token')}` };
+
+    const fetchAlerts = React.useCallback((page = 1) => {
+        setGfLoading(true);
+        const params = new URLSearchParams({
+            page,
+            limit: GF_LIMIT,
+            ...(gfSearch && { staffId: gfSearch }),
+            ...(gfSiteFilter && { siteId: gfSiteFilter }),
+            ...(gfStatusFilter && { status: gfStatusFilter }),
+            ...(gfStartDate && { startDate: gfStartDate }),
+            ...(gfEndDate && { endDate: gfEndDate + 'T23:59:59' }),
+        });
+        fetch(`/api/hr/alerts?${params}`, { headers })
+            .then(r => r.json())
+            .then(data => {
+                if (data?.alerts) {
+                    setGeoFenceAlerts(data.alerts);
+                    setGfTotal(data.total || 0);
+                    setGfTotalPages(data.totalPages || 1);
+                }
+            })
+            .catch(() => showToast('Failed to load alerts', 'error'))
+            .finally(() => setGfLoading(false));
+    }, [gfSearch, gfSiteFilter, gfStatusFilter, gfStartDate, gfEndDate, gfPage]);
+
+    React.useEffect(() => {
+        fetchAlerts(gfPage);
+    }, [gfPage]);
+
+    const handleSearch = () => {
+        setGfPage(1);
+        fetchAlerts(1);
+    };
+
+    const handleResolve = async (alertId) => {
+        try {
+            const res = await fetch(`/api/hr/alerts/${alertId}/resolve`, {
+                method: 'PATCH',
+                headers
+            });
+            if (!res.ok) throw new Error();
+            showToast('Alert marked as resolved', 'success');
+            fetchAlerts(gfPage);
+        } catch {
+            showToast('Failed to resolve alert', 'error');
+        }
+    };
+
+    const unresolvedCount = geoFenceAlerts.filter(a => a.status === 'active').length;
+
+    const formatDateTime = (ts) => {
+        if (!ts) return '—';
+        const d = new Date(ts);
+        return d.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    };
+
+    return (
+        <div className="management-view" style={{ padding: '1.5rem' }}>
+            {/* Header */}
+            <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+                    <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: '#1e293b' }}>Geo Fence Alerts</h2>
+                    {unresolvedCount > 0 && (
+                        <span style={{
+                            background: '#FF5E89', color: '#fff', borderRadius: '999px',
+                            padding: '0.15rem 0.6rem', fontSize: '0.75rem', fontWeight: 700
+                        }}>{unresolvedCount} active</span>
+                    )}
+                </div>
+                <p style={{ margin: 0, color: '#64748b', fontSize: '0.875rem' }}>
+                    Staff detected outside their assigned site geofence. {gfTotal > 0 ? `${gfTotal} total alerts.` : ''}
+                </p>
+            </div>
+
+            {/* Filters */}
+            <div style={{
+                display: 'flex', flexWrap: 'wrap', gap: '0.75rem',
+                background: '#fff', border: '1px solid #e2e8f0',
+                borderRadius: '10px', padding: '1rem', marginBottom: '1.25rem'
+            }}>
+                <input
+                    placeholder="Search by Staff ID…"
+                    value={gfSearch}
+                    onChange={e => setGfSearch(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                    style={{
+                        flex: '1 1 160px', padding: '0.5rem 0.75rem', borderRadius: '7px',
+                        border: '1px solid #e2e8f0', fontSize: '0.875rem', minWidth: '160px'
+                    }}
+                />
+                {user.role === 'HR Admin' && (
+                    <select
+                        value={gfSiteFilter}
+                        onChange={e => setGfSiteFilter(e.target.value)}
+                        style={{
+                            flex: '1 1 160px', padding: '0.5rem 0.75rem', borderRadius: '7px',
+                            border: '1px solid #e2e8f0', fontSize: '0.875rem', background: '#fff'
+                        }}
+                    >
+                        <option value="">All Sites</option>
+                        {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                )}
+                <select
+                    value={gfStatusFilter}
+                    onChange={e => setGfStatusFilter(e.target.value)}
+                    style={{
+                        flex: '1 1 130px', padding: '0.5rem 0.75rem', borderRadius: '7px',
+                        border: '1px solid #e2e8f0', fontSize: '0.875rem', background: '#fff'
+                    }}
+                >
+                    <option value="">All Statuses</option>
+                    <option value="active">Active</option>
+                    <option value="resolved">Resolved</option>
+                </select>
+                <input
+                    type="date"
+                    value={gfStartDate}
+                    onChange={e => setGfStartDate(e.target.value)}
+                    style={{
+                        flex: '1 1 140px', padding: '0.5rem 0.75rem', borderRadius: '7px',
+                        border: '1px solid #e2e8f0', fontSize: '0.875rem'
+                    }}
+                />
+                <input
+                    type="date"
+                    value={gfEndDate}
+                    onChange={e => setGfEndDate(e.target.value)}
+                    style={{
+                        flex: '1 1 140px', padding: '0.5rem 0.75rem', borderRadius: '7px',
+                        border: '1px solid #e2e8f0', fontSize: '0.875rem'
+                    }}
+                />
+                <button
+                    onClick={handleSearch}
+                    style={{
+                        padding: '0.5rem 1.25rem', background: '#6347FE', color: '#fff',
+                        border: 'none', borderRadius: '7px', fontWeight: 600,
+                        fontSize: '0.875rem', cursor: 'pointer'
+                    }}
+                >
+                    Search
+                </button>
+                <button
+                    onClick={() => {
+                        setGfSearch(''); setGfSiteFilter(''); setGfStatusFilter('');
+                        setGfStartDate(''); setGfEndDate('');
+                        setTimeout(() => { setGfPage(1); fetchAlerts(1); }, 0);
+                    }}
+                    style={{
+                        padding: '0.5rem 1rem', background: '#f1f5f9', color: '#475569',
+                        border: '1px solid #e2e8f0', borderRadius: '7px', fontWeight: 600,
+                        fontSize: '0.875rem', cursor: 'pointer'
+                    }}
+                >
+                    Clear
+                </button>
+            </div>
+
+            {/* Table */}
+            <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+                {gfLoading ? (
+                    <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>Loading alerts…</div>
+                ) : geoFenceAlerts.length === 0 ? (
+                    <div style={{ padding: '3rem', textAlign: 'center' }}>
+                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>✅</div>
+                        <div style={{ fontWeight: 600, color: '#334155' }}>No geo-fence alerts</div>
+                        <div style={{ color: '#94a3b8', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                            All staff are within their assigned sites.
+                        </div>
+                    </div>
+                ) : (
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                                {['Staff', 'Site', 'Coordinates', 'Message', 'Time', 'Status', 'Action'].map(h => (
+                                    <th key={h} style={{
+                                        padding: '0.75rem 1rem', textAlign: 'left',
+                                        fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.06em',
+                                        textTransform: 'uppercase', color: '#64748b'
+                                    }}>{h}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {geoFenceAlerts.map((alert, idx) => (
+                                <tr
+                                    key={alert.id}
+                                    style={{
+                                        borderBottom: '1px solid #f1f5f9',
+                                        background: alert.status === 'resolved' ? '#fafafa' : '#fff',
+                                        transition: 'background 0.15s'
+                                    }}
+                                >
+                                    <td style={{ padding: '0.85rem 1rem' }}>
+                                        <div style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.875rem' }}>
+                                            {alert.staff_id}
+                                        </div>
+                                        {(alert.first_name || alert.last_name) && (
+                                            <div style={{ color: '#64748b', fontSize: '0.78rem' }}>
+                                                {[alert.first_name, alert.last_name].filter(Boolean).join(' ')}
+                                            </div>
+                                        )}
+                                    </td>
+                                    <td style={{ padding: '0.85rem 1rem', color: '#334155', fontSize: '0.875rem' }}>
+                                        {alert.site_name || '—'}
+                                    </td>
+                                    <td style={{ padding: '0.85rem 1rem', color: '#64748b', fontSize: '0.78rem', fontFamily: 'monospace' }}>
+                                        {alert.latitude && alert.longitude
+                                            ? `${parseFloat(alert.latitude).toFixed(5)}, ${parseFloat(alert.longitude).toFixed(5)}`
+                                            : '—'}
+                                    </td>
+                                    <td style={{ padding: '0.85rem 1rem', color: '#475569', fontSize: '0.82rem', maxWidth: '280px' }}>
+                                        {alert.message}
+                                    </td>
+                                    <td style={{ padding: '0.85rem 1rem', color: '#64748b', fontSize: '0.82rem', whiteSpace: 'nowrap' }}>
+                                        {formatDateTime(alert.created_at)}
+                                    </td>
+                                    <td style={{ padding: '0.85rem 1rem' }}>
+                                        <span style={{
+                                            display: 'inline-block', padding: '0.2rem 0.6rem',
+                                            borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700,
+                                            background: alert.status === 'resolved' ? '#dcfce7' : '#fee2e2',
+                                            color: alert.status === 'resolved' ? '#16a34a' : '#dc2626'
+                                        }}>
+                                            {alert.status === 'resolved' ? 'Resolved' : 'Active'}
+                                        </span>
+                                    </td>
+                                    <td style={{ padding: '0.85rem 1rem' }}>
+                                        {alert.status !== 'resolved' && (
+                                            <button
+                                                onClick={() => handleResolve(alert.id)}
+                                                style={{
+                                                    padding: '0.3rem 0.8rem', fontSize: '0.78rem', fontWeight: 600,
+                                                    background: '#f0fdf4', color: '#16a34a',
+                                                    border: '1px solid #bbf7d0', borderRadius: '6px', cursor: 'pointer'
+                                                }}
+                                            >
+                                                Resolve
+                                            </button>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+            </div>
+
+            {/* Pagination */}
+            {gfTotalPages > 1 && (
+                <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    marginTop: '1rem', flexWrap: 'wrap', gap: '0.5rem'
+                }}>
+                    <span style={{ fontSize: '0.875rem', color: '#64748b' }}>
+                        Showing {((gfPage - 1) * GF_LIMIT) + 1}–{Math.min(gfPage * GF_LIMIT, gfTotal)} of {gfTotal.toLocaleString()} alerts
+                    </span>
+                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                        <button
+                            disabled={gfPage <= 1}
+                            onClick={() => setGfPage(p => p - 1)}
+                            style={{
+                                padding: '0.4rem 0.9rem', borderRadius: '6px',
+                                border: '1px solid #e2e8f0',
+                                background: gfPage <= 1 ? '#f1f5f9' : '#fff',
+                                color: gfPage <= 1 ? '#94a3b8' : '#334155',
+                                cursor: gfPage <= 1 ? 'not-allowed' : 'pointer',
+                                fontWeight: 600, fontSize: '0.875rem'
+                            }}
+                        >‹ Prev</button>
+                        <span style={{
+                            padding: '0.4rem 0.75rem', borderRadius: '6px',
+                            background: '#6347FE', color: '#fff', fontWeight: 700, fontSize: '0.875rem'
+                        }}>
+                            {gfPage} / {gfTotalPages}
+                        </span>
+                        <button
+                            disabled={gfPage >= gfTotalPages}
+                            onClick={() => setGfPage(p => p + 1)}
+                            style={{
+                                padding: '0.4rem 0.9rem', borderRadius: '6px',
+                                border: '1px solid #e2e8f0',
+                                background: gfPage >= gfTotalPages ? '#f1f5f9' : '#fff',
+                                color: gfPage >= gfTotalPages ? '#94a3b8' : '#334155',
+                                cursor: gfPage >= gfTotalPages ? 'not-allowed' : 'pointer',
+                                fontWeight: 600, fontSize: '0.875rem'
+                            }}
+                        >Next ›</button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 export default HRDashboard;
+
