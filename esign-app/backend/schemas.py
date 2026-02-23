@@ -51,6 +51,7 @@ class WorkflowResponse(BaseModel):
 class UserCreate(BaseModel):
     email: str
     full_name: str
+    job_position: Optional[str] = None
     password: Optional[str] = None
     role: str = "User" # Admin/User
     access_scope: str = "global"
@@ -60,6 +61,7 @@ class UserResponse(BaseModel):
     id: int
     email: str
     full_name: str
+    job_position: Optional[str] = None
     role: str
     auth_provider: str
     access_scope: Optional[str] = "global"
@@ -71,6 +73,7 @@ class UserResponse(BaseModel):
 
 class UserUpdate(BaseModel):
     full_name: Optional[str] = None
+    job_position: Optional[str] = None
     role: Optional[str] = None
     access_scope: Optional[str] = None
     permissions: Optional[Dict[str, Any]] = None

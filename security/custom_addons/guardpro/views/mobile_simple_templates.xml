@@ -3527,7 +3527,7 @@
                                 <i class="fa fa-chevron-right text-muted small"/>
                             </div>
                         </a>
-                        <a href="/mobile/training" class="list-group-item list-group-item-action border-0 py-3">
+                        <a href="/guardpro/mobile/training" class="list-group-item list-group-item-action border-0 py-3">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center me-3" style="width: 42px; height: 42px;">
@@ -3564,7 +3564,7 @@
                         <h6 class="mb-0 text-muted small fw-bold">INFORMATION</h6>
                     </div>
                     <div class="list-group list-group-flush">
-                        <a href="/guardpro/mobile/site_info" class="list-group-item list-group-item-action border-0 py-3 more-menu-item" data-action="site-info">
+                        <a href="/guardpro/mobile/site_info" class="list-group-item list-group-item-action border-0 py-3 more-menu-item">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center me-3" style="width: 42px; height: 42px;">
@@ -3601,7 +3601,7 @@
                         <h6 class="mb-0 text-muted small fw-bold">ACCOUNT</h6>
                     </div>
                     <div class="list-group list-group-flush">
-                        <a href="/guardpro/mobile/profile" class="list-group-item list-group-item-action border-0 py-3 more-menu-item" data-action="profile">
+                        <a href="/guardpro/mobile/profile" class="list-group-item list-group-item-action border-0 py-3 more-menu-item">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-3" style="width: 42px; height: 42px;">
@@ -3670,6 +3670,63 @@
                     <a href="/web/session/logout?redirect=/" class="btn btn-outline-danger btn-lg">
                         <i class="fa fa-sign-out-alt me-2"/>Logout
                     </a>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Mobile Training Screen -->
+    <template id="mobile_training" name="Guard Pro Mobile Training">
+        <t t-call="guardpro.mobile_base">
+            <div class="container-fluid p-3">
+                <!-- Page Header -->
+                <div class="d-flex align-items-center mb-4">
+                    <a href="/guardpro/mobile/more" class="btn btn-outline-primary rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="fa fa-chevron-left"/>
+                    </a>
+                    <h3 class="mb-0 fw-bold">My Training</h3>
+                </div>
+
+                <!-- Training Courses -->
+                <div class="row g-3">
+                    <t t-if="enrollments">
+                        <t t-foreach="enrollments" t-as="enrollment">
+                            <div class="col-12">
+                                <div class="card shadow-sm border-0 border-start border-4 border-success h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge bg-success bg-opacity-10 text-success">
+                                                <t t-esc="enrollment.member_status.replace('_', ' ').title() if hasattr(enrollment, 'member_status') and enrollment.member_status else 'Active'"/>
+                                            </span>
+                                            <small class="text-muted">
+                                                <t t-esc="enrollment.completion if hasattr(enrollment, 'completion') else 0"/>% Complete
+                                            </small>
+                                        </div>
+                                        <h5 class="card-title fw-bold">
+                                            <t t-esc="enrollment.channel_id.name if hasattr(enrollment, 'channel_id') and enrollment.channel_id else enrollment.name"/>
+                                        </h5>
+                                        <p class="card-text text-muted small mb-3">
+                                            <t t-if="hasattr(enrollment, 'channel_id') and enrollment.channel_id and enrollment.channel_id.description">
+                                                <t t-esc="enrollment.channel_id.description[:100]"/>...
+                                            </t>
+                                        </p>
+                                        <div class="d-grid">
+                                            <a t-attf-href="/guardpro/mobile/training/{{enrollment.id}}" class="btn btn-outline-primary btn-sm">
+                                                Continue Course
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                    <t t-else="">
+                        <div class="col-12 text-center py-5">
+                            <i class="fa fa-graduation-cap fa-4x text-muted mb-3 opacity-25"/>
+                            <h5 class="text-muted">No training courses assigned</h5>
+                            <p class="small text-muted">Contact your supervisor to enroll in courses.</p>
+                        </div>
+                    </t>
                 </div>
             </div>
         </t>
@@ -5799,17 +5856,20 @@
                 <div class="card shadow-sm mb-3">
                     <div class="card-body text-center">
                         <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; font-size: 32px;">
-                            <t t-if="guard.image_128">
-                                <img t-att-src="image_data_uri(guard.image_128)" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;"/>
+                            <t t-if="guard.photo">
+                                <img t-att-src="image_data_uri(guard.photo)" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;"/>
+                            </t>
+                            <t t-elif="guard.user_id and guard.user_id.image_128">
+                                <img t-att-src="image_data_uri(guard.user_id.image_128)" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;"/>
                             </t>
                             <t t-else="">
                                 <i class="fa fa-user"/>
                             </t>
                         </div>
-                        <h4 class="mb-1"><t t-esc="guard.name"/></h4>
-                        <p class="text-muted mb-2"><t t-esc="guard.job_title"/></p>
+                        <h4 class="mb-1"><t t-esc="guard.name or 'Security Guard'"/></h4>
+                        <p class="text-muted mb-2"><t t-esc="(guard.employee_id.job_id.name if guard.employee_id and guard.employee_id.job_id else 'Security Guard')"/></p>
                         <span t-attf-class="badge rounded-pill bg-#{'success' if guard.status == 'active' else 'secondary'}">
-                            <t t-esc="guard.status.title()"/>
+                            <t t-esc="guard.status.title() if guard.status else 'Active'"/>
                         </span>
                     </div>
                 </div>
@@ -5820,8 +5880,8 @@
                     </div>
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between">
-                            <span class="text-muted">Employee ID</span>
-                            <span class="fw-bold"><t t-esc="guard.employee_id or 'N/A'"/></span>
+                            <span class="text-muted">Linked Employee</span>
+                            <span class="fw-bold"><t t-esc="guard.employee_id.name if guard.employee_id else 'N/A'"/></span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between">
                             <span class="text-muted">Badge Number</span>
@@ -5829,11 +5889,11 @@
                         </li>
                         <li class="list-group-item d-flex justify-content-between">
                             <span class="text-muted">Phone</span>
-                            <span class="fw-bold"><t t-esc="guard.mobile_phone or guard.work_phone or 'N/A'"/></span>
+                            <span class="fw-bold"><t t-esc="guard.phone or 'N/A'"/></span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between">
                             <span class="text-muted">Email</span>
-                            <span class="fw-bold"><t t-esc="guard.work_email or 'N/A'"/></span>
+                            <span class="fw-bold"><t t-esc="guard.email or 'N/A'"/></span>
                         </li>
                     </ul>
                 </div>
@@ -5845,7 +5905,7 @@
                      <div class="card-body">
                         <t t-if="guard.current_site_id">
                             <h6 class="mb-1"><t t-esc="guard.current_site_id.name"/></h6>
-                             <p class="text-muted small mb-0"><t t-esc="guard.current_site_id.address_preview"/></p>
+                             <p class="text-muted small mb-0"><t t-esc="guard.current_site_id.address or guard.current_site_id.name"/></p>
                         </t>
                         <t t-else="">
                             <p class="text-muted mb-0">No active site assignment</p>
@@ -5875,7 +5935,7 @@
                         </div>
                          <div class="card-body">
                             <h4 class="mb-2"><t t-esc="site.name"/></h4>
-                            <p class="text-muted mb-3"><i class="fa fa-map-marker-alt me-2"/><t t-esc="site.address_preview"/></p>
+                            <p class="text-muted mb-3"><i class="fa fa-map-marker-alt me-2"/><t t-esc="site.address or site.name"/></p>
                             
                             <div class="d-grid gap-2">
                                 <a t-att-href="'https://maps.google.com/?q=' + str(site.latitude) + ',' + str(site.longitude)" target="_blank" class="btn btn-outline-primary">

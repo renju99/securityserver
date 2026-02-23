@@ -475,6 +475,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = models.User(
         email=user.email,
         full_name=user.full_name,
+        job_position=user.job_position,
         hashed_password=get_password_hash(user.password) if user.password else None,
         role=user.role,
         auth_provider="local" if user.password else "microsoft",
@@ -493,6 +494,8 @@ def update_user(user_id: int, user_update: schemas.UserUpdate, db: Session = Dep
     
     if user_update.full_name is not None:
         db_user.full_name = user_update.full_name
+    if user_update.job_position is not None:
+        db_user.job_position = user_update.job_position
     if user_update.role is not None:
         db_user.role = user_update.role
     if user_update.access_scope is not None:
@@ -549,6 +552,80 @@ def create_or_update_workflow(wf: schemas.WorkflowCreate, db: Session = Depends(
         db.refresh(new_wf)
         return new_wf
 
+def prepare_request_pdf(db: Session, req: models.DocumentRequest):
+    """
+    Resolves the workflow and generates the PDF for a request.
+    Ensures current_pdf_url is populated for review.
+    """
+    # 1. Determine approvers from workflow (DB Logic)
+    db_workflow = db.query(models.Workflow).filter(
+        models.Workflow.department == req.department,
+        models.Workflow.doc_type == req.doc_type
+    ).first()
+
+    if db_workflow:
+        approvers = db_workflow.approvers
+        signers = db_workflow.signers
+    else:
+        # Fallback to file config
+        workflow_data = APPROVAL_FLOWS.get(req.department, {}).get(req.doc_type)
+        if not workflow_data:
+             # Default fallback
+             approvers = ["Manager"]
+             signers = []
+        else:
+             approvers = workflow_data.get("approvers", [])
+             signers = workflow_data.get("signers", [])
+
+    all_steps = approvers + signers
+    
+    # Update form data to include approvers for template rendering
+    form_data = dict(req.form_data)
+    for idx, role in enumerate(all_steps):
+        # Look up user by role OR email (case-insensitive)
+        user = db.query(models.User).filter(
+            or_(
+                models.User.role.ilike(role.strip()),
+                models.User.email.ilike(role.strip())
+            )
+        ).first()
+        if user:
+            form_data[f"approver_{idx+1}_name"] = user.full_name
+            form_data[f"approver_{idx+1}_position"] = user.job_position or user.role
+        else:
+            # Fallback to the role name if no specific person is assigned
+            form_data[f"approver_{idx+1}_name"] = role 
+            form_data[f"approver_{idx+1}_position"] = role
+        
+    # Ensure we clear unused slots up to 5
+    for i in range(len(all_steps) + 1, 6):
+        form_data[f"approver_{i}_name"] = ""
+        form_data[f"approver_{i}_position"] = ""
+        
+    req.form_data = form_data 
+
+    # 2. Generate PDF
+    dynamic_template = db.query(models.DynamicTemplate).filter(models.DynamicTemplate.name == req.template_name).first()
+    pdf_template = db.query(models.PdfTemplate).filter(models.PdfTemplate.name == req.template_name).first()
+    
+    pdf_text_fields = []
+    if pdf_template and pdf_template.form_fields:
+        pdf_text_fields = [f for f in pdf_template.form_fields if f.get('type') == 'text']
+    
+    try:
+        layout = dynamic_template.layout if dynamic_template else None
+        pdf_url, signature_anchors = generate_pdf_logic(req.template_name, form_data, layout=layout, pdf_text_fields=pdf_text_fields)
+        req.current_pdf_url = pdf_url
+        if not req.original_pdf_url:
+            req.original_pdf_url = pdf_url # Keep original
+    except Exception as e:
+        print(f"PDF Prep Error: {e}")
+        # For submission it's critical. For draft, we try our best.
+        if req.status != "Draft":
+            raise HTTPException(status_code=500, detail=f"PDF Generation failed: {e}")
+
+    return all_steps
+
 # --- Document Request Workflow Endpoints ---
 
 @app.post("/requests", response_model=schemas.RequestResponse)
@@ -564,6 +641,14 @@ def create_draft(request: schemas.RequestCreate, db: Session = Depends(get_db)):
         status="Draft"
     )
     db.add(db_request)
+    
+    # Generate PDF preview even for Draft
+    try:
+        prepare_request_pdf(db, db_request)
+    except Exception as e:
+        print(f"Draft PDF generation warning: {e}")
+        # We don't crash the draft save if PDF gen fails, but we log it.
+
     db.commit()
     db.refresh(db_request)
     return db_request
@@ -621,6 +706,16 @@ def read_request(request_id: int, db: Session = Depends(get_db)):
     req = db.query(models.DocumentRequest).filter(models.DocumentRequest.id == request_id).first()
     if req is None:
         raise HTTPException(status_code=404, detail="Request not found")
+
+    # JIT PDF generation for old drafts if needed
+    if req.status == "Draft" and not req.current_pdf_url:
+        try:
+            prepare_request_pdf(db, req)
+            db.commit()
+            db.refresh(req)
+        except Exception as e:
+            print(f"JIT PDF generation warning: {e}")
+
     return req
 
 @app.post("/requests/archive")
@@ -718,64 +813,8 @@ def submit_request(request_id: int, db: Session = Depends(get_db)):
         if req.status != "Draft":
              raise HTTPException(status_code=400, detail=f"Cannot submit request in status: {req.status}")
 
-        # 1. Determine approvers from workflow (DB Logic)
-        db_workflow = db.query(models.Workflow).filter(
-            models.Workflow.department == req.department,
-            models.Workflow.doc_type == req.doc_type
-        ).first()
-
-        if db_workflow:
-            approvers = db_workflow.approvers
-            signers = db_workflow.signers
-        else:
-            # Fallback to file config
-            workflow_data = APPROVAL_FLOWS.get(req.department, {}).get(req.doc_type)
-            if not workflow_data:
-                 # Default fallback
-                 approvers = ["Manager"]
-                 signers = []
-            else:
-                 approvers = workflow_data.get("approvers", [])
-                 signers = workflow_data.get("signers", [])
-
-        all_steps = approvers + signers
-        
-        # Update form data to include approvers for template rendering
-        form_data = dict(req.form_data)
-        for idx, role in enumerate(all_steps):
-            # Look up user by role OR email (case-insensitive)
-            user = db.query(models.User).filter(
-                or_(
-                    models.User.role.ilike(role.strip()),
-                    models.User.email.ilike(role.strip())
-                )
-            ).first()
-            if user:
-                form_data[f"approver_{idx+1}_name"] = user.full_name
-                form_data[f"approver_{idx+1}_position"] = user.role
-            else:
-                # Fallback to the role name if no specific person is assigned
-                form_data[f"approver_{idx+1}_name"] = role 
-                form_data[f"approver_{idx+1}_position"] = role
-            
-        # Ensure we clear unused slots up to 5
-        for i in range(len(all_steps) + 1, 6):
-            form_data[f"approver_{i}_name"] = ""
-            form_data[f"approver_{i}_position"] = ""
-            
-        req.form_data = form_data # Save merged data back to DB
-
-        # 2. Generate PDF (Locking Content)
-        # Check if this is a dynamic template or a legacy DOCX one
-        dynamic_template = db.query(models.DynamicTemplate).filter(models.DynamicTemplate.name == req.template_name).first()
-        
-        try:
-            layout = dynamic_template.layout if dynamic_template else None
-            pdf_url, signature_anchors = generate_pdf_logic(req.template_name, form_data, layout=layout)
-            req.current_pdf_url = pdf_url
-            req.original_pdf_url = pdf_url # Keep original
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"PDF Generation failed: {e}")
+        # 1. & 2. Resolve workflow and Generate PDF
+        all_steps = prepare_request_pdf(db, req)
 
         # 3. Create Approval Steps
         for idx, role in enumerate(all_steps):
@@ -806,14 +845,28 @@ def submit_request(request_id: int, db: Session = Depends(get_db)):
             if target_email:
                 subject = f"Action Required: Approve {req.doc_type} Request #{req.id}"
                 content = f"""
-                <p>Hello,</p>
-                <p>A new document request requires your approval.</p>
-                <p><strong>Request ID:</strong> {req.id}</p>
-                <p><strong>Requester:</strong> {req.requester_name}</p>
-                <p><strong>Document:</strong> {req.doc_type}</p>
-                <p><a href="https://esign.berkeleyuae.com">Click here to view and sign</a></p>
-                <br>
-                <p>Thank you.</p>
+                <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+                    <div style="background-color: #003366; color: white; padding: 20px; text-align: center;">
+                        <h2 style="margin: 0; font-weight: 500;">Action Required: Document Approval</h2>
+                    </div>
+                    <div style="padding: 30px; background-color: #fcfcfc;">
+                        <p style="font-size: 16px; margin-top: 0;">Hello,</p>
+                        <p style="font-size: 15px; color: #555;">A new <strong>{req.doc_type}</strong> document request has been submitted and requires your review and approval.</p>
+                        
+                        <div style="background-color: #ffffff; border: 1px solid #eee; border-radius: 6px; padding: 15px; margin: 20px 0;">
+                            <p style="margin: 5px 0; font-size: 14px;"><strong>Request ID:</strong> #{req.id}</p>
+                            <p style="margin: 5px 0; font-size: 14px;"><strong>Requester:</strong> {req.requester_name}</p>
+                            <p style="margin: 5px 0; font-size: 14px;"><strong>Document Type:</strong> {req.doc_type}</p>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 30px;">
+                            <a href="https://esign.berkeleyuae.com" style="background-color: #0055a5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">View and Sign Document</a>
+                        </div>
+                    </div>
+                    <div style="background-color: #f4f4f4; padding: 15px; text-align: center; font-size: 12px; color: #888;">
+                        <p style="margin: 0;">This is an automated notification from the Esign Notifications. Please do not reply.</p>
+                    </div>
+                </div>
                 """
                 send_email_notification(db, target_email, subject, content, req.id)
             else:
@@ -931,60 +984,105 @@ def sign_approval(approval_id: int, payload: schemas.ApprovalSignRequest, db: Se
             
         page = doc[len(doc) - 1] # Sign last page
         
-        # Dynamic Signature Placement (Improved)
-        # Search for the signature placeholder lines
-        sig_line_text = "________________________"
-        all_lines = page.search_for(sig_line_text)
-        
-        # Search for the date placeholder lines
-        date_line_text = "__________"
-        all_date_lines = page.search_for(date_line_text)
-        
-        print(f"DEBUG: Found {len(all_lines)} signature lines and {len(all_date_lines)} date lines for step {approval.step_number}")
-        
-        if len(all_lines) >= approval.step_number:
-            # Use the specific line for this step
-            line_rect = all_lines[approval.step_number - 1]
-            
-            # Place signature box directly above the line
-            x0 = line_rect.x0
-            x1 = line_rect.x1
-            y1 = line_rect.y0 - 2  # 2pt gap above line
-            y0 = y1 - 30           # 30pt height
-            
-            rect = fitz.Rect(x0, y0, x1, y1)
-            print(f"DEBUG: Placing signature at {rect}")
-            
-            # Date Insertion Logic
-            if len(all_date_lines) >= approval.step_number:
-                date_rect = all_date_lines[approval.step_number - 1]
-                # Insert date text centered above/on the line
-                date_str = datetime.now().strftime("%Y-%m-%d")
-                
-                # Calculate position: Center of line, slightly above
-                text_x = date_rect.x0 + 2 # slight padding
-                text_y = date_rect.y1 - 4 # slightly above baseline
-                
-                # Insert Text
-                page.insert_text((text_x, text_y), date_str, fontsize=9, color=(0, 0, 0))
-                print(f"DEBUG: Inserted date '{date_str}' at {text_x},{text_y}")
+        # --- Signature/Field Placement Logic ---
+        pdf_template = db.query(models.PdfTemplate).filter(models.PdfTemplate.name == req.template_name).first()
+        fields_placed = 0
 
-        else:
-            # Fallback to the previous "search for header" logic if lines not found
-            header_rects = page.search_for("Signature") # Changed from "Signature & Date"
-            if header_rects:
-                header_rect = header_rects[-1]
-                # If we couldn't find lines, the table might have shifted.
-                # Estimate position 40pts below header per step
-                y_offset = approval.step_number * 35 # approx row height
-                rect = fitz.Rect(header_rect.x0, header_rect.y1 + y_offset - 30, header_rect.x0 + 120, header_rect.y1 + y_offset - 2)
+        if pdf_template and pdf_template.form_fields:
+            target_role = (approval.role or "").strip().lower()
+            for f in pdf_template.form_fields:
+                if (f.get('assignee') or "").strip().lower() == target_role:
+                    page_idx = f.get('page', 1) - 1
+                    if page_idx >= len(doc): continue
+                    p_rect = doc[page_idx].rect
+                    x0, y0 = (f['x'] / 100) * p_rect.width, (f['y'] / 100) * p_rect.height
+                    x1, y1 = ((f['x'] + f['width']) / 100) * p_rect.width, ((f['y'] + f['height']) / 100) * p_rect.height
+                    ftype = f.get('type', 'signature')
+                    rect = fitz.Rect(x0, y0, x1, y1)
+                    if ftype == 'date':
+                        date_str = datetime.now().strftime("%Y-%m-%d")
+                        for fs in range(12, 4, -1):
+                            r = fitz.Rect(rect)
+                            text_h = fs * 1.2
+                            if r.height > text_h: r.y0 += (r.height - text_h) / 2
+                            if doc[page_idx].insert_textbox(r, date_str, fontsize=fs, align=1) >= 0: break
+                    elif ftype == 'name':
+                        signer_name = signer.full_name if signer else (f.get('assignee') or target_role)
+                        signer_text = f"{signer_name}\n({signer.job_position})" if signer and getattr(signer, 'job_position', None) else signer_name
+                        lines = signer_text.count('\n') + 1
+                        for fs in range(12, 4, -1):
+                            r = fitz.Rect(rect)
+                            text_h = fs * 1.2 * lines
+                            if r.height > text_h: r.y0 += (r.height - text_h) / 2
+                            if doc[page_idx].insert_textbox(r, signer_text, fontsize=fs, align=1) >= 0: break
+                    elif ftype != 'text':
+                        # Signature or Initial
+                        
+                        # Pad the signature box slightly to look nicely centered
+                        pad = min(rect.width, rect.height) * 0.1
+                        r = rect + fitz.Rect(pad, pad, -pad, -pad)
+                        doc[page_idx].insert_image(r, stream=sig_bytes)
+                    
+                    fields_placed += 1
+            if fields_placed > 0: print(f"DEBUG: Placed {fields_placed} coordinate fields for {approval.role}")
+
+        # Fallback: Underscore/Header Search logic
+        if fields_placed == 0:
+            page = doc[len(doc) - 1] # Sign last page
+            # Dynamic Signature Placement (Improved)
+            # Search for the signature placeholder lines
+            sig_line_text = "________________________"
+            all_lines = page.search_for(sig_line_text)
+            
+            # Search for the date placeholder lines
+            date_line_text = "__________"
+            all_date_lines = page.search_for(date_line_text)
+            
+            print(f"DEBUG: Found {len(all_lines)} signature lines and {len(all_date_lines)} date lines for step {approval.step_number}")
+            
+            if len(all_lines) >= approval.step_number:
+                # Use the specific line for this step
+                line_rect = all_lines[approval.step_number - 1]
+                
+                # Place signature box directly above the line
+                x0 = line_rect.x0
+                x1 = line_rect.x1
+                y1 = line_rect.y0 - 2  # 2pt gap above line
+                y0 = y1 - 30           # 30pt height
+                
+                rect = fitz.Rect(x0, y0, x1, y1)
+                print(f"DEBUG: Placing signature at {rect}")
+                
+                # Date Insertion Logic
+                if len(all_date_lines) >= approval.step_number:
+                    date_rect = all_date_lines[approval.step_number - 1]
+                    # Insert date text centered above/on the line
+                    date_str = datetime.now().strftime("%Y-%m-%d")
+                    
+                    # Calculate position: Center of line, slightly above
+                    text_x = date_rect.x0 + 2 # slight padding
+                    text_y = date_rect.y1 - 4 # slightly above baseline
+                    
+                    # Insert Text
+                    page.insert_text((text_x, text_y), date_str, fontsize=9, color=(0, 0, 0))
+                    print(f"DEBUG: Inserted date '{date_str}' at {text_x},{text_y}")
+
             else:
-                # Absolute fallback
-                rect = fitz.Rect(450, 650, 570, 700)
-            print(f"DEBUG: Falling back to rect {rect}")
+                # Fallback to the previous "search for header" logic if lines not found
+                header_rects = page.search_for("Signature") # Changed from "Signature & Date"
+                if header_rects:
+                    header_rect = header_rects[-1]
+                    # If we couldn't find lines, the table might have shifted.
+                    # Estimate position 40pts below header per step
+                    y_offset = approval.step_number * 35 # approx row height
+                    rect = fitz.Rect(header_rect.x0, header_rect.y1 + y_offset - 30, header_rect.x0 + 120, header_rect.y1 + y_offset - 2)
+                else:
+                    # Absolute fallback
+                    rect = fitz.Rect(450, 650, 570, 700)
+                print(f"DEBUG: Falling back to rect {rect}")
 
-        # Insert signature image
-        page.insert_image(rect, stream=sig_bytes)
+            page.insert_image(rect, stream=sig_bytes)
+            print(f"DEBUG: Placed fallback signature at {rect}")
         
         # Save to bytes
         out_buffer = io.BytesIO()
@@ -1045,11 +1143,28 @@ def sign_approval(approval_id: int, payload: schemas.ApprovalSignRequest, db: Se
                 if target_email:
                     subject = f"Action Required: Approve {req.doc_type} Request #{req.id}"
                     content = f"""
-                    <p>Hello,</p>
-                    <p>Step {approval.step_number} is complete. Your approval is required for step {next_step.step_number}.</p>
-                    <p><strong>Request ID:</strong> {req.id}</p>
-                    <p><strong>Requester:</strong> {req.requester_name}</p>
-                    <p><a href="https://esign.berkeleyuae.com">Click here to view and sign</a></p>
+                    <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+                        <div style="background-color: #003366; color: white; padding: 20px; text-align: center;">
+                            <h2 style="margin: 0; font-weight: 500;">Action Required: Document Approval</h2>
+                        </div>
+                        <div style="padding: 30px; background-color: #fcfcfc;">
+                            <p style="font-size: 16px; margin-top: 0;">Hello,</p>
+                            <p style="font-size: 15px; color: #555;">Step {approval.step_number} is complete. Your approval is now required for step {next_step.step_number} of this request.</p>
+                            
+                            <div style="background-color: #ffffff; border: 1px solid #eee; border-radius: 6px; padding: 15px; margin: 20px 0;">
+                                <p style="margin: 5px 0; font-size: 14px;"><strong>Request ID:</strong> #{req.id}</p>
+                                <p style="margin: 5px 0; font-size: 14px;"><strong>Requester:</strong> {req.requester_name}</p>
+                                <p style="margin: 5px 0; font-size: 14px;"><strong>Document Type:</strong> {req.doc_type}</p>
+                            </div>
+                            
+                            <div style="text-align: center; margin-top: 30px;">
+                                <a href="https://esign.berkeleyuae.com" style="background-color: #0055a5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">View and Sign Document</a>
+                            </div>
+                        </div>
+                        <div style="background-color: #f4f4f4; padding: 15px; text-align: center; font-size: 12px; color: #888;">
+                            <p style="margin: 0;">This is an automated notification from the Esign Notifications. Please do not reply.</p>
+                        </div>
+                    </div>
                     """
                     send_email_notification(db, target_email, subject, content, req.id)
             except Exception as e:
@@ -1109,7 +1224,7 @@ def _fill_pdf_placeholders(doc, context: dict):
         
         page.apply_redactions()
 
-def generate_pdf_logic(template_name: str, context: dict, layout: list = None):
+def generate_pdf_logic(template_name: str, context: dict, layout: list = None, pdf_text_fields: list = None):
     """
     Core logic to generate PDF from DOCX or dynamic layout.
     """
@@ -1150,6 +1265,21 @@ def generate_pdf_logic(template_name: str, context: dict, layout: list = None):
             
             # Fill placeholders
             _fill_pdf_placeholders(doc, context)
+            
+            # Fill configured text fields from PdfAnnotator
+            if pdf_text_fields:
+                for f in pdf_text_fields:
+                    assignee = f.get('assignee', '')
+                    val = str(context.get(assignee, ''))
+                    page_idx = f.get('page', 1) - 1
+                    if page_idx >= len(doc): continue
+                    
+                    p_rect = doc[page_idx].rect
+                    x0, y0 = (f['x'] / 100) * p_rect.width, (f['y'] / 100) * p_rect.height
+                    x1, y1 = ((f['x'] + f['width']) / 100) * p_rect.width, ((f['y'] + f['height']) / 100) * p_rect.height
+                    
+                    rect = fitz.Rect(x0, y0, x1, y1)
+                    doc[page_idx].insert_textbox(rect, val, fontsize=11, fontname="helv", color=(0, 0, 0), align=0)
             
             doc.save(tmp_pdf_path)
         else:

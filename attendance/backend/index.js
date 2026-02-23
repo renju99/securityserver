@@ -5,6 +5,8 @@ const cors = require('cors');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const rateLimit = require('express-rate-limit');
+const cron = require('node-cron');
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
@@ -19,6 +21,63 @@ const io = new Server(server, {
         methods: ["GET", "POST"]
     }
 });
+
+// Trust the Nginx reverse proxy so rate limiting uses the real client IP
+app.set('trust proxy', 1);
+
+// ── Rate Limiters ───────────────────────────────────────────────────────────
+
+// 1. Auth limiter — strict: 10 attempts per 15 minutes per IP
+//    Prevents brute-force attacks on /auth/login
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many login attempts. Please try again in 15 minutes.' },
+    handler: (req, res, next, options) => {
+        console.warn(`[RATE LIMIT] Auth blocked: IP=${req.ip} after ${options.max} attempts`);
+        res.status(429).json(options.message);
+    }
+});
+
+// 2. Location update limiter — 120 requests per minute per IP
+//    Allows frequent GPS pings while blocking floods
+const locationLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 120,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Location update rate limit exceeded. Maximum 2 updates per second.' },
+    handler: (req, res, next, options) => {
+        console.warn(`[RATE LIMIT] Location flood blocked: IP=${req.ip}`);
+        res.status(429).json(options.message);
+    }
+});
+
+// 3. General HR API limiter — 300 requests per minute per IP
+//    Protects all /hr/* endpoints from scraping or abuse
+const apiLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 300,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'API rate limit exceeded. Please slow down.' },
+    handler: (req, res, next, options) => {
+        console.warn(`[RATE LIMIT] API abuse blocked: IP=${req.ip} on ${req.path}`);
+        res.status(429).json(options.message);
+    },
+    skip: (req) => {
+        // Skip rate limiting for internal health checks
+        return req.path === '/';
+    }
+});
+
+// Apply general API limiter to all HR routes up-front
+// Individual limiters override this for specific routes below
+app.use('/hr/', apiLimiter);
+
+// ────────────────────────────────────────────────────────────────────────────
 
 // Database pool
 const pool = new Pool({
@@ -136,6 +195,10 @@ const runMigrations = async () => {
             ON CONFLICT (name) DO NOTHING;
         `);
 
+        // 6. Attendance: notes + auto_closed flag (idempotent)
+        await pool.query(`ALTER TABLE attendance ADD COLUMN IF NOT EXISTS notes TEXT`);
+        await pool.query(`ALTER TABLE attendance ADD COLUMN IF NOT EXISTS auto_closed BOOLEAN DEFAULT false`);
+
         console.log('Migrations: Schema updated for Shifts & Geo-Fencing.');
     } catch (err) {
         console.error('Migration error:', err);
@@ -145,6 +208,174 @@ const runMigrations = async () => {
 // Run Seeding and Migration on startup
 seedPermissions();
 runMigrations();
+
+// ── Scheduled Cleanup Jobs (node-cron) ─────────────────────────────────────────────────
+
+const DATA_RETENTION_DAYS = parseInt(process.env.DATA_RETENTION_DAYS || '180');
+
+/**
+ * Daily Cleanup Job — runs every day at 02:00 AM server time
+ * Deletes live_logs and geo_fence_alerts older than DATA_RETENTION_DAYS (default 90).
+ */
+cron.schedule('0 2 * * *', async () => {
+    const started = Date.now();
+    console.log(`[CLEANUP] Starting daily data cleanup (retention: ${DATA_RETENTION_DAYS} days)...`);
+    try {
+        // 1. Prune live_logs
+        const logsResult = await pool.query(
+            `DELETE FROM live_logs WHERE timestamp < NOW() - INTERVAL '${DATA_RETENTION_DAYS} days'`
+        );
+        console.log(`[CLEANUP] live_logs: deleted ${logsResult.rowCount} rows.`);
+
+        // 2. Prune geo_fence_alerts (resolved ones older than retention; keep active regardless)
+        const alertsResult = await pool.query(
+            `DELETE FROM geo_fence_alerts
+             WHERE created_at < NOW() - INTERVAL '${DATA_RETENTION_DAYS} days'
+               AND status = 'resolved'`
+        );
+        console.log(`[CLEANUP] geo_fence_alerts (resolved): deleted ${alertsResult.rowCount} rows.`);
+
+        const elapsed = ((Date.now() - started) / 1000).toFixed(2);
+        console.log(`[CLEANUP] Daily cleanup completed in ${elapsed}s.`);
+    } catch (err) {
+        console.error('[CLEANUP] Daily cleanup error:', err.message);
+    }
+}, {
+    timezone: 'Asia/Dubai'  // UTC+4 — adjust if needed
+});
+
+/**
+ * Weekly VACUUM Job — runs every Sunday at 03:00 AM
+ * Reclaims disk space from deleted rows. VACUUM ANALYZE also updates
+ * query planner statistics so queries stay fast after bulk deletes.
+ */
+cron.schedule('0 3 * * 0', async () => {
+    console.log('[CLEANUP] Starting weekly VACUUM ANALYZE...');
+    try {
+        // VACUUM cannot run inside a transaction, pool.query runs outside one by default
+        await pool.query('VACUUM ANALYZE live_logs');
+        await pool.query('VACUUM ANALYZE geo_fence_alerts');
+        console.log('[CLEANUP] VACUUM ANALYZE completed.');
+    } catch (err) {
+        console.error('[CLEANUP] VACUUM error:', err.message);
+    }
+}, {
+    timezone: 'Asia/Dubai'
+});
+
+console.log(`[CLEANUP] Scheduled: daily pruning at 02:00, weekly VACUUM at Sunday 03:00 (Asia/Dubai). Retention: ${DATA_RETENTION_DAYS} days.`);
+
+// ── Auto Check-Out Cron Job ─────────────────────────────────────────────────
+//
+// Runs every 30 minutes. Finds open attendance records where:
+//  (a) Employee HAS a shift  → auto-close if NOW > shift_end + 2 hours
+//  (b) Employee has NO shift → auto-close if check_in_time is > 10 hours ago
+// Sets check_out_time, marks auto_closed=true, writes a note, and emits
+// a real-time socket event to the HR dashboard.
+
+const AUTO_CHECKOUT_GRACE_HOURS = parseInt(process.env.AUTO_CHECKOUT_GRACE_HOURS || '2');
+const AUTO_CHECKOUT_NO_SHIFT_HOURS = parseInt(process.env.AUTO_CHECKOUT_NO_SHIFT_HOURS || '10');
+
+const runAutoCheckout = async () => {
+    const started = Date.now();
+    try {
+        // Find all open attendance records, joined with shift info
+        const openRecords = await pool.query(`
+            SELECT
+                a.id          AS attendance_id,
+                a.check_in_time,
+                a.employee_id,
+                a.site_id,
+                e.staff_id,
+                e.first_name,
+                e.last_name,
+                sh.name       AS shift_name,
+                sh.end_time   AS shift_end_time
+            FROM attendance a
+            JOIN employees e ON a.employee_id = e.id
+            LEFT JOIN shifts sh ON e.shift_id = sh.id
+            WHERE a.check_out_time IS NULL
+        `);
+
+        if (openRecords.rows.length === 0) return;
+
+        const now = new Date();
+        const toClose = [];
+
+        for (const row of openRecords.rows) {
+            let shouldClose = false;
+            let reason = '';
+
+            if (row.shift_end_time) {
+                // Build today's shift-end datetime (handle overnight shifts)
+                const [endHour, endMin] = row.shift_end_time.split(':').map(Number);
+                const checkInDate = new Date(row.check_in_time);
+
+                // Start from check-in date so overnight shifts resolve correctly
+                const shiftEnd = new Date(checkInDate);
+                shiftEnd.setHours(endHour, endMin, 0, 0);
+
+                // If shift end is before check-in (overnight), push to next day
+                if (shiftEnd <= checkInDate) shiftEnd.setDate(shiftEnd.getDate() + 1);
+
+                const cutoff = new Date(shiftEnd.getTime() + AUTO_CHECKOUT_GRACE_HOURS * 60 * 60 * 1000);
+
+                if (now >= cutoff) {
+                    shouldClose = true;
+                    reason = `Auto closed: shift ended at ${row.shift_end_time} (${row.shift_name}), grace period of ${AUTO_CHECKOUT_GRACE_HOURS}h exceeded.`;
+                }
+            } else {
+                // No shift assigned — use max check-in duration
+                const checkInAge = (now - new Date(row.check_in_time)) / 3600000; // hours
+                if (checkInAge >= AUTO_CHECKOUT_NO_SHIFT_HOURS) {
+                    shouldClose = true;
+                    reason = `Auto closed: no shift assigned and check-in was ${checkInAge.toFixed(1)}h ago (limit: ${AUTO_CHECKOUT_NO_SHIFT_HOURS}h).`;
+                }
+            }
+
+            if (shouldClose) toClose.push({ ...row, reason });
+        }
+
+        if (toClose.length === 0) return;
+
+        console.log(`[AUTO-CHECKOUT] Closing ${toClose.length} open record(s)...`);
+
+        for (const record of toClose) {
+            await pool.query(
+                `UPDATE attendance
+                 SET check_out_time = NOW(),
+                     auto_closed    = true,
+                     notes          = $1
+                 WHERE id = $2 AND check_out_time IS NULL`,
+                [record.reason, record.attendance_id]
+            );
+
+            console.log(`[AUTO-CHECKOUT] Closed attendance #${record.attendance_id} for ${record.staff_id}: ${record.reason}`);
+
+            // Notify HR dashboard in real time
+            io.to('hr-dashboard').emit('auto_checkout', {
+                attendanceId: record.attendance_id,
+                staffId: record.staff_id,
+                name: [record.first_name, record.last_name].filter(Boolean).join(' '),
+                siteId: record.site_id,
+                checkInTime: record.check_in_time,
+                checkOutTime: new Date().toISOString(),
+                reason: record.reason
+            });
+        }
+
+        const elapsed = ((Date.now() - started) / 1000).toFixed(2);
+        console.log(`[AUTO-CHECKOUT] Done. Closed ${toClose.length} record(s) in ${elapsed}s.`);
+    } catch (err) {
+        console.error('[AUTO-CHECKOUT] Error:', err.message);
+    }
+};
+
+// Run every 30 minutes
+cron.schedule('*/30 * * * *', runAutoCheckout, { timezone: 'Asia/Dubai' });
+console.log(`[AUTO-CHECKOUT] Scheduled every 30 min. Grace: ${AUTO_CHECKOUT_GRACE_HOURS}h after shift end. No-shift limit: ${AUTO_CHECKOUT_NO_SHIFT_HOURS}h.`);
+
+// ────────────────────────────────────────────────────────────────────────────
 
 app.use(cors());
 // Configure body parser for larger payloads (photos)
@@ -250,7 +481,7 @@ const authorizeRole = (roles) => {
 };
 
 // Auth Route: Login
-app.post('/auth/login', async (req, res) => {
+app.post('/auth/login', authLimiter, async (req, res) => {
     if (!req.body) { return res.status(400).json({ error: 'Missing request body' }); }
     const { staffId, password } = req.body;
     try {
@@ -415,7 +646,134 @@ app.get('/hr/attendance', authenticateToken, authorizeRole(['HR Admin', 'Site Su
     }
 });
 
+// HR API: Manual Check-In (supervisor logs check-in for an employee)
+app.post('/hr/attendance/manual-checkin', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
+    const { staffId, checkInTime, siteId, notes } = req.body;
+    if (!staffId || !checkInTime) {
+        return res.status(400).json({ error: 'staffId and checkInTime are required.' });
+    }
+    try {
+        // Resolve employee
+        const empResult = await pool.query(
+            `SELECT e.id, e.first_name, e.last_name, e.site_id
+             FROM employees e WHERE e.staff_id = $1`, [staffId]
+        );
+        if (empResult.rows.length === 0) return res.status(404).json({ error: 'Employee not found.' });
+        const emp = empResult.rows[0];
+
+        // Supervisors can only act on their own site's employees
+        if (req.user.role === 'Site Supervisor' && emp.site_id !== req.user.siteId) {
+            return res.status(403).json({ error: 'You can only check in employees from your site.' });
+        }
+
+        // Prevent duplicate open record on same day
+        const existingOpen = await pool.query(
+            `SELECT id FROM attendance
+             WHERE employee_id = $1 AND check_out_time IS NULL
+               AND DATE(check_in_time) = DATE($2)`,
+            [emp.id, checkInTime]
+        );
+        if (existingOpen.rows.length > 0) {
+            return res.status(409).json({ error: 'This employee already has an open check-in for that date. Please check out first.' });
+        }
+
+        const resolvedSiteId = siteId || emp.site_id;
+        const noteText = `Manually logged by ${req.user.staffId} via HR Dashboard. ${notes || ''}`.trim();
+
+        const result = await pool.query(
+            `INSERT INTO attendance (employee_id, check_in_time, site_id, notes)
+             VALUES ($1, $2, $3, $4) RETURNING *`,
+            [emp.id, checkInTime, resolvedSiteId, noteText]
+        );
+        const record = result.rows[0];
+
+        // Emit real-time event to dashboard
+        io.to('hr-dashboard').emit('attendance_event', {
+            type: 'manual_check_in',
+            staffId,
+            name: [emp.first_name, emp.last_name].filter(Boolean).join(' '),
+            siteId: resolvedSiteId,
+            checkInTime,
+            loggedBy: req.user.staffId
+        });
+
+        console.log(`[MANUAL] Check-in: ${staffId} at ${checkInTime} logged by ${req.user.staffId}`);
+        res.status(201).json({ success: true, record });
+    } catch (err) {
+        console.error('Manual check-in error:', err);
+        res.status(500).json({ error: 'Database error', message: err.message });
+    }
+});
+
+// HR API: Manual Check-Out (supervisor logs check-out for an employee)
+app.post('/hr/attendance/manual-checkout', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
+    const { staffId, checkOutTime, attendanceId, notes } = req.body;
+    if (!staffId || !checkOutTime) {
+        return res.status(400).json({ error: 'staffId and checkOutTime are required.' });
+    }
+    try {
+        // Resolve employee
+        const empResult = await pool.query(
+            `SELECT e.id, e.site_id FROM employees e WHERE e.staff_id = $1`, [staffId]
+        );
+        if (empResult.rows.length === 0) return res.status(404).json({ error: 'Employee not found.' });
+        const emp = empResult.rows[0];
+
+        if (req.user.role === 'Site Supervisor' && emp.site_id !== req.user.siteId) {
+            return res.status(403).json({ error: 'You can only check out employees from your site.' });
+        }
+
+        // Find the open record to close — use specific ID if provided
+        let openRecord;
+        if (attendanceId) {
+            const r = await pool.query(
+                `SELECT id FROM attendance WHERE id = $1 AND employee_id = $2 AND check_out_time IS NULL`,
+                [attendanceId, emp.id]
+            );
+            openRecord = r.rows[0];
+        } else {
+            // Close the most recent open record
+            const r = await pool.query(
+                `SELECT id FROM attendance
+                 WHERE employee_id = $1 AND check_out_time IS NULL
+                 ORDER BY check_in_time DESC LIMIT 1`,
+                [emp.id]
+            );
+            openRecord = r.rows[0];
+        }
+
+        if (!openRecord) {
+            return res.status(404).json({ error: 'No open check-in record found for this employee.' });
+        }
+
+        const noteText = `Manually logged by ${req.user.staffId} via HR Dashboard. ${notes || ''}`.trim();
+
+        const result = await pool.query(
+            `UPDATE attendance
+             SET check_out_time = $1, notes = COALESCE(notes || ' | ', '') || $2
+             WHERE id = $3 RETURNING *`,
+            [checkOutTime, noteText, openRecord.id]
+        );
+
+        const record = result.rows[0];
+
+        io.to('hr-dashboard').emit('attendance_event', {
+            type: 'manual_check_out',
+            staffId,
+            checkOutTime,
+            loggedBy: req.user.staffId
+        });
+
+        console.log(`[MANUAL] Check-out: ${staffId} at ${checkOutTime} logged by ${req.user.staffId}`);
+        res.json({ success: true, record });
+    } catch (err) {
+        console.error('Manual check-out error:', err);
+        res.status(500).json({ error: 'Database error', message: err.message });
+    }
+});
+
 // HR API: Get attendance report data
+
 app.get('/hr/reports/attendance', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
     const { startDate, endDate, roleId, siteId, department } = req.query;
 
@@ -726,7 +1084,142 @@ app.post('/hr/users', authenticateToken, authorizeRole(['HR Admin']), async (req
     }
 });
 
+// HR Admin: Data Cleanup Stats
+app.get('/hr/admin/cleanup-stats', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
+    try {
+        const [logsCount, logsOldest, alertsCount, alertsOldest, logsSize] = await Promise.all([
+            pool.query('SELECT COUNT(*) FROM live_logs'),
+            pool.query('SELECT MIN(timestamp) as oldest FROM live_logs'),
+            pool.query('SELECT COUNT(*) FROM geo_fence_alerts'),
+            pool.query('SELECT MIN(created_at) as oldest FROM geo_fence_alerts'),
+            pool.query(`SELECT pg_size_pretty(pg_total_relation_size('live_logs')) as size`)
+        ]);
+
+        res.json({
+            retentionDays: DATA_RETENTION_DAYS,
+            nextCleanup: 'Daily at 02:00 Asia/Dubai',
+            live_logs: {
+                totalRows: parseInt(logsCount.rows[0].count),
+                oldestRecord: logsOldest.rows[0].oldest,
+                tableSize: logsSize.rows[0].size
+            },
+            geo_fence_alerts: {
+                totalRows: parseInt(alertsCount.rows[0].count),
+                oldestRecord: alertsOldest.rows[0].oldest
+            }
+        });
+    } catch (err) {
+        console.error('Cleanup stats error:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// HR Admin: Manually trigger data cleanup (on-demand)
+app.post('/hr/admin/run-cleanup', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
+    const started = Date.now();
+    try {
+        const retentionDays = req.body.retentionDays || DATA_RETENTION_DAYS;
+        console.log(`[CLEANUP] Manual cleanup triggered by ${req.user.staffId}. Retention: ${retentionDays} days.`);
+
+        const logsResult = await pool.query(
+            `DELETE FROM live_logs WHERE timestamp < NOW() - INTERVAL '${parseInt(retentionDays)} days'`
+        );
+        const alertsResult = await pool.query(
+            `DELETE FROM geo_fence_alerts
+             WHERE created_at < NOW() - INTERVAL '${parseInt(retentionDays)} days'
+               AND status = 'resolved'`
+        );
+
+        const elapsed = ((Date.now() - started) / 1000).toFixed(2);
+        console.log(`[CLEANUP] Manual cleanup done in ${elapsed}s: live_logs=${logsResult.rowCount}, alerts=${alertsResult.rowCount}`);
+
+        res.json({
+            success: true,
+            deleted: {
+                live_logs: logsResult.rowCount,
+                geo_fence_alerts: alertsResult.rowCount
+            },
+            retentionDays,
+            elapsed: `${elapsed}s`
+        });
+    } catch (err) {
+        console.error('[CLEANUP] Manual cleanup error:', err);
+        res.status(500).json({ error: 'Cleanup failed', message: err.message });
+    }
+});
+
+// HR Admin: View Auto-Closed attendance records
+app.get('/hr/admin/auto-closed', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
+    try {
+        const { siteId, startDate, endDate, page = 1, limit = 50 } = req.query;
+        const offset = (parseInt(page) - 1) * parseInt(limit);
+        const params = [];
+        const conditions = [`a.auto_closed = true`];
+
+        // Supervisors can only see their own site
+        if (req.user.role === 'Site Supervisor') {
+            params.push(req.user.siteId);
+            conditions.push(`a.site_id = $${params.length}`);
+        } else if (siteId) {
+            params.push(siteId);
+            conditions.push(`a.site_id = $${params.length}`);
+        }
+        if (startDate) {
+            params.push(startDate);
+            conditions.push(`a.check_in_time >= $${params.length}`);
+        }
+        if (endDate) {
+            params.push(endDate + 'T23:59:59');
+            conditions.push(`a.check_in_time <= $${params.length}`);
+        }
+
+        const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+
+        const countResult = await pool.query(
+            `SELECT COUNT(*) FROM attendance a ${whereClause}`, params
+        );
+        const total = parseInt(countResult.rows[0].count);
+
+        params.push(parseInt(limit), offset);
+        const result = await pool.query(
+            `SELECT
+                a.id, a.check_in_time, a.check_out_time, a.notes, a.auto_closed,
+                e.staff_id, e.first_name, e.last_name,
+                s.name as site_name,
+                sh.name as shift_name
+             FROM attendance a
+             JOIN employees e ON a.employee_id = e.id
+             LEFT JOIN sites s ON a.site_id = s.id
+             LEFT JOIN shifts sh ON e.shift_id = sh.id
+             ${whereClause}
+             ORDER BY a.check_in_time DESC
+             LIMIT $${params.length - 1} OFFSET $${params.length}`,
+            params
+        );
+
+        res.json({
+            records: result.rows,
+            total,
+            page: parseInt(page),
+            totalPages: Math.ceil(total / parseInt(limit))
+        });
+    } catch (err) {
+        console.error('Auto-closed query error:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// HR Admin: Manually trigger auto-checkout job now
+app.post('/hr/admin/auto-checkout/run', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
+    console.log(`[AUTO-CHECKOUT] Manual run triggered by ${req.user.staffId}`);
+    // Run async — respond immediately then process
+    res.json({ success: true, message: 'Auto-checkout job started. Check logs for results.' });
+    runAutoCheckout();
+});
+
 // HR API: Get all shifts
+
+
 app.get('/hr/shifts', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM shifts ORDER BY name ASC');
@@ -860,7 +1353,24 @@ app.patch('/hr/alerts/:id/resolve', authenticateToken, authorizeRole(['HR Admin'
     }
 });
 
-// HR API: Get Location Logs (live_logs) with filtering and pagination
+// HR API: Bulk resolve geo-fence alerts
+app.patch('/hr/alerts/bulk-resolve', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ error: 'Provide an array of alert IDs' });
+    }
+    try {
+        const result = await pool.query(
+            `UPDATE geo_fence_alerts SET status = 'resolved' WHERE id = ANY($1) RETURNING *`,
+            [ids]
+        );
+        res.json({ message: `${result.rowCount} alert(s) resolved`, resolved: result.rows });
+    } catch (err) {
+        console.error('Bulk resolve error:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
 app.get('/hr/location-logs', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
     const { staffId, startDate, endDate, page = 1, limit = 100 } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
@@ -1166,7 +1676,7 @@ app.get('/attendance/status', authenticateToken, async (req, res) => {
  * This endpoint handles background pings from the Android App.
  */
 // Location update
-app.post('/location/update', authenticateToken, async (req, res) => {
+app.post('/location/update', locationLimiter, authenticateToken, async (req, res) => {
     try {
         const { lat, lng, hw_id, ts } = req.body;
         const employeeId = req.user.staffId; // From JWT

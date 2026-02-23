@@ -417,10 +417,19 @@ const HRDashboard = () => {
             setGeoFenceAlerts(prev => [data, ...prev]);
         });
 
+        socket.on('auto_checkout', (data) => {
+            console.warn('[AUTO-CHECKOUT] Event received:', data);
+            showToast(
+                `🕐 Auto Check-Out: ${data.name || data.staffId} was automatically checked out. ${data.reason}`,
+                'warning'
+            );
+        });
+
         return () => {
             socket.off('employee_location');
             socket.off('attendance_event');
             socket.off('geo_fence_alert');
+            socket.off('auto_checkout');
         };
     }, [user]);
 
@@ -1599,118 +1608,16 @@ const HRDashboard = () => {
                             </div>
                         </div>
                     ) : activeTab === 'attendance' ? (
-                        <div className="logs-container">
-                            <div className="logs-card">
-                                <div className="logs-header">
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                        <h2>🕒 Live Attendance Logs</h2>
-                                        <div className="logs-search-wrapper">
-                                            <svg className="search-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <circle cx="11" cy="11" r="8"></circle>
-                                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                                            </svg>
-                                            <input
-                                                type="text"
-                                                placeholder="Filter logs by Name or ID..."
-                                                className="logs-search-input"
-                                                value={logSearch}
-                                                onChange={(e) => setLogSearch(e.target.value)}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <button className="btn-secondary" onClick={() => {
-                                            fetch('/api/hr/attendance', { headers: { 'Authorization': `Bearer ${user.token}` } })
-                                                .then(res => res.json())
-                                                .then(setAttendanceLogs);
-                                            showToast('Logs refreshed', 'info');
-                                        }}>
-                                            🔄 Refresh Data
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="logs-table-container">
-                                    <table className="mgmt-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Staff Member</th>
-                                                <th>Check In</th>
-                                                <th>Check Out</th>
-                                                <th>Site Location</th>
-                                                <th style={{ textAlign: 'center' }}>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {attendanceLogs
-                                                .filter(log => {
-                                                    const name = `${log.first_name || ''} ${log.last_name || ''}`.toLowerCase();
-                                                    const sId = (log.staff_id || '').toLowerCase();
-                                                    const query = logSearch.toLowerCase();
-                                                    return name.includes(query) || sId.includes(query);
-                                                })
-                                                .map((log, i) => {
-                                                    const hasCheckOut = !!log.check_out_time;
-                                                    const checkIn = new Date(log.check_in_time);
-                                                    const checkOut = hasCheckOut ? new Date(log.check_out_time) : null;
-
-                                                    return (
-                                                        <tr key={log.id || i} className={log.is_live ? 'live-row' : ''}>
-                                                            <td>
-                                                                <div className="staff-info-cell">
-                                                                    <div className="staff-avatar-mini">
-                                                                        {(log.first_name || log.staff_id || '?')[0].toUpperCase()}
-                                                                    </div>
-                                                                    <div>
-                                                                        <div style={{ fontWeight: 600, color: '#1e293b' }}>
-                                                                            {log.first_name || log.last_name ? `${log.first_name || ''} ${log.last_name || ''}`.trim() : 'Unnamed Employee'}
-                                                                        </div>
-                                                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{log.staff_id}</div>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <div className="time-display">
-                                                                    <span className="date">{checkIn.toLocaleDateString()}</span>
-                                                                    <span className="time">{checkIn.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                {hasCheckOut ? (
-                                                                    <div className="time-display">
-                                                                        <span className="date">{checkOut.toLocaleDateString()}</span>
-                                                                        <span className="time">{checkOut.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                                                    </div>
-                                                                ) : (
-                                                                    <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>--:--</span>
-                                                                )}
-                                                            </td>
-                                                            <td>
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                                    <span style={{ fontSize: '0.9rem' }}>📍</span>
-                                                                    <span>{log.site_name || 'Generic Site'}</span>
-                                                                </div>
-                                                            </td>
-                                                            <td style={{ textAlign: 'center' }}>
-                                                                <span className={`status-badge-pill ${hasCheckOut ? 'completed' : 'active'}`}>
-                                                                    {hasCheckOut ? 'Completed' : 'Active Now'}
-                                                                </span>
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            {attendanceLogs.length === 0 && (
-                                                <tr>
-                                                    <td colSpan="5" style={{ textAlign: 'center', padding: '4rem', color: '#94a3b8' }}>
-                                                        <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📋</div>
-                                                        No recent attendance records found.
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+                        <ManualAttendanceView
+                            user={user}
+                            employees={employees}
+                            sites={sites}
+                            attendanceLogs={attendanceLogs}
+                            setAttendanceLogs={setAttendanceLogs}
+                            logSearch={logSearch}
+                            setLogSearch={setLogSearch}
+                            showToast={showToast}
+                        />
                     ) : activeTab === 'location_logs' ? (
                         <LocationLogsView
                             user={user}
@@ -2110,8 +2017,9 @@ const HRDashboard = () => {
                                 </div>
                             </div>
                         </div>
-                    ) : null}
-                </div>
+                    ) : null
+                    }
+                </div >
 
                 {
                     showUserModal && (
@@ -2785,6 +2693,46 @@ const LocationLogsView = ({
         });
     };
 
+    const handleDeleteFiltered = () => {
+        const filtersActive = locLogSearch || locLogStartDate || locLogEndDate;
+        const msg = filtersActive
+            ? `This will delete ALL location logs matching your current filters. Are you sure?`
+            : `This will delete ALL location logs currently in the system. Are you sure?`;
+
+        setConfirmDialog({
+            isOpen: true,
+            title: 'Delete All Filtered Logs',
+            message: msg,
+            confirmText: 'Delete Everything',
+            type: 'danger',
+            onConfirm: async () => {
+                try {
+                    const res = await fetch('/api/hr/location-logs', {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${user.token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            staffId: locLogSearch,
+                            startDate: locLogStartDate,
+                            endDate: locLogEndDate
+                        })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        showToast(data.message, 'success');
+                        fetchLogs(locLogSearch, locLogStartDate, locLogEndDate, 1);
+                    } else {
+                        showToast(data.error || 'Failed to delete', 'error');
+                    }
+                } catch {
+                    showToast('Network error', 'error');
+                }
+            }
+        });
+    };
+
     const handleCopyCoords = (lat, lng, id) => {
         navigator.clipboard.writeText(`${lat}, ${lng}`).then(() => {
             setCopied(id);
@@ -2812,22 +2760,18 @@ const LocationLogsView = ({
                 </div>
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                     {locLogSelected.length > 0 && user.role === 'HR Admin' && (
-                        <button
-                            onClick={handleBulkDelete}
-                            style={{
-                                display: 'flex', alignItems: 'center', gap: '0.4rem',
-                                padding: '0.5rem 1rem', borderRadius: '8px', border: 'none',
-                                background: '#ef4444', color: '#fff', fontWeight: 600,
-                                cursor: 'pointer', fontSize: '0.875rem'
-                            }}
-                        >
-                            🗑️ Delete Selected ({locLogSelected.length})
+                        <button className="hr-btn danger" onClick={handleBulkDelete}>
+                            🗑 Delete Selected ({locLogSelected.length})
+                        </button>
+                    )}
+                    {user.role === 'HR Admin' && (
+                        <button className="hr-btn danger-outline" onClick={handleDeleteFiltered}>
+                            🧹 Clear All Filtered
                         </button>
                     )}
                     <button
+                        className="hr-btn secondary"
                         onClick={() => fetchLogs(locLogSearch, locLogStartDate, locLogEndDate, locLogPage)}
-                        className="btn-secondary"
-                        style={{ fontSize: '0.875rem', padding: '0.5rem 1rem' }}
                         disabled={locLogLoading}
                     >
                         {locLogLoading ? '⏳ Loading…' : '🔄 Refresh'}
@@ -2890,25 +2834,10 @@ const LocationLogsView = ({
 
                 {/* Buttons */}
                 <div style={{ display: 'flex', gap: '0.5rem', paddingBottom: '1px' }}>
-                    <button
-                        onClick={handleApply}
-                        style={{
-                            padding: '0.5rem 1.25rem', borderRadius: '8px', border: 'none',
-                            background: '#2563eb', color: '#fff', fontWeight: 600,
-                            cursor: 'pointer', fontSize: '0.875rem'
-                        }}
-                    >
+                    <button className="hr-btn primary" onClick={handleApply}>
                         Apply
                     </button>
-                    <button
-                        onClick={handleReset}
-                        style={{
-                            padding: '0.5rem 1rem', borderRadius: '8px',
-                            border: '1px solid #cbd5e1', background: '#fff',
-                            color: '#475569', fontWeight: 600,
-                            cursor: 'pointer', fontSize: '0.875rem'
-                        }}
-                    >
+                    <button className="hr-btn secondary" onClick={handleReset}>
                         Reset
                     </button>
                 </div>
@@ -3030,21 +2959,9 @@ const LocationLogsView = ({
                                             {user.role === 'HR Admin' && (
                                                 <td style={{ padding: '0.65rem 1rem', textAlign: 'center' }}>
                                                     <button
+                                                        className="hr-btn danger-outline sm"
                                                         onClick={() => handleDeleteSingle(log.id)}
                                                         title="Delete this log"
-                                                        style={{
-                                                            background: 'none', border: '1px solid #fca5a5',
-                                                            borderRadius: '6px', padding: '4px 10px',
-                                                            color: '#ef4444', cursor: 'pointer',
-                                                            fontSize: '0.8rem', fontWeight: 600,
-                                                            transition: 'all 0.15s'
-                                                        }}
-                                                        onMouseEnter={e => {
-                                                            e.currentTarget.style.background = '#fef2f2';
-                                                        }}
-                                                        onMouseLeave={e => {
-                                                            e.currentTarget.style.background = 'none';
-                                                        }}
                                                     >
                                                         🗑 Delete
                                                     </button>
@@ -3145,7 +3062,9 @@ const GeoFenceAlertsView = ({
     gfEndDate, setGfEndDate,
     GF_LIMIT, showToast
 }) => {
-    const headers = { Authorization: `Bearer ${localStorage.getItem('hr_token')}` };
+    const headers = { Authorization: `Bearer ${user.token}` };
+    const [selectedAlerts, setSelectedAlerts] = React.useState([]);
+    const [selectAll, setSelectAll] = React.useState(false);
 
     const fetchAlerts = React.useCallback((page = 1) => {
         setGfLoading(true);
@@ -3165,20 +3084,17 @@ const GeoFenceAlertsView = ({
                     setGeoFenceAlerts(data.alerts);
                     setGfTotal(data.total || 0);
                     setGfTotalPages(data.totalPages || 1);
+                    setSelectedAlerts([]);
+                    setSelectAll(false);
                 }
             })
             .catch(() => showToast('Failed to load alerts', 'error'))
             .finally(() => setGfLoading(false));
     }, [gfSearch, gfSiteFilter, gfStatusFilter, gfStartDate, gfEndDate, gfPage]);
 
-    React.useEffect(() => {
-        fetchAlerts(gfPage);
-    }, [gfPage]);
+    React.useEffect(() => { fetchAlerts(gfPage); }, [gfPage]);
 
-    const handleSearch = () => {
-        setGfPage(1);
-        fetchAlerts(1);
-    };
+    const handleSearch = () => { setGfPage(1); fetchAlerts(1); };
 
     const handleResolve = async (alertId) => {
         try {
@@ -3194,8 +3110,64 @@ const GeoFenceAlertsView = ({
         }
     };
 
-    const unresolvedCount = geoFenceAlerts.filter(a => a.status === 'active').length;
+    const handleBulkResolve = async () => {
+        if (selectedAlerts.length === 0) return;
+        try {
+            const res = await fetch('/api/hr/alerts/bulk-resolve', {
+                method: 'PATCH',
+                headers: { ...headers, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids: selectedAlerts })
+            });
+            if (!res.ok) throw new Error();
+            showToast(`${selectedAlerts.length} alerts resolved`, 'success');
+            fetchAlerts(gfPage);
+        } catch {
+            showToast('Failed to bulk resolve alerts', 'error');
+        }
+    };
 
+    const handleToggleAll = () => {
+        if (selectAll) {
+            setSelectedAlerts([]);
+            setSelectAll(false);
+        } else {
+            setSelectedAlerts(geoFenceAlerts.map(a => a.id));
+            setSelectAll(true);
+        }
+    };
+
+    const handleToggleRow = (id) => {
+        setSelectedAlerts(prev =>
+            prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+        );
+        setSelectAll(false);
+    };
+
+    const exportCSV = () => {
+        if (geoFenceAlerts.length === 0) return;
+        const rows = [
+            ['Staff ID', 'Name', 'Site', 'Coordinates', 'Message', 'Time', 'Status'].join(',')
+        ];
+        geoFenceAlerts.forEach(a => {
+            rows.push([
+                a.staff_id,
+                `"${a.first_name || ''} ${a.last_name || ''}"`,
+                `"${a.site_name || ''}"`,
+                `"${a.latitude}, ${a.longitude}"`,
+                `"${a.message || ''}"`,
+                new Date(a.created_at).toLocaleString(),
+                a.status
+            ].join(','));
+        });
+        const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `GeoFence_Alerts_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+    };
+
+    const unresolvedCount = geoFenceAlerts.filter(a => a.status === 'active').length;
     const formatDateTime = (ts) => {
         if (!ts) return '—';
         const d = new Date(ts);
@@ -3205,19 +3177,31 @@ const GeoFenceAlertsView = ({
     return (
         <div className="management-view" style={{ padding: '1.5rem' }}>
             {/* Header */}
-            <div style={{ marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
-                    <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: '#1e293b' }}>Geo Fence Alerts</h2>
-                    {unresolvedCount > 0 && (
-                        <span style={{
-                            background: '#FF5E89', color: '#fff', borderRadius: '999px',
-                            padding: '0.15rem 0.6rem', fontSize: '0.75rem', fontWeight: 700
-                        }}>{unresolvedCount} active</span>
-                    )}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+                        <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: '#1e293b' }}>Geo Fence Alerts</h2>
+                        {unresolvedCount > 0 && (
+                            <span style={{
+                                background: '#FF5E89', color: '#fff', borderRadius: '999px',
+                                padding: '0.15rem 0.6rem', fontSize: '0.75rem', fontWeight: 700
+                            }}>{unresolvedCount} active</span>
+                        )}
+                    </div>
+                    <p style={{ margin: 0, color: '#64748b', fontSize: '0.875rem' }}>
+                        Staff detected outside their assigned site geofence. {gfTotal > 0 ? `${gfTotal} total alerts.` : ''}
+                    </p>
                 </div>
-                <p style={{ margin: 0, color: '#64748b', fontSize: '0.875rem' }}>
-                    Staff detected outside their assigned site geofence. {gfTotal > 0 ? `${gfTotal} total alerts.` : ''}
-                </p>
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    {selectedAlerts.length > 0 && (
+                        <button className="hr-btn success" onClick={handleBulkResolve}>
+                            ✔ Resolve Selected ({selectedAlerts.length})
+                        </button>
+                    )}
+                    <button className="hr-btn secondary" onClick={exportCSV}>
+                        ↓ Export CSV
+                    </button>
+                </div>
             </div>
 
             {/* Filters */}
@@ -3279,26 +3263,13 @@ const GeoFenceAlertsView = ({
                         border: '1px solid #e2e8f0', fontSize: '0.875rem'
                     }}
                 />
+                <button className="hr-btn primary" onClick={handleSearch}>Search</button>
                 <button
-                    onClick={handleSearch}
-                    style={{
-                        padding: '0.5rem 1.25rem', background: '#6347FE', color: '#fff',
-                        border: 'none', borderRadius: '7px', fontWeight: 600,
-                        fontSize: '0.875rem', cursor: 'pointer'
-                    }}
-                >
-                    Search
-                </button>
-                <button
+                    className="hr-btn secondary"
                     onClick={() => {
                         setGfSearch(''); setGfSiteFilter(''); setGfStatusFilter('');
                         setGfStartDate(''); setGfEndDate('');
                         setTimeout(() => { setGfPage(1); fetchAlerts(1); }, 0);
-                    }}
-                    style={{
-                        padding: '0.5rem 1rem', background: '#f1f5f9', color: '#475569',
-                        border: '1px solid #e2e8f0', borderRadius: '7px', fontWeight: 600,
-                        fontSize: '0.875rem', cursor: 'pointer'
                     }}
                 >
                     Clear
@@ -3321,6 +3292,9 @@ const GeoFenceAlertsView = ({
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                                <th style={{ padding: '0.75rem 1rem', width: '40px' }}>
+                                    <input type="checkbox" checked={selectAll} onChange={handleToggleAll} />
+                                </th>
                                 {['Staff', 'Site', 'Coordinates', 'Message', 'Time', 'Status', 'Action'].map(h => (
                                     <th key={h} style={{
                                         padding: '0.75rem 1rem', textAlign: 'left',
@@ -3336,10 +3310,17 @@ const GeoFenceAlertsView = ({
                                     key={alert.id}
                                     style={{
                                         borderBottom: '1px solid #f1f5f9',
-                                        background: alert.status === 'resolved' ? '#fafafa' : '#fff',
+                                        background: selectedAlerts.includes(alert.id) ? '#f0f7ff' : (alert.status === 'resolved' ? '#fafafa' : '#fff'),
                                         transition: 'background 0.15s'
                                     }}
                                 >
+                                    <td style={{ padding: '0.75rem 1rem' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedAlerts.includes(alert.id)}
+                                            onChange={() => handleToggleRow(alert.id)}
+                                        />
+                                    </td>
                                     <td style={{ padding: '0.85rem 1rem' }}>
                                         <div style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.875rem' }}>
                                             {alert.staff_id}
@@ -3377,12 +3358,8 @@ const GeoFenceAlertsView = ({
                                     <td style={{ padding: '0.85rem 1rem' }}>
                                         {alert.status !== 'resolved' && (
                                             <button
+                                                className="hr-btn success sm"
                                                 onClick={() => handleResolve(alert.id)}
-                                                style={{
-                                                    padding: '0.3rem 0.8rem', fontSize: '0.78rem', fontWeight: 600,
-                                                    background: '#f0fdf4', color: '#16a34a',
-                                                    border: '1px solid #bbf7d0', borderRadius: '6px', cursor: 'pointer'
-                                                }}
                                             >
                                                 Resolve
                                             </button>
@@ -3404,36 +3381,22 @@ const GeoFenceAlertsView = ({
                     <span style={{ fontSize: '0.875rem', color: '#64748b' }}>
                         Showing {((gfPage - 1) * GF_LIMIT) + 1}–{Math.min(gfPage * GF_LIMIT, gfTotal)} of {gfTotal.toLocaleString()} alerts
                     </span>
-                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                    <div className="mgmt-pagination" style={{ justifyContent: 'flex-end' }}>
                         <button
+                            className="hr-btn secondary sm"
                             disabled={gfPage <= 1}
                             onClick={() => setGfPage(p => p - 1)}
-                            style={{
-                                padding: '0.4rem 0.9rem', borderRadius: '6px',
-                                border: '1px solid #e2e8f0',
-                                background: gfPage <= 1 ? '#f1f5f9' : '#fff',
-                                color: gfPage <= 1 ? '#94a3b8' : '#334155',
-                                cursor: gfPage <= 1 ? 'not-allowed' : 'pointer',
-                                fontWeight: 600, fontSize: '0.875rem'
-                            }}
                         >‹ Prev</button>
                         <span style={{
-                            padding: '0.4rem 0.75rem', borderRadius: '6px',
-                            background: '#6347FE', color: '#fff', fontWeight: 700, fontSize: '0.875rem'
+                            padding: '0.35rem 0.75rem', borderRadius: '6px',
+                            background: 'var(--primary)', color: '#fff', fontWeight: 700, fontSize: '0.8125rem'
                         }}>
                             {gfPage} / {gfTotalPages}
                         </span>
                         <button
+                            className="hr-btn secondary sm"
                             disabled={gfPage >= gfTotalPages}
                             onClick={() => setGfPage(p => p + 1)}
-                            style={{
-                                padding: '0.4rem 0.9rem', borderRadius: '6px',
-                                border: '1px solid #e2e8f0',
-                                background: gfPage >= gfTotalPages ? '#f1f5f9' : '#fff',
-                                color: gfPage >= gfTotalPages ? '#94a3b8' : '#334155',
-                                cursor: gfPage >= gfTotalPages ? 'not-allowed' : 'pointer',
-                                fontWeight: 600, fontSize: '0.875rem'
-                            }}
                         >Next ›</button>
                     </div>
                 </div>
@@ -3442,5 +3405,376 @@ const GeoFenceAlertsView = ({
     );
 };
 
+// ── Manual Attendance View ─────────────────────────────────────────────────
+const ManualAttendanceView = ({ user, employees, sites, attendanceLogs, setAttendanceLogs, logSearch, setLogSearch, showToast }) => {
+    const [showPanel, setShowPanel] = React.useState(false);
+    const [entryType, setEntryType] = React.useState('checkin'); // 'checkin' | 'checkout'
+    const [staffSearch, setStaffSearch] = React.useState('');
+    const [selectedEmployee, setSelectedEmployee] = React.useState(null);
+    const [showSuggest, setShowSuggest] = React.useState(false);
+    const [dateTime, setDateTime] = React.useState('');
+    const [siteId, setSiteId] = React.useState('');
+    const [notes, setNotes] = React.useState('');
+    const [submitting, setSubmitting] = React.useState(false);
+    const [formError, setFormError] = React.useState('');
+
+    const headers = {
+        'Authorization': `Bearer ${user.token}`,
+        'Content-Type': 'application/json'
+    };
+
+    // Pre-fill datetime to now whenever panel opens
+    React.useEffect(() => {
+        if (showPanel) {
+            const now = new Date();
+            now.setSeconds(0, 0);
+            setDateTime(now.toISOString().slice(0, 16));
+            setFormError('');
+        }
+    }, [showPanel]);
+
+    const suggestions = staffSearch.length >= 1
+        ? employees.filter(e =>
+            e.staff_id?.toLowerCase().includes(staffSearch.toLowerCase()) ||
+            `${e.first_name || ''} ${e.last_name || ''}`.toLowerCase().includes(staffSearch.toLowerCase())
+        ).slice(0, 8)
+        : [];
+
+    const handleSelectEmployee = (emp) => {
+        setSelectedEmployee(emp);
+        setStaffSearch(`${emp.staff_id} – ${emp.first_name || ''} ${emp.last_name || ''}`.trim());
+        setSiteId(emp.site_id || '');
+        setShowSuggest(false);
+    };
+
+    const refreshLogs = () => {
+        fetch('/api/hr/attendance', { headers: { 'Authorization': `Bearer ${user.token}` } })
+            .then(r => r.json())
+            .then(data => { if (Array.isArray(data)) setAttendanceLogs(data); });
+    };
+
+    const handleSubmit = async () => {
+        setFormError('');
+        if (!selectedEmployee) return setFormError('Please select an employee.');
+        if (!dateTime) return setFormError('Please select a date and time.');
+
+        setSubmitting(true);
+        const endpoint = entryType === 'checkin'
+            ? '/api/hr/attendance/manual-checkin'
+            : '/api/hr/attendance/manual-checkout';
+
+        const body = entryType === 'checkin'
+            ? { staffId: selectedEmployee.staff_id, checkInTime: dateTime, siteId: siteId || undefined, notes }
+            : { staffId: selectedEmployee.staff_id, checkOutTime: dateTime, notes };
+
+        try {
+            const res = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(body) });
+            const data = await res.json();
+            if (!res.ok) {
+                setFormError(data.error || 'Failed to save entry.');
+            } else {
+                showToast(`✅ ${entryType === 'checkin' ? 'Check-in' : 'Check-out'} logged for ${selectedEmployee.staff_id}`, 'success');
+                setShowPanel(false);
+                setSelectedEmployee(null);
+                setStaffSearch('');
+                setNotes('');
+                refreshLogs();
+            }
+        } catch {
+            setFormError('Network error. Please try again.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const filteredLogs = attendanceLogs.filter(log => {
+        const name = `${log.first_name || ''} ${log.last_name || ''}`.toLowerCase();
+        const sId = (log.staff_id || '').toLowerCase();
+        return name.includes(logSearch.toLowerCase()) || sId.includes(logSearch.toLowerCase());
+    });
+
+    const inputStyle = {
+        width: '100%', padding: '0.5rem 0.75rem', borderRadius: '7px',
+        border: '1px solid #e2e8f0', fontSize: '0.875rem', boxSizing: 'border-box',
+        outline: 'none', background: '#fff'
+    };
+
+    return (
+        <div className="logs-container">
+            <div className="logs-card">
+                {/* Header */}
+                <div className="logs-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <h2>🕒 Live Attendance Logs</h2>
+                        <div className="logs-search-wrapper">
+                            <svg className="search-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input
+                                type="text"
+                                placeholder="Filter logs by Name or ID..."
+                                className="logs-search-input"
+                                value={logSearch}
+                                onChange={e => setLogSearch(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        <button
+                            className={showPanel ? 'hr-btn secondary' : 'hr-btn primary'}
+                            onClick={() => setShowPanel(p => !p)}
+                        >
+                            ✏️ {showPanel ? 'Cancel' : 'Log Entry'}
+                        </button>
+                        <button className="hr-btn secondary" onClick={() => { refreshLogs(); showToast('Logs refreshed', 'info'); }}>
+                            🔄 Refresh
+                        </button>
+                    </div>
+                </div>
+
+                {/* Manual Entry Panel */}
+                {showPanel && (
+                    <div style={{
+                        margin: '0 0 1.25rem 0', padding: '1.25rem 1.5rem',
+                        background: 'linear-gradient(135deg, #f8f6ff 0%, #fff 100%)',
+                        border: '1.5px solid #c7bbff', borderRadius: '12px',
+                        animation: 'slideDown 0.2s ease'
+                    }}>
+                        <div style={{ marginBottom: '1rem' }}>
+                            <div style={{ fontWeight: 700, fontSize: '1rem', color: '#1e293b', marginBottom: '0.35rem' }}>
+                                Manual Attendance Log
+                            </div>
+                            <p style={{ margin: 0, fontSize: '0.82rem', color: '#64748b' }}>
+                                Log a check-in or check-out on behalf of an employee. All manual entries are audited.
+                            </p>
+                        </div>
+
+                        {/* Type Toggle */}
+                        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                            {['checkin', 'checkout'].map(type => (
+                                <button
+                                    key={type}
+                                    className={`hr-btn sm ${entryType === type ? 'primary' : 'secondary'}`}
+                                    onClick={() => setEntryType(type)}
+                                >
+                                    {type === 'checkin' ? '🟢 Check-In' : '🔴 Check-Out'}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.9rem' }}>
+                            {/* Employee Search */}
+                            <div style={{ position: 'relative', gridColumn: '1 / 2' }}>
+                                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#475569', marginBottom: '0.3rem' }}>
+                                    Employee *
+                                </label>
+                                <input
+                                    style={inputStyle}
+                                    placeholder="Search by name or ID…"
+                                    value={staffSearch}
+                                    onChange={e => { setStaffSearch(e.target.value); setSelectedEmployee(null); setShowSuggest(true); }}
+                                    onFocus={() => setShowSuggest(true)}
+                                    onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
+                                    autoComplete="off"
+                                />
+                                {showSuggest && suggestions.length > 0 && (
+                                    <div style={{
+                                        position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+                                        background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px',
+                                        boxShadow: '0 4px 16px rgba(0,0,0,0.1)', maxHeight: '200px', overflowY: 'auto'
+                                    }}>
+                                        {suggestions.map(emp => (
+                                            <div
+                                                key={emp.id}
+                                                onMouseDown={() => handleSelectEmployee(emp)}
+                                                style={{
+                                                    padding: '0.55rem 0.85rem', cursor: 'pointer',
+                                                    borderBottom: '1px solid #f1f5f9', fontSize: '0.85rem'
+                                                }}
+                                                onMouseEnter={e => e.currentTarget.style.background = '#f5f3ff'}
+                                                onMouseLeave={e => e.currentTarget.style.background = ''}
+                                            >
+                                                <span style={{ fontWeight: 600, color: '#1e293b' }}>{emp.staff_id}</span>
+                                                <span style={{ color: '#64748b', marginLeft: '0.5rem' }}>
+                                                    {[emp.first_name, emp.last_name].filter(Boolean).join(' ')}
+                                                </span>
+                                                {emp.site_name && (
+                                                    <span style={{ color: '#94a3b8', fontSize: '0.75rem', marginLeft: '0.5rem' }}>
+                                                        · {emp.site_name}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* DateTime */}
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#475569', marginBottom: '0.3rem' }}>
+                                    {entryType === 'checkin' ? 'Check-In Time *' : 'Check-Out Time *'}
+                                </label>
+                                <input
+                                    type="datetime-local"
+                                    style={inputStyle}
+                                    value={dateTime}
+                                    onChange={e => setDateTime(e.target.value)}
+                                />
+                            </div>
+
+                            {/* Site (HR Admin only) */}
+                            {user.role === 'HR Admin' && entryType === 'checkin' && (
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#475569', marginBottom: '0.3rem' }}>
+                                        Site (optional)
+                                    </label>
+                                    <select style={inputStyle} value={siteId} onChange={e => setSiteId(e.target.value)}>
+                                        <option value="">Auto (employee's assigned site)</option>
+                                        {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                                    </select>
+                                </div>
+                            )}
+
+                            {/* Notes */}
+                            <div style={{ gridColumn: '1 / -1' }}>
+                                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#475569', marginBottom: '0.3rem' }}>
+                                    Notes (optional)
+                                </label>
+                                <input
+                                    style={inputStyle}
+                                    placeholder="Reason for manual entry…"
+                                    value={notes}
+                                    onChange={e => setNotes(e.target.value)}
+                                    maxLength={200}
+                                />
+                            </div>
+                        </div>
+
+                        {formError && (
+                            <div style={{
+                                marginTop: '0.75rem', padding: '0.5rem 0.85rem', background: '#fee2e2',
+                                color: '#dc2626', borderRadius: '7px', fontSize: '0.83rem', fontWeight: 500
+                            }}>
+                                ⚠ {formError}
+                            </div>
+                        )}
+
+                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+                            <button
+                                className="hr-btn primary"
+                                onClick={handleSubmit}
+                                disabled={submitting}
+                            >
+                                {submitting ? 'Saving…' : `Save ${entryType === 'checkin' ? 'Check-In' : 'Check-Out'}`}
+                            </button>
+                            <button
+                                className="hr-btn secondary"
+                                onClick={() => { setShowPanel(false); setFormError(''); }}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Attendance Table */}
+                <div className="logs-table-container">
+                    <table className="mgmt-table">
+                        <thead>
+                            <tr>
+                                <th>Staff Member</th>
+                                <th>Check In</th>
+                                <th>Check Out</th>
+                                <th>Site Location</th>
+                                <th style={{ textAlign: 'center' }}>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredLogs.map((log, i) => {
+                                const hasCheckOut = !!log.check_out_time;
+                                const checkIn = new Date(log.check_in_time);
+                                const checkOut = hasCheckOut ? new Date(log.check_out_time) : null;
+                                const isManual = log.notes && log.notes.includes('Manually logged');
+                                const isAutoClosed = !!log.auto_closed;
+
+                                return (
+                                    <tr key={log.id || i} className={log.is_live ? 'live-row' : ''}>
+                                        <td>
+                                            <div className="staff-info-cell">
+                                                <div className="staff-avatar-mini">
+                                                    {(log.first_name || log.staff_id || '?')[0].toUpperCase()}
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontWeight: 600, color: '#1e293b' }}>
+                                                        {log.first_name || log.last_name
+                                                            ? `${log.first_name || ''} ${log.last_name || ''}`.trim()
+                                                            : 'Unnamed Employee'}
+                                                    </div>
+                                                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{log.staff_id}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className="time-display">
+                                                <span className="date">{checkIn.toLocaleDateString()}</span>
+                                                <span className="time">{checkIn.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {hasCheckOut ? (
+                                                <div className="time-display">
+                                                    <span className="date">{checkOut.toLocaleDateString()}</span>
+                                                    <span className="time">{checkOut.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                </div>
+                                            ) : (
+                                                <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>--:--</span>
+                                            )}
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <span style={{ fontSize: '0.9rem' }}>📍</span>
+                                                <span>{log.site_name || 'Generic Site'}</span>
+                                            </div>
+                                        </td>
+                                        <td style={{ textAlign: 'center' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
+                                                <span className={`status-badge-pill ${hasCheckOut ? 'completed' : 'active'}`}>
+                                                    {hasCheckOut ? 'Completed' : 'Active Now'}
+                                                </span>
+                                                {isAutoClosed && (
+                                                    <span title={log.notes} style={{
+                                                        fontSize: '0.68rem', fontWeight: 600, color: '#b45309',
+                                                        background: '#fef3c7', borderRadius: '4px', padding: '1px 5px'
+                                                    }}>📝 Auto</span>
+                                                )}
+                                                {isManual && !isAutoClosed && (
+                                                    <span title={log.notes} style={{
+                                                        fontSize: '0.68rem', fontWeight: 600, color: '#4338ca',
+                                                        background: '#eef2ff', borderRadius: '4px', padding: '1px 5px'
+                                                    }}>🖊 Manual</span>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                            {filteredLogs.length === 0 && (
+                                <tr>
+                                    <td colSpan="5" style={{ textAlign: 'center', padding: '4rem', color: '#94a3b8' }}>
+                                        <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📋</div>
+                                        No recent attendance records found.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export default HRDashboard;
+
 

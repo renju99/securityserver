@@ -1084,6 +1084,79 @@ class GuardProPWASimple(http.Controller):
             ]
         )
 
+    @http.route('/guardpro/mobile/profile', type='http', auth='user', website=True)
+    def mobile_profile(self, **kwargs):
+        """Mobile profile page."""
+        _logger.info('[GuardPro Mobile] Accessing profile for user: %s', request.env.user.name)
+        try:
+            guard = self._get_guard_from_user()
+            _logger.info('[GuardPro Mobile] Guard profile found: %s', guard.name if guard else 'None')
+            
+            if not guard:
+                return request.render('guardpro.mobile_no_guard', {
+                    'user': request.env.user,
+                })
+                
+            return request.render('guardpro.mobile_profile_template', {
+                'guard': guard,
+                'user': request.env.user,
+            })
+        except Exception as e:
+            _logger.error('[GuardPro Mobile] Error in mobile_profile: %s', str(e), exc_info=True)
+            raise e
+    
+    @http.route('/guardpro/mobile/site_info', type='http', auth='user', website=True)
+    def mobile_site_info(self, **kwargs):
+        """Mobile site info page."""
+        guard = self._get_guard_from_user()
+        
+        if not guard:
+            return request.render('guardpro.mobile_no_guard', {
+                'user': request.env.user,
+            })
+            
+        site = guard.current_site_id if guard else None
+        
+        return request.render('guardpro.mobile_site_info_template', {
+            'guard': guard,
+            'site': site,
+        })
+
+    @http.route('/guardpro/mobile/emergency', type='http', auth='user', website=True)
+    def mobile_emergency(self, **kwargs):
+        """Mobile emergency procedures page."""
+        guard = self._get_guard_from_user()
+        
+        if not guard:
+            return request.render('guardpro.mobile_no_guard', {
+                'user': request.env.user,
+            })
+            
+        site = guard.current_site_id if guard else None
+        
+        # Get active emergency procedures for the site
+        procedures = []
+        if site:
+             try:
+                 procedures = request.env['emergency.procedure'].sudo().search([
+                     ('site_ids', 'in', site.id),
+                     ('active', '=', True)
+                 ])
+                 # Also get procedures with no specific site (global)
+                 global_procedures = request.env['emergency.procedure'].sudo().search([
+                     ('site_ids', '=', False),
+                     ('active', '=', True)
+                 ])
+                 procedures = procedures | global_procedures
+             except Exception:
+                 _logger.warning("Could not load emergency procedures")
+
+        return request.render('guardpro.mobile_emergency_template', {
+            'guard': guard,
+            'site': site,
+            'procedures': procedures,
+        })
+
     @http.route('/guardpro/mobile/settings', type='http', auth='user', website=True)
     def mobile_settings(self, **kwargs):
         """Settings screen - User preferences and profile."""
@@ -1175,12 +1248,37 @@ class GuardProPWASimple(http.Controller):
             'format_datetime_tz': self._format_datetime_tz,
         })
 
+    @http.route('/guardpro/mobile/training', type='http', auth='user', website=True)
+    def mobile_training(self, **kwargs):
+        """Training screen - View courses and certifications."""
+        guard = self._get_guard_from_user()
+        
+        if not guard:
+            return request.render('guardpro.mobile_no_guard', {
+                'user': request.env.user,
+            })
+        
+        # Get training enrollments
+        enrollments = []
+        if hasattr(guard, 'training_enrollment_ids') and guard.training_enrollment_ids:
+            enrollments = guard.training_enrollment_ids
+        elif 'slide.channel.partner' in request.env:
+            enrollments = request.env['slide.channel.partner'].sudo().search([
+                ('guard_id', '=', guard.id),
+            ], order='create_date desc')
+        
+        return request.render('guardpro.mobile_training', {
+            'guard': guard,
+            'user': request.env.user,
+            'enrollments': enrollments,
+        })
+
     @http.route('/guardpro/mobile/sw.js', type='http', auth='public')
     def mobile_service_worker(self, **kwargs):
         """Minimal service worker for offline support."""
         sw_content = """
 // GuardPro Mobile - Minimal Service Worker (Odoo 18)
-const CACHE_VERSION = 'v2.0.0';
+const CACHE_VERSION = 'v2.0.5';
 const CACHE_NAME = 'guardpro-mobile-' + CACHE_VERSION;
 
 // Install event

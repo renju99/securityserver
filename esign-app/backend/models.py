@@ -55,6 +55,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True)
     full_name = Column(String)
+    job_position = Column(String, nullable=True)
     hashed_password = Column(String, nullable=True) # Null for SSO users
     role = Column(String, default="User") # "Admin" or "User"
     auth_provider = Column(String, default="local") # "local" or "microsoft"

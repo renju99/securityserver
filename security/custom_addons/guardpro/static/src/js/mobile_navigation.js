@@ -140,7 +140,8 @@
             'settings': '/guardpro/mobile/settings',
             'profile': '/guardpro/mobile/profile',
             'site-info': '/guardpro/mobile/site_info',
-            'emergency': '/guardpro/mobile/emergency'
+            'emergency': '/guardpro/mobile/emergency',
+            'training': '/guardpro/mobile/training'
         };
 
         const route = routes[viewName];
@@ -227,6 +228,9 @@
                 break;
             case 'emergency':
                 showEmergencyProcedures();
+                break;
+            case 'training':
+                redirectToView('training');
                 break;
             case 'settings':
                 showSettings();

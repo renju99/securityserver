@@ -331,66 +331,6 @@ class GuardProController(http.Controller):
         
         return request.render('guardpro.guardpro_homepage_template', values)
 
-    @http.route('/guardpro/mobile/profile', type='http', auth='user', website=True)
-    def mobile_profile(self, **kwargs):
-        """Mobile profile page."""
-        user = request.env.user
-        guard = request.env['guard.profile'].search([('user_id', '=', user.id)], limit=1)
-        
-        return request.render('guardpro.mobile_profile_template', {
-            'guard': guard,
-            'user': user,
-        })
-    
-    @http.route('/guardpro/mobile/site_info', type='http', auth='user', website=True)
-    def mobile_site_info(self, **kwargs):
-        """Mobile site info page."""
-        user = request.env.user
-        guard = request.env['guard.profile'].search([('user_id', '=', user.id)], limit=1)
-        site = guard.current_site_id if guard else None
-        
-        return request.render('guardpro.mobile_site_info_template', {
-            'guard': guard,
-            'site': site,
-        })
-        
-    @http.route('/guardpro/mobile/emergency', type='http', auth='user', website=True)
-    def mobile_emergency(self, **kwargs):
-        """Mobile emergency procedures page."""
-        user = request.env.user
-        guard = request.env['guard.profile'].search([('user_id', '=', user.id)], limit=1)
-        site = guard.current_site_id if guard else None
-        
-        # Get active emergency procedures for the site
-        procedures = []
-        if site:
-             # Assuming 'emergency.procedure' model exists
-             try:
-                 procedures = request.env['emergency.procedure'].search([
-                     ('site_ids', 'in', site.id),
-                     ('active', '=', True)
-                 ])
-                 # Also get procedures with no specific site (global)
-                 global_procedures = request.env['emergency.procedure'].search([
-                     ('site_ids', '=', False),
-                     ('active', '=', True)
-                 ])
-                 procedures = procedures | global_procedures
-             except Exception:
-                 _logger.warning("Could not load emergency procedures")
-
-        return request.render('guardpro.mobile_emergency_template', {
-            'guard': guard,
-            'site': site,
-            'procedures': procedures,
-        })
-        
-    @http.route('/guardpro/mobile/settings', type='http', auth='user', website=True)
-    def mobile_settings(self, **kwargs):
-        """Mobile settings page."""
-        return request.render('guardpro.mobile_settings_template', {
-            'user': request.env.user,
-        })
 
     @http.route('/guardpro/dashboard', type='http', auth='user', website=True)
     def dashboard(self, **kwargs):
