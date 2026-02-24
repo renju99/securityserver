@@ -16,7 +16,10 @@ class ApprovalResponse(BaseModel):
     role: str
     status: str
     signed_at: Optional[datetime]
-    step_number: int  # Added step_number for ordering logic
+    step_number: int
+    comment: Optional[str] = None
+    delegated_to: Optional[str] = None
+    reminded_at: Optional[datetime] = None
 
 class RequestResponse(BaseModel):
     id: int
@@ -115,6 +118,11 @@ class ApprovalSignRequest(BaseModel):
     user_email: str
     use_saved: bool = False
     sig_type: str = "full" # "full" or "initial"
+    comment: Optional[str] = None
+
+class ApprovalDelegateRequest(BaseModel):
+    delegate_email: str
+    user_email: str # The person doing the delegating
 
 class UserSignatureUpdate(BaseModel):
     email: str
@@ -191,5 +199,16 @@ class EmailLogResponse(BaseModel):
     error_message: Optional[str] = None
     sent_at: datetime
     request_id: Optional[int] = None
+    class Config:
+        from_attributes = True
+
+class AuditLogResponse(BaseModel):
+    id: int
+    user_email: str
+    action: str
+    resource_type: str
+    resource_id: Optional[str] = None
+    details: Optional[Dict[str, Any]] = None
+    timestamp: datetime
     class Config:
         from_attributes = True

@@ -15,9 +15,11 @@ class DocumentRequest(Base):
     form_data = Column(JSON) # Stores form input values
     status = Column(String, default="Draft") # Draft, Pending Approval, Approved, Rejected
     
-    current_pdf_url = Column(String, nullable=True) # URL of the generated PDF (unsigned or partially signed)
-    original_pdf_url = Column(String, nullable=True) # Original unsigned PDF
-    supporting_documents = Column(JSON, default=list) # List of { name, url, size }
+    current_pdf_url = Column(String, nullable=True)   # Legacy: full SAS URL (kept for backward compat)
+    current_pdf_blob = Column(String, nullable=True)  # NEW: raw blob path for on-demand SAS
+    original_pdf_url = Column(String, nullable=True)  # Legacy: original SAS URL
+    original_pdf_blob = Column(String, nullable=True) # NEW: raw blob path for original PDF
+    supporting_documents = Column(JSON, default=list)
     
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
@@ -36,6 +38,9 @@ class Approval(Base):
     
     signed_at = Column(DateTime, nullable=True)
     signature_url = Column(String, nullable=True) # URL to signature image if any
+    comment = Column(String, nullable=True) # Rejection feedback or signing comment
+    delegated_to = Column(String, nullable=True) # Email of the delegated user
+    reminded_at = Column(DateTime, nullable=True) # Last time a reminder was sent
     
     request = relationship("DocumentRequest", back_populates="approvals")
 
@@ -121,5 +126,16 @@ class EmailLog(Base):
     error_message = Column(String, nullable=True)
     sent_at = Column(DateTime, default=datetime.datetime.utcnow)
     request_id = Column(Integer, ForeignKey("document_requests.id"), nullable=True)
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+    id = Column(Integer, primary_key=True, index=True)
+    user_email = Column(String, index=True)
+    action = Column(String) # e.g., "LOGIN", "SIGN", "CREATE_REQUEST", "DELETE_TEMPLATE"
+    resource_type = Column(String) # e.g., "DOCUMENT", "TEMPLATE", "USER", "CONFIG"
+    resource_id = Column(String, nullable=True)
+    details = Column(JSON, nullable=True)     # Any extra context (IP, change details, etc.)
+    ip_address = Column(String, nullable=True) # Client IP address
+    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
 
 

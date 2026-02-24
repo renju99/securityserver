@@ -8,6 +8,24 @@ import SignatureCanvas from 'react-signature-canvas';
 import { PublicClientApplication } from '@azure/msal-browser';
 import PdfFiller from '../components/PdfFiller';
 
+// Modular Components
+import WorkflowStepper from '../components/Shared/WorkflowStepper';
+import RequestTable from '../components/Dashboard/RequestTable';
+import RequestDetailModal from '../components/Requests/RequestDetailModal';
+import AuditLogViewer from '../components/Admin/AuditLogViewer';
+
+// Shared Types
+import {
+  User,
+  DocumentRequest,
+  WorkflowConfig,
+  PdfTemplateResponse,
+  EmailConfig,
+  EmailLog,
+  DynamicTemplate,
+  MasterData
+} from '../types';
+
 // MSAL Configuration
 const msalConfig = {
   auth: {
@@ -25,97 +43,6 @@ const msalInstance = new PublicClientApplication(msalConfig);
 
 // Define types for our data structure
 
-
-interface User {
-  id: number;
-  email: string;
-  full_name: string;
-  job_position?: string;
-  role: 'Admin' | 'User';
-  auth_provider: string;
-  access_scope?: 'global' | 'department' | 'own';
-  permissions?: {
-    departments?: string[];
-  };
-  saved_signature_url?: string;
-  saved_initials_url?: string;
-}
-
-interface MasterData {
-  id: number;
-  name: string;
-}
-
-interface DynamicTemplate {
-  id: number;
-  name: string;
-  category: string;
-  layout: Array<{
-    type: string;
-    label: string;
-    placeholder?: string;
-    width?: number; // Added for grid support
-  }>;
-}
-
-interface DocumentRequest {
-  id: number;
-  requester_name: string;
-  requester_email: string;
-  template_name: string;
-  department: string;
-  doc_type: string;
-  status: string;
-  created_at: string;
-  current_pdf_url: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  approvals: any[];
-  supporting_documents?: Array<{ name: string; url: string; size: number }>;
-}
-
-interface WorkflowConfig {
-  id?: number;
-  department: string;
-  doc_type: string;
-  approvers: string[];
-  signers: string[];
-}
-
-interface PdfTemplateResponse {
-  id: number;
-  name: string;
-  department: string;
-  doc_type: string;
-  form_fields: Array<{
-    id: string;
-    type: string;
-    assignee: string;
-  }>;
-}
-
-interface EmailConfig {
-  id: number;
-  smtp_server: string;
-  smtp_port: number;
-  username: string;
-  from_email: string;
-  from_name: string;
-  encryption: string;
-  imap_server?: string;
-  imap_port?: number;
-  imap_username?: string;
-  imap_ssl: boolean;
-}
-
-interface EmailLog {
-  id: number;
-  recipient: string;
-  subject: string;
-  status: string;
-  error_message?: string;
-  sent_at: string;
-  request_id?: number;
-}
 
 const CAPEX_SECTIONS = [
   {
@@ -137,6 +64,30 @@ const CAPEX_SECTIONS = [
     fields: ['staff_name', 'justification']
   }
 ];
+
+// Sidebar nav item helper
+const NavItem = ({ tab, activeTab, setActiveTab, setIsSidebarOpen, label, icon }: {
+  tab: string;
+  activeTab: string;
+  setActiveTab: (tab: any) => void;
+  setIsSidebarOpen: (open: boolean) => void;
+  label: string;
+  icon: React.ReactNode
+}) => (
+  <button
+    onClick={() => {
+      setActiveTab(tab as any);
+      setIsSidebarOpen(false); // Close sidebar on mobile after clicking
+    }}
+    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-md transition-all ${activeTab === tab
+      ? 'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-600 pl-3'
+      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-l-4 border-transparent pl-3'
+      }`}
+  >
+    <span className="w-5 h-5 flex-shrink-0">{icon}</span>
+    {label}
+  </button>
+);
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
@@ -213,6 +164,7 @@ export default function Home() {
   // Signature State
   const sigCanvas = useRef<any>(null);
   const [isSigningOpen, setIsSigningOpen] = useState(false);
+  const [signingComment, setSigningComment] = useState("");
   const [signingApprovalId, setSigningApprovalId] = useState<number | null>(null);
   const [isSigning, setIsSigning] = useState(false);
   const [requestSubTab, setRequestSubTab] = useState<'pending' | 'signed'>('pending');
@@ -829,11 +781,21 @@ export default function Home() {
   };
 
   const handleSaveDraft = async () => {
-    if (!selectedTemplate || !department || !docType) return;
-    setGenerationStatus('Saving Draft...');
+    if (!selectedTemplate) {
+      setGenerationStatus('Error: Please select a template first');
+      return;
+    }
+    if (!department) {
+      setGenerationStatus('Error: Department is required');
+      return;
+    }
+    if (!docType) {
+      setGenerationStatus('Error: Document Type is required');
+      return;
+    }
 
-    // Check if updating existing or new
-    // For MVP, always create new draft
+    setGenerationStatus('Initiating Save...');
+
     try {
       const draftPayload = {
         template_name: selectedTemplate,
@@ -852,15 +814,19 @@ export default function Home() {
       });
 
       if (res.ok) {
-        setGenerationStatus('Draft Saved!');
+        setGenerationStatus('Success: Draft Saved!');
         setSupportingDocs([]); // Clear after save
-        setTimeout(() => setActiveTab('requests'), 1000); // Redirect to requests
+        setTimeout(() => {
+          setActiveTab('requests');
+          fetchRequests();
+        }, 1500);
       } else {
-        setGenerationStatus('Saving Draft Failed');
+        const errorData = await res.json().catch(() => ({}));
+        setGenerationStatus(`Save Failed: ${errorData.detail || res.statusText || 'Server Error'}`);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error("Save Draft Error", e);
-      setGenerationStatus('Error saving draft');
+      setGenerationStatus(`Network Error: ${e.message || 'Check your connection'}`);
     }
   };
 
@@ -881,8 +847,23 @@ export default function Home() {
     }
   };
 
+  const handleViewRequestDoc = async (req: any) => {
+    try {
+      const res = await fetch(`/api/requests/${req.id}/view-url?user_email=${encodeURIComponent(user?.email || "")}`);
+      if (res.ok) {
+        const data = await res.json();
+        setPreviewDoc({ name: req.template_name || `Request #${req.id}`, url: data.url });
+      } else {
+        alert("Failed to generate secure view link.");
+      }
+    } catch (e) {
+      alert("Error fetching secure document link.");
+    }
+  };
+
   const handleOpenSignature = (approvalId: number) => {
     setSigningApprovalId(approvalId);
+    setSigningComment("");
     setIsSigningOpen(true);
   };
 
@@ -934,7 +915,8 @@ export default function Home() {
           signature_base64: useSavedSignature ? "" : signatureData,
           user_email: user?.email || "",
           use_saved: useSavedSignature,
-          sig_type: sigType
+          sig_type: sigType,
+          comment: signingComment
         })
       });
 
@@ -1083,22 +1065,6 @@ export default function Home() {
     )
   }
 
-  // Sidebar nav item helper
-  const NavItem = ({ tab, label, icon }: { tab: string; label: string; icon: React.ReactNode }) => (
-    <button
-      onClick={() => {
-        setActiveTab(tab as any);
-        setIsSidebarOpen(false); // Close sidebar on mobile after clicking
-      }}
-      className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-md transition-all ${activeTab === tab
-        ? 'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-600 pl-3'
-        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-l-4 border-transparent pl-3'
-        }`}
-    >
-      <span className="w-5 h-5 flex-shrink-0">{icon}</span>
-      {label}
-    </button>
-  );
 
 
   return (
@@ -1168,10 +1134,10 @@ export default function Home() {
 
           {/* Nav items */}
           <nav className="flex-1 py-2 px-2 space-y-0.5 overflow-y-auto">
-            <NavItem tab="requests" label="My Requests" icon={
+            <NavItem tab="requests" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} label="My Requests" icon={
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
             } />
-            <NavItem tab="template" label="New Request" icon={
+            <NavItem tab="template" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} label="New Request" icon={
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
             } />
             {user.role === 'Admin' && (
@@ -1179,13 +1145,13 @@ export default function Home() {
                 <div className="pt-3 pb-1 px-3">
                   <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Administration</p>
                 </div>
-                <NavItem tab="upload" label="Templates" icon={
+                <NavItem tab="upload" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} label="Templates" icon={
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414A1 1 0 0120 8.414V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
                 } />
-                <NavItem tab="settings" label="Workflows" icon={
+                <NavItem tab="settings" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} label="Workflows" icon={
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
                 } />
-                <NavItem tab="admin" label="Admin" icon={
+                <NavItem tab="admin" activeTab={activeTab} setActiveTab={setActiveTab} setIsSidebarOpen={setIsSidebarOpen} label="Admin" icon={
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 } />
               </>
@@ -1272,110 +1238,18 @@ export default function Home() {
                   </div>
                 )}
 
-                {requests.filter(req => isRequestVisible(req, requestSubTab)).length === 0 ? (
-                  <div className="text-center py-24 bg-white rounded-2xl border border-dashed border-gray-200 shadow-inner">
-                    <p className="text-gray-400 text-lg">No {requestSubTab} requests found.</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-100">
-                    <table className="w-full text-base text-left text-gray-600">
-                      <thead className="text-sm text-gray-700 uppercase bg-gray-50/80 border-b border-gray-100 font-bold">
-                        <tr>
-                          <th className="hidden sm:table-cell px-2 py-3 w-10 text-center">
-                            {user?.role === 'Admin' && (
-                              <input
-                                type="checkbox"
-                                className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    // Select all currently visible
-                                    const visibleIds = requests.filter(req => isRequestVisible(req, requestSubTab)).map(r => r.id);
-                                    setSelectedRequestIds(visibleIds);
-                                  } else {
-                                    setSelectedRequestIds([]);
-                                  }
-                                }}
-                                checked={requests.length > 0 && selectedRequestIds.length > 0 && requests.filter(req => isRequestVisible(req, requestSubTab)).every(r => selectedRequestIds.includes(r.id))}
-                              />
-                            )}
-                          </th>
-                          <th className="hidden sm:table-cell px-2 py-3 text-indigo-600">ID</th>
-                          <th className="px-2 py-3">Template</th>
-                          <th className="px-2 md:px-4 py-3 md:py-4">Status</th>
-                          <th className="hidden lg:table-cell px-2 md:px-4 py-3 md:py-4">Created</th>
-                          <th className="px-2 md:px-4 py-3 md:py-4 text-right">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100">
-                        {requests
-                          .filter(req => isRequestVisible(req, requestSubTab))
-                          .map(req => (
-                            <tr key={req.id} className={`bg-white border-b hover:bg-gray-50 align-middle ${selectedRequestIds.includes(req.id) ? 'bg-indigo-50/40' : ''}`}>
-                              <td className="hidden sm:table-cell px-2 py-3 text-center">
-                                {user?.role === 'Admin' && (
-                                  <input
-                                    type="checkbox"
-                                    className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                                    checked={selectedRequestIds.includes(req.id)}
-                                    onChange={(e) => {
-                                      if (e.target.checked) {
-                                        setSelectedRequestIds([...selectedRequestIds, req.id]);
-                                      } else {
-                                        setSelectedRequestIds(selectedRequestIds.filter(id => id !== req.id));
-                                      }
-                                    }}
-                                  />
-                                )}
-                              </td>
-                              <td className="hidden sm:table-cell px-2 py-3 font-semibold text-indigo-600 text-xs shadow-none">#{req.id}</td>
-                              <td className="px-2 py-3 min-w-0">
-                                <span className="font-bold text-gray-900 text-xs block truncate max-w-[120px] sm:max-w-none" title={req.template_name}>{req.template_name}</span>
-                                <span className="text-[10px] text-gray-400 block truncate max-w-[100px] sm:max-w-none">{req.department} · {req.doc_type}</span>
-                              </td>
-                              <td className="px-2 py-3">
-                                <span
-                                  className={`inline-flex px-2 py-0.5 rounded text-[10px] md:text-xs font-medium border
-                                              ${req.status === 'Draft' ? 'bg-gray-100 text-gray-600 border-gray-200' :
-                                      req.status === 'Pending Approval' ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-emerald-50 text-emerald-700 border-emerald-100'}`}
-                                  title={getDisplayStatus(req)}
-                                >
-                                  {getDisplayStatus(req)}
-                                </span>
-                              </td>
-                              <td className="hidden lg:table-cell px-2 py-3 text-[10px] md:text-sm text-gray-500 whitespace-nowrap">{new Date(req.created_at).toLocaleDateString()}</td>
-                              <td className="px-2 py-3 text-right">
-                                <div className="flex justify-end space-x-1">
-                                  <button
-                                    onClick={() => handleOpenRequestDetail(req.id)}
-                                    className="bg-white border border-indigo-200 text-indigo-600 px-2 py-1 md:px-3 md:py-1.5 rounded text-[10px] md:text-xs font-medium hover:bg-indigo-50 transition-all whitespace-nowrap"
-                                  >
-                                    Details
-                                  </button>
-                                  {req.status === 'Draft' ? (
-                                    <button
-                                      onClick={() => handleSubmit(req.id)}
-                                      className="px-2 py-1 md:px-3 md:py-1.5 bg-indigo-600 text-white rounded text-[10px] md:text-xs font-medium hover:bg-indigo-700 transition-all"
-                                    >
-                                      Submit
-                                    </button>
-                                  ) : (
-                                    <a
-                                      href={req.current_pdf_url}
-                                      target="_blank"
-                                      className="p-1 md:p-1.5 bg-gray-50 border border-gray-200 text-gray-400 rounded hover:text-indigo-600 hover:border-indigo-200 transition-all"
-                                      title="View PDF"
-                                    >
-                                      <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.707 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                                    </a>
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                <RequestTable
+                  requests={requests}
+                  requestSubTab={requestSubTab}
+                  isRequestVisible={isRequestVisible}
+                  selectedRequestIds={selectedRequestIds}
+                  setSelectedRequestIds={setSelectedRequestIds}
+                  handleOpenRequestDetail={handleOpenRequestDetail}
+                  handleSubmit={handleSubmit}
+                  handleViewRequestDoc={handleViewRequestDoc}
+                  getDisplayStatus={getDisplayStatus}
+                  userRole={user?.role}
+                />
               </div>
             )}
 
@@ -2631,48 +2505,8 @@ export default function Home() {
                   </div>
                 )}
 
-                {adminSubTab === 'logs' && (
-                  <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="bg-white p-10 rounded-3xl border-2 border-indigo-50 shadow-xl">
-                      <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-2xl font-black text-gray-900">Email Operation Logs</h3>
-                        <button onClick={fetchEmailLogs} className="text-indigo-600 hover:text-indigo-800 font-bold text-sm">Refresh</button>
-                      </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                          <thead>
-                            <tr className="bg-gray-100 text-gray-600 uppercase text-xs font-bold">
-                              <th className="p-4 rounded-tl-xl text-center">Status</th>
-                              <th className="p-4">Recipient</th>
-                              <th className="p-4">Subject</th>
-                              <th className="p-4">Sent At</th>
-                              <th className="p-4 rounded-tr-xl">Request ID</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {emailLogs.length === 0 ? (
-                              <tr><td colSpan={5} className="p-4 text-center text-gray-400">No logs found.</td></tr>
-                            ) : (
-                              emailLogs.map(log => (
-                                <tr key={log.id} className="border-b border-gray-50 hover:bg-gray-50">
-                                  <td className="p-4">
-                                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${log.status === 'Sent' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                      {log.status}
-                                    </span>
-                                    {log.error_message && <div className="text-xs text-red-500 mt-1 max-w-xs truncate" title={log.error_message}>{log.error_message}</div>}
-                                  </td>
-                                  <td className="p-4 text-sm font-medium text-gray-900">{log.recipient}</td>
-                                  <td className="p-4 text-sm text-gray-600">{log.subject}</td>
-                                  <td className="p-4 text-sm text-gray-500">{new Date(log.sent_at).toLocaleString()}</td>
-                                  <td className="p-4 text-sm text-gray-500">#{log.request_id}</td>
-                                </tr>
-                              ))
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
+                {adminSubTab === "logs" && (
+                  <AuditLogViewer fetchEmailLogs={fetchEmailLogs} emailLogs={emailLogs} />
                 )}
               </div>
             )}
@@ -2820,6 +2654,18 @@ export default function Home() {
                         </label>
                       )}
                     </div>
+
+                    <div className="mt-6 border-t border-gray-100 pt-6">
+                      <label className="block text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-2 px-1">
+                        Signer Note (Optional)
+                      </label>
+                      <textarea
+                        value={signingComment}
+                        onChange={(e) => setSigningComment(e.target.value)}
+                        placeholder="Add a comment or justification for your signature..."
+                        className="w-full bg-gray-50 border-2 border-gray-100 rounded-xl p-4 text-sm font-medium text-gray-900 focus:bg-white focus:border-indigo-300 transition-all outline-none resize-none h-24 shadow-inner"
+                      />
+                    </div>
                   </div>
                   <div className="px-6 py-4 bg-gray-50 border-t flex justify-end space-x-3">
                     <button
@@ -2847,247 +2693,58 @@ export default function Home() {
             )}
 
             {selectedRequest && (
-              <div className="fixed inset-0 bg-slate-900/50 z-40 flex items-center justify-center p-4 backdrop-blur-[2px] animate-in fade-in duration-200">
-                <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col mx-2 sm:mx-0 border border-slate-200">
-                  <div className="bg-slate-50 border-b border-slate-200 p-6 flex justify-between items-center relative">
-                    <div className="relative z-10">
-                      <h2 className="text-xl font-bold text-slate-800 mb-1">Request #{selectedRequest.id}</h2>
-                      <div className="flex items-center space-x-2 text-slate-500 text-xs">
-                        <span className="font-medium tracking-wide">{selectedRequest.department}</span>
-                        <span className="text-slate-300">•</span>
-                        <span className="font-medium tracking-wide">{selectedRequest.doc_type}</span>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setSelectedRequest(null)}
-                      className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded transition-colors"
-                    >
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
+              <RequestDetailModal
+                request={selectedRequest}
+                onClose={() => setSelectedRequest(null)}
+                user={user}
+                onRefresh={fetchRequests}
+                onViewDoc={handleViewRequestDoc}
+              />
+            )}
 
-                  <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50 custom-scrollbar">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Left: Document Info */}
-                      <div className="space-y-6">
-                        <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
-                          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100">Document Details</h3>
-                          <div className="space-y-4">
-                            <div>
-                              <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1">Template Name</p>
-                              <p className="text-sm font-semibold text-slate-800">{selectedRequest.template_name}</p>
-                            </div>
-                            <div>
-                              <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1">Created Date</p>
-                              <p className="text-sm font-medium text-slate-700">{new Date(selectedRequest.created_at).toLocaleString()}</p>
-                            </div>
-                            <div className="pt-2">
-                              <a
-                                href={selectedRequest.current_pdf_url}
-                                target="_blank"
-                                className="inline-flex items-center justify-center space-x-2 bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-50 hover:text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-200"
-                              >
-                                <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.707 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                                <span>View PDF</span>
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
-                          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100">Current Status</h3>
-                          <div className="flex items-center">
-                            <span
-                              className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border
-                              ${selectedRequest.status === 'Draft' ? 'bg-slate-50 text-slate-600 border-slate-200' :
-                                  selectedRequest.status === 'Pending Approval' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}
-                              title={getDisplayStatus(selectedRequest)}
-                            >
-                              {selectedRequest.status === 'Pending Approval' && <svg className="w-3.5 h-3.5 mr-1.5 animate-pulse" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>}
-                              {selectedRequest.status === 'Signed' && <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>}
-                              {getDisplayStatus(selectedRequest)}
-                            </span>
-                          </div>
-                        </div>
-
-                        {selectedRequest.supporting_documents && selectedRequest.supporting_documents.length > 0 && (
-                          <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm mt-6">
-                            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100">Supporting Documents</h3>
-                            <div className="space-y-2">
-                              {selectedRequest.supporting_documents.map((doc: any, i: number) => (
-                                <div
-                                  key={i}
-                                  onClick={() => setPreviewDoc({ name: doc.name, url: doc.url })}
-                                  className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all group cursor-pointer"
-                                >
-                                  <div className="flex items-center space-x-3 overflow-hidden">
-                                    <svg className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.707 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                                    <span className="text-sm text-slate-700 truncate font-medium" title={doc.name}>{doc.name}</span>
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    <svg className="w-4 h-4 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                    <svg className="w-4 h-4 text-slate-300 group-hover:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Right: Workflow Tracker */}
-                      <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex flex-col">
-                        <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-5 pb-2 border-b border-slate-100">Approval Workflow</h3>
-                        <div className="space-y-0 flex-1 relative before:absolute before:inset-0 before:ml-[1.15rem] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
-                          {(!selectedRequest.approvals || selectedRequest.approvals.length === 0) && (
-                            <div className="text-center py-8">
-                              <p className="text-sm text-slate-400">No workflow defined.</p>
-                            </div>
-                          )}
-                          {selectedRequest.approvals && selectedRequest.approvals
-                            .sort((a: any, b: any) => a.step_number - b.step_number)
-                            .map((app: any, index: number) => {
-                              const minPending = Math.min(...selectedRequest.approvals.filter((a: any) => a.status === 'Pending').map((a: any) => a.step_number));
-                              const isTurn = app.step_number === minPending;
-                              const isUserMatch = user?.role?.toLowerCase() === app.role?.toLowerCase() ||
-                                user?.email?.toLowerCase() === app.role?.toLowerCase();
-                              const showButton = app.status === 'Pending' && isTurn && isUserMatch;
-
-                              return (
-                                <div key={app.id} className="relative flex items-start md:items-center py-4 group">
-                                  {/* Timeline node */}
-                                  <div className={`absolute left-0 md:left-1/2 -translate-x-[5px] md:-translate-x-1/2 mt-1 md:mt-0 w-3 h-3 rounded-full border-2 bg-white z-10 transition-colors duration-200 
-                                    ${app.status === 'Signed' ? 'border-emerald-500 bg-emerald-500' :
-                                      app.status === 'Pending' && isTurn ? 'border-indigo-600 outline outline-2 outline-indigo-100 outline-offset-2' :
-                                        app.status === 'Pending' ? 'border-slate-300' : 'border-slate-200 bg-slate-100'}`}
-                                  />
-
-                                  {/* Content */}
-                                  <div className={`flex flex-col md:flex-row w-full pl-6 md:pl-0 
-                                    md:odd:flex-row-reverse md:odd:text-right 
-                                    md:even:flex-row md:even:text-left`}>
-
-                                    <div className="md:w-1/2 md:px-6 mb-2 md:mb-0">
-                                      {/* Role / Addr */}
-                                      <p className={`text-sm font-semibold truncate ${app.status === 'Signed' || (app.status === 'Pending' && isTurn) ? 'text-slate-800' : 'text-slate-500'}`} title={app.role}>
-                                        {app.role}
-                                      </p>
-                                      <p className="text-[11px] font-medium text-slate-400 mt-0.5">Step {app.step_number} • {app.status}</p>
-                                    </div>
-
-                                    {/* Action Area */}
-                                    <div className={`md:w-1/2 md:px-6 flex items-center md:items-start 
-                                      md:odd:justify-start md:even:justify-end`}>
-                                      {showButton ? (
-                                        <button
-                                          onClick={() => handleOpenSignature(app.id)}
-                                          className="px-4 py-1.5 flex items-center justify-center space-x-1.5 bg-indigo-600 text-white rounded-md text-sm font-medium shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 transition-all"
-                                        >
-                                          <span>Sign Document</span>
-                                          <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                                        </button>
-                                      ) : app.status === 'Signed' ? (
-                                        <span className="inline-flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md">
-                                          <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                                          Completed
-                                        </span>
-                                      ) : (
-                                        <span className="inline-flex items-center text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">
-                                          Waiting...
-                                        </span>
-                                      )}
-                                    </div>
-
-                                  </div>
-                                </div>
-                              );
-                            })}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-4 md:p-5 bg-slate-50 border-t border-slate-200 flex justify-end space-x-3">
-                    {user?.role === 'Admin' && selectedRequest.status !== 'Archived' && (
-                      <button
-                        onClick={async () => {
-                          if (confirm('Are you sure you want to archive this request? It will be hidden from the default view.')) {
-                            try {
-                              const res = await fetch(`/api/requests/${selectedRequest.id}/archive?user_email=${encodeURIComponent(user.email)}`, {
-                                method: 'PUT',
-                              });
-                              if (res.ok) {
-                                setSelectedRequest(null);
-                                fetchRequests(); // Refresh list
-                              } else {
-                                alert('Failed to archive request');
-                              }
-                            } catch (e) {
-                              alert('Error archiving request');
-                            }
-                          }
-                        }}
-                        className="px-4 py-2 bg-white border border-red-200 text-red-600 rounded-md text-sm font-medium hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 transition-colors"
+            {/* Document Preview Modal */}
+            {previewDoc && (
+              <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+                  <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-white">
+                    <h2 className="text-lg font-bold text-slate-800 truncate pr-4">{previewDoc.name}</h2>
+                    <div className="flex items-center space-x-2">
+                      <a
+                        href={previewDoc.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                        title="Open in New Tab"
                       >
-                        Archive Request
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                      </a>
+                      <button
+                        onClick={() => setPreviewDoc(null)}
+                        className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
+                      >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
                       </button>
+                    </div>
+                  </div>
+                  <div className="flex-1 bg-slate-100 overflow-auto flex items-center justify-center">
+                    {previewDoc.name.toLowerCase().endsWith('.pdf') ? (
+                      <iframe
+                        src={`${previewDoc.url}#toolbar=0`}
+                        className="w-full h-full border-none"
+                        title="PDF Preview"
+                      />
+                    ) : (
+                      <img
+                        src={previewDoc.url}
+                        alt={previewDoc.name}
+                        className="max-w-full max-h-full object-contain"
+                      />
                     )}
-                    <button
-                      onClick={() => setSelectedRequest(null)}
-                      className="px-5 py-2 bg-white border border-slate-300 text-slate-700 rounded-md text-sm font-medium hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-1 transition-colors"
-                    >
-                      Close
-                    </button>
                   </div>
                 </div>
               </div>
             )}
           </div>
-
-          {/* Document Preview Modal */}
-          {previewDoc && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
-                <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-white">
-                  <h2 className="text-lg font-bold text-slate-800 truncate pr-4">{previewDoc.name}</h2>
-                  <div className="flex items-center space-x-2">
-                    <a
-                      href={previewDoc.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                      title="Open in New Tab"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                    </a>
-                    <button
-                      onClick={() => setPreviewDoc(null)}
-                      className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
-                    >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                  </div>
-                </div>
-                <div className="flex-1 bg-slate-100 overflow-auto flex items-center justify-center">
-                  {previewDoc.name.toLowerCase().endsWith('.pdf') ? (
-                    <iframe
-                      src={`${previewDoc.url}#toolbar=0`}
-                      className="w-full h-full border-none"
-                      title="PDF Preview"
-                    />
-                  ) : (
-                    <img
-                      src={previewDoc.url}
-                      alt={previewDoc.name}
-                      className="max-w-full max-h-full object-contain"
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
         </main>
       </div>
     </div>
