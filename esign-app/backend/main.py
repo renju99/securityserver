@@ -8,6 +8,7 @@ import subprocess
 import shutil
 import json
 from typing import List, Optional, Dict, Any
+from urllib.parse import quote
 from dotenv import load_dotenv
 
 from docxtpl import DocxTemplate
@@ -22,7 +23,7 @@ import ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from sqlalchemy import or_
+from sqlalchemy import or_, text
 from sqlalchemy.orm import Session
 from database import SessionLocal, engine, Base
 import models
@@ -40,6 +41,64 @@ def verify_password(plain_password, hashed_password):
 
 # Initialize Database
 Base.metadata.create_all(bind=engine)
+
+# Lightweight schema healer for Postgres deployments where new columns may be missing.
+def ensure_schema():
+    with engine.connect() as conn:
+        # DocumentRequest core columns (for older databases that predate this model)
+        conn.execute(text("""
+            ALTER TABLE document_requests
+            ADD COLUMN IF NOT EXISTS requester_name TEXT;
+        """))
+        conn.execute(text("""
+            ALTER TABLE document_requests
+            ADD COLUMN IF NOT EXISTS requester_email TEXT;
+        """))
+        conn.execute(text("""
+            ALTER TABLE document_requests
+            ADD COLUMN IF NOT EXISTS department TEXT;
+        """))
+        conn.execute(text("""
+            ALTER TABLE document_requests
+            ADD COLUMN IF NOT EXISTS doc_type TEXT;
+        """))
+        conn.execute(text("""
+            ALTER TABLE document_requests
+            ADD COLUMN IF NOT EXISTS template_name TEXT;
+        """))
+        conn.execute(text("""
+            ALTER TABLE document_requests
+            ADD COLUMN IF NOT EXISTS form_data JSONB;
+        """))
+        conn.execute(text("""
+            ALTER TABLE document_requests
+            ADD COLUMN IF NOT EXISTS status TEXT;
+        """))
+        conn.execute(text("""
+            ALTER TABLE document_requests
+            ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+        """))
+
+        # DocumentRequest columns introduced after initial deployment
+        conn.execute(text("""
+            ALTER TABLE document_requests
+            ADD COLUMN IF NOT EXISTS current_pdf_url TEXT;
+        """))
+        conn.execute(text("""
+            ALTER TABLE document_requests
+            ADD COLUMN IF NOT EXISTS original_pdf_url TEXT;
+        """))
+        conn.execute(text("""
+            ALTER TABLE document_requests
+            ADD COLUMN IF NOT EXISTS supporting_documents JSONB;
+        """))
+        conn.execute(text("""
+            ALTER TABLE document_requests
+            ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+        """))
+        conn.commit()
+
+ensure_schema()
 
 # Seed Admin User and Initial Data
 def seed_data():
@@ -111,12 +170,55 @@ def get_db():
 def read_root():
     return {"message": "eSign API is running"}
 
-@app.post("/upload")
-async def upload_file(file: UploadFile = File(...)):
+def optimize_pdf(input_bytes: bytes) -> bytes:
+    """Optimizes PDF bytes using PyMuPDF."""
     try:
-        blob_client = container_client.get_blob_client(f"templates/{file.filename}")
-        blob_client.upload_blob(file.file, overwrite=True)
-        return {"filename": file.filename, "message": "File uploaded successfully"}
+        doc = fitz.open(stream=input_bytes, filetype="pdf")
+        output_stream = io.BytesIO()
+        # garbage=3: moderate cleanup, deflate=True: compress streams
+        doc.save(output_stream, garbage=3, deflate=True)
+        optimized_bytes = output_stream.getvalue()
+        doc.close()
+        # Only return optimized if it's actually smaller
+        if len(optimized_bytes) < len(input_bytes):
+            return optimized_bytes
+        return input_bytes
+    except Exception as e:
+        print(f"Optimization failed: {e}")
+        return input_bytes
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...), folder: str = "templates", optimize: bool = False):
+    try:
+        file_content = await file.read()
+        
+        if optimize and file.filename.lower().endswith(".pdf"):
+            print(f"Optimizing {file.filename} (original size: {len(file_content)} bytes)")
+            file_content = optimize_pdf(file_content)
+            print(f"New size: {len(file_content)} bytes")
+
+        blob_path = f"{folder}/{file.filename}"
+        blob_client = container_client.get_blob_client(blob_path)
+        blob_client.upload_blob(file_content, overwrite=True)
+        
+        # Generate a SAS link for the uploaded file
+        sas_token = generate_blob_sas(
+            account_name=blob_client.account_name,
+            container_name=CONTAINER_NAME,
+            blob_name=blob_path,
+            account_key=blob_service_client.credential.account_key,
+            permission=BlobSasPermissions(read=True),
+            expiry=datetime.utcnow() + timedelta(days=365),
+            start_time=datetime.utcnow() - timedelta(minutes=15) # Buffer for clock skew
+        )
+        url = f"https://{blob_client.account_name}.blob.core.windows.net/{CONTAINER_NAME}/{quote(blob_path, safe='/')}?{sas_token}"
+        
+        return {
+            "filename": file.filename, 
+            "url": url,
+            "size": len(file_content),
+            "message": "File uploaded successfully"
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -136,9 +238,10 @@ async def get_sas_link(filename: str):
             blob_name=blob_client.blob_name,
             account_key=blob_service_client.credential.account_key,
             permission=BlobSasPermissions(read=True),
-            expiry=datetime.utcnow() + timedelta(hours=1)
+            expiry=datetime.utcnow() + timedelta(hours=12), # Increased from 1h for stability
+            start_time=datetime.utcnow() - timedelta(minutes=15)
         )
-        url = f"https://{blob_client.account_name}.blob.core.windows.net/{CONTAINER_NAME}/{blob_client.blob_name}?{sas_token}"
+        url = f"https://{blob_client.account_name}.blob.core.windows.net/{CONTAINER_NAME}/{quote(blob_client.blob_name, safe='/')}?{sas_token}"
         return {"url": url}
     except Exception as e:
          raise HTTPException(status_code=500, detail=str(e))
@@ -638,6 +741,7 @@ def create_draft(request: schemas.RequestCreate, db: Session = Depends(get_db)):
         department=request.department,
         doc_type=request.doc_type,
         form_data=request.form_data,
+        supporting_documents=request.supporting_documents if request.supporting_documents else [],
         status="Draft"
     )
     db.add(db_request)
@@ -668,13 +772,17 @@ def read_requests(user_email: Optional[str] = None, skip: int = 0, limit: int = 
         user = db.query(models.User).filter(models.User.email.ilike(user_email)).first()
         if user and user.role != "Admin":
             scope = user.access_scope or "global"
+            # Robustly handle missing/null permissions JSON
+            permissions = user.permissions or {}
+            if not isinstance(permissions, dict):
+                permissions = {}
             
             # Base filters for access scope
             scope_filters = []
             if scope == "own":
                 scope_filters.append(models.DocumentRequest.requester_email == user_email)
             elif scope == "department":
-                allowed_depts = user.permissions.get("departments", [])
+                allowed_depts = permissions.get("departments", [])
                 if allowed_depts:
                     scope_filters.append(models.DocumentRequest.department.in_(allowed_depts))
                 else:

@@ -9,6 +9,7 @@ class RequestCreate(BaseModel):
     form_data: Dict[str, Any]
     requester_email: Optional[str] = None
     requester_name: Optional[str] = None
+    supporting_documents: Optional[List[Dict[str, Any]]] = []
 
 class ApprovalResponse(BaseModel):
     id: int
@@ -28,6 +29,7 @@ class RequestResponse(BaseModel):
     status: str
     created_at: datetime
     current_pdf_url: Optional[str]
+    supporting_documents: List[Dict[str, Any]] = []
     approvals: List[ApprovalResponse] = []
 
     class Config:

@@ -17,6 +17,7 @@ class DocumentRequest(Base):
     
     current_pdf_url = Column(String, nullable=True) # URL of the generated PDF (unsigned or partially signed)
     original_pdf_url = Column(String, nullable=True) # Original unsigned PDF
+    supporting_documents = Column(JSON, default=list) # List of { name, url, size }
     
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
