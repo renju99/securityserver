@@ -2708,149 +2708,145 @@ export default function Home() {
             )}
 
             {selectedRequest && (
-              <div className="fixed inset-0 bg-black/60 z-40 flex items-center justify-center p-4 backdrop-blur-md animate-in fade-in duration-300">
-                <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden transform scale-100 animate-in zoom-in-95 duration-300 flex flex-col mx-2 sm:mx-0">
-                  <div className="bg-indigo-700 p-6 md:p-8 text-white flex justify-between items-center relative">
-                    {/* Pattern overlay */}
-                    <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden">
-                      <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <path d="M0 100 C 20 0 50 0 100 100" fill="none" stroke="white" strokeWidth="0.5" />
-                      </svg>
-                    </div>
+              <div className="fixed inset-0 bg-slate-900/50 z-40 flex items-center justify-center p-4 backdrop-blur-[2px] animate-in fade-in duration-200">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col mx-2 sm:mx-0 border border-slate-200">
+                  <div className="bg-slate-50 border-b border-slate-200 p-6 flex justify-between items-center relative">
                     <div className="relative z-10">
-                      <h2 className="text-2xl md:text-3xl font-black tracking-tight mb-2">Request #{selectedRequest.id}</h2>
-                      <div className="flex items-center space-x-3 text-indigo-100">
-                        <span className="bg-white/20 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest">{selectedRequest.department}</span>
-                        <span className="bg-white/20 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest">{selectedRequest.doc_type}</span>
+                      <h2 className="text-xl font-bold text-slate-800 mb-1">Request #{selectedRequest.id}</h2>
+                      <div className="flex items-center space-x-2 text-slate-500 text-xs">
+                        <span className="font-medium tracking-wide">{selectedRequest.department}</span>
+                        <span className="text-slate-300">•</span>
+                        <span className="font-medium tracking-wide">{selectedRequest.doc_type}</span>
                       </div>
                     </div>
                     <button
                       onClick={() => setSelectedRequest(null)}
-                      className="relative z-10 w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white text-xl md:text-2xl font-bold transition-all"
+                      className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded transition-colors"
                     >
-                      ×
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
                     </button>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50 custom-scrollbar">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+                  <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50 custom-scrollbar">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* Left: Document Info */}
-                      <div className="space-y-4 md:space-y-6">
-                        <div className="bg-white p-4 md:p-6 rounded-3xl border border-gray-100 shadow-sm">
-                          <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4">Document Details</h3>
+                      <div className="space-y-6">
+                        <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+                          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100">Document Details</h3>
                           <div className="space-y-4">
                             <div>
-                              <p className="text-xs font-bold text-gray-400 uppercase">Template Name</p>
-                              <p className="text-base md:text-lg font-black text-gray-900">{selectedRequest.template_name}</p>
+                              <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1">Template Name</p>
+                              <p className="text-sm font-semibold text-slate-800">{selectedRequest.template_name}</p>
                             </div>
                             <div>
-                              <p className="text-xs font-bold text-gray-400 uppercase">Created Date</p>
-                              <p className="text-base font-bold text-gray-900">{new Date(selectedRequest.created_at).toLocaleString()}</p>
+                              <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1">Created Date</p>
+                              <p className="text-sm font-medium text-slate-700">{new Date(selectedRequest.created_at).toLocaleString()}</p>
                             </div>
-                            <div className="pt-4">
+                            <div className="pt-2">
                               <a
                                 href={selectedRequest.current_pdf_url}
                                 target="_blank"
-                                className="flex items-center justify-center space-x-2 bg-indigo-600 text-white px-5 py-2.5 rounded-md text-sm font-medium hover:bg-indigo-700 transition-all shadow-sm"
+                                className="inline-flex items-center justify-center space-x-2 bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-50 hover:text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-200"
                               >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.707 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                                <span>Review Document PDF</span>
+                                <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.707 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                                <span>View PDF</span>
                               </a>
                             </div>
                           </div>
                         </div>
 
-                        <div className="bg-white p-4 md:p-6 rounded-3xl border border-gray-100 shadow-sm">
-                          <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4">Current Status</h3>
-                          <div
-                            className={`inline-block px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm border
-                            ${selectedRequest.status === 'Draft' ? 'bg-gray-100 text-gray-600 border-gray-200' :
-                                selectedRequest.status === 'Pending Approval' ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-emerald-50 text-emerald-700 border-emerald-100'}`}
-                            title={getDisplayStatus(selectedRequest)}
-                          >
-                            {getDisplayStatus(selectedRequest)}
+                        <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+                          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100">Current Status</h3>
+                          <div className="flex items-center">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border
+                              ${selectedRequest.status === 'Draft' ? 'bg-slate-50 text-slate-600 border-slate-200' :
+                                  selectedRequest.status === 'Pending Approval' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}
+                              title={getDisplayStatus(selectedRequest)}
+                            >
+                              {selectedRequest.status === 'Pending Approval' && <svg className="w-3.5 h-3.5 mr-1.5 animate-pulse" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>}
+                              {selectedRequest.status === 'Signed' && <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>}
+                              {getDisplayStatus(selectedRequest)}
+                            </span>
                           </div>
                         </div>
                       </div>
 
                       {/* Right: Workflow Tracker */}
-                      <div className="bg-white p-4 md:p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
-                        <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-6">Approval Workflow</h3>
-                        <div className="space-y-4 flex-1">
+                      <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex flex-col">
+                        <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-5 pb-2 border-b border-slate-100">Approval Workflow</h3>
+                        <div className="space-y-0 flex-1 relative before:absolute before:inset-0 before:ml-[1.15rem] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
                           {(!selectedRequest.approvals || selectedRequest.approvals.length === 0) && (
                             <div className="text-center py-8">
-                              <p className="text-gray-400 italic">No workflow initialized for this request.</p>
+                              <p className="text-sm text-slate-400">No workflow defined.</p>
                             </div>
                           )}
                           {selectedRequest.approvals && selectedRequest.approvals
                             .sort((a: any, b: any) => a.step_number - b.step_number)
-                            .map((app: any) => (
-                              <div key={app.id} className={`flex flex-col sm:flex-row sm:items-center p-4 rounded-3xl border-2 transition-all duration-300 ${app.status === 'Signed' ? 'bg-emerald-50/50 border-emerald-100 shadow-sm' : app.status === 'Pending' ? 'bg-white border-indigo-200 shadow-xl scale-[1.02] z-10' : 'bg-gray-50 border-gray-100 opacity-60'}`}>
-                                <div className="flex items-center flex-1 min-w-0 mb-4 sm:mb-0">
-                                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mr-4 font-black flex-shrink-0 shadow-inner ${app.status === 'Signed' ? 'bg-emerald-500 text-white' : app.status === 'Pending' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-gray-200 text-gray-400'}`}>
-                                    {app.status === 'Signed' ? (
-                                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
-                                    ) : app.step_number}
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-1.5 mb-0.5">
-                                      <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" /></svg>
-                                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Approver</p>
-                                    </div>
-                                    <p className="text-sm md:text-base font-black text-gray-900 break-all leading-tight" title={app.role}>
-                                      {app.role}
-                                    </p>
-                                    <div className="flex items-center gap-2 mt-1">
-                                      <span className={`w-2 h-2 rounded-full ${app.status === 'Signed' ? 'bg-emerald-500' : app.status === 'Pending' ? 'bg-indigo-600 animate-pulse' : 'bg-gray-300'}`}></span>
-                                      <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${app.status === 'Signed' ? 'text-emerald-600' : app.status === 'Pending' ? 'text-indigo-600' : 'text-gray-400'}`}>
-                                        {app.status}
+                            .map((app: any, index: number) => {
+                              const minPending = Math.min(...selectedRequest.approvals.filter((a: any) => a.status === 'Pending').map((a: any) => a.step_number));
+                              const isTurn = app.step_number === minPending;
+                              const isUserMatch = user?.role?.toLowerCase() === app.role?.toLowerCase() ||
+                                user?.email?.toLowerCase() === app.role?.toLowerCase();
+                              const showButton = app.status === 'Pending' && isTurn && isUserMatch;
+
+                              return (
+                                <div key={app.id} className="relative flex items-start md:items-center py-4 group">
+                                  {/* Timeline node */}
+                                  <div className={`absolute left-0 md:left-1/2 -translate-x-[5px] md:-translate-x-1/2 mt-1 md:mt-0 w-3 h-3 rounded-full border-2 bg-white z-10 transition-colors duration-200 
+                                    ${app.status === 'Signed' ? 'border-emerald-500 bg-emerald-500' :
+                                      app.status === 'Pending' && isTurn ? 'border-indigo-600 outline outline-2 outline-indigo-100 outline-offset-2' :
+                                        app.status === 'Pending' ? 'border-slate-300' : 'border-slate-200 bg-slate-100'}`}
+                                  />
+
+                                  {/* Content */}
+                                  <div className={`flex flex-col md:flex-row w-full pl-6 md:pl-0 
+                                    md:odd:flex-row-reverse md:odd:text-right 
+                                    md:even:flex-row md:even:text-left`}>
+
+                                    <div className="md:w-1/2 md:px-6 mb-2 md:mb-0">
+                                      {/* Role / Addr */}
+                                      <p className={`text-sm font-semibold truncate ${app.status === 'Signed' || (app.status === 'Pending' && isTurn) ? 'text-slate-800' : 'text-slate-500'}`} title={app.role}>
+                                        {app.role}
                                       </p>
+                                      <p className="text-[11px] font-medium text-slate-400 mt-0.5">Step {app.step_number} • {app.status}</p>
                                     </div>
+
+                                    {/* Action Area */}
+                                    <div className={`md:w-1/2 md:px-6 flex items-center md:items-start 
+                                      md:odd:justify-start md:even:justify-end`}>
+                                      {showButton ? (
+                                        <button
+                                          onClick={() => handleOpenSignature(app.id)}
+                                          className="px-4 py-1.5 flex items-center justify-center space-x-1.5 bg-indigo-600 text-white rounded-md text-sm font-medium shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 transition-all"
+                                        >
+                                          <span>Sign Document</span>
+                                          <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                        </button>
+                                      ) : app.status === 'Signed' ? (
+                                        <span className="inline-flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md">
+                                          <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                                          Completed
+                                        </span>
+                                      ) : (
+                                        <span className="inline-flex items-center text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">
+                                          Waiting...
+                                        </span>
+                                      )}
+                                    </div>
+
                                   </div>
                                 </div>
-                                {app.status === 'Pending' && (
-                                  <div className="w-full sm:w-auto flex justify-end sm:ml-4">
-                                    <button
-                                      onClick={() => {
-                                        const minPending = Math.min(...selectedRequest.approvals.filter((a: any) => a.status === 'Pending').map((a: any) => a.step_number));
-                                        const isTurn = app.step_number === minPending;
-                                        const isUserMatch = user?.role?.toLowerCase() === app.role?.toLowerCase() ||
-                                          user?.email?.toLowerCase() === app.role?.toLowerCase();
-                                        if (isTurn && isUserMatch) {
-                                          handleOpenSignature(app.id);
-                                        }
-                                      }}
-                                      disabled={
-                                        (user?.role?.toLowerCase() !== app.role?.toLowerCase() &&
-                                          user?.email?.toLowerCase() !== app.role?.toLowerCase()) ||
-                                        app.step_number !== Math.min(...selectedRequest.approvals.filter((a: any) => a.status === 'Pending').map((a: any) => a.step_number))
-                                      }
-                                      title={
-                                        (user?.role?.toLowerCase() !== app.role?.toLowerCase() &&
-                                          user?.email?.toLowerCase() !== app.role?.toLowerCase())
-                                          ? "You do not have the required role or email"
-                                          : app.step_number !== Math.min(...selectedRequest.approvals.filter((a: any) => a.status === 'Pending').map((a: any) => a.step_number))
-                                            ? "Previous steps must be completed first"
-                                            : "Sign this document"
-                                      }
-                                      className={`w-full sm:w-auto px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg transition-all transform active:scale-95 ${(user?.role?.toLowerCase() === app.role?.toLowerCase() || user?.email?.toLowerCase() === app.role?.toLowerCase()) &&
-                                        app.step_number === Math.min(...selectedRequest.approvals.filter((a: any) => a.status === 'Pending').map((a: any) => a.step_number))
-                                        ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white hover:from-indigo-700 hover:to-blue-700 shadow-indigo-200'
-                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 opacity-60'
-                                        }`}
-                                    >
-                                      Sign Now
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
-                            ))}
+                              );
+                            })}
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-4 md:p-6 bg-white border-t flex justify-end space-x-3 md:space-x-4">
+                  <div className="p-4 md:p-5 bg-slate-50 border-t border-slate-200 flex justify-end space-x-3">
                     {user?.role === 'Admin' && selectedRequest.status !== 'Archived' && (
                       <button
                         onClick={async () => {
@@ -2870,14 +2866,14 @@ export default function Home() {
                             }
                           }
                         }}
-                        className="px-4 py-2.5 md:px-6 md:py-3 bg-red-50 text-red-600 rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest hover:bg-red-100 transition-all"
+                        className="px-4 py-2 bg-white border border-red-200 text-red-600 rounded-md text-sm font-medium hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 transition-colors"
                       >
-                        Archive
+                        Archive Request
                       </button>
                     )}
                     <button
                       onClick={() => setSelectedRequest(null)}
-                      className="px-6 py-2.5 md:px-8 md:py-3 bg-gray-100 text-gray-600 rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest hover:bg-gray-200 transition-all"
+                      className="px-5 py-2 bg-white border border-slate-300 text-slate-700 rounded-md text-sm font-medium hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-1 transition-colors"
                     >
                       Close
                     </button>

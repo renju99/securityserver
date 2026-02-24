@@ -3,7 +3,7 @@
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 
-console.log("[EmiratesIDReader] V7.4 (Edge Resilience) initialized");
+console.log("[EmiratesIDReader] V7.4.3 (Edge Resilience) initialized");
 
 // Utility to handle Emirates ID Toolkit Service communication
 export const EmiratesIDReader = {
@@ -98,6 +98,7 @@ export const EmiratesIDReader = {
         let retryCount = 0;
         let sequenceCounter = 0;
         let lastReq = null;
+        let cmd6Attempt = 0;
 
         return new Promise((resolve, reject) => {
             const sendReq = (payload) => {
@@ -134,6 +135,33 @@ export const EmiratesIDReader = {
                             selectedReader = "SCM Microsystems Inc. SCR3310 USB Smart Card Reader 0";
                             sendReq({ "cmd": 4, "service_context": serviceContext, "smartcard_reader": selectedReader });
                             return;
+                        }
+
+                        // Robust Fallback for Command 6 (Read Data)
+                        if (errorCode == 290 && lastReq.cmd == 6) {
+                            cmd6Attempt++;
+                            if (cmd6Attempt == 1) {
+                                console.warn("[EmiratesIDReader] CMD 6 Attempt 1 Failed. Trying Classic Mixed payload...");
+                                sendReq({
+                                    "cmd": 6,
+                                    "service_context": serviceContext,
+                                    "card_context": cardContext,
+                                    "is_v2": true,
+                                    "read_publicdata": true,
+                                    "read_photography": true
+                                });
+                                return;
+                            } else if (cmd6Attempt == 2) {
+                                console.warn("[EmiratesIDReader] CMD 6 Attempt 2 Failed. Trying Minimalist payload...");
+                                sendReq({
+                                    "cmd": 6,
+                                    "service_context": serviceContext,
+                                    "card_context": cardContext,
+                                    "is_v2": true,
+                                    "read_publicdata": true
+                                });
+                                return;
+                            }
                         }
 
                         // Hardware Busy Retry
@@ -176,15 +204,17 @@ export const EmiratesIDReader = {
                         sendReq({ "cmd": 19, "service_context": serviceContext, "card_context": cardContext });
                     }
                     else if (res.interface_type) {
-                        console.log(`[EmiratesIDReader] Step 4 OK (${res.interface_type}). Reading data...`);
+                        console.log(`[EmiratesIDReader] Step 4 OK (${res.interface_type}). Reading data (Original Mode)...`);
                         sendReq({
                             "cmd": 6,
                             "service_context": serviceContext,
                             "card_context": cardContext,
-                            "is_v2": true,
-                            "read_publicdata": true,
                             "read_photography": true,
-                            "request_id": btoa(Math.random().toString()).substring(0, 10)
+                            "read_non_modifiable_data": true,
+                            "read_modifiable_data": true,
+                            "request_id": btoa(Math.random().toString()).substring(0, 10),
+                            "signature_image": false,
+                            "address": true
                         });
                     }
                     else if (res.id_number || res.toolkit_response || res.Body || res.payload) {
