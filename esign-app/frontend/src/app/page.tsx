@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 
 const API_BASE_URL = '/api';
 import Link from 'next/link';
@@ -251,6 +251,40 @@ export default function Home() {
   };
 
   const currentFlow = department && docType ? getCurrentFlow() : null;
+
+  const visibleDepartments = useMemo(() => {
+    if (user?.role === 'Admin' || user?.access_scope === 'global') return departments;
+    const allowedDepts = user?.permissions?.departments || [];
+    if (allowedDepts.length === 0) return [];
+    return departments.filter(d => allowedDepts.includes(d.name));
+  }, [departments, user]);
+
+  const visibleTemplates = useMemo(() => {
+    if (!department) return [];
+
+    // Filter templates grouped by their association
+    return templates.filter(tName => {
+      // Admins and Global users see everything in the selected department
+      // But we still filter by the *selected* department.
+
+      // 1. Check PDF Templates mapping
+      const pdfTpl = pdfTemplates.find(p => p.name === tName);
+      if (pdfTpl && pdfTpl.department) {
+        return pdfTpl.department === department;
+      }
+
+      // 2. Check Dynamic Templates mapping
+      const dynTpl = dynamicTemplates.find(d => d.name === tName);
+      if (dynTpl && dynTpl.category) {
+        return dynTpl.category === department;
+      }
+
+      // If it's a generic blob with no department mapping
+      // Only Admins (or maybe global users) see unassociated templates?
+      // Usually unassociated templates are "drafts" or system templates.
+      return user?.role === 'Admin' || user?.access_scope === 'global';
+    });
+  }, [templates, pdfTemplates, dynamicTemplates, department, user]);
 
   useEffect(() => {
     if (selectedTemplate) {
@@ -1689,12 +1723,16 @@ export default function Home() {
                       <label className="block text-xs font-medium text-gray-500 mb-1">Department</label>
                       <select
                         value={department}
-                        onChange={(e) => setDepartment(e.target.value)}
+                        onChange={(e) => {
+                          setDepartment(e.target.value);
+                          setSelectedTemplate('');
+                          setDocType('');
+                        }}
                         className="w-full px-3 py-2 text-sm bg-white text-gray-900 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 transition-all appearance-none cursor-pointer"
                         style={{ color: '#000000', backgroundColor: '#ffffff' }}
                       >
                         <option value="">Select Department</option>
-                        {departments.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
+                        {visibleDepartments.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
                       </select>
                     </div>
                     <div>
@@ -1712,9 +1750,13 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {templates.length === 0 ? (
+                  {!department ? (
+                    <div className="p-4 bg-indigo-50 text-indigo-700 rounded-lg text-sm italic font-medium">
+                      Please select a department above to see available templates.
+                    </div>
+                  ) : visibleTemplates.length === 0 ? (
                     <div className="p-4 bg-yellow-50 text-yellow-800 rounded-lg text-sm">
-                      No templates found. Please upload .docx files to the <strong>templates/</strong> folder.
+                      No templates found for {department}.
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -1726,7 +1768,7 @@ export default function Home() {
                         style={{ color: '#111827', backgroundColor: '#ffffff' }}
                       >
                         <option value="">-- Choose a Template --</option>
-                        {templates.map(t => <option key={t} value={t}>{t}</option>)}
+                        {visibleTemplates.map(t => <option key={t} value={t}>{t}</option>)}
                       </select>
                     </div>
                   )}
