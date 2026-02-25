@@ -141,24 +141,26 @@ def read_request(request_id: int, db: Session = Depends(get_db)):
     return req
 
 @router.get("/requests/{request_id}/view-url")
-def get_request_view_url(request_id: int, user_email: str, request: Request, db: Session = Depends(get_db)):
+def get_request_view_url(request_id: int, user_email: str, request: Request, blob_path: Optional[str] = None, db: Session = Depends(get_db)):
     req = db.query(models.DocumentRequest).filter(models.DocumentRequest.id == request_id).first()
     if not req:
         raise HTTPException(status_code=404, detail="Request not found")
     
-    # Use blob path if available, fallback to parsing URL
-    blob_path = req.current_pdf_blob
-    if not blob_path and req.current_pdf_url:
-        try:
-            blob_path = req.current_pdf_url.split("esign-vault/")[1].split("?")[0]
-        except:
-            pass
+    target_blob = blob_path
+    if not target_blob:
+        # Fallback to main PDF if no specific blob_path provided
+        target_blob = req.current_pdf_blob
+        if not target_blob and req.current_pdf_url:
+            try:
+                target_blob = req.current_pdf_url.split("esign-vault/")[1].split("?")[0]
+            except:
+                pass
 
-    if not blob_path:
+    if not target_blob:
         raise HTTPException(status_code=400, detail="No document blob found")
 
     # Generate a short-lived URL (30 minutes)
-    new_url = blob_service.get_sas_url(blob_path, expiry_hours=0.5)
+    new_url = blob_service.get_sas_url(target_blob, expiry_hours=0.5)
     
     # Audit this view
     audit_service.log_event(

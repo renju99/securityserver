@@ -861,6 +861,28 @@ export default function Home() {
     }
   };
 
+  const handleViewAttachment = async (reqId: number, name: string, url: string) => {
+    try {
+      // Find the blob path from the URL
+      let blobPath = "";
+      try {
+        blobPath = url.split("esign-vault/")[1].split("?")[0];
+      } catch (e) {
+        blobPath = url; // fallback
+      }
+
+      const res = await fetch(`/api/requests/${reqId}/view-url?user_email=${encodeURIComponent(user?.email || "")}&blob_path=${encodeURIComponent(blobPath)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setPreviewDoc({ name, url: data.url });
+      } else {
+        alert("Failed to generate secure attachment link.");
+      }
+    } catch (e) {
+      alert("Error fetching secure attachment link.");
+    }
+  };
+
   const handleOpenSignature = (approvalId: number) => {
     setSigningApprovalId(approvalId);
     setSigningComment("");
@@ -2699,6 +2721,7 @@ export default function Home() {
                 user={user}
                 onRefresh={fetchRequests}
                 onViewDoc={handleViewRequestDoc}
+                onViewAttachment={handleViewAttachment}
               />
             )}
 
@@ -2727,9 +2750,9 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex-1 bg-slate-100 overflow-auto flex items-center justify-center">
-                    {previewDoc.name.toLowerCase().endsWith('.pdf') ? (
+                    {(previewDoc.name.toLowerCase().endsWith('.pdf') || previewDoc.url.toLowerCase().includes('.pdf') || previewDoc.url.toLowerCase().includes('rsct=application%2fpdf')) ? (
                       <iframe
-                        src={`${previewDoc.url}#toolbar=0`}
+                        src={`${previewDoc.url}${previewDoc.url.includes('#') ? '' : '#toolbar=0'}`}
                         className="w-full h-full border-none"
                         title="PDF Preview"
                       />
@@ -2737,7 +2760,14 @@ export default function Home() {
                       <img
                         src={previewDoc.url}
                         alt={previewDoc.name}
-                        className="max-w-full max-h-full object-contain"
+                        className="max-w-full max-h-full object-contain shadow-lg rounded-lg"
+                        onError={(e) => {
+                          // Fallback for cases where auto-detection might fail but it's actually an image
+                          const target = e.target as HTMLImageElement;
+                          if (target.src.includes('rsct=application%2fpdf')) {
+                            console.warn("Image preview failed, might be a PDF mislabeled?");
+                          }
+                        }}
                       />
                     )}
                   </div>

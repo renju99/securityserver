@@ -8,10 +8,11 @@ interface RequestDetailModalProps {
     onClose: () => void;
     onRefresh: () => void;
     onViewDoc: (req: DocumentRequest) => void;
+    onViewAttachment: (reqId: number, name: string, url: string) => void;
 }
 
 const RequestDetailModal: React.FC<RequestDetailModalProps> = ({
-    request, user, onClose, onRefresh, onViewDoc
+    request, user, onClose, onRefresh, onViewDoc, onViewAttachment
 }) => {
     const [rejectComment, setRejectComment] = useState('');
     const [showRejectForm, setShowRejectForm] = useState(false);
@@ -155,10 +156,14 @@ const RequestDetailModal: React.FC<RequestDetailModalProps> = ({
                                                 <span className="text-gray-400 font-bold uppercase text-[10px] tracking-widest block mb-1">Attachments</span>
                                                 <div className="flex flex-wrap gap-2 mt-2">
                                                     {request.supporting_documents.map((doc, i) => (
-                                                        <a key={i} href={doc.url} target="_blank" rel="noreferrer" className="px-3 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-indigo-600 hover:border-indigo-600 transition-all flex items-center gap-1">
+                                                        <button
+                                                            key={i}
+                                                            onClick={() => onViewAttachment(request.id, doc.name, doc.url)}
+                                                            className="px-3 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-indigo-600 hover:border-indigo-600 transition-all flex items-center gap-1 shadow-sm"
+                                                        >
                                                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.414a4 4 0 00-5.656-5.656l-6.415 6.415a6 6 0 108.486 8.486L20.5 13" /></svg>
                                                             {doc.name}
-                                                        </a>
+                                                        </button>
                                                     ))}
                                                 </div>
                                             </div>
