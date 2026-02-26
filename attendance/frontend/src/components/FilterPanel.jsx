@@ -74,137 +74,110 @@ const FilterPanel = ({
     return (
         <div className="filter-panel">
             <div className="filter-header">
-                <h4>Filters</h4>
+                <div className="filter-title">
+                    <span>🔍</span> Filters
+                    {hasFilters && <span className="filter-count">{selectedRoles.length + selectedSites.length}</span>}
+                </div>
                 {hasFilters && (
-                    <button className="filter-clear-btn" onClick={onClear}>
+                    <button className="clear-filters-btn" onClick={onClear}>
                         Clear All
                     </button>
                 )}
             </div>
 
-            <div className="filter-section">
-                <label className="filter-label">Roles</label>
-                <div className="dropdown-container" ref={roleDropdownRef}>
-                    <button
-                        className="dropdown-trigger"
-                        onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
-                        aria-expanded={isRoleDropdownOpen}
-                    >
-                        <span>
+            <div className="filter-grid">
+                {/* Roles Filter */}
+                <div className="filter-section">
+                    <label className="filter-label">Roles</label>
+                    <div className="dropdown-container" ref={roleDropdownRef}>
+                        <button
+                            className={`dropdown-trigger ${selectedRoles.length > 0 ? 'has-selection' : ''}`}
+                            onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
+                        >
                             {selectedRoles.length === 0
-                                ? 'Select Roles...'
+                                ? 'All Roles'
                                 : `${selectedRoles.length} Role${selectedRoles.length > 1 ? 's' : ''} Selected`}
-                        </span>
-                        <svg
-                            className="dropdown-arrow"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </button>
+                            <span className={`dropdown-arrow ${isRoleDropdownOpen ? 'open' : ''}`}>▼</span>
+                        </button>
 
-                    {isRoleDropdownOpen && (
-                        <div className="dropdown-menu">
-                            <div className="dropdown-search">
-                                <input
-                                    type="text"
-                                    placeholder="Search roles..."
-                                    value={roleSearchTerm}
-                                    onChange={(e) => setRoleSearchTerm(e.target.value)}
-                                    autoFocus
-                                    onClick={(e) => e.stopPropagation()}
-                                />
+                        {isRoleDropdownOpen && (
+                            <div className="dropdown-menu">
+                                <div className="dropdown-search">
+                                    <input
+                                        type="text"
+                                        placeholder="Search roles..."
+                                        value={roleSearchTerm}
+                                        onChange={(e) => setRoleSearchTerm(e.target.value)}
+                                        onClick={(e) => e.stopPropagation()}
+                                        autoFocus
+                                    />
+                                </div>
+                                <div className="dropdown-list">
+                                    {filteredRoles.length > 0 ? (
+                                        filteredRoles.map(role => (
+                                            <label key={role.id} className="filter-checkbox" onClick={(e) => e.stopPropagation()}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedRoles.includes(role.id)}
+                                                    onChange={() => handleRoleToggle(role.id)}
+                                                />
+                                                <span>{role.name}</span>
+                                            </label>
+                                        ))
+                                    ) : (
+                                        <div className="no-results">No roles found</div>
+                                    )}
+                                </div>
                             </div>
-                            <div className="dropdown-list">
-                                {filteredRoles.length > 0 ? (
-                                    filteredRoles.map(role => (
-                                        <label key={role.id} className="filter-checkbox">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedRoles.includes(role.id)}
-                                                onChange={() => handleRoleToggle(role.id)}
-                                            />
-                                            <span>{role.name}</span>
-                                        </label>
-                                    ))
-                                ) : (
-                                    <div style={{ padding: '0.5rem', textAlign: 'center', color: '#64748b', fontSize: '0.875rem' }}>
-                                        No roles found
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
-            </div>
 
-            <div className="filter-section">
-                <label className="filter-label">Sites</label>
-                <div className="dropdown-container" ref={siteDropdownRef}>
-                    <button
-                        className="dropdown-trigger"
-                        onClick={() => setIsSiteDropdownOpen(!isSiteDropdownOpen)}
-                        aria-expanded={isSiteDropdownOpen}
-                    >
-                        <span>
-                            {selectedSites.length === 0
-                                ? 'Select Sites...'
-                                : `${selectedSites.length} Site${selectedSites.length > 1 ? 's' : ''} Selected`}
-                        </span>
-                        <svg
-                            className="dropdown-arrow"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
+                {/* Sites Filter */}
+                <div className="filter-section">
+                    <label className="filter-label">Sites</label>
+                    <div className="dropdown-container" ref={siteDropdownRef}>
+                        <button
+                            className={`dropdown-trigger ${selectedSites.length > 0 ? 'has-selection' : ''}`}
+                            onClick={() => setIsSiteDropdownOpen(!isSiteDropdownOpen)}
                         >
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </button>
+                            {selectedSites.length === 0
+                                ? 'All Sites'
+                                : `${selectedSites.length} Site${selectedSites.length > 1 ? 's' : ''} Selected`}
+                            <span className={`dropdown-arrow ${isSiteDropdownOpen ? 'open' : ''}`}>▼</span>
+                        </button>
 
-                    {isSiteDropdownOpen && (
-                        <div className="dropdown-menu">
-                            <div className="dropdown-search">
-                                <input
-                                    type="text"
-                                    placeholder="Search sites..."
-                                    value={siteSearchTerm}
-                                    onChange={(e) => setSiteSearchTerm(e.target.value)}
-                                    autoFocus
-                                    onClick={(e) => e.stopPropagation()}
-                                />
+                        {isSiteDropdownOpen && (
+                            <div className="dropdown-menu">
+                                <div className="dropdown-search">
+                                    <input
+                                        type="text"
+                                        placeholder="Search sites..."
+                                        value={siteSearchTerm}
+                                        onChange={(e) => setSiteSearchTerm(e.target.value)}
+                                        onClick={(e) => e.stopPropagation()}
+                                        autoFocus
+                                    />
+                                </div>
+                                <div className="dropdown-list">
+                                    {filteredSites.length > 0 ? (
+                                        filteredSites.map(site => (
+                                            <label key={site.id} className="filter-checkbox" onClick={(e) => e.stopPropagation()}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedSites.includes(site.id)}
+                                                    onChange={() => handleSiteToggle(site.id)}
+                                                />
+                                                <span>{site.name}</span>
+                                            </label>
+                                        ))
+                                    ) : (
+                                        <div className="no-results">No sites found</div>
+                                    )}
+                                </div>
                             </div>
-                            <div className="dropdown-list">
-                                {filteredSites.length > 0 ? (
-                                    filteredSites.map(site => (
-                                        <label key={site.id} className="filter-checkbox">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedSites.includes(site.id)}
-                                                onChange={() => handleSiteToggle(site.id)}
-                                            />
-                                            <span>{site.name}</span>
-                                        </label>
-                                    ))
-                                ) : (
-                                    <div style={{ padding: '0.5rem', textAlign: 'center', color: '#64748b', fontSize: '0.875rem' }}>
-                                        No sites found
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

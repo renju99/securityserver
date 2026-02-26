@@ -1234,6 +1234,24 @@ button:disabled {
   border: 1px solid var(--gray-200);
 }
 
+.modal-content-lg {
+  max-width: 1000px;
+  width: 95%;
+}
+
+.geofence-form-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 850px) {
+  .geofence-form-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
 .modal-content h3 {
   margin: 0 0 1.25rem;
   font-size: 1rem;

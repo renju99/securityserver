@@ -63,6 +63,24 @@ services:
     networks:
       - default
 
+  # RA08 Facial Recognition Listener
+  ra08-service:
+    build: ./ra08-listener
+    container_name: ra08_service
+    environment:
+      - BACKEND_URL=http://api:3000/api/biometrics/log
+      - INTERNAL_TOKEN=attendance_secret_token
+    volumes:
+      - ./ra08-listener/captures:/app/captures
+    ports:
+      - "8001:8000"
+    depends_on:
+      - api
+    networks:
+      - default
+      - web-proxy-net
+    restart: always
+
 volumes:
   postgres_data:
 

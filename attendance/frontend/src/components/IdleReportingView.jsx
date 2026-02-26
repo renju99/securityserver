@@ -191,15 +191,31 @@ const IdleReportingView = ({ user, employees, onMapUpdate, showToast, idleSpots,
             </div>
 
             {localIdleSpots.length > 0 && (
-                <div className="route-stats">
-                    <div className="stat-card-route">
-                        <div className="stat-icon">🛑</div>
-                        <div className="stat-content">
-                            <span className="stat-label">Idle Occurrences</span>
-                            <span className="stat-value">{localIdleSpots.length}</span>
+                <>
+                    <div className="route-stats">
+                        <div className="stat-card-route">
+                            <span className="rt-stat-icon">👤</span>
+                            <div className="stat-content">
+                                <span className="rt-stat-label">Staff Member</span>
+                                <span className="rt-stat-value">
+                                    {(() => {
+                                        const emp = employees.find(e => e.staff_id === selectedStaff);
+                                        return emp ? `${emp.first_name || ''} ${emp.last_name || ''}`.trim() : selectedStaff;
+                                    })()}
+                                </span>
+                                <span className="rt-stat-subtext">{selectedStaff}</span>
+                            </div>
+                        </div>
+
+                        <div className="stat-card-route">
+                            <div className="rt-stat-icon">🛑</div>
+                            <div className="stat-content">
+                                <span className="rt-stat-label">Idle Occurrences</span>
+                                <span className="rt-stat-value">{localIdleSpots.length} Total</span>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </>
             )}
 
             {localIdleSpots.length > 0 && (

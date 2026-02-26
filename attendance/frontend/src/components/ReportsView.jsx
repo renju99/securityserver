@@ -3,6 +3,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import FilterPanel from './FilterPanel';
 import { LoadingSpinner } from './LoadingSpinner';
+import { exportToCSV } from '../utils/exportUtils';
 
 const ReportsView = ({ user, sites, roles, showToast }) => {
     // Default to current month
@@ -17,6 +18,7 @@ const ReportsView = ({ user, sites, roles, showToast }) => {
     const [selectedRole, setSelectedRole] = useState([]); // FilterPanel uses arrays
     const [selectedSite, setSelectedSite] = useState([]);
     const [department, setDepartment] = useState('');
+    const [dataSource, setDataSource] = useState('app'); // 'app' or 'biometric'
 
     const [reportData, setReportData] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -32,11 +34,11 @@ const ReportsView = ({ user, sites, roles, showToast }) => {
                 ...(department && { department })
             });
 
-            // If FilterPanel allows multiple, we iterate? 
             // My backend implementation used single value for now: e.role_id = $1. 
             // So let's stick to single value or pick first.
 
-            const res = await fetch(`/api/hr/reports/attendance?${query}`, {
+            const endpoint = dataSource === 'biometric' ? '/api/hr/reports/biometrics' : '/api/hr/reports/attendance';
+            const res = await fetch(`${endpoint}?${query}`, {
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });
 
@@ -77,24 +79,29 @@ const ReportsView = ({ user, sites, roles, showToast }) => {
         }
 
         // Header
-        const dateHeaders = dates.map(d => d.getDate().toString());
-        const head = [['Staff ID', 'Dept', ...dateHeaders, 'Total P', 'Total A']];
+        const dateHeaders = dates.map(d => `${d.getMonth() + 1}/${d.getDate()}`);
+        const head = [['Staff ID', 'Name', 'Dept', ...dateHeaders, 'Total P', 'Total A']];
 
         const body = reportData.employees.map(emp => {
             const empLogs = reportData.attendance[emp.id] || [];
 
             let presentCount = 0;
             let absentCount = 0;
+            const empName = emp.first_name || emp.last_name ? `${emp.first_name || ''} ${emp.last_name || ''}`.trim() : '-';
 
             const days = dates.map(date => {
                 const dateStr = date.toISOString().split('T')[0];
-                const hasAttendance = empLogs.some(log => {
-                    const logDate = new Date(log.check_in_time).toISOString().split('T')[0];
-                    return logDate === dateStr;
+                const dayLogs = empLogs.filter(log => {
+                    return new Date(log.check_in_time).toISOString().split('T')[0] === dateStr;
                 });
 
-                if (hasAttendance) {
+                if (dayLogs.length > 0) {
                     presentCount++;
+                    if (dataSource === 'biometric') {
+                        const inTime = new Date(dayLogs[0].check_in_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        const outTime = dayLogs[0].check_out_time ? new Date(dayLogs[0].check_out_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
+                        return `${inTime}\n${outTime}`;
+                    }
                     return 'P';
                 } else {
                     absentCount++;
@@ -102,7 +109,7 @@ const ReportsView = ({ user, sites, roles, showToast }) => {
                 }
             });
 
-            return [emp.staff_id, emp.department_name || '-', ...days, presentCount, absentCount];
+            return [emp.staff_id, empName, emp.department_name || '-', ...days, presentCount, absentCount];
         });
 
         autoTable(doc, {
@@ -112,15 +119,20 @@ const ReportsView = ({ user, sites, roles, showToast }) => {
             styles: { fontSize: 8, cellPadding: 1, halign: 'center' },
             headStyles: { fillColor: [66, 133, 244] },
             columnStyles: {
-                0: { cellWidth: 30, halign: 'left' }, // ID
-                1: { cellWidth: 25, halign: 'left' }, // Dept
+                0: { cellWidth: 20, halign: 'left' }, // ID
+                1: { cellWidth: 30, halign: 'left' }, // Name
+                2: { cellWidth: 25, halign: 'left' }, // Dept
             },
             didParseCell: (data) => {
-                if (data.section === 'body' && data.column.index >= 2 && data.column.index < (2 + dates.length)) {
+                const colIdx = data.column.index;
+                if (data.section === 'body' && colIdx >= 3 && colIdx < (3 + dates.length)) {
                     if (data.cell.raw === 'P') {
                         data.cell.styles.textColor = [0, 128, 0]; // Green
                     } else if (data.cell.raw === 'A') {
                         data.cell.styles.textColor = [200, 0, 0]; // Red
+                    } else if (typeof data.cell.raw === 'string' && data.cell.raw.includes('\n')) {
+                        data.cell.styles.fontSize = 6;
+                        data.cell.styles.textColor = [0, 0, 0];
                     }
                 }
             }
@@ -129,9 +141,68 @@ const ReportsView = ({ user, sites, roles, showToast }) => {
         doc.save(`attendance_report_${startDate}_${endDate}.pdf`);
     };
 
+    const generateExcel = () => {
+        if (!reportData || !reportData.employees.length) return;
+
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const dates = [];
+        let curr = new Date(start);
+        while (curr <= end) {
+            dates.push(new Date(curr));
+            curr.setDate(curr.getDate() + 1);
+        }
+
+        const dateHeaders = dates.map(d => `${d.getMonth() + 1}/${d.getDate()}`);
+
+        const exportRows = reportData.employees.map(emp => {
+            const empLogs = reportData.attendance[emp.id] || [];
+            let presentCount = 0;
+            let absentCount = 0;
+            const empName = emp.first_name || emp.last_name ? `${emp.first_name || ''} ${emp.last_name || ''}`.trim() : '-';
+
+            const row = {
+                'Staff ID': emp.staff_id,
+                'Name': empName,
+                'Department': emp.department_name || '-'
+            };
+
+            dates.forEach((date, index) => {
+                const dateHeader = dateHeaders[index];
+                const dateStr = date.toISOString().split('T')[0];
+                const dayLogs = empLogs.filter(log => {
+                    return new Date(log.check_in_time).toISOString().split('T')[0] === dateStr;
+                });
+
+                if (dayLogs.length > 0) {
+                    presentCount++;
+                    if (dataSource === 'biometric') {
+                        const inTimeStr = new Date(dayLogs[0].check_in_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        let outTimeStr = '--:--';
+                        if (dayLogs[0].check_out_time) {
+                            outTimeStr = new Date(dayLogs[0].check_out_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        }
+                        row[dateHeader] = `${inTimeStr} - ${outTimeStr}`;
+                    } else {
+                        row[dateHeader] = 'P';
+                    }
+                } else {
+                    absentCount++;
+                    row[dateHeader] = 'A';
+                }
+            });
+
+            row['Total Present'] = presentCount;
+            row['Total Absent'] = absentCount;
+            return row;
+        });
+
+        exportToCSV(exportRows, `attendance_report_${startDate}_${endDate}.csv`);
+    };
+
     return (
         <div className="reports-container">
-            <div className="reports-card">
+            <div className="reports-card" style={{ flexShrink: 0 }}>
                 <div className="reports-header">
                     <div>
                         <h2>Attendance Reports</h2>
@@ -164,6 +235,32 @@ const ReportsView = ({ user, sites, roles, showToast }) => {
                                         value={endDate}
                                         onChange={(e) => setEndDate(e.target.value)}
                                     />
+                                </div>
+
+                                <div style={{ marginTop: '0.5rem' }}>
+                                    <h3 className="section-title">📡 Data Source</h3>
+                                    <div className="report-form-group" style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: dataSource === 'app' ? 'bold' : 'normal' }}>
+                                            <input
+                                                type="radio"
+                                                name="dataSource"
+                                                value="app"
+                                                checked={dataSource === 'app'}
+                                                onChange={() => setDataSource('app')}
+                                            />
+                                            📱 Mobile App & NFC
+                                        </label>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: dataSource === 'biometric' ? 'bold' : 'normal' }}>
+                                            <input
+                                                type="radio"
+                                                name="dataSource"
+                                                value="biometric"
+                                                checked={dataSource === 'biometric'}
+                                                onChange={() => setDataSource('biometric')}
+                                            />
+                                            👤 Biometric Terminal
+                                        </label>
+                                    </div>
                                 </div>
 
                                 <div style={{ marginTop: '0.5rem' }}>
@@ -208,9 +305,14 @@ const ReportsView = ({ user, sites, roles, showToast }) => {
                     </div>
                     <div className="reports-actions">
                         {reportData && (
-                            <button onClick={generatePDF} className="btn-report secondary">
-                                📄 Download PDF
-                            </button>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <button onClick={generateExcel} className="btn-report secondary" style={{ background: '#10b981', color: 'white', borderColor: '#10b981' }}>
+                                    📊 Download Excel
+                                </button>
+                                <button onClick={generatePDF} className="btn-report secondary">
+                                    📄 Download PDF
+                                </button>
+                            </div>
                         )}
                         <button
                             onClick={fetchReport}

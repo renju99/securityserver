@@ -140,6 +140,13 @@ const HRDashboard = () => {
         avgAttendance: 0
     });
 
+    // Biometrics state
+    const [biometricDevices, setBiometricDevices] = useState([]);
+    const [biometricLogs, setBiometricLogs] = useState([]);
+    const [showBiometricModal, setShowBiometricModal] = useState(false);
+    const [currentBiometricDevice, setCurrentBiometricDevice] = useState({ name: '', deviceKey: '', siteId: '', type: 'RA08', ipAddress: '', port: '' });
+    const [isBiometricLoading, setIsBiometricLoading] = useState(false);
+
     const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
     // Toast helper functions
@@ -460,6 +467,114 @@ const HRDashboard = () => {
         }
     }, [selectedSites, sites, activeTab]);
 
+    const fetchBiometricDevices = useCallback(() => {
+        setIsBiometricLoading(true);
+        fetch('/api/hr/biometrics/devices', {
+            headers: { 'Authorization': `Bearer ${user.token}` }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) setBiometricDevices(data);
+                setIsBiometricLoading(false);
+            })
+            .catch(() => {
+                showToast('Failed to load biometric devices', 'error');
+                setIsBiometricLoading(false);
+            });
+    }, [user?.token, showToast]);
+
+    const fetchBiometricLogs = useCallback((staffId = '', deviceId = '') => {
+        setIsBiometricLoading(true);
+        const params = new URLSearchParams();
+        if (staffId) params.set('staffId', staffId);
+        if (deviceId) params.set('deviceId', deviceId);
+
+        fetch(`/api/hr/biometrics/logs?${params}`, {
+            headers: { 'Authorization': `Bearer ${user?.token}` }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) setBiometricLogs(data);
+                setIsBiometricLoading(false);
+            })
+            .catch(() => {
+                showToast('Failed to load biometric logs', 'error');
+                setIsBiometricLoading(false);
+            });
+    }, [user?.token, showToast]);
+
+    const handleSaveBiometricDevice = async (e) => {
+        if (e) e.preventDefault();
+        setIsBiometricLoading(true);
+        const method = currentBiometricDevice.id ? 'PATCH' : 'POST';
+        const url = currentBiometricDevice.id
+            ? `/api/hr/biometrics/devices/${currentBiometricDevice.id}`
+            : '/api/hr/biometrics/devices';
+
+        // Prepare payload, ensuring siteId is handled correctly (null if empty)
+        const payload = {
+            ...currentBiometricDevice,
+            siteId: currentBiometricDevice.siteId || null
+        };
+
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user.token}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                setShowBiometricModal(false);
+                fetchBiometricDevices();
+                showToast(currentBiometricDevice.id ? 'Device updated' : 'Device registered', 'success');
+            } else {
+                const error = await res.json();
+                showToast(error.error || 'Failed to save device', 'error');
+            }
+        } catch (err) {
+            showToast('Network error', 'error');
+        } finally {
+            setIsBiometricLoading(false);
+        }
+    };
+
+    const handleDeleteBiometricDevice = async (id) => {
+        setConfirmDialog({
+            isOpen: true,
+            title: 'Delete Device?',
+            message: 'Are you sure you want to remove this biometric terminal? This will not delete associated logs.',
+            confirmText: 'Delete',
+            type: 'danger',
+            onConfirm: async () => {
+                try {
+                    const res = await fetch(`/api/hr/biometrics/devices/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${user.token}` }
+                    });
+                    if (res.ok) {
+                        fetchBiometricDevices();
+                        showToast('Device removed', 'success');
+                    } else {
+                        showToast('Failed to delete device', 'error');
+                    }
+                } catch {
+                    showToast('Network error', 'error');
+                }
+            }
+        });
+    };
+
+    useEffect(() => {
+        if (activeTab === 'biometrics' && (user?.role === 'HR Admin' || user?.role === 'Site Supervisor')) {
+            fetchBiometricDevices();
+            fetchBiometricLogs();
+        }
+    }, [activeTab, fetchBiometricDevices, fetchBiometricLogs, user]);
+
     // Debounced search
     useEffect(() => {
         if (activeTab !== 'staff') return;
@@ -472,6 +587,7 @@ const HRDashboard = () => {
     }, [mgmtSearch]);
 
     const fetchManagementUsers = () => {
+        if (!user || !user.token) return;
         setIsMgmtLoading(true);
         fetch(`/api/hr/users?page=${mgmtPage}&search=${mgmtSearch}`, {
             headers: { 'Authorization': `Bearer ${user.token}` }
@@ -883,6 +999,14 @@ const HRDashboard = () => {
                                 onClick={() => setActiveTab('geo_fence_alerts')}
                             >
                                 ⚠ Geo Alerts{geoFenceAlerts.length > 0 ? ` (${gfTotal || geoFenceAlerts.length})` : ''}
+                            </button>
+                        )}
+                        {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
+                            <button
+                                className={`tab-btn ${activeTab === 'biometrics' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('biometrics')}
+                            >
+                                🤳 Biometrics
                             </button>
                         )}
                         {(user.role === 'HR Admin') && (
@@ -2017,6 +2141,20 @@ const HRDashboard = () => {
                                 </div>
                             </div>
                         </div>
+                    ) : activeTab === 'biometrics' ? (
+                        <BiometricsView
+                            user={user}
+                            sites={sites}
+                            biometricDevices={biometricDevices}
+                            biometricLogs={biometricLogs}
+                            fetchDevices={fetchBiometricDevices}
+                            fetchLogs={fetchBiometricLogs}
+                            isMgmtLoading={isBiometricLoading}
+                            showToast={showToast}
+                            setShowModal={setShowBiometricModal}
+                            setCurrentDevice={setCurrentBiometricDevice}
+                            onDelete={handleDeleteBiometricDevice}
+                        />
                     ) : null
                     }
                 </div >
@@ -2322,6 +2460,90 @@ const HRDashboard = () => {
                                 </form>
                             </div>
                         </div >
+                    )
+                }
+
+                {
+                    showBiometricModal && (
+                        <div className="modal-overlay">
+                            <div className="modal-content">
+                                <h3>{currentBiometricDevice.id ? 'Edit' : 'Add'} Biometric Terminal</h3>
+                                <form onSubmit={handleSaveBiometricDevice}>
+                                    <div className="form-grid" style={{ gridTemplateColumns: '1fr' }}>
+                                        <div className="form-group">
+                                            <label>Device Name *</label>
+                                            <input
+                                                type="text"
+                                                value={currentBiometricDevice.name}
+                                                onChange={(e) => setCurrentBiometricDevice({ ...currentBiometricDevice, name: e.target.value })}
+                                                required
+                                                placeholder="e.g. Main Entrance RA08"
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Device Key / Serial Number *</label>
+                                            <input
+                                                type="text"
+                                                value={currentBiometricDevice.deviceKey !== undefined ? currentBiometricDevice.deviceKey : (currentBiometricDevice.device_key || '')}
+                                                onChange={(e) => setCurrentBiometricDevice({ ...currentBiometricDevice, deviceKey: e.target.value })}
+                                                required
+                                                placeholder="e.g. RA08-01234567"
+                                                disabled={!!currentBiometricDevice.id}
+                                            />
+                                            <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
+                                                Unique identifier sent by the device hardware.
+                                            </p>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '7fr 3fr', gap: '1rem' }}>
+                                            <div className="form-group">
+                                                <label>IP Address / Hostname</label>
+                                                <input
+                                                    type="text"
+                                                    value={currentBiometricDevice.ipAddress !== undefined ? currentBiometricDevice.ipAddress : (currentBiometricDevice.ip_address || '')}
+                                                    onChange={(e) => setCurrentBiometricDevice({ ...currentBiometricDevice, ipAddress: e.target.value })}
+                                                    placeholder="e.g. head-office.dynalias.com"
+                                                />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Port</label>
+                                                <input
+                                                    type="number"
+                                                    value={currentBiometricDevice.port !== undefined ? currentBiometricDevice.port : (currentBiometricDevice.port || '')}
+                                                    onChange={(e) => setCurrentBiometricDevice({ ...currentBiometricDevice, port: parseInt(e.target.value) || '' })}
+                                                    placeholder="8092"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Assigned Site</label>
+                                            <select
+                                                value={currentBiometricDevice.siteId !== undefined ? currentBiometricDevice.siteId : (currentBiometricDevice.site_id || '')}
+                                                onChange={(e) => setCurrentBiometricDevice({ ...currentBiometricDevice, siteId: e.target.value })}
+                                            >
+                                                <option value="">Global / Unassigned</option>
+                                                {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Terminal Type</label>
+                                            <select
+                                                value={currentBiometricDevice.type || 'RA08'}
+                                                onChange={(e) => setCurrentBiometricDevice({ ...currentBiometricDevice, type: e.target.value })}
+                                            >
+                                                <option value="RA08">RA08 (AIBOX)</option>
+                                                <option value="Generic">Generic Biometric</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="modal-footer">
+                                        <button type="button" className="btn-secondary" onClick={() => setShowBiometricModal(false)}>Cancel</button>
+                                        <button type="submit" className="btn-primary" disabled={isBiometricLoading}>
+                                            {isBiometricLoading ? 'Saving...' : 'Save Device'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     )
                 }
 
@@ -3398,6 +3620,178 @@ const GeoFenceAlertsView = ({
                             disabled={gfPage >= gfTotalPages}
                             onClick={() => setGfPage(p => p + 1)}
                         >Next ›</button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+// ── Biometrics View ──────────────────────────────────────────────────────────
+const BiometricsView = ({
+    user, sites, biometricDevices, biometricLogs,
+    fetchDevices, fetchLogs, isMgmtLoading, showToast,
+    setShowModal, setCurrentDevice, onDelete
+}) => {
+    const [subTab, setSubTab] = React.useState('logs'); // 'logs' or 'devices'
+    const [staffIdFilter, setStaffIdFilter] = React.useState('');
+    const [deviceIdFilter, setDeviceIdFilter] = React.useState('');
+
+    return (
+        <div className="management-view" style={{ padding: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <div>
+                    <h2 style={{ margin: 0, color: '#1e293b', fontSize: '1.5rem' }}>Biometric Management</h2>
+                    <p style={{ margin: '0.25rem 0 0', color: '#64748b', fontSize: '0.875rem' }}>Monitor facial recognition terminals and biometric logs</p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    {subTab === 'devices' && user?.role === 'HR Admin' && (
+                        <button
+                            className="hr-btn primary sm"
+                            style={{ marginRight: '1rem' }}
+                            onClick={() => {
+                                setCurrentDevice({ name: '', deviceKey: '', siteId: '', type: 'RA08' });
+                                setShowModal(true);
+                            }}
+                        >
+                            + Add Device
+                        </button>
+                    )}
+                    <button className={`hr-btn sm ${subTab === 'logs' ? 'primary' : 'secondary'}`} onClick={() => setSubTab('logs')}>Scan Logs</button>
+                    <button className={`hr-btn sm ${subTab === 'devices' ? 'primary' : 'secondary'}`} onClick={() => setSubTab('devices')}>Manage Devices</button>
+                </div>
+            </div>
+
+            {subTab === 'logs' ? (
+                <div>
+                    {/* Log Filters */}
+                    <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem', background: '#f8fafc', padding: '1rem', borderRadius: '10px' }}>
+                        <input
+                            placeholder="Staff ID..."
+                            value={staffIdFilter}
+                            onChange={e => setStaffIdFilter(e.target.value)}
+                            style={{ padding: '0.5rem', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '0.875rem' }}
+                        />
+                        <select
+                            value={deviceIdFilter}
+                            onChange={e => setDeviceIdFilter(e.target.value)}
+                            style={{ padding: '0.5rem', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '0.875rem' }}
+                        >
+                            <option value="">All Devices</option>
+                            {biometricDevices.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                        </select>
+                        <button className="hr-btn primary sm" onClick={() => fetchLogs(staffIdFilter, deviceIdFilter)}>Search</button>
+                        <button className="hr-btn secondary sm" onClick={() => { setStaffIdFilter(''); setDeviceIdFilter(''); fetchLogs(); }}>Reset</button>
+                    </div>
+
+                    <div className="mgmt-table-container">
+                        <table className="mgmt-table" style={{ width: '100%' }}>
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Staff ID</th>
+                                    <th>Name</th>
+                                    <th>Device</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {biometricLogs.map(log => (
+                                    <tr key={log.id}>
+                                        <td style={{ padding: '0.5rem' }}>
+                                            {log.photo_url ? (
+                                                <img src={log.photo_url} alt="scan" style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover', border: '1px solid #e2e8f0' }} />
+                                            ) : <div style={{ width: '40px', height: '40px', background: '#f1f5f9', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', color: '#94a3b8' }}>NO IMG</div>}
+                                        </td>
+                                        <td><strong>{log.staff_id}</strong></td>
+                                        <td>{log.first_name ? `${log.first_name} ${log.last_name || ''}` : '-'}</td>
+                                        <td>{log.device_name}</td>
+                                        <td>{new Date(log.timestamp).toLocaleString()}</td>
+                                    </tr>
+                                ))}
+                                {biometricLogs.length === 0 && (
+                                    <tr><td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>No biometric logs found</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            ) : (
+                <div className="site-management">
+                    {/* Manage Devices */}
+                    <div className="mgmt-table-container">
+                        <table className="mgmt-table" style={{ width: '100%' }}>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Device Key</th>
+                                    <th>Connection (IP:Port)</th>
+                                    <th>Assigned Site</th>
+                                    <th>Last Seen</th>
+                                    <th>Status</th>
+                                    {user?.role === 'HR Admin' && <th style={{ textAlign: 'right' }}>Actions</th>}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {biometricDevices.map(d => (
+                                    <tr key={d.id}>
+                                        <td><strong>{d.name}</strong></td>
+                                        <td><code>{d.device_key}</code></td>
+                                        <td>
+                                            {d.ip_address ? (
+                                                <span style={{ fontSize: '0.85rem' }}>
+                                                    {d.ip_address}<strong>:{d.port || '80'}</strong>
+                                                </span>
+                                            ) : (
+                                                <em style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Not Configured</em>
+                                            )}
+                                        </td>
+                                        <td>{d.site_name || <em style={{ color: '#94a3b8' }}>Global / Unassigned</em>}</td>
+                                        <td>{d.last_seen ? new Date(d.last_seen).toLocaleString() : <em style={{ color: '#94a3b8' }}>Never</em>}</td>
+                                        <td>
+                                            <span style={{
+                                                padding: '0.2rem 0.6rem', borderRadius: '999px', fontSize: '0.7rem', fontWeight: 700,
+                                                background: d.is_active ? '#dcfce7' : '#fee2e2', color: d.is_active ? '#16a34a' : '#dc2626'
+                                            }}>
+                                                {d.is_active ? 'Active' : 'Inactive'}
+                                            </span>
+                                        </td>
+                                        {user?.role === 'HR Admin' && (
+                                            <td style={{ textAlign: 'right' }}>
+                                                <button
+                                                    className="hr-btn secondary sm"
+                                                    style={{ marginRight: '0.5rem' }}
+                                                    onClick={() => {
+                                                        setCurrentDevice({
+                                                            id: d.id,
+                                                            name: d.name,
+                                                            deviceKey: d.device_key,
+                                                            siteId: d.site_id,
+                                                            type: d.type,
+                                                            isActive: d.is_active,
+                                                            ipAddress: d.ip_address,
+                                                            port: d.port
+                                                        });
+                                                        setShowModal(true);
+                                                    }}
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    className="hr-btn danger sm"
+                                                    onClick={() => onDelete(d.id)}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </td>
+                                        )}
+                                    </tr>
+                                ))}
+                                {biometricDevices.length === 0 && (
+                                    <tr><td colSpan={user?.role === 'HR Admin' ? "6" : "5"} style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>No devices registered. Click "+ Add Device" to register a terminal.</td></tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             )}

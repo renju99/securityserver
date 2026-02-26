@@ -250,44 +250,44 @@ const RouteTrackingView = ({ user, employees, onMapUpdate, showToast, routeData,
                 <>
                     <div className="route-stats">
                         <div className="stat-card-route">
-                            <span className="stat-icon">👤</span>
+                            <span className="rt-stat-icon">👤</span>
                             <div className="stat-content">
-                                <span className="stat-label">Staff Member</span>
-                                <span className="stat-value">{routeData.employee.firstName} {routeData.employee.lastName}</span>
-                                <span className="stat-subtext">{routeData.employee.staffId}</span>
+                                <span className="rt-stat-label">Staff Member</span>
+                                <span className="rt-stat-value">{(routeData.employee.firstName || routeData.employee.lastName) ? `${routeData.employee.firstName || ''} ${routeData.employee.lastName || ''}`.trim() : 'Unnamed Staff'}</span>
+                                <span className="rt-stat-subtext">{routeData.employee.staffId}</span>
                             </div>
                         </div>
 
                         <div className="stat-card-route">
-                            <span className="stat-icon">📏</span>
+                            <span className="rt-stat-icon">📏</span>
                             <div className="stat-content">
-                                <span className="stat-label">Total Distance</span>
-                                <span className="stat-value">{getTotalDistance()} km</span>
+                                <span className="rt-stat-label">Total Distance</span>
+                                <span className="rt-stat-value">{getTotalDistance()} km</span>
                             </div>
                         </div>
 
                         <div className="stat-card-route">
-                            <span className="stat-icon">⏱️</span>
+                            <span className="rt-stat-icon">⏱️</span>
                             <div className="stat-content">
-                                <span className="stat-label">Duration</span>
-                                <span className="stat-value">{getDuration()}</span>
+                                <span className="rt-stat-label">Duration</span>
+                                <span className="rt-stat-value">{getDuration()}</span>
                             </div>
                         </div>
 
                         <div className="stat-card-route">
-                            <span className="stat-icon">📍</span>
+                            <span className="rt-stat-icon">📍</span>
                             <div className="stat-content">
-                                <span className="stat-label">Location Points</span>
-                                <span className="stat-value">{routeData.totalPoints}</span>
+                                <span className="rt-stat-label">Location Points</span>
+                                <span className="rt-stat-value">{routeData.totalPoints}</span>
                             </div>
                         </div>
 
                         {routeData.employee.siteName && (
                             <div className="stat-card-route">
-                                <span className="stat-icon">🏢</span>
+                                <span className="rt-stat-icon">🏢</span>
                                 <div className="stat-content">
-                                    <span className="stat-label">Assigned Site</span>
-                                    <span className="stat-value">{routeData.employee.siteName}</span>
+                                    <span className="rt-stat-label">Assigned Site</span>
+                                    <span className="rt-stat-value">{routeData.employee.siteName}</span>
                                 </div>
                             </div>
                         )}

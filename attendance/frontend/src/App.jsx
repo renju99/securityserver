@@ -387,13 +387,13 @@ function EmployeeView() {
   /* const handleAction = (type) => { // Removed native logic for now to force standard socket
     const targetSocket = (window.isNativeApp && window.appSocket) ? window.appSocket : socket; */
 
-  const handleAction = (type) => {
+  const handleAction = (type, nfcPayload = null) => {
     // Force use of standard socket
     const targetSocket = socket;
     const isConn = targetSocket.connected;
 
     // Remote Log the attempt
-    remoteLog('BTN_CLICK', `Action: ${type}, Staff: ${staffId}, Socket: ${isConn}`);
+    remoteLog('BTN_CLICK', `Action: ${type}, Staff: ${staffId}, Socket: ${isConn}, NFC: ${!!nfcPayload}`);
 
     if (!isConn) {
       remoteLog('SOCKET_RETRY', 'Socket disconnected. Attempting reconnect...');
@@ -407,6 +407,9 @@ function EmployeeView() {
         payload.latitude = location.latitude;
         payload.longitude = location.longitude;
       }
+      if (nfcPayload) {
+        payload.nfcPayload = nfcPayload;
+      }
 
       console.log(`[FRONTEND] Emitting ${type} with payload:`, payload);
       targetSocket.emit(type, payload);
@@ -418,6 +421,43 @@ function EmployeeView() {
     } else {
       setError('Waiting for GPS location...');
       remoteLog('BTN_FAIL', 'Missing staffId');
+    }
+  };
+
+  const handleNfcAction = async (type) => {
+    if (!('NDEFReader' in window)) {
+      alert('NFC is not supported on this browser. Try Chrome on Android.');
+      return;
+    }
+
+    try {
+      const ndef = new window.NDEFReader();
+      await ndef.scan();
+      // Show scanning modal (using simple alert for now)
+      setError(`Ready to scan NFC. Tap your device to the Site Tag to ${type === 'check_in' ? 'Check In' : 'Check Out'}.`);
+
+      ndef.onreading = event => {
+        let textPayload = event.serialNumber || 'UNKNOWN_TAG';
+        if (event.message && event.message.records) {
+          for (const record of event.message.records) {
+            if (record.recordType === "text") {
+              const textDecoder = new TextDecoder(record.encoding || 'utf-8');
+              textPayload = textDecoder.decode(record.data);
+              break;
+            }
+          }
+        }
+        setError('');
+        alert(`NFC Tag Read Successfully. Processing ${type}...`);
+        handleAction(type, textPayload);
+      };
+
+      ndef.onreadingerror = () => {
+        setError('Error reading NFC tag. Please hold it steady and try again.');
+      };
+    } catch (error) {
+      console.error(error);
+      setError('NFC Error: ' + error.message);
     }
   };
 
@@ -563,6 +603,27 @@ function EmployeeView() {
             >
               {attendanceStatus === 'checked_out' ? 'Checked Out' : 'Check Out'}
             </button>
+            {'NDEFReader' in window && (
+              <>
+                <button
+                  className="check-in-btn nfc-btn"
+                  disabled={attendanceStatus === 'checked_in'}
+                  onClick={() => handleNfcAction('check_in')}
+                  style={{ opacity: attendanceStatus === 'checked_in' ? 0.5 : 1, background: '#4f46e5', marginTop: '10px' }}
+                >
+                  📶 NFC Check In
+                </button>
+                <button
+                  className="check-out-btn nfc-btn"
+                  disabled={attendanceStatus === 'checked_out'}
+                  onClick={() => handleNfcAction('check_out')}
+                  style={{ opacity: attendanceStatus === 'checked_out' ? 0.5 : 1, background: '#4f46e5', color: '#fff', border: 'none', marginTop: '10px' }}
+                >
+                  📶 NFC Check Out
+                </button>
+              </>
+            )}
+            {error && <p style={{ color: '#d97706', fontSize: '0.85rem', marginTop: '10px', width: '100%', textAlign: 'center' }}>{error}</p>}
           </div>
 
           <button

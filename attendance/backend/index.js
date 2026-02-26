@@ -10,6 +10,7 @@ const cron = require('node-cron');
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
+const authRoutes = require('./routes/auth'); // Added this line
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 
@@ -169,7 +170,8 @@ const runMigrations = async () => {
             ADD COLUMN IF NOT EXISTS radius_meters INTEGER DEFAULT 100,
             ADD COLUMN IF NOT EXISTS geofence_type VARCHAR(20) DEFAULT 'CIRCLE',
             ADD COLUMN IF NOT EXISTS geofence_data JSONB,
-            ADD COLUMN IF NOT EXISTS geofence_enabled BOOLEAN DEFAULT true;
+            ADD COLUMN IF NOT EXISTS geofence_enabled BOOLEAN DEFAULT true,
+            ADD COLUMN IF NOT EXISTS nfc_payload VARCHAR(255);
         `);
 
         // 4. Geo Fence Alerts Table
@@ -199,7 +201,35 @@ const runMigrations = async () => {
         await pool.query(`ALTER TABLE attendance ADD COLUMN IF NOT EXISTS notes TEXT`);
         await pool.query(`ALTER TABLE attendance ADD COLUMN IF NOT EXISTS auto_closed BOOLEAN DEFAULT false`);
 
-        console.log('Migrations: Schema updated for Shifts & Geo-Fencing.');
+        // 7. Biometric Devices Table
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS biometric_devices (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(100) NOT NULL,
+                device_key VARCHAR(100) UNIQUE NOT NULL,
+                site_id INTEGER REFERENCES sites(id),
+                type VARCHAR(50) DEFAULT 'RA08',
+                last_seen TIMESTAMP,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
+        // 8. Biometric Logs Table
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS biometric_logs (
+                id SERIAL PRIMARY KEY,
+                device_id INTEGER REFERENCES biometric_devices(id),
+                staff_id VARCHAR(50), 
+                employee_id INTEGER REFERENCES employees(id),
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                photo_url VARCHAR(255),
+                raw_data JSONB,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
+        console.log('Migrations: Schema updated for Shifts, Geo-Fencing, and Biometrics.');
     } catch (err) {
         console.error('Migration error:', err);
     }
@@ -430,6 +460,35 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
     return d;
 };
 
+// Helper: Check if current time is within shift timings (Asia/Dubai)
+const isDuringShift = (startTime, endTime) => {
+    if (!startTime || !endTime) return true;
+
+    try {
+        const dubaiStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Dubai' });
+        const dubaiNow = new Date(dubaiStr);
+        const currentSeconds = dubaiNow.getHours() * 3600 + dubaiNow.getMinutes() * 60 + dubaiNow.getSeconds();
+
+        const toSeconds = (t) => {
+            const [h, m, s] = t.split(':').map(Number);
+            return h * 3600 + (m || 0) * 60 + (s || 0);
+        };
+
+        const start = toSeconds(startTime);
+        const end = toSeconds(endTime);
+
+        if (start <= end) {
+            return currentSeconds >= start && currentSeconds <= end;
+        } else {
+            // crosses midnight
+            return currentSeconds >= start || currentSeconds <= end;
+        }
+    } catch (e) {
+        console.error('Shift check error:', e);
+        return true;
+    }
+};
+
 // Ray-casting algorithm to check if a point is inside a polygon
 const isPointInPolygon = (lat, lng, polygon) => {
     let inside = false;
@@ -480,51 +539,40 @@ const authorizeRole = (roles) => {
     };
 };
 
-// Auth Route: Login
-app.post('/auth/login', authLimiter, async (req, res) => {
-    if (!req.body) { return res.status(400).json({ error: 'Missing request body' }); }
-    const { staffId, password } = req.body;
-    try {
-        const result = await pool.query(
-            `SELECT e.*, r.name as role_name, s.name as site_name 
-             FROM employees e 
-             JOIN roles r ON e.role_id = r.id 
-             LEFT JOIN sites s ON e.site_id = s.id
-             WHERE e.staff_id = $1`,
-            [staffId]
-        );
-
-        if (result.rows.length === 0) return res.status(401).json({ error: 'Invalid ID' });
-
-        const user = result.rows[0];
-        const validPass = await bcrypt.compare(password, user.password_hash);
-        if (!validPass) return res.status(401).json({ error: 'Invalid password' });
-
-        const token = jwt.sign(
-            { id: user.id, staffId: user.staff_id, role: user.role_name, siteId: user.site_id },
-            JWT_SECRET,
-            { expiresIn: '365d' }
-        );
-
-        res.json({
-            token,
-            user: {
-                staffId: user.staff_id,
-                role: user.role_name,
-                siteId: user.site_id,
-                siteName: user.site_name,
-                firstName: user.first_name,
-                lastName: user.last_name,
-                photoUrl: user.photo_url
-            }
-        });
-    } catch (err) {
-        res.status(500).json({ error: 'Login error' });
-    }
-});
+// Mount Auth Route
+app.use('/auth', authRoutes(pool, JWT_SECRET, authLimiter));
 
 app.get('/', (req, res) => {
     res.send('Berkeley Workforce 360 API Running');
+});
+
+// HR API: Get global settings
+app.get('/hr/settings', authenticateToken, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT key, value FROM settings');
+        const settings = {};
+        result.rows.forEach(r => { settings[r.key] = r.value; });
+        res.json(settings);
+    } catch (err) {
+        console.error('Error fetching settings:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// HR API: Update global settings
+app.post('/hr/settings', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
+    const { key, value } = req.body;
+    if (!key) return res.status(400).json({ error: 'Missing key' });
+    try {
+        await pool.query(
+            'INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value',
+            [key, JSON.stringify(value)]
+        );
+        res.json({ message: 'Setting updated' });
+    } catch (err) {
+        console.error('Error updating setting:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
 // HR API: Get all employees
@@ -573,8 +621,8 @@ app.post('/hr/users', authenticateToken, authorizeRole(['HR Admin']), async (req
         }
 
         const query = `
-            INSERT INTO employees (staff_id, email, password_hash, role_id, site_id, department_name, first_name, last_name, photo_url, shift_id)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            INSERT INTO employees (staff_id, email, password_hash, role_id, site_id, department_name, first_name, last_name, photo_url, shift_id, is_tracking_enabled)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
             ON CONFLICT (staff_id) DO UPDATE SET
             email = EXCLUDED.email,
             password_hash = COALESCE(EXCLUDED.password_hash, employees.password_hash),
@@ -584,7 +632,8 @@ app.post('/hr/users', authenticateToken, authorizeRole(['HR Admin']), async (req
             first_name = EXCLUDED.first_name,
             last_name = EXCLUDED.last_name,
             photo_url = COALESCE($9, employees.photo_url),
-            shift_id = EXCLUDED.shift_id
+            shift_id = EXCLUDED.shift_id,
+            is_tracking_enabled = COALESCE(EXCLUDED.is_tracking_enabled, employees.is_tracking_enabled)
             RETURNING *
         `;
 
@@ -592,6 +641,7 @@ app.post('/hr/users', authenticateToken, authorizeRole(['HR Admin']), async (req
         const sanitizedSiteId = siteId || null;
         const sanitizedDept = departmentName || null;
         const sanitizedShiftId = req.body.shiftId || null;
+        const sanitizedTracking = req.body.isTrackingEnabled !== undefined ? req.body.isTrackingEnabled : true;
 
         const result = await pool.query(query, [
             staffId,
@@ -603,8 +653,10 @@ app.post('/hr/users', authenticateToken, authorizeRole(['HR Admin']), async (req
             firstName || null,
             lastName || null,
             photoUrl,
-            sanitizedShiftId
+            sanitizedShiftId,
+            sanitizedTracking
         ]);
+
         res.json(result.rows[0]);
     } catch (err) {
         console.error('Error adding user:', err);
@@ -861,6 +913,124 @@ app.get('/hr/reports/attendance', authenticateToken, authorizeRole(['HR Admin', 
     }
 });
 
+// --- BIOMETRIC ATTENDANCE REPORT DEDICATED ENDPOINT ---
+app.get('/hr/reports/biometrics', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
+    const { startDate, endDate, roleId, siteId, department } = req.query;
+
+    try {
+        // 1. Fetch relevant employees
+        let empQuery = `
+            SELECT e.id, e.staff_id, e.first_name, e.last_name, e.department_name, r.name as role_name, s.name as site_name 
+            FROM employees e 
+            LEFT JOIN roles r ON e.role_id = r.id 
+            LEFT JOIN sites s ON e.site_id = s.id
+            WHERE 1=1
+        `;
+        const empParams = [];
+        let paramIdx = 1;
+
+        if (roleId) {
+            empQuery += ` AND e.role_id = $${paramIdx++}`;
+            empParams.push(roleId);
+        }
+
+        const targetSiteId = req.user.role === 'Site Supervisor' ? req.user.siteId : siteId;
+        if (targetSiteId) {
+            empQuery += ` AND e.site_id = $${paramIdx++}`;
+            empParams.push(targetSiteId);
+        }
+
+        if (department) {
+            empQuery += ` AND e.department_name ILIKE $${paramIdx++}`;
+            empParams.push(`%${department}%`);
+        }
+
+        empQuery += ` ORDER BY e.staff_id ASC`;
+        const empResult = await pool.query(empQuery, empParams);
+        let employees = empResult.rows;
+        const validStaffIds = employees.map(e => e.staff_id).filter(id => id);
+
+        // 2. Fetch biometric logs
+        let logQuery = `
+            SELECT staff_id, timestamp::date as log_date, min(timestamp) as check_in_time, max(timestamp) as check_out_time, min(raw_data::text) as raw_data
+            FROM biometric_logs
+            WHERE 1=1
+        `;
+        const logParams = [];
+        let logParamIdx = 1;
+
+        if (validStaffIds.length > 0) {
+            if (roleId || siteId || department) {
+                logQuery += ` AND staff_id = ANY($${logParamIdx++})`;
+                logParams.push(validStaffIds);
+            }
+        } else if (roleId || siteId || department) {
+            return res.json({ employees: [], attendance: {} });
+        }
+
+        if (startDate) {
+            logQuery += ` AND timestamp >= $${logParamIdx++}`;
+            logParams.push(startDate);
+        }
+        if (endDate) {
+            logQuery += ` AND timestamp < ($${logParamIdx++}::date + interval '1 day')`;
+            logParams.push(endDate);
+        }
+
+        logQuery += ` GROUP BY staff_id, timestamp::date ORDER BY timestamp::date ASC`;
+
+        const logResult = await pool.query(logQuery, logParams);
+
+        // 3. Map logs to employees and handle unregistered terminals users (ghosts)
+        const attendanceMap = {};
+        const staffIdMap = {};
+        employees.forEach(e => staffIdMap[e.staff_id] = e);
+
+        logResult.rows.forEach(log => {
+            const staffId = log.staff_id;
+
+            if (!staffIdMap[staffId] && !roleId && !siteId && !department && staffId) {
+                let rawDataObj = {};
+                try { rawDataObj = JSON.parse(log.raw_data); } catch (e) { }
+                const fallbackName = rawDataObj?.personName || rawDataObj?.personId || staffId;
+                const ghostEmp = {
+                    id: `ghost-${staffId}`,
+                    staff_id: staffId,
+                    first_name: fallbackName,
+                    department_name: 'Terminal Data',
+                    role_name: '-',
+                    site_name: '-'
+                };
+                employees.push(ghostEmp);
+                staffIdMap[staffId] = ghostEmp;
+            }
+
+            if (staffIdMap[staffId]) {
+                const empId = staffIdMap[staffId].id;
+                if (!attendanceMap[empId]) attendanceMap[empId] = [];
+
+                const checkIn = new Date(log.check_in_time);
+                const checkOut = new Date(log.check_out_time);
+                const finalCheckOut = checkIn.getTime() === checkOut.getTime() ? null : log.check_out_time;
+
+                attendanceMap[empId].push({
+                    check_in_time: log.check_in_time,
+                    check_out_time: finalCheckOut
+                });
+            }
+        });
+
+        // Filter out employees without logs to keep report clean
+        employees = employees.filter(e => attendanceMap[e.id] && attendanceMap[e.id].length > 0);
+
+        res.json({ employees, attendance: attendanceMap });
+
+    } catch (err) {
+        console.error('Error fetching biometric report:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
 // Audit Log Helper
 const logAudit = async (actorId, action, targetId = null, details = '') => {
     try {
@@ -885,11 +1055,11 @@ app.get('/hr/sites', authenticateToken, authorizeRole(['HR Admin', 'Site Supervi
 
 // HR API: Create site
 app.post('/hr/sites', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
-    const { name, location, latitude, longitude, radiusMeters, geofenceType, geofenceData, geofenceEnabled } = req.body;
+    const { name, location, latitude, longitude, radiusMeters, geofenceType, geofenceData, geofenceEnabled, nfcPayload } = req.body;
     try {
         const result = await pool.query(
-            'INSERT INTO sites (name, location, latitude, longitude, radius_meters, geofence_type, geofence_data, geofence_enabled) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-            [name, location, latitude, longitude, radiusMeters || 100, geofenceType || 'CIRCLE', JSON.stringify(geofenceData), geofenceEnabled !== false]
+            'INSERT INTO sites (name, location, latitude, longitude, radius_meters, geofence_type, geofence_data, geofence_enabled, nfc_payload) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+            [name, location, latitude, longitude, radiusMeters || 100, geofenceType || 'CIRCLE', JSON.stringify(geofenceData), geofenceEnabled !== false, nfcPayload || null]
         );
         res.json(result.rows[0]);
     } catch (err) {
@@ -901,11 +1071,11 @@ app.post('/hr/sites', authenticateToken, authorizeRole(['HR Admin']), async (req
 // HR API: Update site
 app.patch('/hr/sites/:id', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
     const { id } = req.params;
-    const { name, location, latitude, longitude, radiusMeters, geofenceType, geofenceData, geofenceEnabled } = req.body;
+    const { name, location, latitude, longitude, radiusMeters, geofenceType, geofenceData, geofenceEnabled, nfcPayload } = req.body;
     try {
         const result = await pool.query(
-            'UPDATE sites SET name = $1, location = $2, latitude = $3, longitude = $4, radius_meters = $5, geofence_type = $6, geofence_data = $7, geofence_enabled = $8 WHERE id = $9 RETURNING *',
-            [name, location, latitude, longitude, radiusMeters, geofenceType, JSON.stringify(geofenceData), geofenceEnabled !== false, id]
+            'UPDATE sites SET name = $1, location = $2, latitude = $3, longitude = $4, radius_meters = $5, geofence_type = $6, geofence_data = $7, geofence_enabled = $8, nfc_payload = $9 WHERE id = $10 RETURNING *',
+            [name, location, latitude, longitude, radiusMeters, geofenceType, JSON.stringify(geofenceData), geofenceEnabled !== false, nfcPayload || null, id]
         );
         res.json(result.rows[0]);
     } catch (err) {
@@ -1021,6 +1191,49 @@ app.get('/hr/users', authenticateToken, authorizeRole(['HR Admin']), async (req,
     }
 });
 
+// HR API: Bulk update user fields (Shift, Site, Dept)
+app.patch('/api/hr/users/bulk-update', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
+    const { userIds, shiftId, siteId, departmentName } = req.body;
+    if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+        return res.status(400).json({ error: 'Provide an array of user IDs' });
+    }
+
+    try {
+        const updates = [];
+        const params = [userIds];
+        let paramIdx = 2;
+
+        if (shiftId !== undefined) {
+            updates.push(`shift_id = $${paramIdx++}`);
+            params.push(shiftId === "" ? null : parseInt(shiftId));
+        }
+        if (siteId !== undefined) {
+            updates.push(`site_id = $${paramIdx++}`);
+            params.push(siteId === "" ? null : parseInt(siteId));
+        }
+        if (departmentName !== undefined) {
+            updates.push(`department_name = $${paramIdx++}`);
+            params.push(departmentName);
+        }
+        if (req.body.isTrackingEnabled !== undefined) {
+            updates.push(`is_tracking_enabled = $${paramIdx++}`);
+            params.push(req.body.isTrackingEnabled);
+        }
+
+        if (updates.length === 0) {
+            return res.status(400).json({ error: 'No update data provided' });
+        }
+
+        const query = `UPDATE employees SET ${updates.join(', ')} WHERE id = ANY($1) RETURNING *`;
+        const result = await pool.query(query, params);
+
+        res.json({ message: `${result.rowCount} user(s) updated successfully`, count: result.rowCount });
+    } catch (err) {
+        console.error('Bulk update error:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
 // HR API: Create/Update user - Updated
 app.post('/hr/users', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
     if (!req.body) { return res.status(400).json({ error: 'Missing request body' }); }
@@ -1080,6 +1293,135 @@ app.post('/hr/users', authenticateToken, authorizeRole(['HR Admin']), async (req
                 return res.status(400).json({ error: 'Staff ID already exists' });
             }
         }
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// ── Biometrics API ──────────────────────────────────────────────────────────
+
+app.get('/hr/biometrics/devices', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT b.*, s.name as site_name 
+            FROM biometric_devices b 
+            LEFT JOIN sites s ON b.site_id = s.id 
+            ORDER BY b.name ASC
+        `);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching biometric devices:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.post('/hr/biometrics/devices', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
+    const { name, deviceKey, siteId, type, ipAddress, port } = req.body;
+    try {
+        const result = await pool.query(
+            'INSERT INTO biometric_devices (name, device_key, site_id, type, ip_address, port) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+            [name, deviceKey, siteId || null, type || 'RA08', ipAddress || null, port || null]
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error creating biometric device:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.patch('/hr/biometrics/devices/:id', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
+    const { id } = req.params;
+    const { name, siteId, type, isActive, ipAddress, port } = req.body;
+    try {
+        const result = await pool.query(
+            'UPDATE biometric_devices SET name = COALESCE($1, name), site_id = $2, type = COALESCE($3, type), is_active = COALESCE($4, is_active), ip_address = COALESCE($5, ip_address), port = COALESCE($6, port) WHERE id = $7 RETURNING *',
+            [name, siteId || null, type, isActive !== undefined ? isActive : true, ipAddress || null, port || null, id]
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error updating biometric device:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.delete('/hr/biometrics/devices/:id', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
+    try {
+        await pool.query('DELETE FROM biometric_devices WHERE id = $1', [req.params.id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error deleting biometric device:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.get('/hr/biometrics/logs', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
+    const { staffId, deviceId } = req.query;
+    try {
+        let query = `
+            SELECT l.*, d.name as device_name, e.first_name, e.last_name 
+            FROM biometric_logs l
+            JOIN biometric_devices d ON l.device_id = d.id
+            LEFT JOIN employees e ON l.employee_id = e.id
+            WHERE 1=1
+        `;
+        const params = [];
+        let pIdx = 1;
+
+        if (staffId) {
+            query += ` AND (l.staff_id = $${pIdx} OR e.staff_id = $${pIdx})`;
+            params.push(staffId);
+            pIdx++;
+        }
+        if (deviceId) {
+            query += ` AND l.device_id = $${pIdx}`;
+            params.push(deviceId);
+            pIdx++;
+        }
+
+        query += ' ORDER BY l.timestamp DESC LIMIT 100';
+        const result = await pool.query(query, params);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching biometric logs:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// Internal endpoint for RA08 listener (Basic shared token auth)
+app.post('/api/biometrics/log', async (req, res) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (token !== 'attendance_secret_token') {
+        console.warn(`[BIOMETRICS] Unauthorized log attempt with token: ${token}`);
+        return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const { deviceKey, staffId, timestamp, photoUrl, rawData } = req.body;
+
+    try {
+        // Find device
+        const deviceRes = await pool.query('SELECT id, site_id FROM biometric_devices WHERE device_key = $1', [deviceKey]);
+        if (deviceRes.rows.length === 0) {
+            return res.status(404).json({ error: 'Device not found' });
+        }
+        const deviceId = deviceRes.rows[0].id;
+
+        // Find employee
+        const empRes = await pool.query('SELECT id FROM employees WHERE staff_id = $1', [staffId]);
+        const employeeId = empRes.rows.length > 0 ? empRes.rows[0].id : null;
+
+        // Log biometric event
+        await pool.query(
+            'INSERT INTO biometric_logs (device_id, staff_id, employee_id, timestamp, photo_url, raw_data) VALUES ($1, $2, $3, $4, $5, $6)',
+            [deviceId, staffId, employeeId, new Date(timestamp), photoUrl, JSON.stringify(rawData)]
+        );
+
+        // Update device last_seen
+        await pool.query('UPDATE biometric_devices SET last_seen = NOW() WHERE id = $1', [deviceId]);
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Internal biometric log error:', err);
         res.status(500).json({ error: 'Database error' });
     }
 });
@@ -1689,7 +2031,7 @@ app.post('/location/update', locationLimiter, authenticateToken, async (req, res
 
         // Get Employee Details including Shift and Site
         const empRes = await pool.query(
-            `SELECT e.id, e.site_id, e.department_name, e.photo_url,
+            `SELECT e.id, e.site_id, e.department_name, e.photo_url, e.is_tracking_enabled,
                    s.latitude as site_lat, s.longitude as site_lon, s.radius_meters, s.name as site_name, s.geofence_type, s.geofence_data, s.geofence_enabled,
                    sh.start_time, sh.end_time
              FROM employees e
@@ -1699,9 +2041,31 @@ app.post('/location/update', locationLimiter, authenticateToken, async (req, res
             [employeeId]
         );
 
+
         if (empRes.rows.length > 0) {
             const emp = empRes.rows[0];
             const internalId = emp.id;
+
+            // 1. Check Global Tracking
+            const globalRes = await pool.query('SELECT value FROM settings WHERE key = $1', ['global_tracking_enabled']);
+            const globalEnabled = globalRes.rows.length > 0 ? (globalRes.rows[0].value === true) : true;
+
+            if (!globalEnabled) {
+                return res.json({ message: 'Tracking disabled globally' });
+            }
+
+            // 2. Check Staff Level
+            if (emp.is_tracking_enabled === false) {
+                return res.json({ message: 'Tracking disabled for this staff' });
+            }
+
+            // 3. Check Shift Timings
+            if (emp.start_time && emp.end_time) {
+                if (!isDuringShift(emp.start_time, emp.end_time)) {
+                    return res.json({ message: 'Outside shift hours' });
+                }
+            }
+
 
             // 1. Broadcast to HR Dashboards (Socket.io)
             const payload = {
@@ -1945,14 +2309,21 @@ io.on('connection', (socket) => {
 
         try {
             const empRes = await pool.query(`
-                SELECT e.id, e.first_name, e.last_name, e.site_id, s.name as site_name 
+                SELECT e.id, e.first_name, e.last_name, e.site_id, s.name as site_name, s.nfc_payload as site_nfc_payload 
                 FROM employees e 
                 LEFT JOIN sites s ON e.site_id = s.id 
                 WHERE e.staff_id = $1
             `, [employeeId]);
 
             if (empRes.rows.length > 0) {
-                const { id: internalId, first_name: firstName, last_name: lastName, site_id: siteId, site_name: siteName } = empRes.rows[0];
+                const { id: internalId, first_name: firstName, last_name: lastName, site_id: siteId, site_name: siteName, site_nfc_payload: siteNfcPayload } = empRes.rows[0];
+
+                if (siteNfcPayload && siteNfcPayload.trim().length > 0) {
+                    if (!data.nfcPayload || data.nfcPayload !== siteNfcPayload) {
+                        socket.emit('error', { message: 'NFC Scan Required. Please tap the correct NFC tag to Check In.' });
+                        return;
+                    }
+                }
 
                 // Fallback: If no coordinates provided, try fetching last known location
                 if (!latitude || !longitude) {
@@ -2016,14 +2387,21 @@ io.on('connection', (socket) => {
         if (!employeeId) return;
         try {
             const empRes = await pool.query(`
-                SELECT e.id, e.first_name, e.last_name, e.site_id, s.name as site_name
+                SELECT e.id, e.first_name, e.last_name, e.site_id, s.name as site_name, s.nfc_payload as site_nfc_payload
                 FROM employees e
                 LEFT JOIN sites s ON e.site_id = s.id
                 WHERE e.staff_id = $1
             `, [employeeId]);
 
             if (empRes.rows.length > 0) {
-                const { id: internalId, first_name: firstName, last_name: lastName, site_id: siteId, site_name: siteName } = empRes.rows[0];
+                const { id: internalId, first_name: firstName, last_name: lastName, site_id: siteId, site_name: siteName, site_nfc_payload: siteNfcPayload } = empRes.rows[0];
+
+                if (siteNfcPayload && siteNfcPayload.trim().length > 0) {
+                    if (!data.nfcPayload || data.nfcPayload !== siteNfcPayload) {
+                        socket.emit('error', { message: 'NFC Scan Required. Please tap the correct NFC tag to Check Out.' });
+                        return;
+                    }
+                }
 
                 // Fallback: If no coordinates provided, try fetching last known location
                 if (!latitude || !longitude) {
