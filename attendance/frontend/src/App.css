@@ -1,15 +1,15 @@
 /* ============================================================
    BERKELEY WORKFORCE 360 — Enterprise UI
-   Colors preserved: #6347FE primary, #20D3AD success, #FF5E89 danger
+   Colors preserved: #5c42bc primary, #20D3AD success, #FF5E89 danger
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --primary: #6347FE;
-  --primary-dark: #4B17EE;
-  --primary-light: #EEF0FF;
-  --primary-mid: #8567FF;
+  --primary: #5c42bc;
+  --primary-dark: #4a3596;
+  --primary-light: #edebfa;
+  --primary-mid: #7d68c9;
   --success: #20D3AD;
   --success-bg: #E6FAF6;
   --danger: #FF5E89;
@@ -157,7 +157,7 @@ body {
   justify-content: center;
   border-radius: 50%;
   margin: 0 auto 1rem;
-  box-shadow: 0 4px 12px rgba(99, 71, 254, 0.35);
+  box-shadow: 0 4px 12px rgba(92, 66, 188, 0.35);
 }
 
 .employee-card h2 {
@@ -289,7 +289,7 @@ button:disabled {
   background: var(--primary);
   color: white;
   width: 100%;
-  box-shadow: 0 2px 8px rgba(99, 71, 254, 0.3);
+  box-shadow: 0 2px 8px rgba(92, 66, 188, 0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -343,13 +343,13 @@ button:disabled {
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
-  box-shadow: 0 1px 3px rgba(99, 71, 254, 0.22);
+  box-shadow: 0 1px 3px rgba(92, 66, 188, 0.22);
 }
 
 .hr-btn.primary:hover:not(:disabled) {
   background: var(--primary-dark);
   border-color: var(--primary-dark);
-  box-shadow: 0 3px 8px rgba(99, 71, 254, 0.3);
+  box-shadow: 0 3px 8px rgba(92, 66, 188, 0.3);
 }
 
 .hr-btn.primary:active:not(:disabled) {
@@ -556,7 +556,7 @@ button:disabled {
   outline: none;
   border-color: var(--primary);
   background: var(--white);
-  box-shadow: 0 0 0 3px rgba(99, 71, 254, 0.12);
+  box-shadow: 0 0 0 3px rgba(92, 66, 188, 0.12);
 }
 
 .error-box {
@@ -603,7 +603,10 @@ button:disabled {
 
 /* ── Top Navigation Bar ── */
 .dashboard-header {
-  background: var(--primary-dark);
+  background: rgba(74, 53, 150, 0.95);
+  /* Semi-transparent dark purple */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: white;
   padding: 0 1.5rem;
   display: flex;
@@ -709,6 +712,22 @@ button:disabled {
 
 .socket-connected {
   color: var(--success) !important;
+  animation: pulse-connected 2s infinite ease-in-out;
+}
+
+@keyframes pulse-connected {
+  0% {
+    opacity: 0.7;
+  }
+
+  50% {
+    opacity: 1;
+    text-shadow: 0 0 8px rgba(32, 211, 173, 0.6);
+  }
+
+  100% {
+    opacity: 0.7;
+  }
 }
 
 .socket-disconnected,
@@ -781,8 +800,11 @@ button:disabled {
 .sidebar {
   width: 260px;
   min-width: 260px;
-  background: var(--white);
-  border-right: 1px solid var(--gray-200);
+  background: rgba(255, 255, 255, 0.85);
+  /* Glassmorphism background */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-right: 1px solid rgba(226, 232, 240, 0.8);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -826,7 +848,7 @@ button:disabled {
   outline: none;
   border-color: var(--primary);
   background: var(--white);
-  box-shadow: 0 0 0 3px rgba(99, 71, 254, 0.1);
+  box-shadow: 0 0 0 3px rgba(92, 66, 188, 0.1);
 }
 
 /* Employee list items */
@@ -860,7 +882,7 @@ button:disabled {
 
 .list-item.selected {
   background: var(--primary-light);
-  border-color: rgba(99, 71, 254, 0.2);
+  border-color: rgba(92, 66, 188, 0.2);
 }
 
 .item-main {
@@ -1076,7 +1098,7 @@ button:disabled {
 .mgmt-search:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(99, 71, 254, 0.1);
+  box-shadow: 0 0 0 3px rgba(92, 66, 188, 0.1);
 }
 
 /* Action buttons in toolbar */
@@ -1170,7 +1192,7 @@ button:disabled {
   color: white;
   border-color: var(--primary);
   transform: none !important;
-  box-shadow: 0 2px 6px rgba(99, 71, 254, 0.25) !important;
+  box-shadow: 0 2px 6px rgba(92, 66, 188, 0.25) !important;
 }
 
 /* ── Pagination ── */
@@ -1223,11 +1245,13 @@ button:disabled {
 }
 
 .modal-content {
-  background: var(--white);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   padding: 1.75rem;
   border-radius: var(--radius-xl);
   width: 100%;
-  max-width: 580px;
+  max-width: 650px;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: var(--shadow-lg);
@@ -1289,6 +1313,9 @@ button:disabled {
   font-family: var(--font);
   color: var(--gray-800);
   background: var(--gray-50);
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 100%;
   transition: var(--transition);
 }
 
@@ -1297,7 +1324,7 @@ button:disabled {
   outline: none;
   border-color: var(--primary);
   background: var(--white);
-  box-shadow: 0 0 0 3px rgba(99, 71, 254, 0.1);
+  box-shadow: 0 0 0 3px rgba(92, 66, 188, 0.1);
 }
 
 .modal-footer {
@@ -1379,9 +1406,9 @@ button:disabled {
 }
 
 .analytics-modern-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
-  border-color: var(--gray-300);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary);
 }
 
 .card-icon {
@@ -1559,7 +1586,7 @@ button:disabled {
 
 /* Analytics action bar */
 .analytics-actions-bar {
-  background: var(--gray-900);
+  background: var(--primary);
   border-radius: var(--radius-lg);
   padding: 1.5rem 2rem;
   display: flex;
@@ -1731,7 +1758,7 @@ button:disabled {
 .logs-search-input:focus {
   border-color: var(--primary);
   background: var(--white);
-  box-shadow: 0 0 0 3px rgba(99, 71, 254, 0.1);
+  box-shadow: 0 0 0 3px rgba(92, 66, 188, 0.1);
 }
 
 .search-icon-svg {
@@ -1755,7 +1782,7 @@ button:disabled {
 }
 
 .reports-header {
-  background: var(--gray-900);
+  background: var(--primary);
   color: white;
   padding: 1.25rem 1.5rem;
   display: flex;
@@ -1822,7 +1849,7 @@ button:disabled {
 .control-input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(99, 71, 254, 0.1);
+  box-shadow: 0 0 0 3px rgba(92, 66, 188, 0.1);
   background: var(--white);
 }
 
@@ -1862,7 +1889,7 @@ button:disabled {
 .btn-report.primary {
   background: var(--primary);
   color: white;
-  box-shadow: 0 2px 6px rgba(99, 71, 254, 0.25);
+  box-shadow: 0 2px 6px rgba(92, 66, 188, 0.25);
 }
 
 .btn-report.primary:hover {
@@ -2011,4 +2038,42 @@ button:disabled {
   .reports-container {
     padding: 1rem !important;
   }
+}
+
+/* ── UI Animations ── */
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Custom Scrollbars ── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(74, 53, 150, 0.4);
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(74, 53, 150, 0.7);
 }

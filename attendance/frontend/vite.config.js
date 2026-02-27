@@ -36,6 +36,17 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: ['attendance.berkeleyuae.com']
+    allowedHosts: ['attendance.berkeleyuae.com'],
+    proxy: {
+      '/api': {
+        target: 'http://api:3000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      },
+      '/socket.io': {
+        target: 'http://api:3000',
+        ws: true
+      }
+    }
   }
 })
