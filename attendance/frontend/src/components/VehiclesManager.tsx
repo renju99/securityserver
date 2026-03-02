@@ -13,6 +13,7 @@ interface StaffManagerProps {
     setCurrentUser: (user: any) => void;
     setShowUserModal: (val: boolean) => void;
     handleBulkExport: () => void;
+    handleBulkArchive: () => void;
     handleBulkDelete: () => void;
     handleFocusSite: (site: Site) => void;
     setCurrentSite: (site: any) => void;
@@ -27,7 +28,7 @@ interface StaffManagerProps {
 export default function VehiclesManager({
     onEditUser,
     setCurrentUser, setShowUserModal,
-    handleBulkExport, handleBulkDelete, handleFocusSite,
+    handleBulkExport, handleBulkArchive, handleBulkDelete, handleFocusSite,
     setCurrentSite, setShowSiteModal,
     setCurrentShift, setShowShiftModal, currentShift,
     setValidationErrors, showShiftModal
@@ -234,6 +235,7 @@ export default function VehiclesManager({
                                 </div>
                                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                                     <button className="btn-secondary" onClick={handleBulkExport} style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>📥 Export</button>
+                                    <button className="btn-secondary" onClick={handleBulkArchive} style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem', background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a' }}>📦 Archive</button>
                                     <button className="btn-secondary" onClick={handleBulkDelete} style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem', background: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca' }}>🗑️ Delete</button>
                                     <button className="btn-secondary" onClick={() => { setSelectedUsers([]); setSelectAll(false); }} style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>✕ Clear</button>
                                 </div>

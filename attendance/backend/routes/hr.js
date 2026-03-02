@@ -631,13 +631,13 @@ module.exports = (pool, authenticateToken, authorizeRole, bcrypt, jwt, JWT_SECRE
             LEFT JOIN roles r ON e.role_id = r.id
             LEFT JOIN sites s ON e.site_id = s.id
             LEFT JOIN shifts sh ON e.shift_id = sh.id
-            WHERE e.staff_id ILIKE $1 OR e.email ILIKE $1
+            WHERE (e.is_active = TRUE OR e.is_active IS NULL) AND (e.staff_id ILIKE $1 OR e.email ILIKE $1)
             ORDER BY e.created_at DESC
             LIMIT $2 OFFSET $3
         `;
             const result = await pool.query(query, [`%${search}%`, limit, offset]);
 
-            const countRes = await pool.query('SELECT COUNT(*) FROM employees WHERE staff_id ILIKE $1 OR email ILIKE $1', [`%${search}%`]);
+            const countRes = await pool.query('SELECT COUNT(*) FROM employees WHERE (is_active = TRUE OR is_active IS NULL) AND (staff_id ILIKE $1 OR email ILIKE $1)', [`%${search}%`]);
 
             res.json({
                 users: result.rows,
@@ -649,6 +649,30 @@ module.exports = (pool, authenticateToken, authorizeRole, bcrypt, jwt, JWT_SECRE
             res.status(500).json({ error: 'Database error' });
         }
     });
+
+    // HR API: Delete or Archive user
+    router.delete('/hr/users/:id', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
+        const { id } = req.params;
+        try {
+            await pool.query('DELETE FROM employees WHERE id = $1', [id]);
+            res.json({ message: 'User permanently deleted' });
+        } catch (err) {
+            if (err.code === '23503') { // Foreign key constraint violation
+                try {
+                    await pool.query('UPDATE employees SET is_active = FALSE WHERE id = $1', [id]);
+                    res.json({ message: 'User archived properly due to existing records' });
+                } catch (archiveErr) {
+                    console.error('Error archiving user:', archiveErr);
+                    res.status(500).json({ error: 'Failed to archive user' });
+                }
+            } else {
+                console.error('Error deleting user:', err);
+                res.status(500).json({ error: 'Database error' });
+            }
+        }
+    });
+
+
 
     // HR API: Bulk update user fields (Shift, Site, Dept)
     router.patch('/api/hr/users/bulk-update', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
@@ -677,6 +701,10 @@ module.exports = (pool, authenticateToken, authorizeRole, bcrypt, jwt, JWT_SECRE
             if (req.body.isTrackingEnabled !== undefined) {
                 updates.push(`is_tracking_enabled = $${paramIdx++}`);
                 params.push(req.body.isTrackingEnabled);
+            }
+            if (req.body.isActive !== undefined) {
+                updates.push(`is_active = $${paramIdx++}`);
+                params.push(req.body.isActive);
             }
 
             if (updates.length === 0) {

@@ -801,7 +801,8 @@ class GuardPortal(CustomerPortal):
                 _logger.warning('[Mobile Course View] Error getting slides: %s', str(slide_error))
                 slides = request.env['slide.slide']
             
-            slide_data = []            for slide in slides:
+            slide_data = []
+            for slide in slides:
                 # Check completion status
                 slide_partner = request.env['slide.slide.partner'].sudo().search([
                     ('slide_id', '=', slide.id),

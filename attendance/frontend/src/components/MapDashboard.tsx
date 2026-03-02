@@ -175,33 +175,41 @@ export default function MapDashboard() {
 
                             return matchesSearch && matchesSite;
                         })
-                        .map((loc) => (
-                            <React.Fragment key={loc.employeeId}>
-                                <Marker
-                                    position={{ lat: loc.latitude, lng: loc.longitude }}
-                                    onClick={() => setSelectedId(loc.employeeId)}
-                                />
-                                {selectedId === loc.employeeId && (
-                                    <InfoWindow
+                        .map((loc) => {
+                            const isVehicle = (loc as any).departmentName === 'Vehicle' || (loc as any).department_name === 'Vehicle';
+                            const iconUrl = isVehicle
+                                ? `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="14" fill="#6366f1" stroke="white" stroke-width="2"/><text x="16" y="21" font-size="14" text-anchor="middle">🚙</text></svg>')}`
+                                : `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="14" fill="#10b981" stroke="white" stroke-width="2"/><text x="16" y="21" font-size="14" text-anchor="middle">🧑‍💼</text></svg>')}`;
+
+                            return (
+                                <React.Fragment key={loc.employeeId}>
+                                    <Marker
                                         position={{ lat: loc.latitude, lng: loc.longitude }}
-                                        onCloseClick={() => setSelectedId(null)}
-                                    >
-                                        <div className="map-popup">
-                                            {(loc.photoUrl || loc.photo_url) && (
-                                                <img src={loc.photoUrl || loc.photo_url} alt="Staff" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', marginBottom: '8px' }} />
-                                            )}
-                                            <strong>{loc.departmentName || loc.department_name || 'Staff'}</strong>
-                                            <div style={{ fontSize: '0.9rem', color: '#555' }}>ID: {loc.employeeId}</div>
-                                            <p style={{ margin: '4px 0', fontSize: '0.8rem' }}>Last seen: {loc.lastSeen}</p>
-                                            <small>
-                                                {typeof loc.latitude === 'number' ? loc.latitude.toFixed(5) : loc.latitude},
-                                                {typeof loc.longitude === 'number' ? loc.longitude.toFixed(5) : loc.longitude}
-                                            </small>
-                                        </div>
-                                    </InfoWindow>
-                                )}
-                            </React.Fragment>
-                        ))}
+                                        onClick={() => setSelectedId(loc.employeeId)}
+                                        icon={{ url: iconUrl, scaledSize: { width: 32, height: 32 } as any }}
+                                    />
+                                    {selectedId === loc.employeeId && (
+                                        <InfoWindow
+                                            position={{ lat: loc.latitude, lng: loc.longitude }}
+                                            onCloseClick={() => setSelectedId(null)}
+                                        >
+                                            <div className="map-popup">
+                                                {(loc.photoUrl || loc.photo_url) && (
+                                                    <img src={loc.photoUrl || loc.photo_url} alt="Staff" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', marginBottom: '8px' }} />
+                                                )}
+                                                <strong>{loc.departmentName || loc.department_name || 'Staff'}</strong>
+                                                <div style={{ fontSize: '0.9rem', color: '#555' }}>ID: {loc.employeeId}</div>
+                                                <p style={{ margin: '4px 0', fontSize: '0.8rem' }}>Last seen: {loc.lastSeen}</p>
+                                                <small>
+                                                    {typeof loc.latitude === 'number' ? loc.latitude.toFixed(5) : loc.latitude},
+                                                    {typeof loc.longitude === 'number' ? loc.longitude.toFixed(5) : loc.longitude}
+                                                </small>
+                                            </div>
+                                        </InfoWindow>
+                                    )}
+                                </React.Fragment>
+                            );
+                        })}
                 </Map>
             </main>
         </>

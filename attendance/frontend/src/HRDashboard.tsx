@@ -300,6 +300,44 @@ const HRDashboard = () => {
         });
     }, [selectedUsers, user, showToast, openConfirm, fetchManagementUsers, mgmtPage, mgmtSearch]);
 
+    const handleBulkArchive = useCallback(() => {
+        if (selectedUsers.length === 0) {
+            showToast('No users selected', 'warning');
+            return;
+        }
+
+        openConfirm({
+            title: 'Archive Selected Staff?',
+            message: `Are you sure you want to archive ${selectedUsers.length} staff member(s)? They will be hidden but their history will be preserved.`,
+            confirmText: 'Archive All',
+            cancelText: 'Cancel',
+            type: 'warning',
+            onConfirm: async () => {
+                setIsLoading(true);
+                try {
+                    const res = await fetch(`/api/hr/users/bulk-update`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.token}` },
+                        body: JSON.stringify({ userIds: selectedUsers, isActive: false })
+                    });
+
+                    if (res.ok) {
+                        showToast(`Successfully archived ${selectedUsers.length} user(s)`, 'success');
+                        setSelectedUsers([]);
+                        setSelectAll(false);
+                        fetchManagementUsers(user?.token || '', mgmtPage, mgmtSearch);
+                    } else {
+                        throw new Error('Failed');
+                    }
+                } catch (err) {
+                    showToast('Failed to archive some users', 'error');
+                } finally {
+                    setIsLoading(false);
+                }
+            }
+        });
+    }, [selectedUsers, user, showToast, openConfirm, fetchManagementUsers, mgmtPage, mgmtSearch]);
+
     const handleBulkExport = useCallback(() => {
         if (selectedUsers.length === 0) {
             showToast('No users selected', 'warning');
@@ -977,6 +1015,7 @@ const HRDashboard = () => {
                             setCurrentUser={setCurrentUser}
                             setShowUserModal={setShowUserModal}
                             handleBulkExport={handleBulkExport}
+                            handleBulkArchive={handleBulkArchive}
                             handleBulkDelete={handleBulkDelete}
                             handleFocusSite={handleFocusSite}
                             setCurrentSite={setCurrentSite}
@@ -1004,9 +1043,10 @@ const HRDashboard = () => {
                             }}
                             setCurrentUser={setCurrentUser}
                             setShowUserModal={setShowUserModal}
-                            handleBulkExport={() => { }}
-                            handleBulkDelete={() => { }}
-                            handleFocusSite={() => { }}
+                            handleBulkExport={handleBulkExport}
+                            handleBulkArchive={handleBulkArchive}
+                            handleBulkDelete={handleBulkDelete}
+                            handleFocusSite={handleFocusSite}
                             setCurrentSite={setCurrentSite}
                             setShowSiteModal={setShowSiteModal}
                             setCurrentShift={setCurrentShift}
