@@ -4,6 +4,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+# .env (with VITE_GOOGLE_MAPS_API_KEY) is read by Vite at build time
 RUN npm run build
 
 # Production stage

@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Berkeley Cleaner</string>
+    <string name="asset_statements">
+        [{\n
+            \"relation\": [\"delegate_permission/common.handle_all_urls\"],\n
+            \"target\": {\n
+                \"namespace\": \"android_app\",\n
+                \"package_name\": \"com.berkeleyuae.cleaner\",\n
+                \"sha256_cert_fingerprints\": [\"D2:9E:62:66:B6:15:C6:44:FD:07:89:2B:26:CA:0F:D7:39:F3:14:C5:04:AE:87:24:15:C4:09:68:DE:99:7F:1E\"]\n
+            }\n
+        }]
+    </string>
+</resources>

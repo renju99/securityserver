@@ -18,7 +18,8 @@ const Login = () => {
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('user', JSON.stringify(response.data.user));
 
-            if (response.data.user.role === 'admin') {
+            const role = response.data.user.role;
+            if (role === 'admin' || role === 'manager' || role === 'supervisor') {
                 navigate('/admin');
             } else {
                 navigate('/cleaner');
@@ -69,63 +70,6 @@ const Login = () => {
                     </button>
                 </form>
             </div>
-
-            <style jsx>{`
-        .login-page {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex: 1;
-          padding: 1.5rem;
-          background: radial-gradient(circle at top right, #1e293b, #0f172a);
-        }
-        .login-card {
-          width: 100%;
-          max-width: 400px;
-          padding: 2.5rem;
-        }
-        .login-header {
-          text-align: center;
-          margin-bottom: 2rem;
-        }
-        .logo-icon {
-          font-size: 3rem;
-          margin-bottom: 0.5rem;
-        }
-        .form-group {
-          margin-bottom: 1.5rem;
-        }
-        label {
-          display: block;
-          font-size: 0.875rem;
-          color: var(--text-muted);
-          margin-bottom: 0.5rem;
-        }
-        input {
-          width: 100%;
-          padding: 0.75rem 1rem;
-          background: var(--surface-light);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: var(--radius);
-          color: white;
-          font-size: 1rem;
-          outline: none;
-          transition: border-color 0.2s;
-        }
-        input:focus {
-          border-color: var(--primary);
-        }
-        .login-btn {
-          width: 100%;
-          margin-top: 1rem;
-        }
-        .error-message {
-          color: var(--danger);
-          font-size: 0.875rem;
-          margin-bottom: 1rem;
-          text-align: center;
-        }
-      `}</style>
         </div>
     );
 };

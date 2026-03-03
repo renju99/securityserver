@@ -5,6 +5,8 @@ services:
     image: postgres:15
     container_name: cleaner-db
     restart: always
+    ports:
+      - "5433:5432"   # host 5433 to avoid conflict with Postgres on 5432
     environment:
       POSTGRES_DB: cleaner_attendance
       POSTGRES_USER: admin

@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS projects (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     code VARCHAR(50) UNIQUE,
+    location VARCHAR(500),
     geofence_lat DOUBLE PRECISION NOT NULL,
     geofence_lng DOUBLE PRECISION NOT NULL,
     geofence_radius DOUBLE PRECISION DEFAULT 100.0,
@@ -36,7 +37,7 @@ CREATE TABLE IF NOT EXISTS employees (
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    role VARCHAR(20) DEFAULT 'cleaner', -- 'cleaner', 'admin', 'manager'
+    role VARCHAR(20) DEFAULT 'cleaner', -- 'cleaner', 'supervisor', 'manager', 'admin'
     active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -45,6 +46,7 @@ CREATE TABLE IF NOT EXISTS employees (
 CREATE TABLE IF NOT EXISTS schedules (
     id SERIAL PRIMARY KEY,
     washroom_id INTEGER REFERENCES washrooms(id) ON DELETE CASCADE,
+    employee_id INTEGER REFERENCES employees(id) ON DELETE SET NULL,
     start_time TIME NOT NULL, -- e.g., '08:00:00'
     end_time TIME,
     interval_value NUMERIC NOT NULL DEFAULT 2.0,

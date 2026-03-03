@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../utils/db');
 
@@ -20,23 +20,45 @@ const login = async (req, res) => {
     let { email, password } = req.body;
     console.log(`Login attempt for: ${email}`);
     try {
-        if (email) email = email.trim().toLowerCase();
-        const result = await db.query('SELECT * FROM employees WHERE email = $1', [email]);
+        if (!email || typeof password !== 'string') {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+        email = email.trim().toLowerCase();
+        console.log('Login: querying DB');
+        const result = await db.query('SELECT id, name, email, role, password_hash FROM employees WHERE email = $1', [email]);
+        console.log('Login: got rows', result.rows.length);
         if (result.rows.length === 0) {
             console.warn(`Login failed: User not found - ${email}`);
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
         const user = result.rows[0];
-        const validPassword = await bcrypt.compare(password, user.password_hash);
+        const hash = user.password_hash;
+        console.log('Login: comparing password');
+        if (!hash || typeof hash !== 'string') {
+            console.warn(`Login failed: No password hash for ${email}`);
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        let validPassword = false;
+        try {
+            validPassword = await bcrypt.compare(String(password), hash);
+        } catch (bcryptErr) {
+            console.error('bcrypt.compare error:', bcryptErr.message);
+            return res.status(500).json({ error: 'Login failed' });
+        }
         if (!validPassword) {
             console.warn(`Login failed: Incorrect password for ${email}`);
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+            console.error('JWT_SECRET is not set');
+            return res.status(500).json({ error: 'Server configuration error' });
+        }
         const token = jwt.sign(
             { id: user.id, role: user.role },
-            process.env.JWT_SECRET,
+            secret,
             { expiresIn: '24h' }
         );
 
@@ -45,7 +67,10 @@ const login = async (req, res) => {
             user: { id: user.id, name: user.name, email: user.email, role: user.role }
         });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Login error:', error && error.stack ? error.stack : error);
+        if (!res.headersSent) {
+            res.status(500).json({ error: error.message || 'Login failed' });
+        }
     }
 };
 

@@ -1,4 +1,10 @@
 require('dotenv').config();
+process.on('uncaughtException', (err) => {
+    console.error('uncaughtException:', err);
+});
+process.on('unhandledRejection', (reason, p) => {
+    console.error('unhandledRejection:', reason);
+});
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
@@ -42,10 +48,12 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date() });
 });
 
-// Error Handling Middleware
+// Error Handling Middleware (must have 4 args so Express treats it as error handler)
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ error: 'Something went wrong!' });
+    console.error('Express error handler:', err && err.stack ? err.stack : err);
+    if (!res.headersSent) {
+        res.status(500).json({ error: err.message || 'Something went wrong!' });
+    }
 });
 
 const PORT = process.env.PORT || 3001;
