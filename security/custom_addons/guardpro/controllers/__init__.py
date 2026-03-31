@@ -5,7 +5,6 @@ from . import main
 from . import mobile_api
 from . import mobile_enhanced_api
 from . import messaging_api
-from . import biometric_api
 from . import push_to_talk_api
 from . import smart_features_api
 from . import guard_portal

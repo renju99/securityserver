@@ -287,13 +287,7 @@ class GuardCredential(models.Model):
                     body=_('Credential has expired!'),
                     subtype_xmlid='mail.mt_comment'
                 )
-                # Create activity for supervisor
-                credential.activity_schedule(
-                    'mail.mail_activity_data_warning',
-                    summary=_('Expired Credential: %s') % credential.credential_type_id.name,
-                    note=_('Guard %s credential has expired. Immediate action required!') % credential.guard_id.name,
-                    user_id=credential.guard_id.supervisor_id.id if credential.guard_id.supervisor_id else self.env.user.id
-                )
+                # Planned activity intentionally disabled.
             elif days_until <= renewal_days:
                 # Expiring soon
                 if credential.state != 'expiring_soon':
@@ -302,13 +296,7 @@ class GuardCredential(models.Model):
                         body=_('Credential expiring in %d days') % days_until,
                         subtype_xmlid='mail.mt_comment'
                     )
-                    # Create activity for guard and supervisor
-                    credential.activity_schedule(
-                        'mail.mail_activity_data_todo',
-                        summary=_('Renew Credential: %s') % credential.credential_type_id.name,
-                        note=_('Credential expires on %s. Please renew.') % credential.expiry_date,
-                        user_id=credential.guard_id.user_id.id if credential.guard_id.user_id else self.env.user.id
-                    )
+                    # Planned activity intentionally disabled.
         
         return True
     
@@ -326,17 +314,7 @@ class GuardCredential(models.Model):
             if manager_group:
                 managers = manager_group.users
                 
-                # Prepare email
-                template = self.env.ref('guardpro.email_template_credential_compliance_report', raise_if_not_found=False)
-                if template:
-                    for manager in managers:
-                        template.send_mail(
-                            manager.id,
-                            force_send=True,
-                            email_values={
-                                'email_to': manager.email
-                            }
-                        )
+                # Email notifications are disabled globally.
         
         return True
 

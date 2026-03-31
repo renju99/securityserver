@@ -770,6 +770,34 @@ class GuardMessageChannel(models.Model):
         compute='_compute_last_message',
         store=True
     )
+
+    def is_accessible_by_guard(self, guard):
+        """Team chat channel: membership/public rules + site scope (user.site_ids).
+
+        Site-assigned guards only see channels linked to one of their sites, or
+        legacy channels with no site if they are explicit members (not public).
+
+        If ``all_sites_access`` is enabled, members may use the channel regardless
+        of site assignment.
+        """
+        self.ensure_one()
+        if self.is_archived:
+            return False
+        if not guard or not guard.exists():
+            return False
+        user = guard.user_id
+        if not self.is_public and guard.id not in self.member_ids.ids:
+            return False
+        # Global channel: only explicit members skip site checks (not anonymous public viewers)
+        if self.all_sites_access and guard.id in self.member_ids.ids:
+            return True
+        if user and user.site_ids:
+            if self.site_id:
+                return self.site_id.id in user.site_ids.ids
+            if self.is_public:
+                return False
+            return guard.id in self.member_ids.ids
+        return True
     
     # Statistics
     active_member_count = fields.Integer(

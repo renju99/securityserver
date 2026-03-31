@@ -1,242 +1,88 @@
-# 🚨 Sentry - Enterprise Security Operations Suite
+# Sentry — Security operations on Odoo 18
 
-<div align="center">
+Sentry brings guard scheduling, patrol proof, incidents, visitors, and client reporting into **Odoo 18 Community**. Supervisors, control room staff, and guards share one system; clients can use the portal where you enable it.
 
-**Win premium guard contracts with an Odoo-native suite for mobile patrols, SLA automation, client portals, and analytics.**
-
-[![Version](https://img.shields.io/badge/version-18.0.1.0.8-blue.svg)](https://github.com/renju99/custom_addons)
-[![Odoo](https://img.shields.io/badge/odoo-18.0-green.svg)](https://www.odoo.com/)
-[![License](https://img.shields.io/badge/license-LGPL--3-blue.svg)](LICENSE)
-
-*Mobile-first security operations • Real-time GPS tracking • Automated compliance • Client portals • Analytics dashboards*
-
-[📖 Documentation](INDEX.md) • [🚀 Quick Start](user-guide/01-introduction.md) • [📱 Mobile App](api/mobile-api.md) • [🔗 API](api/rest-api.md)
-
-</div>
+**Version:** 18.0.1.1.17 · See also [Documentation index](INDEX.md) and [Get started](GETTING_STARTED.md).
 
 ---
 
-## 🎯 What is Sentry?
+## What you get
 
-Sentry centralizes security guard field operations, compliance, and client reporting inside **Odoo 18 Community Edition**. The suite connects supervisors, control rooms, guards, and clients with real-time visibility, mobile-first workflows, and automated analytics.
+### Field and mobile
 
-Built for security companies, corporate security teams, and property managers who need enterprise-grade security operations without the complexity of traditional security software.
+- Responsive **mobile web** for guards (bookmark or add to home screen; flows are Odoo-native routes).  
+- GPS-related features where enabled: location history, geofence alerts, checkpoint scans (QR/NFC/manual, per configuration).  
+- Patrol **tours**, **checkpoints**, route helpers, and **tour logs** for audit evidence.  
 
----
+### Control room
 
-## ✨ Core Features
+- **Shifts**, templates, swaps, and attendance aligned with your setup.  
+- **Incidents** with investigation, escalation, and SLA links where configured.  
+- **Visitors**, packages, keys, lost-and-found, and related workflows.  
+- **Emergency broadcast** and internal messaging features where installed and permitted.  
+- **Dashboards and reports** (PDF/Excel depending on configuration).  
 
-### 📱 Mobile-First Guard Experience
-- **Progressive Web App** installable on iOS and Android with offline synchronization
-- **GPS diagnostics**, location history, panic alerts, and live geofence monitoring
-- **Patrol tour designer**, checkpoint map creator, optimized route planner, and bulk assignment wizards
-- **Guard shift management** with swap approvals, availability planning, and attendance reconciliation
+### Compliance
 
-### 🏢 Control Room & Compliance
-- **Incident lifecycle coverage**: reporting, investigation, escalation logs, SLA breach alerts, and client notifications
-- **Visitor, contractor, package, key, and lost and found workflows** with automated reminders
-- **Compliance audits, SOP knowledge base, emergency procedures, broadcast templates**, and audit-ready trails
-- **Performance dashboards, analytics grids, KPI tracking**, and exportable PDF or Excel reports
+- Audits, **daily activity reports**, SLA definitions and performance tracking.  
+- Knowledge / SOP content and eLearning when **website_slides** and your data packs are present.  
 
-### 🤖 Automation & Intelligence
-- **18 scheduled actions** handling alerts, daily activity report generation, SLA calculations, credential renewals, and messaging
-- **REST API endpoints, webhook framework, and portal enhancements** for external integrations
-- **Odoo-native collaboration** with mail chatter, project tasks, HR employees, website slides eLearning, and portal
+### Automation and integration
 
----
-
-## 🏆 Latest Enhancements (v18.0.1.0.8)
-
-### 🎯 2025 Enhancement Wave
-- ✅ **Analytics Dashboards** - Real-time KPI tracking and performance metrics
-- ✅ **Emergency Broadcast Suite** - Push notifications and emergency communication
-- ✅ **Enhanced eLearning** - Comprehensive guard training modules
-- ✅ **Security Audit Tooling** - Advanced compliance and audit automation
-- ✅ **Biometric Integration** - Secure authentication and verification
-- ✅ **CCTV Camera Management** - Live streaming and camera control
-- ✅ **UAE/SIRA Compliance** - Dubai and SIRA standards integration
-
-### 📊 Advanced Analytics
-- **Live Guard View** with real-time GPS tracking
-- **Performance Dashboards** with customizable KPIs
-- **Incident Analytics** and trend analysis
-- **SLA Performance Monitoring** with breach alerts
-- **Client Feedback Analytics** and satisfaction tracking
+- Scheduled actions for reminders, DAR, SLAs, credentials, and more.  
+- APIs and webhooks for integrations (see `docs/api/`).  
 
 ---
 
-## 👥 Who Uses Sentry?
+## Product scope notes
 
-### 🛡️ Security Companies
-- **Guard management** and credential lifecycle
-- **Shift scheduling** and conflict detection
-- **Client billing** and contract management
-- **Quality assurance** and performance monitoring
-- **Multi-site operations** and centralized control
+This README describes the **current** product, not every line of experimental or optional code in the repository.
 
-### 🏢 Corporate Security Teams
-- **In-house guard teams** management
-- **Facility security** operations
-- **Compliance tracking** and reporting
-- **Incident management** and investigation
-- **Access control** and visitor management
-
-### 🏠 Property Management
-- **Residential security** for communities
-- **Commercial building** security operations
-- **Tenant services** and resident portals
-- **Multi-site management** and reporting
-- **Emergency response** coordination
+- **CCTV:** Site camera records may exist; **live viewing is not exposed** in the default UI.  
+- **Biometric:** Default browser bundles do not include in-capture biometric scripts; verification may still be used via API/devices per your deployment.  
+- **Optional modules:** `hr_attendance` and `maintenance` extend attendance and equipment when installed.  
 
 ---
 
-## 🚀 Getting Started
+## Who it is for
 
-<div align="center">
-
-### ⚡ Quick Setup (30 minutes)
-
-| Step | Task | Documentation |
-|------|------|---------------|
-| 1 | **Install Odoo 18** | [Installation Guide](user-guide/02-installation.md) |
-| 2 | **Install Sentry Module** | [Configuration](user-guide/03-configuration.md) |
-| 3 | **Add Security Guards** | [Guard Profiles](guards/profile_management.md) |
-| 4 | **Configure Sites** | [Site Setup](sites/site_setup.md) |
-| 5 | **Create First Shift** | [Shift Management](operations/shift_management.md) |
-
-</div>
-
-### 📱 Mobile Deployment
-1. **Access the PWA** at `/guardpro/mobile` on any mobile device
-2. **Install as app** from browser menu (Add to Home Screen)
-3. **Login with guard credentials** and start operations
-4. **Works offline** with automatic synchronization
+- Contract security providers and in-house security teams  
+- Property and facilities teams that need patrol and incident discipline  
+- Anyone who has outgrown spreadsheets for SLA and audit evidence  
 
 ---
 
-## 📊 Feature Comparison
+## Quick setup
 
-| Feature | Sentry | Traditional Software | Spreadsheets |
-|---------|--------|---------------------|--------------|
-| **Mobile App** | ✅ Native PWA | ❌ Expensive | ❌ None |
-| **GPS Tracking** | ✅ Real-time | ⚠️ Limited | ❌ Manual |
-| **Offline Mode** | ✅ Full sync | ❌ None | ❌ None |
-| **Automation** | ✅ 18+ scheduled tasks | ⚠️ Basic | ❌ Manual |
-| **Reporting** | ✅ 25+ PDF reports | ✅ Basic | ❌ Manual |
-| **API Integration** | ✅ REST + Webhooks | ✅ Enterprise only | ❌ None |
-| **Cost** | ✅ Odoo Community | ❌ $10k+/month | ❌ Time-intensive |
-| **UAE Compliance** | ✅ SIRA Standards | ❌ Additional cost | ❌ Manual |
+| Step | Topic | Link |
+|------|--------|------|
+| 1 | First patrol loop (guided) | [Get started](GETTING_STARTED.md) |
+| 2 | Install the module | [Installation](user-guide/02-installation.md) |
+| 3 | Configure groups and settings | [Configuration](user-guide/03-configuration.md) |
+| 4 | Add guards and a site | [Guard profiles](guards/profile_management.md) · [Site setup](sites/site_setup.md) |
+| 5 | First shift | [Shift management](operations/shift_management.md) |
 
 ---
 
-## 🛠️ Technical Specifications
+## Technical notes
 
-### System Requirements
-- **Odoo**: 18.0 Community Edition
-- **Python**: 3.10 or higher
-- **Database**: PostgreSQL 13+
-- **Web Server**: Compatible with Odoo (nginx recommended)
-- **Mobile**: iOS 12+, Android 8+ (PWA)
+- **Odoo:** 18 Community  
+- **Python:** 3.10+  
+- **PostgreSQL:** 13+  
+- **Python deps:** `markdown` (in-app docs), plus packages listed in `requirements.txt` / manifest for optional features  
 
-### Dependencies
-```python
-# Core Odoo modules
-base, web, website, hr, project, contacts, mail, portal, auth_signup, website_slides
-
-# Optional integrations
-hr_attendance, maintenance
-```
-
-### External Dependencies
-```python
-markdown>=3.4.0        # Documentation rendering
-cryptography>=41.0.0   # Biometric encryption
-requests>=2.28.0       # API integrations
-```
+Core dependencies include: `base`, `web`, `website`, `hr`, `project`, `contacts`, `mail`, `portal`, `auth_signup`, `website_slides`.
 
 ---
 
-## 📚 Documentation & Resources
+## License
 
-### 📖 Complete Documentation
-- **[Full Documentation Index](INDEX.md)** - Complete guide
-- **[User Guide](user-guide/)** - Step-by-step instructions
-- **[API Reference](api/)** - Integration documentation
-- **[Developer Guide](developer-guide/)** - Customization guide
-
-### 🎥 Learning Resources
-- **In-App Training** - Integrated eLearning modules
-- **Video Tutorials** - Available in application
-- **Knowledge Base** - Integrated help system
-- **SOP Guides** - Printable standard procedures
-
-### 💬 Support & Community
-- **Email Support**: support@sentry.app
-- **Phone Support**: 1-800-SENTRY
-- **GitHub Issues**: [Report bugs](https://github.com/renju99/custom_addons/issues)
-- **Documentation**: [Report issues](https://github.com/renju99/custom_addons/issues)
+LGPL-3 — see the module root for the full license text.
 
 ---
 
-## 🔄 Version History
+## More
 
-### v18.0.1.0.8 (January 2026)
-- 🚀 **Analytics Dashboards** - Real-time performance monitoring
-- 📢 **Emergency Broadcast** - Push notification system
-- 🎓 **Enhanced eLearning** - Comprehensive training modules
-- 🔒 **Biometric Security** - Advanced authentication
-- 📹 **CCTV Integration** - Camera management and streaming
-- 🇦🇪 **UAE Compliance** - SIRA standards implementation
-
-### v18.0.1.0.6 (November 2025)
-- 📋 **Knowledge Base** - SOP and emergency procedures
-- 🏷️ **Enhanced Tagging** - Better organization and search
-- 📄 **Advanced Reporting** - New PDF templates and exports
-
-### v18.0.1.0.2 (October 2025)
-- 🎯 **Performance Tracking** - KPI dashboards and analytics
-- 📱 **Mobile Enhancements** - Improved PWA experience
-- 🔄 **Sync Improvements** - Better offline synchronization
-
----
-
-## 🏆 Success Stories
-
-> *"Sentry transformed our security operations. We went from paper-based reporting to real-time mobile operations in just 2 weeks."*
-> — **Ahmed Al-Mansoori**, Security Director, Dubai Properties
-
-> *"The ROI was immediate. Reduced overtime by 30% and improved response times by 50%."*
-> — **Sarah Johnson**, Operations Manager, SecureCorp UAE
-
-> *"Perfect for UAE market requirements. SIRA compliance built-in."*
-> — **Mohammed Al-Rashid**, Compliance Officer, Emirates Security
-
----
-
-## 📞 Contact & Support
-
-<div align="center">
-
-**Ready to transform your security operations?**
-
-[![Contact Us](https://img.shields.io/badge/Contact_Us-017e84?style=for-the-badge&logo=mail.ru&logoColor=white)](mailto:support@sentry.app)
-[![Documentation](https://img.shields.io/badge/Documentation-017e84?style=for-the-badge&logo=read-the-docs&logoColor=white)](INDEX.md)
-[![GitHub](https://img.shields.io/badge/GitHub-017e84?style=for-the-badge&logo=github&logoColor=white)](https://github.com/renju99/custom_addons)
-
-**Sentry Support Team**  
-📧 support@sentry.app  
-📞 1-800-SENTRY  
-🌐 https://sentry.proptechme.com/
-
-</div>
-
----
-
-<div align="center">
-
-**Built with ❤️ for the security industry**  
-*Empowering security professionals with enterprise-grade technology*
-
-**Version 18.0.1.0.8** • **Last Updated: January 20, 2026** • **License: LGPL-3**
-
-</div>
+- [Full index](INDEX.md)  
+- [Quick reference](QUICK_REFERENCE.md)  
+- [Developer guide](developer-guide/01-architecture.md)  

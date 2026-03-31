@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="incident_community_violation_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2 class="text-center"><strong>COMMUNITY VIOLATION REPORT</strong></h2>
+                        <h4 class="text-center text-muted"><span t-field="doc.name"/></h4>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <table class="table table-bordered table-sm">
+                                    <tr><td width="30%"><strong>Category</strong></td><td width="70%"><span t-field="doc.category_id.name"/></td></tr>
+                                    <tr><td><strong>Title</strong></td><td><span t-field="doc.title"/></td></tr>
+                                    <tr><td><strong>Site</strong></td><td><span t-field="doc.site_id.name"/></td></tr>
+                                    <tr><td><strong>Date/Time</strong></td><td><span t-field="doc.incident_datetime" t-options='{"widget": "datetime"}'/></td></tr>
+                                    <tr t-if="doc.violation_unit_number"><td><strong>Unit/Villa/Shop</strong></td><td><span t-field="doc.violation_unit_number"/></td></tr>
+                                    <tr t-if="doc.violation_reported_by"><td><strong>Reported By</strong></td><td><span t-field="doc.violation_reported_by"/></td></tr>
+                                    <tr t-if="doc.violation_observed_datetime"><td><strong>Observed Date/Time</strong></td><td><span t-field="doc.violation_observed_datetime" t-options='{"widget": "datetime"}'/></td></tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4><strong>Violation Details</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.violation_details"/>
+                                    <p t-if="not doc.violation_details" class="text-muted"><em>No detailed notes provided.</em></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4><strong>Immediate Action Taken</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.violation_action_taken"/>
+                                    <p t-if="not doc.violation_action_taken" class="text-muted"><em>No action logged.</em></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td width="30%"><strong>Notice Issued</strong></td>
+                                        <td width="70%"><span t-if="doc.violation_notice_issued">Yes</span><span t-else="">No</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Repeat Offense</strong></td>
+                                        <td><span t-if="doc.violation_repeat_offense">Yes</span><span t-else="">No</span></td>
+                                    </tr>
+                                    <tr t-if="doc.violation_fine_amount">
+                                        <td><strong>Fine Amount</strong></td>
+                                        <td><span t-field="doc.violation_fine_amount" t-options='{"widget": "monetary"}'/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3" t-if="doc.security_officer_signature">
+                            <div class="col-6">
+                                <h4><strong>Security Officer Signature</strong></h4>
+                                <img t-att-src="image_data_uri(doc.security_officer_signature)"
+                                     style="max-height: 120px; border: 1px solid #ddd;"/>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_incident_community_violation" model="ir.actions.report">
+        <field name="name">Community Violation Report</field>
+        <field name="model">incident.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.incident_community_violation_pdf_template</field>
+        <field name="report_file">guardpro.incident_community_violation_pdf_template</field>
+        <field name="print_report_name">'Community_Violation_%s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_incident_report"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

@@ -3,6 +3,7 @@
 
 from odoo import http
 from odoo.http import request
+from odoo import fields as odoo_fields
 import logging
 import base64
 import json
@@ -13,6 +14,12 @@ _logger = logging.getLogger(__name__)
 
 class PushToTalkAPI(http.Controller):
     """API endpoints for push-to-talk (walkie-talkie) functionality."""
+
+    def _ptt_guard_can_use_channel(self, guard, channel):
+        """Membership + site scope (see ``push.to.talk.channel.is_accessible_by_guard``)."""
+        if not guard or not channel or not channel.exists():
+            return False
+        return channel.sudo().is_accessible_by_guard(guard)
 
     @http.route('/guardpro/api/push-to-talk/test', type='json', auth='user', methods=['POST'], csrf=False)
     def test_endpoint(self, **kwargs):
@@ -83,6 +90,8 @@ class PushToTalkAPI(http.Controller):
                     'code': channel_sudo.code,
                     'description': channel_sudo.description or '',
                     'channel_type': channel_sudo.channel_type,
+                    'site_id': channel_sudo.site_id.id if channel_sudo.site_id else None,
+                    'all_sites_access': bool(channel_sudo.all_sites_access),
                     'is_member': True,  # All channels returned are ones guard is assigned to
                     'is_public': channel_sudo.is_public,
                     'active_members_count': channel_sudo.active_members_count,
@@ -169,15 +178,12 @@ class PushToTalkAPI(http.Controller):
                     status=400
                 )
 
-            # Check if guard is assigned to this channel (use sudo to read member_ids)
-            # Guards can only connect to channels they're assigned to
-            is_member = guard.id in channel.sudo().member_ids.ids
-            
-            if not is_member:
+            # Member + site scope (multi-site)
+            if not self._ptt_guard_can_use_channel(guard, channel):
                 return request.make_response(
                     json.dumps({
                         'success': False, 
-                        'error': 'Access denied. You are not assigned to this channel. Please contact your supervisor to be assigned to the channel for your project.'
+                        'error': 'Access denied. You are not assigned to this channel for your site(s), or the channel has no site set. Please contact your supervisor.'
                     }),
                     headers=[
                         ('Content-Type', 'application/json'),
@@ -264,12 +270,8 @@ class PushToTalkAPI(http.Controller):
             if not channel.exists():
                 return {'success': False, 'error': 'Channel not found'}
 
-            # Check access - guards can only read messages from channels they're assigned to
-            # Use sudo() to read member_ids (bypasses record rules)
-            is_member = guard.id in channel.sudo().member_ids.ids
-            
-            if not is_member:
-                return {'success': False, 'error': 'Access denied. You are not assigned to this channel.'}
+            if not self._ptt_guard_can_use_channel(guard, channel):
+                return {'success': False, 'error': 'Access denied. You cannot read messages on this channel for your site(s).'}
 
             # Get messages (use voice_message_ids to avoid conflict with mail.thread's message_ids)
             # Use sudo() to read messages - guards should be able to read messages from channels they're members of
@@ -343,14 +345,10 @@ class PushToTalkAPI(http.Controller):
             if not channel.active:
                 return {'success': False, 'error': 'Channel is not active'}
 
-            # Check access - guards can only send messages to channels they're assigned to
-            # Use sudo() to read member_ids (bypasses record rules)
-            is_member = guard.id in channel.sudo().member_ids.ids
-            
-            if not is_member:
+            if not self._ptt_guard_can_use_channel(guard, channel):
                 return {
                     'success': False, 
-                    'error': 'Access denied. You are not assigned to this channel. Please contact your supervisor to be added to the channel for your project.'
+                    'error': 'Access denied. You cannot send to this channel for your site(s).'
                 }
 
             # Validate duration
@@ -409,6 +407,79 @@ class PushToTalkAPI(http.Controller):
             _logger.error('Error sending voice message: %s', str(e))
             return {'success': False, 'error': str(e)}
 
+    @http.route('/guardpro/api/push-to-talk/stream/start', type='json', auth='user', methods=['POST'], csrf=False)
+    def stream_start(self, channel_id, stream_id, is_urgent=False, latitude=None, longitude=None, **kwargs):
+        """Start a new voice message stream session."""
+        try:
+            guard = request.env['guard.profile'].sudo().search([
+                ('user_id', '=', request.env.user.id)
+            ], limit=1)
+
+            if not guard:
+                return {'success': False, 'error': 'Guard profile not found'}
+
+            channel = request.env['push.to.talk.channel'].browse(channel_id)
+            if not channel.exists() or not channel.active:
+                return {'success': False, 'error': 'Channel not found or inactive'}
+
+            if not self._ptt_guard_can_use_channel(guard, channel):
+                return {'success': False, 'error': 'Access denied'}
+
+            # Create initial message record in streaming mode
+            Message = request.env['push.to.talk.message']
+            message = Message.sudo().create({
+                'channel_id': channel.id,
+                'sender_guard_id': guard.id,
+                'duration_seconds': 0.0,
+                'file_size': 0,
+                'is_urgent': is_urgent,
+                'location_latitude': latitude,
+                'location_longitude': longitude,
+                'is_streaming': True,
+                'stream_id': stream_id,
+                'created_at': datetime.now()
+            })
+
+            return {
+                'success': True,
+                'message_id': message.id
+            }
+        except Exception as e:
+            _logger.error('Error starting stream: %s', str(e))
+            return {'success': False, 'error': str(e)}
+
+    @http.route('/guardpro/api/push-to-talk/stream/chunk', type='json', auth='user', methods=['POST'], csrf=False)
+    def stream_chunk(self, message_id, audio_chunk, is_last=False, duration_seconds=0, **kwargs):
+        """Receive a chunk of audio for an active stream."""
+        try:
+            message = request.env['push.to.talk.message'].sudo().browse(message_id)
+            if not message.exists() or not message.is_streaming:
+                return {'success': False, 'error': 'Message not found or not in streaming mode'}
+
+            guard = request.env['guard.profile'].sudo().search([
+                ('user_id', '=', request.env.user.id)
+            ], limit=1)
+            if not guard or message.sender_guard_id.id != guard.id:
+                return {'success': False, 'error': 'Access denied'}
+
+            # Append chunk and broadcast
+            message.append_audio_chunk(audio_chunk)
+
+            if is_last:
+                # Assemble temp stream data into final audio payload once.
+                message.finalize_stream_audio()
+                message.write({
+                    'is_streaming': False,
+                    'duration_seconds': duration_seconds
+                })
+                # Final broadcast of the full message notification so it appears in history
+                message.action_broadcast_notification()
+
+            return {'success': True}
+        except Exception as e:
+            _logger.error('Error in stream chunk: %s', str(e))
+            return {'success': False, 'error': str(e)}
+
     @http.route('/guardpro/api/push-to-talk/message/<int:message_id>/audio', type='http', auth='user', methods=['GET'], csrf=False)
     def get_audio_file(self, message_id, **kwargs):
         """Serve audio file for a message with proper content-type headers."""
@@ -427,11 +498,10 @@ class PushToTalkAPI(http.Controller):
             if not guard:
                 return request.make_response('Guard profile not found', status=403)
             
-            # Check if guard is a member of the channel
-            is_member = guard.id in message.channel_id.sudo().member_ids.ids
-            if not is_member:
-                _logger.warning('[Push-to-Talk] User %s (guard %s) tried to access audio from channel %s they are not a member of', 
-                              request.env.user.name, guard.id, message.channel_id.id)
+            if not self._ptt_guard_can_use_channel(guard, message.channel_id):
+                _logger.warning(
+                    '[Push-to-Talk] User %s (guard %s) denied audio access to channel %s',
+                    request.env.user.name, guard.id, message.channel_id.id)
                 return request.make_response('Access denied', status=403)
             
             # Get audio data
@@ -495,9 +565,15 @@ class PushToTalkAPI(http.Controller):
     def mark_message_played(self, message_id, **kwargs):
         """Mark a message as played."""
         try:
-            message = request.env['push.to.talk.message'].browse(message_id)
+            message = request.env['push.to.talk.message'].sudo().browse(message_id)
             if not message.exists():
                 return {'success': False, 'error': 'Message not found'}
+
+            guard = request.env['guard.profile'].sudo().search([
+                ('user_id', '=', request.env.user.id)
+            ], limit=1)
+            if not guard or not self._ptt_guard_can_use_channel(guard, message.channel_id):
+                return {'success': False, 'error': 'Access denied'}
 
             message.mark_as_played(request.env.user.id)
 
@@ -511,13 +587,22 @@ class PushToTalkAPI(http.Controller):
     def get_active_guards(self, channel_id=None, **kwargs):
         """Get guards who have been active on channels recently."""
         try:
+            guard = request.env['guard.profile'].sudo().search([
+                ('user_id', '=', request.env.user.id)
+            ], limit=1)
+            if not guard:
+                return {'success': False, 'error': 'Guard profile not found'}
+
             # Get guards who sent messages in the last 5 minutes
-            cutoff = datetime.now() - timedelta(minutes=5)
-            
-            domain = [('created_at', '>=', cutoff.isoformat())]
+            cutoff = odoo_fields.Datetime.now() - timedelta(minutes=5)
+
+            domain = [('created_at', '>=', cutoff)]
             if channel_id:
+                channel = request.env['push.to.talk.channel'].browse(channel_id)
+                if not channel.exists() or not self._ptt_guard_can_use_channel(guard, channel):
+                    return {'success': False, 'error': 'Access denied'}
                 domain.append(('channel_id', '=', channel_id))
-            
+
             messages = request.env['push.to.talk.message'].search(domain)
             active_guards = messages.mapped('sender_guard_id')
             

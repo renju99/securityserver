@@ -63,6 +63,7 @@
                             <field name="site_id" options="{'no_create': True}"/>
                             <field name="visit_date"/>
                             <field name="visit_purpose"/>
+                            <field name="host_id" options="{'no_create': True}"/>
                             <field name="host_name"/>
                             <field name="is_vip" invisible="1"/>
                             <field name="is_overdue_checkout" invisible="1"/>
@@ -208,6 +209,7 @@
                 <field name="visit_date"/>
                 <field name="checkin_time" optional="show"/>
                 <field name="checkout_time" optional="hide"/>
+                <field name="host_id" optional="show"/>
                 <field name="host_name"/>
                 <field name="visit_purpose" optional="hide"/>
                 <field name="watchlist_hit" widget="boolean_toggle" optional="show"/>
@@ -307,6 +309,7 @@
                 <field name="name" string="Visitor" filter_domain="[('name', 'ilike', self)]"/>
                 <field name="id_number"/>
                 <field name="site_id"/>
+                <field name="host_id"/>
                 <field name="host_name"/>
                 <field name="company"/>
                 <separator/>
@@ -330,7 +333,7 @@
                     <filter string="Visitor Type" name="group_type" context="{'group_by': 'visitor_type'}"/>
                     <filter string="Status" name="group_status" context="{'group_by': 'state'}"/>
                     <filter string="Visit Date" name="group_date" context="{'group_by': 'visit_date'}"/>
-                    <filter string="Host" name="group_host" context="{'group_by': 'host_name'}"/>
+                    <filter string="Host" name="group_host" context="{'group_by': 'host_id'}"/>
                 </group>
             </search>
         </field>
@@ -441,6 +444,64 @@
                 or flagged for additional security screening.
             </p>
         </field>
+    </record>
+
+    <!-- Visitor Host Directory -->
+    <record id="view_visitor_host_list" model="ir.ui.view">
+        <field name="name">visitor.host.list</field>
+        <field name="model">visitor.host</field>
+        <field name="arch" type="xml">
+            <list string="Visitor Hosts">
+                <field name="display_name"/>
+                <field name="first_name"/>
+                <field name="last_name"/>
+                <field name="email"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_visitor_host_form" model="ir.ui.view">
+        <field name="name">visitor.host.form</field>
+        <field name="model">visitor.host</field>
+        <field name="arch" type="xml">
+            <form string="Visitor Host">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="display_name" readonly="1"/>
+                            <field name="first_name"/>
+                            <field name="last_name"/>
+                        </group>
+                        <group>
+                            <field name="email"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_visitor_host_search" model="ir.ui.view">
+        <field name="name">visitor.host.search</field>
+        <field name="model">visitor.host</field>
+        <field name="arch" type="xml">
+            <search string="Search Hosts">
+                <field name="display_name"/>
+                <field name="first_name"/>
+                <field name="last_name"/>
+                <field name="email"/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_visitor_hosts" model="ir.actions.act_window">
+        <field name="name">Hosts</field>
+        <field name="res_model">visitor.host</field>
+        <field name="view_mode">list,form</field>
     </record>
 
 </odoo>

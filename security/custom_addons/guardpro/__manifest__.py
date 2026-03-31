@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Sentry - Security Guard Management',
-    'version': '18.0.1.1.14',
+    'version': '18.0.1.1.22',
     'category': 'Services/Security',
     'summary': 'Win premium guard contracts with an Odoo-native suite for mobile patrols, SLA automation, client portals, and analytics.',
     'description': """
@@ -49,7 +49,7 @@ Technical Requirements
 ----------------------
 * Odoo 18 Community Edition, Python 3.10+, PostgreSQL 13+
 * Mandatory dependencies: base, web, website, hr, project, contacts, mail, portal, auth_signup, website_slides
-* Optional integrations: hr_attendance for biometric syncing, maintenance for equipment lifecycle
+* Optional integrations: hr_attendance for attendance syncing, maintenance for equipment lifecycle
 * External Python dependency: markdown (documentation rendering)
 
 Implementation Guidance
@@ -110,7 +110,6 @@ Support & Roadmap
         'data/sequences.xml',
         'data/investigation_sequences.xml',
         'data/checkpoint_sequence.xml',
-        'data/biometric_sequences.xml',  # Biometric verification sequence
         
         # Master Data (always load)
         'data/incident_categories.xml',
@@ -131,9 +130,6 @@ Support & Roadmap
         'data/compliance_audit_templates_data.xml',
         'data/uae_compliance_audit_templates_data.xml',
         'data/sla_template_data.xml',  # SLA Templates for easy setup
-        'data/cctv_sites_test_data.xml',  # Minimal sites for CCTV cameras (must load before cameras)
-        'data/cctv_camera_test_data.xml',  # CCTV Camera test data (always loads)
-        
         # Knowledge Base & SOPs - UAE/SIRA Standards (Nov 2025)
         'data/knowledge_guard_roles_uae.xml',
         'data/knowledge_categories_uae.xml',
@@ -147,12 +143,14 @@ Support & Roadmap
         # Investigation Templates and Checklists (Jan 2026)
         'data/investigation_templates_data.xml',
         'data/investigation_checklist_items_data.xml',
+        'data/fire_emergency_category.xml',
         
         # Guard Task Templates - UAE Standards (Jan 2026)
         'data/guard_task_templates_uae.xml',
         'data/guard_task_templates_uae_extended.xml',
         
         # Scheduled Actions (Cron Jobs)
+        'data/mail_mail_retention_config.xml',
         'data/ir_cron.xml',
         'data/new_modules_cron.xml',
         'data/elearning_cron.xml',
@@ -195,6 +193,8 @@ Support & Roadmap
         'data/elearning/elearning_slides_uae_penal_code.xml',
         'data/elearning/elearning_slides_uae_commercial_security.xml',
         'data/elearning/elearning_slides_uae_residential_security.xml',
+        'data/elearning/elearning_slides_drone_attack_procedures.xml',
+        'data/elearning/elearning_slides_security_cordons_incident_site.xml',
         
         # Reports (PDF) - Must load before views that reference them
         'data/id_card_paperformat.xml',
@@ -245,11 +245,9 @@ Support & Roadmap
         'views/emergency_broadcast_views.xml',
         'views/push_to_talk_views.xml',  # Push-to-Talk (Walkie-Talkie) feature
         'views/guard_message_views.xml',  # Internal messaging system
-        'views/guard_biometric_views.xml',  # Biometric integration
         'views/guard_attendance_views.xml',
         'views/guard_performance_views.xml',
         'views/equipment_views.xml',
-        'views/cctv_camera_views.xml',  # CCTV Camera management
         # OPTIONAL: Requires maintenance module
         # 'views/equipment_maintenance_views.xml',  # Native maintenance module extension
         # OPTIONAL: Requires project module
@@ -284,6 +282,9 @@ Support & Roadmap
         'reports/attendance_report_template.xml',
         'reports/daily_activity_report_template.xml',
         'reports/visitor_management_report_template.xml',
+        'reports/incident_statement_report_template.xml',
+        'reports/incident_lost_found_forms_report_template.xml',
+        'reports/incident_community_violation_report_template.xml',
         'reports/package_management_report_template.xml',
         'reports/lost_found_report_template.xml',
         'reports/key_management_report_template.xml',
@@ -304,6 +305,7 @@ Support & Roadmap
         'reports/security_tour_route_report_template.xml',
         'reports/analytics_dashboard_report.xml',
         'reports/tours_dashboard_report.xml',
+        'reports/incident_fire_emergency_report.xml',
         # Phase 2 PDF Reports - New templates (Nov 2025)
         'reports/incident_investigation_report_template.xml',  # Incident investigation comprehensive report
         'reports/training_certificate_template.xml',  # Training course completion certificates
@@ -337,7 +339,6 @@ Support & Roadmap
         'wizard/package_collect_wizard_views.xml',
         'wizard/key_issue_wizard_views.xml',
         'wizard/compliance_audit_create_wizard_views.xml',
-        'wizard/cctv_viewer_wizard_views.xml',  # CCTV viewer wizard
         'views/tour_manual_generation_wizard_views.xml',
         'wizard/email_template_tester_views.xml',
         # OPTIONAL: Requires maintenance module
@@ -353,15 +354,18 @@ Support & Roadmap
         # Location Hierarchy Views (MUST load before menus that reference actions)
         'views/location_hierarchy_views.xml',
 
+        # CCTV actions (menus reference guardpro.action_cctv_monitoring / action_cctv_camera)
+        'views/cctv_camera_views.xml',
+
+        # Biometric actions (menus reference action_guard_biometric_*)
+        'views/guard_biometric_views.xml',
+
         # Views - Menus (MUST be loaded AFTER actions)
         'views/guardpro_menus.xml',
 
         # Portal Enhancement Templates
         'views/portal_enhanced_templates.xml',
         'views/portal_feedback_templates.xml',
-        
-        # CCTV Stream Viewer Template
-        'views/cctv_stream_viewer_template.xml',
         
         # Site Geofence Map Template
         'views/site_geofence_map.xml',
@@ -384,7 +388,7 @@ Support & Roadmap
         'python': [
             'markdown',  # Documentation rendering
             'cryptography>=41.0.0',  # Biometric encryption (Fernet, PBKDF2)
-            'requests>=2.28.0',  # CCTV stream proxy, webhooks, API calls
+            'requests>=2.28.0',  # webhooks, API calls
         ],
     },
     'assets': {
@@ -399,6 +403,7 @@ Support & Roadmap
             'guardpro/static/src/css/push_to_talk.css',  # Push-to-Talk styles
             'guardpro/static/src/js/gps_tracker.js',
             'guardpro/static/src/js/guard_gps_auto_init.js',  # Auto-start GPS for guards
+            'guardpro/static/src/js/incident_location_geofill.js',
             'guardpro/static/src/js/nfc_scanner.js',
             'guardpro/static/src/js/qr_scanner.js',
             'guardpro/static/src/js/geofence.js',
@@ -413,7 +418,6 @@ Support & Roadmap
             'guardpro/static/src/js/guardpro_analytics_dashboard.js',
             'guardpro/static/src/js/guardpro_tours_dashboard.js',
             'guardpro/static/src/js/push_to_talk.js',  # Push-to-Talk widget
-            'guardpro/static/src/js/biometric_capture.js',  # Biometric capture for mobile
             'guardpro/static/src/js/eid_reader_core_v7.js',  # Emirates ID toolkit integration (V5.1 - Final - Renamed)
             'guardpro/static/src/xml/dashboard_templates.xml',
             'guardpro/static/src/xml/dashboard_refresh_template.xml',
@@ -441,8 +445,7 @@ Support & Roadmap
             'guardpro/static/src/js/guard_elearning_navigation.js',  # Back to Mobile button for guards
             'guardpro/static/src/js/tour_scanner.js',  # QR/NFC scanning for tours
             'guardpro/static/src/js/mobile_push_to_talk.js',  # Push-to-Talk for mobile interface
-            # Note: biometric_capture.js removed from frontend - uses backend modules (web.rpc, web.core)
-            # It's still available in backend assets for admin/supervisor use
+            # Note: biometric_capture.js removed from frontend and backend assets
             
             # Note: Old complex PWA files removed
             # See docs/PWA_MIGRATION_SUMMARY.md for details
@@ -471,7 +474,6 @@ Support & Roadmap
         'demo/compliance_audit_demo_data.xml',
         'demo/sla_management_demo_data.xml',
         'demo/performance_demo_data.xml',
-        'demo/cctv_camera_demo_data.xml',  # CCTV Camera test data
     ],
     'images': [
         # Big Screenshot (first image ending with '_screenshot' - displays as large screenshot)

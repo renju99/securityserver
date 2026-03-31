@@ -102,6 +102,17 @@
                                 <field name="missed_checkin_grace_period" class="oe_inline"/> minutes
                             </div>
                         </setting>
+
+                        <setting help="mail.mail queue rows: auto-removed after this many days (chatter / mail.message is kept)">
+                            <label for="mail_mail_retention_days"/>
+                            <div class="row mt-2">
+                                <label for="mail_mail_retention_days" class="col-lg-3 o_light_label"/>
+                                <field name="mail_mail_retention_days" class="oe_inline"/> days
+                            </div>
+                            <div class="text-muted">
+                                Default 365. Document chatter history is not deleted.
+                            </div>
+                        </setting>
                     </block>
                     
                     <!-- Geofencing -->
@@ -122,6 +133,24 @@
                             <div class="row mt-2">
                                 <label for="geofence_check_interval" class="col-lg-3 o_light_label"/>
                                 <field name="geofence_check_interval" class="oe_inline"/> seconds
+                            </div>
+                        </setting>
+
+                        <!-- Interval is read from ir.config_parameter (no view field): avoids OwlError
+                             when workers/registry lag behind after deploy. Change under:
+                             Settings → Technical → Parameters → System Parameters:
+                             key guardpro.geofence_alert_interval_minutes (default 15). -->
+                        <setting string="Geofence alert interval" help="Minimum time between repeated geofence alerts for the same guard and site">
+                            <div class="text-muted">
+                                <p>
+                                    Stored as system parameter
+                                    <code>guardpro.geofence_alert_interval_minutes</code>
+                                    (default: <strong>15</strong> minutes).
+                                </p>
+                                <p>
+                                    Edit via <strong>Settings → Technical → Parameters → System Parameters</strong>,
+                                    or use Odoo shell / RPC to set the parameter.
+                                </p>
                             </div>
                         </setting>
                     </block>

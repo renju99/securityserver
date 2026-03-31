@@ -29,27 +29,28 @@ class GuardProDocumentation(http.Controller):
         docs_path = self._get_docs_path()
         structure = {
             'overview': {
-                'title': 'Overview',
-                'description': 'Get started with GuardPro',
+                'title': 'Guide home',
+                'description': 'Navigate the documentation like a guidebook',
                 'sections': [
-                    {'file': 'INDEX.md', 'title': 'Documentation Index', 'description': 'Complete documentation overview'},
-                    {'file': 'README.md', 'title': 'What is GuardPro?', 'description': 'Introduction to GuardPro features'},
-                    {'file': 'QUICK_REFERENCE.md', 'title': 'Quick Reference', 'description': 'Essential shortcuts and tips'},
+                    {'file': 'INDEX.md', 'title': 'Documentation hub', 'description': 'Chapters, scope, and links'},
+                    {'file': 'GETTING_STARTED.md', 'title': 'Chapter 1 — Get started', 'description': 'First site, shift, tour, and mobile patrol loop'},
+                    {'file': 'README.md', 'title': 'What is Sentry?', 'description': 'Product summary and quick setup'},
+                    {'file': 'QUICK_REFERENCE.md', 'title': 'Quick reference', 'description': 'Shortcuts and tips'},
                 ]
             },
             'getting_started': {
-                'title': 'Getting Started',
-                'description': 'Setup and initial configuration',
+                'title': 'Setup and concepts',
+                'description': 'Installation and how the app fits together',
                 'sections': [
-                    {'file': 'user-guide/01-introduction.md', 'title': 'Introduction', 'description': 'Getting started with GuardPro'},
-                    {'file': 'user-guide/02-installation.md', 'title': 'Installation', 'description': 'Installing GuardPro'},
-                    {'file': 'user-guide/03-configuration.md', 'title': 'Configuration', 'description': 'Initial system setup'},
-                    {'file': 'user-guide/04-features.md', 'title': 'Features Overview', 'description': 'Overview of all features'},
+                    {'file': 'user-guide/01-introduction.md', 'title': 'Introduction', 'description': 'Concepts and navigation'},
+                    {'file': 'user-guide/02-installation.md', 'title': 'Installation', 'description': 'Installing Sentry on Odoo 18'},
+                    {'file': 'user-guide/03-configuration.md', 'title': 'Configuration', 'description': 'Settings and security groups'},
+                    {'file': 'user-guide/04-features.md', 'title': 'Features overview', 'description': 'Areas of the module'},
                 ]
             },
             'operations': {
-                'title': 'Daily Operations',
-                'description': 'Managing daily security operations',
+                'title': 'Daily operations',
+                'description': 'Shifts, incidents, visitors, and access',
                 'sections': [
                     {'file': 'operations/shift_management.md', 'title': 'Shift Management', 'description': 'How to create, assign, and manage guard shifts'},
                     {'file': 'operations/incident_management.md', 'title': 'Incident Management', 'description': 'How to report and track security incidents'},
@@ -58,8 +59,8 @@ class GuardProDocumentation(http.Controller):
                 ]
             },
             'guards': {
-                'title': 'Guard Management',
-                'description': 'Managing security guards',
+                'title': 'Guard management',
+                'description': 'Profiles, attendance, performance, training',
                 'sections': [
                     {'file': 'guards/profile_management.md', 'title': 'Guard Profiles', 'description': 'How to create and manage guard profiles'},
                     {'file': 'guards/attendance.md', 'title': 'Attendance Tracking', 'description': 'How to track guard attendance'},
@@ -68,8 +69,8 @@ class GuardProDocumentation(http.Controller):
                 ]
             },
             'sites': {
-                'title': 'Site Management',
-                'description': 'Managing security sites and locations',
+                'title': 'Site management',
+                'description': 'Sites, checkpoints, patrols, equipment',
                 'sections': [
                     {'file': 'sites/site_setup.md', 'title': 'Site Setup', 'description': 'How to create and configure sites'},
                     {'file': 'sites/checkpoints.md', 'title': 'Checkpoints', 'description': 'How to set up and manage checkpoints'},
@@ -78,8 +79,8 @@ class GuardProDocumentation(http.Controller):
                 ]
             },
             'compliance': {
-                'title': 'Compliance & Reporting',
-                'description': 'Audits, reports, and compliance',
+                'title': 'Compliance & reporting',
+                'description': 'Audits, daily activity reports, SLAs',
                 'sections': [
                     {'file': 'compliance/audits.md', 'title': 'Audits & Inspections', 'description': 'How to conduct and manage compliance audits'},
                     {'file': 'compliance/reports.md', 'title': 'Daily Activity Reports', 'description': 'How to create and manage DARs'},
@@ -87,8 +88,8 @@ class GuardProDocumentation(http.Controller):
                 ]
             },
             'workflows': {
-                'title': 'Common Workflows',
-                'description': 'Step-by-step guides for common tasks',
+                'title': 'Workflows & help',
+                'description': 'Common flows and troubleshooting',
                 'sections': [
                     {'file': 'user-guide/05-workflows.md', 'title': 'Workflow Guide', 'description': 'Common task workflows'},
                     {'file': 'user-guide/06-troubleshooting.md', 'title': 'Troubleshooting', 'description': 'Common issues and solutions'},
@@ -113,6 +114,7 @@ class GuardProDocumentation(http.Controller):
                 content = f.read()
             
             # Convert markdown to HTML with extensions
+            # codehilite: light Pygments style (requires Pygments; see requirements.txt)
             html = markdown.markdown(
                 content,
                 extensions=[
@@ -121,7 +123,12 @@ class GuardProDocumentation(http.Controller):
                     'tables',
                     'toc',
                     'nl2br',
-                ]
+                ],
+                extension_configs={
+                    'codehilite': {
+                        'pygments_style': 'default',
+                    },
+                },
             )
             return html
         except Exception as e:

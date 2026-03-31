@@ -11,7 +11,7 @@
         <record id="email_template_visitor_arrival" model="mail.template">
             <field name="name">Visitor Arrival Notification</field>
             <field name="model_id" ref="model_visitor_management"/>
-            <field name="subject">Visitor Arrival: ${object.visitor_name} is here to see you</field>
+            <field name="subject">Visitor Arrival: ${object.name} is here to see you</field>
             <field name="email_from">${user.email_formatted}</field>
             <field name="email_to">${object.host_email}</field>
             <field name="body_html" type="html">
@@ -30,18 +30,18 @@
                     <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
                         <tr>
                             <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; width: 30%;">Visitor Name:</td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${object.visitor_name}</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.name}</td>
                         </tr>
-                        % if object.company_name:
+                        % if object.company:
                         <tr>
                             <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Company:</td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${object.company_name}</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.company}</td>
                         </tr>
                         % endif
-                        % if object.phone:
+                        % if object.mobile_number:
                         <tr>
                             <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Phone:</td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${object.phone}</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.mobile_number}</td>
                         </tr>
                         % endif
                         % if object.email:
@@ -52,11 +52,11 @@
                         % endif
                         <tr>
                             <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Check-in Time:</td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${format_datetime(object.check_in_time, dt_format='medium')}</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${format_datetime(object.checkin_time, dt_format='medium')}</td>
                         </tr>
                         <tr>
                             <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Purpose:</td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">${object.purpose or 'Not specified'}</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">${object.purpose_details or object.visit_purpose or 'Not specified'}</td>
                         </tr>
                         % if object.badge_number:
                         <tr>

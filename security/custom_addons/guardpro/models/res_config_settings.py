@@ -97,6 +97,14 @@ class ResConfigSettings(models.TransientModel):
         help='Grace period before alerting supervisors about missed check-ins. '
              'Recommended: 10-15 minutes.'
     )
+
+    mail_mail_retention_days = fields.Integer(
+        string='Email queue log retention (days)',
+        default=365,
+        config_parameter='guardpro.mail_mail_retention_days',
+        help='How long to keep mail.mail rows (outgoing/sent/exception queue) before the daily job '
+             'removes them. Chatter messages on documents (mail.message) are not deleted.'
+    )
     
     # ====================================================
     # GEOFENCING SETTINGS
@@ -117,6 +125,14 @@ class ResConfigSettings(models.TransientModel):
         config_parameter='guardpro.geofence_check_interval',
         help='How often to check if guards are within their assigned geofences. '
              'Recommended: 60-300 seconds.'
+    )
+
+    geofence_alert_interval_minutes = fields.Integer(
+        string='Geofence Alert Interval (minutes)',
+        default=15,
+        config_parameter='guardpro.geofence_alert_interval_minutes',
+        help='Minimum time between repeated geofence alerts for the same guard and site. '
+             'Recommended: 15 minutes.'
     )
     
     # ====================================================
@@ -423,5 +439,31 @@ class ResConfigSettings(models.TransientModel):
             if record.shift_reminder_minutes > 480:  # 8 hours
                 raise ValidationError(_(
                     'Shift reminder should not exceed 8 hours.'
+                ))
+
+    @api.constrains('geofence_alert_interval_minutes')
+    def _check_geofence_alert_interval(self):
+        """Validate geofence alert interval."""
+        for record in self:
+            if record.geofence_alert_interval_minutes < 1:
+                raise ValidationError(_(
+                    'Geofence alert interval must be at least 1 minute.'
+                ))
+            if record.geofence_alert_interval_minutes > 1440:
+                raise ValidationError(_(
+                    'Geofence alert interval should not exceed 24 hours (1440 minutes).'
+                ))
+
+    @api.constrains('mail_mail_retention_days')
+    def _check_mail_mail_retention_days(self):
+        """Validate mail.mail retention."""
+        for record in self:
+            if record.mail_mail_retention_days < 1:
+                raise ValidationError(_(
+                    'Email queue retention must be at least 1 day.'
+                ))
+            if record.mail_mail_retention_days > 3650:
+                raise ValidationError(_(
+                    'Email queue retention should not exceed 3650 days (10 years).'
                 ))
 

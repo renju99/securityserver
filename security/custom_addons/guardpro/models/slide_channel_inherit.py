@@ -84,6 +84,28 @@ class SlideChannel(models.Model):
         compute='_compute_expiring_certifications',
         help='Number of certifications expiring within 30 days'
     )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Create courses with publish/share email templates disabled."""
+        sanitized_vals_list = []
+        for vals in vals_list:
+            v = dict(vals)
+            # website_slides publication/share mails come from these templates.
+            # Keep them empty by default so new courses don't send announcement emails.
+            v['publish_template_id'] = False
+            v['share_slide_template_id'] = False
+            sanitized_vals_list.append(v)
+        return super().create(sanitized_vals_list)
+
+    def write(self, vals):
+        """Prevent enabling publish/share mail templates on courses."""
+        updated_vals = dict(vals)
+        if 'publish_template_id' in updated_vals:
+            updated_vals['publish_template_id'] = False
+        if 'share_slide_template_id' in updated_vals:
+            updated_vals['share_slide_template_id'] = False
+        return super().write(updated_vals)
     
     @api.depends('channel_partner_ids.partner_id')
     def _compute_guard_statistics(self):

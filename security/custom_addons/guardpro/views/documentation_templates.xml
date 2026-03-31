@@ -4,307 +4,38 @@
     <template id="documentation_page" name="Sentry Documentation">
         <t t-call="web.layout">
             <t t-set="head">
-                <link rel="stylesheet" href="/guardpro/static/src/css/documentation.css"/>
-                <script src="/guardpro/static/src/js/documentation.js"></script>
-                <style>
-                    /* Odoo Documentation Style */
-                    .odoo-docs-header {
-                        background: linear-gradient(135deg, #017e84 0%, #00b4b4 100%);
-                        color: white;
-                        padding: 2rem 0;
-                        margin-bottom: 2rem;
-                    }
-                    .odoo-docs-header h1 {
-                        font-size: 2.5rem;
-                        font-weight: 300;
-                        margin: 0;
-                    }
-                    .odoo-docs-header p {
-                        font-size: 1.1rem;
-                        opacity: 0.9;
-                        margin: 0.5rem 0 0 0;
-                    }
-                    
-                    .odoo-docs-container {
-                        max-width: 1200px;
-                        margin: 0 auto;
-                        padding: 0 1rem;
-                    }
-                    
-                    .odoo-docs-layout {
-                        display: flex;
-                        gap: 2rem;
-                        margin-top: 2rem;
-                    }
-                    
-                    .odoo-docs-sidebar {
-                        width: 280px;
-                        background: #f8f9fa;
-                        border-radius: 8px;
-                        padding: 1.5rem;
-                        height: fit-content;
-                        position: sticky;
-                        top: 2rem;
-                    }
-                    
-                    .odoo-docs-sidebar h3 {
-                        color: #017e84;
-                        font-size: 1rem;
-                        font-weight: 600;
-                        margin: 0 0 1rem 0;
-                        text-transform: uppercase;
-                        letter-spacing: 0.5px;
-                    }
-                    
-                    .odoo-docs-sidebar .section {
-                        margin-bottom: 2rem;
-                    }
-                    
-                    .odoo-docs-sidebar .section:last-child {
-                        margin-bottom: 0;
-                    }
-                    
-                    .odoo-docs-sidebar .section-title {
-                        color: #495057;
-                        font-weight: 600;
-                        font-size: 0.9rem;
-                        margin-bottom: 0.5rem;
-                        text-transform: uppercase;
-                        letter-spacing: 0.3px;
-                    }
-                    
-                    .odoo-docs-sidebar .section-description {
-                        color: #6c757d;
-                        font-size: 0.8rem;
-                        margin-bottom: 0.8rem;
-                        line-height: 1.4;
-                    }
-                    
-                    .odoo-docs-sidebar ul {
-                        list-style: none;
-                        padding: 0;
-                        margin: 0;
-                    }
-                    
-                    .odoo-docs-sidebar li {
-                        margin-bottom: 0.3rem;
-                    }
-                    
-                    .odoo-docs-sidebar a {
-                        color: #495057;
-                        text-decoration: none;
-                        font-size: 0.9rem;
-                        padding: 0.3rem 0.5rem;
-                        border-radius: 4px;
-                        display: block;
-                        transition: all 0.2s ease;
-                    }
-                    
-                    .odoo-docs-sidebar a:hover {
-                        background: #e9ecef;
-                        color: #017e84;
-                    }
-                    
-                    .odoo-docs-sidebar a.active {
-                        background: #017e84;
-                        color: white;
-                    }
-                    
-                    .odoo-docs-content {
-                        flex: 1;
-                        background: white;
-                        border-radius: 8px;
-                        padding: 2rem;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    }
-                    
-                    .odoo-docs-breadcrumb {
-                        background: #f8f9fa;
-                        padding: 0.5rem 1rem;
-                        border-radius: 4px;
-                        margin-bottom: 1.5rem;
-                        font-size: 0.9rem;
-                    }
-                    
-                    .odoo-docs-breadcrumb a {
-                        color: #017e84;
-                        text-decoration: none;
-                    }
-                    
-                    .odoo-docs-breadcrumb a:hover {
-                        text-decoration: underline;
-                    }
-                    
-                    .odoo-docs-breadcrumb .separator {
-                        margin: 0 0.5rem;
-                        color: #6c757d;
-                    }
-                    
-                    .odoo-docs-title {
-                        color: #212529;
-                        font-size: 2rem;
-                        font-weight: 400;
-                        margin: 0 0 1rem 0;
-                        border-bottom: 2px solid #017e84;
-                        padding-bottom: 0.5rem;
-                    }
-                    
-                    .odoo-docs-description {
-                        color: #6c757d;
-                        font-size: 1.1rem;
-                        margin-bottom: 2rem;
-                        font-style: italic;
-                    }
-                    
-                    .odoo-docs-body {
-                        line-height: 1.6;
-                        color: #495057;
-                    }
-                    
-                    .odoo-docs-body h1, .odoo-docs-body h2, .odoo-docs-body h3 {
-                        color: #212529;
-                        margin-top: 2rem;
-                        margin-bottom: 1rem;
-                    }
-                    
-                    .odoo-docs-body h2 {
-                        border-bottom: 1px solid #dee2e6;
-                        padding-bottom: 0.5rem;
-                    }
-                    
-                    .odoo-docs-body pre {
-                        background: #f8f9fa;
-                        border: 1px solid #e9ecef;
-                        border-radius: 4px;
-                        padding: 1rem;
-                        overflow-x: auto;
-                        font-size: 0.9rem;
-                    }
-                    
-                    .odoo-docs-body code {
-                        background: #f8f9fa;
-                        padding: 0.2rem 0.4rem;
-                        border-radius: 3px;
-                        font-size: 0.9em;
-                        color: #e83e8c;
-                    }
-                    
-                    .odoo-docs-body blockquote {
-                        border-left: 4px solid #017e84;
-                        padding-left: 1rem;
-                        margin: 1.5rem 0;
-                        color: #6c757d;
-                        font-style: italic;
-                    }
-                    
-                    .odoo-docs-search {
-                        margin-bottom: 2rem;
-                    }
-                    
-                    .odoo-docs-search input {
-                        width: 100%;
-                        padding: 0.75rem 1rem;
-                        border: 2px solid #dee2e6;
-                        border-radius: 6px;
-                        font-size: 1rem;
-                        transition: border-color 0.2s ease;
-                    }
-                    
-                    .odoo-docs-search input:focus {
-                        outline: none;
-                        border-color: #017e84;
-                        box-shadow: 0 0 0 3px rgba(1, 126, 132, 0.1);
-                    }
-                    
-                    .search-results {
-                        margin-top: 1rem;
-                    }
-                    
-                    .search-result {
-                        background: white;
-                        border: 1px solid #dee2e6;
-                        border-radius: 4px;
-                        padding: 1rem;
-                        margin-bottom: 0.5rem;
-                    }
-                    
-                    .search-result h4 {
-                        color: #017e84;
-                        margin: 0 0 0.5rem 0;
-                        font-size: 1rem;
-                    }
-                    
-                    .search-result p {
-                        color: #6c757d;
-                        margin: 0;
-                        font-size: 0.9rem;
-                    }
-                    
-                    .odoo-docs-footer {
-                        margin-top: 3rem;
-                        padding-top: 2rem;
-                        border-top: 1px solid #dee2e6;
-                        text-align: center;
-                        color: #6c757d;
-                    }
-                    
-                    .back-to-guardpro {
-                        position: fixed;
-                        bottom: 2rem;
-                        right: 2rem;
-                        background: #017e84;
-                        color: white;
-                        padding: 1rem;
-                        border-radius: 50%;
-                        text-decoration: none;
-                        box-shadow: 0 4px 12px rgba(1, 126, 132, 0.3);
-                        transition: all 0.3s ease;
-                        z-index: 1000;
-                    }
-                    
-                    .back-to-guardpro:hover {
-                        background: #00b4b4;
-                        transform: translateY(-2px);
-                        color: white;
-                        text-decoration: none;
-                    }
-                </style>
+                <!-- Cache-bust so browsers pick up CSS/JS after upgrades -->
+                <link rel="stylesheet" href="/guardpro/static/src/css/documentation.css?v=20260323e"/>
+                <script src="/guardpro/static/src/js/documentation.js?v=20260323e"></script>
             </t>
             
             <div class="odoo-docs-header">
                 <div class="odoo-docs-container">
-                    <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-start justify-content-between flex-wrap">
                         <div>
+                            <div class="odoo-docs-kicker">Sentry · Product guide</div>
                             <h1 class="mb-2">
-                                <i class="fa fa-shield mr-3" style="color: white;"></i>
-                                Sentry Documentation
+                                <i class="fa fa-book mr-2" style="color: #017e84;"></i>
+                                Documentation
                             </h1>
-                            <p class="mb-0 lead">Enterprise security operations suite for modern guard management</p>
+                            <p class="mb-0 lead">Chapters, step-by-step flows, and reference material for security operations on Odoo 18.</p>
                             <div class="mt-3">
                                 <span class="badge badge-light mr-2">
-                                    <i class="fa fa-code"></i> Version 18.0.1.0.8
+                                    <i class="fa fa-code"></i> v18.0.1.1.18
                                 </span>
                                 <span class="badge badge-light mr-2">
-                                    <i class="fa fa-calendar"></i> Updated Jan 2026
-                                </span>
-                                <span class="badge badge-light">
-                                    <i class="fa fa-star"></i> Enterprise Ready
+                                    <i class="fa fa-calendar"></i> Mar 2026
                                 </span>
                             </div>
                         </div>
-                        <div class="text-right d-none d-md-block">
-                            <div class="mb-2">
-                                <i class="fa fa-mobile fa-2x text-white mr-3"></i>
-                                <i class="fa fa-map-marker fa-2x text-white mr-3"></i>
-                                <i class="fa fa-users fa-2x text-white mr-3"></i>
-                                <i class="fa fa-bar-chart fa-2x text-white"></i>
-                            </div>
-                            <small class="text-white-50">Mobile • GPS • Team • Analytics</small>
+                        <div class="text-right d-none d-md-block pt-1">
+                            <small class="text-muted" style="color: #5e6c84 !important;">Patrols · Incidents · Compliance · Portal</small>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
+            <div class="odoo-docs-guide-wrap sentry-docs-guide">
             <div class="odoo-docs-container">
                 <div class="odoo-docs-layout">
                     <!-- Sidebar Navigation -->
@@ -382,25 +113,26 @@
                         <!-- Page Title -->
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
+                                <div class="odoo-docs-page-kicker" t-if="current_page_info">Guide</div>
+                                <div class="odoo-docs-page-kicker" t-if="not current_page_info">Start here</div>
                                 <h1 class="odoo-docs-title" t-if="current_page_info" t-esc="current_page_info.get('title', '')"/>
                                 <h1 class="odoo-docs-title" t-if="not current_page_info">
-                                    <i class="fa fa-book mr-3"></i>Sentry Documentation
+                                    Welcome to the Sentry guide
                                 </h1>
 
                                 <!-- Page Description -->
                                 <p class="odoo-docs-description" t-if="current_page_info" t-esc="current_page_info.get('description', '')"/>
                                 <p class="odoo-docs-description" t-if="not current_page_info">
-                                    Welcome to the complete documentation for Sentry, the enterprise security guard management system.
-                                    Choose a topic from the sidebar or use the search above to find what you need.
+                                    Pick a chapter in the sidebar or search. Each page is written so you can follow it top to bottom, like a product guide.
                                 </p>
                             </div>
 
                             <!-- Quick Actions -->
                             <div class="d-none d-md-flex flex-column gap-2">
-                                <a href="/web#action=guardpro.action_guard_dashboard" class="btn btn-outline-primary btn-sm">
+                                <a href="/web#action=guardpro.action_guardpro_analytics_dashboard_client" class="btn btn-outline-primary btn-sm">
                                     <i class="fa fa-tachometer mr-1"></i> Open Sentry
                                 </a>
-                                <button onclick="window.print()" class="btn btn-outline-secondary btn-sm">
+                                <button type="button" onclick="window.print()" class="btn btn-outline-secondary btn-sm">
                                     <i class="fa fa-print mr-1"></i> Print Page
                                 </button>
                                 <a href="mailto:support@sentry.app" class="btn btn-outline-info btn-sm">
@@ -409,61 +141,62 @@
                             </div>
                         </div>
                         
-                        <!-- Content -->
-                        <div class="odoo-docs-body">
+                        <!-- Content (documentation-body: shared styles in documentation.css) -->
+                        <div class="odoo-docs-body documentation-body guide-prose">
                             <t t-out="content"/>
                         </div>
                         
                         <!-- Footer -->
-                        <footer class="odoo-docs-footer">
+                        <footer class="odoo-docs-footer text-left">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <h6 class="text-white mb-3">
-                                        <i class="fa fa-info-circle mr-2"></i>Sentry Documentation
+                                    <h6 class="text-secondary mb-2 font-weight-bold">
+                                        <i class="fa fa-info-circle mr-2"></i>Sentry documentation
                                     </h6>
-                                    <p class="mb-2">
-                                        <strong>Version:</strong> 18.0.1.0.8 (January 2026)
+                                    <p class="mb-2 text-muted small">
+                                        <strong>Version:</strong> 18.0.1.1.18
                                     </p>
-                                    <p class="mb-0">
-                                        <strong>Last Updated:</strong> January 20, 2026
+                                    <p class="mb-0 text-muted small">
+                                        <strong>Last updated:</strong> March 2026
                                     </p>
                                 </div>
                                 <div class="col-md-6 text-md-right">
-                                    <h6 class="text-white mb-3">Quick Links</h6>
+                                    <h6 class="text-secondary mb-2 font-weight-bold">Quick links</h6>
                                     <div class="mb-2">
-                                        <a href="/guardpro/documentation/QUICK_REFERENCE.md" class="text-white-50 mr-3">
-                                            <i class="fa fa-flash mr-1"></i> Quick Reference
+                                        <a href="/guardpro/documentation/GETTING_STARTED.md" class="text-primary mr-3 small">
+                                            <i class="fa fa-play-circle mr-1"></i> Chapter 1
                                         </a>
-                                        <a href="/guardpro/documentation/README.md" class="text-white-50 mr-3">
-                                            <i class="fa fa-home mr-1"></i> Overview
+                                        <a href="/guardpro/documentation/QUICK_REFERENCE.md" class="text-primary mr-3 small">
+                                            <i class="fa fa-bolt mr-1"></i> Quick reference
+                                        </a>
+                                        <a href="/guardpro/documentation/INDEX.md" class="text-primary small">
+                                            <i class="fa fa-list mr-1"></i> Hub
                                         </a>
                                     </div>
                                     <div>
-                                        <a href="https://github.com/renju99/custom_addons" target="_blank" class="text-white-50 mr-3">
-                                            <i class="fa fa-github mr-1"></i> GitHub
+                                        <a href="mailto:support@sentry.app" class="text-muted mr-3 small">
+                                            <i class="fa fa-envelope mr-1"></i> support@sentry.app
                                         </a>
-                                        <a href="mailto:support@sentry.app" class="text-white-50 mr-3">
-                                            <i class="fa fa-envelope mr-1"></i> Support
-                                        </a>
-                                        <a href="https://sentry.proptechme.com/" target="_blank" class="text-white-50">
+                                        <a href="https://sentry.proptechme.com/" target="_blank" rel="noopener noreferrer" class="text-muted small">
                                             <i class="fa fa-globe mr-1"></i> Website
                                         </a>
                                     </div>
                                 </div>
                             </div>
-                            <hr class="my-3" style="border-color: rgba(255,255,255,0.1);" />
+                            <hr class="my-3" style="border-color: #dfe1e6;" />
                             <div class="text-center">
-                                <small class="text-white-50">
-                                    © 2026 Sentry Security Operations Suite • Built for the security industry • Made with ❤️ in Dubai
+                                <small class="text-muted">
+                                    © 2026 Sentry · Security operations for Odoo
                                 </small>
                             </div>
                         </footer>
                     </main>
                 </div>
             </div>
+            </div>
             
             <!-- Back to GuardPro Button -->
-            <a href="/web#action=guardpro.action_guard_dashboard" class="back-to-guardpro" title="Back to Sentry Dashboard">
+            <a href="/web#action=guardpro.action_guardpro_analytics_dashboard_client" class="back-to-guardpro" title="Back to Sentry Dashboard">
                 <i class="fa fa-tachometer"></i>
                 <span class="d-none d-md-inline ml-2">Dashboard</span>
             </a>

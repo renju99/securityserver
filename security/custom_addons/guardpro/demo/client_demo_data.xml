@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="0">
+    <!-- noupdate=1: demo sites stay stable across module upgrades (avoids XML churn vs shift templates). -->
+    <data noupdate="1">
         
         <!-- Demo Client Company -->
         <record id="client_nshama" model="res.partner">

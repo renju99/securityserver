@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="incident_fire_emergency_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <style>
+                    .emg-page { font-family: 'Helvetica', 'Arial', sans-serif; padding: 0; margin: 0; color: #333; }
+                    .red-bar { background-color: #941818; color: white; text-align: right; padding: 5px 20px; font-size: 14px; font-weight: bold; }
+                    .blue-bar { background-color: #0E91CF; color: white; text-align: right; padding: 5px 20px; font-size: 14px; font-weight: bold; }
+                    .emg-header { margin-top: 20px; margin-bottom: 20px; }
+                    .emg-logo { max-height: 70px; }
+                    .emg-post-name { text-align: right; font-size: 18px; color: #333; font-weight: bold; }
+                    .emg-formal-title { text-align: center; font-size: 22px; font-weight: bold; text-transform: uppercase; margin: 25px 0; color: #333; }
+                    
+                    .emg-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #E0E0E0; }
+                    .emg-table td { padding: 10px 15px; border: 1px solid #E0E0E0; font-size: 14px; vertical-align: middle; }
+                    .emg-label { background-color: #F2F2F2; font-weight: bold; width: 320px; color: #333; }
+                    .emg-value { width: auto; color: #000; }
+                    
+                    .emg-section-header { font-size: 24px; font-weight: bold; color: #333; margin: 30px 0 10px 0; }
+                    .emg-instruction { background-color: #F2F2F2; padding: 10px 15px; border: 1px solid #E0E0E0; font-size: 14px; font-weight: bold; margin-bottom: -1px; }
+                    
+                    .emg-text-content { font-size: 14px; line-height: 1.6; color: #000; padding: 5px 0; white-space: pre-wrap; }
+                    .emg-sig-box { width: 100%; border: none; padding: 10px 0; }
+                    .emg-sig-img { max-height: 100px; display: block; margin-bottom: 5px; }
+                    .emg-sig-line { border-top: 1px solid #000; width: 250px; }
+                    .emg-sig-text { font-weight: bold; font-size: 14px; margin-top: 5px; }
+                    
+                    .emg-picture-box { margin-bottom: 25px; border: 1px solid #E0E0E0; }
+                    .emg-picture-label { background-color: #F2F2F2; padding: 12px 15px; font-weight: bold; font-size: 14px; border-bottom: 1px solid #E0E0E0; width: 320px; float: left; height: 100%; min-height: 300px; }
+                    .emg-picture-content { padding: 15px; text-align: center; overflow: hidden; }
+                    .emg-picture-img { max-width: 100%; max-height: 450px; }
+                    
+                    .no-break { page-break-inside: avoid; }
+                    .mt-4 { margin-top: 30px; }
+                </style>
+
+                <div class="emg-page">
+                    <!-- Top Colored Bars -->
+                    <div class="red-bar">
+                        This report contains personal data. It must be deleted on or before <span t-esc="(doc.incident_datetime + datetime.timedelta(days=365*5)).strftime('%d/%m/%Y') if doc.incident_datetime else ''"/>
+                    </div>
+                    <div class="blue-bar">
+                        New Activity // <span t-field="doc.name"/>
+                    </div>
+
+                    <div class="container" style="padding: 20px 40px;">
+                        <!-- Header with Logo and Post -->
+                        <div class="row emg-header">
+                            <div class="col-6">
+                                <img t-if="res_company.logo" t-att-src="image_data_uri(res_company.logo)" class="emg-logo"/>
+                            </div>
+                            <div class="col-6 emg-post-name">
+                                <span t-field="doc.site_id.name"/>
+                            </div>
+                        </div>
+
+                        <!-- Formal Title -->
+                        <div class="emg-formal-title">
+                            EMERGENCY UAE NTSQD SEC PRO_01_F_001, V. 0 18.11.19
+                        </div>
+
+                        <!-- Main Info Table -->
+                        <div class="no-break">
+                            <table class="emg-table">
+                                <tr>
+                                    <td class="emg-label">Category</td>
+                                    <td class="emg-value"><span t-field="doc.category_id.name"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">Priority</td>
+                                    <td class="emg-value"><span t-field="doc.severity" style="text-transform: capitalize;"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">Post</td>
+                                    <td class="emg-value"><span t-field="doc.site_id.name"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">Report Created by</td>
+                                    <td class="emg-value"><span t-field="doc.guard_id.name"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">Start Date</td>
+                                    <td class="emg-value"><span t-field="doc.incident_datetime" t-options='{"widget": "datetime"}'/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">GPS Position</td>
+                                    <td class="emg-value">
+                                        <a t-attf-href="https://www.google.com/maps?q=#{doc.latitude},#{doc.longitude}" style="color: blue; text-decoration: underline;">
+                                            <span t-field="doc.latitude"/>, <span t-field="doc.longitude"/>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr t-if="doc.latitude and doc.longitude">
+                                    <td class="emg-label">Map</td>
+                                    <td class="emg-value map-container" style="padding: 0;">
+                                        <img t-att-src="doc.get_static_map_url()" style="width: 100%; display: block;" t-if="doc.get_static_map_url()"/>
+                                        <div t-else="" style="background-color: #eee; height: 300px; display: flex; align-items: center; justify-content: center; color: #666; font-style: italic;">
+                                            [Satellite Map View Placeholder]
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Incident Details Section -->
+                        <div class="no-break">
+                            <div class="emg-section-header">Incident Details</div>
+                            <table class="emg-table">
+                                <tr>
+                                    <td class="emg-label">Incident Date</td>
+                                    <td class="emg-value"><span t-field="doc.incident_datetime" t-options='{"widget": "date"}'/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">Incident Time</td>
+                                    <td class="emg-value"><span t-field="doc.incident_datetime" t-options='{"widget": "datetime", "time_only": True}'/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">Incident Location</td>
+                                    <td class="emg-value"><span t-field="doc.location"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">Select the type of emergency</td>
+                                    <td class="emg-value"><span t-field="doc.fire_emergency_type"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">If your previous selection was related to an alarm, please specify?</td>
+                                    <td class="emg-value"><span t-field="doc.fire_alarm_specification"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">Alarm status</td>
+                                    <td class="emg-value"><span t-field="doc.fire_alarm_status"/></td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Law Enforcement Section -->
+                        <div class="no-break">
+                            <div class="emg-section-header">Law Enforcement Reported to the Incident Scene</div>
+                            <div class="emg-instruction">
+                                If law enforcement reported to the incident scene, write the arrival and departure time along with the plate number.
+                            </div>
+                            <table class="emg-table">
+                                <tr>
+                                    <td class="emg-label">Law Enforcement Notified</td>
+                                    <td class="emg-value"><span t-field="doc.fire_law_enforcement_notified"/></td>
+                                </tr>
+                                <tr t-if="doc.fire_law_enforcement_details">
+                                    <td class="emg-label">Details</td>
+                                    <td class="emg-value"><span t-field="doc.fire_law_enforcement_details"/></td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- CCTV Section -->
+                        <div class="no-break">
+                            <div class="emg-section-header">CCTV Related</div>
+                            <table class="emg-table">
+                                <tr>
+                                    <td class="emg-label">CCTV Footage Review</td>
+                                    <td class="emg-value"><span t-field="doc.fire_cctv_reviewed"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">If your answer was yes to the CCTV footage review, kindly type the name of the person who reviewed the CCTV.</td>
+                                    <td class="emg-value"><span t-field="doc.fire_cctv_reviewer_name"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">Mobile Number</td>
+                                    <td class="emg-value"><span t-field="doc.fire_cctv_reviewer_mobile"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">CCTV Footage handover</td>
+                                    <td class="emg-value"><span t-field="doc.fire_cctv_handover"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">Police officer name</td>
+                                    <td class="emg-value"><span t-field="doc.fire_cctv_police_officer_name"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">Police officer mobile No.</td>
+                                    <td class="emg-value"><span t-field="doc.fire_cctv_police_officer_mobile"/></td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Narrative Report Section -->
+                        <div class="no-break">
+                            <div class="emg-section-header">Narrative Report</div>
+                            <table class="emg-table">
+                                <tr>
+                                    <td class="emg-label">Incident Description</td>
+                                    <td class="emg-value">
+                                        <div class="emg-text-content">
+                                            <span t-field="doc.description"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">Fire Alarm Activation Time</td>
+                                    <td class="emg-value"><span t-field="doc.fire_activation_time"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">Reset Time</td>
+                                    <td class="emg-value"><span t-field="doc.fire_reset_time"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">Sounder</td>
+                                    <td class="emg-value"><span t-field="doc.fire_sounder_status"/></td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Official Details Section -->
+                        <div class="no-break">
+                            <table class="emg-table">
+                                <tr>
+                                    <td class="emg-label">Security Name</td>
+                                    <td class="emg-value"><span t-field="doc.guard_id.name"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">Designation</td>
+                                    <td class="emg-value"><span t-esc="doc.guard_id.user_id.partner_id.function or 'Security Officer'"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">Signature</td>
+                                    <td class="emg-value">
+                                        <div class="emg-sig-box" t-if="doc.security_officer_signature">
+                                            <img t-att-src="image_data_uri(doc.security_officer_signature)" class="emg-sig-img"/>
+                                            <div class="emg-sig-line"></div>
+                                            <div class="emg-sig-text">Signature</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Attachments Row / Picture loop -->
+                        <div t-if="doc.photo_ids" class="mt-4">
+                            <div class="emg-section-header">Attachments</div>
+                            <t t-set="pic_index" t-value="1"/>
+                            <t t-foreach="doc.photo_ids" t-as="img">
+                                <div class="no-break emg-picture-box">
+                                    <div class="emg-picture-label">Picture <t t-esc="pic_index"/></div>
+                                    <div class="emg-picture-content">
+                                        <img t-att-src="image_data_uri(img.datas)" class="emg-picture-img"/>
+                                    </div>
+                                </div>
+                                <t t-set="pic_index" t-value="pic_index + 1"/>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Action for Fire Alarm Emergency -->
+    <record id="action_report_incident_fire_emergency" model="ir.actions.report">
+        <field name="name">Fire Alarm Emergency Report</field>
+        <field name="model">incident.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.incident_fire_emergency_pdf_template</field>
+        <field name="report_file">guardpro.incident_fire_emergency_pdf_template</field>
+        <field name="print_report_name">'Fire_Emergency_%s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_incident_report"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

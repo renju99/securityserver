@@ -112,3 +112,75 @@ class SafetyHazardReportPdf(models.AbstractModel):
             'data': data,
         }
 
+
+class StatementIncidentReportPdf(models.AbstractModel):
+    """Statement Form Incident Report PDF."""
+
+    _name = 'report.guardpro.incident_statement_pdf_template'
+    _description = 'Statement Form Incident Report PDF'
+
+    @api.model
+    def _get_report_values(self, docids, data=None):
+        """Get values for statement incident report."""
+        docs = self.env['incident.report'].browse(docids)
+        return {
+            'doc_ids': docids,
+            'doc_model': 'incident.report',
+            'docs': docs,
+            'data': data,
+        }
+
+
+class FoundItemIncidentReportPdf(models.AbstractModel):
+    """Found Item Incident Report PDF."""
+
+    _name = 'report.guardpro.incident_found_item_pdf_template'
+    _description = 'Found Item Incident Report PDF'
+
+    @api.model
+    def _get_report_values(self, docids, data=None):
+        """Get values for found item incident report."""
+        docs = self.env['incident.report'].browse(docids)
+        return {
+            'doc_ids': docids,
+            'doc_model': 'incident.report',
+            'docs': docs,
+            'data': data,
+        }
+
+
+class ReturnFormIncidentReportPdf(models.AbstractModel):
+    """Return Form Incident Report PDF."""
+
+    _name = 'report.guardpro.incident_return_form_pdf_template'
+    _description = 'Return Form Incident Report PDF'
+
+    @api.model
+    def _get_report_values(self, docids, data=None):
+        """Get values for return form incident report."""
+        docs = self.env['incident.report'].browse(docids)
+        return {
+            'doc_ids': docids,
+            'doc_model': 'incident.report',
+            'docs': docs,
+            'data': data,
+        }
+
+
+class CommunityViolationIncidentReportPdf(models.AbstractModel):
+    """Community Violation Incident Report PDF."""
+
+    _name = 'report.guardpro.incident_community_violation_pdf_template'
+    _description = 'Community Violation Incident Report PDF'
+
+    @api.model
+    def _get_report_values(self, docids, data=None):
+        """Get values for community violation incident report."""
+        docs = self.env['incident.report'].browse(docids)
+        return {
+            'doc_ids': docids,
+            'doc_model': 'incident.report',
+            'docs': docs,
+            'data': data,
+        }
+

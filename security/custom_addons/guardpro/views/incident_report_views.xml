@@ -40,7 +40,7 @@
             <field name="name">incident.report.form</field>
             <field name="model">incident.report</field>
             <field name="arch" type="xml">
-                <form string="Incident Report">
+                <form string="Incident Report" js_class="incident_report_form">
                     <header>
                         <button name="action_add_status_update" string="Add Status Update" type="object" 
                                 class="oe_highlight" 
@@ -89,6 +89,8 @@
                         <field name="is_security_incident" invisible="1"/>
                         <field name="is_vehicle_incident" invisible="1"/>
                         <field name="is_safety_incident" invisible="1"/>
+                        <field name="is_statement_incident" invisible="1"/>
+                        <!-- Removed legacy toggles no longer present on model -->
                         
                         <div class="oe_title">
                             <label for="name" string="Incident Number"/>
@@ -130,20 +132,22 @@
                             <field name="visible_to_client" widget="boolean_toggle" string="Visible to Client Portal"/>
                         </group>
                         </group>
-                        <group string="Location" invisible="not category_id">
-                            <field name="location"/>
-                            <field name="latitude"/>
-                            <field name="longitude"/>
+                        <group string="Location Information" name="location_info">
+                            <field name="checkpoint_id" string="Select Location" options="{'no_create': True}" 
+                                   domain="[('site_id', '=', site_id)]"/>
+                            <field name="location" string="Location Details"/>
+                            <field name="latitude" string="Latitude"/>
+                            <field name="longitude" string="Longitude"/>
                         </group>
                         
                         <notebook invisible="not category_id">
                             <!-- DESCRIPTION - Always visible -->
-                            <page string="📝 Description" name="description">
+                            <page string="Description" name="description">
                                 <field name="description" widget="html" placeholder="Provide detailed description of the incident..."/>
                             </page>
                             
                             <!-- MEDICAL EMERGENCY SPECIFIC -->
-                            <page string="🚑 Patient Information" name="medical_patient" 
+                            <page string="Patient Information" name="medical_patient" 
                                   invisible="not is_medical_incident">
                                 <group>
                                     <group>
@@ -166,7 +170,7 @@
                             </page>
                             
                             <!-- FIRE INCIDENT SPECIFIC -->
-                            <page string="🔥 Fire/Emergency Response" name="fire_response" 
+                            <page string="Fire/Emergency Response" name="fire_response" 
                                   invisible="not is_fire_incident">
                                 <group>
                                     <group string="Emergency Services">
@@ -196,7 +200,7 @@
                             </page>
                             
                             <!-- SECURITY INCIDENT SPECIFIC -->
-                            <page string="🔒 Security Details" name="security_details" 
+                            <page string="Security Details" name="security_details" 
                                   invisible="not is_security_incident">
                                 <group>
                                     <group string="Suspects/Persons Involved">
@@ -297,9 +301,192 @@
                                 </group>
                             </page>
                             
+                            <!-- STATEMENT FORM SPECIFIC -->
+                            <page string="Statement Form" name="statement_details" 
+                                  invisible="not is_statement_incident">
+                                <group>
+                                    <group string="Personal Information of the Person Writing the Statement">
+                                        <field name="statement_person_name" required="is_statement_incident"/>
+                                        <field name="statement_person_mobile"/>
+                                        <field name="statement_person_email"/>
+                                        <field name="statement_person_nationality"/>
+                                        <field name="statement_person_gender"/>
+                                    </group>
+                                    <group string="EID Details">
+                                        <field name="statement_person_eid_number"/>
+                                        <field name="statement_person_eid_expiry"/>
+                                        <field name="statement_person_eid_front" widget="image" options="{'size': [150, 100]}"/>
+                                        <field name="statement_person_eid_back" widget="image" options="{'size': [150, 100]}"/>
+                                    </group>
+                                </group>
+                                <group>
+                                    <group string="Professional Details">
+                                        <field name="statement_person_company"/>
+                                        <field name="statement_person_department"/>
+                                        <field name="statement_person_designation"/>
+                                    </group>
+                                </group>
+                                <separator string="Statement Content"/>
+                                <div class="alert alert-info" role="alert">
+                                    I hereby acknowledge that the information I have supplied in this document is correct. This statement is made voluntarily and is true to the best of my knowledge.
+                                </div>
+                                <field name="statement_text" widget="html" 
+                                       placeholder="Enter the detailed statement here..."
+                                       required="is_statement_incident"/>
+                                
+                                <group>
+                                    <group string="Signatures">
+                                        <label for="statement_person_signature" string="Person Signature"/>
+                                        <field name="statement_person_signature" widget="signature" nolabel="1" required="is_statement_incident"/>
+                                        
+                                        <label for="security_officer_signature" string="Security Officer Signature"/>
+                                        <field name="security_officer_signature" widget="signature" nolabel="1" required="is_statement_incident"/>
+                                    </group>
+                                </group>
+                            </page>
+
+                            <!-- FOUND ITEM FORM SPECIFIC -->
+                            <page string="Found Item Form" name="found_item_details"
+                                  invisible="not is_found_item_incident">
+                                <group>
+                                    <group string="Found Item Description">
+                                        <field name="found_item_time"/>
+                                        <field name="found_item_date"/>
+                                        <field name="found_person_name" required="is_found_item_incident"/>
+                                        <field name="found_person_home_address"/>
+                                        <field name="found_person_mobile"/>
+                                        <field name="found_person_email"/>
+                                        <field name="found_item_category"/>
+                                    </group>
+                                    <group string="Security Checks">
+                                        <field name="found_item_inspected" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="found_item_supervisor_informed" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="found_item_handover" widget="radio" options="{'horizontal': true}"/>
+                                    </group>
+                                </group>
+                                <separator string="Item(s) Found - Full Description"/>
+                                <field name="found_item_description" widget="html"
+                                       required="is_found_item_incident"
+                                       placeholder="Description i.e. make, brand, model, colour, size, and any relevant information..."/>
+                                <group>
+                                    <group string="Signatures">
+                                        <label for="found_item_person_signature" string="Signature of Person Who Found the Item"/>
+                                        <field name="found_item_person_signature" widget="signature" nolabel="1"/>
+                                        <label for="security_officer_signature" string="Security Officer Signature"/>
+                                        <field name="security_officer_signature" widget="signature" nolabel="1"/>
+                                    </group>
+                                    <group string="Office Use Only by Security">
+                                        <field name="found_item_security_name"/>
+                                        <field name="found_item_security_designation"/>
+                                    </group>
+                                </group>
+                            </page>
+
+                            <!-- RETURN FORM SPECIFIC -->
+                            <page string="Return Form" name="return_form_details"
+                                  invisible="not is_return_form_incident">
+                                <group>
+                                    <group string="Recipient Particulars">
+                                        <field name="return_recipient_name" required="is_return_form_incident"/>
+                                        <field name="return_recipient_home_address"/>
+                                        <field name="return_recipient_mobile"/>
+                                        <field name="return_recipient_email"/>
+                                    </group>
+                                    <group string="Office Use Only by Security">
+                                        <field name="return_item_category"/>
+                                        <field name="return_security_name"/>
+                                        <field name="return_security_designation"/>
+                                    </group>
+                                </group>
+                                <separator string="Item(s) Received - Full Description"/>
+                                <field name="return_item_description" widget="html"
+                                       required="is_return_form_incident"
+                                       placeholder="Description i.e. make, brand, model, colour, size, and any relevant information..."/>
+                                <group>
+                                    <group string="Signatures">
+                                        <label for="return_recipient_signature" string="Recipient Signature"/>
+                                        <field name="return_recipient_signature" widget="signature" nolabel="1"/>
+                                        <label for="security_officer_signature" string="Security Officer Signature"/>
+                                        <field name="security_officer_signature" widget="signature" nolabel="1"/>
+                                    </group>
+                                </group>
+                            </page>
+
+                            <!-- COMMUNITY VIOLATION SPECIFIC -->
+                            <page string="Community Violation Form" name="community_violation_details"
+                                  invisible="not is_community_violation_incident">
+                                <group>
+                                    <group string="Violation Information">
+                                        <field name="category_id" readonly="1"/>
+                                        <field name="violation_unit_number"/>
+                                        <field name="violation_reported_by"/>
+                                        <field name="violation_observed_datetime"/>
+                                    </group>
+                                    <group string="Enforcement">
+                                        <field name="violation_notice_issued"/>
+                                        <field name="violation_repeat_offense"/>
+                                        <field name="violation_fine_amount"/>
+                                        <label for="security_officer_signature" string="Security Officer Signature"/>
+                                        <field name="security_officer_signature" widget="signature" nolabel="1"/>
+                                    </group>
+                                </group>
+                                <separator string="Violation Details"/>
+                                <field name="violation_details" widget="html"
+                                       placeholder="Describe violation details and observations..."/>
+                                <separator string="Immediate Action Taken"/>
+                                <field name="violation_action_taken" widget="text"
+                                       placeholder="Warning, notice issued, escalation, photos collected, etc..."/>
+                            </page>
+                            
+                            <!-- FIRE ALARM EMERGENCY SPECIFIC -->
+                            <page string="Fire Alarm Emergency" name="fire_emergency_details" 
+                                  invisible="not is_fire_emergency_incident">
+                                <div class="alert alert-danger" role="alert" style="background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; margin-bottom: 20px;">
+                                    <i class="fa fa-exclamation-triangle" title="Emergency"/> <strong>EMERGENCY UAE NTSQD SEC PRO_01_F_001</strong>
+                                </div>
+                                <group>
+                                    <group string="Incident Details">
+                                        <field name="fire_emergency_type" required="is_fire_emergency_incident"/>
+                                        <field name="fire_alarm_specification"/>
+                                        <field name="fire_alarm_status"/>
+                                        <field name="fire_activation_time"/>
+                                        <field name="fire_reset_time"/>
+                                        <field name="fire_sounder_status"/>
+                                    </group>
+                                    <group string="Law Enforcement">
+                                        <field name="fire_law_enforcement_notified" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="fire_law_enforcement_details" 
+                                               invisible="fire_law_enforcement_notified != 'YES'"
+                                               placeholder="Arrival, departure and plate number..."/>
+                                    </group>
+                                </group>
+                                <group string="CCTV Related">
+                                    <group>
+                                        <field name="fire_cctv_reviewed" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="fire_cctv_reviewer_name" invisible="fire_cctv_reviewed != 'YES'"/>
+                                        <field name="fire_cctv_reviewer_mobile" invisible="fire_cctv_reviewed != 'YES'"/>
+                                    </group>
+                                    <group>
+                                        <field name="fire_cctv_handover" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="fire_cctv_police_officer_name" invisible="fire_cctv_handover != 'YES'"/>
+                                        <field name="fire_cctv_police_officer_mobile" invisible="fire_cctv_handover != 'YES'"/>
+                                    </group>
+                                </group>
+                                <separator string="Narrative Report"/>
+                                <field name="description" widget="html" string="Incident Description"/>
+                                
+                                <group string="Security Officer Details">
+                                    <group>
+                                        <field name="guard_id" readonly="1" string="Security Name"/>
+                                        <label for="security_officer_signature" string="Signature"/>
+                                        <field name="security_officer_signature" widget="signature" nolabel="1" required="is_fire_emergency_incident"/>
+                                    </group>
+                                </group>
+                            </page>
+                            
                             <!-- PEOPLE INVOLVED - Visible for non-specific categories -->
-                            <page string="👥 People Involved" name="people" 
-                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_safety_incident">
+                            <page string="People Involved" name="people" 
+                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_safety_incident or is_statement_incident or is_found_item_incident or is_return_form_incident or is_community_violation_incident">
                                 <group>
                                     <field name="persons_involved" widget="text" 
                                            placeholder="Names and details of people involved..."/>
@@ -309,14 +496,14 @@
                             </page>
                             
                             <!-- ACTIONS TAKEN - For general incidents -->
-                            <page string="⚡ Actions Taken" name="actions" 
-                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_safety_incident">
+                            <page string="Actions Taken" name="actions" 
+                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_safety_incident or is_statement_incident or is_found_item_incident or is_return_form_incident or is_community_violation_incident">
                                 <field name="immediate_actions" widget="text" 
                                        placeholder="Describe all actions taken in response to this incident..."/>
                             </page>
                             
                             <!-- EMERGENCY SERVICES - For general incidents -->
-                            <page string="🚨 Emergency Services" name="emergency" 
+                            <page string="Emergency Services" name="emergency" 
                                   invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident">
                                 <group>
                                     <group>
@@ -334,8 +521,8 @@
                             </page>
                             
                             <!-- INJURIES/DAMAGE - For general incidents -->
-                            <page string="💥 Injuries/Damage" name="injuries_damage" 
-                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_safety_incident">
+                            <page string="Injuries/Damage" name="injuries_damage" 
+                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_safety_incident or is_statement_incident or is_found_item_incident or is_return_form_incident or is_community_violation_incident">
                                 <group>
                                     <group>
                                         <field name="injuries"/>
@@ -350,7 +537,7 @@
                             </page>
                             
                             <!-- MEDIA - Always visible -->
-                            <page string="📷 Photos/Videos" name="media">
+                            <page string="Photos/Videos" name="media">
                                 <group>
                                     <field name="photo_ids" widget="many2many_binary"/>
                                     <field name="video_ids" widget="many2many_binary"/>
@@ -358,7 +545,7 @@
                             </page>
                             
                             <!-- REVIEW - Supervisor only -->
-                            <page string="✅ Review" name="review" groups="guardpro.group_guardpro_supervisor">
+                            <page string="Review" name="review" groups="guardpro.group_guardpro_supervisor">
                                 <group>
                                     <field name="reviewed_by"/>
                                     <field name="review_datetime"/>
@@ -367,7 +554,7 @@
                             </page>
                             
                             <!-- SLA TRACKING -->
-                            <page string="⏱️ SLA &amp; Escalation" name="sla_tracking">
+                            <page string="SLA &amp; Escalation" name="sla_tracking">
                                 <div class="alert alert-info" role="alert" invisible="sla_policy_id">
                                     <p><i class="fa fa-info-circle" aria-hidden="true" title="Informational message"/> No SLA policy applies to this incident based on its severity and site.</p>
                                 </div>
@@ -431,7 +618,7 @@
                             </page>
                             
                             <!-- FOLLOW-UP - Visible for all except safety (has its own) -->
-                            <page string="📋 Follow-up" name="followup" 
+                            <page string="Follow-up" name="followup" 
                                   invisible="is_safety_incident">
                                 <group>
                                     <field name="requires_followup"/>
@@ -441,7 +628,7 @@
                             </page>
                             
                             <!-- STATUS UPDATES - Real-time incident progress -->
-                            <page string="📊 Status Updates" name="status_updates">
+                            <page string="Status Updates" name="status_updates">
                                 <field name="status_update_ids">
                                     <list string="Status Updates" editable="bottom" 
                                           decoration-info="update_type == 'progress'" 
@@ -466,7 +653,7 @@
                             </page>
                             
                             <!-- ADDITIONAL NOTES - Always visible -->
-                            <page string="📌 Additional Notes" name="notes">
+                            <page string="Additional Notes" name="notes">
                                 <field name="notes" widget="text" placeholder="Any additional information or notes..."/>
                             </page>
                         </notebook>

@@ -1,170 +1,97 @@
-# Sentry Security Guard Management System - Documentation Index
+# Sentry documentation
 
-Welcome to the comprehensive documentation for **Sentry**, the enterprise-grade security guard management system built on Odoo 18.
+Welcome to the documentation for **Sentry**, the security guard operations suite for Odoo 18. This hub is organized like a **guide**: short chapters, clear outcomes, and links into deeper topics.
 
-## 📋 Documentation Overview
-
-This documentation covers all aspects of the Sentry system, from initial setup to advanced features, API integrations, and best practices.
+**Module version:** 18.0.1.1.17 · **Last updated:** March 2026
 
 ---
 
-## 🚀 Quick Start
+## How to use this guide
 
-**New to Sentry?** Start here:
+| If you want to… | Start here |
+|-----------------|------------|
+| Go from zero to first patrol loop | [Get started — Chapter 1](GETTING_STARTED.md) |
+| Install and turn the module on | [Installation](user-guide/02-installation.md) |
+| Permissions, settings, go-live checklist | [Configuration](user-guide/03-configuration.md) |
+| One-page cheat sheet | [Quick reference](QUICK_REFERENCE.md) |
+| APIs and integrations | [Mobile API](api/mobile-api.md) · [REST API](api/rest-api.md) · [Webhooks](api/webhooks.md) |
 
-1. **[Introduction](user-guide/01-introduction.md)** - What is Sentry and who it's for
-2. **[Installation Guide](user-guide/02-installation.md)** - Step-by-step setup instructions
-3. **[Configuration](user-guide/03-configuration.md)** - Initial system configuration
-4. **[Quick Reference](QUICK_REFERENCE.md)** - Essential shortcuts and tips
-
----
-
-## 📚 Complete Documentation Structure
-
-### 🎯 Getting Started
-- [Introduction](user-guide/01-introduction.md) - Overview of Sentry features and capabilities
-- [Installation](user-guide/02-installation.md) - Complete installation guide for Odoo 18
-- [Configuration](user-guide/03-configuration.md) - System setup and initial configuration
-- [Features Overview](user-guide/04-features.md) - Comprehensive feature list
-- [Workflows](user-guide/05-workflows.md) - Common operational workflows
-- [Troubleshooting](user-guide/06-troubleshooting.md) - Common issues and solutions
-
-### 👮 Guard Management
-- [Guard Profiles](guards/profile_management.md) - Creating and managing guard accounts
-- [Attendance Tracking](guards/attendance.md) - Time tracking and attendance management
-- [Performance Management](guards/performance.md) - Performance evaluation and KPIs
-- [Training & Certifications](guards/training.md) - Training programs and certification tracking
-
-### 🏢 Site Management
-- [Site Setup](sites/site_setup.md) - Creating and configuring security sites
-- [Checkpoints](sites/checkpoints.md) - Managing security checkpoints and QR/NFC scanning
-- [Patrol Routes](sites/patrols.md) - Creating optimized patrol routes and schedules
-- [Equipment](sites/equipment.md) - Managing site equipment and assets
-
-### ⚡ Daily Operations
-- [Shift Management](operations/shift_management.md) - Creating schedules and managing shifts
-- [Incident Management](operations/incident_management.md) - Reporting and tracking security incidents
-- [Visitor Management](operations/visitor_management.md) - Managing visitors and access control
-- [Access Control](operations/access_control.md) - Managing site access and permissions
-
-### 📊 Compliance & Reporting
-- [Audits & Inspections](compliance/audits.md) - Conducting compliance audits and inspections
-- [Daily Activity Reports](compliance/reports.md) - Creating and managing DARs
-- [SLA Management](compliance/sla.md) - Monitoring and managing service level agreements
-
-### 🔧 Developer Resources
-- [Architecture Overview](developer-guide/01-architecture.md) - System architecture and design
-- [Models Reference](developer-guide/02-models.md) - Data models and relationships
-- [Views & UI](developer-guide/03-views.md) - User interface components
-- [Business Logic](developer-guide/04-business-logic.md) - Core business logic and workflows
-- [Security](developer-guide/05-security.md) - Security model and access control
-- [Customization](developer-guide/06-customization.md) - Extending and customizing the system
-
-### 🔗 API & Integration
-- [Mobile API](api/mobile-api.md) - Mobile application API endpoints
-- [REST API](api/rest-api.md) - RESTful API for integrations
-- [Webhooks](api/webhooks.md) - Webhook integration for real-time updates
-
-### 📋 Additional Resources
-- [Knowledge Base](README.md) - Quick overview and getting started
-- [SOP Printable Guide](SOP_PRINTABLE_GUIDE.md) - Standard operating procedures
-- [Biometric Implementation](BIOMETRIC_IMPLEMENTATION_SUMMARY.md) - Biometric integration details
-- [CCTV Testing](CCTV_CAMERA_TESTING.md) - CCTV camera integration guide
-- [Competitive Analysis](COMPETITIVE_FEATURES_ANALYSIS.md) - Feature comparison with competitors
-- [Emirates ID Setup](EMIRATES_ID_SETUP.md) - UAE-specific ID scanning integration
+Open the **in-app documentation** (from Sentry, if your admin enabled it) for search and the same content in a reader-friendly layout.
 
 ---
 
-## 🎯 Most Popular Pages
+## Product scope (current build)
 
-| Topic | Description | Link |
-|-------|-------------|------|
-| **Quick Start** | Get up and running in 30 minutes | [Start Here](user-guide/01-introduction.md) |
-| **Guard Setup** | Add your first security guards | [Guard Profiles](guards/profile_management.md) |
-| **Site Setup** | Configure your security sites | [Site Setup](sites/site_setup.md) |
-| **Shift Scheduling** | Create guard schedules | [Shift Management](operations/shift_management.md) |
-| **Incident Reports** | Handle security incidents | [Incident Management](operations/incident_management.md) |
-| **Mobile App** | Use the mobile application | [Mobile API](api/mobile-api.md) |
+Documentation matches **what ships today**, not a future roadmap.
+
+- **Mobile:** Guards use the **web app** (responsive, installable from the browser on many devices). Older standalone PWA bundles are not used.  
+- **CCTV:** Camera records can exist per site configuration; **live monitoring is not available** in the default web UI.  
+- **Biometric:** In-browser biometric capture is **not** in the default asset bundle; attendance and verification depend on your configured process (manual, device, or integration).  
+- **Optional Odoo apps:** `hr_attendance` and `maintenance` remain optional; some menus and automation appear only when those apps are installed.  
 
 ---
 
-## 🔍 Search & Navigation
+## Chapters at a glance
 
-- **Search**: Use the search box in the sidebar to find specific topics
-- **Navigation**: Browse by category using the sidebar menu
-- **Quick Links**: Use the table above for popular topics
-- **Breadcrumbs**: Follow the breadcrumb trail at the top of each page
+### Chapter 1 — Orientation
 
----
+- [Get started — first site and patrol loop](GETTING_STARTED.md)  
+- [Introduction](user-guide/01-introduction.md)  
+- [Features overview](user-guide/04-features.md)  
+- [Workflows](user-guide/05-workflows.md)  
+- [Troubleshooting](user-guide/06-troubleshooting.md)  
 
-## 📞 Support & Resources
+### Chapter 2 — People and sites
 
-### Support Channels
-- **Documentation**: You're reading it! 🎉
-- **GitHub Issues**: [Report bugs or request features](https://github.com/yourusername/guardpro/issues)
-- **Email Support**: support@sentry.app
-- **Phone Support**: 1-800-SENTRY
+- [Guard profiles](guards/profile_management.md)  
+- [Attendance](guards/attendance.md)  
+- [Performance](guards/performance.md)  
+- [Training](guards/training.md)  
+- [Site setup](sites/site_setup.md)  
+- [Checkpoints](sites/checkpoints.md)  
+- [Patrols](sites/patrols.md)  
+- [Equipment](sites/equipment.md)  
 
-### Community Resources
-- **Video Tutorials**: Available in-app training modules
-- **Knowledge Base**: Integrated help system within the application
-- **API Documentation**: Complete API reference for integrations
+### Chapter 3 — Daily operations
 
-### Technical Information
-- **Version**: 18.0.1.0.8
-- **Platform**: Odoo 18 Community Edition
-- **Requirements**: Python 3.10+, PostgreSQL 13+
-- **Last Updated**: January 2026
+- [Shifts](operations/shift_management.md)  
+- [Incidents](operations/incident_management.md)  
+- [Visitors](operations/visitor_management.md)  
+- [Access control](operations/access_control.md)  
 
----
+### Chapter 4 — Compliance and reporting
 
-## 🚀 What's New in v18.0.1.0.8
+- [Audits](compliance/audits.md)  
+- [Daily activity reports](compliance/reports.md)  
+- [SLA](compliance/sla.md)  
 
-**Latest Enhancement Wave (2025)**:
-- ✅ Analytics dashboards with KPI tracking
-- ✅ Emergency broadcast suite with push notifications
-- ✅ Enhanced eLearning content for guard training
-- ✅ Advanced security audit tooling
-- ✅ Biometric integration and compliance automation
-- ✅ CCTV camera management and live streaming
-- ✅ UAE/SIRA compliance standards integration
+### Chapter 5 — Developers and integrations
 
----
-
-## 📖 Reading Guide
-
-**For Administrators**: Start with [Installation](user-guide/02-installation.md) and [Configuration](user-guide/03-configuration.md)
-
-**For Security Supervisors**: Focus on [Operations](operations/shift_management.md) and [Incident Management](operations/incident_management.md)
-
-**For Guards**: Use [Mobile App Guide](api/mobile-api.md) and [Training Materials](guards/training.md)
-
-**For Developers**: See [Developer Guide](developer-guide/01-architecture.md) and [API Reference](api/rest-api.md)
+- [Architecture](developer-guide/01-architecture.md)  
+- [Models](developer-guide/02-models.md)  
+- [Views](developer-guide/03-views.md)  
+- [Business logic](developer-guide/04-business-logic.md)  
+- [Security (access rules)](developer-guide/05-security.md)  
+- [Customization](developer-guide/06-customization.md)  
 
 ---
 
-*This documentation is continuously updated. Last updated: January 20, 2026*
+## Additional reference material
+
+Specialized notes (deployment, testing, planning) live alongside this guide, for example:
+
+- [SOP printable guide](SOP_PRINTABLE_GUIDE.md)  
+- Printable and operational PDFs are generated from the app where templates are configured.  
+
+Use the sidebar search in the **in-app documentation** viewer to find niche topics quickly.
 
 ---
 
-## 📋 Table of Contents Legend
+## Support
 
-| Icon | Meaning |
-|------|---------|
-| 🎯 | Getting Started |
-| 👮 | Guard Management |
-| 🏢 | Site Management |
-| ⚡ | Operations |
-| 📊 | Compliance & Reporting |
-| 🔧 | Developer Resources |
-| 🔗 | API & Integration |
-| 📋 | Additional Resources |
+- **Email:** support@sentry.app  
+- **Website:** [sentry.proptechme.com](https://sentry.proptechme.com/)  
 
 ---
 
-**[⬆ Back to Top](#sentry-security-guard-management-system---documentation-index)**
-
-
-
-
-
+[↑ Back to top](#sentry-documentation)

@@ -27,6 +27,15 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
+// Reports: managers and full admins only
+const requireManagerOrAdmin = (req, res, next) => {
+    const role = (req.user && req.user.role) || '';
+    if (role !== 'manager' && role !== 'admin') {
+        return res.status(403).json({ error: 'Reports are only accessible to managers and admins.' });
+    }
+    next();
+};
+
 // Wrap async handlers so rejections are passed to Express
 const asyncHandler = (fn) => (req, res, next) => {
     Promise.resolve(fn(req, res, next)).catch(next);
@@ -40,10 +49,10 @@ router.get('/projects', authenticateToken, locationController.getProjects);
 router.post('/projects', authenticateToken, locationController.createProject);
 router.put('/projects/:id', authenticateToken, locationController.updateProject);
 router.delete('/projects/:id', authenticateToken, locationController.deleteProject);
-router.get('/washrooms', authenticateToken, locationController.getWashrooms);
-router.post('/washrooms', authenticateToken, locationController.createWashroom);
-router.put('/washrooms/:id', authenticateToken, locationController.updateWashroom);
-router.delete('/washrooms/:id', authenticateToken, locationController.deleteWashroom);
+router.get('/locations', authenticateToken, locationController.getLocations);
+router.post('/locations', authenticateToken, locationController.createLocation);
+router.put('/locations/:id', authenticateToken, locationController.updateLocation);
+router.delete('/locations/:id', authenticateToken, locationController.deleteLocation);
 
 // Attendance Routes (Protected)
 router.post('/attendance/check-in', authenticateToken, attendanceController.checkIn);
@@ -69,8 +78,11 @@ router.delete('/staff/:id', authenticateToken, staffController.deleteStaff);
 router.get('/checklist-types', authenticateToken, checklistController.getChecklistTypes);
 router.get('/checklist-items', authenticateToken, checklistController.getChecklistItems);
 router.post('/checklist/submit', authenticateToken, checklistController.submitChecklist);
-router.get('/reports', authenticateToken, checklistController.getReports);
-router.get('/reports/monthly', authenticateToken, checklistController.getMonthlyReport);
-router.get('/reports/:id', authenticateToken, checklistController.getReportDetail);
+// Reports: managers and admins only (manual reports)
+router.get('/reports', authenticateToken, requireManagerOrAdmin, checklistController.getReports);
+router.get('/reports/monthly', authenticateToken, requireManagerOrAdmin, checklistController.getMonthlyReport);
+router.get('/reports/completed-attendances', authenticateToken, requireManagerOrAdmin, checklistController.getCompletedAttendancesForReports);
+router.post('/reports', authenticateToken, requireManagerOrAdmin, checklistController.createReportFromAttendance);
+router.get('/reports/:id', authenticateToken, requireManagerOrAdmin, checklistController.getReportDetail);
 
 module.exports = router;

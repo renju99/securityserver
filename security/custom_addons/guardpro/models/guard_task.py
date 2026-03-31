@@ -275,17 +275,10 @@ class GuardTask(models.Model):
     def _send_assignment_email(self):
         """Send email notification about task assignment."""
         self.ensure_one()
-        if self.assigned_to and self.assigned_to.email:
-            template = self.env.ref(
-                'guardpro.email_template_task_assigned',
-                raise_if_not_found=False
-            )
-            if template:
-                try:
-                    template.send_mail(self.id, force_send=True)
-                    _logger.info('Task assignment email sent to guard %s', self.assigned_to.name)
-                except Exception as e:
-                    _logger.warning('Failed to send task assignment email: %s', str(e))
+        _logger.info(
+            'Email notifications are disabled: skipped task assignment email for task %s',
+            self.id
+        )
     
     @api.model_create_multi
     def create(self, vals_list):
@@ -369,13 +362,7 @@ class GuardTask(models.Model):
         # Send email notification
         self._send_assignment_email()
         
-        # Send notification to guard
-        self.activity_schedule(
-            'mail.mail_activity_data_todo',
-            summary=_('New Task Assigned: %s') % self.name,
-            user_id=self.assigned_to.user_id.id if self.assigned_to.user_id else self.env.user.id,
-            note=self.description or ''
-        )
+        # Planned activity intentionally disabled.
         
         _logger.info('Task %s assigned to guard %s', self.name, self.assigned_to.name)
         return True
@@ -448,16 +435,7 @@ class GuardTask(models.Model):
             ('due_date', '<', fields.Datetime.now())
         ])
         
-        for task in overdue_tasks:
-            # Create activity for supervisor
-            task.activity_schedule(
-                'mail.mail_activity_data_warning',
-                summary=_('Overdue Task: %s') % task.name,
-                note=_('Task assigned to %s is overdue. Due date was %s.') % (
-                    task.assigned_to.name if task.assigned_to else 'Unassigned',
-                    task.due_date
-                )
-            )
+        # Planned activities intentionally disabled for overdue tasks.
         
         _logger.info('Sent overdue alerts for %d tasks', len(overdue_tasks))
         return True

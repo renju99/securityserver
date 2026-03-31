@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Default: keep mail.mail rows 365 days, then cron removes them. Chatter is untouched. -->
+        <record id="icp_mail_mail_retention_days" model="ir.config_parameter">
+            <field name="key">guardpro.mail_mail_retention_days</field>
+            <field name="value">365</field>
+        </record>
+    </data>
+</odoo>

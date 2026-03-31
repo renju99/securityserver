@@ -291,16 +291,7 @@ class GuardVaccination(models.Model):
             body=_('Adverse reaction reported'),
             subtype_xmlid='mail.mt_comment'
         )
-        # Create activity for supervisor
-        self.activity_schedule(
-            'mail.mail_activity_data_warning',
-            summary=_('Adverse Vaccine Reaction Reported'),
-            note=_('Guard %s reported adverse reaction to %s vaccine') % (
-                self.guard_id.name,
-                dict(self._fields['vaccine_type'].selection).get(self.vaccine_type, '')
-            ),
-            user_id=self.guard_id.supervisor_id.id if self.guard_id.supervisor_id else self.env.user.id
-        )
+        # Planned activity intentionally disabled.
     
     def action_schedule_next_dose(self):
         """Create record for next dose"""
@@ -356,13 +347,7 @@ class GuardVaccination(models.Model):
             ('expiry_date', '>=', today)
         ])
         
-        for vaccination in expiring:
-            vaccination.activity_schedule(
-                'mail.mail_activity_data_todo',
-                summary=_('Vaccination Immunity Expiring'),
-                note=_('Vaccination immunity expires on %s. Booster may be needed.') % vaccination.expiry_date,
-                user_id=vaccination.guard_id.user_id.id if vaccination.guard_id.user_id else self.env.user.id
-            )
+        # Planned activities intentionally disabled for expiring vaccinations.
         
         # Mark expired vaccinations
         expired = self.search([
@@ -386,16 +371,7 @@ class GuardVaccination(models.Model):
             ('is_series_complete', '=', False)
         ])
         
-        for vaccination in upcoming_doses:
-            vaccination.activity_schedule(
-                'mail.mail_activity_data_todo',
-                summary=_('Next Vaccine Dose Due'),
-                note=_('Next dose of %s due on %s') % (
-                    dict(self._fields['vaccine_type'].selection).get(vaccination.vaccine_type, ''),
-                    vaccination.next_dose_date
-                ),
-                user_id=vaccination.guard_id.user_id.id if vaccination.guard_id.user_id else self.env.user.id
-            )
+        # Planned activities intentionally disabled for upcoming doses.
         
         return True
 

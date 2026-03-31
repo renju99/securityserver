@@ -1,654 +1,631 @@
-/* Sentry Documentation Styles - Modern UI */
+/* =============================================================================
+   Sentry in-app documentation
+   - Unique class names (odoo-docs-*) avoid collisions with Odoo UI.
+   - Prose is scoped under .sentry-docs-guide so global Odoo CSS cannot break it.
+   ============================================================================= */
 
-.guardpro-documentation {
-    padding-top: 20px;
-    min-height: 100vh;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+/* --- Top banner (sibling of .sentry-docs-guide in template) --- */
+.odoo-docs-header {
+    background: #ffffff;
+    color: #172b4d;
+    padding: 1.25rem 0 1rem;
+    border-bottom: 1px solid #dfe1e6;
+    box-shadow: 0 1px 0 rgba(9, 30, 66, 0.06);
 }
 
-/* Sidebar Styles */
-.documentation-sidebar {
-    background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
-    border-right: 1px solid #e9ecef;
-    padding: 24px 16px;
-    height: 100vh;
-    overflow-y: auto;
-    position: sticky;
-    top: 0;
-    box-shadow: 2px 0 8px rgba(0,0,0,0.05);
-}
-
-.sidebar-heading {
-    color: #1a202c;
-    font-weight: 700;
-    margin-bottom: 24px;
-    padding-bottom: 12px;
-    border-bottom: 3px solid #017e84;
-    font-size: 1.1rem;
-    letter-spacing: -0.025em;
-}
-
-.sidebar-section-title {
-    color: #4a5568;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    margin-top: 24px;
-    margin-bottom: 12px;
-    padding-left: 12px;
-    letter-spacing: 0.05em;
-    border-left: 3px solid #017e84;
-    line-height: 1.2;
-}
-
-.nav-section {
-    margin-bottom: 20px;
-}
-
-.documentation-sidebar .nav-link {
-    color: #4a5568;
-    font-size: 0.9rem;
-    padding: 10px 16px;
-    border-radius: 8px;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    margin-bottom: 2px;
-    border: 1px solid transparent;
-    font-weight: 500;
-}
-
-.documentation-sidebar .nav-link:hover {
-    background: linear-gradient(135deg, #017e84 0%, #00b4b4 100%);
-    color: white;
-    text-decoration: none;
-    transform: translateX(4px);
-    box-shadow: 0 4px 12px rgba(1, 126, 132, 0.25);
-}
-
-.documentation-sidebar .nav-link.active {
-    background: linear-gradient(135deg, #017e84 0%, #00b4b4 100%);
-    color: white;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(1, 126, 132, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* Content Styles */
-.documentation-content {
-    padding: 32px 48px;
-    max-width: 1200px;
-}
-
-.documentation-body {
-    background: white;
-    padding: 48px;
-    border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-    min-height: 600px;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    position: relative;
-}
-
-.documentation-body::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #017e84 0%, #00b4b4 50%, #017e84 100%);
-    border-radius: 16px 16px 0 0;
-}
-
-/* Markdown Content Styles */
-.documentation-body h1 {
-    color: #1a202c;
-    border-bottom: 3px solid #017e84;
-    padding-bottom: 16px;
-    margin-bottom: 32px;
-    font-size: 2.5rem;
-    font-weight: 800;
-    letter-spacing: -0.025em;
-    line-height: 1.2;
-}
-
-.documentation-body h2 {
-    color: #2d3748;
-    margin-top: 48px;
-    margin-bottom: 24px;
-    font-size: 1.875rem;
-    font-weight: 700;
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 12px;
-    letter-spacing: -0.025em;
-}
-
-.documentation-body h3 {
-    color: #4a5568;
-    margin-top: 36px;
-    margin-bottom: 16px;
+.odoo-docs-header h1 {
     font-size: 1.5rem;
     font-weight: 600;
-    line-height: 1.3;
+    letter-spacing: -0.02em;
+    margin: 0;
+    color: #172b4d !important;
 }
 
-.documentation-body h4 {
-    color: #718096;
-    margin-top: 28px;
-    margin-bottom: 12px;
-    font-size: 1.25rem;
-    font-weight: 600;
+.odoo-docs-header p.lead {
+    font-size: 0.95rem;
+    color: #5e6c84 !important;
+    margin: 0.35rem 0 0 0;
 }
 
-.documentation-body p {
-    line-height: 1.8;
-    margin-bottom: 20px;
-    color: #4a5568;
-    font-size: 1.1rem;
-}
-
-.documentation-body a {
+.odoo-docs-header .odoo-docs-kicker {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
     color: #017e84;
-    text-decoration: none;
+    margin-bottom: 0.35rem;
+}
+
+.odoo-docs-header .badge {
+    background: #f4f5f7 !important;
+    color: #42526e !important;
+    border: 1px solid #dfe1e6;
     font-weight: 500;
-    border-bottom: 1px solid transparent;
-    transition: all 0.2s ease;
+    font-size: 0.8rem;
 }
 
-.documentation-body a:hover {
-    color: #00b4b4;
-    border-bottom-color: #00b4b4;
-    text-decoration: none;
+.odoo-docs-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
 }
 
-.documentation-body ul,
-.documentation-body ol {
-    margin-bottom: 15px;
-    padding-left: 30px;
+.odoo-docs-layout {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.25rem;
+    align-items: flex-start;
 }
 
-.documentation-body li {
-    margin-bottom: 8px;
-    line-height: 1.6;
+@media (max-width: 991px) {
+    .odoo-docs-layout {
+        flex-direction: column;
+    }
+    .sentry-docs-guide .odoo-docs-sidebar {
+        width: 100%;
+        position: relative;
+        top: 0;
+    }
 }
 
-.documentation-body code {
-    background-color: #f8f9fa;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    font-size: 0.9em;
-    color: #e83e8c;
+.sentry-docs-guide {
+    color-scheme: only light;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
-.documentation-body pre {
-    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
-    color: #e2e8f0;
-    padding: 24px;
-    border-radius: 12px;
-    overflow-x: auto;
-    margin: 24px 0;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+/* --- Shell --- */
+.sentry-docs-guide.odoo-docs-guide-wrap {
+    background: #f4f5f7;
+    min-height: calc(100vh - 48px);
+    padding-bottom: 2rem;
+}
+
+/* --- Markdown column (single source of truth for article typography) --- */
+.sentry-docs-guide .documentation-body,
+.sentry-docs-guide .odoo-docs-body.documentation-body {
+    max-width: 48rem;
+    background: #ffffff !important;
+    color: #172b4d !important;
+    padding: 0.75rem 0 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    min-height: 0 !important;
     position: relative;
+    font-size: 1rem;
+    line-height: 1.65;
 }
 
-.documentation-body pre::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #017e84, #00b4b4, #017e84);
-    border-radius: 12px 12px 0 0;
+.sentry-docs-guide .documentation-body::before {
+    display: none !important;
 }
 
-.documentation-body pre code {
-    background-color: transparent;
-    color: #e2e8f0;
-    padding: 0;
-    font-size: 0.9rem;
-    font-family: 'Fira Code', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
-    line-height: 1.6;
-}
-
-.documentation-body table {
-    width: 100%;
-    margin-bottom: 20px;
-    border-collapse: collapse;
-}
-
-.documentation-body table th,
-.documentation-body table td {
-    padding: 10px;
-    border: 1px solid #dee2e6;
-    text-align: left;
-}
-
-.documentation-body table th {
-    background-color: #f8f9fa;
+.sentry-docs-guide .documentation-body h1 {
+    font-size: 1.75rem;
     font-weight: 600;
-    color: #495057;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    color: #172b4d !important;
+    margin: 0 0 1rem 0 !important;
+    padding: 0 0 0.75rem 0 !important;
+    border-bottom: 1px solid #dfe1e6 !important;
 }
 
-.documentation-body table tr:nth-child(even) {
-    background-color: #f8f9fa;
+.sentry-docs-guide .documentation-body h2 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: #172b4d !important;
+    margin: 1.75rem 0 0.75rem !important;
+    padding: 0 0 0.5rem !important;
+    border-bottom: 1px solid #ebecf0 !important;
 }
 
-.documentation-body blockquote {
-    border-left: 4px solid #007bff;
-    padding-left: 15px;
-    margin-left: 0;
-    color: #6c757d;
-    font-style: italic;
+.sentry-docs-guide .documentation-body h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #253858 !important;
+    margin: 1.5rem 0 0.5rem !important;
+    border: none !important;
+    padding: 0 !important;
 }
 
-.documentation-body img {
+.sentry-docs-guide .documentation-body h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #42526e !important;
+    margin: 1.25rem 0 0.5rem !important;
+}
+
+.sentry-docs-guide .documentation-body p {
+    margin: 0 0 1rem !important;
+    color: #42526e !important;
+    font-size: 1rem !important;
+    line-height: 1.65 !important;
+}
+
+.sentry-docs-guide .documentation-body ul,
+.sentry-docs-guide .documentation-body ol {
+    margin: 0 0 1rem !important;
+    padding-left: 1.5rem !important;
+    color: #42526e !important;
+}
+
+.sentry-docs-guide .documentation-body li {
+    margin-bottom: 0.35rem;
+    line-height: 1.55;
+}
+
+.sentry-docs-guide .documentation-body hr {
+    border: none;
+    border-top: 1px solid #dfe1e6;
+    margin: 1.5rem 0;
+}
+
+.sentry-docs-guide .documentation-body a {
+    color: #0c66e4 !important;
+    font-weight: 500;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+}
+
+.sentry-docs-guide .documentation-body a:hover {
+    color: #0055cc !important;
+    border-bottom-color: #0055cc;
+}
+
+.sentry-docs-guide .documentation-body strong {
+    color: #172b4d;
+    font-weight: 600;
+}
+
+/* Inline & block code — always light */
+.sentry-docs-guide .documentation-body code {
+    background: #f4f5f7 !important;
+    color: #0747a6 !important;
+    padding: 0.15rem 0.4rem !important;
+    border-radius: 4px !important;
+    font-size: 0.9em !important;
+    font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, monospace !important;
+    border: 1px solid #ebecf0 !important;
+}
+
+.sentry-docs-guide .documentation-body pre {
+    background: #f4f5f7 !important;
+    color: #172b4d !important;
+    border: 1px solid #dfe1e6 !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
+    margin: 1rem 0 !important;
+    overflow-x: auto !important;
+    box-shadow: none !important;
+    font-size: 0.875rem !important;
+}
+
+.sentry-docs-guide .documentation-body pre::before {
+    display: none !important;
+}
+
+.sentry-docs-guide .documentation-body pre code {
+    background: transparent !important;
+    color: inherit !important;
+    border: none !important;
+    padding: 0 !important;
+    font-size: inherit !important;
+}
+
+.sentry-docs-guide .documentation-body .codehilite {
+    background: #f4f5f7 !important;
+    border: 1px solid #dfe1e6 !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 1rem !important;
+    margin: 1rem 0 !important;
+}
+
+/* Tables — neutral, readable */
+.sentry-docs-guide .documentation-body table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 1rem 0 !important;
+    font-size: 0.9375rem !important;
+    border: 1px solid #dfe1e6 !important;
+    border-radius: 8px !important;
+    overflow: hidden;
+    box-shadow: none !important;
+}
+
+.sentry-docs-guide .documentation-body table th,
+.sentry-docs-guide .documentation-body table td {
+    padding: 0.65rem 0.85rem !important;
+    border: 1px solid #ebecf0 !important;
+    text-align: left !important;
+    vertical-align: top;
+}
+
+.sentry-docs-guide .documentation-body table th {
+    background: #f4f5f7 !important;
+    color: #172b4d !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+}
+
+.sentry-docs-guide .documentation-body table tr:nth-child(even) td {
+    background: #fafbfc !important;
+}
+
+/* Blockquotes */
+.sentry-docs-guide .documentation-body blockquote {
+    margin: 1rem 0 !important;
+    padding: 0.75rem 1rem !important;
+    border-left: 4px solid #017e84 !important;
+    background: #f4f5f7 !important;
+    color: #42526e !important;
+    border-radius: 0 6px 6px 0 !important;
+    font-style: normal !important;
+}
+
+.sentry-docs-guide .documentation-body blockquote::before {
+    display: none !important;
+}
+
+.sentry-docs-guide .documentation-body img {
     max-width: 100%;
     height: auto;
-    border-radius: 5px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    margin: 20px 0;
+    border-radius: 8px;
+    border: 1px solid #ebecf0;
+    margin: 1rem 0;
+    box-shadow: none;
 }
 
-/* Search Styles */
-.documentation-search {
-    margin-bottom: 24px;
+.sentry-docs-guide .documentation-body img:hover {
+    transform: none;
 }
 
-.odoo-docs-search .input-group {
-    margin-bottom: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
+/* Optional JS TOC panel */
+.sentry-docs-guide .documentation-toc.docs-toc-panel {
+    background: #f4f5f7;
+    border: 1px solid #dfe1e6;
+    border-radius: 8px;
+    margin: 0 0 1rem;
     overflow: hidden;
 }
 
-.odoo-docs-search .form-control {
-    border: 2px solid #e2e8f0;
-    border-right: none;
-    border-radius: 12px 0 0 12px;
-    padding: 12px 16px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
+.sentry-docs-guide .docs-toc-header {
+    background: #fff;
+    border-bottom: 1px solid #dfe1e6;
+    padding: 0.5rem 0.85rem;
 }
 
-.odoo-docs-search .form-control:focus {
-    border-color: #017e84;
-    box-shadow: 0 0 0 3px rgba(1, 126, 132, 0.1);
+.sentry-docs-guide .docs-toc-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #5e6c84;
 }
 
-.odoo-docs-search .btn {
-    border: 2px solid #017e84;
-    border-radius: 0 12px 12px 0;
-    background: linear-gradient(135deg, #017e84 0%, #00b4b4 100%);
-    color: white;
-    padding: 12px 20px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.odoo-docs-search .btn:hover {
-    background: linear-gradient(135deg, #00b4b4 0%, #017e84 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(1, 126, 132, 0.3);
-}
-
-.search-results {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    max-height: 500px;
+.sentry-docs-guide .docs-toc-body {
+    padding: 0.5rem 0.85rem 0.75rem;
+    background: #fff;
+    max-height: 260px;
     overflow-y: auto;
-    display: none;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    margin-top: 8px;
 }
 
-.search-results.show {
-    display: block;
+.sentry-docs-guide .documentation-toc .toc-list a {
+    color: #0c66e4 !important;
+    font-size: 0.9rem;
 }
 
-.search-result-item {
-    padding: 20px;
-    border-bottom: 1px solid #f1f5f9;
+/* --- Main column chrome (title area + actions) --- */
+.sentry-docs-guide .odoo-docs-content {
+    flex: 1;
+    min-width: 0;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem 1.75rem;
+    border: 1px solid #dfe1e6;
+    box-shadow: 0 1px 2px rgba(9, 30, 66, 0.08);
+    max-width: 920px;
+}
+
+.sentry-docs-guide .odoo-docs-breadcrumb {
+    background: #f4f5f7;
+    padding: 0.5rem 0.85rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    color: #5e6c84 !important;
+    border: 1px solid #ebecf0;
+}
+
+.sentry-docs-guide .odoo-docs-breadcrumb a {
+    color: #0c66e4 !important;
+}
+
+.sentry-docs-guide .odoo-docs-title {
+    color: #172b4d !important;
+    font-size: 1.5rem !important;
+    font-weight: 600 !important;
+    margin: 0 0 0.5rem !important;
+}
+
+.sentry-docs-guide .odoo-docs-page-kicker {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #017e84;
+    margin-bottom: 0.25rem;
+}
+
+.sentry-docs-guide .odoo-docs-description {
+    color: #5e6c84 !important;
+    font-size: 0.95rem !important;
+    margin-bottom: 1rem !important;
+    line-height: 1.5 !important;
+}
+
+/* Toolbar buttons: explicit so Odoo link/button reset does not break */
+.sentry-docs-guide .odoo-docs-content .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    border-radius: 6px;
+    padding: 0.35rem 0.75rem;
+    line-height: 1.5;
+    text-decoration: none !important;
+    border: 1px solid transparent;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
 }
 
-.search-result-item:hover {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    transform: translateX(4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+.sentry-docs-guide .odoo-docs-content .btn-outline-primary {
+    color: #0c66e4 !important;
+    border-color: #0c66e4 !important;
+    background: #fff !important;
 }
 
-.search-result-item:last-child {
+.sentry-docs-guide .odoo-docs-content .btn-outline-primary:hover {
+    background: #f4f5f7 !important;
+    color: #0055cc !important;
+}
+
+.sentry-docs-guide .odoo-docs-content .btn-outline-secondary {
+    color: #42526e !important;
+    border-color: #c1c7d0 !important;
+    background: #fff !important;
+}
+
+.sentry-docs-guide .odoo-docs-content .btn-outline-secondary:hover {
+    background: #f4f5f7 !important;
+}
+
+.sentry-docs-guide .odoo-docs-content .btn-outline-info {
+    color: #0c66e4 !important;
+    border-color: #7a869a !important;
+    background: #fff !important;
+}
+
+.sentry-docs-guide .odoo-docs-content .btn-outline-info:hover {
+    background: #f4f5f7 !important;
+}
+
+/* --- Sidebar --- */
+.sentry-docs-guide .odoo-docs-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1rem 0.85rem;
+    height: fit-content;
+    position: sticky;
+    top: 1rem;
+    border: 1px solid #dfe1e6;
+    box-shadow: 0 1px 2px rgba(9, 30, 66, 0.06);
+}
+
+.sentry-docs-guide .odoo-docs-sidebar .section {
+    margin-bottom: 1.15rem;
+}
+
+.sentry-docs-guide .odoo-docs-sidebar .section:last-child {
+    margin-bottom: 0;
+}
+
+.sentry-docs-guide .odoo-docs-sidebar h3 {
+    color: #017e84;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin: 0 0 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.sentry-docs-guide .odoo-docs-sidebar .section-title {
+    color: #5e6c84;
+    font-weight: 700;
+    font-size: 0.7rem;
+    margin: 1rem 0 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sentry-docs-guide .odoo-docs-sidebar .section-description {
+    color: #7a869a;
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.35;
+}
+
+.sentry-docs-guide .odoo-docs-sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sentry-docs-guide .odoo-docs-sidebar a {
+    color: #253858 !important;
+    text-decoration: none !important;
+    font-size: 0.875rem;
+    padding: 0.4rem 0.5rem;
+    border-radius: 6px;
+    display: block;
+    line-height: 1.35;
+}
+
+.sentry-docs-guide .odoo-docs-sidebar a:hover {
+    background: #f4f5f7;
+    color: #0c66e4 !important;
+}
+
+.sentry-docs-guide .odoo-docs-sidebar a.active {
+    background: #017e84 !important;
+    color: #ffffff !important;
+}
+
+/* Search row */
+.sentry-docs-guide .odoo-docs-search {
+    margin-bottom: 1rem;
+}
+
+.sentry-docs-guide .odoo-docs-search .input-group {
+    flex-wrap: nowrap;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #dfe1e6;
+    background: #fff;
+}
+
+.sentry-docs-guide .odoo-docs-search .input-group-text {
+    background: #f4f5f7 !important;
+    border: none !important;
+    color: #5e6c84 !important;
+    padding: 0.5rem 0.65rem;
+}
+
+.sentry-docs-guide .odoo-docs-search .form-control {
+    border: none !important;
+    box-shadow: none !important;
+    font-size: 0.875rem !important;
+    padding: 0.5rem 0.65rem !important;
+    color: #172b4d !important;
+    background: #fff !important;
+}
+
+.sentry-docs-guide .odoo-docs-search .form-control::placeholder {
+    color: #7a869a;
+}
+
+.sentry-docs-guide .odoo-docs-search .input-group-append .btn {
+    border-radius: 0 !important;
+    border: none !important;
+    padding: 0.5rem 0.85rem !important;
+    font-size: 0.8125rem !important;
+    font-weight: 600;
+    background: #017e84 !important;
+    color: #fff !important;
+}
+
+.sentry-docs-guide .odoo-docs-search .input-group-append .btn:hover {
+    background: #015c61 !important;
+    color: #fff !important;
+}
+
+.sentry-docs-guide #searchResults.search-results {
+    margin-top: 0.5rem;
+    max-height: 280px;
+    overflow-y: auto;
+    border: 1px solid #dfe1e6;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(9, 30, 66, 0.12);
+}
+
+.sentry-docs-guide .search-result-item {
+    padding: 0.65rem 0.85rem !important;
+    border-bottom: 1px solid #ebecf0;
+    cursor: pointer;
+}
+
+.sentry-docs-guide .search-result-item:last-child {
     border-bottom: none;
 }
 
-.search-result-title {
-    font-weight: 700;
-    color: #017e84;
-    margin-bottom: 8px;
-    font-size: 1.1rem;
-    transition: color 0.2s ease;
+.sentry-docs-guide .search-result-item:hover {
+    background: #f4f5f7 !important;
 }
 
-.search-result-item:hover .search-result-title {
-    color: #00b4b4;
-}
-
-.search-result-context {
-    color: #64748b;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    margin-bottom: 8px;
-}
-
-.search-result-section {
-    font-size: 0.75rem;
-    color: #94a3b8;
-    text-transform: uppercase;
+.sentry-docs-guide .search-result-title {
+    color: #0c66e4 !important;
     font-weight: 600;
-    letter-spacing: 0.05em;
-}
-
-/* Footer Styles */
-.documentation-footer {
-    padding: 20px 0;
     font-size: 0.9rem;
 }
 
-/* Alert Styles */
-.documentation-body .alert {
-    padding: 15px;
-    border-radius: 5px;
-    margin-bottom: 20px;
+.sentry-docs-guide .search-result-context {
+    color: #5e6c84 !important;
+    font-size: 0.8rem;
 }
 
-.documentation-body .alert-warning {
-    background-color: #fff3cd;
-    border: 1px solid #ffeaa7;
-    color: #856404;
-}
-
-.documentation-body .alert-danger {
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    color: #721c24;
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .documentation-content {
-        padding: 24px 32px;
-    }
-
-    .documentation-body {
-        padding: 32px;
-    }
-}
-
-@media (max-width: 768px) {
-    .documentation-sidebar {
-        position: relative;
-        height: auto;
-        border-right: none;
-        border-bottom: 1px solid #e2e8f0;
-        padding: 20px 12px;
-    }
-
-    .documentation-content {
-        padding: 20px 16px;
-    }
-
-    .documentation-body {
-        padding: 24px;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    }
-
-    .documentation-body h1 {
-        font-size: 2rem;
-    }
-
-    .documentation-body h2 {
-        font-size: 1.5rem;
-    }
-
-    .documentation-body h3 {
-        font-size: 1.25rem;
-    }
-
-    .documentation-body pre {
-        padding: 16px;
-        font-size: 0.85rem;
-    }
-
-    .odoo-docs-search .form-control {
-        font-size: 16px; /* Prevents zoom on iOS */
-    }
-}
-
-@media (max-width: 480px) {
-    .documentation-content {
-        padding: 16px 12px;
-    }
-
-    .documentation-body {
-        padding: 20px;
-    }
-
-    .documentation-body h1 {
-        font-size: 1.75rem;
-    }
-
-    .documentation-body h2 {
-        font-size: 1.25rem;
-    }
-}
-
-/* Modern Enhancements */
-.documentation-body table {
-    width: 100%;
-    margin: 24px 0;
-    border-collapse: collapse;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e2e8f0;
-}
-
-.documentation-body table th,
-.documentation-body table td {
-    padding: 16px 20px;
-    border: 1px solid #e2e8f0;
+/* Footer */
+.sentry-docs-guide .odoo-docs-footer {
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #dfe1e6;
     text-align: left;
-    font-size: 0.95rem;
+    color: #5e6c84 !important;
 }
 
-.documentation-body table th {
-    background: linear-gradient(135deg, #017e84 0%, #00b4b4 100%);
-    color: white;
-    font-weight: 700;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+.sentry-docs-guide .odoo-docs-footer a {
+    color: #0c66e4 !important;
 }
 
-.documentation-body table tr:nth-child(even) {
-    background-color: #f8fafc;
+/* Floating buttons */
+.sentry-docs-guide ~ .back-to-guardpro,
+body .back-to-guardpro {
+    z-index: 1001;
 }
 
-.documentation-body table tr:hover {
-    background-color: #f1f5f9;
-    transition: background-color 0.2s ease;
+.back-to-guardpro {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: #017e84;
+    color: #fff !important;
+    padding: 0.85rem 1rem;
+    border-radius: 999px;
+    text-decoration: none !important;
+    box-shadow: 0 2px 8px rgba(9, 30, 66, 0.2);
+    font-size: 0.875rem;
+    font-weight: 500;
 }
 
-.documentation-body blockquote {
-    border-left: 4px solid #017e84;
-    padding-left: 24px;
-    margin: 24px 0;
-    color: #4a5568;
-    font-style: italic;
-    background: #f8fafc;
-    padding: 20px 24px;
-    border-radius: 0 8px 8px 0;
-    position: relative;
+.back-to-guardpro:hover {
+    background: #015c61;
+    color: #fff !important;
 }
 
-.documentation-body blockquote::before {
-    content: '"';
-    position: absolute;
-    top: -10px;
-    left: 12px;
-    font-size: 4rem;
-    color: #017e84;
-    opacity: 0.1;
-    font-family: Georgia, serif;
-}
-
-.documentation-body img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-    margin: 24px 0;
-    transition: transform 0.3s ease;
-}
-
-.documentation-body img:hover {
-    transform: scale(1.02);
-}
-
-/* Animation Classes */
+/* JS helpers */
 .fade-in {
-    animation: fadeIn 0.5s ease-in-out;
+    animation: sentryDocFade 0.25s ease-out;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+@keyframes sentryDocFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-.slide-in-left {
-    animation: slideInLeft 0.3s ease-out;
-}
-
-@keyframes slideInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-/* Loading States */
-.loading {
-    position: relative;
-    pointer-events: none;
-}
-
-.loading::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 20px;
-    height: 20px;
-    margin: -10px 0 0 -10px;
-    border: 2px solid #e2e8f0;
-    border-top: 2px solid #017e84;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-    .documentation-sidebar {
-        background: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);
-    }
-
-    .sidebar-heading {
-        color: #e2e8f0;
-        border-bottom-color: #017e84;
-    }
-
-    .sidebar-section-title {
-        color: #a0aec0;
-    }
-
-    .documentation-sidebar .nav-link {
-        color: #a0aec0;
-    }
-
-    .documentation-sidebar .nav-link:hover,
-    .documentation-sidebar .nav-link.active {
-        background: linear-gradient(135deg, #017e84 0%, #00b4b4 100%);
-        color: white;
-    }
-
-    .documentation-body {
-        background: #2d3748;
-        color: #e2e8f0;
-        border-color: #4a5568;
-    }
-
-    .documentation-body h1,
-    .documentation-body h2,
-    .documentation-body h3,
-    .documentation-body h4 {
-        color: #e2e8f0;
-    }
-
-    .documentation-body p {
-        color: #a0aec0;
-    }
-}
-
-/* Print Styles */
+/* Print */
 @media print {
-    .documentation-sidebar {
-        display: none;
+    .sentry-docs-guide .odoo-docs-sidebar,
+    .back-to-guardpro,
+    #scrollToTop {
+        display: none !important;
     }
-
-    .documentation-content {
-        max-width: 100%;
-        padding: 0;
-    }
-
-    .documentation-search,
-    .documentation-footer {
-        display: none;
-    }
-
-    .documentation-body {
+    .sentry-docs-guide .odoo-docs-content {
         box-shadow: none;
-        border: 1px solid #000;
-    }
-
-    .documentation-body pre {
-        background: #f0f0f0 !important;
-        color: #000 !important;
-        border: 1px solid #000;
-    }
-
-    .documentation-body pre code {
-        color: #000 !important;
+        border: none;
+        max-width: 100%;
     }
 }
-

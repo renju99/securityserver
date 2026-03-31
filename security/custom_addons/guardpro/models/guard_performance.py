@@ -802,14 +802,10 @@ class GuardPerformanceReview(models.Model):
     def _send_review_notification(self):
         """Send review notification to guard."""
         self.ensure_one()
-        
-        if self.guard_id.employee_id.user_id:
-            template = self.env.ref(
-                'guardpro.email_template_performance_review',
-                raise_if_not_found=False
-            )
-            if template:
-                template.send_mail(self.id, force_send=True)
+        _logger.info(
+            'Email notifications are disabled: skipped performance review email for %s',
+            self.id
+        )
 
     @api.model
     def _cron_calculate_monthly_performance(self):

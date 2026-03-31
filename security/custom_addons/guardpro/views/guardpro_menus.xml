@@ -7,18 +7,19 @@
 
         <!-- ROOT MENU -->
         <menuitem id="menu_guardpro_root"
-                  name="Documentation"
+                  name="GuardPro"
                   sequence="10"
-                  web_icon="website,static/description/icon.png"/>
+                  web_icon="website,static/description/icon.png"
+                  groups="base.group_no_one"/>
 
         <!-- ================================================================
              CCTV MONITORING - Live Camera Viewing
              ================================================================ -->
         <menuitem id="menu_guardpro_cctv"
                   name="CCTV Monitoring"
+                  parent="menu_guardpro_configuration"
                   sequence="5"
                   action="guardpro.action_cctv_monitoring"
-                  web_icon="mail,static/description/icon.png"
                   groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_cctv_manage_cameras"
@@ -35,15 +36,21 @@
                   name="Dashboard"
                   sequence="10"
                   action="action_guardpro_analytics_dashboard_client"
-                  web_icon="board,static/description/icon.png"
                   groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_guardpro_documentation"
-                  name="Documentation"
-                  parent="menu_guardpro_root"
+                  name="User Documentation"
+                  parent="menu_guardpro_training_knowledge"
                   action="guardpro.action_guardpro_documentation"
                   sequence="15"
                   groups="group_guardpro_admin"/>
+
+        <menuitem id="menu_client_contracts_documents"
+                  name="Client Contracts"
+                  parent="menu_guardpro_training_knowledge"
+                  action="action_client_site"
+                  sequence="10"
+                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <!-- Command Center menu removed - replaced by Analytics Dashboard -->
         <!--
@@ -73,7 +80,7 @@
                   name="Live Guard Map"
                   parent="menu_guardpro_dashboard"
                   action="action_guards_map"
-                  sequence="20"
+                  sequence="10"
                   groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <!-- ================================================================
@@ -81,13 +88,18 @@
              ================================================================ -->
         <menuitem id="menu_guardpro_operations"
                   name="Operations"
-                  sequence="20"
-                  web_icon="mrp,static/description/icon.png"/>
+                  sequence="20"/>
+
+        <!-- 3. TIME & ATTENDANCE -->
+        <menuitem id="menu_guardpro_time_attendance"
+                  name="Time &amp; Attendance"
+                  sequence="25"
+                  web_icon="hr_holidays,static/description/icon.png"/>
 
         <!-- 2.1 Shifts & Scheduling -->
         <menuitem id="menu_operations_scheduling"
                   name="Shifts &amp; Scheduling"
-                  parent="menu_guardpro_operations"
+                  parent="menu_guardpro_time_attendance"
                   sequence="10"/>
 
         <menuitem id="menu_guard_shift_legacy"
@@ -131,7 +143,7 @@
         <!-- 2.2 Attendance & Time Tracking -->
         <menuitem id="menu_operations_attendance"
                   name="Time &amp; Attendance"
-                  parent="menu_guardpro_operations"
+                  parent="menu_guardpro_time_attendance"
                   sequence="20"/>
 
         <menuitem id="menu_guard_attendance_legacy"
@@ -185,7 +197,7 @@
         <menuitem id="menu_operations_tours"
                   name="Tours &amp; Patrols"
                   parent="menu_guardpro_operations"
-                  sequence="40"/>
+                  sequence="10"/>
 
         <menuitem id="menu_security_tour"
                   name="Security Tours"
@@ -212,12 +224,11 @@
              3. SITE MANAGEMENT - Site-Level Operations
              ================================================================ -->
         <menuitem id="menu_guardpro_site_management"
-                  name="Site Management"
-                  sequence="30"
-                  web_icon="stock,static/description/icon.png"/>
+                  name="Visitor Management"
+                  sequence="30"/>
 
         <menuitem id="menu_visitor_management"
-                  name="Visitors &amp; Contractors"
+                  name="Visitor Summary"
                   parent="menu_guardpro_site_management"
                   action="action_visitor_management"
                   sequence="10"
@@ -225,37 +236,44 @@
 
         <menuitem id="menu_visitor_watchlist"
                   name="Watchlist"
-                  parent="menu_guardpro_site_management"
+                  parent="menu_guardpro_operations"
                   action="action_visitor_watchlist"
-                  sequence="15"
+                  sequence="85"
                   groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+        <menuitem id="menu_visitor_hosts"
+                  name="Host Information"
+                  parent="menu_guardpro_site_management"
+                  action="action_visitor_hosts"
+                  sequence="18"
+                  groups="group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_package_management"
                   name="Package &amp; Deliveries"
-                  parent="menu_guardpro_site_management"
+                  parent="menu_guardpro_operations"
                   action="action_package_management"
-                  sequence="20"
+                  sequence="80"
                   groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_lost_found"
                   name="Lost &amp; Found"
-                  parent="menu_guardpro_site_management"
+                  parent="menu_guardpro_operations"
                   action="action_lost_found_item"
-                  sequence="30"
+                  sequence="40"
                   groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_key_management"
                   name="Key Management"
-                  parent="menu_guardpro_site_management"
+                  parent="menu_guardpro_operations"
                   action="action_key_register"
-                  sequence="40"
+                  sequence="50"
                   groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
 
         <menuitem id="menu_residents_tenants_root"
                   name="Residents &amp; Tenants"
-                  parent="menu_guardpro_site_management"
-                  sequence="60"/>
+                  parent="menu_guardpro_operations"
+                  sequence="90"/>
 
         <menuitem id="tenant_resident_menu"
                   name="Residents/Tenants"
@@ -275,9 +293,9 @@
              4. INCIDENTS & EMERGENCY - Critical Events
              ================================================================ -->
         <menuitem id="menu_guardpro_incidents_emergency"
-                  name="Incidents &amp; Emergency"
-                  sequence="40"
-                  web_icon="repair,static/description/icon.png"/>
+                  name="Incidents"
+                  parent="menu_guardpro_operations"
+                  sequence="20"/>
 
         <!-- 4.1 Incident Management -->
         <menuitem id="menu_incidents_submenu"
@@ -368,8 +386,8 @@
              ================================================================ -->
         <menuitem id="menu_guardpro_compliance"
                   name="Compliance &amp; Quality"
-                  sequence="50"
-                  web_icon="survey,static/description/icon.png"/>
+                  parent="menu_guardpro_operations"
+                  sequence="70"/>
 
         <!-- 5.1 Audits & Compliance -->
         <menuitem id="menu_compliance_submenu"
@@ -431,8 +449,8 @@
              ================================================================ -->
         <menuitem id="menu_guardpro_resources"
                   name="Resources"
+                  parent="menu_guardpro_configuration"
                   sequence="60"
-                  web_icon="hr,static/description/icon.png"
                   groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_guard_profile"
@@ -602,15 +620,14 @@
              7. TRAINING & KNOWLEDGE - Learning & Documentation
              ================================================================ -->
         <menuitem id="menu_guardpro_training_knowledge"
-                  name="Training &amp; Knowledge"
-                  sequence="70"
-                  web_icon="website_slides,static/description/icon.png"/>
+                  name="Documents"
+                  sequence="70"/>
 
         <!-- 7.1 Training (eLearning) -->
         <menuitem id="menu_training_submenu"
                   name="Training Management"
-                  parent="menu_guardpro_training_knowledge"
-                  sequence="10"/>
+                  parent="menu_guardpro_operations"
+                  sequence="95"/>
 
         <menuitem id="menu_guard_training_elearning"
                   name="eLearning Courses"
@@ -642,9 +659,9 @@
 
         <!-- 7.2 Knowledge Base & SOPs -->
         <menuitem id="menu_knowledge_submenu"
-                  name="Knowledge &amp; SOPs"
+                  name="SOPs"
                   parent="menu_guardpro_training_knowledge"
-                  sequence="20"/>
+                  sequence="30"/>
 
         <menuitem id="menu_knowledge_article"
                   name="Knowledge Base"
@@ -671,9 +688,8 @@
              8. TRACKING & MONITORING - Location & Activity Tracking
              ================================================================ -->
         <menuitem id="menu_guardpro_tracking"
-                  name="Tracking &amp; Monitoring"
-                  sequence="80"
-                  web_icon="fleet,static/description/icon.png"/>
+                  name="Command Centre"
+                  sequence="80"/>
 
         <menuitem id="menu_guard_location_history"
                   name="Location History"
@@ -702,8 +718,8 @@
              ================================================================ -->
         <menuitem id="menu_guardpro_feedback"
                   name="Feedback &amp; Communication"
-                  sequence="90"
-                  web_icon="mail,static/description/icon.png"/>
+                  parent="menu_guardpro_operations"
+                  sequence="90"/>
 
         <menuitem id="menu_client_feedback"
                   name="Client Feedback"
@@ -808,9 +824,8 @@
              10. CONFIGURATION - Settings & Administration
              ================================================================ -->
         <menuitem id="menu_guardpro_configuration"
-                  name="Configuration"
+                  name="Settings"
                   sequence="100"
-                  web_icon="project,static/description/icon.png"
                   groups="group_guardpro_manager,group_guardpro_admin"/>
 
         <!-- 11.1 Settings -->
@@ -964,6 +979,26 @@
 
         <!-- GuardPro Dashboard menu - exclude reception users (visible to manager, supervisor, client users, admin) -->
         <record id="menu_guardpro_dashboard" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6, 0, [ref('group_guardpro_client_user'), ref('group_guardpro_supervisor'), ref('group_guardpro_manager'), ref('group_guardpro_admin')])]"/>
+        </record>
+
+        <!-- Place Live Guard Map under Command Centre -->
+        <record id="menu_guards_map" model="ir.ui.menu">
+            <field name="parent_id" ref="menu_guardpro_tracking"/>
+        </record>
+
+        <!-- Open Location History when clicking Command Centre -->
+        <record id="menu_guardpro_tracking" model="ir.ui.menu">
+            <field name="action" eval="'ir.actions.act_window,%d' % ref('action_guard_location_history')"/>
+        </record>
+
+        <!-- Ensure requested labels and visibility persist -->
+        <record id="menu_visitor_hosts" model="ir.ui.menu">
+            <field name="name">Host Information</field>
+        </record>
+
+        <record id="menu_guardpro_documentation" model="ir.ui.menu">
+            <field name="name">User Documentation</field>
             <field name="groups_id" eval="[(6, 0, [ref('group_guardpro_client_user'), ref('group_guardpro_supervisor'), ref('group_guardpro_manager'), ref('group_guardpro_admin')])]"/>
         </record>
 

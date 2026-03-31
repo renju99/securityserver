@@ -26,7 +26,8 @@ class ShiftTemplate(models.Model):
     site_id = fields.Many2one(
         'client.site',
         string='Site',
-        required=True
+        required=True,
+        ondelete='restrict',
     )
     
     shift_type = fields.Selection([

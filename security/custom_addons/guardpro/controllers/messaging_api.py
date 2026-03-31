@@ -373,14 +373,15 @@ class GuardProMessagingAPI(http.Controller):
             if not guard:
                 return {'success': False, 'error': 'Guard profile not found'}
             
-            # Get channels where guard is a member or public channels
+            # Get channels where guard is a member or public channels, then apply site scope
             Channel = request.env['guard.message.channel']
             channels = Channel.search([
                 '|',
                 ('member_ids', 'in', [guard.id]),
                 ('is_public', '=', True),
                 ('is_archived', '=', False)
-            ], order='last_message_time desc', limit=limit)
+            ], order='last_message_time desc', limit=max(limit * 5, 50))
+            channels = channels.filtered(lambda c: c.is_accessible_by_guard(guard))[:limit]
             
             channels_list = []
             for channel in channels:
@@ -389,6 +390,8 @@ class GuardProMessagingAPI(http.Controller):
                     'name': channel.name,
                     'channel_type': channel.channel_type,
                     'description': channel.description,
+                    'site_id': channel.site_id.id if channel.site_id else None,
+                    'all_sites_access': bool(channel.all_sites_access),
                     'message_count': channel.message_count,
                     'active_member_count': channel.active_member_count,
                     'last_message': channel.last_message,
@@ -425,9 +428,8 @@ class GuardProMessagingAPI(http.Controller):
             if not guard:
                 return {'success': False, 'error': 'Guard profile not found'}
             
-            # Check if guard is member or channel is public
-            if not channel.is_public and guard.id not in channel.member_ids.ids:
-                return {'success': False, 'error': 'Access denied. You are not a member of this channel.'}
+            if not channel.is_accessible_by_guard(guard):
+                return {'success': False, 'error': 'Access denied. You cannot access this channel for your site(s).'}
             
             # Get messages
             messages = channel.message_ids.sorted('created_at', reverse=True)[offset:offset+limit]
@@ -484,6 +486,16 @@ class GuardProMessagingAPI(http.Controller):
             receiver_guard = request.env['guard.profile'].browse(guard_id)
             if not receiver_guard.exists() or not receiver_guard.user_id:
                 return {'success': False, 'error': 'Receiver guard not found or has no user account'}
+
+            # Multi-site: only message guards who share at least one assigned site
+            su = sender
+            ru = receiver_guard.user_id
+            if su.site_ids and ru.site_ids:
+                if not (set(su.site_ids.ids) & set(ru.site_ids.ids)):
+                    return {
+                        'success': False,
+                        'error': 'You can only message guards assigned to the same site(s) as you.',
+                    }
             
             # Get or create conversation
             Conversation = request.env['guard.conversation']
@@ -537,9 +549,8 @@ class GuardProMessagingAPI(http.Controller):
             if not channel.exists():
                 return {'success': False, 'error': 'Channel not found'}
             
-            # Check access
-            if not channel.is_public and sender_guard.id not in channel.member_ids.ids:
-                return {'success': False, 'error': 'Access denied. You are not a member of this channel.'}
+            if not channel.is_accessible_by_guard(sender_guard):
+                return {'success': False, 'error': 'Access denied. You cannot post to this channel for your site(s).'}
             
             # Check if guards can post
             if not channel.allow_guards_to_post:
@@ -627,11 +638,19 @@ class GuardProMessagingAPI(http.Controller):
                 ('user_id', '=', request.env.user.id)
             ], limit=1)
             
-            # Get all active guards (excluding current user)
-            guards = request.env['guard.profile'].search([
+            # Get active guards (excluding current user), scoped by shared site assignment
+            domain = [
                 ('status', '=', 'active'),
                 ('id', '!=', current_guard.id if current_guard else False)
-            ])
+            ]
+            guards = request.env['guard.profile'].search(domain)
+            user = request.env.user
+            if user.site_ids:
+                allowed = set(user.site_ids.ids)
+                guards = guards.filtered(
+                    lambda g: g.user_id and g.user_id.site_ids
+                    and bool(allowed & set(g.user_id.site_ids.ids))
+                )
             
             guards_list = []
             for guard in guards:

@@ -11,6 +11,7 @@ import base64
 from odoo import http, fields
 from odoo.http import request
 from datetime import datetime, timedelta
+from ..common.video_optimizer import VideoOptimizer
 
 _logger = logging.getLogger(__name__)
 
@@ -47,6 +48,67 @@ class GuardProPWASimple(http.Controller):
                 ], limit=1)
         
         return guard
+
+    def _normalize_signature_data(self, value):
+        """Normalize data URL/base64 signature input for Binary fields."""
+        if not value:
+            return False
+        if isinstance(value, bytes):
+            value = value.decode('utf-8', errors='ignore')
+        value = value.strip()
+        if not value:
+            return False
+        if ',' in value and value.startswith('data:image'):
+            return value.split(',', 1)[1]
+        return value
+
+    def _selection_from_yes_no(self, value):
+        """Convert common yes/no form values to selection keys."""
+        if not value:
+            return False
+        val = str(value).strip().lower()
+        if val in ('yes', 'y', 'true', '1', 'on'):
+            return 'yes'
+        if val in ('no', 'n', 'false', '0', 'off'):
+            return 'no'
+        return False
+
+    def _is_video_upload(self, uploaded_file):
+        """Detect if uploaded file is a video based on mime or extension."""
+        content_type = (uploaded_file.content_type or '').lower()
+        if content_type.startswith('video/'):
+            return True
+        filename = (uploaded_file.filename or '').lower()
+        return filename.endswith(('.mp4', '.mov', '.avi', '.mkv', '.webm', '.m4v', '.3gp'))
+
+    def _create_incident_media_attachment(self, incident, uploaded_file):
+        """Create a media attachment for incident with video compression."""
+        file_content = uploaded_file.read()
+        is_video = self._is_video_upload(uploaded_file)
+        mimetype = (uploaded_file.content_type or '').lower()
+
+        if is_video:
+            datas, compressed = VideoOptimizer.optimize_video(
+                file_content,
+                filename=uploaded_file.filename,
+            )
+            if compressed:
+                mimetype = 'video/mp4'
+            elif not mimetype:
+                mimetype = 'video/mp4'
+        else:
+            datas = base64.b64encode(file_content)
+            if not mimetype:
+                mimetype = 'image/jpeg'
+
+        return request.env['ir.attachment'].sudo().create({
+            'name': uploaded_file.filename,
+            'type': 'binary',
+            'datas': datas,
+            'res_model': 'incident.report',
+            'res_id': incident.id,
+            'mimetype': mimetype,
+        }), is_video
 
     @http.route('/guardpro/mobile', type='http', auth='user', website=True)
     def mobile_dashboard(self, **kwargs):
@@ -693,6 +755,68 @@ class GuardProPWASimple(http.Controller):
                 })
             except (ValueError, TypeError):
                 pass
+
+        # Category-specific fields (statement/found item/return form)
+        category_specific_fields = {
+            'statement_person_name': kwargs.get('statement_person_name'),
+            'statement_person_mobile': kwargs.get('statement_person_mobile'),
+            'statement_person_email': kwargs.get('statement_person_email'),
+            'statement_person_nationality': kwargs.get('statement_person_nationality'),
+            'statement_person_gender': kwargs.get('statement_person_gender'),
+            'statement_person_eid_number': kwargs.get('statement_person_eid_number'),
+            'statement_person_company': kwargs.get('statement_person_company'),
+            'statement_person_department': kwargs.get('statement_person_department'),
+            'statement_person_designation': kwargs.get('statement_person_designation'),
+            'statement_text': kwargs.get('statement_text'),
+            'found_item_time': kwargs.get('found_item_time'),
+            'found_person_name': kwargs.get('found_person_name'),
+            'found_person_home_address': kwargs.get('found_person_home_address'),
+            'found_person_mobile': kwargs.get('found_person_mobile'),
+            'found_person_email': kwargs.get('found_person_email'),
+            'found_item_category': kwargs.get('found_item_category'),
+            'found_item_description': kwargs.get('found_item_description'),
+            'found_item_security_name': kwargs.get('found_item_security_name'),
+            'found_item_security_designation': kwargs.get('found_item_security_designation'),
+            'return_recipient_name': kwargs.get('return_recipient_name'),
+            'return_recipient_home_address': kwargs.get('return_recipient_home_address'),
+            'return_recipient_mobile': kwargs.get('return_recipient_mobile'),
+            'return_recipient_email': kwargs.get('return_recipient_email'),
+            'return_item_description': kwargs.get('return_item_description'),
+            'return_item_category': kwargs.get('return_item_category'),
+            'return_security_name': kwargs.get('return_security_name'),
+            'return_security_designation': kwargs.get('return_security_designation'),
+        }
+        for field_name, field_value in category_specific_fields.items():
+            if field_value:
+                vals[field_name] = field_value
+
+        # Date fields
+        if kwargs.get('statement_person_eid_expiry'):
+            vals['statement_person_eid_expiry'] = kwargs.get('statement_person_eid_expiry')
+        if kwargs.get('found_item_date'):
+            vals['found_item_date'] = kwargs.get('found_item_date')
+
+        # Selection fields
+        if kwargs.get('found_item_inspected'):
+            vals['found_item_inspected'] = self._selection_from_yes_no(kwargs.get('found_item_inspected'))
+        if kwargs.get('found_item_supervisor_informed'):
+            vals['found_item_supervisor_informed'] = self._selection_from_yes_no(kwargs.get('found_item_supervisor_informed'))
+        if kwargs.get('found_item_handover'):
+            vals['found_item_handover'] = self._selection_from_yes_no(kwargs.get('found_item_handover'))
+
+        # Signature fields
+        statement_person_sig = self._normalize_signature_data(kwargs.get('statement_person_signature'))
+        if statement_person_sig:
+            vals['statement_person_signature'] = statement_person_sig
+        security_officer_sig = self._normalize_signature_data(kwargs.get('security_officer_signature'))
+        if security_officer_sig:
+            vals['security_officer_signature'] = security_officer_sig
+        found_person_sig = self._normalize_signature_data(kwargs.get('found_item_person_signature'))
+        if found_person_sig:
+            vals['found_item_person_signature'] = found_person_sig
+        return_recipient_sig = self._normalize_signature_data(kwargs.get('return_recipient_signature'))
+        if return_recipient_sig:
+            vals['return_recipient_signature'] = return_recipient_sig
         
         try:
             # Create the incident report
@@ -700,36 +824,33 @@ class GuardProPWASimple(http.Controller):
             
             # Handle image uploads
             uploaded_files = request.httprequest.files.getlist('incident_images')
+            uploaded_files += request.httprequest.files.getlist('incident_videos')
             if uploaded_files:
-                attachment_ids = []
+                photo_attachment_ids = []
+                video_attachment_ids = []
                 for uploaded_file in uploaded_files:
                     if uploaded_file and uploaded_file.filename:
                         try:
-                            # Read file content
-                            file_content = uploaded_file.read()
-                            file_base64 = base64.b64encode(file_content)
-                            
-                            # Create attachment
-                            attachment = request.env['ir.attachment'].sudo().create({
-                                'name': uploaded_file.filename,
-                                'type': 'binary',
-                                'datas': file_base64,
-                                'res_model': 'incident.report',
-                                'res_id': incident.id,
-                                'mimetype': uploaded_file.content_type or 'image/jpeg',
-                            })
-                            attachment_ids.append(attachment.id)
+                            attachment, is_video = self._create_incident_media_attachment(
+                                incident, uploaded_file
+                            )
+                            if is_video:
+                                video_attachment_ids.append(attachment.id)
+                            else:
+                                photo_attachment_ids.append(attachment.id)
                             _logger.info("Created attachment %s for incident %s", 
                                        uploaded_file.filename, incident.name)
                         except Exception as e:
                             _logger.error("Error uploading file %s: %s", 
                                         uploaded_file.filename, str(e))
                 
-                # Link attachments to incident photos
-                if attachment_ids:
-                    incident.sudo().write({
-                        'photo_ids': [(6, 0, attachment_ids)]
-                    })
+                update_vals = {}
+                if photo_attachment_ids:
+                    update_vals['photo_ids'] = [(6, 0, photo_attachment_ids)]
+                if video_attachment_ids:
+                    update_vals['video_ids'] = [(6, 0, video_attachment_ids)]
+                if update_vals:
+                    incident.sudo().write(update_vals)
             
             return request.redirect('/guardpro/mobile/incidents?success=incident_created')
         except Exception as e:
@@ -876,6 +997,70 @@ class GuardProPWASimple(http.Controller):
             # Status update
             if 'status' in kwargs:
                 vals['status'] = kwargs['status']
+
+            # Category-specific fields
+            category_specific_fields = [
+                'statement_person_name',
+                'statement_person_mobile',
+                'statement_person_email',
+                'statement_person_nationality',
+                'statement_person_gender',
+                'statement_person_eid_number',
+                'statement_person_company',
+                'statement_person_department',
+                'statement_person_designation',
+                'statement_text',
+                'found_item_time',
+                'found_person_name',
+                'found_person_home_address',
+                'found_person_mobile',
+                'found_person_email',
+                'found_item_category',
+                'found_item_description',
+                'found_item_security_name',
+                'found_item_security_designation',
+                'return_recipient_name',
+                'return_recipient_home_address',
+                'return_recipient_mobile',
+                'return_recipient_email',
+                'return_item_description',
+                'return_item_category',
+                'return_security_name',
+                'return_security_designation',
+            ]
+            for field_name in category_specific_fields:
+                if field_name in kwargs:
+                    vals[field_name] = kwargs.get(field_name)
+
+            if 'statement_person_eid_expiry' in kwargs and kwargs.get('statement_person_eid_expiry'):
+                vals['statement_person_eid_expiry'] = kwargs.get('statement_person_eid_expiry')
+            if 'found_item_date' in kwargs and kwargs.get('found_item_date'):
+                vals['found_item_date'] = kwargs.get('found_item_date')
+
+            if 'found_item_inspected' in kwargs:
+                vals['found_item_inspected'] = self._selection_from_yes_no(kwargs.get('found_item_inspected'))
+            if 'found_item_supervisor_informed' in kwargs:
+                vals['found_item_supervisor_informed'] = self._selection_from_yes_no(kwargs.get('found_item_supervisor_informed'))
+            if 'found_item_handover' in kwargs:
+                vals['found_item_handover'] = self._selection_from_yes_no(kwargs.get('found_item_handover'))
+
+            # Signatures
+            if 'statement_person_signature' in kwargs:
+                signature_data = self._normalize_signature_data(kwargs.get('statement_person_signature'))
+                if signature_data:
+                    vals['statement_person_signature'] = signature_data
+            if 'security_officer_signature' in kwargs:
+                signature_data = self._normalize_signature_data(kwargs.get('security_officer_signature'))
+                if signature_data:
+                    vals['security_officer_signature'] = signature_data
+            if 'found_item_person_signature' in kwargs:
+                signature_data = self._normalize_signature_data(kwargs.get('found_item_person_signature'))
+                if signature_data:
+                    vals['found_item_person_signature'] = signature_data
+            if 'return_recipient_signature' in kwargs:
+                signature_data = self._normalize_signature_data(kwargs.get('return_recipient_signature'))
+                if signature_data:
+                    vals['return_recipient_signature'] = signature_data
             
             # Incident datetime - convert from datetime-local format (YYYY-MM-DDTHH:MM) to Odoo format (YYYY-MM-DD HH:MM:SS)
             if 'incident_datetime' in kwargs and kwargs['incident_datetime']:
@@ -911,30 +1096,30 @@ class GuardProPWASimple(http.Controller):
             
             # Handle image uploads
             uploaded_files = request.httprequest.files.getlist('incident_images')
+            uploaded_files += request.httprequest.files.getlist('incident_videos')
             if uploaded_files:
-                attachment_ids = list(incident.photo_ids.ids) if incident.photo_ids else []
+                photo_attachment_ids = list(incident.photo_ids.ids) if incident.photo_ids else []
+                video_attachment_ids = list(incident.video_ids.ids) if incident.video_ids else []
                 for uploaded_file in uploaded_files:
                     if uploaded_file and uploaded_file.filename:
                         try:
-                            file_content = uploaded_file.read()
-                            file_base64 = base64.b64encode(file_content)
-                            
-                            attachment = request.env['ir.attachment'].sudo().create({
-                                'name': uploaded_file.filename,
-                                'type': 'binary',
-                                'datas': file_base64,
-                                'res_model': 'incident.report',
-                                'res_id': incident.id,
-                                'mimetype': uploaded_file.content_type or 'image/jpeg',
-                            })
-                            attachment_ids.append(attachment.id)
+                            attachment, is_video = self._create_incident_media_attachment(
+                                incident, uploaded_file
+                            )
+                            if is_video:
+                                video_attachment_ids.append(attachment.id)
+                            else:
+                                photo_attachment_ids.append(attachment.id)
                         except Exception as e:
                             _logger.error("Error uploading file %s: %s", uploaded_file.filename, str(e))
                 
-                if attachment_ids:
-                    incident.sudo().write({
-                        'photo_ids': [(6, 0, attachment_ids)]
-                    })
+                update_vals = {}
+                if photo_attachment_ids:
+                    update_vals['photo_ids'] = [(6, 0, photo_attachment_ids)]
+                if video_attachment_ids:
+                    update_vals['video_ids'] = [(6, 0, video_attachment_ids)]
+                if update_vals:
+                    incident.sudo().write(update_vals)
             
             return request.redirect(f'/guardpro/mobile/incident/{incident_id}?success=updated')
         except Exception as e:
@@ -1115,12 +1300,43 @@ class GuardProPWASimple(http.Controller):
                 'user': request.env.user,
             })
             
-        site = guard.current_site_id if guard else None
-        
-        return request.render('guardpro.mobile_site_info_template', {
-            'guard': guard,
-            'site': site,
-        })
+        try:
+            site = guard.current_site_id if guard else None
+            
+            # Fallback: If no site on profile, check active attendance
+            if not site and guard:
+                active_attendance = request.env['guard.attendance'].sudo().search([
+                    ('guard_id', '=', guard.id),
+                    ('checkout_time', '=', False),
+                ], limit=1, order='checkin_time desc')
+                if active_attendance:
+                    site = active_attendance.site_id
+                    _logger.info('[GuardPro Mobile] Found site from active attendance: %s', site.name)
+            
+            # Second Fallback: Check most recent shift
+            if not site and guard:
+                recent_shift = request.env['guard.shift'].sudo().search([
+                    ('guard_id', '=', guard.id),
+                ], limit=1, order='start_datetime desc')
+                if recent_shift:
+                    site = recent_shift.site_id
+                    _logger.info('[GuardPro Mobile] Found site from recent shift: %s', site.name)
+
+            _logger.info('[GuardPro Mobile] Site Info for Guard %s: Site=%s (ID: %s)', guard.name, site.name if site else 'None', site.id if site else 'None')
+            
+            if site and site.manager_id:
+                _logger.info('[GuardPro Mobile] Site Manager for Site %s: %s (ID: %s)', site.name, site.manager_id.name, site.manager_id.id)
+            
+            return request.render('guardpro.mobile_site_info_template', {
+                'guard': guard,
+                'site': site,
+                'format_datetime_tz': self._format_datetime_tz,
+            })
+        except Exception as e:
+            import traceback
+            error_trace = traceback.format_exc()
+            _logger.error('[GuardPro Mobile] Error in mobile_site_info: %s\n%s', str(e), error_trace)
+            return request.make_response(f"Internal Server Error\n\n{str(e)}\n\n{error_trace}", status=500)
 
     @http.route('/guardpro/mobile/emergency', type='http', auth='user', website=True)
     def mobile_emergency(self, **kwargs):
@@ -1212,66 +1428,31 @@ class GuardProPWASimple(http.Controller):
             'user': request.env.user,
         })
 
-    @http.route('/guardpro/mobile/biometric', type='http', auth='user', website=True)
-    def mobile_biometric(self, **kwargs):
-        """Biometric management screen - View and enroll biometrics."""
-        guard = self._get_guard_from_user()
-        
-        if not guard:
-            return request.render('guardpro.mobile_no_guard', {
-                'user': request.env.user,
-            })
-        
-        # Get guard's biometric templates
-        templates = request.env['guard.biometric.template'].sudo().search([
-            ('guard_id', '=', guard.id),
-        ], order='create_date desc')
-        
-        # Get recent verifications
-        recent_verifications = request.env['guard.biometric.verification'].sudo().search([
-            ('guard_id', '=', guard.id),
-        ], limit=10, order='verification_time desc')
-        
-        # Group templates by type
-        fingerprint_templates = templates.filtered(lambda t: t.biometric_type == 'fingerprint')
-        facial_templates = templates.filtered(lambda t: t.biometric_type == 'facial')
-        voice_templates = templates.filtered(lambda t: t.biometric_type == 'voice')
-        
-        return request.render('guardpro.mobile_biometric', {
-            'guard': guard,
-            'user': request.env.user,
-            'templates': templates,
-            'fingerprint_templates': fingerprint_templates,
-            'facial_templates': facial_templates,
-            'voice_templates': voice_templates,
-            'recent_verifications': recent_verifications,
-            'format_datetime_tz': self._format_datetime_tz,
-        })
-
     @http.route('/guardpro/mobile/training', type='http', auth='user', website=True)
     def mobile_training(self, **kwargs):
-        """Training screen - View courses and certifications."""
+        """Legacy training route - redirect to full mobile training dashboard."""
+        return request.redirect('/mobile/training')
+    @http.route('/guardpro/mobile/training/<int:enrollment_id>', type='http', auth='user', website=True)
+    def mobile_training_view(self, enrollment_id, **kwargs):
+        """View details of a specific training enrollment."""
         guard = self._get_guard_from_user()
-        
         if not guard:
             return request.render('guardpro.mobile_no_guard', {
                 'user': request.env.user,
             })
-        
-        # Get training enrollments
-        enrollments = []
-        if hasattr(guard, 'training_enrollment_ids') and guard.training_enrollment_ids:
-            enrollments = guard.training_enrollment_ids
-        elif 'slide.channel.partner' in request.env:
-            enrollments = request.env['slide.channel.partner'].sudo().search([
-                ('guard_id', '=', guard.id),
-            ], order='create_date desc')
-        
-        return request.render('guardpro.mobile_training', {
-            'guard': guard,
-            'user': request.env.user,
-            'enrollments': enrollments,
-        })
+            
+        enrollment = request.env['slide.channel.partner'].sudo().browse(enrollment_id)
+        if not enrollment.exists() or enrollment.guard_id.id != guard.id:
+            # Fallback for security/integrity
+            return request.redirect('/guardpro/mobile/training')
+            
+        # Redirect to the website_slides course page or render a custom mobile-friendly view
+        # For now, let's redirect to the standard eLearning page if available
+        if enrollment.channel_id:
+            return request.redirect(f'/slides/{enrollment.channel_id.id}')
+            
+        return request.redirect('/guardpro/mobile/training')
+
 
     @http.route('/guardpro/mobile/sw.js', type='http', auth='public')
     def mobile_service_worker(self, **kwargs):

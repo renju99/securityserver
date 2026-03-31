@@ -531,26 +531,7 @@ class TourLog(models.Model):
             try:
                 minutes_overdue = int((now - tour.scheduled_end_time).total_seconds() / 60)
                 
-                # Create activity for supervisor
-                tour.activity_schedule(
-                    'mail.mail_activity_data_warning',
-                    summary=_('Overdue Tour: %s') % tour.tour_id.name,
-                    note=_(
-                        'Tour is overdue by %d minutes.\n\n'
-                        'Guard: %s\n'
-                        'Site: %s\n'
-                        'Started: %s\n'
-                        'Should have finished: %s\n\n'
-                        'Please check on the guard and tour status.'
-                    ) % (
-                        minutes_overdue,
-                        tour.guard_id.name,
-                        tour.site_id.name,
-                        tour.start_time,
-                        tour.scheduled_end_time
-                    ),
-                    user_id=tour.site_id.supervisor_id.id if tour.site_id.supervisor_id else self.env.user.id
-                )
+                # Planned activity intentionally disabled.
                 
                 # Send notification to guard
                 tour.message_post(

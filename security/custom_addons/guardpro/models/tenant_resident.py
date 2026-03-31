@@ -217,29 +217,12 @@ class TenantResident(models.Model):
         # This sets the signup_type field on the partner, which is used by _get_signup_url()
         user.partner_id.signup_prepare(signup_type='signup')
         
-        # Send portal access email
+        # Email notifications are disabled globally.
         if user:
-            try:
-                # Determine the 'from' email address
-                email_from = self.env.user.email or 'noreply@example.com'
-                if self.site_id and self.site_id.client_id and self.site_id.client_id.email:
-                    email_from = self.site_id.client_id.email
-                
-                # Create the email with rendered values
-                mail_values = {
-                    'subject': f'Welcome to {self.site_id.name} - Portal Access',
-                    'email_from': email_from,
-                    'email_to': self.email,
-                    'body_html': self._render_portal_invitation_body(),
-                }
-                
-                if self.partner_id:
-                    mail_values['partner_ids'] = [(4, self.partner_id.id)]
-                
-                mail = self.env['mail.mail'].create(mail_values)
-                mail.send()
-            except Exception as e:
-                _logger.warning('Could not send portal access email: %s', str(e))
+            _logger.info(
+                'Email notifications are disabled: skipped portal access email for resident %s',
+                self.id
+            )
     
     def action_grant_portal_access(self):
         """Grant portal access to resident."""
@@ -309,49 +292,20 @@ class TenantResident(models.Model):
                 # Set signup_type so the user can set/reset their password
                 partner.signup_prepare(signup_type='signup')
         
-        try:
-            # Determine the 'from' email address
-            email_from = self.env.user.email or 'noreply@example.com'
-            if self.site_id and self.site_id.client_id and self.site_id.client_id.email:
-                email_from = self.site_id.client_id.email
-            
-            # Create the email directly with rendered values
-            mail_values = {
-                'subject': f'Welcome to {self.site_id.name} - Portal Access',
-                'email_from': email_from,
-                'email_to': self.email,
-                'body_html': self._render_portal_invitation_body(),
+        _logger.info(
+            'Email notifications are disabled: skipped manual portal invitation for resident %s',
+            self.id
+        )
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Email Disabled'),
+                'message': _('Portal invitation email is disabled by policy.'),
+                'type': 'warning',
+                'sticky': False,
             }
-            
-            # Add partner for tracking
-            if self.partner_id:
-                mail_values['partner_ids'] = [(4, self.partner_id.id)]
-            
-            # Create and send the email
-            mail = self.env['mail.mail'].create(mail_values)
-            mail.send()
-            
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'title': _('Invitation Sent'),
-                    'message': _('Portal invitation email has been sent to %s') % self.email,
-                    'type': 'success',
-                    'sticky': False,
-                }
-            }
-        except Exception as e:
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'title': _('Error'),
-                    'message': str(e),
-                    'type': 'danger',
-                    'sticky': True,
-                }
-            }
+        }
     
     def _render_portal_invitation_body(self):
         """Render the portal invitation email body."""

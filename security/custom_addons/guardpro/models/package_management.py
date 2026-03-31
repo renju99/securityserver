@@ -488,19 +488,10 @@ class PackageManagement(models.Model):
         """Send email notification about package arrival."""
         self.ensure_one()
         if self.recipient_email and self.state == 'received':
-            template = self.env.ref(
-                'guardpro.email_template_package_arrival',
-                raise_if_not_found=False
+            _logger.info(
+                'Email notifications are disabled: skipped package arrival email for package %s',
+                self.name
             )
-            if template:
-                try:
-                    template.send_mail(self.id, force_send=True)
-                    _logger.info(
-                        'Package arrival email sent to %s for package %s',
-                        self.recipient_name, self.name
-                    )
-                except Exception as e:
-                    _logger.warning('Failed to send package arrival email: %s', str(e))
 
     @api.depends('received_date', 'state')
     def _compute_days_in_storage(self):
@@ -540,28 +531,13 @@ class PackageManagement(models.Model):
         if not self.recipient_email and not self.recipient_phone:
             raise UserError(_('Please provide recipient email or phone number.'))
         
-        # Send email notification
+        # Email notifications are disabled globally.
         notification_sent = False
         if self.recipient_email:
-            template = self.env.ref(
-                'guardpro.email_template_package_pickup_notification',
-                raise_if_not_found=False
+            _logger.info(
+                'Email notifications are disabled: skipped pickup notification email for package %s',
+                self.name
             )
-            if template:
-                try:
-                    template.send_mail(self.id, force_send=True)
-                    notification_sent = True
-                    _logger.info(
-                        'Pickup notification email sent to %s for package %s',
-                        self.recipient_email,
-                        self.name
-                    )
-                except Exception as e:
-                    _logger.warning(
-                        'Failed to send pickup notification email: %s',
-                        str(e),
-                        exc_info=True
-                    )
         
         # Update package state
         self.write({
@@ -752,17 +728,6 @@ class PackageManagement(models.Model):
         ])
         
         for package in overdue_packages:
-            # Create activity
-            package.activity_schedule(
-                'mail.mail_activity_data_warning',
-                summary=_('Overdue Package: %s') % package.name,
-                note=_('Package for %s has not been collected.\nReceived: %s\nDays in storage: %d') % (
-                    package.recipient_name,
-                    package.received_date,
-                    package.days_in_storage
-                )
-            )
-            
             # Re-notify recipient
             if package.recipient_email or package.recipient_phone:
                 # Send reminder notification

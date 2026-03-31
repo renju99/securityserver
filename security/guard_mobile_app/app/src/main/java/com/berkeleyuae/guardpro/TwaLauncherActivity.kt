@@ -8,14 +8,12 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.nfc.NfcAdapter
+import android.nfc.Tag
+import android.nfc.tech.Ndef
 import android.provider.Settings
 import android.util.Log
-import android.webkit.GeolocationPermissions
-import android.webkit.JavascriptInterface
-import android.webkit.WebChromeClient
-import android.webkit.WebSettings
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.webkit.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -26,6 +24,7 @@ class TwaLauncherActivity : AppCompatActivity() {
 
     private val PERMISSION_REQUEST_CODE = 1001
     private lateinit var webView: WebView
+    private var nfcAdapter: NfcAdapter? = null
     
     // Configure URL here - Use Security domain
     private val START_URL = "https://security.berkeleyuae.com/guardpro/mobile"
@@ -37,11 +36,86 @@ class TwaLauncherActivity : AppCompatActivity() {
         // Setup WebView UI
         setupWebView()
 
+        // Initialize NFC
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+
         // Check and request permissions
         if (checkPermissions()) {
             startLocationService()
         } else {
             requestPermissions()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        enableNfcForegroundDispatch()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        disableNfcForegroundDispatch()
+    }
+
+    private fun enableNfcForegroundDispatch() {
+        val intent = Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        val pendingIntent = android.app.PendingIntent.getActivity(this, 0, intent, android.app.PendingIntent.FLAG_MUTABLE)
+        nfcAdapter?.enableForegroundDispatch(this, pendingIntent, null, null)
+    }
+
+    private fun disableNfcForegroundDispatch() {
+        nfcAdapter?.disableForegroundDispatch(this)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        intent?.let {
+            if (NfcAdapter.ACTION_TAG_DISCOVERED == it.action || 
+                NfcAdapter.ACTION_NDEF_DISCOVERED == it.action || 
+                NfcAdapter.ACTION_TECH_DISCOVERED == it.action) {
+                
+                val tag: Tag? = it.getParcelableExtra(NfcAdapter.EXTRA_TAG)
+                tag?.let { processNfcTag(it) }
+            }
+        }
+    }
+
+    private fun processNfcTag(tag: Tag) {
+        val ndef = Ndef.get(tag)
+        var tagData = ""
+        
+        // Try to get serial number as fallback
+        val serialNumber = tag.id.joinToString("") { "%02X".format(it) }
+        
+        try {
+            ndef?.let {
+                it.connect()
+                val ndefMessage = it.ndefMessage
+                if (ndefMessage != null && ndefMessage.records.isNotEmpty()) {
+                    val record = ndefMessage.records[0]
+                    val payload = record.payload
+                    // Usually the first byte is the encoding/language code length
+                    val textEncoding = if ((payload[0].toInt() and 128) == 0) "UTF-8" else "UTF-16"
+                    val languageCodeLength = payload[0].toInt() and 63
+                    tagData = String(payload, languageCodeLength + 1, payload.size - languageCodeLength - 1, charset(textEncoding))
+                }
+                it.close()
+            }
+        } catch (e: Exception) {
+            Log.e("NFC", "Error reading NDEF: ${e.message}")
+        }
+
+        // If NDEF failed or was empty, use serial number
+        if (tagData.isEmpty()) {
+            tagData = serialNumber
+        }
+
+        Log.d("NFC", "Scanned Tag: $tagData")
+        
+        // Inject into WebView
+        val js = "if(window.onNativeNFCScan) window.onNativeNFCScan('$tagData', '$serialNumber');"
+        webView.post {
+            webView.evaluateJavascript(js, null)
         }
     }
 
@@ -73,6 +147,13 @@ class TwaLauncherActivity : AppCompatActivity() {
                 callback.invoke(origin, true, false)
             }
             
+            override fun onPermissionRequest(request: android.webkit.PermissionRequest?) {
+                // Grant all requested permissions (Browser-level)
+                request?.resources?.let {
+                    request.grant(it)
+                }
+            }
+
             override fun onConsoleMessage(consoleMessage: android.webkit.ConsoleMessage?): Boolean {
                 consoleMessage?.let {
                     Log.d("WebViewConsole", "[${it.messageLevel()}] ${it.message()} -- From line ${it.lineNumber()} of ${it.sourceId()}")
@@ -85,8 +166,70 @@ class TwaLauncherActivity : AppCompatActivity() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 Log.d("WebView", "Page finished loading: $url")
-                // Inform the web layer about the native environment
-                webView.evaluateJavascript("window.isNativeApp = true; if(window.setPermissionUI) window.setPermissionUI('granted');", null)
+                
+                // Polyfill for NDEFReader to handle the "permission request denied" issue in WebView
+                val nfcPolyfill = """
+                    (function() {
+                        window.isNativeApp = true;
+                        if (window.setPermissionUI) window.setPermissionUI('granted');
+                        
+                        // Mock Permissions API for NFC
+                        if (navigator.permissions && navigator.permissions.query) {
+                            const originalQuery = navigator.permissions.query;
+                            navigator.permissions.query = function(params) {
+                                if (params && params.name === 'nfc') {
+                                    return Promise.resolve({ state: 'granted', onchange: null });
+                                }
+                                return originalQuery.apply(this, arguments);
+                            };
+                        }
+
+                        // Mock NDEFReader if it's broken or missing in WebView
+                        if (!('NDEFReader' in window) || window.AndroidBridge) {
+                            console.log('Mocking NDEFReader for Native Bridge...');
+                            window.NDEFReader = class {
+                                constructor() {
+                                    this.onreading = null;
+                                    this.onreadingerror = null;
+                                    window._nativeNDEFReader = this;
+                                }
+                                async scan() {
+                                    console.log('NDEFReader.scan() called - using native bridge');
+                                    return Promise.resolve();
+                                }
+                                addEventListener(type, listener) {
+                                    if (type === 'reading') this.onreading = listener;
+                                    if (type === 'readingerror') this.onreadingerror = listener;
+                                }
+                            };
+                        }
+                        
+                        // Bridge for native updates
+                        const originalOnNativeNFCScan = window.onNativeNFCScan;
+                        window.onNativeNFCScan = function(tagData, serial) {
+                            if (originalOnNativeNFCScan) originalOnNativeNFCScan(tagData, serial);
+                            if (window._nativeNDEFReader && window._nativeNDEFReader.onreading) {
+                                const event = {
+                                    serialNumber: serial,
+                                    message: {
+                                        records: [{
+                                            recordType: 'text',
+                                            data: new TextEncoder().encode(tagData),
+                                            encoding: 'utf-8'
+                                        }]
+                                    }
+                                };
+                                if (typeof window._nativeNDEFReader.onreading === 'function') {
+                                    window._nativeNDEFReader.onreading(event);
+                                } else if (window._nativeNDEFReader.onreading.handleEvent) {
+                                    window._nativeNDEFReader.onreading.handleEvent(event);
+                                }
+                            }
+                        };
+                    })();
+                """.trimIndent()
+                
+                webView.evaluateJavascript(nfcPolyfill, null)
             }
             
             override fun onReceivedSslError(view: WebView?, handler: android.webkit.SslErrorHandler?, error: android.net.http.SslError?) {
@@ -164,15 +307,20 @@ class TwaLauncherActivity : AppCompatActivity() {
     private fun checkPermissions(): Boolean {
         val fineLocation = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
         val coarseLocation = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        val recordAudio = ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
         var backgroundLocation = true
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             backgroundLocation = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED
         }
-        return fineLocation && coarseLocation && backgroundLocation
+        return fineLocation && coarseLocation && backgroundLocation && recordAudio
     }
 
     private fun requestPermissions() {
-        val permissions = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+        val permissions = mutableListOf(
+            Manifest.permission.ACCESS_FINE_LOCATION, 
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.RECORD_AUDIO
+        )
         if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
         ActivityCompat.requestPermissions(this, permissions.toTypedArray(), PERMISSION_REQUEST_CODE)
     }

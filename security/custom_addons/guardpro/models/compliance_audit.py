@@ -509,18 +509,7 @@ class ComplianceAudit(models.Model):
             ('state', '=', 'closed')
         ])
         
-        for audit in audits_needing_schedule:
-            # Create activity
-            audit.activity_schedule(
-                'mail.mail_activity_data_todo',
-                summary=_('Scheduled Audit Due: %s') % audit.audit_type,
-                note=_('Next %s audit is due on %s.\nLocation: %s') % (
-                    audit.audit_type,
-                    audit.next_audit_date,
-                    audit.site_id.name if audit.site_id else 'N/A'
-                ),
-                user_id=audit.auditor_id.id
-            )
+        # Planned activities intentionally disabled for scheduled audit reminders.
         
         _logger.info('Sent audit reminders for %d upcoming audits', len(audits_needing_schedule))
         return True
@@ -805,13 +794,7 @@ class ComplianceCorrectiveAction(models.Model):
             'completion_date': fields.Date.today()
         })
         
-        # Notify auditor for verification
-        if self.audit_id.auditor_id:
-            self.activity_schedule(
-                'mail.mail_activity_data_todo',
-                summary=_('Verify Corrective Action: %s') % self.name,
-                user_id=self.audit_id.auditor_id.id
-            )
+        # Planned activity intentionally disabled for corrective-action verification.
         
         return True
 
@@ -838,17 +821,7 @@ class ComplianceCorrectiveAction(models.Model):
             ('is_overdue', '=', True)
         ])
         
-        for action in overdue_actions:
-            # Create activity
-            action.activity_schedule(
-                'mail.mail_activity_data_warning',
-                summary=_('Overdue Corrective Action: %s') % action.name,
-                note=_('Corrective action is overdue.\nDue date: %s\nAudit: %s') % (
-                    action.due_date,
-                    action.audit_id.name
-                ),
-                user_id=action.assigned_to.id
-            )
+        # Planned activities intentionally disabled for overdue corrective actions.
         
         _logger.info('Sent overdue alerts for %d corrective actions', len(overdue_actions))
         return True

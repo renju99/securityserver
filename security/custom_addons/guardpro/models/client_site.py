@@ -355,6 +355,20 @@ class ClientSite(models.Model):
                     'Contract end date must be after start date!'
                 ))
 
+    def unlink(self):
+        """Block hard delete when shift templates still point at this site (no cascade)."""
+        n = self.env['shift.template'].sudo().search_count(
+            [('site_id', 'in', self.ids)]
+        )
+        if n:
+            names = ', '.join(self.mapped('display_name'))
+            raise ValidationError(_(
+                'Cannot delete site(s) (%s): %s shift template(s) still reference them. '
+                'Archive the site (clear Active) to keep all existing data, '
+                'or delete or reassign those templates first.'
+            ) % (names, n))
+        return super().unlink()
+
     def action_view_shifts(self):
         """Open site's shift schedule."""
         self.ensure_one()

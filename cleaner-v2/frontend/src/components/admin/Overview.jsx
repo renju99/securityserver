@@ -105,7 +105,7 @@ const Overview = () => {
                         {recentActivity.map(item => (
                             <div key={item.report_id || item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                 <div>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: '600' }}>{item.washroom_name || 'Washroom'}</div>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: '600' }}>{item.location_name || 'Location'}</div>
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.employee_name || 'Staff'}</div>
                                 </div>
                                 <span style={{ fontSize: '0.75rem', background: 'rgba(34,197,94,0.15)', color: 'var(--success)', padding: '2px 8px', borderRadius: '20px' }}>

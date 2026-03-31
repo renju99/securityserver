@@ -273,10 +273,15 @@ class SecurityTour(models.Model):
         """
         self.ensure_one()
         
-        if self.status != 'active':
+        if self.status not in ['active', 'draft']:
             raise ValidationError(_(
                 'Cannot start inactive tour!'
             ))
+        
+        # Auto-activate draft tours when started
+        if self.status == 'draft':
+            _logger.info('Auto-activating draft tour %s upon start', self.id)
+            self.action_activate()
         
         # Auto-complete ANY existing in-progress tours for this guard (any tour)
         # This handles browser refresh, crashes, and multiple tour scenarios

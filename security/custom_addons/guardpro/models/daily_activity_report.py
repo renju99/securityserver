@@ -520,16 +520,7 @@ class DailyActivityReport(models.Model):
             'mimetype': 'application/pdf'
         })
 
-        # Send email
-        template = self.env.ref('guardpro.email_template_dar_to_client', raise_if_not_found=False)
-        if template:
-            template.send_mail(
-                self.id,
-                force_send=True,
-                email_values={
-                    'attachment_ids': [(6, 0, [attachment.id])]
-                }
-            )
+        # Email notifications are disabled globally.
 
         self.write({
             'sent_to_client': True,

@@ -44,20 +44,20 @@ const deleteProject = async (req, res) => {
     }
 };
 
-// ─── WASHROOMS ───────────────────────────────────────
-const getWashrooms = async (req, res) => {
+// ─── LOCATIONS (washrooms, bedrooms, other cleanable areas) ───
+const getLocations = async (req, res) => {
     const { project_id } = req.query;
     try {
         let text, params;
         if (project_id) {
-            text = `SELECT w.*, p.name as project_name FROM washrooms w 
-                    LEFT JOIN projects p ON w.project_id = p.id
-                    WHERE w.project_id = $1 AND w.active = true ORDER BY w.name ASC`;
+            text = `SELECT l.*, p.name as project_name FROM locations l 
+                    LEFT JOIN projects p ON l.project_id = p.id
+                    WHERE l.project_id = $1 AND l.active = true ORDER BY l.name ASC`;
             params = [project_id];
         } else {
-            text = `SELECT w.*, p.name as project_name FROM washrooms w 
-                    LEFT JOIN projects p ON w.project_id = p.id
-                    WHERE w.active = true ORDER BY p.name, w.name ASC`;
+            text = `SELECT l.*, p.name as project_name FROM locations l 
+                    LEFT JOIN projects p ON l.project_id = p.id
+                    WHERE l.active = true ORDER BY p.name, l.name ASC`;
             params = [];
         }
         const result = await db.query(text, params);
@@ -67,7 +67,7 @@ const getWashrooms = async (req, res) => {
     }
 };
 
-const createWashroom = async (req, res) => {
+const createLocation = async (req, res) => {
     const { project_id: rawProjectId, name, code, building, floor, room, lat, lng } = req.body;
     if (rawProjectId === '' || rawProjectId === undefined || rawProjectId === null) {
         return res.status(400).json({ error: 'Project is required' });
@@ -77,12 +77,12 @@ const createWashroom = async (req, res) => {
         return res.status(400).json({ error: 'Invalid project' });
     }
     if (!name || String(name).trim() === '') {
-        return res.status(400).json({ error: 'Washroom name is required' });
+        return res.status(400).json({ error: 'Location name is required' });
     }
     const qr_token = crypto.randomBytes(12).toString('hex'); // auto-generate unique QR token
     try {
         const result = await db.query(
-            'INSERT INTO washrooms (project_id, name, code, building, floor, room, qr_token, lat, lng) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+            'INSERT INTO locations (project_id, name, code, building, floor, room, qr_token, lat, lng) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
             [project_id, name.trim(), code || name.trim(), building || null, floor || null, room || null, qr_token, lat || null, lng || null]
         );
         res.status(201).json(result.rows[0]);
@@ -91,7 +91,7 @@ const createWashroom = async (req, res) => {
     }
 };
 
-const updateWashroom = async (req, res) => {
+const updateLocation = async (req, res) => {
     const { id } = req.params;
     const { project_id: rawProjectId, name, code, building, floor, room, lat, lng } = req.body;
     if (rawProjectId === '' || rawProjectId === undefined || rawProjectId === null) {
@@ -103,7 +103,7 @@ const updateWashroom = async (req, res) => {
     }
     try {
         const result = await db.query(
-            'UPDATE washrooms SET project_id=$1, name=$2, code=$3, building=$4, floor=$5, room=$6, lat=$7, lng=$8 WHERE id=$9 RETURNING *',
+            'UPDATE locations SET project_id=$1, name=$2, code=$3, building=$4, floor=$5, room=$6, lat=$7, lng=$8 WHERE id=$9 RETURNING *',
             [project_id, name, code || null, building || null, floor || null, room || null, lat || null, lng || null, id]
         );
         res.json(result.rows[0]);
@@ -112,14 +112,14 @@ const updateWashroom = async (req, res) => {
     }
 };
 
-const deleteWashroom = async (req, res) => {
+const deleteLocation = async (req, res) => {
     const { id } = req.params;
     try {
-        await db.query('UPDATE washrooms SET active=false WHERE id=$1', [id]);
+        await db.query('UPDATE locations SET active=false WHERE id=$1', [id]);
         res.status(204).send();
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
 
-module.exports = { getProjects, createProject, updateProject, deleteProject, getWashrooms, createWashroom, updateWashroom, deleteWashroom };
+module.exports = { getProjects, createProject, updateProject, deleteProject, getLocations, createLocation, updateLocation, deleteLocation };

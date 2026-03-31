@@ -1,10 +1,10 @@
-# Features Overview
+# Features overview
 
-Complete overview of all GuardPro features.
+High-level map of Sentry areas. For **what is enabled in your build** (mobile web, optional Odoo apps, CCTV UI, biometric capture), see the [Documentation hub](../INDEX.md) section *Product scope*.
 
 ---
 
-## Core Features
+## Core features
 
 ### Guard Management
 Comprehensive guard profile and credential management

@@ -12,24 +12,25 @@ const importSchedules = async (req, res) => {
         const sheet = workbook.Sheets[sheetName];
         const data = xlsx.utils.sheet_to_json(sheet);
 
-        // Expected columns: WashroomCode, EmployeeEmail, StartTime, IntervalValue, IntervalUnit
+        // Expected columns: LocationCode or WashroomCode, EmployeeEmail, StartTime, IntervalValue, IntervalUnit
         const results = [];
         for (const row of data) {
-            const { WashroomCode, EmployeeEmail, StartTime, IntervalValue, IntervalUnit } = row;
+            const code = row.LocationCode ?? row.WashroomCode;
+            const { EmployeeEmail, StartTime, IntervalValue, IntervalUnit } = row;
 
-            // 1. Find Washroom
-            const washroomRes = await db.query('SELECT id FROM washrooms WHERE code = $1', [WashroomCode]);
-            const washroom_id = washroomRes.rows[0]?.id || null;
+            // 1. Find Location
+            const locationRes = await db.query('SELECT id FROM locations WHERE code = $1', [code]);
+            const location_id = locationRes.rows[0]?.id || null;
 
             // 2. Find Employee
             const employeeRes = await db.query('SELECT id FROM employees WHERE email = $1', [EmployeeEmail]);
             const employee_id = employeeRes.rows[0]?.id || null;
 
-            if (washroom_id && employee_id) {
+            if (location_id && employee_id) {
                 const insertRes = await db.query(
-                    `INSERT INTO schedules (washroom_id, employee_id, start_time, interval_value, interval_unit) 
+                    `INSERT INTO schedules (location_id, employee_id, start_time, interval_value, interval_unit) 
                      VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-                    [washroom_id, employee_id, StartTime, IntervalValue || 2, IntervalUnit || 'hours']
+                    [location_id, employee_id, StartTime, IntervalValue || 2, IntervalUnit || 'hours']
                 );
                 results.push(insertRes.rows[0].id);
             }

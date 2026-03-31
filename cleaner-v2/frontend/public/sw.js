@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cleaner-v2-v1';
+const CACHE_NAME = 'cleaner-v2-v2';
 const OFFLINE_QUEUE_KEY = 'cleaner_offline_queue';
 
 // Assets to cache for offline shell
@@ -21,14 +21,17 @@ self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
 
-// Activate: clean old caches
+// Activate: clean old caches, then force all tabs to reload so they get the new app
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keys) =>
             Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+        ).then(() => self.clients.claim()).then(() =>
+            self.clients.matchAll().then((clientList) =>
+                Promise.all(clientList.map((client) => client.navigate(client.url)))
+            )
         )
     );
-    self.clients.claim();
 });
 
 // Fetch: Network-first for API, cache-first for static assets

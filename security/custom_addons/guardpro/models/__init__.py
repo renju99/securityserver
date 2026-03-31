@@ -3,6 +3,8 @@
 
 from . import website_fix  # Fix for REQUEST_URI KeyError in website module
 from . import photo_attachment_mixin  # Mixin for photo attachments
+from . import mail_activity  # Suppress noisy activity assignment emails
+from . import mail_mail  # mail.mail retention (optional cron)
 from . import res_partner
 from . import res_users
 from . import gps_diagnostic
@@ -31,10 +33,12 @@ from . import shift_template
 # from . import guard_shift_template
 from . import guard_task
 from . import guard_message
+from . import guard_message_channel_all_sites
 from . import guard_biometric_template
 from . import guard_biometric_verification
 from . import guard_biometric_device
 from . import push_to_talk
+from . import push_to_talk_all_sites
 from . import task_suggestion
 from . import incident_report
 from . import incident_sla_policy

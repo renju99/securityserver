@@ -12,7 +12,8 @@
             initDocumentationSearch();
             initCodeHighlighting();
             initSmoothScroll();
-            initTableOfContents();
+            /* In-app docs already have a full sidebar; auto-TOC duplicated nav and looked broken in some themes. */
+            /* initTableOfContents(); */
             initScrollToTop();
             initKeyboardShortcuts();
             initLoadingStates();
@@ -227,14 +228,16 @@
             return;
         }
         
-        // Create TOC container
+        // Create TOC container (custom markup — avoid Bootstrap .card dark-theme clashes in Odoo)
         var tocContainer = document.createElement('div');
-        tocContainer.className = 'documentation-toc card mb-4';
-        tocContainer.innerHTML = '<div class="card-header">' +
-            '<h6 class="mb-0"><i class="fa fa-list"></i> Table of Contents</h6>' +
+        tocContainer.className = 'documentation-toc docs-toc-panel';
+        tocContainer.setAttribute('role', 'navigation');
+        tocContainer.setAttribute('aria-label', 'On this page');
+        tocContainer.innerHTML = '<div class="docs-toc-header">' +
+            '<span class="docs-toc-title"><i class="fa fa-list mr-1"></i> On this page</span>' +
             '</div>' +
-            '<div class="card-body">' +
-            '<ul class="toc-list"></ul>' +
+            '<div class="docs-toc-body">' +
+            '<ul class="toc-list list-unstyled mb-0"></ul>' +
             '</div>';
         
         var tocList = tocContainer.querySelector('.toc-list');

@@ -6,6 +6,9 @@ from odoo.exceptions import ValidationError, UserError
 from odoo.tools.translate import _
 import logging
 import base64
+import os
+import tempfile
+from datetime import timedelta, datetime
 
 _logger = logging.getLogger(__name__)
 
@@ -45,7 +48,9 @@ class PushToTalkChannel(models.Model):
     site_id = fields.Many2one(
         'client.site',
         string='Site',
-        help='Associated site (for site channels)'
+        help='Required for multi-site deployments: only guards assigned to this site '
+             '(via their user account) can use this channel. Leave empty only for legacy '
+             'single-tenant setups; site-assigned guards will not see channels without a site.'
     )
     
     member_ids = fields.Many2many(
@@ -209,8 +214,35 @@ class PushToTalkChannel(models.Model):
             ('active', '=', True),
             ('member_ids', 'in', [guard.id])
         ])
+        # Multi-site: guards with assigned sites only see PTT channels for those sites.
+        channels = channels.filtered(lambda c: c.is_accessible_by_guard(guard))
         
         return channels
+
+    def is_accessible_by_guard(self, guard):
+        """Membership + site scope (user.site_ids / guard.site_ids).
+
+        If the guard's user has one or more assigned sites, the channel must be
+        linked to one of those sites. Channels without ``site_id`` are hidden
+        for site-assigned guards (configure ``site_id`` on each channel).
+
+        If ``all_sites_access`` is enabled, any member may use the channel regardless
+        of site assignment (global / emergency channels).
+        """
+        self.ensure_one()
+        guard = guard.sudo() if guard else guard
+        if not guard or not guard.exists():
+            return False
+        if guard.id not in self.sudo().member_ids.ids:
+            return False
+        if self.all_sites_access:
+            return True
+        user = guard.user_id
+        if user and user.site_ids:
+            if not self.site_id:
+                return False
+            return self.site_id.id in user.site_ids.ids
+        return True
 
 
 class PushToTalkMessage(models.Model):
@@ -247,7 +279,7 @@ class PushToTalkMessage(models.Model):
     audio_data = fields.Binary(
         string='Audio File',
         attachment=True,
-        required=True,
+        required=False,  # Now optional during streaming
         help='Voice message audio data'
     )
     
@@ -272,6 +304,23 @@ class PushToTalkMessage(models.Model):
         default=fields.Datetime.now,
         required=True,
         index=True
+    )
+    
+    is_streaming = fields.Boolean(
+        string='Is Streaming',
+        default=False,
+        help='Whether the message is currently being streamed'
+    )
+    
+    stream_id = fields.Char(
+        string='Stream ID',
+        index=True,
+        help='Unique ID for the audio stream session'
+    )
+    
+    chunk_count = fields.Integer(
+        string='Chunk Count',
+        default=0
     )
     
     is_urgent = fields.Boolean(
@@ -335,37 +384,214 @@ class PushToTalkMessage(models.Model):
         self.ensure_one()
         # Use the API endpoint for better control over content-type and streaming
         return f'/guardpro/api/push-to-talk/message/{self.id}/audio'
-    
+
     def action_broadcast_notification(self):
-        """Send notification to all channel members about new message."""
+        """Notify channel members that a complete voice message is available (history / UI)."""
         self.ensure_one()
-        
-        # Get all channel members and supervisors
+        channel = self.channel_id.sudo()
+        partner_ids = self._get_ptt_bus_recipient_partner_ids()
+        if not partner_ids:
+            return True
+        try:
+            self.env['bus.bus']._sendmany(
+                [(pid, 'push_to_talk_message', {
+                    'message_id': self.id,
+                    'channel_id': channel.id,
+                    'sender_name': self.sender_guard_id.name if self.sender_guard_id else '',
+                    'is_urgent': self.is_urgent,
+                }) for pid in partner_ids]
+            )
+        except Exception as e:
+            _logger.error('Failed to broadcast push-to-talk message notification: %s', str(e))
+        return True
+
+    def _get_ptt_bus_recipient_partner_ids(self):
+        """Partner IDs for bus notifications, respecting channel site scope."""
+        self.ensure_one()
+        channel = self.channel_id.sudo()
+        if channel.all_sites_access:
+            recipients = []
+            for guard in channel.member_ids:
+                if guard.user_id and guard.user_id.partner_id:
+                    recipients.append(guard.user_id.partner_id.id)
+            for supervisor in channel.supervisor_ids:
+                if supervisor.partner_id:
+                    recipients.append(supervisor.partner_id.id)
+            return list(set(recipients))
         recipients = []
-        for guard in self.channel_id.member_ids:
-            if guard.user_id:
-                recipients.append(guard.user_id.partner_id.id)
-        
-        for supervisor in self.channel_id.supervisor_ids:
-            if supervisor.partner_id:
-                recipients.append(supervisor.partner_id.id)
-        
+        for guard in channel.member_ids:
+            if not guard.user_id or not guard.user_id.partner_id:
+                continue
+            user = guard.user_id
+            if channel.site_id:
+                if user.site_ids and channel.site_id.id not in user.site_ids.ids:
+                    continue
+            else:
+                if user.site_ids:
+                    continue
+            recipients.append(user.partner_id.id)
+        for supervisor in channel.supervisor_ids:
+            if not supervisor.partner_id:
+                continue
+            if channel.site_id and supervisor.site_ids:
+                if channel.site_id.id not in supervisor.site_ids.ids:
+                    continue
+            elif not channel.site_id and supervisor.site_ids:
+                continue
+            recipients.append(supervisor.partner_id.id)
+        return list(set(recipients))
+
+    def append_audio_chunk(self, chunk_data):
+        """Append a streaming chunk to a temporary file and broadcast it.
+
+        This avoids repeatedly decoding/re-encoding the full accumulated audio on every
+        chunk write, which can cause latency for longer push-to-talk streams.
+        """
+        self.ensure_one()
+        try:
+            # Decode chunk
+            if isinstance(chunk_data, str):
+                if chunk_data.startswith('data:audio'):
+                    chunk_data = chunk_data.split(',')[1]
+                chunk_binary = base64.b64decode(chunk_data)
+            else:
+                chunk_binary = chunk_data
+
+            # Append chunk to temp file (constant-time append per chunk)
+            temp_path = self._get_stream_temp_path()
+            with open(temp_path, 'ab') as tmp_file:
+                tmp_file.write(chunk_binary)
+
+            # Keep metadata updates minimal during streaming
+            self.write({
+                'chunk_count': self.chunk_count + 1,
+            })
+            
+            # Broadcast chunk specifically
+            self._broadcast_chunk(chunk_data)
+            
+            return True
+        except Exception as e:
+            _logger.error('Failed to append audio chunk: %s', str(e))
+            return False
+
+    def finalize_stream_audio(self):
+        """Finalize streaming data by moving accumulated temp bytes into Binary field."""
+        self.ensure_one()
+        try:
+            temp_path = self._get_stream_temp_path()
+            if not os.path.exists(temp_path):
+                return False
+
+            with open(temp_path, 'rb') as tmp_file:
+                audio_binary = tmp_file.read()
+
+            # Binary fields accept bytes and are encoded by ORM.
+            self.write({
+                'audio_data': audio_binary,
+                'file_size': len(audio_binary),
+            })
+
+            try:
+                os.remove(temp_path)
+            except Exception:
+                pass
+
+            return True
+        except Exception as e:
+            _logger.error('Failed to finalize stream audio: %s', str(e))
+            return False
+
+    def _get_stream_temp_path(self):
+        """Build deterministic temp path for message stream buffering."""
+        self.ensure_one()
+        safe_stream_id = (self.stream_id or f'msg_{self.id}').replace('/', '_')
+        filename = f'guardpro_ptt_{self.id}_{safe_stream_id}.bin'
+        return os.path.join(tempfile.gettempdir(), filename)
+
+    @api.model
+    def cron_cleanup_stale_stream_temp_files(self):
+        """Remove stale push-to-talk temp files left by interrupted sessions.
+
+        Retention is controlled by ``guardpro.ptt_temp_retention_hours`` (default 24).
+        """
+        param = self.env['ir.config_parameter'].sudo().get_param(
+            'guardpro.ptt_temp_retention_hours', '24'
+        )
+        try:
+            retention_hours = max(int(param or 24), 1)
+        except (TypeError, ValueError):
+            retention_hours = 24
+
+        cutoff = fields.Datetime.now() - timedelta(hours=retention_hours)
+        temp_dir = tempfile.gettempdir()
+        prefix = 'guardpro_ptt_'
+        suffix = '.bin'
+        removed = 0
+
+        # Skip temp files belonging to currently active streams.
+        active_message_ids = set(
+            self.sudo().search([('is_streaming', '=', True)]).ids
+        )
+
+        try:
+            with os.scandir(temp_dir) as entries:
+                for entry in entries:
+                    if not entry.is_file():
+                        continue
+                    name = entry.name
+                    if not (name.startswith(prefix) and name.endswith(suffix)):
+                        continue
+
+                    # Filename format: guardpro_ptt_<message_id>_<stream_id>.bin
+                    try:
+                        parts = name[:-len(suffix)].split('_')
+                        message_id = int(parts[2])
+                    except (ValueError, IndexError):
+                        # Unknown shape; leave it untouched.
+                        continue
+
+                    if message_id in active_message_ids:
+                        continue
+
+                    mtime = datetime.fromtimestamp(entry.stat().st_mtime)
+                    if mtime <= cutoff:
+                        try:
+                            os.remove(entry.path)
+                            removed += 1
+                        except Exception as remove_err:
+                            _logger.warning(
+                                'GuardPro PTT temp cleanup: failed removing %s: %s',
+                                entry.path,
+                                remove_err,
+                            )
+        except Exception as scan_err:
+            _logger.error('GuardPro PTT temp cleanup scan failed: %s', scan_err)
+            return False
+
+        if removed:
+            _logger.info(
+                'GuardPro PTT temp cleanup: removed %s stale file(s) older than %s hour(s)',
+                removed,
+                retention_hours,
+            )
+        return True
+
+    def _broadcast_chunk(self, chunk_data):
+        """Broadcast ONLY the new chunk to minimize bandwidth."""
+        self.ensure_one()
+        recipients = self._get_ptt_bus_recipient_partner_ids()
         if recipients:
-            # Send via Odoo bus for real-time notification
             try:
                 self.env['bus.bus']._sendmany(
-                    [(partner_id, 'push_to_talk_message', {
+                    [(partner_id, 'push_to_talk_chunk', {
                         'message_id': self.id,
-                        'channel_id': self.channel_id.id,
-                        'channel_name': self.channel_id.name,
+                        'stream_id': self.stream_id,
+                        'chunk': chunk_data,
+                        'chunk_index': self.chunk_count,
                         'sender_name': self.sender_guard_id.name,
-                        'duration': self.duration_seconds,
-                        'is_urgent': self.is_urgent,
-                        'created_at': self.created_at.isoformat(),
-                        'audio_url': self.get_audio_url()
+                        'channel_id': self.channel_id.id
                     }) for partner_id in recipients]
                 )
             except Exception as e:
-                _logger.error('Failed to send push-to-talk notification: %s', str(e))
-        
-        return True
+                _logger.error('Failed to broadcast chunk: %s', str(e))

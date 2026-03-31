@@ -124,6 +124,7 @@
                 <field name="name"/>
                 <field name="channel_type"/>
                 <field name="site_id"/>
+                <field name="all_sites_access"/>
                 <field name="message_count"/>
                 <field name="active_member_count"/>
                 <field name="last_message_time" widget="datetime"/>
@@ -162,6 +163,7 @@
                         </group>
                         <group>
                             <field name="site_id"/>
+                            <field name="all_sites_access"/>
                             <field name="shift_id"/>
                         </group>
                     </group>
@@ -242,6 +244,7 @@
                 <field name="name"/>
                 <field name="site_id"/>
                 <filter string="Public" name="public" domain="[('is_public', '=', True)]"/>
+                <filter string="All Sites" name="all_sites" domain="[('all_sites_access', '=', True)]"/>
                 <filter string="Archived" name="archived" domain="[('is_archived', '=', True)]"/>
                 <separator/>
                 <filter string="Site Channel" name="site" domain="[('channel_type', '=', 'site')]"/>

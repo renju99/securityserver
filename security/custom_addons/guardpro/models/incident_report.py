@@ -5,6 +5,7 @@ from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 from markupsafe import Markup
 import logging
+from datetime import timedelta
 
 _logger = logging.getLogger(__name__)
 
@@ -80,17 +81,24 @@ class IncidentReport(models.Model):
     ], string='Severity', default='medium', required=True, tracking=True, index=True)
     
     # Location
+    checkpoint_id = fields.Many2one(
+        'checkpoint',
+        string='Selected Location',
+        help='Select a predefined location at the site'
+    )
     location = fields.Char(
-        string='Incident Location',
-        help='Specific location within site'
+        string='Location Details',
+        help='Specific location within site or additional details'
     )
     latitude = fields.Float(
         string='Latitude',
-        digits=(10, 7)
+        digits=(10, 7),
+        tracking=True
     )
     longitude = fields.Float(
         string='Longitude',
-        digits=(10, 7)
+        digits=(10, 7),
+        tracking=True
     )
     
     # Description
@@ -406,6 +414,141 @@ class IncidentReport(models.Model):
         compute='_compute_incident_type',
         string='Is Safety Incident'
     )
+    is_statement_incident = fields.Boolean(
+        compute='_compute_incident_type',
+        string='Is Statement Incident'
+    )
+    is_fire_emergency_incident = fields.Boolean(
+        compute='_compute_incident_type',
+        string='Is Fire Alarm Emergency Incident'
+    )
+    is_found_item_incident = fields.Boolean(
+        compute='_compute_incident_type',
+        string='Is Found Item Incident'
+    )
+    is_return_form_incident = fields.Boolean(
+        compute='_compute_incident_type',
+        string='Is Return Form Incident'
+    )
+    is_community_violation_incident = fields.Boolean(
+        compute='_compute_incident_type',
+        string='Is Community Violation Incident'
+    )
+
+    # Statement Form Specific Fields
+    statement_person_name = fields.Char(string='Full Name (Person Writing Statement)')
+    statement_person_mobile = fields.Char(string='Mobile Number')
+    statement_person_email = fields.Char(string='Email Address')
+    statement_person_nationality = fields.Char(string='Nationality')
+    statement_person_gender = fields.Selection([
+        ('male', 'Male'),
+        ('female', 'Female'),
+        ('other', 'Other')
+    ], string='Gender')
+    statement_person_eid_number = fields.Char(string='EID Number')
+    statement_person_eid_expiry = fields.Date(string='EID Expiry Date')
+    statement_person_eid_front = fields.Image(string='EID Front')
+    statement_person_eid_back = fields.Image(string='EID Back')
+    statement_person_company = fields.Char(string='Company')
+    statement_person_department = fields.Char(string='Department')
+    statement_person_designation = fields.Char(string='Designation')
+    statement_text = fields.Html(string='Statement Content')
+    statement_person_signature = fields.Binary(string='Person Signature')
+    security_officer_signature = fields.Binary(string='Security Officer Signature')
+    
+    # Fire Alarm Emergency Specific Fields
+    fire_emergency_type = fields.Selection([
+        ('fire_alarm', 'Fire Alarm'),
+        ('smoke', 'Smoke'),
+        ('emergency', 'Other Emergency')
+    ], string='Type of Emergency')
+    fire_alarm_specification = fields.Char(string='If your previous selection was related to an alarm, please specify?')
+    fire_alarm_status = fields.Char(string='Alarm status')
+    fire_law_enforcement_notified = fields.Selection([('YES', 'YES'), ('NO', 'NO')], string='Law Enforcement Notified', default='NO')
+    fire_law_enforcement_details = fields.Text(string='Law enforcement arrival/departure time and plate number')
+    
+    fire_cctv_reviewed = fields.Selection([('YES', 'YES'), ('NO', 'NO')], string='CCTV Footage Review', default='NO')
+    fire_cctv_reviewer_name = fields.Char(string='If your answer was yes to the CCTV footage review, kindly type the name of the person who reviewed the CCTV.')
+    fire_cctv_reviewer_mobile = fields.Char(string='Reviewer Mobile Number')
+    fire_cctv_handover = fields.Selection([('YES', 'YES'), ('NO', 'NO')], string='CCTV Footage handover', default='NO')
+    fire_cctv_police_officer_name = fields.Char(string='Police officer name')
+    fire_cctv_police_officer_mobile = fields.Char(string='Police officer mobile No.')
+    
+    fire_activation_time = fields.Char(string='Fire Alarm Activation Time')
+    fire_reset_time = fields.Char(string='Reset Time')
+    fire_sounder_status = fields.Char(string='Sounder')
+
+    # Found Item Form Specific Fields
+    found_item_time = fields.Char(string='When the Item is Found (Time)')
+    found_item_date = fields.Date(string='When the Item is Found (Date)')
+    found_person_name = fields.Char(string='Name of Person Who Found the Item')
+    found_person_home_address = fields.Char(string='Finder Home Address')
+    found_person_mobile = fields.Char(string='Finder Mobile Number')
+    found_person_email = fields.Char(string='Finder Email Address')
+    found_item_category = fields.Char(string='Category of Found Item')
+    found_item_description = fields.Html(
+        string='Item(s) Found - Full Description'
+    )
+    found_item_inspected = fields.Selection(
+        [('yes', 'Yes'), ('no', 'No')],
+        string='Did the security officer inspect the item in your presence?'
+    )
+    found_item_person_signature = fields.Binary(
+        string='Signature of Person Who Found the Item'
+    )
+    found_item_supervisor_informed = fields.Selection(
+        [('yes', 'Yes'), ('no', 'No')],
+        string='Did you inform your Supervisor?'
+    )
+    found_item_handover = fields.Selection(
+        [('yes', 'Yes'), ('no', 'No')],
+        string='Did you handover the item to lost and found?'
+    )
+    found_item_security_name = fields.Char(string='Security Name (Office Use)')
+    found_item_security_designation = fields.Char(
+        string='Designation (Office Use)'
+    )
+
+    # Return Form Specific Fields
+    return_recipient_name = fields.Char(string='Recipient Name')
+    return_recipient_home_address = fields.Char(
+        string='Recipient Home Address'
+    )
+    return_recipient_mobile = fields.Char(string='Recipient Mobile Number')
+    return_recipient_email = fields.Char(string='Recipient Email Address')
+    return_item_description = fields.Html(
+        string='Item(s) Received - Full Description'
+    )
+    return_item_category = fields.Char(
+        string='Category of Lost and Found Items'
+    )
+    return_recipient_signature = fields.Binary(string='Recipient Signature')
+    return_security_name = fields.Char(string='Security Name (Office Use)')
+    return_security_designation = fields.Char(string='Designation (Office Use)')
+
+    # Community Violation Form Specific Fields
+    violation_unit_number = fields.Char(string='Unit/Villa/Shop Number')
+    violation_reported_by = fields.Char(string='Reported By')
+    violation_observed_datetime = fields.Datetime(string='Observed Date/Time')
+    violation_details = fields.Html(string='Violation Details')
+    violation_action_taken = fields.Text(string='Immediate Action Taken')
+    violation_notice_issued = fields.Boolean(string='Notice Issued')
+    violation_repeat_offense = fields.Boolean(string='Repeat Offense')
+    violation_fine_amount = fields.Float(string='Fine Amount', digits=(10, 2))
+    
+    statement_expiry_date = fields.Date(
+        string='Statement Expiry Date',
+        compute='_compute_statement_expiry_date'
+    )
+
+    @api.depends('incident_datetime')
+    def _compute_statement_expiry_date(self):
+        """Compute the 5-year expiry date for the statement."""
+        for record in self:
+            if record.incident_datetime:
+                record.statement_expiry_date = record.incident_datetime.date() + timedelta(days=365*5)
+            else:
+                record.statement_expiry_date = False
 
     # ============================================================
     # SLA COMPUTE METHODS
@@ -576,6 +719,42 @@ class IncidentReport(models.Model):
                 ) or _('New')
         return super().create(vals_list)
 
+    @api.onchange('checkpoint_id')
+    def _onchange_checkpoint_id(self):
+        """Update location details when a checkpoint is selected."""
+        if self.checkpoint_id:
+            self.location = self.checkpoint_id.name
+            self.latitude = self.checkpoint_id.latitude
+            self.longitude = self.checkpoint_id.longitude
+
+    def get_static_map_url(self):
+        """Generate Google Static Maps URL for the incident location."""
+        self.ensure_one()
+        if not self.latitude or not self.longitude:
+            return False
+            
+        api_key = self.env['ir.config_parameter'].sudo().get_param('guardpro.google_maps_api_key')
+        if not api_key:
+            return False
+            
+        params = {
+            'center': '%f,%f' % (self.latitude, self.longitude),
+            'zoom': '16',
+            'size': '600x300',
+            'maptype': 'satellite',
+            'markers': 'color:red|%f,%f' % (self.latitude, self.longitude),
+            'key': api_key
+        }
+        import urllib.parse
+        return "https://maps.googleapis.com/maps/api/staticmap?%s" % urllib.parse.urlencode(params)
+
+    def get_google_maps_link(self):
+        """Generate a clickable Google Maps link."""
+        self.ensure_one()
+        if not self.latitude or not self.longitude:
+            return False
+        return "https://www.google.com/maps/search/?api=1&query=%f,%f" % (self.latitude, self.longitude)
+
     def _compute_color(self):
         """Set color based on severity."""
         color_map = {
@@ -609,6 +788,26 @@ class IncidentReport(models.Model):
             
             # Safety incidents
             record.is_safety_incident = category_code == 'SAFE'
+            
+            # Statement incidents
+            record.is_statement_incident = category_code == 'STMT'
+
+            # Fire Emergency incidents
+            record.is_fire_emergency_incident = category_code == 'FIRE_EMG'
+
+            # Found Item incidents
+            record.is_found_item_incident = category_code == 'FOUND'
+
+            # Return Form incidents
+            record.is_return_form_incident = category_code == 'RETURN'
+
+            # Community violation incidents
+            record.is_community_violation_incident = category_code in [
+                'VAND', 'SHORT_LET', 'ILL_STAFF', 'MOVE_POL', 'SALE_POL',
+                'ANIMAL', 'DMG_REC', 'DMG_COM', 'DMG_SPT', 'DMG_POOL',
+                'DMG_PLNT', 'GARDEN', 'HOME_APP', 'EXT_MAJ', 'EXT_MIN',
+                'SIGNAGE', 'TERRACE', 'PEST', 'GARAGE', 'RETAIL',
+            ]
 
     @api.constrains('incident_datetime', 'reported_datetime')
     def _check_dates(self):
@@ -729,14 +928,10 @@ class IncidentReport(models.Model):
 
     def _send_incident_notification(self):
         """Send email notification for incident."""
-        template = self.env.ref('guardpro.incident_notification_email',
-                                raise_if_not_found=False)
-        if template:
-            for record in self:
-                try:
-                    template.send_mail(record.id, force_send=True)
-                except Exception as e:
-                    _logger.warning('Could not send incident notification email: %s', str(e))
+        _logger.info(
+            'Email notifications are disabled: skipped incident notification for %s record(s)',
+            len(self)
+        )
 
     def _send_panic_alert(self):
         """Send emergency alert for panic button."""
@@ -763,6 +958,29 @@ class IncidentReport(models.Model):
             'SUSP': 'guardpro.action_report_incident_security',
             'VEH': 'guardpro.action_report_incident_vehicle',
             'SAFE': 'guardpro.action_report_incident_safety',
+            'STMT': 'guardpro.action_report_incident_statement',
+            'FOUND': 'guardpro.action_report_incident_found_item',
+            'RETURN': 'guardpro.action_report_incident_return_form',
+            'VAND': 'guardpro.action_report_incident_community_violation',
+            'SHORT_LET': 'guardpro.action_report_incident_community_violation',
+            'ILL_STAFF': 'guardpro.action_report_incident_community_violation',
+            'MOVE_POL': 'guardpro.action_report_incident_community_violation',
+            'SALE_POL': 'guardpro.action_report_incident_community_violation',
+            'ANIMAL': 'guardpro.action_report_incident_community_violation',
+            'DMG_REC': 'guardpro.action_report_incident_community_violation',
+            'DMG_COM': 'guardpro.action_report_incident_community_violation',
+            'DMG_SPT': 'guardpro.action_report_incident_community_violation',
+            'DMG_POOL': 'guardpro.action_report_incident_community_violation',
+            'DMG_PLNT': 'guardpro.action_report_incident_community_violation',
+            'GARDEN': 'guardpro.action_report_incident_community_violation',
+            'HOME_APP': 'guardpro.action_report_incident_community_violation',
+            'EXT_MAJ': 'guardpro.action_report_incident_community_violation',
+            'EXT_MIN': 'guardpro.action_report_incident_community_violation',
+            'SIGNAGE': 'guardpro.action_report_incident_community_violation',
+            'TERRACE': 'guardpro.action_report_incident_community_violation',
+            'PEST': 'guardpro.action_report_incident_community_violation',
+            'GARAGE': 'guardpro.action_report_incident_community_violation',
+            'RETAIL': 'guardpro.action_report_incident_community_violation',
         }
         
         category_code = self.category_id.code if self.category_id else ''
@@ -1267,27 +1485,13 @@ class IncidentReport(models.Model):
             
             body_html += _('</tbody></table>')
             
-            # Send email to each manager
+            # Email notifications are disabled globally; keep report generation only.
             for user in manager_group.users:
                 if user.email:
-                    mail_values = {
-                        'subject': _('Daily SLA Breach Report - %s - %d Breaches') % (
-                            yesterday.strftime('%Y-%m-%d'),
-                            total_breaches
-                        ),
-                        'body_html': body_html,
-                        'email_to': user.email,
-                        'email_from': self.env.user.email or 'noreply@sentry.app',
-                        'auto_delete': False,
-                    }
-                    
-                    try:
-                        mail = self.env['mail.mail'].create(mail_values)
-                        mail.send()
-                        _logger.info('Sent SLA breach report to %s', user.email)
-                    except Exception as e:
-                        _logger.error('Failed to send SLA breach report to %s: %s',
-                                      user.email, str(e))
+                    _logger.info(
+                        'Email notifications are disabled: skipped SLA breach report for %s',
+                        user.email
+                    )
         
         _logger.info('Generated daily SLA breach report: %d breaches on %s',
                     total_breaches, yesterday)

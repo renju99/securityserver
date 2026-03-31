@@ -70,6 +70,10 @@ services:
     environment:
       - BACKEND_URL=http://api:3000/api/biometrics/log
       - INTERNAL_TOKEN=attendance_secret_token
+      - DEDUP_WINDOW_SECONDS=300 # Skip duplicate captures within 5 minutes
+      - IMAGE_RETENTION_HOURS=2160 # Auto-delete images older than 90 days
+      - MAX_CAPTURES_DIR_MB=500 # Stop saving if captures exceed 500MB
+      - CLEANUP_INTERVAL_SECONDS=3600 # Run cleanup every 1 hour
     volumes:
       - ./ra08-listener/captures:/app/captures
     ports:

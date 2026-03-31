@@ -141,7 +141,7 @@
             'profile': '/guardpro/mobile/profile',
             'site-info': '/guardpro/mobile/site_info',
             'emergency': '/guardpro/mobile/emergency',
-            'training': '/guardpro/mobile/training'
+            'training': '/mobile/training'
         };
 
         const route = routes[viewName];

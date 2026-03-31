@@ -86,6 +86,160 @@
             <field name="color">9</field>
         </record>
 
+        <record id="incident_cat_statement" model="incident.category">
+            <field name="name">Statement</field>
+            <field name="code">STMT</field>
+            <field name="sequence">130</field>
+            <field name="color">4</field>
+        </record>
+
+        <record id="incident_cat_found_item" model="incident.category">
+            <field name="name">Found Item</field>
+            <field name="code">FOUND</field>
+            <field name="sequence">140</field>
+            <field name="color">5</field>
+        </record>
+
+        <record id="incident_cat_return_form" model="incident.category">
+            <field name="name">Return Form</field>
+            <field name="code">RETURN</field>
+            <field name="sequence">150</field>
+            <field name="color">6</field>
+        </record>
+
+        <record id="incident_cat_short_term_letting" model="incident.category">
+            <field name="name">Short term letting/Staff accommodation/Commercial activities</field>
+            <field name="code">SHORT_LET</field>
+            <field name="sequence">160</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="incident_cat_illegal_household_staff" model="incident.category">
+            <field name="name">Illegal household staff</field>
+            <field name="code">ILL_STAFF</field>
+            <field name="sequence">170</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="incident_cat_violation_moving_policy" model="incident.category">
+            <field name="name">Violation of moving-in/out policy</field>
+            <field name="code">MOVE_POL</field>
+            <field name="sequence">180</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="incident_cat_violation_sales_policy" model="incident.category">
+            <field name="name">Violation of sales/leasing policy</field>
+            <field name="code">SALE_POL</field>
+            <field name="sequence">190</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="incident_cat_violation_animal_rules" model="incident.category">
+            <field name="name">Violation of animal keeping rules</field>
+            <field name="code">ANIMAL</field>
+            <field name="sequence">200</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="incident_cat_damage_recreation" model="incident.category">
+            <field name="name">Damage/Misuse of recreation areas (Eg: parks and playgrounds)</field>
+            <field name="code">DMG_REC</field>
+            <field name="sequence">210</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="incident_cat_damage_common_areas" model="incident.category">
+            <field name="name">Damage/Misuse of other common areas</field>
+            <field name="code">DMG_COM</field>
+            <field name="sequence">220</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="incident_cat_damage_sports_leisure" model="incident.category">
+            <field name="name">Damage/Misuse of sports areas/ Leisure Facilities</field>
+            <field name="code">DMG_SPT</field>
+            <field name="sequence">230</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="incident_cat_damage_pools" model="incident.category">
+            <field name="name">Damage/Misuse of swimming pools</field>
+            <field name="code">DMG_POOL</field>
+            <field name="sequence">240</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="incident_cat_damage_plants" model="incident.category">
+            <field name="name">Damage/Misuse of plants</field>
+            <field name="code">DMG_PLNT</field>
+            <field name="sequence">250</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="incident_cat_poor_garden_maintenance" model="incident.category">
+            <field name="name">Poor maintenance of garden and landscape</field>
+            <field name="code">GARDEN</field>
+            <field name="sequence">260</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="incident_cat_improper_home_appearance" model="incident.category">
+            <field name="name">Improper home maintenance/appearance</field>
+            <field name="code">HOME_APP</field>
+            <field name="sequence">270</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="incident_cat_unauth_exterior_major" model="incident.category">
+            <field name="name">Unauthorized exterior attachments/alterations (major Alterations)</field>
+            <field name="code">EXT_MAJ</field>
+            <field name="sequence">280</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="incident_cat_unauth_exterior_minor" model="incident.category">
+            <field name="name">Unauthorized exterior attachments/alterations (minor alterations)</field>
+            <field name="code">EXT_MIN</field>
+            <field name="sequence">290</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="incident_cat_signage_violation" model="incident.category">
+            <field name="name">Violation of terms against signage use</field>
+            <field name="code">SIGNAGE</field>
+            <field name="sequence">300</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="incident_cat_terrace_balconies" model="incident.category">
+            <field name="name">Misuse of terrace and balconies</field>
+            <field name="code">TERRACE</field>
+            <field name="sequence">310</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="incident_cat_inadequate_pest_control" model="incident.category">
+            <field name="name">Inadequate pest control</field>
+            <field name="code">PEST</field>
+            <field name="sequence">320</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="incident_cat_misuse_garage" model="incident.category">
+            <field name="name">Misuse of garage area</field>
+            <field name="code">GARAGE</field>
+            <field name="sequence">330</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="incident_cat_retail_violation" model="incident.category">
+            <field name="name">Retail Violation</field>
+            <field name="code">RETAIL</field>
+            <field name="sequence">340</field>
+            <field name="color">8</field>
+        </record>
+
         <record id="incident_cat_other" model="incident.category">
             <field name="name">Other</field>
             <field name="code">OTHER</field>

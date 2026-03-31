@@ -798,26 +798,7 @@ class IncidentInvestigation(models.Model):
         if overdue:
             _logger.warning('Found %d overdue investigations', len(overdue))
             
-            for investigation in overdue:
-                # Create activity for lead investigator
-                investigation.activity_schedule(
-                    'mail.mail_activity_data_warning',
-                    summary=_('OVERDUE: Investigation %s') % investigation.name,
-                    note=_(
-                        'Investigation is overdue!\n\n'
-                        'Investigation: %s\n'
-                        'Incident: %s\n'
-                        'Target Date: %s\n'
-                        'Days Overdue: %d\n\n'
-                        'Please complete the investigation or update the target date.'
-                    ) % (
-                        investigation.title,
-                        investigation.incident_name,
-                        investigation.target_completion_date,
-                        (today - investigation.target_completion_date).days
-                    ),
-                    user_id=investigation.lead_investigator_id.id
-                )
+            # Planned activities intentionally disabled for overdue investigations.
         
         return True
 

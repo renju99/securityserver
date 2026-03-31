@@ -8,10 +8,10 @@ const inputStyle = { width: '100%', padding: '0.6rem 0.8rem', borderRadius: '8px
 const labelStyle = { fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.3rem', display: 'block' };
 
 const ROLE_OPTIONS = [
-    { value: 'cleaner', label: 'Cleaner', description: 'Check-in at washrooms, complete checklists', color: 'var(--primary)' },
+    { value: 'cleaner', label: 'Cleaner', description: 'Check-in at locations, complete checklists', color: 'var(--primary)' },
     { value: 'supervisor', label: 'Supervisor', description: 'View reports and schedules, oversee cleaners', color: '#0ea5e9' },
     { value: 'manager', label: 'Manager', description: 'Manage schedules, staff, and reports', color: '#8b5cf6' },
-    { value: 'admin', label: 'Full Admin', description: 'Full access: projects, washrooms, users, all settings', color: 'var(--success)' },
+    { value: 'admin', label: 'Full Admin', description: 'Full access: projects, locations, users, all settings', color: 'var(--success)' },
 ];
 
 const roleLabel = (role) => ROLE_OPTIONS.find(r => r.value === role)?.label || role;

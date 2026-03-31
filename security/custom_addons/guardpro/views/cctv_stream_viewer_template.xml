@@ -23,7 +23,7 @@
                                         <t t-esc="camera.status"/>
                                     </span>
                                 </div>
-                                <a href="/web#action=action_cctv_monitoring" class="btn btn-sm btn-secondary">
+                                <a href="/web#action=guardpro.action_cctv_monitoring" class="btn btn-sm btn-secondary">
                                     <i class="fa fa-arrow-left"/> Back to Cameras
                                 </a>
                             </div>

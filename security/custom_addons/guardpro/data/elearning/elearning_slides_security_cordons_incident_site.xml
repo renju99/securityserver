@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Course 24: Security Cordons and Measures at Incident Sites -->
+
+        <!-- Module 1: Emergency and Security Cordon Fundamentals -->
+        <record id="slide_cordon_m1_fundamentals" model="slide.slide">
+            <field name="name">Module 1: Emergency and Security Cordon Fundamentals</field>
+            <field name="channel_id" ref="elearning_course_security_cordons_incident_site"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Module 1: Emergency and Security Cordon Fundamentals&lt;/h2&gt;
+                &lt;p&gt;This module defines emergency concepts and the purpose of a security cordon at an incident site.&lt;/p&gt;
+
+                &lt;h3&gt;Definition of Emergency&lt;/h3&gt;
+                &lt;p&gt;An emergency is a sudden event that threatens life, property, operations, or public order and requires immediate, organized response.&lt;/p&gt;
+
+                &lt;h3&gt;Definition of Security Cordon&lt;/h3&gt;
+                &lt;p&gt;A security cordon is a controlled perimeter established around an incident site to isolate risk, protect people, preserve evidence, and support emergency operations.&lt;/p&gt;
+
+                &lt;h3&gt;Why Cordons Are Critical&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Prevent unauthorized access to hazardous areas.&lt;/li&gt;
+                    &lt;li&gt;Protect victims, responders, and the public.&lt;/li&gt;
+                    &lt;li&gt;Maintain incident-site integrity for investigation.&lt;/li&gt;
+                    &lt;li&gt;Create safe operating space for police, civil defense, and medical teams.&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_cordon_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_security_cordons_incident_site"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_cordon_m1_q1" model="slide.question">
+            <field name="question">What is the primary purpose of a security cordon?</field>
+            <field name="slide_id" ref="slide_cordon_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_cordon_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m1_q1"/>
+            <field name="text_value">To isolate risk and control access around an incident site</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_cordon_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m1_q1"/>
+            <field name="text_value">To gather spectators at a safe viewing point</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_cordon_m1_q2" model="slide.question">
+            <field name="question">Which objective is directly supported by security cordons?</field>
+            <field name="slide_id" ref="slide_cordon_m1_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_cordon_m1_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m1_q2"/>
+            <field name="text_value">Protecting responders and preserving incident-site integrity</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_cordon_m1_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m1_q2"/>
+            <field name="text_value">Allowing unrestricted access for faster public movement</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_cordon_m1_q3" model="slide.question">
+            <field name="question">An emergency is best described as:</field>
+            <field name="slide_id" ref="slide_cordon_m1_quiz"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="quiz_cordon_m1_q3_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m1_q3"/>
+            <field name="text_value">A sudden threat requiring immediate organized response</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_cordon_m1_q3_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m1_q3"/>
+            <field name="text_value">Any routine operational delay during normal duty</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 2: Safe Measures, Threat Recognition, and Guard Duties -->
+        <record id="slide_cordon_m2_measures_roles" model="slide.slide">
+            <field name="name">Module 2: Safe Measures, Threat Recognition, and Guard Duties</field>
+            <field name="channel_id" ref="elearning_course_security_cordons_incident_site"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.6</field>
+            <field name="html_content">
+                &lt;h2&gt;Module 2: Safe Measures, Threat Recognition, and Guard Duties&lt;/h2&gt;
+                &lt;p&gt;Effective site protection starts with preventive safety measures and threat awareness.&lt;/p&gt;
+
+                &lt;h3&gt;Importance of Safe Measures&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Protection of lives and property.&lt;/li&gt;
+                    &lt;li&gt;Enhancing public confidence in private security operations.&lt;/li&gt;
+                    &lt;li&gt;Reducing risks affecting the location or event.&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Potential Threat Categories&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Crowd threats:&lt;/strong&gt; scramble, panic, crowd surge, chaos.&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Technical threats:&lt;/strong&gt; camera failure, communication failure, access-control faults.&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Natural and emergency incidents:&lt;/strong&gt; fire, medical emergency, structural hazards.&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Core Responsibilities of Security Personnel&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Strict commitment to field procedures and chain of command.&lt;/li&gt;
+                    &lt;li&gt;Provide initial support in emergency cases until specialists arrive.&lt;/li&gt;
+                    &lt;li&gt;Coordinate with police and civil defense without delay.&lt;/li&gt;
+                    &lt;li&gt;Provide accurate real-time updates to control room and supervisors.&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_cordon_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_security_cordons_incident_site"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_cordon_m2_q1" model="slide.question">
+            <field name="question">Which of the following is a technical threat?</field>
+            <field name="slide_id" ref="slide_cordon_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_cordon_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m2_q1"/>
+            <field name="text_value">Camera or security system failure</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_cordon_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m2_q1"/>
+            <field name="text_value">A planned evacuation drill</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_cordon_m2_q2" model="slide.question">
+            <field name="question">Which is a core guard responsibility during incident response?</field>
+            <field name="slide_id" ref="slide_cordon_m2_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_cordon_m2_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m2_q2"/>
+            <field name="text_value">Coordinate with police and civil defense</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_cordon_m2_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m2_q2"/>
+            <field name="text_value">Ignore command chain if crowd pressure increases</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_cordon_m2_q3" model="slide.question">
+            <field name="question">Why are safe measures important at events and sites?</field>
+            <field name="slide_id" ref="slide_cordon_m2_quiz"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="quiz_cordon_m2_q3_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m2_q3"/>
+            <field name="text_value">They protect lives/property and reduce operational risks</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_cordon_m2_q3_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m2_q3"/>
+            <field name="text_value">They only improve event appearance</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 3: Incident Site Cordon Setup and Zoning -->
+        <record id="slide_cordon_m3_setup_zoning" model="slide.slide">
+            <field name="name">Module 3: Incident Site Cordon Setup and Zoning</field>
+            <field name="channel_id" ref="elearning_course_security_cordons_incident_site"/>
+            <field name="sequence">30</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.7</field>
+            <field name="html_content">
+                &lt;h2&gt;Module 3: Incident Site Cordon Setup and Zoning&lt;/h2&gt;
+                &lt;p&gt;A proper cordon creates order, protects lives, and supports response teams.&lt;/p&gt;
+
+                &lt;h3&gt;Step-by-Step Cordon Setup&lt;/h3&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Initial assessment:&lt;/strong&gt; identify hazard source, blast/fire radius, and movement paths.&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Set boundaries:&lt;/strong&gt; establish inner and outer perimeter based on risk level.&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Control entry points:&lt;/strong&gt; assign guards and maintain an entry/exit log.&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Mark and communicate:&lt;/strong&gt; use barriers, tape, signs, and verbal direction.&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Preserve scene:&lt;/strong&gt; prevent tampering and protect evidence areas.&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h3&gt;Recommended Zone Structure&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Hot Zone (inner cordon):&lt;/strong&gt; immediate danger area, authorized specialists only.&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Warm Zone:&lt;/strong&gt; controlled support area for staging and triage access.&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Cold Zone (outer cordon):&lt;/strong&gt; public separation, media holding, and safe assembly.&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Critical Guard Practices&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Never leave cordon posts unattended.&lt;/li&gt;
+                    &lt;li&gt;Use one communication language and clear commands.&lt;/li&gt;
+                    &lt;li&gt;Escalate any breach attempt immediately.&lt;/li&gt;
+                    &lt;li&gt;Continuously reassess perimeter as threat conditions change.&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_cordon_m3_quiz" model="slide.slide">
+            <field name="name">Module 3: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_security_cordons_incident_site"/>
+            <field name="sequence">31</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_cordon_m3_q1" model="slide.question">
+            <field name="question">Which zone should be restricted to authorized emergency specialists only?</field>
+            <field name="slide_id" ref="slide_cordon_m3_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_cordon_m3_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m3_q1"/>
+            <field name="text_value">Hot Zone (inner cordon)</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_cordon_m3_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m3_q1"/>
+            <field name="text_value">Cold Zone (outer cordon)</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_cordon_m3_q2" model="slide.question">
+            <field name="question">What should be controlled at every cordon boundary?</field>
+            <field name="slide_id" ref="slide_cordon_m3_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_cordon_m3_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m3_q2"/>
+            <field name="text_value">Entry points with guard assignment and logging</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_cordon_m3_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m3_q2"/>
+            <field name="text_value">Only parking areas, not perimeter access</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_cordon_m3_q3" model="slide.question">
+            <field name="question">When should cordon boundaries be reviewed?</field>
+            <field name="slide_id" ref="slide_cordon_m3_quiz"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="quiz_cordon_m3_q3_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m3_q3"/>
+            <field name="text_value">Continuously, as incident risk conditions change</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_cordon_m3_q3_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m3_q3"/>
+            <field name="text_value">Only once at the beginning of the incident</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 4: Crowd Management at Events and Incidents -->
+        <record id="slide_cordon_m4_crowd_management" model="slide.slide">
+            <field name="name">Module 4: Crowd Management at Events and Incidents</field>
+            <field name="channel_id" ref="elearning_course_security_cordons_incident_site"/>
+            <field name="sequence">40</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.7</field>
+            <field name="html_content">
+                &lt;h2&gt;Module 4: Crowd Management at Events and Incidents&lt;/h2&gt;
+                &lt;p&gt;Crowd control is a public security practice to prevent stampedes, fights, riots, and dangerous congestion.&lt;/p&gt;
+
+                &lt;h3&gt;Crowd Management Essentials&lt;/h3&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;&lt;strong&gt;Signage reliance:&lt;/strong&gt; clear directional and security signs at key locations.&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Communication plan:&lt;/strong&gt; reliable radio/phone channels inside and outside venue.&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;One communication language:&lt;/strong&gt; standardized terms for all teams.&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Post-event review:&lt;/strong&gt; capture lessons learned and team observations.&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h3&gt;Crowd Density Awareness&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Crowd risk is measured by density, not only total size.&lt;/li&gt;
+                    &lt;li&gt;Static dense crowds can reach critical pressure quickly.&lt;/li&gt;
+                    &lt;li&gt;Dynamic moving crowds can turn unstable near bottlenecks.&lt;/li&gt;
+                    &lt;li&gt;Monitor choke points: gates, corridors, stairs, and transport exits.&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Practical Control Methods&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Planning and preparation before doors open.&lt;/li&gt;
+                    &lt;li&gt;Use verbal commands and calm tone to direct flow.&lt;/li&gt;
+                    &lt;li&gt;Apply teamwork with engineering, administrative, and behavioral support.&lt;/li&gt;
+                    &lt;li&gt;Use modern technologies and organizational tools where available.&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_cordon_m4_quiz" model="slide.slide">
+            <field name="name">Module 4: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_security_cordons_incident_site"/>
+            <field name="sequence">41</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_cordon_m4_q1" model="slide.question">
+            <field name="question">Crowd danger is primarily measured by:</field>
+            <field name="slide_id" ref="slide_cordon_m4_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_cordon_m4_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m4_q1"/>
+            <field name="text_value">Density and movement pressure</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_cordon_m4_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m4_q1"/>
+            <field name="text_value">Only the event ticket count</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_cordon_m4_q2" model="slide.question">
+            <field name="question">Which communication practice improves crowd control reliability?</field>
+            <field name="slide_id" ref="slide_cordon_m4_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_cordon_m4_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m4_q2"/>
+            <field name="text_value">Use one standard operational language across teams</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_cordon_m4_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m4_q2"/>
+            <field name="text_value">Allow each team to use different terminology</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_cordon_m4_q3" model="slide.question">
+            <field name="question">Why are signs important in crowd management?</field>
+            <field name="slide_id" ref="slide_cordon_m4_quiz"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="quiz_cordon_m4_q3_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m4_q3"/>
+            <field name="text_value">They provide fast visual guidance for movement and safety</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_cordon_m4_q3_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m4_q3"/>
+            <field name="text_value">They are decorative and not operationally necessary</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 5: Interdepartmental Coordination and General Warnings -->
+        <record id="slide_cordon_m5_coordination_warnings" model="slide.slide">
+            <field name="name">Module 5: Interdepartmental Coordination and General Warnings</field>
+            <field name="channel_id" ref="elearning_course_security_cordons_incident_site"/>
+            <field name="sequence">50</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.6</field>
+            <field name="html_content">
+                &lt;h2&gt;Module 5: Interdepartmental Coordination and General Warnings&lt;/h2&gt;
+                &lt;p&gt;Cordon effectiveness depends on synchronized coordination and strict warning compliance.&lt;/p&gt;
+
+                &lt;h3&gt;Departments Related to Crowd/Incident Management&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;Engineering:&lt;/strong&gt; technology, layouts, flow design, and congestion prevention.&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Administrative:&lt;/strong&gt; staffing plans, communication management, operations coordination.&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Behavioral:&lt;/strong&gt; psychological and social behavior management of groups.&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;General Warnings at Incident Sites&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Do not allow unauthorized persons to cross any perimeter.&lt;/li&gt;
+                    &lt;li&gt;Do not spread unverified information to public or media.&lt;/li&gt;
+                    &lt;li&gt;Do not remove or move potential evidence items.&lt;/li&gt;
+                    &lt;li&gt;Do not change perimeter boundaries without command approval.&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Post-Incident Improvement Cycle&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Conduct immediate team debrief after stabilization.&lt;/li&gt;
+                    &lt;li&gt;Document weaknesses, breaches, and communication gaps.&lt;/li&gt;
+                    &lt;li&gt;Record lessons learned for future event planning.&lt;/li&gt;
+                    &lt;li&gt;Collect attendee and stakeholder feedback where practical.&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_cordon_m5_quiz" model="slide.slide">
+            <field name="name">Module 5: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_security_cordons_incident_site"/>
+            <field name="sequence">51</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_cordon_m5_q1" model="slide.question">
+            <field name="question">Which department mainly supports flow design and congestion prevention?</field>
+            <field name="slide_id" ref="slide_cordon_m5_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_cordon_m5_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m5_q1"/>
+            <field name="text_value">Engineering department</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_cordon_m5_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m5_q1"/>
+            <field name="text_value">Catering department</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_cordon_m5_q2" model="slide.question">
+            <field name="question">Which action is prohibited inside a secured incident perimeter?</field>
+            <field name="slide_id" ref="slide_cordon_m5_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_cordon_m5_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m5_q2"/>
+            <field name="text_value">Moving potential evidence without command approval</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_cordon_m5_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m5_q2"/>
+            <field name="text_value">Recording perimeter entries in a log</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_cordon_m5_q3" model="slide.question">
+            <field name="question">What is the main purpose of an immediate post-incident debrief?</field>
+            <field name="slide_id" ref="slide_cordon_m5_quiz"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="quiz_cordon_m5_q3_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m5_q3"/>
+            <field name="text_value">Capture lessons learned and close operational gaps</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_cordon_m5_q3_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_m5_q3"/>
+            <field name="text_value">Assign blame without process review</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Final Assessment -->
+        <record id="slide_cordon_final_assessment" model="slide.slide">
+            <field name="name">Final Assessment: Security Cordons and Incident Site Measures</field>
+            <field name="channel_id" ref="elearning_course_security_cordons_incident_site"/>
+            <field name="sequence">60</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.2</field>
+        </record>
+
+        <record id="quiz_cordon_final_q1" model="slide.question">
+            <field name="question">Which action best protects an incident scene for investigation?</field>
+            <field name="slide_id" ref="slide_cordon_final_assessment"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_cordon_final_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_final_q1"/>
+            <field name="text_value">Maintain cordon integrity and prevent unauthorized entry</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_cordon_final_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_final_q1"/>
+            <field name="text_value">Allow controlled public walkthroughs for transparency</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_cordon_final_q2" model="slide.question">
+            <field name="question">A proper post-incident review should include:</field>
+            <field name="slide_id" ref="slide_cordon_final_assessment"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_cordon_final_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_final_q2"/>
+            <field name="text_value">Debrief, weaknesses, lessons learned, and process updates</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_cordon_final_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_final_q2"/>
+            <field name="text_value">No review, because the event is already finished</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_cordon_final_q3" model="slide.question">
+            <field name="question">Which pair best represents effective crowd-control foundations?</field>
+            <field name="slide_id" ref="slide_cordon_final_assessment"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="quiz_cordon_final_q3_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_final_q3"/>
+            <field name="text_value">Clear signage and reliable team communication</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_cordon_final_q3_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_final_q3"/>
+            <field name="text_value">Minimal guidance and ad-hoc instructions</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_cordon_final_q4" model="slide.question">
+            <field name="question">If an unknown person insists on entering the inner perimeter, the guard should:</field>
+            <field name="slide_id" ref="slide_cordon_final_assessment"/>
+            <field name="sequence">4</field>
+        </record>
+        <record id="quiz_cordon_final_q4_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_final_q4"/>
+            <field name="text_value">Deny entry and escalate through command channels</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_cordon_final_q4_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_cordon_final_q4"/>
+            <field name="text_value">Allow entry if they seem confident</field>
+            <field name="is_correct">False</field>
+        </record>
+
+    </data>
+</odoo>

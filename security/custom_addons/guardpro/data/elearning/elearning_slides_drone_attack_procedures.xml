@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        
+        <!-- Course 23: Drone Attack Emergency Procedures - Slides -->
+        
+        <!-- Module 1: Risk Recognition and Site Readiness -->
+        <record id="slide_drone_attack_m1_intro" model="slide.slide">
+            <field name="name">Module 1: Risk Recognition and Site Readiness</field>
+            <field name="channel_id" ref="elearning_course_drone_attack_procedures"/>
+            <field name="sequence">10</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Module 1: Risk Recognition and Site Readiness&lt;/h2&gt;
+                &lt;p&gt;Before any emergency, a security guard must already know where people can be protected quickly and safely.&lt;/p&gt;
+
+                &lt;h3&gt;Pre-Incident Site Mapping&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Identify safe areas: interior corridors and rooms away from windows.&lt;/li&gt;
+                    &lt;li&gt;Mark dangerous zones: glass facades, exposed areas, and upper floors.&lt;/li&gt;
+                    &lt;li&gt;Know all emergency exits and alternate stair routes.&lt;/li&gt;
+                    &lt;li&gt;Know exact gas and electricity shutoff points for rapid utility isolation.&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Emergency Kit Standards&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;First aid kit for bleeding control and basic trauma support.&lt;/li&gt;
+                    &lt;li&gt;Flashlight for low-visibility conditions and power failures.&lt;/li&gt;
+                    &lt;li&gt;Backup battery or power bank for communications continuity.&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Early Drone Attack Indicators&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;A low buzzing sound similar to a small motorcycle.&lt;/li&gt;
+                    &lt;li&gt;A drone with triangular wings flying at low altitude.&lt;/li&gt;
+                    &lt;li&gt;Public reports from witnesses: treat all credible reports as urgent.&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Activation Trigger&lt;/h3&gt;
+                &lt;p&gt;If a warning sign is seen or heard, immediately begin protective procedures without delay.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_drone_attack_m1_quiz" model="slide.slide">
+            <field name="name">Module 1: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_drone_attack_procedures"/>
+            <field name="sequence">11</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_drone_attack_m1_q1" model="slide.question">
+            <field name="question">Which location is safest for initial shelter inside a building?</field>
+            <field name="slide_id" ref="slide_drone_attack_m1_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_drone_attack_m1_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m1_q1"/>
+            <field name="text_value">Interior corridor away from windows</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_drone_attack_m1_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m1_q1"/>
+            <field name="text_value">Top floor near glass facade</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_drone_attack_m1_q2" model="slide.question">
+            <field name="question">What should trigger immediate activation of safety procedures?</field>
+            <field name="slide_id" ref="slide_drone_attack_m1_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_drone_attack_m1_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m1_q2"/>
+            <field name="text_value">Buzzing drone sound or credible drone report</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_drone_attack_m1_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m1_q2"/>
+            <field name="text_value">Wait until visible explosion before acting</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 2: Civilian Protection and Crowd Control -->
+        <record id="slide_drone_attack_m2_crowd_control" model="slide.slide">
+            <field name="name">Module 2: Civilian Protection and Crowd Control</field>
+            <field name="channel_id" ref="elearning_course_drone_attack_procedures"/>
+            <field name="sequence">20</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Module 2: Civilian Protection and Crowd Control&lt;/h2&gt;
+                &lt;p&gt;Curiosity during an aerial threat increases risk. The guard must quickly control movement and reduce group vulnerability.&lt;/p&gt;
+
+                &lt;h3&gt;Immediate Public Control Rules&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Do not allow people to stop and watch the sky.&lt;/li&gt;
+                    &lt;li&gt;Issue clear, firm instructions and move people without argument.&lt;/li&gt;
+                    &lt;li&gt;Direct everyone immediately to designated safe areas.&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Movement Strategy to Reduce Casualties&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Divide crowds into smaller separate groups so they do not become a single target.&lt;/li&gt;
+                    &lt;li&gt;Move people at a side angle away from the drone's path.&lt;/li&gt;
+                    &lt;li&gt;Guide people behind solid walls or any low ground.&lt;/li&gt;
+                    &lt;li&gt;Keep everyone away from vehicles, fuel tanks, and power poles.&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Priority Support Group&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Assist children and elderly first.&lt;/li&gt;
+                    &lt;li&gt;Assign nearby adults to support people with reduced mobility.&lt;/li&gt;
+                    &lt;li&gt;Keep communication calm and repetitive to prevent panic spread.&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_drone_attack_m2_quiz" model="slide.slide">
+            <field name="name">Module 2: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_drone_attack_procedures"/>
+            <field name="sequence">21</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_drone_attack_m2_q1" model="slide.question">
+            <field name="question">Why should crowds be split into smaller groups during a drone attack?</field>
+            <field name="slide_id" ref="slide_drone_attack_m2_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_drone_attack_m2_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m2_q1"/>
+            <field name="text_value">To avoid becoming a single concentrated target</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_drone_attack_m2_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m2_q1"/>
+            <field name="text_value">To make headcount impossible for responders</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_drone_attack_m2_q2" model="slide.question">
+            <field name="question">Which direction is safer when moving people away from a drone path?</field>
+            <field name="slide_id" ref="slide_drone_attack_m2_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_drone_attack_m2_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m2_q2"/>
+            <field name="text_value">At a side angle away from the path</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_drone_attack_m2_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m2_q2"/>
+            <field name="text_value">Straight under the drone to pass beneath it</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 3: Blast Protection and Building Shelter -->
+        <record id="slide_drone_attack_m3_blast_shelter" model="slide.slide">
+            <field name="name">Module 3: Blast Protection and Building Shelter</field>
+            <field name="channel_id" ref="elearning_course_drone_attack_procedures"/>
+            <field name="sequence">30</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Module 3: Blast Protection and Building Shelter&lt;/h2&gt;
+                &lt;p&gt;When immediate shelter is limited, your instructions must be precise and physically demonstrated.&lt;/p&gt;
+
+                &lt;h3&gt;No-Cover Emergency Body Position&lt;/h3&gt;
+                &lt;p&gt;If no nearby cover exists, instruct and demonstrate:&lt;/p&gt;
+                &lt;ol&gt;
+                    &lt;li&gt;Lie flat on your stomach.&lt;/li&gt;
+                    &lt;li&gt;Point your feet toward the direction of the explosion.&lt;/li&gt;
+                    &lt;li&gt;Cover your head and ears with your hands.&lt;/li&gt;
+                    &lt;li&gt;Open your mouth slightly to reduce pressure-wave impact.&lt;/li&gt;
+                &lt;/ol&gt;
+
+                &lt;h3&gt;Building Interior Protection Rules&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Move everyone away from glass windows immediately.&lt;/li&gt;
+                    &lt;li&gt;Use interior corridors and lower floors for cover.&lt;/li&gt;
+                    &lt;li&gt;Use stairs only. Do not allow elevator use.&lt;/li&gt;
+                    &lt;li&gt;Ask people to shelter under sturdy tables where available.&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Successive Wave Discipline&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Stay alert. Attacks may come in successive waves.&lt;/li&gt;
+                    &lt;li&gt;Do not allow people to leave shelter points too early.&lt;/li&gt;
+                    &lt;li&gt;Wait for official authority clearance before release.&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_drone_attack_m3_quiz" model="slide.slide">
+            <field name="name">Module 3: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_drone_attack_procedures"/>
+            <field name="sequence">31</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_drone_attack_m3_q1" model="slide.question">
+            <field name="question">What is the correct instruction regarding elevators during shelter movement?</field>
+            <field name="slide_id" ref="slide_drone_attack_m3_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_drone_attack_m3_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m3_q1"/>
+            <field name="text_value">Do not use elevators; move by stairs</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_drone_attack_m3_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m3_q1"/>
+            <field name="text_value">Elevators are preferred for fast descent</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_drone_attack_m3_q2" model="slide.question">
+            <field name="question">Which body position is correct when no cover is available?</field>
+            <field name="slide_id" ref="slide_drone_attack_m3_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_drone_attack_m3_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m3_q2"/>
+            <field name="text_value">Lie flat, feet toward blast direction, cover head and ears</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_drone_attack_m3_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m3_q2"/>
+            <field name="text_value">Stand and run directly toward nearest window exit</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 4: Casualty Care and Scene Control -->
+        <record id="slide_drone_attack_m4_casualty_scene" model="slide.slide">
+            <field name="name">Module 4: Casualty Care and Scene Control</field>
+            <field name="channel_id" ref="elearning_course_drone_attack_procedures"/>
+            <field name="sequence">40</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.5</field>
+            <field name="html_content">
+                &lt;h2&gt;Module 4: Casualty Care and Scene Control&lt;/h2&gt;
+                &lt;p&gt;After immediate protection, the guard must stabilize injuries while controlling secondary risks.&lt;/p&gt;
+
+                &lt;h3&gt;Immediate Injury Response&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;If there are injuries, bring the first aid kit immediately.&lt;/li&gt;
+                    &lt;li&gt;Request help from anyone with first aid experience.&lt;/li&gt;
+                    &lt;li&gt;Prioritize stopping bleeding with direct pressure on wounds.&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Debris and Hazard Discipline&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Do not allow anyone to touch debris or unexploded parts.&lt;/li&gt;
+                    &lt;li&gt;Create a no-entry perimeter around suspicious remains.&lt;/li&gt;
+                    &lt;li&gt;Preserve site condition for specialist authority handling.&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Information Security&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Do not allow filming of strike locations.&lt;/li&gt;
+                    &lt;li&gt;Instruct everyone not to share videos or tactical details.&lt;/li&gt;
+                    &lt;li&gt;Control rumor spread by using one clear authorized message.&lt;/li&gt;
+                &lt;/ul&gt;
+            </field>
+        </record>
+
+        <record id="slide_drone_attack_m4_quiz" model="slide.slide">
+            <field name="name">Module 4: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_drone_attack_procedures"/>
+            <field name="sequence">41</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_drone_attack_m4_q1" model="slide.question">
+            <field name="question">What is the first medical priority mentioned in this course?</field>
+            <field name="slide_id" ref="slide_drone_attack_m4_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_drone_attack_m4_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m4_q1"/>
+            <field name="text_value">Stop severe bleeding using direct pressure</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_drone_attack_m4_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m4_q1"/>
+            <field name="text_value">Move all casualties immediately regardless of risk</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_drone_attack_m4_q2" model="slide.question">
+            <field name="question">What should be done with debris and unexploded parts?</field>
+            <field name="slide_id" ref="slide_drone_attack_m4_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_drone_attack_m4_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m4_q2"/>
+            <field name="text_value">Keep people away and do not touch them</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_drone_attack_m4_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m4_q2"/>
+            <field name="text_value">Collect samples for social media evidence</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Module 5: Vehicle and Roadside Survival Procedures -->
+        <record id="slide_drone_attack_m5_vehicle" model="slide.slide">
+            <field name="name">Module 5: Vehicle and Roadside Survival Procedures</field>
+            <field name="channel_id" ref="elearning_course_drone_attack_procedures"/>
+            <field name="sequence">50</field>
+            <field name="slide_category">article</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.4</field>
+            <field name="html_content">
+                &lt;h2&gt;Module 5: Vehicle and Roadside Survival Procedures&lt;/h2&gt;
+                &lt;p&gt;If explosions occur while driving, your decisions must prioritize immediate protection and hazard avoidance.&lt;/p&gt;
+
+                &lt;h3&gt;While Driving During Explosions&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Slow down immediately and pull over safely to the side.&lt;/li&gt;
+                    &lt;li&gt;Avoid bridges, power poles, and exposed utility structures.&lt;/li&gt;
+                    &lt;li&gt;If a nearby building is available, enter and shelter inside.&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Open Area Vehicle Shelter&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Remain inside the vehicle when no better shelter exists.&lt;/li&gt;
+                    &lt;li&gt;Turn off the engine.&lt;/li&gt;
+                    &lt;li&gt;Stay below the level of vehicle windows.&lt;/li&gt;
+                &lt;/ul&gt;
+
+                &lt;h3&gt;Final Professional Standard&lt;/h3&gt;
+                &lt;p&gt;People usually follow the security guard. Stay calm, model correct behavior, and maintain strict procedure discipline until authorities confirm safety.&lt;/p&gt;
+            </field>
+        </record>
+
+        <record id="slide_drone_attack_m5_quiz" model="slide.slide">
+            <field name="name">Module 5: Knowledge Check</field>
+            <field name="channel_id" ref="elearning_course_drone_attack_procedures"/>
+            <field name="sequence">51</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.1</field>
+        </record>
+
+        <record id="quiz_drone_attack_m5_q1" model="slide.question">
+            <field name="question">If blasts occur while driving and no safe building is nearby, what should you do?</field>
+            <field name="slide_id" ref="slide_drone_attack_m5_quiz"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_drone_attack_m5_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m5_q1"/>
+            <field name="text_value">Stay in vehicle, turn off engine, stay below window level</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_drone_attack_m5_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m5_q1"/>
+            <field name="text_value">Stop under a bridge for maximum overhead cover</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_drone_attack_m5_q2" model="slide.question">
+            <field name="question">Who should determine when sheltered people can leave?</field>
+            <field name="slide_id" ref="slide_drone_attack_m5_quiz"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_drone_attack_m5_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m5_q2"/>
+            <field name="text_value">Authorized authorities after official safety announcement</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_drone_attack_m5_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_m5_q2"/>
+            <field name="text_value">The first person who feels calm enough to leave</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <!-- Final Assessment -->
+        <record id="slide_drone_attack_final" model="slide.slide">
+            <field name="name">Final Assessment: Drone Attack Procedures</field>
+            <field name="channel_id" ref="elearning_course_drone_attack_procedures"/>
+            <field name="sequence">60</field>
+            <field name="slide_category">quiz</field>
+            <field name="is_published">True</field>
+            <field name="completion_time">0.2</field>
+        </record>
+
+        <record id="quiz_drone_attack_final_q1" model="slide.question">
+            <field name="question">What is the guard's top priority at first contact with a suspected drone threat?</field>
+            <field name="slide_id" ref="slide_drone_attack_final"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="quiz_drone_attack_final_q1_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_final_q1"/>
+            <field name="text_value">Protect self and quickly move the public toward safe areas</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_drone_attack_final_q1_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_final_q1"/>
+            <field name="text_value">Remain in place and wait for visual confirmation of impact</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_drone_attack_final_q2" model="slide.question">
+            <field name="question">Which action is prohibited due to operational security risk?</field>
+            <field name="slide_id" ref="slide_drone_attack_final"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="quiz_drone_attack_final_q2_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_final_q2"/>
+            <field name="text_value">Filming and sharing strike-location videos</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_drone_attack_final_q2_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_final_q2"/>
+            <field name="text_value">Reporting suspicious sounds and low-altitude drone movement</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_drone_attack_final_q3" model="slide.question">
+            <field name="question">What is the correct first-aid focus in this training for visible trauma?</field>
+            <field name="slide_id" ref="slide_drone_attack_final"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="quiz_drone_attack_final_q3_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_final_q3"/>
+            <field name="text_value">Stop severe bleeding using direct pressure</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_drone_attack_final_q3_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_final_q3"/>
+            <field name="text_value">Delay care until all documentation is completed</field>
+            <field name="is_correct">False</field>
+        </record>
+
+        <record id="quiz_drone_attack_final_q4" model="slide.question">
+            <field name="question">When can people be released from shelter positions?</field>
+            <field name="slide_id" ref="slide_drone_attack_final"/>
+            <field name="sequence">4</field>
+        </record>
+        <record id="quiz_drone_attack_final_q4_a1" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_final_q4"/>
+            <field name="text_value">Only after official authority clearance</field>
+            <field name="is_correct">True</field>
+        </record>
+        <record id="quiz_drone_attack_final_q4_a2" model="slide.answer">
+            <field name="question_id" ref="quiz_drone_attack_final_q4"/>
+            <field name="text_value">As soon as the noise temporarily stops</field>
+            <field name="is_correct">False</field>
+        </record>
+
+    </data>
+</odoo>

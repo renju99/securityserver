@@ -647,6 +647,11 @@ class GuardPortal(CustomerPortal):
                     'progress': enrollment.completion if enrollment else 0,
                     'passed': enrollment.passed_course if enrollment else False,
                     'certification_status': enrollment.certification_status if enrollment else 'none',
+                    'certification_expiry': (
+                        enrollment.certification_expiry_date.strftime('%Y-%m-%d')
+                        if enrollment and enrollment.certification_expiry_date
+                        else None
+                    ),
                 })
 
             values.update({

@@ -2,7 +2,7 @@
 """CCTV Camera Model."""
 
 from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -176,16 +176,6 @@ class CCTVCamera(models.Model):
         return result
     
     def action_play_stream(self):
-        """Open camera stream viewer in a new window."""
+        """Live CCTV viewing is not exposed in the web UI."""
         self.ensure_one()
-        if self.status != 'online':
-            raise ValidationError(_('Camera is not online. Cannot play stream.'))
-        
-        if not self.is_active:
-            raise ValidationError(_('Camera is not active. Cannot play stream.'))
-        
-        return {
-            'type': 'ir.actions.act_url',
-            'url': f'/guardpro/cctv/view/{self.id}',
-            'target': 'new',
-        }
+        raise UserError(_('CCTV monitoring is not available.'))

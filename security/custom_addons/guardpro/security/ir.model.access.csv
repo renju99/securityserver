@@ -551,6 +551,11 @@ access_shift_swap_request_client_user,shift.swap.request.client.user,model_shift
 access_visitor_watchlist_guard_portal,visitor.watchlist.guard.portal,model_visitor_watchlist,group_guardpro_guard_portal,1,0,0,0
 access_visitor_watchlist_client_user,visitor.watchlist.client.user,model_visitor_watchlist,group_guardpro_client_user,1,0,0,0
 access_visitor_management_client_user,visitor.management.client.user,model_visitor_management,group_guardpro_client_user,1,0,0,0
+access_visitor_host_reception,visitor.host.reception,model_visitor_host,group_guardpro_reception,1,1,1,0
+access_visitor_host_supervisor,visitor.host.supervisor,model_visitor_host,group_guardpro_supervisor,1,1,1,1
+access_visitor_host_manager,visitor.host.manager,model_visitor_host,group_guardpro_manager,1,1,1,1
+access_visitor_host_admin,visitor.host.admin,model_visitor_host,group_guardpro_admin,1,1,1,1
+access_visitor_host_client_user,visitor.host.client.user,model_visitor_host,group_guardpro_client_user,1,0,0,0
 access_lost_found_item_client_user,lost.found.item.client.user,model_lost_found_item,group_guardpro_client_user,1,0,0,0
 access_package_management_client_user,package.management.client.user,model_package_management,group_guardpro_client_user,1,0,0,0
 access_key_register_client_user,key.register.client.user,model_key_register,group_guardpro_client_user,1,0,0,0

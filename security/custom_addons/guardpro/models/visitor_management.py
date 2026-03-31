@@ -8,6 +8,9 @@ import qrcode
 import base64
 from io import BytesIO
 import logging
+from datetime import datetime
+import pytz
+import xlsxwriter
 
 _logger = logging.getLogger(__name__)
 
@@ -143,6 +146,12 @@ class VisitorManagement(models.Model):
         required=True,
         tracking=True,
         help='Name of the person being visited'
+    )
+    host_id = fields.Many2one(
+        'visitor.host',
+        string='Host',
+        tracking=True,
+        help='Select host from maintained host directory'
     )
     host_phone = fields.Char(
         string='Host Phone',
@@ -380,6 +389,13 @@ class VisitorManagement(models.Model):
             if 'notes' in vals and vals['notes']:
                 vals['notes'] = html_sanitize(vals['notes'])
             
+            # Sync host details from selected host directory entry.
+            if vals.get('host_id'):
+                host = self.env['visitor.host'].browse(vals['host_id'])
+                if host.exists():
+                    vals['host_name'] = host.display_name
+                    vals['host_email'] = host.email
+
             # Normalize email addresses
             if 'email' in vals and vals['email']:
                 try:
@@ -405,6 +421,13 @@ class VisitorManagement(models.Model):
     
     def write(self, vals):
         """Override write to sanitize inputs on update"""
+        # Sync host details from selected host directory entry.
+        if vals.get('host_id'):
+            host = self.env['visitor.host'].browse(vals['host_id'])
+            if host.exists():
+                vals['host_name'] = host.display_name
+                vals['host_email'] = host.email
+
         # Sanitize HTML input fields
         if 'purpose_details' in vals and vals['purpose_details']:
             vals['purpose_details'] = html_sanitize(vals['purpose_details'])
@@ -448,6 +471,13 @@ class VisitorManagement(models.Model):
                 )
         
         return super().write(vals)
+
+    @api.onchange('host_id')
+    def _onchange_host_id(self):
+        """Autofill host name/email when selecting from dropdown."""
+        if self.host_id:
+            self.host_name = self.host_id.display_name
+            self.host_email = self.host_id.email
 
     @api.depends('qr_code')
     def _compute_qr_image(self):
@@ -544,14 +574,7 @@ class VisitorManagement(models.Model):
                 'denied_reason': _('Visitor found in watchlist: %s') % watchlist_entry.reason
             })
             
-            # Create activity for supervisor
-            self.activity_schedule(
-                'mail.mail_activity_data_warning',
-                summary=_('Watchlist Hit: %s') % self.name,
-                note=_('Visitor %s (ID: %s) is on the watchlist.\nReason: %s') % (
-                    self.name, self.id_number, watchlist_entry.reason
-                )
-            )
+            # Planned activity intentionally disabled.
             
             _logger.warning(
                 'Watchlist hit for visitor %s (ID: %s)',
@@ -634,10 +657,10 @@ class VisitorManagement(models.Model):
         if not self.host_email:
             raise UserError(_('Host email is not provided.'))
         
-        # Send email notification
-        template = self.env.ref('guardpro.email_template_visitor_arrival', raise_if_not_found=False)
-        if template:
-            template.send_mail(self.id, force_send=True)
+        _logger.info(
+            'Email notifications are disabled: skipped visitor-arrival host email for visitor %s',
+            self.name
+        )
         
         self.write({
             'host_notified': True,
@@ -722,15 +745,7 @@ class VisitorManagement(models.Model):
             ('is_overdue_checkout', '=', True)
         ])
         
-        for visitor in overdue_visitors:
-            # Create activity
-            visitor.activity_schedule(
-                'mail.mail_activity_data_warning',
-                summary=_('Overdue Visitor: %s') % visitor.name,
-                note=_('Visitor %s at %s has exceeded expected visit duration.') % (
-                    visitor.name, visitor.site_id.name
-                )
-            )
+        # Planned activities intentionally disabled for overdue visitors.
         
         _logger.info('Found %d overdue visitors', len(overdue_visitors))
         return True
@@ -750,6 +765,222 @@ class VisitorManagement(models.Model):
         _logger.info('Expired %d old pre-registrations', len(old_registrations))
         return True
 
+    @api.model
+    def send_daily_visitor_log_email(self):
+        """Cron job: send daily visitor log summary at 6 PM Dubai time."""
+        dubai_tz = pytz.timezone('Asia/Dubai')
+        now_dubai = datetime.now(dubai_tz)
+        today_dubai = now_dubai.date()
+
+        # Run hourly via cron, but only send during 18:00 hour.
+        if now_dubai.hour != 18:
+            return True
+
+        config = self.env['ir.config_parameter'].sudo()
+        sent_key = 'guardpro.daily_visitor_log_last_sent_date'
+        if config.get_param(sent_key) == str(today_dubai):
+            return True
+
+        visitors = self.search([('visit_date', '=', today_dubai)])
+        total = len(visitors)
+        checked_in = len(visitors.filtered(lambda v: v.state == 'checked_in'))
+        checked_out = len(visitors.filtered(lambda v: v.state == 'checked_out'))
+        denied = len(visitors.filtered(lambda v: v.state == 'denied'))
+        pre_registered = len(visitors.filtered(lambda v: v.state == 'pre_registered'))
+
+        by_site = {}
+        for visitor in visitors:
+            site_name = visitor.site_id.name if visitor.site_id else 'Unassigned Site'
+            by_site[site_name] = by_site.get(site_name, 0) + 1
+
+        rows = ''.join(
+            f'<tr><td style="padding:6px 10px;border:1px solid #ddd;">{site}</td>'
+            f'<td style="padding:6px 10px;border:1px solid #ddd;text-align:right;">{count}</td></tr>'
+            for site, count in sorted(by_site.items())
+        ) or '<tr><td style="padding:6px 10px;border:1px solid #ddd;" colspan="2">No visitor entries today.</td></tr>'
+
+        body_html = (
+            f'<div style="font-family:Arial,sans-serif;">'
+            f'<h3>Daily Visitor Log - {today_dubai}</h3>'
+            f'<p><strong>Total:</strong> {total}</p>'
+            f'<ul>'
+            f'<li>Checked In: {checked_in}</li>'
+            f'<li>Checked Out: {checked_out}</li>'
+            f'<li>Denied: {denied}</li>'
+            f'<li>Pre-Registered: {pre_registered}</li>'
+            f'</ul>'
+            f'<h4>Visitors by Site</h4>'
+            f'<table style="border-collapse:collapse;min-width:420px;">'
+            f'<thead><tr><th style="padding:6px 10px;border:1px solid #ddd;text-align:left;">Site</th>'
+            f'<th style="padding:6px 10px;border:1px solid #ddd;text-align:right;">Count</th></tr></thead>'
+            f'<tbody>{rows}</tbody></table>'
+            f'<p style="margin-top:16px;">A detailed Excel file is attached with full visitor records.</p>'
+            f'</div>'
+        )
+
+        xlsx_data = self._build_daily_visitor_log_xlsx(visitors, today_dubai, dubai_tz)
+
+        # Use a fixed, verified sender identity for SMTP providers like SendGrid.
+        sender = 'noreply@berkeleyuae.com'
+        mail = self.env['mail.mail'].sudo().create({
+            'subject': f'Daily Visitor Log - {today_dubai}',
+            'email_from': sender,
+            'email_to': 'khristine@berkeleyuae.com',
+            'body_html': body_html,
+            'attachment_ids': [(0, 0, {
+                'name': f'visitor_log_{today_dubai}.xlsx',
+                'datas': base64.b64encode(xlsx_data),
+                'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            })],
+            'auto_delete': False,
+        })
+        mail.send()
+
+        config.set_param(sent_key, str(today_dubai))
+        _logger.info('Daily visitor log email sent for %s to khristine@berkeleyuae.com', today_dubai)
+        return True
+
+    @api.model
+    def _build_daily_visitor_log_xlsx(self, visitors, report_date, dubai_tz):
+        """Build an XLSX workbook containing detailed visitor records."""
+        output = BytesIO()
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+        worksheet = workbook.add_worksheet('Visitor Log')
+
+        header_fmt = workbook.add_format({'bold': True, 'bg_color': '#E8EEF7', 'border': 1})
+        cell_fmt = workbook.add_format({'border': 1})
+
+        headers = [
+            'Visitor Name', 'Visitor Type', 'State', 'Visit Date',
+            'Check-in (Dubai)', 'Check-out (Dubai)',
+            'Site', 'Host Name', 'Host Email', 'Host Phone',
+            'Purpose', 'Purpose Details',
+            'Company', 'Mobile Number', 'Email',
+            'ID Type', 'ID Number', 'Badge Number',
+            'Vehicle Number', 'Nationality', 'Date of Birth', 'Gender',
+            'ID Issue Date', 'ID Expiry Date',
+            'Pre-Registered', 'Walk-in', 'Watchlist Hit',
+            'Denied Reason', 'Expected Duration (hrs)', 'Actual Duration (hrs)',
+            'Created On (Dubai)'
+        ]
+
+        for col, title in enumerate(headers):
+            worksheet.write(0, col, title, header_fmt)
+            worksheet.set_column(col, col, 20)
+
+        row = 1
+        for visitor in visitors:
+            checkin = visitor.checkin_time
+            checkout = visitor.checkout_time
+            created = visitor.create_date
+
+            checkin_local = fields.Datetime.context_timestamp(
+                visitor.with_context(tz='Asia/Dubai'), checkin
+            ) if checkin else False
+            checkout_local = fields.Datetime.context_timestamp(
+                visitor.with_context(tz='Asia/Dubai'), checkout
+            ) if checkout else False
+            created_local = fields.Datetime.context_timestamp(
+                visitor.with_context(tz='Asia/Dubai'), created
+            ) if created else False
+
+            values = [
+                visitor.name or '',
+                dict(visitor._fields['visitor_type'].selection).get(visitor.visitor_type, '') if visitor.visitor_type else '',
+                dict(visitor._fields['state'].selection).get(visitor.state, '') if visitor.state else '',
+                str(visitor.visit_date or ''),
+                checkin_local.strftime('%Y-%m-%d %H:%M:%S') if checkin_local else '',
+                checkout_local.strftime('%Y-%m-%d %H:%M:%S') if checkout_local else '',
+                visitor.site_id.name or '',
+                visitor.host_name or '',
+                visitor.host_email or '',
+                visitor.host_phone or '',
+                dict(visitor._fields['visit_purpose'].selection).get(visitor.visit_purpose, '') if visitor.visit_purpose else '',
+                visitor.purpose_details or '',
+                visitor.company or '',
+                visitor.mobile_number or '',
+                visitor.email or '',
+                dict(visitor._fields['id_type'].selection).get(visitor.id_type, '') if visitor.id_type else '',
+                visitor.id_number or '',
+                visitor.badge_number or '',
+                visitor.vehicle_number or '',
+                visitor.nationality or '',
+                str(visitor.date_of_birth or ''),
+                dict(visitor._fields['gender'].selection).get(visitor.gender, '') if visitor.gender else '',
+                str(visitor.id_issue_date or ''),
+                str(visitor.id_expiry_date or ''),
+                'Yes' if visitor.pre_registered else 'No',
+                'Yes' if getattr(visitor, 'walk_in', False) else 'No',
+                'Yes' if visitor.watchlist_hit else 'No',
+                visitor.denied_reason or '',
+                visitor.expected_duration or 0.0,
+                visitor.actual_duration or 0.0,
+                created_local.strftime('%Y-%m-%d %H:%M:%S') if created_local else '',
+            ]
+
+            for col, value in enumerate(values):
+                worksheet.write(row, col, value, cell_fmt)
+            row += 1
+
+        worksheet.freeze_panes(1, 0)
+        workbook.close()
+        output.seek(0)
+        return output.read()
+
+
+class VisitorHost(models.Model):
+    """Host directory used for searchable dropdown in visitor entries."""
+    _name = 'visitor.host'
+    _description = 'Visitor Host'
+    _order = 'first_name, last_name, id'
+    _rec_name = 'display_name'
+
+    first_name = fields.Char(string='First Name', required=True, index=True)
+    last_name = fields.Char(string='Last Name', required=True, index=True)
+    email = fields.Char(string='Email', required=True, index=True)
+    active = fields.Boolean(default=True)
+    display_name = fields.Char(string='Name', compute='_compute_display_name', store=True)
+
+    _sql_constraints = [
+        ('visitor_host_email_unique', 'unique(email)', 'Host email must be unique.'),
+    ]
+
+    @api.depends('first_name', 'last_name')
+    def _compute_display_name(self):
+        for rec in self:
+            rec.display_name = f"{(rec.first_name or '').strip()} {(rec.last_name or '').strip()}".strip()
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('email'):
+                vals['email'] = email_normalize(vals['email'])
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if vals.get('email'):
+            vals['email'] = email_normalize(vals['email'])
+        return super().write(vals)
+
+    def name_get(self):
+        result = []
+        for rec in self:
+            label = rec.display_name or f"{rec.first_name or ''} {rec.last_name or ''}".strip()
+            if rec.email:
+                label = f"{label} ({rec.email})"
+            result.append((rec.id, label))
+        return result
+
+    @api.model
+    def _name_search(self, name='', args=None, operator='ilike', limit=100, order=None):
+        args = list(args or [])
+        if name:
+            args = ['|', '|', '|',
+                    ('display_name', operator, name),
+                    ('first_name', operator, name),
+                    ('last_name', operator, name),
+                    ('email', operator, name)] + args
+        return self._search(args, limit=limit, order=order)
 
 
 class VisitorWatchlist(models.Model):

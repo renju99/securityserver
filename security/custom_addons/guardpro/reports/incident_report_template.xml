@@ -1,5 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Reusable Map Snippet -->
+    <template id="incident_map_snippet">
+        <div class="row mb-3" t-if="doc.get_static_map_url()">
+            <div class="col-12 text-center">
+                <div style="border: 1px solid #dee2e6; padding: 10px; background-color: #f8f9fa;">
+                    <img t-att-src="doc.get_static_map_url()" style="max-height: 250px; width: 100%; object-fit: cover; border: 1px solid #ccc;"/>
+                    <div class="mt-2">
+                        <small>
+                            <a t-att-href="doc.get_google_maps_link()" style="color: #007bff; text-decoration: none;" target="_blank">
+                                📍 View Location on Google Maps
+                            </a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <!-- Incident Report PDF Template -->
     <template id="incident_report_pdf_template">
         <t t-call="web.html_container">
@@ -87,7 +104,6 @@
                                 </table>
                             </div>
                         </div>
-
                         <!-- Location Information -->
                         <div class="row mb-3" t-if="doc.location or doc.latitude">
                             <div class="col-12">
@@ -102,6 +118,7 @@
                                         <td><t t-esc="doc.latitude"/>, <t t-esc="doc.longitude"/></td>
                                     </tr>
                                 </table>
+                                <t t-call="guardpro.incident_map_snippet"/>
                             </div>
                         </div>
 

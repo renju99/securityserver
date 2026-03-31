@@ -605,18 +605,7 @@ class SLAPerformance(models.Model):
             ('sla_id.state', '=', 'active')
         ])
 
-        for perf in breached_performance:
-            # Create activity for SLA manager
-            perf.sla_id.activity_schedule(
-                'mail.mail_activity_data_warning',
-                summary=_('SLA KPI Breach: %s') % perf.kpi_id.name,
-                note=_('KPI %s is below target.\nActual: %s\nTarget: %s\nPerformance: %.1f%%') % (
-                    perf.kpi_id.name,
-                    perf.actual_value,
-                    perf.target_value,
-                    perf.performance_percentage
-                )
-            )
+        # Planned activities intentionally disabled for SLA KPI breaches.
 
         _logger.info('Sent breach alerts for %d SLA KPIs', len(breached_performance))
         return True

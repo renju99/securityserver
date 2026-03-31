@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="incident_cat_fire_emergency" model="incident.category">
+            <field name="name">Fire Alarm Emergency</field>
+            <field name="code">FIRE_EMG</field>
+            <field name="sequence">65</field>
+            <field name="color">1</field>
+        </record>
+    </data>
+</odoo>

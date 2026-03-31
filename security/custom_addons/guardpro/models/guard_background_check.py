@@ -241,13 +241,7 @@ class GuardBackgroundCheck(models.Model):
             ('expiry_date', '>=', today)
         ])
         
-        for check in checks:
-            check.activity_schedule(
-                'mail.mail_activity_data_todo',
-                summary=_('Background Check Expiring'),
-                note=_('Background check expires on %s. Schedule renewal.') % check.expiry_date,
-                user_id=check.guard_id.supervisor_id.id if check.guard_id.supervisor_id else self.env.user.id
-            )
+        # Planned activities intentionally disabled for expiring background checks.
         
         # Mark expired checks
         expired_checks = self.search([

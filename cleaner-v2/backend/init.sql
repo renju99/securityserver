@@ -15,8 +15,8 @@ CREATE TABLE IF NOT EXISTS projects (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Washrooms
-CREATE TABLE IF NOT EXISTS washrooms (
+-- Locations (washrooms, bedrooms, and other cleanable areas)
+CREATE TABLE IF NOT EXISTS locations (
     id SERIAL PRIMARY KEY,
     project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
@@ -45,8 +45,9 @@ CREATE TABLE IF NOT EXISTS employees (
 -- Cleaning Schedules
 CREATE TABLE IF NOT EXISTS schedules (
     id SERIAL PRIMARY KEY,
-    washroom_id INTEGER REFERENCES washrooms(id) ON DELETE CASCADE,
+    location_id INTEGER REFERENCES locations(id) ON DELETE CASCADE,
     employee_id INTEGER REFERENCES employees(id) ON DELETE SET NULL,
+    location_details TEXT,
     start_time TIME NOT NULL, -- e.g., '08:00:00'
     end_time TIME,
     interval_value NUMERIC NOT NULL DEFAULT 2.0,
@@ -60,7 +61,7 @@ CREATE TABLE IF NOT EXISTS schedules (
 CREATE TABLE IF NOT EXISTS attendance (
     id SERIAL PRIMARY KEY,
     employee_id INTEGER REFERENCES employees(id),
-    washroom_id INTEGER REFERENCES washrooms(id),
+    location_id INTEGER REFERENCES locations(id),
     project_id INTEGER REFERENCES projects(id),
     schedule_id INTEGER REFERENCES schedules(id),
     check_in TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -87,11 +88,23 @@ CREATE TABLE IF NOT EXISTS checklist_items (
     active BOOLEAN DEFAULT TRUE
 );
 
--- Cleaning Reports (Linked to attendance)
+-- Checklist results per attendance (saved when cleaner submits; report created only by manager)
+CREATE TABLE IF NOT EXISTS attendance_checklist_lines (
+    id SERIAL PRIMARY KEY,
+    attendance_id INTEGER REFERENCES attendance(id) ON DELETE CASCADE,
+    item_id INTEGER REFERENCES checklist_items(id),
+    checked BOOLEAN DEFAULT FALSE,
+    notes TEXT
+);
+
+-- Cleaning Reports (created manually by manager from completed attendance)
 CREATE TABLE IF NOT EXISTS reports (
     id SERIAL PRIMARY KEY,
     attendance_id INTEGER REFERENCES attendance(id) ON DELETE CASCADE,
     employee_id INTEGER REFERENCES employees(id),
+    location_id INTEGER REFERENCES locations(id),
+    checklist_type VARCHAR(80),
+    period_label VARCHAR(100),
     date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(20) DEFAULT 'completed',
     notes TEXT
@@ -109,6 +122,6 @@ CREATE TABLE IF NOT EXISTS report_lines (
 
 -- Indexes for performance
 CREATE INDEX idx_attendance_employee ON attendance(employee_id);
-CREATE INDEX idx_attendance_washroom ON attendance(washroom_id);
+CREATE INDEX idx_attendance_location ON attendance(location_id);
 CREATE INDEX idx_attendance_check_in ON attendance(check_in);
-CREATE INDEX idx_washrooms_qr ON washrooms(qr_token);
+CREATE INDEX idx_locations_qr ON locations(qr_token);

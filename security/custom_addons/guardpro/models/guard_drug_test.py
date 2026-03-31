@@ -259,13 +259,7 @@ class GuardDrugTest(models.Model):
             body=_('Test result: POSITIVE (Fail) - Action Required!'),
             subtype_xmlid='mail.mt_comment'
         )
-        # Create activity for supervisor
-        self.activity_schedule(
-            'mail.mail_activity_data_warning',
-            summary=_('Positive Drug Test - Action Required'),
-            note=_('Guard %s tested positive. Immediate action required!') % self.guard_id.name,
-            user_id=self.guard_id.supervisor_id.id if self.guard_id.supervisor_id else self.env.user.id
-        )
+        # Planned activity intentionally disabled.
     
     def action_schedule_retest(self):
         """Schedule a retest"""

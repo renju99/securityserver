@@ -4,12 +4,24 @@ import { LayoutGrid, Globe, MapPin, Users, Calendar, FileText } from 'lucide-rea
 
 import Overview from './admin/Overview';
 import Projects from './admin/Projects';
-import Washrooms from './admin/Washrooms';
+import Locations from './admin/Locations';
 import Staff from './admin/Staff';
 import Schedules from './admin/Schedules';
 import Reports from './admin/Reports';
 
+const isManagerOrAdmin = () => {
+    try {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const role = (user.role || '').toLowerCase();
+        return role === 'manager' || role === 'admin';
+    } catch {
+        return false;
+    }
+};
+
 const AdminDashboard = () => {
+    const canAccessReports = isManagerOrAdmin();
+
     return (
         <div className="admin-page fade-in">
             <aside className="sidebar glass">
@@ -23,8 +35,8 @@ const AdminDashboard = () => {
                     <NavLink to="/admin/projects" className={({ isActive }) => isActive ? "active" : ""}>
                         <Globe size={18} /> Projects
                     </NavLink>
-                    <NavLink to="/admin/washrooms" className={({ isActive }) => isActive ? "active" : ""}>
-                        <MapPin size={18} /> Washrooms
+                    <NavLink to="/admin/locations" className={({ isActive }) => isActive ? "active" : ""}>
+                        <MapPin size={18} /> Locations
                     </NavLink>
                     <NavLink to="/admin/staff" className={({ isActive }) => isActive ? "active" : ""}>
                         <Users size={18} /> Users
@@ -32,9 +44,11 @@ const AdminDashboard = () => {
                     <NavLink to="/admin/schedules" className={({ isActive }) => isActive ? "active" : ""}>
                         <Calendar size={18} /> Schedules
                     </NavLink>
-                    <NavLink to="/admin/reports" className={({ isActive }) => isActive ? "active" : ""}>
-                        <FileText size={18} /> Reports
-                    </NavLink>
+                    {canAccessReports && (
+                        <NavLink to="/admin/reports" className={({ isActive }) => isActive ? "active" : ""}>
+                            <FileText size={18} /> Reports
+                        </NavLink>
+                    )}
                 </nav>
             </aside>
 
@@ -42,10 +56,10 @@ const AdminDashboard = () => {
                 <Routes>
                     <Route path="overview" element={<Overview />} />
                     <Route path="projects" element={<Projects />} />
-                    <Route path="washrooms" element={<Washrooms />} />
+                    <Route path="locations" element={<Locations />} />
                     <Route path="staff" element={<Staff />} />
                     <Route path="schedules" element={<Schedules />} />
-                    <Route path="reports" element={<Reports />} />
+                    <Route path="reports" element={canAccessReports ? <Reports /> : <Navigate to="/admin/overview" replace />} />
                     <Route path="/" element={<Navigate to="overview" replace />} />
                 </Routes>
             </main>

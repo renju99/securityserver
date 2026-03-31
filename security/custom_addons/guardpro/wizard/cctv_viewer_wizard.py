@@ -2,7 +2,7 @@
 """CCTV Viewer Wizard - Site and Camera Selection."""
 
 from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -78,20 +78,9 @@ class CCTVViewerWizard(models.TransientModel):
         self.camera_id = False
 
     def action_view_camera(self):
-        """Open camera stream viewer."""
+        """Live CCTV viewing is not exposed in the web UI."""
         self.ensure_one()
-        if not self.camera_id:
-            raise ValidationError(_('Please select a camera to view.'))
-        
-        if self.camera_id.status != 'online':
-            raise ValidationError(_('Selected camera is not online. Please select an online camera.'))
-        
-        # Return action to open stream viewer in new window
-        return {
-            'type': 'ir.actions.act_url',
-            'url': f'/guardpro/cctv/view/{self.camera_id.id}',
-            'target': 'new',
-        }
+        raise UserError(_('CCTV monitoring is not available.'))
 
 
 

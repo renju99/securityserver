@@ -29,6 +29,11 @@
                     <t t-esc="state.error"/>
                 </div>
                 
+                <!-- Incoming Stream Indicator -->
+                <div class="alert alert-info incoming-stream-indicator" t-if="state.isIncomingStream" role="alert">
+                    <i class="fa fa-signal fa-beat"/> <strong>LIVE:</strong> Receiving from <t t-esc="state.incomingSender"/>...
+                </div>
+                
                 <!-- Main Push-to-Talk Interface -->
                 <div class="push-to-talk-main" t-if="state.currentChannel">
                     <!-- Recording Button -->

@@ -466,6 +466,46 @@
             <field name="minimum_passing_score">85</field>
         </record>
 
+        <!-- Course 23: Drone Attack Emergency Procedures -->
+        <record id="elearning_course_drone_attack_procedures" model="slide.channel">
+            <field name="name">Drone Attack Emergency Procedures for Security Guards</field>
+            <field name="description">Critical guidance for security guards on personal safety, public protection, and immediate response during suspected drone attack incidents.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">3</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">emergency</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">85</field>
+        </record>
+
+        <!-- Course 24: Security Cordons and Incident Site Measures -->
+        <record id="elearning_course_security_cordons_incident_site" model="slide.channel">
+            <field name="name">Security Cordons and Measures at Incident Sites</field>
+            <field name="description">Detailed practical training for security guards on emergency definitions, cordon setup, crowd management, and protective measures at incident locations.</field>
+            <field name="channel_type">training</field>
+            <field name="enroll">public</field>
+            <field name="visibility">public</field>
+            <field name="is_published" eval="True"/>
+            <field name="allow_comment">True</field>
+            <field name="promote_strategy">most_voted</field>
+            <field name="total_time">3.5</field>
+            <field name="tag_ids" eval="[(6, 0, [ref('elearning_category_security')])]"/>
+            <!-- Guard Training Specific Fields -->
+            <field name="is_guard_training" eval="True"/>
+            <field name="training_category">emergency</field>
+            <field name="is_mandatory_for_guards" eval="True"/>
+            <field name="certification_validity_months">12</field>
+            <field name="minimum_passing_score">85</field>
+        </record>
+
     </data>
 </odoo>
 

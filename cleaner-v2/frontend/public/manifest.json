@@ -1,7 +1,7 @@
 {
     "name": "Cleaner Attendance",
     "short_name": "Cleaner",
-    "description": "Washroom cleaning attendance and checklist tracker",
+    "description": "Cleaning attendance and checklist tracker for locations (washrooms, bedrooms, and more)",
     "start_url": "/cleaner",
     "display": "standalone",
     "background_color": "#0a0a1a",

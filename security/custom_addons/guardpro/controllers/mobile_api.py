@@ -14,6 +14,7 @@ import re
 from datetime import datetime
 from ..common import validators
 from ..common.rate_limiter import rate_limit
+from ..common.video_optimizer import VideoOptimizer
 
 _logger = logging.getLogger(__name__)
 
@@ -26,6 +27,14 @@ class MobileAPIController(http.Controller):
         if not request.env.user or request.env.user._is_public():
             return {'error': 'Authentication required'}, 401
         return None, None
+
+    def _is_video_payload(self, payload):
+        """Detect whether JSON attachment payload contains a video."""
+        name = (payload.get('name') or '').lower()
+        mimetype = (payload.get('mimetype') or payload.get('content_type') or '').lower()
+        if mimetype.startswith('video/'):
+            return True
+        return name.endswith(('.mp4', '.mov', '.avi', '.mkv', '.webm', '.m4v', '.3gp'))
 
     @http.route('/guardpro/api/guard/profile', type='json', auth='user', methods=['POST'], csrf=False)
     def get_guard_profile(self):
@@ -689,17 +698,51 @@ class MobileAPIController(http.Controller):
                 'location': validated['location'],
             }
             
-            # Handle photos
-            if kwargs.get('photos'):
+            # Handle uploaded media
+            media_payloads = []
+            media_payloads.extend(kwargs.get('photos', []) or [])
+            media_payloads.extend(kwargs.get('videos', []) or [])
+            if media_payloads:
                 photos = []
-                for photo_data in kwargs.get('photos', []):
+                videos = []
+                for payload in media_payloads:
+                    payload = payload or {}
+                    payload_name = payload.get('name', 'incident_media')
+                    payload_data = payload.get('data')
+                    if not payload_data:
+                        continue
+
+                    mimetype = (
+                        payload.get('mimetype')
+                        or payload.get('content_type')
+                        or 'application/octet-stream'
+                    )
+                    is_video = self._is_video_payload(payload)
+                    attachment_data = payload_data
+
+                    if is_video:
+                        attachment_data, compressed = VideoOptimizer.optimize_video(
+                            payload_data,
+                            filename=payload_name,
+                        )
+                        if compressed:
+                            mimetype = 'video/mp4'
+
                     attachment = request.env['ir.attachment'].create({
-                        'name': photo_data.get('name', 'incident_photo.jpg'),
-                        'datas': photo_data.get('data'),
+                        'name': payload_name,
+                        'datas': attachment_data,
                         'res_model': 'incident.report',
+                        'mimetype': mimetype,
                     })
-                    photos.append(attachment.id)
-                vals['photo_ids'] = [(6, 0, photos)]
+                    if is_video:
+                        videos.append(attachment.id)
+                    else:
+                        photos.append(attachment.id)
+
+                if photos:
+                    vals['photo_ids'] = [(6, 0, photos)]
+                if videos:
+                    vals['video_ids'] = [(6, 0, videos)]
             
             incident = request.env['incident.report'].create(vals)
             incident.action_submit()

@@ -117,30 +117,10 @@ class EmergencyBroadcast(models.Model):
 
     def _send_broadcast_emails(self, guards):
         """Send email notifications to all target guards."""
-        template = self.env.ref(
-            'guardpro.email_template_emergency_broadcast',
-            raise_if_not_found=False
+        _logger.info(
+            'Email notifications are disabled: skipped emergency broadcast emails for %d guards',
+            len(guards.filtered('email'))
         )
-        if template:
-            for guard in guards:
-                if guard.email:
-                    try:
-                        # Create a temporary context with the guard's email
-                        template.with_context(
-                            email_to=guard.email
-                        ).send_mail(self.id, force_send=False, email_values={
-                            'email_to': guard.email,
-                            'recipient_ids': [(4, guard.user_id.partner_id.id)] if guard.user_id else []
-                        })
-                    except Exception as e:
-                        _logger.warning(
-                            'Failed to send emergency broadcast email to %s: %s',
-                            guard.name, str(e)
-                        )
-            _logger.info(
-                'Emergency broadcast emails queued for %d guards', 
-                len(guards.filtered('email'))
-            )
     
     def action_send_broadcast(self):
         """Send the emergency broadcast to guards."""

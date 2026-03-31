@@ -92,7 +92,7 @@
 
                 <!-- Page Content -->
                 <div class="guardpro-mobile-content pb-5">
-                    <t t-raw="0"/>
+                    <t t-out="0"/>
                 </div>
 
                 <!-- Bottom Navigation -->
@@ -1700,7 +1700,14 @@
                     currentCheckpointId = btn.dataset.checkpointId;
                     currentTourLogId = btn.dataset.tourLogId;
                     currentScanType = btn.dataset.scanType || 'qr';
-                    console.log('[Guard Pro Tours] Opening scanner for checkpoint:', currentCheckpointId);
+                    console.log('[Guard Pro Tours] Opening scanner for checkpoint:', currentCheckpointId, 'Mode:', currentScanType);
+                    
+                    // CRITICAL: Call startNFCScanner immediately on user click to preserve User Gesture context
+                    // This prevents 'NFC Permission request denied' errors in many browsers
+                    if (currentScanType === 'nfc' || currentScanType === 'both') {
+                        // Start NFC in background before modal animation finishes
+                        startNFCScanner().catch(e => console.warn('Delayed NFC start failed:', e));
+                    }
                     
                     // Ensure Bootstrap modal is properly initialized and shown
                     const modalEl = document.getElementById('scannerModal');
@@ -1775,19 +1782,72 @@
                     }
                 }
 
+                // Global bridge for Native NFC (Called from TwaLauncherActivity.kt)
+                window.onNativeNFCScan = function(tagData, serial) {
+                    console.log('[Guard Pro Tours] NFC Tag scanned via Native Bridge:', tagData, serial);
+                    
+                    // Only process if the scanner modal is open and in NFC mode
+                    const nfcContainer = document.getElementById('nfcScannerContainer');
+                    const modalEl = document.getElementById('scannerModal');
+                    
+                    if (nfcContainer && nfcContainer.style.display === 'block' && 
+                        modalEl && modalEl.classList.contains('show')) {
+                        
+                        console.log('[Guard Pro Tours] Modal is active, processing native scan result');
+                        
+                        // Use handleScanSuccess directly
+                        if (typeof handleScanSuccess === 'function') {
+                            handleScanSuccess(tagData, 'nfc');
+                        }
+                    } else {
+                        console.log('[Guard Pro Tours] Scan ignored: Modal not active or not in NFC mode');
+                    }
+                };
+
                 async function startNFCScanner() {
-                    document.getElementById('qrScannerContainer').style.display = 'none';
-                    document.getElementById('nfcScannerContainer').style.display = 'block';
+                    const nfcContainer = document.getElementById('nfcScannerContainer');
+                    const qrContainer = document.getElementById('qrScannerContainer');
+                    if (nfcContainer) nfcContainer.style.display = 'block';
+                    if (qrContainer) qrContainer.style.display = 'none';
 
                     try {
+                        const isNative = window.isNativeApp || (typeof AndroidBridge !== 'undefined');
+
                         if (!('NDEFReader' in window)) {
-                            throw new Error('NFC not supported. Please use Chrome on Android.');
+                            if (isNative) {
+                                console.log('[Guard Pro Tours] Web NFC API unavailable, using Native Bridge');
+                                tourScanner = { type: 'nfc', native: true };
+                                return;
+                            }
+                            throw new Error('Web NFC is not supported on this device or browser. Please use Chrome on Android.');
                         }
 
-                        const nfcReader = new NDEFReader();
-                        await nfcReader.scan();
+                        // Use existing scanner if available
+                        if (tourScanner && tourScanner.type === 'nfc' && (tourScanner.initializing || tourScanner.nfc || tourScanner.native)) {
+                            console.log('[Guard Pro Tours] NFC scanner already active or initializing');
+                            return;
+                        }
 
-                        nfcReader.addEventListener('reading', ({ message, serialNumber }) => {
+                        console.log('[Guard Pro Tours] Starting NFC scan (checking permissions)...');
+                        tourScanner = { type: 'nfc', initializing: true };
+                        const nfcReader = new NDEFReader();
+                        
+                        try {
+                            // This call must be triggered by a user gesture
+                            await nfcReader.scan();
+                        } catch (e) {
+                            if (isNative) {
+                                console.warn('[Guard Pro Tours] Web NFC scan failed in native app, falling back to Bridge:', e);
+                                tourScanner = { type: 'nfc', native: true };
+                                return;
+                            }
+                            tourScanner = null; // Reset so user can try again
+                            throw e;
+                        }
+
+                        console.log('[Guard Pro Tours] Web NFC scan started successfully');
+
+                        nfcReader.onreading = ({ message, serialNumber }) => {
                             let tagData = null;
                             
                             console.log('[NFC Scan] Serial number:', serialNumber);
@@ -1855,7 +1915,7 @@
                                 console.error('[NFC Scan] Invalid tag data:', tagData);
                                 showScanError('Could not read NFC tag data. Please try again.');
                             }
-                        });
+                        };
 
                         nfcReader.addEventListener('readingerror', () => {
                             showScanError('NFC reading error. Please try again.');
@@ -2150,10 +2210,13 @@
 
                 async function startTour(btn) {
                     const tourId = parseInt(btn.dataset.tourId);
+                    console.log('[DEBUG] startTour triggered for tourId:', tourId);
+                    
                     btn.disabled = true;
                     btn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i>Starting...';
 
                     try {
+                        console.log('[DEBUG] Sending fetch request to /guardpro/api/tour/start');
                         const response = await fetch('/guardpro/api/tour/start', {
                             method: 'POST',
                             headers: {
@@ -2168,7 +2231,9 @@
                             })
                         });
 
+                        console.log('[DEBUG] Fetch response received:', response.status);
                         const result = await response.json();
+                        console.log('[DEBUG] JSON result:', result);
                         
                         if (result.result && result.result.success) {
                             window.location.reload();
@@ -2534,6 +2599,97 @@
                                     <label for="location" class="form-label">Specific Location</label>
                                     <input type="text" class="form-control" id="location" name="location" placeholder="Specific location within site (optional)"/>
                                 </div>
+
+                                <!-- Statement-specific fields -->
+                                <div id="mobile-statement-fields" style="display: none;">
+                                    <div class="card mb-3 border-primary">
+                                        <div class="card-header bg-primary text-white"><strong>Statement Details</strong></div>
+                                        <div class="card-body">
+                                            <div class="mb-2"><input type="text" class="form-control" name="statement_person_name" placeholder="Full Name"/></div>
+                                            <div class="mb-2"><input type="text" class="form-control" name="statement_person_mobile" placeholder="Mobile Number"/></div>
+                                            <div class="mb-2"><input type="email" class="form-control" name="statement_person_email" placeholder="Email Address"/></div>
+                                            <div class="mb-2"><input type="text" class="form-control" name="statement_person_nationality" placeholder="Nationality"/></div>
+                                            <div class="mb-2">
+                                                <select class="form-select" name="statement_person_gender">
+                                                    <option value="">Gender</option>
+                                                    <option value="male">Male</option>
+                                                    <option value="female">Female</option>
+                                                    <option value="other">Other</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-2"><input type="text" class="form-control" name="statement_person_eid_number" placeholder="EID Number"/></div>
+                                            <div class="mb-2"><input type="date" class="form-control" name="statement_person_eid_expiry"/></div>
+                                            <div class="mb-2"><input type="text" class="form-control" name="statement_person_company" placeholder="Company"/></div>
+                                            <div class="mb-2"><input type="text" class="form-control" name="statement_person_department" placeholder="Department"/></div>
+                                            <div class="mb-2"><input type="text" class="form-control" name="statement_person_designation" placeholder="Designation"/></div>
+                                            <div class="mb-2"><textarea class="form-control" name="statement_text" rows="4" placeholder="Statement content"></textarea></div>
+                                            <label class="form-label">Person Signature</label>
+                                            <canvas id="statement-person-signature-canvas" style="width: 100%; height: 140px; border: 1px solid #ccc; border-radius: 4px; background: #fff; touch-action: none;"></canvas>
+                                            <input type="hidden" name="statement_person_signature" id="statement-person-signature-input"/>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary mt-1" onclick="clearSignatureCanvas('statement-person-signature-canvas', 'statement-person-signature-input')">Clear</button>
+                                            <label class="form-label mt-3">Security Officer Signature</label>
+                                            <canvas id="security-officer-signature-canvas-create" style="width: 100%; height: 140px; border: 1px solid #ccc; border-radius: 4px; background: #fff; touch-action: none;"></canvas>
+                                            <input type="hidden" name="security_officer_signature" id="security-officer-signature-input-create"/>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary mt-1" onclick="clearSignatureCanvas('security-officer-signature-canvas-create', 'security-officer-signature-input-create')">Clear</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Found Item-specific fields -->
+                                <div id="mobile-found-fields" style="display: none;">
+                                    <div class="card mb-3 border-info">
+                                        <div class="card-header bg-info text-white"><strong>Found Item Details</strong></div>
+                                        <div class="card-body">
+                                            <div class="mb-2"><input type="time" class="form-control" name="found_item_time"/></div>
+                                            <div class="mb-2"><input type="date" class="form-control" name="found_item_date"/></div>
+                                            <div class="mb-2"><input type="text" class="form-control" name="found_person_name" placeholder="Name of Person Who Found the Item"/></div>
+                                            <div class="mb-2"><input type="text" class="form-control" name="found_person_home_address" placeholder="Home Address"/></div>
+                                            <div class="mb-2"><input type="text" class="form-control" name="found_person_mobile" placeholder="Mobile Number"/></div>
+                                            <div class="mb-2"><input type="email" class="form-control" name="found_person_email" placeholder="Email Address"/></div>
+                                            <div class="mb-2"><input type="text" class="form-control" name="found_item_category" placeholder="Category of Found Item"/></div>
+                                            <div class="mb-2"><textarea class="form-control" name="found_item_description" rows="4" placeholder="Item(s) Found - Full Description"></textarea></div>
+                                            <div class="mb-2">
+                                                <label class="form-label">Security officer inspected item?</label>
+                                                <select class="form-select" name="found_item_inspected"><option value="">--</option><option value="yes">Yes</option><option value="no">No</option></select>
+                                            </div>
+                                            <label class="form-label">Finder Signature</label>
+                                            <canvas id="found-person-signature-canvas" style="width: 100%; height: 140px; border: 1px solid #ccc; border-radius: 4px; background: #fff; touch-action: none;"></canvas>
+                                            <input type="hidden" name="found_item_person_signature" id="found-person-signature-input"/>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary mt-1" onclick="clearSignatureCanvas('found-person-signature-canvas', 'found-person-signature-input')">Clear</button>
+                                            <div class="mb-2 mt-3"><input type="text" class="form-control" name="found_item_security_name" placeholder="Security Name"/></div>
+                                            <div class="mb-2"><input type="text" class="form-control" name="found_item_security_designation" placeholder="Designation"/></div>
+                                            <div class="mb-2">
+                                                <label class="form-label">Did you inform your Supervisor?</label>
+                                                <select class="form-select" name="found_item_supervisor_informed"><option value="">--</option><option value="yes">Yes</option><option value="no">No</option></select>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label">Did you handover to lost and found?</label>
+                                                <select class="form-select" name="found_item_handover"><option value="">--</option><option value="yes">Yes</option><option value="no">No</option></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Return Form-specific fields -->
+                                <div id="mobile-return-fields" style="display: none;">
+                                    <div class="card mb-3 border-warning">
+                                        <div class="card-header bg-warning text-dark"><strong>Return Form Details</strong></div>
+                                        <div class="card-body">
+                                            <div class="mb-2"><input type="text" class="form-control" name="return_recipient_name" placeholder="Recipient Name"/></div>
+                                            <div class="mb-2"><input type="text" class="form-control" name="return_recipient_home_address" placeholder="Recipient Home Address"/></div>
+                                            <div class="mb-2"><input type="text" class="form-control" name="return_recipient_mobile" placeholder="Recipient Mobile Number"/></div>
+                                            <div class="mb-2"><input type="email" class="form-control" name="return_recipient_email" placeholder="Recipient Email Address"/></div>
+                                            <div class="mb-2"><textarea class="form-control" name="return_item_description" rows="4" placeholder="Item(s) Received - Full Description"></textarea></div>
+                                            <label class="form-label">Recipient Signature</label>
+                                            <canvas id="return-recipient-signature-canvas" style="width: 100%; height: 140px; border: 1px solid #ccc; border-radius: 4px; background: #fff; touch-action: none;"></canvas>
+                                            <input type="hidden" name="return_recipient_signature" id="return-recipient-signature-input"/>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary mt-1" onclick="clearSignatureCanvas('return-recipient-signature-canvas', 'return-recipient-signature-input')">Clear</button>
+                                            <div class="mb-2 mt-3"><input type="text" class="form-control" name="return_item_category" placeholder="Category of Lost and Found Items"/></div>
+                                            <div class="mb-2"><input type="text" class="form-control" name="return_security_name" placeholder="Security Name"/></div>
+                                            <div class="mb-2"><input type="text" class="form-control" name="return_security_designation" placeholder="Designation"/></div>
+                                        </div>
+                                    </div>
+                                </div>
                                 
                                 <div class="mb-3">
                                     <label for="incident_images" class="form-label">
@@ -2779,6 +2935,77 @@
                         }, 2000);
                     }
                 }
+
+                function setupSignatureCanvas(canvasId, inputId) {
+                    const canvas = document.getElementById(canvasId);
+                    const input = document.getElementById(inputId);
+                    if (!canvas || !input) return;
+                    const ctx = canvas.getContext('2d');
+                    const ratio = window.devicePixelRatio || 1;
+                    const rect = canvas.getBoundingClientRect();
+                    const width = Math.max(280, Math.floor(rect.width || canvas.clientWidth || 280));
+                    const height = Math.max(140, Math.floor(rect.height || canvas.clientHeight || 140));
+                    canvas.width = Math.floor(width * ratio);
+                    canvas.height = Math.floor(height * ratio);
+                    ctx.scale(ratio, ratio);
+                    ctx.lineWidth = 2;
+                    ctx.lineCap = 'round';
+                    let drawing = false;
+                    const point = (e) => {
+                        const r = canvas.getBoundingClientRect();
+                        const src = e.touches ? e.touches[0] : e;
+                        return { x: src.clientX - r.left, y: src.clientY - r.top };
+                    };
+                    const start = (e) => { drawing = true; const p = point(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); if (e.cancelable) e.preventDefault(); };
+                    const move = (e) => { if (!drawing) return; const p = point(e); ctx.lineTo(p.x, p.y); ctx.stroke(); input.value = canvas.toDataURL('image/png'); if (e.cancelable) e.preventDefault(); };
+                    const end = () => { drawing = false; };
+                    canvas.addEventListener('mousedown', start);
+                    canvas.addEventListener('mousemove', move);
+                    canvas.addEventListener('mouseup', end);
+                    canvas.addEventListener('mouseleave', end);
+                    canvas.addEventListener('touchstart', start, { passive: false });
+                    canvas.addEventListener('touchmove', move, { passive: false });
+                    canvas.addEventListener('touchend', end);
+                }
+
+                function clearSignatureCanvas(canvasId, inputId) {
+                    const canvas = document.getElementById(canvasId);
+                    const input = document.getElementById(inputId);
+                    if (!canvas || !input) return;
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    input.value = '';
+                }
+
+                function toggleMobileIncidentCategoryFields() {
+                    const categorySelect = document.getElementById('category_id');
+                    const statement = document.getElementById('mobile-statement-fields');
+                    const found = document.getElementById('mobile-found-fields');
+                    const ret = document.getElementById('mobile-return-fields');
+                    if (!categorySelect || !statement || !found || !ret) return;
+                    const selectedText = categorySelect.options[categorySelect.selectedIndex] ? categorySelect.options[categorySelect.selectedIndex].text.toLowerCase() : '';
+                    statement.style.display = selectedText.includes('statement') ? 'block' : 'none';
+                    found.style.display = selectedText.includes('found item') ? 'block' : 'none';
+                    ret.style.display = selectedText.includes('return form') ? 'block' : 'none';
+                    setTimeout(function() {
+                        setupSignatureCanvas('statement-person-signature-canvas', 'statement-person-signature-input');
+                        setupSignatureCanvas('security-officer-signature-canvas-create', 'security-officer-signature-input-create');
+                        setupSignatureCanvas('found-person-signature-canvas', 'found-person-signature-input');
+                        setupSignatureCanvas('return-recipient-signature-canvas', 'return-recipient-signature-input');
+                    }, 0);
+                }
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    setupSignatureCanvas('statement-person-signature-canvas', 'statement-person-signature-input');
+                    setupSignatureCanvas('security-officer-signature-canvas-create', 'security-officer-signature-input-create');
+                    setupSignatureCanvas('found-person-signature-canvas', 'found-person-signature-input');
+                    setupSignatureCanvas('return-recipient-signature-canvas', 'return-recipient-signature-input');
+                    const categorySelect = document.getElementById('category_id');
+                    if (categorySelect) {
+                        categorySelect.addEventListener('change', toggleMobileIncidentCategoryFields);
+                        toggleMobileIncidentCategoryFields();
+                    }
+                });
             </script>
         </t>
     </template>
@@ -2895,6 +3122,107 @@
                             <div class="mb-3">
                                 <label for="description" class="form-label">Description *</label>
                                 <textarea class="form-control" id="description" name="description" rows="5" required="required" placeholder="Detailed description of what happened"><t t-esc="incident.description or ''"/></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category-specific details -->
+                    <div id="mobile-statement-fields-edit" style="display: none;">
+                        <div class="card mb-3 shadow-sm border-primary">
+                            <div class="card-header bg-primary text-white"><h6 class="mb-0">Statement Details</h6></div>
+                            <div class="card-body">
+                                <div class="mb-2"><input type="text" class="form-control" name="statement_person_name" placeholder="Full Name" t-att-value="incident.statement_person_name or ''"/></div>
+                                <div class="mb-2"><input type="text" class="form-control" name="statement_person_mobile" placeholder="Mobile Number" t-att-value="incident.statement_person_mobile or ''"/></div>
+                                <div class="mb-2"><input type="email" class="form-control" name="statement_person_email" placeholder="Email Address" t-att-value="incident.statement_person_email or ''"/></div>
+                                <div class="mb-2"><input type="text" class="form-control" name="statement_person_nationality" placeholder="Nationality" t-att-value="incident.statement_person_nationality or ''"/></div>
+                                <div class="mb-2">
+                                    <select class="form-select" name="statement_person_gender">
+                                        <option value="">Gender</option>
+                                        <option value="male" t-att-selected="incident.statement_person_gender == 'male'">Male</option>
+                                        <option value="female" t-att-selected="incident.statement_person_gender == 'female'">Female</option>
+                                        <option value="other" t-att-selected="incident.statement_person_gender == 'other'">Other</option>
+                                    </select>
+                                </div>
+                                <div class="mb-2"><input type="text" class="form-control" name="statement_person_eid_number" placeholder="EID Number" t-att-value="incident.statement_person_eid_number or ''"/></div>
+                                <div class="mb-2"><input type="date" class="form-control" name="statement_person_eid_expiry" t-att-value="incident.statement_person_eid_expiry or ''"/></div>
+                                <div class="mb-2"><input type="text" class="form-control" name="statement_person_company" placeholder="Company" t-att-value="incident.statement_person_company or ''"/></div>
+                                <div class="mb-2"><input type="text" class="form-control" name="statement_person_department" placeholder="Department" t-att-value="incident.statement_person_department or ''"/></div>
+                                <div class="mb-2"><input type="text" class="form-control" name="statement_person_designation" placeholder="Designation" t-att-value="incident.statement_person_designation or ''"/></div>
+                                <div class="mb-2"><textarea class="form-control" name="statement_text" rows="4" placeholder="Statement content"><t t-esc="incident.statement_text or ''"/></textarea></div>
+                                <label class="form-label">Person Signature</label>
+                                <canvas id="statement-person-signature-canvas-edit" style="width: 100%; height: 140px; border: 1px solid #ccc; border-radius: 4px; background: #fff; touch-action: none;"></canvas>
+                                <input type="hidden" name="statement_person_signature" id="statement-person-signature-input-edit"/>
+                                <button type="button" class="btn btn-sm btn-outline-secondary mt-1" onclick="clearSignatureCanvas('statement-person-signature-canvas-edit', 'statement-person-signature-input-edit')">Clear</button>
+                                <label class="form-label mt-3">Security Officer Signature</label>
+                                <canvas id="security-officer-signature-canvas-edit" style="width: 100%; height: 140px; border: 1px solid #ccc; border-radius: 4px; background: #fff; touch-action: none;"></canvas>
+                                <input type="hidden" name="security_officer_signature" id="security-officer-signature-input-edit"/>
+                                <button type="button" class="btn btn-sm btn-outline-secondary mt-1" onclick="clearSignatureCanvas('security-officer-signature-canvas-edit', 'security-officer-signature-input-edit')">Clear</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="mobile-found-fields-edit" style="display: none;">
+                        <div class="card mb-3 shadow-sm border-info">
+                            <div class="card-header bg-info text-white"><h6 class="mb-0">Found Item Details</h6></div>
+                            <div class="card-body">
+                                <div class="mb-2"><input type="time" class="form-control" name="found_item_time" t-att-value="incident.found_item_time or ''"/></div>
+                                <div class="mb-2"><input type="date" class="form-control" name="found_item_date" t-att-value="incident.found_item_date or ''"/></div>
+                                <div class="mb-2"><input type="text" class="form-control" name="found_person_name" placeholder="Name of Person Who Found the Item" t-att-value="incident.found_person_name or ''"/></div>
+                                <div class="mb-2"><input type="text" class="form-control" name="found_person_home_address" placeholder="Home Address" t-att-value="incident.found_person_home_address or ''"/></div>
+                                <div class="mb-2"><input type="text" class="form-control" name="found_person_mobile" placeholder="Mobile Number" t-att-value="incident.found_person_mobile or ''"/></div>
+                                <div class="mb-2"><input type="email" class="form-control" name="found_person_email" placeholder="Email Address" t-att-value="incident.found_person_email or ''"/></div>
+                                <div class="mb-2"><input type="text" class="form-control" name="found_item_category" placeholder="Category of Found Item" t-att-value="incident.found_item_category or ''"/></div>
+                                <div class="mb-2"><textarea class="form-control" name="found_item_description" rows="4" placeholder="Item(s) Found - Full Description"><t t-esc="incident.found_item_description or ''"/></textarea></div>
+                                <div class="mb-2">
+                                    <label class="form-label">Security officer inspected item?</label>
+                                    <select class="form-select" name="found_item_inspected">
+                                        <option value="">--</option>
+                                        <option value="yes" t-att-selected="incident.found_item_inspected == 'yes'">Yes</option>
+                                        <option value="no" t-att-selected="incident.found_item_inspected == 'no'">No</option>
+                                    </select>
+                                </div>
+                                <label class="form-label">Finder Signature</label>
+                                <canvas id="found-person-signature-canvas-edit" style="width: 100%; height: 140px; border: 1px solid #ccc; border-radius: 4px; background: #fff; touch-action: none;"></canvas>
+                                <input type="hidden" name="found_item_person_signature" id="found-person-signature-input-edit"/>
+                                <button type="button" class="btn btn-sm btn-outline-secondary mt-1" onclick="clearSignatureCanvas('found-person-signature-canvas-edit', 'found-person-signature-input-edit')">Clear</button>
+                                <div class="mb-2 mt-3"><input type="text" class="form-control" name="found_item_security_name" placeholder="Security Name" t-att-value="incident.found_item_security_name or ''"/></div>
+                                <div class="mb-2"><input type="text" class="form-control" name="found_item_security_designation" placeholder="Designation" t-att-value="incident.found_item_security_designation or ''"/></div>
+                                <div class="mb-2">
+                                    <label class="form-label">Did you inform your Supervisor?</label>
+                                    <select class="form-select" name="found_item_supervisor_informed">
+                                        <option value="">--</option>
+                                        <option value="yes" t-att-selected="incident.found_item_supervisor_informed == 'yes'">Yes</option>
+                                        <option value="no" t-att-selected="incident.found_item_supervisor_informed == 'no'">No</option>
+                                    </select>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label">Did you handover to lost and found?</label>
+                                    <select class="form-select" name="found_item_handover">
+                                        <option value="">--</option>
+                                        <option value="yes" t-att-selected="incident.found_item_handover == 'yes'">Yes</option>
+                                        <option value="no" t-att-selected="incident.found_item_handover == 'no'">No</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="mobile-return-fields-edit" style="display: none;">
+                        <div class="card mb-3 shadow-sm border-warning">
+                            <div class="card-header bg-warning text-dark"><h6 class="mb-0">Return Form Details</h6></div>
+                            <div class="card-body">
+                                <div class="mb-2"><input type="text" class="form-control" name="return_recipient_name" placeholder="Recipient Name" t-att-value="incident.return_recipient_name or ''"/></div>
+                                <div class="mb-2"><input type="text" class="form-control" name="return_recipient_home_address" placeholder="Recipient Home Address" t-att-value="incident.return_recipient_home_address or ''"/></div>
+                                <div class="mb-2"><input type="text" class="form-control" name="return_recipient_mobile" placeholder="Recipient Mobile Number" t-att-value="incident.return_recipient_mobile or ''"/></div>
+                                <div class="mb-2"><input type="email" class="form-control" name="return_recipient_email" placeholder="Recipient Email Address" t-att-value="incident.return_recipient_email or ''"/></div>
+                                <div class="mb-2"><textarea class="form-control" name="return_item_description" rows="4" placeholder="Item(s) Received - Full Description"><t t-esc="incident.return_item_description or ''"/></textarea></div>
+                                <label class="form-label">Recipient Signature</label>
+                                <canvas id="return-recipient-signature-canvas-edit" style="width: 100%; height: 140px; border: 1px solid #ccc; border-radius: 4px; background: #fff; touch-action: none;"></canvas>
+                                <input type="hidden" name="return_recipient_signature" id="return-recipient-signature-input-edit"/>
+                                <button type="button" class="btn btn-sm btn-outline-secondary mt-1" onclick="clearSignatureCanvas('return-recipient-signature-canvas-edit', 'return-recipient-signature-input-edit')">Clear</button>
+                                <div class="mb-2 mt-3"><input type="text" class="form-control" name="return_item_category" placeholder="Category of Lost and Found Items" t-att-value="incident.return_item_category or ''"/></div>
+                                <div class="mb-2"><input type="text" class="form-control" name="return_security_name" placeholder="Security Name" t-att-value="incident.return_security_name or ''"/></div>
+                                <div class="mb-2"><input type="text" class="form-control" name="return_security_designation" placeholder="Designation" t-att-value="incident.return_security_designation or ''"/></div>
                             </div>
                         </div>
                     </div>
@@ -3168,10 +3496,78 @@
                         estimatedCostGroup.style.display = show ? 'block' : 'none';
                     }
                 }
+
+                function toggleMobileIncidentCategoryFieldsEdit() {
+                    const categorySelect = document.getElementById('category_id');
+                    const statement = document.getElementById('mobile-statement-fields-edit');
+                    const found = document.getElementById('mobile-found-fields-edit');
+                    const ret = document.getElementById('mobile-return-fields-edit');
+                    if (!categorySelect || !statement || !found || !ret) return;
+                    const selectedText = categorySelect.options[categorySelect.selectedIndex] ? categorySelect.options[categorySelect.selectedIndex].text.toLowerCase() : '';
+                    statement.style.display = selectedText.includes('statement') ? 'block' : 'none';
+                    found.style.display = selectedText.includes('found item') ? 'block' : 'none';
+                    ret.style.display = selectedText.includes('return form') ? 'block' : 'none';
+                    setTimeout(function() {
+                        setupSignatureCanvas('statement-person-signature-canvas-edit', 'statement-person-signature-input-edit');
+                        setupSignatureCanvas('security-officer-signature-canvas-edit', 'security-officer-signature-input-edit');
+                        setupSignatureCanvas('found-person-signature-canvas-edit', 'found-person-signature-input-edit');
+                        setupSignatureCanvas('return-recipient-signature-canvas-edit', 'return-recipient-signature-input-edit');
+                    }, 0);
+                }
+
+                function setupSignatureCanvas(canvasId, inputId) {
+                    const canvas = document.getElementById(canvasId);
+                    const input = document.getElementById(inputId);
+                    if (!canvas || !input) return;
+                    const ctx = canvas.getContext('2d');
+                    const ratio = window.devicePixelRatio || 1;
+                    const rect = canvas.getBoundingClientRect();
+                    const width = Math.max(280, Math.floor(rect.width || canvas.clientWidth || 280));
+                    const height = Math.max(140, Math.floor(rect.height || canvas.clientHeight || 140));
+                    canvas.width = Math.floor(width * ratio);
+                    canvas.height = Math.floor(height * ratio);
+                    ctx.scale(ratio, ratio);
+                    ctx.lineWidth = 2;
+                    ctx.lineCap = 'round';
+                    let drawing = false;
+                    const point = (e) => {
+                        const r = canvas.getBoundingClientRect();
+                        const src = e.touches ? e.touches[0] : e;
+                        return { x: src.clientX - r.left, y: src.clientY - r.top };
+                    };
+                    const start = (e) => { drawing = true; const p = point(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); if (e.cancelable) e.preventDefault(); };
+                    const move = (e) => { if (!drawing) return; const p = point(e); ctx.lineTo(p.x, p.y); ctx.stroke(); input.value = canvas.toDataURL('image/png'); if (e.cancelable) e.preventDefault(); };
+                    const end = () => { drawing = false; };
+                    canvas.addEventListener('mousedown', start);
+                    canvas.addEventListener('mousemove', move);
+                    canvas.addEventListener('mouseup', end);
+                    canvas.addEventListener('mouseleave', end);
+                    canvas.addEventListener('touchstart', start, { passive: false });
+                    canvas.addEventListener('touchmove', move, { passive: false });
+                    canvas.addEventListener('touchend', end);
+                }
+
+                function clearSignatureCanvas(canvasId, inputId) {
+                    const canvas = document.getElementById(canvasId);
+                    const input = document.getElementById(inputId);
+                    if (!canvas || !input) return;
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    input.value = '';
+                }
                 
                 // Initialize on page load
                 document.addEventListener('DOMContentLoaded', function() {
                     toggleConditionalFields();
+                    toggleMobileIncidentCategoryFieldsEdit();
+                    const categorySelect = document.getElementById('category_id');
+                    if (categorySelect) {
+                        categorySelect.addEventListener('change', toggleMobileIncidentCategoryFieldsEdit);
+                    }
+                    setupSignatureCanvas('statement-person-signature-canvas-edit', 'statement-person-signature-input-edit');
+                    setupSignatureCanvas('security-officer-signature-canvas-edit', 'security-officer-signature-input-edit');
+                    setupSignatureCanvas('found-person-signature-canvas-edit', 'found-person-signature-input-edit');
+                    setupSignatureCanvas('return-recipient-signature-canvas-edit', 'return-recipient-signature-input-edit');
                 });
                 
                 // Image preview function
@@ -3527,7 +3923,7 @@
                                 <i class="fa fa-chevron-right text-muted small"/>
                             </div>
                         </a>
-                        <a href="/guardpro/mobile/training" class="list-group-item list-group-item-action border-0 py-3">
+                        <a href="/mobile/training" class="list-group-item list-group-item-action border-0 py-3">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center">
                                     <div class="rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center me-3" style="width: 42px; height: 42px;">
@@ -3536,20 +3932,6 @@
                                     <div>
                                         <div class="fw-bold">My Training</div>
                                         <small class="text-muted">Courses and certifications</small>
-                                    </div>
-                                </div>
-                                <i class="fa fa-chevron-right text-muted small"/>
-                            </div>
-                        </a>
-                        <a href="/guardpro/mobile/biometric" class="list-group-item list-group-item-action border-0 py-3">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center me-3" style="width: 42px; height: 42px;">
-                                        <i class="fa fa-fingerprint fs-5"/>
-                                    </div>
-                                    <div>
-                                        <div class="fw-bold">Biometric Verification</div>
-                                        <small class="text-muted">Digital identity management</small>
                                     </div>
                                 </div>
                                 <i class="fa fa-chevron-right text-muted small"/>
@@ -3696,22 +4078,22 @@
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
                                             <span class="badge bg-success bg-opacity-10 text-success">
-                                                <t t-esc="enrollment.member_status.replace('_', ' ').title() if hasattr(enrollment, 'member_status') and enrollment.member_status else 'Active'"/>
+                                                <t t-esc="str(enrollment.member_status).replace('_', ' ').title() if enrollment.member_status else 'Joined'"/>
                                             </span>
                                             <small class="text-muted">
-                                                <t t-esc="enrollment.completion if hasattr(enrollment, 'completion') else 0"/>% Complete
+                                                <t t-esc="enrollment.completion or 0"/>% Complete
                                             </small>
                                         </div>
                                         <h5 class="card-title fw-bold">
-                                            <t t-esc="enrollment.channel_id.name if hasattr(enrollment, 'channel_id') and enrollment.channel_id else enrollment.name"/>
+                                            <t t-esc="enrollment.channel_id.name or enrollment.name"/>
                                         </h5>
                                         <p class="card-text text-muted small mb-3">
-                                            <t t-if="hasattr(enrollment, 'channel_id') and enrollment.channel_id and enrollment.channel_id.description">
+                                            <t t-if="enrollment.channel_id and enrollment.channel_id.description">
                                                 <t t-esc="enrollment.channel_id.description[:100]"/>...
                                             </t>
                                         </p>
                                         <div class="d-grid">
-                                            <a t-attf-href="/guardpro/mobile/training/{{enrollment.id}}" class="btn btn-outline-primary btn-sm">
+                                            <a t-attf-href="/mobile/training/course/{{ enrollment.channel_id.id }}" class="btn btn-outline-primary btn-sm">
                                                 Continue Course
                                             </a>
                                         </div>
@@ -3729,432 +4111,6 @@
                     </t>
                 </div>
             </div>
-        </t>
-    </template>
-
-    <!-- Biometric Management Screen -->
-    <template id="mobile_biometric" name="Guard Pro Mobile Biometric">
-        <t t-call="guardpro.mobile_base">
-            <div class="container-fluid p-3">
-                <!-- Page Header -->
-                <div class="mb-4">
-                    <h3 class="mb-1"><i class="fa fa-fingerprint me-2"/>Biometric Verification</h3>
-                    <p class="text-muted small mb-0">Manage your fingerprint and facial recognition templates</p>
-                </div>
-
-                <!-- Enrollment Section -->
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="fa fa-plus-circle me-2"/>Enroll New Biometric</h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="text-muted small mb-3">
-                            Enroll your biometric data to enable secure check-in and check-out verification.
-                        </p>
-                        <div class="d-grid gap-2">
-                            <button type="button" class="btn btn-outline-primary" onclick="enrollBiometric('fingerprint')">
-                                <i class="fa fa-fingerprint me-2"/>Enroll Fingerprint
-                            </button>
-                            <button type="button" class="btn btn-outline-info" onclick="enrollBiometric('facial')">
-                                <i class="fa fa-user-circle me-2"/>Enroll Facial Recognition
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Current Templates -->
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0"><i class="fa fa-list me-2"/>My Biometric Templates</h5>
-                    </div>
-                    <div class="card-body">
-                        <t t-if="not templates">
-                            <div class="text-center py-4">
-                                <i class="fa fa-fingerprint fa-3x text-muted mb-3"/>
-                                <p class="text-muted">No biometric templates enrolled yet.</p>
-                                <p class="text-muted small">Enroll a fingerprint or facial recognition template to get started.</p>
-                            </div>
-                        </t>
-                        <t t-if="templates">
-                            <!-- Fingerprint Templates -->
-                            <t t-if="fingerprint_templates">
-                                <h6 class="text-muted mb-2"><i class="fa fa-fingerprint me-1"/>Fingerprint</h6>
-                                <div class="list-group mb-3">
-                                    <t t-foreach="fingerprint_templates" t-as="template">
-                                        <div class="list-group-item">
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <div>
-                                                    <div class="fw-semibold">
-                                                        <t t-if="template.is_primary">
-                                                            <span class="badge bg-primary me-2">Primary</span>
-                                                        </t>
-                                                        <t t-esc="template.display_name"/>
-                                                    </div>
-                                                    <small class="text-muted">
-                                                        <i class="fa fa-calendar me-1"/>Enrolled: <t t-esc="template.enrolled_date"/>
-                                                        <t t-if="template.quality_score">
-                                                            <span class="ms-2">
-                                                                <i class="fa fa-star me-1"/>Quality: <t t-esc="template.quality_score"/>%
-                                                            </span>
-                                                        </t>
-                                                    </small>
-                                                </div>
-                                                <div>
-                                                    <t t-if="template.is_active">
-                                                        <span class="badge bg-success">Active</span>
-                                                    </t>
-                                                    <t t-if="not template.is_active">
-                                                        <span class="badge bg-secondary">Inactive</span>
-                                                    </t>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </t>
-                                </div>
-                            </t>
-
-                            <!-- Facial Templates -->
-                            <t t-if="facial_templates">
-                                <h6 class="text-muted mb-2"><i class="fa fa-user-circle me-1"/>Facial Recognition</h6>
-                                <div class="list-group mb-3">
-                                    <t t-foreach="facial_templates" t-as="template">
-                                        <div class="list-group-item">
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <div>
-                                                    <div class="fw-semibold">
-                                                        <t t-if="template.is_primary">
-                                                            <span class="badge bg-primary me-2">Primary</span>
-                                                        </t>
-                                                        <t t-esc="template.display_name"/>
-                                                    </div>
-                                                    <small class="text-muted">
-                                                        <i class="fa fa-calendar me-1"/>Enrolled: <t t-esc="template.enrolled_date"/>
-                                                        <t t-if="template.quality_score">
-                                                            <span class="ms-2">
-                                                                <i class="fa fa-star me-1"/>Quality: <t t-esc="template.quality_score"/>%
-                                                            </span>
-                                                        </t>
-                                                    </small>
-                                                </div>
-                                                <div>
-                                                    <t t-if="template.is_active">
-                                                        <span class="badge bg-success">Active</span>
-                                                    </t>
-                                                    <t t-if="not template.is_active">
-                                                        <span class="badge bg-secondary">Inactive</span>
-                                                    </t>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </t>
-                                </div>
-                            </t>
-
-                            <!-- Voice Templates -->
-                            <t t-if="voice_templates">
-                                <h6 class="text-muted mb-2"><i class="fa fa-microphone me-1"/>Voice Recognition</h6>
-                                <div class="list-group mb-3">
-                                    <t t-foreach="voice_templates" t-as="template">
-                                        <div class="list-group-item">
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <div>
-                                                    <div class="fw-semibold">
-                                                        <t t-if="template.is_primary">
-                                                            <span class="badge bg-primary me-2">Primary</span>
-                                                        </t>
-                                                        <t t-esc="template.display_name"/>
-                                                    </div>
-                                                    <small class="text-muted">
-                                                        <i class="fa fa-calendar me-1"/>Enrolled: <t t-esc="template.enrolled_date"/>
-                                                        <t t-if="template.quality_score">
-                                                            <span class="ms-2">
-                                                                <i class="fa fa-star me-1"/>Quality: <t t-esc="template.quality_score"/>%
-                                                            </span>
-                                                        </t>
-                                                    </small>
-                                                </div>
-                                                <div>
-                                                    <t t-if="template.is_active">
-                                                        <span class="badge bg-success">Active</span>
-                                                    </t>
-                                                    <t t-if="not template.is_active">
-                                                        <span class="badge bg-secondary">Inactive</span>
-                                                    </t>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </t>
-                                </div>
-                            </t>
-                        </t>
-                    </div>
-                </div>
-
-                <!-- Verification History -->
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0"><i class="fa fa-history me-2"/>Recent Verifications</h5>
-                    </div>
-                    <div class="card-body">
-                        <t t-if="not recent_verifications">
-                            <div class="text-center py-3">
-                                <i class="fa fa-clock fa-2x text-muted mb-2"/>
-                                <p class="text-muted small mb-0">No verification history yet.</p>
-                            </div>
-                        </t>
-                        <t t-if="recent_verifications">
-                            <div class="list-group">
-                                <t t-foreach="recent_verifications" t-as="verification">
-                                    <div class="list-group-item">
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <div>
-                                                <div class="fw-semibold">
-                                                    <i t-attf-class="fa {{verification.biometric_type == 'fingerprint' and 'fa-fingerprint' or (verification.biometric_type == 'facial' and 'fa-user-circle' or 'fa-microphone')}} me-2"/>
-                                                    <span><t t-esc="verification.biometric_type.title()"/></span>
-                                                </div>
-                                                <small class="text-muted">
-                                                    <i class="fa fa-calendar me-1"/><t t-esc="format_datetime_tz(verification, verification.verification_datetime, '%b %d, %H:%M') if verification.verification_datetime else 'N/A'"/>
-                                                    <t t-if="verification.confidence_score">
-                                                        <span class="ms-2">
-                                                            <i class="fa fa-percent me-1"/>Confidence: <t t-esc="verification.confidence_score"/>%
-                                                        </span>
-                                                    </t>
-                                                </small>
-                                            </div>
-                                            <div>
-                                                <t t-if="verification.verified">
-                                                    <span class="badge bg-success">Verified</span>
-                                                </t>
-                                                <t t-if="not verification.verified">
-                                                    <span class="badge bg-danger">Failed</span>
-                                                </t>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </t>
-                            </div>
-                        </t>
-                    </div>
-                </div>
-
-                <!-- Information Card -->
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-body">
-                        <h6 class="mb-2"><i class="fa fa-info-circle me-2"/>About Biometric Verification</h6>
-                        <p class="text-muted small mb-2">
-                            Biometric verification adds an extra layer of security to your check-in and check-out process.
-                        </p>
-                        <ul class="text-muted small mb-0 ps-3">
-                            <li>Fingerprint: Use your device's fingerprint sensor (Touch ID, Face ID, or Android Fingerprint)</li>
-                            <li>Facial Recognition: Use your device's front camera for face recognition</li>
-                            <li>All biometric data is encrypted and stored securely</li>
-                            <li>You can enroll multiple templates for backup</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Biometric Enrollment Modal -->
-            <div class="modal fade" id="biometricEnrollModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="biometricEnrollModalTitle">Enroll Biometric</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div id="biometricEnrollContent">
-                                <p class="text-muted">Preparing biometric capture...</p>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Biometric Enrollment Script -->
-            <script type="text/javascript">
-                <![CDATA[
-                function enrollBiometric(type) {
-                    var modal = new bootstrap.Modal(document.getElementById('biometricEnrollModal'));
-                    var title = document.getElementById('biometricEnrollModalTitle');
-                    var content = document.getElementById('biometricEnrollContent');
-                    
-                    if (type === 'fingerprint') {
-                        title.textContent = 'Enroll Fingerprint';
-                        content.innerHTML = '<div class="text-center py-4">' +
-                            '<i class="fa fa-fingerprint fa-3x text-primary mb-3"></i>' +
-                            '<p>Please use your device\'s fingerprint sensor (Touch ID, Face ID, or Android Fingerprint) to enroll.</p>' +
-                            '<button class="btn btn-primary" onclick="captureFingerprint()">Start Enrollment</button>' +
-                            '</div>';
-                    } else if (type === 'facial') {
-                        title.textContent = 'Enroll Facial Recognition';
-                        content.innerHTML = '<div class="text-center py-4">' +
-                            '<i class="fa fa-user-circle fa-3x text-info mb-3"></i>' +
-                            '<p>Please allow camera access and position your face in front of the camera.</p>' +
-                            '<button class="btn btn-info" onclick="captureFace()">Start Enrollment</button>' +
-                            '</div>';
-                    }
-                    
-                    modal.show();
-                }
-                
-                function captureFingerprint() {
-                    // Check if WebAuthn API is available
-                    if ('PublicKeyCredential' in window) {
-                        // Use WebAuthn API
-                        navigator.credentials.create({
-                            publicKey: {
-                                challenge: new Uint8Array(32),
-                                rp: { name: "GuardPro" },
-                                user: {
-                                    id: new Uint8Array(16),
-                                    name: "guard",
-                                    displayName: "Guard"
-                                },
-                                pubKeyCredParams: [{alg: -7, type: "public-key"}],
-                                authenticatorSelection: {
-                                    authenticatorAttachment: "platform",
-                                    userVerification: "required"
-                                }
-                            }
-                        }).then(function(credential) {
-                            // Send to backend
-                            enrollBiometricAPI('fingerprint', {success: true, credential: 'captured'});
-                        }).catch(function(error) {
-                            alert('Fingerprint enrollment failed: ' + error.message);
-                        });
-                    } else {
-                        // Fallback: Use device-specific API or show message
-                        alert('Fingerprint enrollment is not supported on this device. Please use a device with Touch ID, Face ID, or Android Fingerprint.');
-                    }
-                }
-                
-                function captureFace() {
-                    // Request camera access
-                    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-                        .then(function(stream) {
-                            var video = document.createElement('video');
-                            video.srcObject = stream;
-                            video.autoplay = true;
-                            video.playsInline = true;
-                            
-                            var content = document.getElementById('biometricEnrollContent');
-                            content.innerHTML = '<div id="face-capture-container">' +
-                                '<video id="face-preview" autoplay playsinline style="width: 100%; max-width: 400px; border-radius: 8px;"></video>' +
-                                '<div class="text-center mt-3">' +
-                                '<button class="btn btn-primary" onclick="captureFaceImage()">Capture</button>' +
-                                '<button class="btn btn-secondary ms-2" onclick="cancelFaceCapture()">Cancel</button>' +
-                                '</div></div>';
-                            
-                            var preview = document.getElementById('face-preview');
-                            preview.srcObject = stream;
-                            
-                            window.faceStream = stream;
-                        })
-                        .catch(function(error) {
-                            alert('Camera access denied: ' + error.message);
-                        });
-                }
-                
-                function captureFaceImage() {
-                    var video = document.getElementById('face-preview');
-                    var canvas = document.createElement('canvas');
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    var ctx = canvas.getContext('2d');
-                    ctx.drawImage(video, 0, 0);
-                    
-                    // Stop stream
-                    if (window.faceStream) {
-                        window.faceStream.getTracks().forEach(function(track) {
-                            track.stop();
-                        });
-                    }
-                    
-                    // Convert to base64
-                    var imageData = canvas.toDataURL('image/jpeg', 0.9);
-                    
-                    // Send to backend
-                    enrollBiometricAPI('facial', imageData);
-                }
-                
-                function cancelFaceCapture() {
-                    if (window.faceStream) {
-                        window.faceStream.getTracks().forEach(function(track) {
-                            track.stop();
-                        });
-                    }
-                    bootstrap.Modal.getInstance(document.getElementById('biometricEnrollModal')).hide();
-                }
-                
-                function enrollBiometricAPI(type, data) {
-                    var guardId = ]]><t t-esc="guard.id"/><![CDATA[;
-                    var content = document.getElementById('biometricEnrollContent');
-                    content.innerHTML = '<div class="text-center py-4"><i class="fa fa-spinner fa-spin fa-2x mb-3"></i><p>Enrolling biometric...</p></div>';
-                    
-                    // Prepare data for API
-                    var payload = {
-                        guard_id: guardId,
-                        biometric_type: type,
-                        template_data: data,
-                        device_model: navigator.userAgent || 'Unknown Device'
-                    };
-                    
-                    // Get device ID if available
-                    if (navigator.userAgent) {
-                        payload.device_id = navigator.userAgent.substring(0, 50);
-                    }
-                    
-                    // Use fetch API to call the JSON endpoint
-                    fetch('/guardpro/api/biometric/enroll', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(payload)
-                    })
-                    .then(function(response) {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(function(result) {
-                        if (result.success || result.result === 'success') {
-                            content.innerHTML = '<div class="text-center py-4">' +
-                                '<i class="fa fa-check-circle fa-3x text-success mb-3"></i>' +
-                                '<p class="text-success">Biometric enrolled successfully!</p>' +
-                                '</div>';
-                            setTimeout(function() {
-                                var modal = bootstrap.Modal.getInstance(document.getElementById('biometricEnrollModal'));
-                                if (modal) {
-                                    modal.hide();
-                                }
-                                location.reload();
-                            }, 1500);
-                        } else {
-                            var errorMsg = result.error || result.message || 'Unknown error';
-                            content.innerHTML = '<div class="text-center py-4">' +
-                                '<i class="fa fa-exclamation-circle fa-3x text-danger mb-3"></i>' +
-                                '<p class="text-danger">Enrollment failed: ' + errorMsg + '</p>' +
-                                '<button class="btn btn-secondary mt-2" onclick="bootstrap.Modal.getInstance(document.getElementById(\'biometricEnrollModal\')).hide()">Close</button>' +
-                                '</div>';
-                        }
-                    })
-                    .catch(function(error) {
-                        console.error('Biometric enrollment error:', error);
-                        content.innerHTML = '<div class="text-center py-4">' +
-                            '<i class="fa fa-exclamation-circle fa-3x text-danger mb-3"></i>' +
-                            '<p class="text-danger">Enrollment failed: ' + error.message + '</p>' +
-                            '<button class="btn btn-secondary mt-2" onclick="bootstrap.Modal.getInstance(document.getElementById(\'biometricEnrollModal\')).hide()">Close</button>' +
-                            '</div>';
-                    });
-                }
-                ]]>
-            </script>
         </t>
     </template>
 
@@ -4232,7 +4188,7 @@
                                 <div class="col-6 col-md-3">
                                     <div class="text-center">
                                         <div class="badge-circle bg-info text-white mx-auto mb-2" style="width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;">
-                                            <i class="fa fa-shield-alt"/>
+                                            <i class="fa fa-certificate"/>
                                         </div>
                                         <small class="text-muted d-block">SIRA Certified</small>
                                     </div>
@@ -4272,11 +4228,34 @@
 
                 <!-- Courses List -->
                 <div class="mb-4">
-                    <h5 class="mb-3">Available Courses</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Available Courses</h5>
+                        <small class="text-muted" id="course-search-count">
+                            <t t-esc="len(courses) if courses else 0"/> courses
+                        </small>
+                    </div>
+
+                    <!-- Course Search -->
+                    <div class="input-group mb-3">
+                        <span class="input-group-text bg-white">
+                            <i class="fa fa-search text-muted"/>
+                        </span>
+                        <input type="text"
+                               id="course-search-input"
+                               class="form-control"
+                               placeholder="Search by course name, category, or description"/>
+                        <button type="button" id="course-search-clear" class="btn btn-outline-secondary">
+                            Clear
+                        </button>
+                    </div>
 
                     <t t-if="courses">
                         <t t-foreach="courses" t-as="course">
-                            <div class="card mb-3" t-att-data-course-id="course['id']">
+                            <div class="card mb-3 course-card"
+                                 t-att-data-course-id="course['id']"
+                                 t-att-data-course-name="course['name'] or ''"
+                                 t-att-data-course-category="course['category'] or ''"
+                                 t-att-data-course-description="course['description'] or ''">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
                                         <div class="flex-grow-1">
@@ -4375,6 +4354,11 @@
                                 </div>
                             </div>
                         </t>
+
+                        <div id="course-search-no-results" class="text-center py-4 d-none">
+                            <i class="fa fa-search fa-2x text-muted mb-2"/>
+                            <p class="mb-0 text-muted">No courses match your search.</p>
+                        </div>
                     </t>
                     <t t-else="">
                         <div class="text-center py-5">
@@ -4438,6 +4422,71 @@
                     </div>
                 </t>
             </div>
+
+            <script type="text/javascript"><![CDATA[
+                (function () {
+                    function normalize(value) {
+                        return (value || '').toString().toLowerCase();
+                    }
+
+                    function initCourseSearch() {
+                        const searchInput = document.getElementById('course-search-input');
+                        const clearBtn = document.getElementById('course-search-clear');
+                        const noResults = document.getElementById('course-search-no-results');
+                        const countLabel = document.getElementById('course-search-count');
+                        const cards = Array.from(document.querySelectorAll('.course-card'));
+
+                        if (!searchInput || !clearBtn || cards.length === 0) {
+                            return;
+                        }
+
+                        const total = cards.length;
+                        function updateCount(visible) {
+                            if (countLabel) {
+                                countLabel.textContent = `${visible}/${total} courses`;
+                            }
+                        }
+
+                        function applySearch() {
+                            const query = normalize(searchInput.value.trim());
+                            let visibleCount = 0;
+
+                            cards.forEach((card) => {
+                                const haystack = [
+                                    card.getAttribute('data-course-name'),
+                                    card.getAttribute('data-course-category'),
+                                    card.getAttribute('data-course-description'),
+                                ].map(normalize).join(' ');
+
+                                const matched = !query || haystack.includes(query);
+                                card.classList.toggle('d-none', !matched);
+                                if (matched) {
+                                    visibleCount += 1;
+                                }
+                            });
+
+                            if (noResults) {
+                                noResults.classList.toggle('d-none', visibleCount !== 0);
+                            }
+                            updateCount(visibleCount);
+                        }
+
+                        searchInput.addEventListener('input', applySearch);
+                        clearBtn.addEventListener('click', function () {
+                            searchInput.value = '';
+                            applySearch();
+                            searchInput.focus();
+                        });
+                        applySearch();
+                    }
+
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', initCourseSearch);
+                    } else {
+                        initCourseSearch();
+                    }
+                })();
+            ]]></script>
 
             <!-- Mobile Training JavaScript -->
             <script type="text/javascript"><![CDATA[
@@ -4834,7 +4883,7 @@
                             <span class="badge bg-success">Completed</span>
                         </t>
                         <t t-if="course_cert_status == 'valid'">
-                            <span class="badge bg-info">Certified</span>
+                            <span class="badge bg-info"><i class="fa fa-certificate me-1"/>Certified</span>
                         </t>
                     </div>
                 </div>
@@ -4858,7 +4907,7 @@
                         <t t-set="slide_name" t-esc="slide.get('name', 'Untitled Lesson')"/>
                         <t t-set="slide_category" t-esc="slide.get('category', 'article')"/>
                         <t t-set="slide_completed" t-value="slide.get('completed', False)"/>
-                        <t t-set="slide_html_content" t-raw="slide.get('html_content', '') or ''"/>
+                        <t t-set="slide_html_content" t-out="slide.get('html_content', '') or ''"/>
                         <t t-set="slide_completion_time_raw" t-value="slide.get('completion_time', 0) or 0"/>
                         
                         <div class="card mb-3 slide-card" t-att-data-slide-id="slide_id">
@@ -4886,7 +4935,7 @@
                                 <t t-if="slide_category in ['article', 'infographic'] and slide_html_content">
                                     <div class="slide-content mb-3"
                                          style="max-height: 150px; overflow: hidden;">
-                                        <t t-raw="slide_html_content"/>
+                                        <t t-out="slide_html_content"/>
                                     </div>
                                 </t>
 
@@ -5934,11 +5983,11 @@
                             <h5 class="mb-0"><i class="fa fa-building me-2"/>Site Information</h5>
                         </div>
                          <div class="card-body">
-                            <h4 class="mb-2"><t t-esc="site.name"/></h4>
-                            <p class="text-muted mb-3"><i class="fa fa-map-marker-alt me-2"/><t t-esc="site.address or site.name"/></p>
+                            <h4 class="mb-2"><t t-esc="site.name or 'Unnamed Site'"/></h4>
+                            <p class="text-muted mb-3"><i class="fa fa-map-marker-alt me-2"/><t t-esc="site.address or site.name or 'No Address'"/></p>
                             
                             <div class="d-grid gap-2">
-                                <a t-att-href="'https://maps.google.com/?q=' + str(site.latitude) + ',' + str(site.longitude)" target="_blank" class="btn btn-outline-primary">
+                                <a t-if="site.latitude and site.longitude" t-attf-href="https://maps.google.com/?q={{site.latitude}},{{site.longitude}}" target="_blank" class="btn btn-outline-primary">
                                     <i class="fa fa-map-marked-alt me-2"/>View on Map
                                 </a>
                             </div>
@@ -5950,14 +5999,14 @@
                             <h5 class="mb-0"><i class="fa fa-phone me-2"/>Key Contacts</h5>
                         </div>
                         <ul class="list-group list-group-flush">
-                             <t t-if="site.site_manager_id">
+                             <t t-if="site.manager_id">
                                 <li class="list-group-item">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
                                             <h6 class="mb-0">Site Manager</h6>
-                                            <small class="text-muted"><t t-esc="site.site_manager_id.name"/></small>
+                                            <small class="text-muted"><t t-esc="site.manager_id.name or 'N/A'"/></small>
                                         </div>
-                                         <a t-if="site.site_manager_id.phone" t-att-href="'tel:' + site.site_manager_id.phone" class="btn btn-sm btn-success rounded-circle">
+                                         <a t-if="site.manager_id and site.manager_id.phone" t-att-href="'tel:' + str(site.manager_id.phone)" class="btn btn-sm btn-success rounded-circle">
                                             <i class="fa fa-phone"/>
                                         </a>
                                     </div>

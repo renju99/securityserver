@@ -345,17 +345,7 @@ class KeyTransaction(models.Model):
             ('is_overdue', '=', True)
         ])
         
-        for txn in overdue:
-            # Create activity
-            txn.key_id.activity_schedule(
-                'mail.mail_activity_data_warning',
-                summary=_('Overdue Key: %s') % txn.key_id.name,
-                note=_('Key %s is overdue for return.\nIssued to: %s\nOverdue by: %d days') % (
-                    txn.key_id.name,
-                    txn.issued_to_name,
-                    txn.overdue_days
-                )
-            )
+        # Planned activities intentionally disabled for overdue keys.
         
         _logger.info('Sent overdue reminders for %d keys', len(overdue))
         return True

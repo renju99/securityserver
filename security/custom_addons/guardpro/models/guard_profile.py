@@ -912,28 +912,32 @@ class GuardProfile(models.Model):
         if not (self.current_latitude and self.current_longitude):
             return
         
-        # Get guard's active shifts (scheduled, confirmed, or in_progress)
+        # Get guard's shifts that are active *right now*.
         Shift = self.env['guard.shift']
-        today = fields.Date.today()
-        today_start = fields.Datetime.to_datetime(today)
-        today_end = today_start + timedelta(days=1)
+        now = fields.Datetime.now()
         
         active_shifts = Shift.search([
             ('guard_id', '=', self.id),
             ('status', 'in', ['scheduled', 'confirmed', 'in_progress']),
-            ('start_datetime', '<', today_end),
-            ('end_datetime', '>', today_start)
+            ('start_datetime', '<=', now),
+            ('end_datetime', '>=', now)
         ])
         
         if not active_shifts:
             _logger.debug('Guard %s has no active shifts - skipping geofence check', self.id)
             return
         
-        # Check geofence for each active shift's site
-        for shift in active_shifts:
-            if not shift.site_id:
-                continue
-                
+        # Deduplicate by site to avoid duplicate alerts when overlapping shifts
+        # point to the same site for the same guard.
+        shifts_by_site = {}
+        for shift in active_shifts.sorted(
+            key=lambda s: (s.status != 'in_progress', s.start_datetime or fields.Datetime.now())
+        ):
+            if shift.site_id and shift.site_id.id not in shifts_by_site:
+                shifts_by_site[shift.site_id.id] = shift
+
+        # Check geofence once per site
+        for shift in shifts_by_site.values():
             site = shift.site_id
             
             # Skip if geofencing is disabled
@@ -966,46 +970,17 @@ class GuardProfile(models.Model):
                     site.latitude, site.longitude
                 )
                 
-                # Check if alert was already sent today (rate limiting: 1 per day)
-                geofence_alert_model = self.env['geofence.alert'].sudo()
-                alert_already_sent = geofence_alert_model._check_alert_sent_today(
+                # Create alert (internally rate-limited by interval, default: 15 min).
+                # No mail.activity here — those send "assigned to you" emails; bus + geofence.alert row is enough.
+                self.env['geofence.alert'].sudo().create_alert(
                     guard_id=self.id,
                     alert_type='outside_geofence',
-                    site_id=site.id
+                    site_id=site.id,
+                    shift_id=shift.id,
+                    latitude=self.current_latitude,
+                    longitude=self.current_longitude,
+                    distance_from_site=distance / 1000  # Convert to km
                 )
-                
-                if not alert_already_sent:
-                    # Create geofence alert (system-generated, requires sudo)
-                    # Justification: Automated geofence alerts need to be created regardless of user permissions
-                    geofence_alert_model.create_alert(
-                        guard_id=self.id,
-                        alert_type='outside_geofence',
-                        site_id=site.id,
-                        shift_id=shift.id,
-                        latitude=self.current_latitude,
-                        longitude=self.current_longitude,
-                        distance_from_site=distance / 1000  # Convert to km
-                    )
-                    
-                    # Create a geofence violation activity (system notification, requires sudo)
-                    # Justification: System-generated notifications for supervisors
-                    # Only created if alert wasn't already sent today (rate limited)
-                    if shift.supervisor_id and shift.supervisor_id.user_id:
-                        self.env['mail.activity'].sudo().create({
-                            'activity_type_id': self.env.ref('mail.mail_activity_data_warning').id,
-                            'res_id': shift.id,
-                            'res_model_id': self.env['ir.model']._get('guard.shift').id,
-                            'user_id': shift.supervisor_id.user_id.id,
-                            'summary': 'Geofence Violation Alert',
-                            'note': f'Guard {self.name} is outside the geofence of {site.name}. '
-                                    f'Distance: {distance:.2f}m (allowed: {site.geofence_radius}m)',
-                        })
-                else:
-                    _logger.info(
-                        'Skipped creating geofence alert for guard %s - '
-                        'alert already sent today (rate limited)',
-                        self.name
-                    )
     
     def _calculate_distance_to_site(self, site):
         """Calculate distance between guard and site in meters using Haversine formula."""

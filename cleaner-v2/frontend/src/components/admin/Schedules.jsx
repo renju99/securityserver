@@ -8,14 +8,15 @@ const Schedules = () => {
     const [schedules, setSchedules] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-    const [washrooms, setWashrooms] = useState([]);
+    const [locations, setLocations] = useState([]);
     const [staff, setStaff] = useState([]);
     const [checklistTypes, setChecklistTypes] = useState([]);
     const [saving, setSaving] = useState(false);
     const [editItem, setEditItem] = useState(null);
     const [form, setForm] = useState({
-        washroom_id: '',
+        location_id: '',
         employee_id: '',
+        location_details: '',
         start_time: '08:00',
         end_time: '',
         interval_value: 2,
@@ -29,14 +30,14 @@ const Schedules = () => {
 
     const fetchAll = async () => {
         try {
-            const [schRes, washRes, staffRes, typeRes] = await Promise.all([
+            const [schRes, locRes, staffRes, typeRes] = await Promise.all([
                 axios.get('/api/schedules', { headers: authHeader }),
-                axios.get('/api/washrooms', { headers: authHeader }),
+                axios.get('/api/locations', { headers: authHeader }),
                 axios.get('/api/staff', { headers: authHeader }),
                 axios.get('/api/checklist-types', { headers: authHeader }),
             ]);
             setSchedules(schRes.data);
-            setWashrooms(washRes.data);
+            setLocations(locRes.data);
             setStaff(staffRes.data);
             setChecklistTypes(typeRes.data);
         } catch (error) {
@@ -71,8 +72,9 @@ const Schedules = () => {
     const openEdit = (item) => {
         setEditItem(item);
         setForm({
-            washroom_id: item.washroom_id,
+            location_id: item.location_id,
             employee_id: item.employee_id || '',
+            location_details: item.location_details || '',
             start_time: item.start_time?.slice(0, 5) || '08:00',
             end_time: item.end_time?.slice(0, 5) || '',
             interval_value: item.interval_value ?? 2,
@@ -93,7 +95,7 @@ const Schedules = () => {
             }
             setShowModal(false);
             setEditItem(null);
-            setForm({ washroom_id: '', employee_id: '', start_time: '08:00', end_time: '', interval_value: 2, interval_unit: 'hours', checklist_type: 'daily_moderate' });
+            setForm({ location_id: '', employee_id: '', location_details: '', start_time: '08:00', end_time: '', interval_value: 2, interval_unit: 'hours', checklist_type: 'daily_moderate' });
             fetchAll();
         } catch (error) {
             alert('Save failed: ' + (error.response?.data?.error || error.message));
@@ -139,7 +141,7 @@ const Schedules = () => {
                     <button className="btn btn-secondary" onClick={handleImportExcel} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                         <FileSpreadsheet size={16} /> Import Excel
                     </button>
-                    <button className="btn btn-primary" onClick={() => { setEditItem(null); setForm({ washroom_id: '', employee_id: '', start_time: '08:00', end_time: '', interval_value: 2, interval_unit: 'hours', checklist_type: 'daily_moderate' }); setShowModal(true); }} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <button className="btn btn-primary" onClick={() => { setEditItem(null); setForm({ location_id: '', employee_id: '', location_details: '', start_time: '08:00', end_time: '', interval_value: 2, interval_unit: 'hours', checklist_type: 'daily_moderate' }); setShowModal(true); }} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                         <Plus size={16} /> New Schedule
                     </button>
                 </div>
@@ -154,6 +156,7 @@ const Schedules = () => {
                         <thead>
                             <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
                                 <th style={{ textAlign: 'left', padding: '1rem', color: 'var(--text-muted)', fontWeight: '600' }}>Location</th>
+                                <th style={{ textAlign: 'left', padding: '1rem', color: 'var(--text-muted)', fontWeight: '600' }}>Location details</th>
                                 <th style={{ textAlign: 'left', padding: '1rem', color: 'var(--text-muted)', fontWeight: '600' }}>Start Time</th>
                                 <th style={{ textAlign: 'left', padding: '1rem', color: 'var(--text-muted)', fontWeight: '600' }}>Interval</th>
                                 <th style={{ textAlign: 'left', padding: '1rem', color: 'var(--text-muted)', fontWeight: '600' }}>Assigned To</th>
@@ -168,8 +171,11 @@ const Schedules = () => {
                                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                 >
                                     <td style={{ padding: '1rem' }}>
-                                        <div style={{ fontWeight: '600' }}>{item.washroom_name || 'All Washrooms'}</div>
+                                        <div style={{ fontWeight: '600' }}>{item.location_name || 'All Locations'}</div>
                                         <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{item.project_name || '—'}</div>
+                                    </td>
+                                    <td style={{ padding: '1rem', maxWidth: '200px' }}>
+                                        <span style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>{item.location_details || '—'}</span>
                                     </td>
                                     <td style={{ padding: '1rem' }}>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -221,13 +227,23 @@ const Schedules = () => {
             >
                 <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <div>
-                        <label style={labelStyle}>Washroom *</label>
-                        <select style={inputStyle} required value={form.washroom_id} onChange={e => setForm(f => ({ ...f, washroom_id: e.target.value }))}>
-                            <option value="">Select washroom...</option>
-                            {washrooms.map(w => (
-                                <option key={w.id} value={w.id}>{w.name} {w.project_name ? `(${w.project_name})` : ''}</option>
+                        <label style={labelStyle}>Location *</label>
+                        <select style={inputStyle} required value={form.location_id} onChange={e => setForm(f => ({ ...f, location_id: e.target.value }))}>
+                            <option value="">Select location...</option>
+                            {locations.map(l => (
+                                <option key={l.id} value={l.id}>{l.name} {l.project_name ? `(${l.project_name})` : ''}</option>
                             ))}
                         </select>
+                    </div>
+                    <div>
+                        <label style={labelStyle}>Location details (optional)</label>
+                        <input
+                            type="text"
+                            style={inputStyle}
+                            placeholder="e.g. Building A, 2nd floor corridor"
+                            value={form.location_details}
+                            onChange={e => setForm(f => ({ ...f, location_details: e.target.value }))}
+                        />
                     </div>
                     <div>
                         <label style={labelStyle}>Assign To (Staff)</label>

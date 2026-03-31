@@ -374,31 +374,8 @@ class IncidentEscalationLog(models.Model):
                                             raise_if_not_found=False)
             
             if activity_type:
-                self.incident_id.activity_schedule(
-                    activity_type_xmlid=activity_type.xml_id if activity_type else False,
-                    summary=_('ESCALATION: %s') % self.incident_id.title,
-                    note=_(
-                        'Incident %s has been escalated to Level %d\n\n'
-                        'Escalation Type: %s\n'
-                        'Severity: %s\n'
-                        'Site: %s\n'
-                        'Time Since Incident: %.0f minutes\n\n'
-                        'Reason:\n%s'
-                    ) % (
-                        self.incident_id.name,
-                        self.escalation_level,
-                        dict(self._fields['escalation_type'].selection).get(
-                            self.escalation_type, 'Unknown'
-                        ),
-                        dict(self.incident_id._fields['severity'].selection).get(
-                            self.incident_severity, 'Unknown'
-                        ),
-                        self.site_id.name,
-                        self.time_since_incident,
-                        self.escalation_reason
-                    ),
-                    user_id=user.id
-                )
+                # Planned activity intentionally disabled.
+                continue
         
         # Mark notification as sent
         self.write({
@@ -406,17 +383,12 @@ class IncidentEscalationLog(models.Model):
             'notification_sent_datetime': fields.Datetime.now()
         })
         
-        # Send email using template if available
-        template = self.env.ref('guardpro.incident_escalation_email_template',
-                               raise_if_not_found=False)
-        if template:
-            try:
-                for user in self.escalated_to_user_ids:
-                    template.with_context(
-                        escalation_user=user
-                    ).send_mail(self.id, force_send=True)
-            except Exception as e:
-                _logger.error('Failed to send escalation email: %s', str(e))
+        # Email notifications are disabled globally.
+        if self.escalated_to_user_ids:
+            _logger.info(
+                'Email notifications are disabled: skipped escalation emails for incident %s',
+                self.incident_id.name
+            )
         
         _logger.info(
             'Sent escalation notification for incident %s to %d users',

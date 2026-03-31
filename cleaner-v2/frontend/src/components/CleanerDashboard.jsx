@@ -76,8 +76,8 @@ const CleanerDashboard = () => {
         setCurrentAttendance(att);
         // If there's an active check-in, load the checklist for it
         const schedRes = await axios.get(`/api/schedules`, { headers: authHeader() });
-        // Find the schedule linked to this attendance's washroom
-        const matchingSchedule = schedRes.data.find(s => s.washroom_id === att.washroom_id);
+        // Find the schedule linked to this attendance's location
+        const matchingSchedule = schedRes.data.find(s => s.location_id === att.location_id);
         const type = matchingSchedule?.checklist_type || 'daily_moderate';
         await loadChecklistForType(type);
         setStage('checklist');
@@ -120,7 +120,7 @@ const CleanerDashboard = () => {
         // Queue for later sync
         addToQueue({ type: 'check_in', payload, token: localStorage.getItem('token') });
         // Optimistically set a local attendance record
-        const localAtt = { id: `local_${Date.now()}`, washroom_name: 'Scanned Washroom', check_in: new Date().toISOString(), isLocal: true };
+        const localAtt = { id: `local_${Date.now()}`, location_name: 'Scanned Location', check_in: new Date().toISOString(), isLocal: true };
         setCurrentAttendance(localAtt);
         await loadChecklistForType('daily_moderate');
         setStage('checklist');
@@ -133,11 +133,11 @@ const CleanerDashboard = () => {
         const att = res.data;
         setCurrentAttendance(att);
 
-        // Get the checklist type from the schedule linked to this washroom
+        // Get the checklist type from the schedule linked to this location
         const type = att.schedule_checklist_type || 'daily_moderate';
         await loadChecklistForType(type);
         setStage('checklist');
-        setStatusMsg({ type: 'success', text: `Checked in at ${att.washroom_name} ✓` });
+        setStatusMsg({ type: 'success', text: `Checked in at ${att.location_name} ✓` });
         setTimeout(() => setStatusMsg({ type: '', text: '' }), 3000);
       } catch (err) {
         setStage('idle');
@@ -162,7 +162,7 @@ const CleanerDashboard = () => {
     const doSubmit = async (lat, lng) => {
       const payload = {
         attendanceId: currentAttendance.id,
-        washroomId: currentAttendance.washroom_id,
+        locationId: currentAttendance.location_id,
         checklistType,
         items,
         notes: '',
@@ -185,7 +185,7 @@ const CleanerDashboard = () => {
         setCurrentAttendance(null);
         setChecklistItems([]);
         setStage('done');
-        setStatusMsg({ type: 'success', text: 'Report submitted! Great work ✓' });
+        setStatusMsg({ type: 'success', text: 'Checklist submitted! Great work ✓' });
         setTimeout(() => { setStage('idle'); setStatusMsg({ type: '', text: '' }); }, 4000);
       } catch (err) {
         setStage('checklist');
@@ -261,7 +261,7 @@ const CleanerDashboard = () => {
         {renderStatusBar()}
         <div style={{ textAlign: 'center', padding: '2rem 0' }}>
           <div style={{ color: 'var(--text-muted)', marginBottom: '2rem', fontSize: '0.9rem' }}>
-            Scan a washroom QR or NFC tag to begin
+            Scan a location QR or NFC tag to begin
           </div>
           <button onClick={() => setStage('scanning')} style={styles.scanBtn}>
             <Camera size={48} />
@@ -298,7 +298,7 @@ const CleanerDashboard = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '2px' }}>Currently cleaning</div>
-              <div style={{ fontWeight: '700', fontSize: '1.1rem' }}>{currentAttendance?.washroom_name || 'Washroom'}</div>
+              <div style={{ fontWeight: '700', fontSize: '1.1rem' }}>{currentAttendance?.location_name || 'Location'}</div>
               <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                 Started {currentAttendance?.check_in ? new Date(currentAttendance.check_in).toLocaleTimeString() : 'just now'}
               </div>

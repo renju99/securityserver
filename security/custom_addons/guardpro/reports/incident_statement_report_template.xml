@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="incident_statement_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <style>
+                    .stmt-page { font-family: 'Helvetica', 'Arial', sans-serif; padding: 0; margin: 0; color: #333; }
+                    .red-bar { background-color: #a52a2a; color: white; text-align: right; padding: 5px 20px; font-size: 14px; font-weight: bold; }
+                    .blue-bar { background-color: #4a90e2; color: white; text-align: right; padding: 5px 20px; font-size: 14px; font-weight: bold; }
+                    .stmt-header { margin-top: 20px; margin-bottom: 30px; }
+                    .stmt-logo { max-height: 80px; }
+                    .stmt-post-name { text-align: right; font-size: 18px; color: #666; }
+                    .stmt-formal-title { text-align: center; font-size: 24px; font-weight: bold; text-transform: uppercase; margin: 30px 0; color: #444; }
+                    
+                    .stmt-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; border: 1px solid #eee; }
+                    .stmt-table td { padding: 12px 15px; border: 1px solid #eee; font-size: 14px; vertical-align: top; }
+                    .stmt-label { background-color: #f9f9f9; font-weight: bold; width: 250px; color: #555; }
+                    .stmt-value { width: auto; color: #000; }
+                    
+                    .stmt-section-header { font-size: 22px; font-weight: bold; color: #444; margin: 30px 0 15px 0; border-bottom: none; }
+                    .stmt-acknowledgment { background-color: #f2f2f2; padding: 15px 20px; font-size: 14px; line-height: 1.5; color: #333; margin-bottom: 20px; border: 1px solid #eee; }
+                    
+                    .stmt-text-content { font-size: 15px; line-height: 1.7; color: #222; min-height: 150px; padding: 10px 0; }
+                    .stmt-signature-area { margin-top: 40px; page-break-inside: avoid; }
+                    .stmt-sig-box { width: 100%; border: none; }
+                    .stmt-sig-img { max-height: 120px; display: block; margin: 10px 0; }
+                    .stmt-sig-line { border-top: 1px solid #333; margin-top: 5px; padding-top: 5px; width: 100%; font-weight: bold; }
+                    
+                    .eid-image-container { text-align: center; background-color: #f9f9f9; padding: 20px; border: 1px solid #eee; }
+                    .eid-image { max-width: 90%; max-height: 350px; border: 1px solid #ddd; }
+                    
+                    /* Utility classes */
+                    .mt-4 { margin-top: 40px; }
+                    .mb-4 { margin-bottom: 40px; }
+                </style>
+
+                <div class="stmt-page">
+                    <!-- Top Colored Bars -->
+                    <div class="red-bar" t-if="doc.statement_expiry_date">
+                        This report contains personal data. It must be deleted on or before 
+                        <span t-field="doc.statement_expiry_date" t-options='{"widget": "date"}'/>
+                    </div>
+                    <div class="blue-bar">
+                        New Activity // <span t-field="doc.name"/>
+                    </div>
+
+                    <div class="container" style="padding: 20px 40px;">
+                        <!-- Header with Logo and Post -->
+                        <div class="row stmt-header">
+                            <div class="col-6">
+                                <img t-if="res_company.logo" t-att-src="image_data_uri(res_company.logo)" class="stmt-logo"/>
+                            </div>
+                            <div class="col-6 stmt-post-name">
+                                <span t-field="doc.site_id.name"/>
+                            </div>
+                        </div>
+
+                        <!-- Formal Title -->
+                        <div class="stmt-formal-title">
+                            STATEMENT FORM UAE NTSQD SEC F_023, V. 0 01.07.19
+                        </div>
+
+                        <!-- Main Incident Info Table -->
+                        <table class="stmt-table">
+                            <tr>
+                                <td class="stmt-label">Category</td>
+                                <td class="stmt-value"><span t-field="doc.category_id.name"/></td>
+                            </tr>
+                            <tr>
+                                <td class="stmt-label">Priority</td>
+                                <td class="stmt-value"><span t-field="doc.severity" style="text-transform: capitalize;"/></td>
+                            </tr>
+                            <tr>
+                                <td class="stmt-label">Post</td>
+                                <td class="stmt-value"><span t-field="doc.site_id.name"/></td>
+                            </tr>
+                            <tr>
+                                <td class="stmt-label">Report Created by</td>
+                                <td class="stmt-value"><span t-field="doc.guard_id.name"/> <span t-if="doc.site_id"> - <span t-field="doc.site_id.name"/></span></td>
+                            </tr>
+                            <tr>
+                                <td class="stmt-label">Start Date</td>
+                                <td class="stmt-value"><span t-field="doc.incident_datetime" t-options='{"widget": "datetime"}'/></td>
+                            </tr>
+                        </table>
+                        <t t-call="guardpro.incident_map_snippet"/>
+
+                        <!-- Personal Information Section -->
+                        <div class="stmt-section-header">Personal Information of the Person Writing the Statement</div>
+                        
+                        <div class="stmt-acknowledgment">
+                            I hereby acknowledge that the information I have supplied in this document is correct. This statement is made
+                            voluntarily and is true to the best of my knowledge.
+                        </div>
+
+                        <table class="stmt-table">
+                            <tr>
+                                <td class="stmt-label">Date</td>
+                                <td class="stmt-value"><span t-field="doc.incident_datetime" t-options='{"widget": "date"}'/></td>
+                            </tr>
+                            <tr>
+                                <td class="stmt-label">Time</td>
+                                <td class="stmt-value"><span t-field="doc.incident_datetime" t-options='{"widget": "datetime", "time_only": True}'/></td>
+                            </tr>
+                            <tr>
+                                <td class="stmt-label">Full Name</td>
+                                <td class="stmt-value"><span t-field="doc.statement_person_name"/></td>
+                            </tr>
+                            <tr>
+                                <td class="stmt-label">Mobile Number</td>
+                                <td class="stmt-value"><span t-field="doc.statement_person_mobile"/></td>
+                            </tr>
+                            <tr t-if="doc.statement_person_email">
+                                <td class="stmt-label">Email Address</td>
+                                <td class="stmt-value"><span t-field="doc.statement_person_email"/></td>
+                            </tr>
+                            <tr>
+                                <td class="stmt-label">Nationality</td>
+                                <td class="stmt-value"><span t-field="doc.statement_person_nationality"/></td>
+                            </tr>
+                            <tr>
+                                <td class="stmt-label">Gender</td>
+                                <td class="stmt-value"><span t-field="doc.statement_person_gender" style="text-transform: capitalize;"/></td>
+                            </tr>
+                            <tr>
+                                <td class="stmt-label">EID Number</td>
+                                <td class="stmt-value"><span t-field="doc.statement_person_eid_number"/></td>
+                            </tr>
+                            <tr>
+                                <td class="stmt-label">EID Expiry Date</td>
+                                <td class="stmt-value"><span t-field="doc.statement_person_eid_expiry"/></td>
+                            </tr>
+                            
+                            <!-- EID Front Image -->
+                            <tr t-if="doc.statement_person_eid_front">
+                                <td class="stmt-label">EID Front</td>
+                                <td class="stmt-value eid-image-container">
+                                    <img t-att-src="image_data_uri(doc.statement_person_eid_front)" class="eid-image"/>
+                                </td>
+                            </tr>
+
+                            <!-- EID Back Image -->
+                            <tr t-if="doc.statement_person_eid_back">
+                                <td class="stmt-label">EID Back</td>
+                                <td class="stmt-value eid-image-container">
+                                    <img t-att-src="image_data_uri(doc.statement_person_eid_back)" class="eid-image"/>
+                                </td>
+                            </tr>
+
+                            <!-- Professional Details -->
+                            <tr>
+                                <td class="stmt-label">Company</td>
+                                <td class="stmt-value"><span t-field="doc.statement_person_company"/></td>
+                            </tr>
+                            <tr>
+                                <td class="stmt-label">Department</td>
+                                <td class="stmt-value"><span t-field="doc.statement_person_department"/></td>
+                            </tr>
+                            <tr>
+                                <td class="stmt-label">Designation</td>
+                                <td class="stmt-value"><span t-field="doc.statement_person_designation"/></td>
+                            </tr>
+
+                            <!-- Statement Content -->
+                            <tr>
+                                <td class="stmt-label">Statement</td>
+                                <td class="stmt-value">
+                                    <div class="stmt-text-content">
+                                        <span t-field="doc.statement_text"/>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Signature of Person Providing Statement -->
+                            <tr>
+                                <td class="stmt-label">Signature</td>
+                                <td class="stmt-value">
+                                    <div class="stmt-sig-box" t-if="doc.statement_person_signature">
+                                        <img t-att-src="image_data_uri(doc.statement_person_signature)" class="stmt-sig-img"/>
+                                        <div class="stmt-sig-line">Signature</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Security Officer Details -->
+                        <div class="stmt-section-header">Security Officer Details</div>
+                        <table class="stmt-table">
+                            <tr>
+                                <td class="stmt-label">Security Name</td>
+                                <td class="stmt-value"><span t-field="doc.guard_id.name"/></td>
+                            </tr>
+                            <tr t-if="doc.guard_id.phone">
+                                <td class="stmt-label">Mobile Number</td>
+                                <td class="stmt-value"><span t-field="doc.guard_id.phone"/></td>
+                            </tr>
+                            <tr>
+                                <td class="stmt-label">Signature</td>
+                                <td class="stmt-value">
+                                    <div class="stmt-sig-box" t-if="doc.security_officer_signature">
+                                        <img t-att-src="image_data_uri(doc.security_officer_signature)" class="stmt-sig-img"/>
+                                        <div class="stmt-sig-line">Signature</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <!-- Attachments Row (matching reference) -->
+                        <div class="mt-4">
+                            <h4 style="font-weight: bold; color: #444;">Attachments</h4>
+                            <hr style="border-top: 2px solid #eee;"/>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Action for Statement Form -->
+    <record id="action_report_incident_statement" model="ir.actions.report">
+        <field name="name">Statement Form (Activity Report)</field>
+        <field name="model">incident.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.incident_statement_pdf_template</field>
+        <field name="report_file">guardpro.incident_statement_pdf_template</field>
+        <field name="print_report_name">'Statement_Form_%s_%s' % (object.name, object.statement_person_name or 'unnamed')</field>
+        <field name="binding_model_id" ref="model_incident_report"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

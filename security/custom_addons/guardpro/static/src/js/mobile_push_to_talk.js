@@ -42,6 +42,12 @@
             this.lastMessageId = 0; // Track last message ID for walkie-talkie functionality
             this.playedMessageIds = new Set(); // Track played messages to avoid duplicates
 
+            this.activeStreams = new Map(); // message_id -> { buffer: [], isPlaying: false, audioEl: null }
+            this.minPlaybackBufferChunks = 2;
+            this.pendingChunkQueue = [];
+            this.streamStartPromise = null;
+            this.pendingFinalChunk = false;
+
             this.init();
         }
 
@@ -130,8 +136,8 @@
             // Set up channel selector if needed
             this.setupChannelSelector();
 
-            // Set up message listener
-            this.setupMessageListener();
+            // Set up message listener (Bus based)
+            this.setupBusListener();
 
             console.log('[Push-to-Talk] Setup complete');
         }
@@ -521,6 +527,8 @@
                 this.mediaRecorder = new MediaRecorder(this.audioStream, options);
                 this.audioChunks = [];
                 this.capturedDuration = 0;
+                this.pendingChunkQueue = [];
+                this.pendingFinalChunk = false;
 
                 this.mediaRecorder.ondataavailable = (event) => {
                     if (event.data.size > 0) {
@@ -560,8 +568,20 @@
                     const maxDuration = this.currentChannel?.max_duration_seconds || 60;
                     if (this.recordingDuration >= maxDuration) {
                         this.stopRecording();
+                        return;
+                    }
+
+                    // NEW: Send current buffer as a chunk every 800ms
+                    if (this.audioChunks.length > 0 && (Date.now() - this.lastChunkSentTime > 800)) {
+                        this.sendStreamingChunk(false);
                     }
                 }, 100);
+
+                // Initialize streaming on server and keep promise reference
+                this.streamingMessageId = null;
+                this.streamId = 'str_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                this.lastChunkSentTime = Date.now();
+                this.streamStartPromise = this.startStreamingOnServer();
 
             } catch (error) {
                 console.error('[Push-to-Talk] Recording failed:', error);
@@ -612,128 +632,299 @@
             }
 
             try {
-                // Combine audio chunks using the actual recorded mime type
-                const audioBlob = new Blob(this.audioChunks, { type: this.mediaRecorder.mimeType || 'audio/ogg' });
+                // Send final chunk
+                await this.sendStreamingChunk(true);
+                await this.flushPendingChunks();
 
-                // Convert to base64
-                const reader = new FileReader();
-                reader.onloadend = async () => {
-                    const base64Audio = reader.result.split(',')[1];
-
-                    // Get current location if available
-                    let latitude = null;
-                    let longitude = null;
-                    if (navigator.geolocation) {
-                        try {
-                            const position = await new Promise((resolve, reject) => {
-                                navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 2000 });
-                            });
-                            latitude = position.coords.latitude;
-                            longitude = position.coords.longitude;
-                        } catch (e) {
-                            // Location not available
-                        }
-                    }
-
-                    // Send to server using JSON-RPC format
-                    const response = await fetch('/guardpro/api/push-to-talk/send', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify({
-                            jsonrpc: '2.0',
-                            method: 'call',
-                            id: Math.floor(Math.random() * 1000000),
-                            params: {
-                                channel_id: this.currentChannel.id,
-                                audio_data: base64Audio,
-                                duration_seconds: Math.max(0.1, this.capturedDuration || this.recordingDuration),
-                                is_urgent: false,
-                                latitude: latitude,
-                                longitude: longitude
-                            }
-                        })
-                    });
-
-                    if (!response.ok) {
-                        const text = await response.text();
-                        console.error('[Push-to-Talk] Send error:', response.status, text.substring(0, 200));
-                        this.showNotification('Failed to send message. Please try again.', 'error');
-                        return;
-                    }
-
-                    const contentType = response.headers.get('content-type');
-                    if (!contentType || !contentType.includes('application/json')) {
-                        console.error('[Push-to-Talk] Non-JSON response for send');
-                        this.showNotification('Invalid server response', 'error');
-                        return;
-                    }
-
-                    const result = await response.json();
-                    let data = result;
-                    if (result.jsonrpc && result.result !== undefined) {
-                        data = result.result;
-                    } else if (result.error) {
-                        console.error('[Push-to-Talk] Send JSON-RPC error:', result.error);
-                        this.showNotification('Error: ' + (result.error.message || result.error.data || 'Unknown error'), 'error');
-                        return;
-                    }
-
-                    if (data && data.success) {
-                        this.showNotification('Voice message sent', 'success');
-                        // Update last message ID to include the message we just sent
-                        // This prevents us from playing our own message back
-                        if (data.message_id && data.message_id > this.lastMessageId) {
-                            this.lastMessageId = data.message_id;
-                            this.playedMessageIds.add(data.message_id);
-                        }
-                    } else {
-                        this.showNotification('Failed to send: ' + (data?.error || 'Unknown error'), 'error');
-                    }
-
-                    // Reset
-                    this.recordingDuration = 0;
-                    this.updateRecordingDuration();
-                };
-
-                reader.readAsDataURL(audioBlob);
+                // Reset
+                this.recordingDuration = 0;
+                this.updateRecordingDuration();
+                this.streamingMessageId = null;
+                this.streamStartPromise = null;
+                this.pendingFinalChunk = false;
 
             } catch (error) {
                 console.error('Error processing recording:', error);
-                this.showNotification('Error processing recording', 'error');
             }
+        }
+
+        async startStreamingOnServer() {
+            try {
+                let latitude = null;
+                let longitude = null;
+                if (navigator.geolocation) {
+                    try {
+                        const position = await new Promise((resolve, reject) => {
+                            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 2000 });
+                        });
+                        latitude = position.coords.latitude;
+                        longitude = position.coords.longitude;
+                    } catch (e) { }
+                }
+
+                const response = await fetch('/guardpro/api/push-to-talk/stream/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        method: 'call',
+                        params: {
+                            channel_id: this.currentChannel.id,
+                            stream_id: this.streamId,
+                            latitude: latitude,
+                            longitude: longitude
+                        }
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    const data = result.result || result;
+                    if (data && data.success) {
+                        this.streamingMessageId = data.message_id;
+                        await this.flushPendingChunks();
+                    }
+                }
+            } catch (err) {
+                console.error('[Push-to-Talk] Failed to start stream:', err);
+            }
+        }
+
+        async sendStreamingChunk(isLast = false) {
+            if (this.audioChunks.length === 0 && !isLast) return;
+
+            // If stream isn't ready yet, queue chunks to avoid losing short/early recordings.
+            if (!this.streamingMessageId) {
+                if (this.audioChunks.length > 0) {
+                    const queuedBlob = new Blob([...this.audioChunks], { type: this.mediaRecorder?.mimeType || 'audio/ogg' });
+                    this.pendingChunkQueue.push({
+                        blob: queuedBlob,
+                        isLast: isLast,
+                        duration: this.recordingDuration
+                    });
+                    this.audioChunks = [];
+                } else if (isLast) {
+                    this.pendingFinalChunk = true;
+                }
+
+                if (!this.streamStartPromise && this.streamId && this.currentChannel) {
+                    this.streamStartPromise = this.startStreamingOnServer();
+                }
+                return;
+            }
+
+            const chunksToSend = [...this.audioChunks];
+            this.audioChunks = [];
+            this.lastChunkSentTime = Date.now();
+
+            try {
+                if (chunksToSend.length === 0 && !isLast) return;
+                const audioBlob = new Blob(chunksToSend, { type: this.mediaRecorder?.mimeType || 'audio/ogg' });
+                await this.postChunkBlob(audioBlob, isLast, this.recordingDuration);
+            } catch (err) {
+                console.error('[Push-to-Talk] Failed to send chunk:', err);
+            }
+        }
+
+        async postChunkBlob(audioBlob, isLast, durationSeconds) {
+            const reader = new FileReader();
+            const base64Chunk = await new Promise((resolve, reject) => {
+                reader.onloadend = () => resolve((reader.result || '').split(',')[1] || '');
+                reader.onerror = reject;
+                reader.readAsDataURL(audioBlob);
+            });
+
+            await fetch('/guardpro/api/push-to-talk/stream/chunk', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    jsonrpc: '2.0',
+                    method: 'call',
+                    params: {
+                        message_id: this.streamingMessageId,
+                        audio_chunk: base64Chunk,
+                        is_last: isLast,
+                        duration_seconds: durationSeconds
+                    }
+                })
+            });
+        }
+
+        async flushPendingChunks() {
+            if (!this.streamingMessageId) return;
+            while (this.pendingChunkQueue.length > 0) {
+                const item = this.pendingChunkQueue.shift();
+                await this.postChunkBlob(item.blob, item.isLast, item.duration);
+            }
+            if (this.pendingFinalChunk) {
+                this.pendingFinalChunk = false;
+                await this.postChunkBlob(new Blob([], { type: this.mediaRecorder?.mimeType || 'audio/ogg' }), true, this.recordingDuration);
+            }
+        }
+
+        setupBusListener() {
+            // Standard Odoo Bus listener pattern for version 18
+            const bus = window.odoo && window.odoo.__session_info__ && window.odoo.__session_info__.bus_id;
+
+            // Listen for 'bus_notification' which is dispatched by Odoo's bus service
+            document.addEventListener('bus_notification', (event) => {
+                const notifications = event.detail;
+                if (!Array.isArray(notifications)) return;
+
+                notifications.forEach(notif => {
+                    if (notif.type === 'push_to_talk_chunk') {
+                        this.onChunkReceived(notif.payload);
+                    }
+                });
+            });
+
+            // Polling fallback if Bus is not active or for history
+            setInterval(async () => {
+                if (this.currentChannel && !this.isRecording) {
+                    await this.checkNewMessages();
+                }
+            }, 3000); // Slower polling as fallback
+        }
+
+        async onChunkReceived(chunkData) {
+            if (chunkData.channel_id !== this.currentChannel?.id) return;
+            if (this.isRecording) return; // Don't play while user is talking
+
+            let stream = this.activeStreams.get(chunkData.message_id);
+            if (!stream) {
+                console.log('[Push-to-Talk] Incoming stream from', chunkData.sender_name);
+                this.showNotification(`Incoming: ${chunkData.sender_name}`, 'info');
+                stream = { buffer: [], isPlaying: false };
+                this.activeStreams.set(chunkData.message_id, stream);
+            }
+
+            // Decode base64 to ArrayBuffer
+            const chunkBinary = atob(chunkData.chunk);
+            const arrayBuffer = new ArrayBuffer(chunkBinary.length);
+            const view = new Uint8Array(arrayBuffer);
+            for (let i = 0; i < chunkBinary.length; i++) {
+                view[i] = chunkBinary.charCodeAt(i);
+            }
+
+            stream.buffer.push(arrayBuffer);
+
+            if (!stream.isPlaying) {
+                this.playStreamChunks(chunkData.message_id);
+            }
+        }
+
+        async playStreamChunks(messageId) {
+            const stream = this.activeStreams.get(messageId);
+            if (!stream) {
+                return;
+            }
+
+            // Small pre-buffer to reduce per-chunk playback gaps.
+            if (!stream.isPlaying && stream.buffer.length < this.minPlaybackBufferChunks) {
+                setTimeout(() => {
+                    if (!stream.isPlaying) this.playStreamChunks(messageId);
+                }, 60);
+                return;
+            }
+
+            if (stream.buffer.length === 0) {
+                if (stream) stream.isPlaying = false;
+                return;
+            }
+
+            stream.isPlaying = true;
+            const chunk = stream.buffer.shift();
+            const blob = new Blob([chunk], { type: 'audio/ogg' });
+            const url = URL.createObjectURL(blob);
+
+            const audio = new Audio(url);
+            audio.onended = () => {
+                URL.revokeObjectURL(url);
+                this.playStreamChunks(messageId);
+            };
+            audio.onerror = () => {
+                stream.isPlaying = false;
+                URL.revokeObjectURL(url);
+            };
+
+            try {
+                await audio.play();
+            } catch (err) {
+                stream.isPlaying = false;
+            }
+        }
+
+        async checkNewMessages() {
+            try {
+                if (!this.currentChannel) return;
+                if (this.lastMessageId === 0) await this.initializeLastMessageId();
+
+                const response = await fetch(`/guardpro/api/push-to-talk/channel/${this.currentChannel.id}/messages`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        method: 'call',
+                        params: { limit: 20, since_id: this.lastMessageId }
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    const data = result.result || result;
+                    if (data && data.success && data.messages) {
+                        const newMsgs = data.messages.filter(m => !m.is_sent_by_me && !this.playedMessageIds.has(m.id) && m.id > this.lastMessageId);
+                        if (newMsgs.length > 0) {
+                            newMsgs.sort((a, b) => a.id - b.id);
+                            this.lastMessageId = Math.max(...newMsgs.map(m => m.id));
+                            for (const msg of newMsgs) {
+                                if (!this.playedMessageIds.has(msg.id)) {
+                                    this.playedMessageIds.add(msg.id);
+                                    await this.playMessage(msg.id, msg.audio_url);
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (err) { }
+        }
+
+        async playMessage(messageId, audioUrl) {
+            try {
+                if (this.audioElement) {
+                    this.audioElement.pause();
+                    this.audioElement = null;
+                }
+                this.audioElement = new Audio(audioUrl);
+                this.audioElement.onended = () => { this.audioElement = null; };
+                await this.audioElement.play();
+
+                fetch(`/guardpro/api/push-to-talk/message/${messageId}/mark-played`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ jsonrpc: '2.0', method: 'call', params: {} })
+                }).catch(() => { });
+            } catch (err) { }
         }
 
         updateRecordingUI(isRecording) {
             const button = document.getElementById('push-to-talk-button');
             if (!button) return;
-
             const durationEl = document.getElementById('push-to-talk-duration');
             const iconEl = button.querySelector('.push-to-talk-icon');
 
             if (isRecording) {
                 button.classList.add('recording');
-                if (iconEl) {
-                    iconEl.classList.remove('fa-microphone');
-                    iconEl.classList.add('fa-stop');
-                }
-                // Show duration timer when recording
-                if (durationEl) {
-                    durationEl.style.display = 'block';
-                    durationEl.style.visibility = 'visible';
-                }
+                if (iconEl) { iconEl.classList.remove('fa-microphone'); iconEl.classList.add('fa-stop'); }
+                if (durationEl) { durationEl.style.display = 'block'; }
             } else {
                 button.classList.remove('recording');
-                if (iconEl) {
-                    iconEl.classList.remove('fa-stop');
-                    iconEl.classList.add('fa-microphone');
-                }
-                // Hide duration timer when not recording
-                if (durationEl) {
-                    durationEl.style.display = 'none';
-                }
+                if (iconEl) { iconEl.classList.remove('fa-stop'); iconEl.classList.add('fa-microphone'); }
+                if (durationEl) { durationEl.style.display = 'none'; }
             }
         }
 
@@ -743,384 +934,23 @@
                 const totalSecs = Math.floor(this.recordingDuration);
                 const mins = Math.floor(totalSecs / 60);
                 const secs = totalSecs % 60;
-                const timeString = `${mins}:${secs.toString().padStart(2, '0')}`;
-                durationEl.textContent = timeString;
-
-                if (this.isRecording) {
-                    durationEl.style.display = 'block';
-                    durationEl.style.visibility = 'visible';
-                    durationEl.style.opacity = '1';
-                }
+                durationEl.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
             }
-        }
-
-        setupMessageListener() {
-            // Poll every 1.5 seconds – fast enough for walkie-talkie feel
-            // Skip polling while user is actively recording to avoid interference
-            setInterval(async () => {
-                if (this.currentChannel && this.hasGuardProfile && !this.isRecording) {
-                    await this.checkNewMessages();
-                }
-            }, 1500);
-        }
-
-        async checkNewMessages() {
-            try {
-                if (!this.currentChannel) {
-                    return;
-                }
-
-                // Ensure lastMessageId is initialized
-                if (this.lastMessageId === 0) {
-                    console.log('[Push-to-Talk] lastMessageId not initialized, initializing now...');
-                    await this.initializeLastMessageId();
-                }
-
-                const response = await fetch(`/guardpro/api/push-to-talk/channel/${this.currentChannel.id}/messages`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        jsonrpc: '2.0',
-                        method: 'call',
-                        id: Math.floor(Math.random() * 1000000),
-                        params: {
-                            limit: 50, // Get more messages to catch up
-                            offset: 0,
-                            since_id: this.lastMessageId // Only get messages after last known message
-                        }
-                    })
-                });
-
-                if (!response.ok) {
-                    console.warn('[Push-to-Talk] Polling failed:', response.status);
-                    return; // Silently fail for polling
-                }
-
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    console.warn('[Push-to-Talk] Non-JSON response in polling');
-                    return; // Silently fail for polling
-                }
-
-                const result = await response.json();
-                let data = result;
-                if (result.jsonrpc && result.result !== undefined) {
-                    data = result.result;
-                } else if (result.error) {
-                    console.warn('[Push-to-Talk] Polling error:', result.error);
-                    return; // Silently fail for polling
-                }
-
-                if (data && data.success) {
-                    if (data.messages && data.messages.length > 0) {
-                        console.log(`[Push-to-Talk] Received ${data.messages.length} messages, lastMessageId: ${this.lastMessageId}`);
-
-                        // Filter for new messages: not sent by me, not already played, and newer than lastMessageId
-                        const newMessages = data.messages.filter(m =>
-                            !m.is_sent_by_me &&
-                            !this.playedMessageIds.has(m.id) &&
-                            m.id > this.lastMessageId
-                        );
-
-                        if (newMessages.length > 0) {
-                            console.log(`[Push-to-Talk] Found ${newMessages.length} new messages to play`);
-
-                            // Sort by ID to play in order (oldest first for walkie-talkie)
-                            newMessages.sort((a, b) => a.id - b.id);
-
-                            // Update last message ID to the highest ID we've seen
-                            const maxId = Math.max(...newMessages.map(m => m.id));
-                            if (maxId > this.lastMessageId) {
-                                this.lastMessageId = maxId;
-                                console.log('[Push-to-Talk] Updated lastMessageId to:', this.lastMessageId);
-                            }
-
-                            // Play all new messages in sequence (walkie-talkie style)
-                            for (const msg of newMessages) {
-                                if (!this.playedMessageIds.has(msg.id)) {
-                                    this.playedMessageIds.add(msg.id);
-                                    console.log(`[Push-to-Talk] Playing message ${msg.id} from ${msg.sender_name}`);
-                                    // Show notification that message is being received
-                                    this.showNotification(`Message from ${msg.sender_name}`, 'info');
-                                    await this.playMessage(msg.id, msg.audio_url);
-                                    // Small delay between messages to avoid overlap
-                                    await new Promise(resolve => setTimeout(resolve, 100));
-                                }
-                            }
-                        }
-                    }
-                } else if (data && !data.success) {
-                    console.warn('[Push-to-Talk] Polling returned error:', data.error);
-                }
-            } catch (error) {
-                // Log errors but don't spam console
-                console.error('[Push-to-Talk] Error checking messages:', error);
-            }
-        }
-
-        async playMessage(messageId, audioUrl) {
-            try {
-                console.log(`[Push-to-Talk] Attempting to play message ${messageId} from URL: ${audioUrl}`);
-
-                // Stop current playback if any
-                if (this.audioElement) {
-                    console.log('[Push-to-Talk] Stopping previous audio playback');
-                    this.audioElement.pause();
-                    this.audioElement.currentTime = 0;
-                    this.audioElement = null;
-                }
-
-                // Create audio element with crossOrigin for CORS if needed
-                this.audioElement = new Audio(audioUrl);
-                this.audioElement.crossOrigin = 'anonymous'; // Allow CORS if needed
-
-                // Add event listeners for debugging
-                this.audioElement.addEventListener('loadstart', () => {
-                    console.log('[Push-to-Talk] Audio loading started for URL:', audioUrl);
-                });
-
-                this.audioElement.addEventListener('loadedmetadata', () => {
-                    console.log('[Push-to-Talk] Audio metadata loaded, duration:', this.audioElement.duration);
-                });
-
-                this.audioElement.addEventListener('loadeddata', () => {
-                    console.log('[Push-to-Talk] Audio data loaded');
-                });
-
-                this.audioElement.addEventListener('canplay', () => {
-                    console.log('[Push-to-Talk] Audio can play');
-                });
-
-                this.audioElement.addEventListener('canplaythrough', () => {
-                    console.log('[Push-to-Talk] Audio can play through');
-                });
-
-                this.audioElement.addEventListener('play', () => {
-                    console.log('[Push-to-Talk] Audio playback started');
-                    this.showNotification('Playing message...', 'info');
-                });
-
-                this.audioElement.addEventListener('playing', () => {
-                    console.log('[Push-to-Talk] Audio is playing');
-                });
-
-                this.audioElement.addEventListener('pause', () => {
-                    console.log('[Push-to-Talk] Audio paused');
-                });
-
-                this.audioElement.addEventListener('ended', () => {
-                    console.log('[Push-to-Talk] Audio playback ended');
-                    this.audioElement = null;
-                });
-
-                this.audioElement.addEventListener('waiting', () => {
-                    console.warn('[Push-to-Talk] Audio waiting for data');
-                });
-
-                this.audioElement.addEventListener('stalled', () => {
-                    console.warn('[Push-to-Talk] Audio stalled');
-                });
-
-                this.audioElement.addEventListener('error', (e) => {
-                    console.error('[Push-to-Talk] Audio error:', e);
-                    console.error('[Push-to-Talk] Audio error details:', {
-                        error: this.audioElement.error,
-                        code: this.audioElement.error?.code,
-                        message: this.audioElement.error?.message,
-                        networkState: this.audioElement.networkState,
-                        readyState: this.audioElement.readyState
-                    });
-
-                    let errorMsg = 'Failed to play audio message';
-                    if (this.audioElement.error) {
-                        switch (this.audioElement.error.code) {
-                            case 1: // MEDIA_ERR_ABORTED
-                                errorMsg = 'Audio playback aborted';
-                                break;
-                            case 2: // MEDIA_ERR_NETWORK
-                                errorMsg = 'Network error loading audio';
-                                break;
-                            case 3: // MEDIA_ERR_DECODE
-                                errorMsg = 'Audio format not supported';
-                                break;
-                            case 4: // MEDIA_ERR_SRC_NOT_SUPPORTED
-                                errorMsg = 'Audio source not supported';
-                                break;
-                        }
-                    }
-                    this.showNotification(errorMsg, 'error');
-                    this.audioElement = null;
-                });
-
-                // Set volume and other properties
-                this.audioElement.volume = 1.0;
-                this.audioElement.preload = 'auto';
-
-                // For mobile browsers, ensure audio is ready
-                // Wait for the audio to be ready before playing
-                await new Promise((resolve, reject) => {
-                    const timeout = setTimeout(() => {
-                        reject(new Error('Audio load timeout'));
-                    }, 5000); // 5 second timeout
-
-                    const onCanPlay = () => {
-                        clearTimeout(timeout);
-                        this.audioElement.removeEventListener('canplay', onCanPlay);
-                        this.audioElement.removeEventListener('error', onError);
-                        resolve();
-                    };
-
-                    const onError = (e) => {
-                        clearTimeout(timeout);
-                        this.audioElement.removeEventListener('canplay', onCanPlay);
-                        this.audioElement.removeEventListener('error', onError);
-                        reject(e);
-                    };
-
-                    if (this.audioElement.readyState >= 2) { // HAVE_CURRENT_DATA
-                        clearTimeout(timeout);
-                        resolve();
-                    } else {
-                        this.audioElement.addEventListener('canplay', onCanPlay);
-                        this.audioElement.addEventListener('error', onError);
-                    }
-                });
-
-                // Try to play
-                console.log('[Push-to-Talk] Calling audio.play(), readyState:', this.audioElement.readyState);
-                try {
-                    const playPromise = this.audioElement.play();
-
-                    if (playPromise !== undefined) {
-                        await playPromise;
-                        console.log('[Push-to-Talk] Audio.play() promise resolved, playing:', !this.audioElement.paused);
-                    } else {
-                        console.log('[Push-to-Talk] Audio.play() returned undefined');
-                    }
-                } catch (playError) {
-                    console.error('[Push-to-Talk] Play error:', playError);
-
-                    // Handle autoplay restrictions
-                    if (playError.name === 'NotAllowedError' || playError.name === 'NotSupportedError') {
-                        console.warn('[Push-to-Talk] Autoplay blocked, user interaction required');
-                        this.showNotification('Click anywhere to enable audio playback', 'warning');
-
-                        // Try to enable audio on next user interaction
-                        const enableAudio = async () => {
-                            try {
-                                await this.audioElement.play();
-                                console.log('[Push-to-Talk] Audio playback started after user interaction');
-                                document.removeEventListener('click', enableAudio);
-                                document.removeEventListener('touchstart', enableAudio);
-                            } catch (e) {
-                                console.error('[Push-to-Talk] Still failed after user interaction:', e);
-                            }
-                        };
-
-                        document.addEventListener('click', enableAudio, { once: true });
-                        document.addEventListener('touchstart', enableAudio, { once: true });
-                    } else {
-                        throw playError;
-                    }
-                }
-
-                // Mark as played (fire and forget)
-                fetch(`/guardpro/api/push-to-talk/message/${messageId}/mark-played`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        jsonrpc: '2.0',
-                        method: 'call',
-                        id: Math.floor(Math.random() * 1000000),
-                        params: {}
-                    })
-                }).catch(err => {
-                    console.error('[Push-to-Talk] Error marking as played:', err);
-                });
-
-            } catch (error) {
-                console.error('[Push-to-Talk] Error in playMessage:', error);
-                this.showNotification('Error playing message: ' + error.message, 'error');
-            }
-        }
-
-        getCSRFToken() {
-            // Try to get CSRF token from meta tag or form
-            const metaTag = document.querySelector('meta[name="csrf-token"]');
-            if (metaTag) {
-                return metaTag.getAttribute('content');
-            }
-
-            // Try to get from form
-            const form = document.querySelector('form[method="post"]');
-            if (form) {
-                const csrfInput = form.querySelector('input[name="csrf_token"]');
-                if (csrfInput) {
-                    return csrfInput.value;
-                }
-            }
-
-            return null;
         }
 
         showNotification(message, type) {
-            // Simple notification - you can enhance this
-            const alertClass = type === 'success' ? 'success' :
-                type === 'error' ? 'danger' :
-                    type === 'warning' ? 'warning' : 'info';
+            const alertClass = type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info';
             const notification = document.createElement('div');
             notification.className = `alert alert-${alertClass} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
             notification.style.zIndex = '9999';
-            notification.style.maxWidth = '90%';
-            notification.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" onclick="this.parentElement.remove()"></button>
-            `;
+            notification.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert" onclick="this.parentElement.remove()"></button>`;
             document.body.appendChild(notification);
-
-            setTimeout(() => {
-                if (notification.parentElement) {
-                    notification.remove();
-                }
-            }, type === 'warning' ? 8000 : 5000);
+            setTimeout(() => { if (notification.parentElement) notification.remove(); }, 5000);
         }
     }
 
-    // Initialize when script loads
-    // IMPORTANT: Do NOT create wrapper functions for startRecording/stopRecording
-    // Wrappers cause infinite recursion. The instance methods are already accessible.
-
-    // Force reinitialize to avoid cached wrapper issues
-    // Clear any existing instance completely
-    if (window.MobilePushToTalk) {
-        try {
-            // Stop any ongoing operations
-            if (window.MobilePushToTalk.stopRecording) {
-                try {
-                    window.MobilePushToTalk.stopRecording();
-                } catch (e) {
-                    // Ignore errors when stopping old instance
-                }
-            }
-        } catch (e) {
-            // Ignore errors
-        }
-        // Completely remove old instance
-        delete window.MobilePushToTalk;
-        window.MobilePushToTalk = undefined;
-    }
-
-    // Always create fresh instance to avoid cache issues
-    const instance = new MobilePushToTalk();
-    // Assign instance directly - its methods are already bound and accessible
-    // DO NOT create any wrapper functions - this causes infinite recursion
-    window.MobilePushToTalk = instance;
-    console.log('[Push-to-Talk] Initialized successfully (v2.3 - Seamless Hold-to-Talk)');
+    if (window.MobilePushToTalk) delete window.MobilePushToTalk;
+    window.MobilePushToTalk = new MobilePushToTalk();
+    console.log('[Push-to-Talk] Streaming enabled (v2.5)');
 
 })();

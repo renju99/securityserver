@@ -26,21 +26,33 @@ class NFCScanner {
         }
 
         try {
-            this.reader = new NDEFReader();
-            
-            // Request permission
+            if (!this.reader) {
+                this.reader = new NDEFReader();
+            }
+
+            // Request permission and start reading
+            // NOTE: This must be called from a user gesture (e.g., click event)
             await this.reader.scan();
-            
+
             this.scanning = true;
             console.log('NFC scanning started');
 
             // Listen for NFC tags
-            this.reader.addEventListener('reading', this.onReading.bind(this));
-            this.reader.addEventListener('readingerror', this.onError.bind(this));
+            this.reader.onreading = this.onReading.bind(this);
+            this.reader.onreadingerror = this.onError.bind(this);
 
             return true;
         } catch (error) {
-            console.error('Failed to start NFC scan:', error);
+            if (error.name === 'NotAllowedError') {
+                console.error('NFC permission denied by user or environment');
+                this.showError('NFC permission denied. Please allow NFC access and ensure you are using a secure (HTTPS) connection.');
+            } else if (error.name === 'NotSupportedError') {
+                console.error('NFC not supported by this browser/device');
+                this.showError('NFC is not supported on this device or is disabled.');
+            } else {
+                console.error('Failed to start NFC scan:', error);
+                this.showError('Failed to start NFC scan: ' + (error.message || 'Unknown error'));
+            }
             throw error;
         }
     }
@@ -77,16 +89,16 @@ class NFCScanner {
             for (const record of event.message.records) {
                 try {
                     console.log('[NFC Scanner] Processing record - Type:', record.recordType, 'Media:', record.mediaType);
-                    
+
                     const decoder = new TextDecoder(record.encoding || 'utf-8');
                     const text = decoder.decode(record.data);
-                    
+
                     tagData.records.push({
                         recordType: record.recordType,
                         mediaType: record.mediaType,
                         data: text
                     });
-                    
+
                     // Extract checkpoint ID from text/plain records first
                     if (!checkpointId) {
                         if (record.recordType === 'text' || record.mediaType === 'text/plain') {
@@ -145,7 +157,7 @@ class NFCScanner {
      */
     onError(event) {
         console.error('NFC read error:', event);
-        
+
         const customEvent = new CustomEvent('nfc-error', {
             detail: { error: event }
         });

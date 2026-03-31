@@ -69,7 +69,7 @@ const Projects = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Delete this project? All washrooms under it will also be deleted.')) return;
+        if (!window.confirm('Delete this project? All locations under it will also be deleted.')) return;
         try {
             await axios.delete(`/api/projects/${id}`, { headers: authHeader() });
             setProjects(prev => prev.filter(p => p.id !== id));

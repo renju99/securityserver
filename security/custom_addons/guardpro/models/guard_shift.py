@@ -808,20 +808,10 @@ class GuardShift(models.Model):
     def _send_shift_change_email(self):
         """Send email notification about shift changes/cancellations."""
         self.ensure_one()
-        if self.guard_id and self.guard_id.email:
-            template = self.env.ref(
-                'guardpro.email_template_shift_change',
-                raise_if_not_found=False
-            )
-            if template:
-                try:
-                    template.send_mail(self.id, force_send=True)
-                    _logger.info(
-                        'Shift change email sent to guard %s for shift at %s',
-                        self.guard_id.name, self.site_id.name
-                    )
-                except Exception as e:
-                    _logger.warning('Failed to send shift change email: %s', str(e))
+        _logger.info(
+            'Email notifications are disabled: skipped shift change email for shift %s',
+            self.id
+        )
 
     def action_checkin(self, latitude=None, longitude=None, checkpoint_scan_id=None, photo=None,
                       biometric_type=None, biometric_data=None, device_id=None):
