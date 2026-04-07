@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="param_submit_review_min_score" model="ir.config_parameter">
+        <field name="key">sales_bid_board.submit_review_min_score</field>
+        <field name="value">70</field>
+    </record>
+</odoo>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="default_sales_bid_board_dashboard" model="sales_bid_board.dashboard">
+            <field name="name">Sales Bid Board Dashboard</field>
+        </record>
+    </data>
+</odoo>

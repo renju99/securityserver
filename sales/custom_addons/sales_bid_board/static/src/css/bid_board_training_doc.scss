@@ -1,0 +1,166 @@
+// Bid Board training: full-page client action (not list empty-state)
+.o_bid_board_training_action.o_content {
+    background: var(--body-bg, #f8f9fa);
+}
+
+.o_bid_board_training_action {
+    .o_bid_board_doc {
+        --bb-doc-accent: #714b67;
+        --bb-doc-border: #e7e9ed;
+        --bb-doc-text: #1f2933;
+        --bb-doc-muted: #52606d;
+        --bb-doc-bg: #ffffff;
+
+        max-width: 1120px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 1rem 1.25rem 2.5rem;
+        box-sizing: border-box;
+        font-family: "SF Pro Text", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: var(--bb-doc-text);
+        text-align: left;
+
+        @media (min-width: 768px) {
+            padding: 1.25rem 1.5rem 3rem;
+        }
+
+        a {
+            color: var(--bb-doc-accent);
+            text-decoration: none;
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+
+        .o_bid_board_doc_header {
+            background: linear-gradient(135deg, var(--bb-doc-accent) 0%, #5a3d52 100%);
+            color: #fff;
+            border-radius: 8px;
+            padding: 1.75rem 1.5rem 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 14px rgba(113, 75, 103, 0.2);
+
+            h1 {
+                font-size: 1.75rem;
+                font-weight: 700;
+                margin: 0 0 0.35rem;
+                letter-spacing: -0.02em;
+                line-height: 1.2;
+            }
+
+            .o_bid_board_doc_sub {
+                margin: 0;
+                opacity: 0.92;
+                font-size: 1rem;
+            }
+        }
+
+        .o_bid_board_doc_layout {
+            display: grid;
+            grid-template-columns: minmax(180px, 240px) 1fr;
+            gap: 1.75rem;
+            align-items: start;
+
+            @media (max-width: 768px) {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .o_bid_board_doc_toc {
+            position: sticky;
+            top: 0.5rem;
+            background: var(--bb-doc-bg);
+            border: 1px solid var(--bb-doc-border);
+            border-radius: 8px;
+            padding: 1rem 1rem 1.1rem;
+            font-size: 0.875rem;
+            text-align: left;
+
+            strong {
+                display: block;
+                font-size: 0.7rem;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                color: var(--bb-doc-muted);
+                margin-bottom: 0.65rem;
+            }
+
+            ul {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+
+            li {
+                margin-bottom: 0.4rem;
+                line-height: 1.35;
+            }
+
+            a {
+                font-weight: 500;
+            }
+        }
+
+        .o_bid_board_doc_main {
+            min-width: 0;
+            background: var(--bb-doc-bg);
+            border: 1px solid var(--bb-doc-border);
+            border-radius: 8px;
+            padding: 1.5rem 1.5rem 1.75rem;
+            text-align: left;
+        }
+
+        .o_bid_board_doc_main h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 1.75rem 0 0.75rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--bb-doc-border);
+            color: var(--bb-doc-text);
+
+            &:first-child {
+                margin-top: 0;
+                padding-top: 0;
+                border-top: none;
+            }
+        }
+
+        .o_bid_board_doc_main h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin: 1.25rem 0 0.5rem;
+            color: var(--bb-doc-text);
+        }
+
+        .o_bid_board_doc_main h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin: 1rem 0 0.4rem;
+            color: var(--bb-doc-text);
+        }
+
+        .o_bid_board_doc_main p,
+        .o_bid_board_doc_main li {
+            font-size: 0.9375rem;
+            line-height: 1.65;
+            color: var(--bb-doc-muted);
+        }
+
+        .o_bid_board_doc_main p {
+            margin: 0 0 0.85rem;
+        }
+
+        .o_bid_board_doc_main ul {
+            margin: 0 0 1rem;
+            padding-left: 1.25rem;
+        }
+
+        .o_bid_board_doc_main li {
+            margin-bottom: 0.35rem;
+        }
+
+        .o_bid_board_doc_main strong {
+            color: var(--bb-doc-text);
+        }
+    }
+}

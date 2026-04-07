@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_bid_board_root"
+              name="Bid Board"
+              web_icon="sales_bid_board,static/description/icon.png"
+              action="action_bid_projects"
+              sequence="10"
+              groups="sales_bid_board.group_bid_board_user,sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+
+    <!-- Projects & intake -->
+    <menuitem id="menu_bid_board_projects"
+              name="All Projects"
+              parent="menu_bid_board_root"
+              action="action_bid_projects"
+              sequence="15"
+              groups="sales_bid_board.group_bid_board_user,sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+
+    <menuitem id="menu_bid_board_new_project"
+              name="New Project"
+              parent="menu_bid_board_root"
+              action="action_bid_new_project_wizard"
+              sequence="20"
+              groups="sales_bid_board.group_bid_board_user,sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+
+    <!-- Decision & governance -->
+    <menuitem id="menu_bid_board_bid_no_bid"
+              name="Bid / No Bid"
+              parent="menu_bid_board_root"
+              action="action_bid_no_bid"
+              sequence="40"
+              groups="sales_bid_board.group_bid_board_user,sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+
+    <menuitem id="menu_bid_board_review"
+              name="Review Queue"
+              parent="menu_bid_board_root"
+              action="action_bid_reviewer_queue"
+              sequence="50"
+              groups="sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+
+    <!-- Submissions & reminders -->
+    <menuitem id="menu_bid_board_submissions"
+              name="Submissions"
+              parent="menu_bid_board_root"
+              action="action_bid_submissions"
+              sequence="60"
+              groups="sales_bid_board.group_bid_board_user,sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+
+    <menuitem id="menu_bid_board_notifications"
+              name="Deadline Reminders"
+              parent="menu_bid_board_root"
+              action="action_bid_notifications"
+              sequence="70"
+              groups="sales_bid_board.group_bid_board_user,sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+
+    <!-- Insights & reporting -->
+    <menuitem id="menu_bid_board_reports"
+              name="Reports"
+              parent="menu_bid_board_root"
+              sequence="80"
+              groups="sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+
+    <menuitem id="menu_bid_board_reports_dashboard"
+              name="Project Reports"
+              parent="menu_bid_board_reports"
+              action="action_bid_reports"
+              sequence="10"
+              groups="sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+
+    <menuitem id="menu_bid_board_dashboards"
+              name="Analytics"
+              parent="menu_bid_board_root"
+              sequence="85"
+              groups="sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+
+    <menuitem id="menu_bid_board_analytics_dashboard"
+              name="Sales Analytics"
+              parent="menu_bid_board_dashboards"
+              action="action_sales_bid_board_dashboard_client"
+              sequence="10"
+              groups="sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+
+    <menuitem id="menu_bid_board_salesperson_analytics_dashboard"
+              name="Salesperson Analytics"
+              parent="menu_bid_board_dashboards"
+              action="action_sales_bid_board_salesperson_dashboard_client"
+              sequence="20"
+              groups="sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+
+    <!-- Administration (managers) -->
+    <menuitem id="menu_bid_board_configuration"
+              name="Configuration"
+              parent="menu_bid_board_root"
+              sequence="100"
+              groups="sales_bid_board.group_bid_board_manager"/>
+
+    <menuitem id="menu_bid_board_settings"
+              name="Settings"
+              parent="menu_bid_board_configuration"
+              action="action_bid_board_settings"
+              sequence="10"
+              groups="sales_bid_board.group_bid_board_manager"/>
+
+    <menuitem id="menu_bid_board_email_crons"
+              name="Email Schedule"
+              parent="menu_bid_board_configuration"
+              action="action_bid_board_email_crons"
+              sequence="20"
+              groups="sales_bid_board.group_bid_board_manager"/>
+
+    <menuitem id="menu_bid_board_submit_threshold"
+              name="Submit Threshold"
+              parent="menu_bid_board_configuration"
+              action="action_bid_board_submit_threshold_param"
+              sequence="25"
+              groups="sales_bid_board.group_bid_board_manager"/>
+
+    <menuitem id="menu_bid_board_team"
+              name="Team"
+              parent="menu_bid_board_configuration"
+              action="action_bid_team_members"
+              sequence="30"
+              groups="sales_bid_board.group_bid_board_manager"/>
+
+    <menuitem id="menu_bid_board_bid_no_bid_training"
+              name="Documentation"
+              parent="menu_bid_board_root"
+              action="action_bid_board_training_client"
+              sequence="110"
+              active="True"
+              groups="sales_bid_board.group_bid_board_user,sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+</odoo>

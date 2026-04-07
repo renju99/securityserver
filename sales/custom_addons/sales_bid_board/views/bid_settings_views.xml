@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_bid_board_email_crons" model="ir.actions.act_window">
+        <field name="name">Bid Board Email Cron Jobs</field>
+        <field name="res_model">ir.cron</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{'search_default_active': 1}</field>
+    </record>
+
+    <record id="action_bid_board_submit_threshold_param" model="ir.actions.act_window">
+        <field name="name">Submit Threshold</field>
+        <field name="res_model">ir.config_parameter</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('key', '=', 'sales_bid_board.submit_review_min_score')]</field>
+        <field name="context">{'default_key': 'sales_bid_board.submit_review_min_score', 'default_value': '70'}</field>
+    </record>
+
+    <record id="view_bid_board_settings_form" model="ir.ui.view">
+        <field name="name">bid.board.settings.form</field>
+        <field name="model">bid.board.settings</field>
+        <field name="arch" type="xml">
+            <form string="Bid Board Settings">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                    <group string="Email Configuration">
+                        <field name="notification_email_from" placeholder='"Berkeley UAE" &lt;noreply@berkeleyuae.com&gt;'/>
+                        <label for="test_notification_recipient" string="Test email"/>
+                        <div class="o_row">
+                            <field name="test_notification_recipient" class="oe_inline"/>
+                            <button
+                                name="action_send_test_notification_email"
+                                type="object"
+                                string="Send test email"
+                                class="btn-primary ms-2"
+                                groups="sales_bid_board.group_bid_board_manager"
+                            />
+                        </div>
+                        <field name="cso_approver_emails"/>
+                        <field name="notify_cso_on_all_submissions"/>
+                        <field name="commercial_manager_email"/>
+                        <field name="bid_manager_email"/>
+                        <field name="notify_creator_on_approval"/>
+                        <field name="pending_review_sla_days"/>
+                    </group>
+                    <group string="Automation">
+                        <button
+                            name="%(action_bid_board_email_crons)d"
+                            type="action"
+                            string="Open Bid Board Email Cron Jobs"
+                            class="btn-secondary"
+                        />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_bid_board_settings_tree" model="ir.ui.view">
+        <field name="name">bid.board.settings.tree</field>
+        <field name="model">bid.board.settings</field>
+        <field name="arch" type="xml">
+            <list create="false" delete="false">
+                <field name="name"/>
+                <field name="notification_email_from"/>
+                <field name="cso_approver_emails"/>
+                <field name="notify_cso_on_all_submissions"/>
+                <field name="commercial_manager_email"/>
+                <field name="bid_manager_email"/>
+                <field name="notify_creator_on_approval"/>
+                <field name="pending_review_sla_days"/>
+            </list>
+        </field>
+    </record>
+
+    <delete id="action_bid_board_settings" model="ir.actions.act_window"/>
+    <record id="action_bid_board_settings" model="ir.actions.server">
+        <field name="name">Settings</field>
+        <field name="model_id" ref="model_bid_board_settings"/>
+        <field name="state">code</field>
+        <field name="code">
+rec = env["bid.board.settings"].get_singleton()
+action = rec.get_formview_action()
+action["target"] = "current"
+        </field>
+    </record>
+</odoo>

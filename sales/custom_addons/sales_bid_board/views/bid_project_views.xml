@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_bid_project_tree" model="ir.ui.view">
+        <field name="name">bid.project.tree</field>
+        <field name="model">bid.project</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="client_name"/>
+                <field name="sales_rep"/>
+                <field name="review_status"/>
+                <field name="stage_id"/>
+                <field name="deadline_date"/>
+                <field name="project_lead_id"/>
+                <field name="progress"/>
+                <field name="score_overall"/>
+                <field name="decision_final"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_bid_project_form" model="ir.ui.view">
+        <field name="name">bid.project.form</field>
+        <field name="model">bid.project</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_save_draft"
+                            string="Save Draft"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="not can_non_cso_actions"/>
+                    <button name="action_submit_for_review"
+                            string="Submit for Review"
+                            type="object"
+                            class="btn-primary"
+                            invisible="not can_non_cso_actions"/>
+                    <button name="action_open_change_request_wizard"
+                            string="Request Change"
+                            type="object"
+                            class="btn-secondary"
+                            groups="sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"
+                            invisible="not can_cso_review"/>
+                    <button name="action_decline_review"
+                            string="Decline"
+                            type="object"
+                            class="btn-secondary"
+                            groups="sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"
+                            invisible="not can_cso_review"/>
+                    <button name="action_approve_review"
+                            string="Approve"
+                            type="object"
+                            class="btn-primary"
+                            groups="sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"
+                            invisible="not can_cso_review"/>
+                    <field name="review_status" widget="statusbar"
+                           statusbar_visible="draft,pending_review,change_requested,approved,declined"/>
+                </header>
+                <sheet>
+                    <notebook>
+                        <page string="Project Info">
+                            <group col="3">
+                                <group>
+                                    <field name="sales_rep"/>
+                                    <field name="client_name"/>
+                                    <field name="contract_duration"/>
+                                    <field name="contract_type"/>
+                                    <field name="performance_bond"/>
+                                </group>
+                                <group>
+                                    <field name="code" readonly="1"/>
+                                    <field name="emirate"/>
+                                    <field name="contract_value"/>
+                                    <field name="threshold"/>
+                                    <field name="kpi"/>
+                                </group>
+                                <group>
+                                    <field name="name"/>
+                                    <field name="industry"/>
+                                    <field name="deadline_date"/>
+                                    <field name="tender_bond"/>
+                                    <field name="state"/>
+                                </group>
+                            </group>
+                            <group col="2">
+                                <group>
+                                    <field name="project_lead_id"/>
+                                </group>
+                                <group>
+                                    <field name="team_member_ids" widget="many2many_tags"/>
+                                    <field name="progress"/>
+                                </group>
+                            </group>
+                            <group string="Scope of Work (%)" col="4">
+                                <field name="scope_cleaning"/>
+                                <field name="scope_maintenance"/>
+                                <field name="scope_security"/>
+                                <field name="scope_landscaping"/>
+                                <field name="scope_laundry"/>
+                                <field name="scope_support"/>
+                                <field name="scope_others"/>
+                                <field name="scope_total" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="description" placeholder="Project notes and remarks..."/>
+                            </group>
+                        </page>
+                        <page string="Scorecard">
+                            <button name="action_load_default_scorecard"
+                                    string="Load Default Scorecard"
+                                    type="object"
+                                    class="btn-secondary"
+                                    invisible="criteria_line_ids"/>
+                            <field name="criteria_line_ids">
+                                <list editable="bottom">
+                                    <field name="category"/>
+                                    <field name="name"/>
+                                    <field name="option_1_text"/>
+                                    <field name="option_2_text"/>
+                                    <field name="option_3_text"/>
+                                    <field name="score"/>
+                                    <field name="weight"/>
+                                    <field name="comment"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Decision Sheet">
+                            <group col="5">
+                                <group>
+                                    <div class="o_form_label">Strategy</div>
+                                    <field name="score_strategy" readonly="1"/>
+                                </group>
+                                <group>
+                                    <div class="o_form_label">Customer</div>
+                                    <field name="score_customer" readonly="1"/>
+                                </group>
+                                <group>
+                                    <div class="o_form_label">Commercial</div>
+                                    <field name="score_commercial" readonly="1"/>
+                                </group>
+                                <group>
+                                    <div class="o_form_label">Finance</div>
+                                    <field name="score_finance" readonly="1"/>
+                                </group>
+                                <group>
+                                    <div class="o_form_label">Operation</div>
+                                    <field name="score_operations" readonly="1"/>
+                                </group>
+                            </group>
+
+                            <group string="Overall Recommendation">
+                                <field name="score_overall" readonly="1"/>
+                                <field name="recommendation_text" readonly="1"/>
+                                <field name="recommendation_note" readonly="1"/>
+                                <field name="decision_auto" readonly="1"/>
+                                <field name="decision_override"/>
+                                <field name="decision_final" readonly="1"/>
+                                <field name="review_status" readonly="1"/>
+                            </group>
+
+                            <group>
+                                <field name="override_reason" placeholder="Required when overriding auto decision"/>
+                            </group>
+                        </page>
+                        <page string="Change Requests">
+                            <field name="change_request_ids">
+                                <list editable="bottom">
+                                    <field name="reviewer_id"/>
+                                    <field name="priority"/>
+                                    <field name="comments"/>
+                                    <field name="resolved"/>
+                                    <field name="resolved_date"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Submissions">
+                            <field name="submission_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="owner_id"/>
+                                    <field name="submitted_date"/>
+                                    <field name="status"/>
+                                    <field name="notes"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notifications">
+                            <field name="notification_ids">
+                                <list editable="bottom">
+                                    <field name="notify_team"/>
+                                    <field name="deadline_date"/>
+                                    <field name="state"/>
+                                    <field name="last_reminder_at"/>
+                                    <field name="note"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_bid_project_search" model="ir.ui.view">
+        <field name="name">bid.project.search</field>
+        <field name="model">bid.project</field>
+        <field name="arch" type="xml">
+            <search string="Project Search">
+                <field name="name"/>
+                <field name="client_name"/>
+                <field name="project_lead_id"/>
+                <field name="emirate"/>
+                <field name="industry"/>
+                <field name="review_status"/>
+                <filter name="filter_all" string="All" domain="[]"/>
+                <filter name="filter_active" string="Active" domain="[('state','=','active')]"/>
+                <filter name="filter_completed" string="Completed" domain="[('state','=','completed')]"/>
+                <filter name="filter_declined" string="Declined" domain="[('state','=','declined')]"/>
+                <filter name="filter_priority" string="Priority" domain="[('state','=','priority')]"/>
+                <separator/>
+                <filter name="filter_pending_review" string="Pending Review" domain="[('review_status','=','pending_review')]"/>
+                <filter name="filter_change_requested" string="Change Requested" domain="[('review_status','=','change_requested')]"/>
+                <separator/>
+                <filter name="group_stage" string="Stage" context="{'group_by':'stage_id'}"/>
+                <filter name="group_state" string="Status" context="{'group_by':'state'}"/>
+                <filter name="group_lead" string="Project Lead" context="{'group_by':'project_lead_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_bid_project_wizard_form" model="ir.ui.view">
+        <field name="name">bid.project.create.wizard.form</field>
+        <field name="model">bid.project.create.wizard</field>
+        <field name="arch" type="xml">
+            <form string="New Project">
+                <group>
+                    <field name="name"/>
+                    <field name="client_name"/>
+                    <field name="project_lead_id"/>
+                    <field name="team_member_ids" widget="many2many_tags"/>
+                    <field name="deadline_datetime"/>
+                    <field name="state"/>
+                    <field name="progress"/>
+                </group>
+                <footer>
+                    <button name="action_create_project" string="Save Project" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_bid_change_request_wizard_form" model="ir.ui.view">
+        <field name="name">bid.change.request.wizard.form</field>
+        <field name="model">bid.change.request.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Request Change">
+                <group>
+                    <field name="project_id" readonly="1"/>
+                    <field name="priority"/>
+                    <field name="comments" placeholder="Enter CSO comments for required changes..."/>
+                </group>
+                <footer>
+                    <button name="action_submit_change_request" string="Submit Request" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_bid_projects" model="ir.actions.act_window">
+        <field name="name">Projects</field>
+        <field name="res_model">bid.project</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_bid_no_bid" model="ir.actions.act_window">
+        <field name="name">Bid / No Bid</field>
+        <field name="res_model">bid.project</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_filter_all': 1}</field>
+        <field name="search_view_id" ref="view_bid_project_search"/>
+    </record>
+
+    <record id="action_bid_reviewer_queue" model="ir.actions.act_window">
+        <field name="name">Review</field>
+        <field name="res_model">bid.project</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_bid_project_search"/>
+        <field name="domain">[('review_status','in',('pending_review','change_requested'))]</field>
+    </record>
+
+    <record id="action_bid_reports" model="ir.actions.act_window">
+        <field name="name">Reports</field>
+        <field name="res_model">bid.project</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="view_bid_project_search"/>
+    </record>
+
+    <record id="action_bid_new_project_wizard" model="ir.actions.act_window">
+        <field name="name">New Project</field>
+        <field name="res_model">bid.project.create.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

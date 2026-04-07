@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="rule_ir_cron_bid_board_manager_email_jobs_only" model="ir.rule">
+        <field name="name">Bid Board Manager: email notification crons only</field>
+        <field name="model_id" ref="base.model_ir_cron"/>
+        <field name="domain_force" eval="[('id', 'in', (ref('sales_bid_board.ir_cron_bid_governance_sla_notifications'), ref('sales_bid_board.ir_cron_bid_deadline_notification_reminders')))]"/>
+        <field name="groups" eval="[(4, ref('sales_bid_board.group_bid_board_manager'))]"/>
+    </record>
+</odoo>
