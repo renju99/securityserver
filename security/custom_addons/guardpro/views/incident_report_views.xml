@@ -539,8 +539,8 @@
                             <!-- MEDIA - Always visible -->
                             <page string="Photos/Videos" name="media">
                                 <group>
-                                    <field name="photo_ids" widget="many2many_binary"/>
-                                    <field name="video_ids" widget="many2many_binary"/>
+                                    <field name="photo_ids" widget="many2many_binary" string="Photos"/>
+                                    <field name="video_ids" widget="many2many_binary" string="Videos"/>
                                 </group>
                             </page>
                             
@@ -757,8 +757,36 @@
                     <field name="name"/>
                     <field name="code"/>
                     <field name="description"/>
+                    <field name="notification_emails"/>
+                    <field name="attach_report_to_notification"/>
                     <field name="active"/>
                 </list>
+            </field>
+        </record>
+
+        <record id="view_incident_category_form" model="ir.ui.view">
+            <field name="name">incident.category.form</field>
+            <field name="model">incident.category</field>
+            <field name="arch" type="xml">
+                <form string="Incident Category">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="code"/>
+                                <field name="sequence"/>
+                                <field name="active"/>
+                            </group>
+                            <group>
+                                <field name="notification_emails" placeholder="ops@example.com, hse@example.com"/>
+                                <field name="attach_report_to_notification"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="description"/>
+                        </group>
+                    </sheet>
+                </form>
             </field>
         </record>
 

@@ -561,11 +561,11 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal: Own Equipment Assignments -->
+        <!-- Guard Portal: Own Equipment Assignments (recipient or prior guard on transfer) -->
         <record id="rule_equipment_assignment_log_guard_portal" model="ir.rule">
             <field name="name">Guard Portal: Own Equipment Assignments</field>
             <field name="model_id" ref="model_equipment_assignment_log"/>
-            <field name="domain_force">[('guard_id.user_id', '=', user.id)]</field>
+            <field name="domain_force">['|', ('guard_id.user_id', '=', user.id), ('from_guard_id.user_id', '=', user.id)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
@@ -579,6 +579,58 @@
             <field name="model_id" ref="model_equipment_assignment_log"/>
             <field name="domain_force">['|', ('equipment_id.assigned_site', 'in', user.site_ids.ids), ('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- EQUIPMENT.HANDOVER RECORD RULES                                    -->
+        <!-- ================================================================ -->
+
+        <record id="rule_equipment_handover_admin" model="ir.rule">
+            <field name="name">Administrator: All Equipment Handovers</field>
+            <field name="model_id" ref="guardpro.model_equipment_handover"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <record id="rule_equipment_handover_manager" model="ir.rule">
+            <field name="name">Manager: Equipment Handovers at Assigned Sites</field>
+            <field name="model_id" ref="guardpro.model_equipment_handover"/>
+            <field name="domain_force">['|', ('site_id', 'in', user.site_ids.ids), ('equipment_id.assigned_site', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+        </record>
+
+        <record id="rule_equipment_handover_supervisor" model="ir.rule">
+            <field name="name">Supervisor: Equipment Handovers at Assigned Sites</field>
+            <field name="model_id" ref="guardpro.model_equipment_handover"/>
+            <field name="domain_force">['|', ('site_id', 'in', user.site_ids.ids), ('equipment_id.assigned_site', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_equipment_handover_guard_portal" model="ir.rule">
+            <field name="name">Guard Portal: Equipment Handovers Involving Me</field>
+            <field name="model_id" ref="guardpro.model_equipment_handover"/>
+            <field name="domain_force">['|', ('from_guard_id.user_id', '=', user.id), ('to_guard_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_equipment_handover_client_user" model="ir.rule">
+            <field name="name">Client User: Equipment Handovers at Assigned Sites</field>
+            <field name="model_id" ref="guardpro.model_equipment_handover"/>
+            <field name="domain_force">['|', ('site_id', 'in', user.site_ids.ids), ('equipment_id.assigned_site', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>

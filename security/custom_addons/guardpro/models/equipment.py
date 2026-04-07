@@ -2,7 +2,7 @@
 """Equipment Model - Asset Tracking."""
 
 from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from datetime import timedelta
 import logging
 
@@ -162,7 +162,17 @@ class Equipment(models.Model):
         'equipment_id',
         string='Maintenance History'
     )
-    
+    handover_ids = fields.One2many(
+        'equipment.handover',
+        'equipment_id',
+        string='Handovers',
+        help='Formal handovers between guards for this item.',
+    )
+    handover_count = fields.Integer(
+        string='Handovers',
+        compute='_compute_handover_count',
+    )
+
     # Attachments
     photo = fields.Binary(
         string='Equipment Photo',
@@ -179,6 +189,22 @@ class Equipment(models.Model):
         ('serial_unique', 'unique(serial_number)',
          'Serial number must be unique!'),
     ]
+
+    @api.depends('handover_ids')
+    def _compute_handover_count(self):
+        for rec in self:
+            rec.handover_count = len(rec.handover_ids)
+
+    def action_view_handovers(self):
+        self.ensure_one()
+        return {
+            'name': _('Equipment Handovers'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'equipment.handover',
+            'view_mode': 'list,form',
+            'domain': [('equipment_id', '=', self.id)],
+            'context': {'default_equipment_id': self.id},
+        }
 
     @api.constrains('warranty_expiry')
     def _check_warranty(self):
@@ -371,6 +397,12 @@ class EquipmentAssignmentLog(models.Model):
         string='Guard',
         required=True
     )
+    from_guard_id = fields.Many2one(
+        'guard.profile',
+        string='From Guard',
+        ondelete='set null',
+        help='Previous assignee for handover / transfer entries.',
+    )
     site_id = fields.Many2one(
         'client.site',
         string='Site'
@@ -427,4 +459,206 @@ class EquipmentMaintenanceLog(models.Model):
         string='Maintenance Notes'
     )
 
+
+class EquipmentHandover(models.Model):
+    """Guard-to-guard equipment handover with printable record."""
+
+    _name = 'equipment.handover'
+    _description = 'Equipment Handover'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _order = 'handover_datetime desc, id desc'
+
+    name = fields.Char(
+        string='Reference',
+        required=True,
+        default='New',
+        copy=False,
+        readonly=True,
+        index=True,
+    )
+    state = fields.Selection(
+        [
+            ('draft', 'Draft'),
+            ('done', 'Completed'),
+            ('cancelled', 'Cancelled'),
+        ],
+        string='Status',
+        default='draft',
+        required=True,
+        tracking=True,
+    )
+    equipment_id = fields.Many2one(
+        'guardpro.equipment',
+        string='Equipment',
+        required=True,
+        ondelete='restrict',
+        tracking=True,
+        index=True,
+    )
+    site_id = fields.Many2one(
+        'client.site',
+        string='Site',
+        tracking=True,
+        index=True,
+    )
+    from_guard_id = fields.Many2one(
+        'guard.profile',
+        string='Handing Over (From)',
+        required=True,
+        ondelete='restrict',
+        tracking=True,
+        index=True,
+    )
+    to_guard_id = fields.Many2one(
+        'guard.profile',
+        string='Receiving (To)',
+        required=True,
+        ondelete='restrict',
+        tracking=True,
+        index=True,
+    )
+    handover_datetime = fields.Datetime(
+        string='Handover Date/Time',
+        required=True,
+        default=fields.Datetime.now,
+        tracking=True,
+    )
+    condition_at_handover = fields.Selection(
+        [
+            ('new', 'New'),
+            ('excellent', 'Excellent'),
+            ('good', 'Good'),
+            ('fair', 'Fair'),
+            ('poor', 'Poor'),
+        ],
+        string='Condition at Handover',
+        help='Observed condition when the item changes hands.',
+    )
+    notes = fields.Text(string='Notes / Defects / Accessories')
+    procedure_ack = fields.Boolean(
+        string='Procedure followed',
+        default=False,
+        help='Outgoing guard confirms standard handover steps were followed (identity check, '
+        'accessories, demonstration if required).',
+    )
+    confirmed_at = fields.Datetime(string='Confirmed At', readonly=True)
+
+    @api.model
+    def default_get(self, fields_list):
+        res = super().default_get(fields_list)
+        if 'from_guard_id' in fields_list and 'from_guard_id' not in res:
+            guard = self.env['guard.profile'].search(
+                [('user_id', '=', self.env.user.id)], limit=1
+            )
+            if guard:
+                res['from_guard_id'] = guard.id
+        return res
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('name', 'New') in ('New', _('New')):
+                vals['name'] = (
+                    self.env['ir.sequence'].next_by_code('equipment.handover') or 'New'
+                )
+        return super().create(vals_list)
+
+    @api.constrains('from_guard_id', 'to_guard_id')
+    def _check_distinct_guards(self):
+        for rec in self:
+            if (
+                rec.from_guard_id
+                and rec.to_guard_id
+                and rec.from_guard_id.id == rec.to_guard_id.id
+            ):
+                raise ValidationError(_('From and receiving guard must be different.'))
+
+    def action_confirm(self):
+        """Apply handover: reassign equipment and log transfer."""
+        user = self.env.user
+        for rec in self:
+            if rec.state != 'draft':
+                raise UserError(_('Only draft handovers can be completed.'))
+            if not rec.procedure_ack:
+                raise UserError(
+                    _('Confirm on the form that the standard handover procedure was followed.')
+                )
+            rec._check_confirm_access()
+            eq = rec.equipment_id
+            staff = user.has_group('guardpro.group_guardpro_supervisor')
+            if eq.assigned_to:
+                if eq.assigned_to.id != rec.from_guard_id.id:
+                    raise UserError(
+                        _('Equipment is assigned to %s, not the handing-over guard on this record.')
+                        % (eq.assigned_to.name or '')
+                    )
+            elif not staff:
+                raise UserError(
+                    _('This equipment is not checked out. A supervisor must register the handover.')
+                )
+            rec._apply_transfer(eq)
+            rec.write(
+                {
+                    'state': 'done',
+                    'confirmed_at': fields.Datetime.now(),
+                }
+            )
+        return True
+
+    def action_cancel(self):
+        self.filtered(lambda r: r.state == 'draft').write({'state': 'cancelled'})
+        return True
+
+    def _check_confirm_access(self):
+        self.ensure_one()
+        user = self.env.user
+        if user.has_group('guardpro.group_guardpro_admin'):
+            return
+        if user.has_group('guardpro.group_guardpro_manager'):
+            return
+        if user.has_group('guardpro.group_guardpro_supervisor'):
+            sites = user.site_ids.ids
+            if self.site_id and self.site_id.id in sites:
+                return
+            if (
+                self.equipment_id.assigned_site
+                and self.equipment_id.assigned_site.id in sites
+            ):
+                return
+            raise AccessError(
+                _('You can only confirm handovers for equipment or sites in your assignment.')
+            )
+        guard = self.env['guard.profile'].search(
+            [('user_id', '=', user.id)], limit=1
+        )
+        if not guard or guard.id != self.from_guard_id.id:
+            raise AccessError(
+                _('Only the handing-over guard (or a supervisor) can complete this handover.')
+            )
+
+    def _apply_transfer(self, equipment):
+        self.ensure_one()
+        site = self.site_id or equipment.assigned_site
+        log_vals = {
+            'equipment_id': equipment.id,
+            'from_guard_id': self.from_guard_id.id,
+            'guard_id': self.to_guard_id.id,
+            'site_id': site.id if site else False,
+            'assignment_date': fields.Date.today(),
+            'action_type': 'transferred',
+            'notes': _('Handover %s: %s') % (self.name, (self.notes or '').strip()[:500]),
+        }
+        self.env['equipment.assignment.log'].sudo().create(log_vals)
+        site_id = site.id if site else (
+            equipment.assigned_site.id if equipment.assigned_site else False
+        )
+        equipment.sudo().write(
+            {
+                'assigned_to': self.to_guard_id.id,
+                'assignment_date': fields.Date.today(),
+                'assigned_site': site_id,
+                'status': 'assigned',
+                'condition': self.condition_at_handover or equipment.condition,
+            }
+        )
 

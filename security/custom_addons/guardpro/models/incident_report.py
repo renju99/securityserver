@@ -5,6 +5,7 @@ from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 from markupsafe import Markup
 import logging
+import base64
 from datetime import timedelta
 
 _logger = logging.getLogger(__name__)
@@ -927,11 +928,85 @@ class IncidentReport(models.Model):
         }
 
     def _send_incident_notification(self):
-        """Send email notification for incident."""
-        _logger.info(
-            'Email notifications are disabled: skipped incident notification for %s record(s)',
-            len(self)
+        """Send incident submission emails configured per category."""
+        default_template = self.env.ref(
+            'guardpro.incident_category_submit_email_template',
+            raise_if_not_found=False,
         )
+        Attachment = self.env['ir.attachment'].sudo()
+
+        for incident in self:
+            category = incident.category_id
+            if not category:
+                continue
+
+            raw_recipients = (category.notification_emails or '').strip()
+            if not raw_recipients:
+                _logger.info(
+                    'Incident %s: category %s has no notification emails configured',
+                    incident.name,
+                    category.name,
+                )
+                continue
+
+            # Accept comma/semicolon/newline separated addresses.
+            recipients = [
+                e.strip()
+                for e in raw_recipients.replace(';', ',').replace('\n', ',').split(',')
+                if e.strip()
+            ]
+            if not recipients:
+                continue
+
+            template = default_template
+            if not template:
+                _logger.warning(
+                    'Incident %s: no notification template found for category %s',
+                    incident.name,
+                    category.name,
+                )
+                continue
+
+            email_values = {
+                'email_to': ','.join(recipients),
+            }
+
+            if category.attach_report_to_notification:
+                try:
+                    report = incident.get_recommended_report() or self.env.ref(
+                        'guardpro.action_report_incident',
+                        raise_if_not_found=False,
+                    )
+                    if report:
+                        pdf_content, _content_type = report._render_qweb_pdf(incident.ids)
+                        attachment = Attachment.create({
+                            'name': '%s.pdf' % (incident.name or 'incident_report'),
+                            'type': 'binary',
+                            'datas': base64.b64encode(pdf_content),
+                            'res_model': 'incident.report',
+                            'res_id': incident.id,
+                            'mimetype': 'application/pdf',
+                        })
+                        email_values['attachment_ids'] = [(4, attachment.id)]
+                except Exception as err:
+                    _logger.exception(
+                        'Incident %s: failed to generate PDF attachment: %s',
+                        incident.name,
+                        err,
+                    )
+
+            try:
+                template.send_mail(
+                    incident.id,
+                    force_send=True,
+                    email_values=email_values,
+                )
+            except Exception as err:
+                _logger.exception(
+                    'Incident %s: failed to send notification email: %s',
+                    incident.name,
+                    err,
+                )
 
     def _send_panic_alert(self):
         """Send emergency alert for panic button."""
@@ -957,6 +1032,11 @@ class IncidentReport(models.Model):
             'TRESP': 'guardpro.action_report_incident_security',
             'SUSP': 'guardpro.action_report_incident_security',
             'VEH': 'guardpro.action_report_incident_vehicle',
+            'ABND_VEH': 'guardpro.action_report_incident_abandoned_vehicle',
+            'LT_PARK': 'guardpro.action_report_incident_long_term_parked_vehicle',
+            'EQ_HO': 'guardpro.action_report_incident_equipment_handover',
+            'CCTV_HO': 'guardpro.action_report_incident_cctv_handover',
+            'AUTH_VISIT': 'guardpro.action_report_incident_local_authority_visit',
             'SAFE': 'guardpro.action_report_incident_safety',
             'STMT': 'guardpro.action_report_incident_statement',
             'FOUND': 'guardpro.action_report_incident_found_item',
@@ -1556,6 +1636,15 @@ class IncidentCategory(models.Model):
     active = fields.Boolean(
         string='Active',
         default=True
+    )
+    notification_emails = fields.Text(
+        string='Submission Notification Emails',
+        help='Recipients notified when incidents in this category are submitted. Use comma, semicolon, or new line separators.',
+    )
+    attach_report_to_notification = fields.Boolean(
+        string='Attach Incident Report PDF',
+        default=True,
+        help='Attach the incident PDF report when sending submission notifications.',
     )
     
     _sql_constraints = [

@@ -236,6 +236,17 @@
             <field name="number_next">1</field>
             <field name="implementation">standard</field>
         </record>
+
+        <!-- Equipment guard-to-guard handover reference -->
+        <record id="seq_equipment_handover" model="ir.sequence">
+            <field name="name">Equipment Handover Sequence</field>
+            <field name="code">equipment.handover</field>
+            <field name="prefix">EQ-HO-</field>
+            <field name="padding">5</field>
+            <field name="number_increment">1</field>
+            <field name="number_next">1</field>
+            <field name="implementation">standard</field>
+        </record>
         
     </data>
 </odoo>

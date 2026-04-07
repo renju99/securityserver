@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="equipment_handover_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h2>Equipment Handover Record</h2>
+                                <p class="text-muted mb-0">Guard-to-guard custody transfer</p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <h4>Reference: <span t-field="o.name"/></h4>
+                            </div>
+                            <div class="col-6 text-end">
+                                <h5>
+                                    <t t-if="o.state == 'draft'">
+                                        <span class="badge bg-secondary">Draft</span>
+                                    </t>
+                                    <t t-elif="o.state == 'done'">
+                                        <span class="badge bg-success">Completed</span>
+                                    </t>
+                                    <t t-elif="o.state == 'cancelled'">
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    </t>
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h5>Standard handover procedure</h5>
+                                <p class="small text-muted">Both guards should complete these steps before signing or completing the handover in the system.</p>
+                                <ol class="small">
+                                    <li>Verify the <strong>identity</strong> of the receiving guard (badge / roster).</li>
+                                    <li>Confirm the <strong>equipment identity</strong> (name, code, serial if applicable).</li>
+                                    <li><strong>Inspect</strong> physical condition; note damage, wear, or faults in the notes.</li>
+                                    <li><strong>Accessories</strong>: keys, batteries, chargers, holsters, mounts — count and list.</li>
+                                    <li>For operational gear, perform a brief <strong>function check</strong> where safe and appropriate.</li>
+                                    <li>Receiving guard confirms they <strong>accept custody</strong> as described.</li>
+                                </ol>
+                                <p t-if="o.procedure_ack" class="small mb-0">
+                                    <strong>Procedure confirmation:</strong> The handing-over guard confirmed these steps were followed (system checkbox).
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5>Handover details</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td width="30%"><strong>Date / time:</strong></td>
+                                        <td><span t-field="o.handover_datetime"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Equipment:</strong></td>
+                                        <td><span t-field="o.equipment_id.display_name"/></td>
+                                    </tr>
+                                    <tr t-if="o.equipment_id.code">
+                                        <td><strong>Equipment code:</strong></td>
+                                        <td><span t-field="o.equipment_id.code"/></td>
+                                    </tr>
+                                    <tr t-if="o.equipment_id.serial_number">
+                                        <td><strong>Serial number:</strong></td>
+                                        <td><span t-field="o.equipment_id.serial_number"/></td>
+                                    </tr>
+                                    <tr t-if="o.site_id">
+                                        <td><strong>Site:</strong></td>
+                                        <td><span t-field="o.site_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Handing over (from):</strong></td>
+                                        <td><span t-field="o.from_guard_id.display_name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Receiving (to):</strong></td>
+                                        <td><span t-field="o.to_guard_id.display_name"/></td>
+                                    </tr>
+                                    <tr t-if="o.condition_at_handover">
+                                        <td><strong>Condition at handover:</strong></td>
+                                        <td><span t-field="o.condition_at_handover"/></td>
+                                    </tr>
+                                    <tr t-if="o.confirmed_at">
+                                        <td><strong>Recorded complete at:</strong></td>
+                                        <td><span t-field="o.confirmed_at"/></td>
+                                    </tr>
+                                    <tr t-if="o.notes">
+                                        <td><strong>Notes / defects / accessories:</strong></td>
+                                        <td><span t-field="o.notes"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="row mt-5">
+                            <div class="col-6">
+                                <p class="mb-5 border-bottom"><strong>Handing over (name &amp; signature)</strong></p>
+                                <p class="small text-muted" t-if="o.from_guard_id">Printed name: <span t-field="o.from_guard_id.name"/></p>
+                            </div>
+                            <div class="col-6">
+                                <p class="mb-5 border-bottom"><strong>Receiving (name &amp; signature)</strong></p>
+                                <p class="small text-muted" t-if="o.to_guard_id">Printed name: <span t-field="o.to_guard_id.name"/></p>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12 text-center text-muted">
+                                <small>Equipment handover — confidential operations record</small>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_equipment_handover" model="ir.actions.report">
+        <field name="name">Equipment Handover (PDF)</field>
+        <field name="model">equipment.handover</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.equipment_handover_report_template</field>
+        <field name="report_file">guardpro.equipment_handover_report_template</field>
+        <field name="binding_model_id" ref="guardpro.model_equipment_handover"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Equipment_Handover_%s' % (object.name)</field>
+    </record>
+</odoo>

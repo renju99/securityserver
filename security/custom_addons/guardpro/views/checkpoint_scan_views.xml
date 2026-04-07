@@ -64,7 +64,8 @@
                         </group>
                         <group string="Media">
                             <field name="photo" widget="image"/>
-                            <field name="photo_ids" widget="many2many_binary"/>
+                            <field name="photo_ids" widget="many2many_binary" string="Photos"/>
+                            <field name="video_ids" widget="many2many_binary" string="Videos (optional)"/>
                         </group>
                         <field name="notes" widget="text"/>
                     </sheet>

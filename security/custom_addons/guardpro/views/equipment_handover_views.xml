@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_equipment_handover_list" model="ir.ui.view">
+            <field name="name">equipment.handover.list</field>
+            <field name="model">equipment.handover</field>
+            <field name="arch" type="xml">
+                <list string="Equipment Handovers">
+                    <field name="name"/>
+                    <field name="handover_datetime"/>
+                    <field name="equipment_id"/>
+                    <field name="site_id" optional="show"/>
+                    <field name="from_guard_id"/>
+                    <field name="to_guard_id"/>
+                    <field name="condition_at_handover" optional="hide"/>
+                    <field name="state" widget="badge"
+                           decoration-success="state == 'done'"
+                           decoration-info="state == 'draft'"
+                           decoration-muted="state == 'cancelled'"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_equipment_handover_form" model="ir.ui.view">
+            <field name="name">equipment.handover.form</field>
+            <field name="model">equipment.handover</field>
+            <field name="arch" type="xml">
+                <form string="Equipment Handover">
+                    <header>
+                        <button name="action_confirm" type="object" string="Complete handover"
+                                class="btn-primary" invisible="state != 'draft'"/>
+                        <button name="action_cancel" type="object" string="Cancel"
+                                invisible="state != 'draft'"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" readonly="1"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group string="Equipment &amp; location">
+                                <field name="equipment_id" readonly="state != 'draft'"/>
+                                <field name="site_id" readonly="state != 'draft'"/>
+                                <field name="handover_datetime" readonly="state != 'draft'"/>
+                            </group>
+                            <group string="Guards">
+                                <field name="from_guard_id" readonly="state != 'draft'"
+                                       widget="many2one_avatar"/>
+                                <field name="to_guard_id" readonly="state != 'draft'"
+                                       widget="many2one_avatar"/>
+                                <field name="condition_at_handover" readonly="state != 'draft'"/>
+                                <field name="procedure_ack" readonly="state != 'draft'"/>
+                            </group>
+                        </group>
+                        <group string="Notes">
+                            <field name="notes" nolabel="1" readonly="state != 'draft'"/>
+                        </group>
+                        <group string="Completion" invisible="state == 'draft'">
+                            <field name="confirmed_at" readonly="1"/>
+                        </group>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_equipment_handover_search" model="ir.ui.view">
+            <field name="name">equipment.handover.search</field>
+            <field name="model">equipment.handover</field>
+            <field name="arch" type="xml">
+                <search string="Handovers">
+                    <field name="name"/>
+                    <field name="equipment_id"/>
+                    <field name="from_guard_id"/>
+                    <field name="to_guard_id"/>
+                    <field name="site_id"/>
+                    <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                    <filter string="Completed" name="done" domain="[('state', '=', 'done')]"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_equipment_handover" model="ir.actions.act_window">
+            <field name="name">Equipment Handovers</field>
+            <field name="res_model">equipment.handover</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_equipment_handover_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Register a formal handover when a guard passes equipment to another guard.
+                </p>
+                <p>
+                    Complete the handover to update custody on the equipment record and produce a PDF certificate.
+                </p>
+            </field>
+        </record>
+
+        <!-- Equipment form: handover stats &amp; shortcut -->
+        <record id="view_equipment_form_handover_button" model="ir.ui.view">
+            <field name="name">guardpro.equipment.form.handover</field>
+            <field name="model">guardpro.equipment</field>
+            <field name="inherit_id" ref="guardpro.view_equipment_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//sheet/field[@name='photo']" position="before">
+                    <div class="oe_button_box" name="button_box">
+                        <button type="object" name="action_view_handovers" class="oe_stat_button" icon="fa-exchange">
+                            <field name="handover_count" widget="statinfo" string="Handovers"/>
+                        </button>
+                    </div>
+                </xpath>
+                <xpath expr="//notebook" position="inside">
+                    <page string="Handovers" name="handovers">
+                        <field name="handover_ids" readonly="1">
+                            <list>
+                                <field name="name"/>
+                                <field name="handover_datetime"/>
+                                <field name="from_guard_id"/>
+                                <field name="to_guard_id"/>
+                                <field name="state"/>
+                            </list>
+                        </field>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

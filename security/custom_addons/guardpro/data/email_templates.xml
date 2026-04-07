@@ -81,6 +81,51 @@
             </field>
         </record>
 
+        <!-- Incident Submitted (Category Recipients) -->
+        <record id="incident_category_submit_email_template" model="mail.template">
+            <field name="name">Incident Submitted - Category Notification</field>
+            <field name="model_id" ref="model_incident_report"/>
+            <field name="subject">Incident Submitted: ${object.name} - ${object.title}</field>
+            <field name="email_from">${(user.email_formatted or '')}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: #1f4e78; margin: 0 0 12px 0;">Incident Submitted</h2>
+                    <p style="margin: 0 0 16px 0;">
+                        A new incident has been submitted and requires review.
+                    </p>
+                    <table style="width: 100%; border-collapse: collapse; margin: 12px 0 18px 0;">
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 32%;">Incident Number</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${object.name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Title</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${object.title}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Category</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${object.category_id.name or ''}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Severity</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${object.severity or ''}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Site</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${object.site_id.name or ''}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Reported By</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${object.guard_id.name or ''}</td>
+                        </tr>
+                    </table>
+                    <p style="margin: 0;">
+                        Incident details are attached as PDF when enabled on the category configuration.
+                    </p>
+                </div>
+            </field>
+        </record>
+
         <!-- Shift Reminder Email Template -->
         <record id="shift_reminder_email" model="mail.template">
             <field name="name">Shift Reminder</field>

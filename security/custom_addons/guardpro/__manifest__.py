@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Sentry - Security Guard Management',
-    'version': '18.0.1.1.22',
+    'version': '18.0.1.1.26',
     'category': 'Services/Security',
     'summary': 'Win premium guard contracts with an Odoo-native suite for mobile patrols, SLA automation, client portals, and analytics.',
     'description': """
@@ -248,6 +248,7 @@ Support & Roadmap
         'views/guard_attendance_views.xml',
         'views/guard_performance_views.xml',
         'views/equipment_views.xml',
+        'views/equipment_handover_views.xml',
         # OPTIONAL: Requires maintenance module
         # 'views/equipment_maintenance_views.xml',  # Native maintenance module extension
         # OPTIONAL: Requires project module
@@ -285,6 +286,7 @@ Support & Roadmap
         'reports/incident_statement_report_template.xml',
         'reports/incident_lost_found_forms_report_template.xml',
         'reports/incident_community_violation_report_template.xml',
+        'reports/incident_additional_categories_report_template.xml',
         'reports/package_management_report_template.xml',
         'reports/lost_found_report_template.xml',
         'reports/key_management_report_template.xml',
@@ -295,6 +297,7 @@ Support & Roadmap
         'reports/guard_task_report_template.xml',
         'reports/resident_complaint_report_template.xml',
         'reports/equipment_report_template.xml',
+        'reports/equipment_handover_report_template.xml',
         'reports/guard_background_check_report_template.xml',
         'reports/guard_drug_test_report_template.xml',
         'reports/guard_vaccination_report_template.xml',
@@ -493,5 +496,6 @@ Support & Roadmap
     'installable': True,
     'application': True,
     'auto_install': False,
+    'post_init_hook': 'post_init_hook',
 }
 

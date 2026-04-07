@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Shared layout for additional incident category reports -->
+    <template id="incident_additional_categories_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2 class="text-center"><strong><span t-field="doc.category_id.name"/></strong></h2>
+                        <h4 class="text-center text-muted"><span t-field="doc.name"/></h4>
+
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <table class="table table-bordered table-sm">
+                                    <tr><td width="30%"><strong>Incident Number</strong></td><td width="70%"><span t-field="doc.name"/></td></tr>
+                                    <tr><td><strong>Category</strong></td><td><span t-field="doc.category_id.name"/></td></tr>
+                                    <tr><td><strong>Title</strong></td><td><span t-field="doc.title"/></td></tr>
+                                    <tr><td><strong>Site</strong></td><td><span t-field="doc.site_id.name"/></td></tr>
+                                    <tr><td><strong>Reported By</strong></td><td><span t-field="doc.guard_id.name"/></td></tr>
+                                    <tr><td><strong>Date/Time</strong></td><td><span t-field="doc.incident_datetime" t-options='{"widget": "datetime"}'/></td></tr>
+                                    <tr><td><strong>Severity</strong></td><td><span t-field="doc.severity"/></td></tr>
+                                    <tr><td><strong>Location</strong></td><td><span t-field="doc.location"/></td></tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h4><strong>Description</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.description"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3" t-if="doc.immediate_actions">
+                            <div class="col-12">
+                                <h4><strong>Immediate Actions Taken</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.immediate_actions"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3" t-if="doc.notes">
+                            <div class="col-12">
+                                <h4><strong>Additional Notes</strong></h4>
+                                <div class="border p-3">
+                                    <span t-field="doc.notes"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_incident_abandoned_vehicle" model="ir.actions.report">
+        <field name="name">Abandoned Vehicle Report</field>
+        <field name="model">incident.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.incident_additional_categories_pdf_template</field>
+        <field name="report_file">guardpro.incident_additional_categories_pdf_template</field>
+        <field name="print_report_name">'Abandoned_Vehicle_%s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_incident_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_incident_long_term_parked_vehicle" model="ir.actions.report">
+        <field name="name">Long-Term Parked Vehicle Report</field>
+        <field name="model">incident.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.incident_additional_categories_pdf_template</field>
+        <field name="report_file">guardpro.incident_additional_categories_pdf_template</field>
+        <field name="print_report_name">'Long_Term_Parked_Vehicle_%s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_incident_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_incident_equipment_handover" model="ir.actions.report">
+        <field name="name">Equipment Handover Report</field>
+        <field name="model">incident.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.incident_additional_categories_pdf_template</field>
+        <field name="report_file">guardpro.incident_additional_categories_pdf_template</field>
+        <field name="print_report_name">'Equipment_Handover_%s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_incident_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_incident_cctv_handover" model="ir.actions.report">
+        <field name="name">CCTV Handover Report</field>
+        <field name="model">incident.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.incident_additional_categories_pdf_template</field>
+        <field name="report_file">guardpro.incident_additional_categories_pdf_template</field>
+        <field name="print_report_name">'CCTV_Handover_%s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_incident_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_incident_local_authority_visit" model="ir.actions.report">
+        <field name="name">Local Authority Visit Report</field>
+        <field name="model">incident.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.incident_additional_categories_pdf_template</field>
+        <field name="report_file">guardpro.incident_additional_categories_pdf_template</field>
+        <field name="print_report_name">'Local_Authority_Visit_%s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_incident_report"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

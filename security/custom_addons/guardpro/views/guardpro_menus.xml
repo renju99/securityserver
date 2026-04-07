@@ -5,11 +5,11 @@
              GUARDPRO MENU STRUCTURE - Logically Organized
              ================================================================ -->
 
-        <!-- ROOT MENU -->
+        <!-- ROOT MENU (visible to Sentry / GuardPro users; not technical-only) -->
         <menuitem id="menu_guardpro_root"
-                  name="GuardPro"
+                  name="Sentry"
                   sequence="10"
-                  web_icon="website,static/description/icon.png"
+                  web_icon="guardpro,static/description/icon.png"
                   groups="base.group_no_one"/>
 
         <!-- ================================================================
@@ -20,7 +20,7 @@
                   parent="menu_guardpro_configuration"
                   sequence="5"
                   action="guardpro.action_cctv_monitoring"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_cctv_manage_cameras"
                   name="Manage Cameras"
@@ -36,7 +36,7 @@
                   name="Dashboard"
                   sequence="10"
                   action="action_guardpro_analytics_dashboard_client"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_guardpro_documentation"
                   name="User Documentation"
@@ -50,7 +50,7 @@
                   parent="menu_guardpro_training_knowledge"
                   action="action_client_site"
                   sequence="10"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <!-- Command Center menu removed - replaced by Analytics Dashboard -->
         <!--
@@ -59,7 +59,7 @@
                   parent="menu_guardpro_dashboard"
                   action="action_guardpro_dashboard"
                   sequence="10"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
         -->
 
         <menuitem id="menu_guardpro_analytics_dashboard"
@@ -67,21 +67,21 @@
                   parent="menu_guardpro_dashboard"
                   action="action_guardpro_analytics_dashboard_client"
                   sequence="10"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_guardpro_tours_dashboard"
                   name="Tours Dashboard"
                   parent="menu_guardpro_dashboard"
                   action="action_guardpro_tours_dashboard_client"
                   sequence="15"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_guards_map"
                   name="Live Guard Map"
                   parent="menu_guardpro_dashboard"
                   action="action_guards_map"
                   sequence="10"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <!-- ================================================================
              2. OPERATIONS - Daily Guard Operations
@@ -92,9 +92,8 @@
 
         <!-- 3. TIME & ATTENDANCE -->
         <menuitem id="menu_guardpro_time_attendance"
-                  name="Time &amp; Attendance"
-                  sequence="25"
-                  web_icon="hr_holidays,static/description/icon.png"/>
+                  name="Time and Attendance"
+                  sequence="25"/>
 
         <!-- 2.1 Shifts & Scheduling -->
         <menuitem id="menu_operations_scheduling"
@@ -204,28 +203,29 @@
                   parent="menu_operations_tours"
                   action="action_security_tour"
                   sequence="10"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_tour_log"
                   name="Tour Logs"
                   parent="menu_operations_tours"
                   action="action_tour_log"
                   sequence="20"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_checkpoint_scan"
                   name="Checkpoint Scans"
                   parent="menu_operations_tours"
                   action="action_checkpoint_scan"
                   sequence="30"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <!-- ================================================================
              3. SITE MANAGEMENT - Site-Level Operations
              ================================================================ -->
         <menuitem id="menu_guardpro_site_management"
                   name="Visitor Management"
-                  sequence="30"/>
+                  sequence="30"
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_visitor_management"
                   name="Visitor Summary"
@@ -269,6 +269,13 @@
                   sequence="50"
                   groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
+        <menuitem id="menu_equipment_handover_operations"
+                  name="Equipment Handovers"
+                  parent="menu_guardpro_operations"
+                  action="guardpro.action_equipment_handover"
+                  sequence="55"
+                  groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
 
         <menuitem id="menu_residents_tenants_root"
                   name="Residents &amp; Tenants"
@@ -293,9 +300,9 @@
              4. INCIDENTS & EMERGENCY - Critical Events
              ================================================================ -->
         <menuitem id="menu_guardpro_incidents_emergency"
-                  name="Incidents"
+                  name="Incidents &amp; Emergency"
                   parent="menu_guardpro_operations"
-                  sequence="20"/>
+                  sequence="40"/>
 
         <!-- 4.1 Incident Management -->
         <menuitem id="menu_incidents_submenu"
@@ -430,6 +437,13 @@
                   parent="menu_guardpro_compliance"
                   sequence="30"/>
 
+        <menuitem id="menu_sla_template"
+                  name="SLA Templates"
+                  parent="menu_sla_submenu"
+                  action="action_sla_template"
+                  sequence="5"
+                  groups="group_guardpro_manager,group_guardpro_admin"/>
+
         <menuitem id="menu_sla_definition"
                   name="SLA Definitions"
                   parent="menu_sla_submenu"
@@ -442,63 +456,62 @@
                   parent="menu_sla_submenu"
                   action="action_sla_performance"
                   sequence="20"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <!-- ================================================================
              6. RESOURCES - Master Data & Personnel
              ================================================================ -->
         <menuitem id="menu_guardpro_resources"
                   name="Resources"
-                  parent="menu_guardpro_configuration"
                   sequence="60"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_guard_profile"
                   name="Guards"
                   parent="menu_guardpro_resources"
                   action="action_guard_profile"
                   sequence="10"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_client_site"
                   name="Sites"
                   parent="menu_guardpro_resources"
                   sequence="20"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_client_sites_view"
                   name="View Sites"
                   parent="menu_client_site"
                   action="action_client_site"
                   sequence="5"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_location_hierarchy"
                   name="Location Hierarchy"
                   parent="menu_client_site"
                   sequence="10"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_buildings"
                   name="Buildings"
                   parent="menu_location_hierarchy"
                   action="action_site_buildings"
                   sequence="10"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_floors"
                   name="Floors"
                   parent="menu_location_hierarchy"
                   action="action_building_floors"
                   sequence="20"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_areas"
                   name="Areas/Rooms"
                   parent="menu_location_hierarchy"
                   action="action_floor_areas"
                   sequence="30"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <menuitem id="menu_checkpoint"
                   name="Checkpoints"
@@ -514,11 +527,25 @@
                   sequence="31"
                   groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
-        <menuitem id="menu_equipment"
+        <!-- Equipment: folder under Resources with registry + handovers -->
+        <menuitem id="menu_guardpro_equipment_section"
                   name="Equipment"
                   parent="menu_guardpro_resources"
-                  action="action_equipment"
                   sequence="40"
+                  groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+        <menuitem id="menu_equipment"
+                  name="Equipment"
+                  parent="menu_guardpro_equipment_section"
+                  action="action_equipment"
+                  sequence="10"
+                  groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+        <menuitem id="menu_equipment_handover_resources"
+                  name="Handovers"
+                  parent="menu_guardpro_equipment_section"
+                  action="guardpro.action_equipment_handover"
+                  sequence="20"
                   groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
 
@@ -626,8 +653,8 @@
         <!-- 7.1 Training (eLearning) -->
         <menuitem id="menu_training_submenu"
                   name="Training Management"
-                  parent="menu_guardpro_operations"
-                  sequence="95"/>
+                  parent="menu_guardpro_training_knowledge"
+                  sequence="10"/>
 
         <menuitem id="menu_guard_training_elearning"
                   name="eLearning Courses"
@@ -688,7 +715,7 @@
              8. TRACKING & MONITORING - Location & Activity Tracking
              ================================================================ -->
         <menuitem id="menu_guardpro_tracking"
-                  name="Command Centre"
+                  name="Command Center"
                   sequence="80"/>
 
         <menuitem id="menu_guard_location_history"
@@ -726,7 +753,7 @@
                   parent="menu_guardpro_feedback"
                   action="action_client_feedback"
                   sequence="10"
-                  groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+                  groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
         <!-- Push-to-Talk Channels (for supervisors/managers to manage) -->
         <menuitem id="menu_push_to_talk_channels"

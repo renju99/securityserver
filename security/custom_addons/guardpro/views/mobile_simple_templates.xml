@@ -50,6 +50,15 @@
                         <t t-elif="request.params.get('success') == 'incident_created'">
                             <i class="fa fa-check-circle me-2"/>Incident reported successfully!
                         </t>
+                        <t t-elif="request.params.get('success') == 'audit_started'">
+                            <i class="fa fa-check-circle me-2"/>Audit started. Complete all checklist items before finishing.
+                        </t>
+                        <t t-elif="request.params.get('success') == 'audit_completed'">
+                            <i class="fa fa-check-circle me-2"/>Audit submitted successfully.
+                        </t>
+                        <t t-elif="request.params.get('success') == 'audit_item_saved'">
+                            <i class="fa fa-check-circle me-2"/>Checklist line saved.
+                        </t>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"/>
                     </div>
                 </t>
@@ -82,6 +91,30 @@
                         </t>
                         <t t-elif="request.params.get('error') == 'creation_failed'">
                             <i class="fa fa-exclamation-circle me-2"/>Failed to create incident report
+                        </t>
+                        <t t-elif="request.params.get('error') == 'audit_not_found'">
+                            <i class="fa fa-exclamation-circle me-2"/>Audit not found
+                        </t>
+                        <t t-elif="request.params.get('error') == 'audit_access_denied'">
+                            <i class="fa fa-exclamation-circle me-2"/>You can only open audits assigned to you as auditor
+                        </t>
+                        <t t-elif="request.params.get('error') == 'audit_invalid_state'">
+                            <i class="fa fa-exclamation-circle me-2"/>This audit can no longer be edited
+                        </t>
+                        <t t-elif="request.params.get('error') == 'audit_start_failed'">
+                            <i class="fa fa-exclamation-circle me-2"/>Could not start audit (may already be in progress)
+                        </t>
+                        <t t-elif="request.params.get('error') == 'audit_complete_failed'">
+                            <i class="fa fa-exclamation-circle me-2"/>Complete every checklist item (Pass, Fail, or N/A) before finishing
+                        </t>
+                        <t t-elif="request.params.get('error') == 'audit_photo_failed'">
+                            <i class="fa fa-exclamation-circle me-2"/>Could not save photo for this line
+                        </t>
+                        <t t-elif="request.params.get('error') == 'audit_item_save_failed'">
+                            <i class="fa fa-exclamation-circle me-2"/>Could not save checklist line
+                        </t>
+                        <t t-elif="request.params.get('error') == 'compliance_staff_only'">
+                            <i class="fa fa-exclamation-circle me-2"/>Compliance audits are only available for supervisor or manager logins
                         </t>
                         <t t-else="">
                             <i class="fa fa-exclamation-circle me-2"/>An error occurred
@@ -699,6 +732,26 @@
                             </div>
                         </a>
                     </div>
+                    <div class="col-12" t-if="show_compliance_audits">
+                        <a href="/guardpro/mobile/compliance" class="card text-decoration-none h-100 hover-shadow">
+                            <div class="card-body text-center py-3">
+                                <div class="d-flex align-items-center justify-content-center gap-3">
+                                    <i class="fa fa-clipboard-check fa-2x text-secondary"/>
+                                    <div class="text-start">
+                                        <h6 class="mb-0">Compliance audits</h6>
+                                        <p class="text-muted small mb-0">
+                                            <t t-if="compliance_open_count">
+                                                <t t-esc="compliance_open_count"/> open
+                                            </t>
+                                            <t t-else="">
+                                                None open
+                                            </t>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Today's Summary -->
@@ -1094,7 +1147,20 @@
                     Your user account is not linked to a guard profile.
                     <br/>Please contact your administrator.
                 </p>
-                <a href="/web" class="btn btn-primary mt-3">
+                <t t-if="show_compliance_audits">
+                    <div class="card shadow-sm text-start mx-auto mt-4" style="max-width: 420px;">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="fa fa-clipboard-check me-2"/>Compliance audits</h6>
+                            <p class="card-text small text-muted mb-3">
+                                Open this if you use a <strong>supervisor, manager, or admin</strong> login in Sentry / GuardPro.
+                            </p>
+                            <a href="/guardpro/mobile/compliance" class="btn btn-primary w-100">
+                                <i class="fa fa-arrow-right me-2"/>Open compliance audits
+                            </a>
+                        </div>
+                    </div>
+                </t>
+                <a href="/web" class="btn btn-outline-primary mt-4">
                     <i class="fa fa-home me-2"/>Go to Main Dashboard
                 </a>
             </div>
@@ -1562,7 +1628,7 @@
                 <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">Scan Checkpoint</h5>
+                            <h5 class="modal-title" id="scannerModalTitle">Scan Checkpoint</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
@@ -1607,6 +1673,34 @@
                                     <button class="btn btn-primary" type="button" onclick="submitManualCode()">
                                         <i class="fa fa-check"/>
                                     </button>
+                                </div>
+                            </div>
+
+                            <!-- Optional findings after successful scan -->
+                            <div id="postScanEvidencePanel" class="mt-3" style="display:none;">
+                                <div class="alert alert-success mb-3 py-2">
+                                    <i class="fa fa-check-circle me-2"/>
+                                    <span id="postScanSuccessMsg">Checkpoint recorded.</span>
+                                </div>
+                                <p class="text-muted small mb-3">Optional: add photos, a short video, or notes about what you found at this checkpoint.</p>
+                                <div class="mb-2">
+                                    <label class="form-label" for="postScanObservations">Notes / findings</label>
+                                    <textarea class="form-control" id="postScanObservations" rows="3" placeholder="Anything to report? (optional)"></textarea>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label" for="postScanPhotos">Photos</label>
+                                    <input type="file" class="form-control" id="postScanPhotos" accept="image/*" multiple="multiple"/>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label" for="postScanVideos">Videos</label>
+                                    <input type="file" class="form-control" id="postScanVideos" accept="video/*" multiple="multiple"/>
+                                </div>
+                                <div id="postScanEvidenceError" class="alert alert-danger py-2 small" style="display:none;"></div>
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-primary" id="postScanEvidenceSubmitBtn" onclick="submitPostScanEvidence()">
+                                        <i class="fa fa-paperclip me-1" title="Save findings"/>Save findings
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="skipPostScanEvidence()">Skip — no findings</button>
                                 </div>
                             </div>
 
@@ -1665,6 +1759,7 @@
                 let currentCheckpointId = null;
                 let currentTourLogId = null;
                 let currentScanType = 'qr';
+                let pendingCheckpointScanId = null;
 
                 // Handle modal shown event (Bootstrap 5 event)
                 document.addEventListener('DOMContentLoaded', function() {
@@ -1689,13 +1784,31 @@
                         modalEl.addEventListener('hidden.bs.modal', function() {
                             console.log('[Guard Pro Tours] Scanner modal closed');
                             stopScanning();
+                            pendingCheckpointScanId = null;
                             document.getElementById('scanResult').style.display = 'none';
                             document.getElementById('manualCodeInput').value = '';
+                            const evPanel = document.getElementById('postScanEvidencePanel');
+                            if (evPanel) evPanel.style.display = 'none';
+                            const pPh = document.getElementById('postScanPhotos');
+                            const pVid = document.getElementById('postScanVideos');
+                            const pObs = document.getElementById('postScanObservations');
+                            const pErr = document.getElementById('postScanEvidenceError');
+                            if (pPh) pPh.value = '';
+                            if (pVid) pVid.value = '';
+                            if (pObs) pObs.value = '';
+                            if (pErr) { pErr.style.display = 'none'; pErr.textContent = ''; }
+                            const titleEl = document.getElementById('scannerModalTitle');
+                            if (titleEl) titleEl.textContent = 'Scan Checkpoint';
                         });
                     }
                 });
 
                 function openScanner(btn) {
+                    pendingCheckpointScanId = null;
+                    const evPanel0 = document.getElementById('postScanEvidencePanel');
+                    if (evPanel0) evPanel0.style.display = 'none';
+                    const title0 = document.getElementById('scannerModalTitle');
+                    if (title0) title0.textContent = 'Scan Checkpoint';
                     // Store checkpoint data for when modal opens
                     currentCheckpointId = btn.dataset.checkpointId;
                     currentTourLogId = btn.dataset.tourLogId;
@@ -1960,6 +2073,122 @@
                     if (nfcContainer) nfcContainer.style.display = 'none';
                 }
 
+                function closeModalAndReload() {
+                    const modalEl = document.getElementById('scannerModal');
+                    if (!modalEl) {
+                        window.location.reload(true);
+                        return;
+                    }
+                    const onHidden = function() {
+                        modalEl.removeEventListener('hidden.bs.modal', onHidden);
+                        window.location.reload(true);
+                    };
+                    modalEl.addEventListener('hidden.bs.modal', onHidden, { once: true });
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                        bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+                    } else {
+                        window.location.reload(true);
+                    }
+                }
+
+                function showPostScanEvidenceStep(scanId, message) {
+                    pendingCheckpointScanId = scanId;
+                    const modeToggle = document.getElementById('scannerModeToggle');
+                    if (modeToggle) modeToggle.style.display = 'none';
+                    document.getElementById('qrScannerContainer').style.display = 'none';
+                    document.getElementById('nfcScannerContainer').style.display = 'none';
+                    document.getElementById('manualInputContainer').style.display = 'none';
+                    document.getElementById('scanResult').style.display = 'none';
+                    const titleEl = document.getElementById('scannerModalTitle');
+                    if (titleEl) titleEl.textContent = 'Add findings (optional)';
+                    const msgEl = document.getElementById('postScanSuccessMsg');
+                    if (msgEl) msgEl.textContent = message || 'Checkpoint recorded.';
+                    const errEl = document.getElementById('postScanEvidenceError');
+                    if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+                    document.getElementById('postScanEvidencePanel').style.display = 'block';
+                }
+
+                function skipPostScanEvidence() {
+                    closeModalAndReload();
+                }
+
+                function fileToBase64Payload(file) {
+                    return new Promise(function(resolve, reject) {
+                        var reader = new FileReader();
+                        reader.onload = function() {
+                            var res = reader.result;
+                            var comma = res.indexOf(',');
+                            var base64 = comma >= 0 ? res.substring(comma + 1) : res;
+                            resolve({
+                                name: file.name,
+                                data: base64,
+                                mimetype: file.type || 'application/octet-stream'
+                            });
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    });
+                }
+
+                async function submitPostScanEvidence() {
+                    if (!pendingCheckpointScanId) {
+                        skipPostScanEvidence();
+                        return;
+                    }
+                    var btn = document.getElementById('postScanEvidenceSubmitBtn');
+                    var errEl = document.getElementById('postScanEvidenceError');
+                    if (btn) btn.disabled = true;
+                    if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+                    try {
+                        var photosIn = document.getElementById('postScanPhotos').files;
+                        var videosIn = document.getElementById('postScanVideos').files;
+                        var obs = document.getElementById('postScanObservations').value.trim();
+                        var photos = [];
+                        var videos = [];
+                        var i;
+                        for (i = 0; i < photosIn.length; i++) {
+                            photos.push(await fileToBase64Payload(photosIn[i]));
+                        }
+                        for (i = 0; i < videosIn.length; i++) {
+                            videos.push(await fileToBase64Payload(videosIn[i]));
+                        }
+                        if (!photos.length && !videos.length && !obs) {
+                            skipPostScanEvidence();
+                            return;
+                        }
+                        var response = await fetch('/guardpro/api/checkpoint/scan/evidence', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                jsonrpc: '2.0',
+                                method: 'call',
+                                params: {
+                                    scan_id: pendingCheckpointScanId,
+                                    photos: photos.length ? photos : undefined,
+                                    videos: videos.length ? videos : undefined,
+                                    observations: obs || undefined
+                                }
+                            })
+                        });
+                        var result = await response.json();
+                        var responseData = result.result !== undefined ? result.result : result;
+                        if (responseData && responseData.success) {
+                            closeModalAndReload();
+                        } else {
+                            var errMsg = (responseData && (responseData.message || responseData.error)) || 'Could not save findings';
+                            if (errEl) { errEl.textContent = errMsg; errEl.style.display = 'block'; }
+                        }
+                    } catch (e) {
+                        console.error('[Guard Pro Tours] Evidence submit error:', e);
+                        if (errEl) {
+                            errEl.textContent = 'Failed to save. You can skip and try again from the back office.';
+                            errEl.style.display = 'block';
+                        }
+                    } finally {
+                        if (btn) btn.disabled = false;
+                    }
+                }
+
                 async function handleScanSuccess(scanData, scanType) {
                     await stopScanning();
 
@@ -2040,41 +2269,17 @@
                         if (responseData.success) {
                             console.log('[Guard Pro Tours] Scan SUCCESS - Status:', responseData.status);
                             showScanSuccess(responseData.message || 'Checkpoint scanned successfully!');
-                            
-                            // Stop any running scanners first
                             await stopScanning();
-                            
-                            // Close modal and reload page to show updated progress
-                            setTimeout(() => {
-                                console.log('[Guard Pro Tours] Closing modal and reloading...');
-                                const modalEl = document.getElementById('scannerModal');
-                                
-                                // Add one-time event listener to reload page after modal is fully hidden
-                                modalEl.addEventListener('hidden.bs.modal', function reloadAfterHide() {
-                                    console.log('[Guard Pro Tours] Modal hidden, reloading page...');
-                                    // Remove this listener to avoid duplicate triggers
-                                    modalEl.removeEventListener('hidden.bs.modal', reloadAfterHide);
-                                    // Reload page to show updated progress
-                                    window.location.reload(true); // Force reload from server (bypass cache)
-                                }, { once: true });
-                                
-                                // Hide the modal using Bootstrap's API - use getOrCreateInstance for reliability
-                                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-                                if (modal) {
-                                    console.log('[Guard Pro Tours] Modal instance found/created, hiding now...');
-                                    modal.hide(); // This will trigger the hidden.bs.modal event
-                                } else {
-                                    console.error('[Guard Pro Tours] Failed to get/create modal instance, using fallback...');
-                                    // Fallback: manually hide modal
-                                    modalEl.classList.remove('show');
-                                    document.querySelector('.modal-backdrop')?.remove();
-                                    document.body.classList.remove('modal-open');
-                                    document.body.style.overflow = '';
-                                    document.body.style.paddingRight = '';
-                                    // Trigger reload after a short delay
-                                    setTimeout(() => window.location.reload(true), 300);
-                                }
-                            }, 1000);  // Show success message for 1 second before closing
+                            const sid = responseData.scan_id;
+                            const st = responseData.status;
+                            if (sid && st !== 'failed') {
+                                pendingCheckpointScanId = sid;
+                                setTimeout(function() {
+                                    showPostScanEvidenceStep(sid, responseData.message || 'Checkpoint recorded.');
+                                }, 1100);
+                            } else {
+                                setTimeout(function() { closeModalAndReload(); }, 1200);
+                            }
                         } else {
                             const errorMsg = responseData.message || responseData.error || result.error || 'Scan failed. Please try again.';
                             console.error('[Guard Pro Tours] Scan FAILED:', errorMsg, 'Full response:', responseData);
@@ -2698,6 +2903,13 @@
                                     <input type="file" class="form-control" id="incident_images" name="incident_images" accept="image/*" multiple="multiple" onchange="previewIncidentImages(this)"/>
                                     <small class="form-text text-muted">You can select multiple images</small>
                                     <div id="image-preview-container" class="mt-2" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="incident_videos" class="form-label">
+                                        <i class="fa fa-video-camera me-1"/>Attach Videos (Optional)
+                                    </label>
+                                    <input type="file" class="form-control" id="incident_videos" name="incident_videos" accept="video/*" multiple="multiple"/>
+                                    <small class="form-text text-muted">Separate from photos; you can attach multiple videos</small>
                                 </div>
                                 
                                 <t t-if="current_site">
@@ -3379,11 +3591,27 @@
                                     </div>
                                 </div>
                             </t>
+                            <t t-if="incident.video_ids">
+                                <div class="mb-3">
+                                    <label class="form-label">Current Videos</label>
+                                    <div class="d-flex flex-column gap-2">
+                                        <t t-foreach="incident.video_ids" t-as="vid">
+                                            <video controls="controls" class="w-100" style="max-height: 240px; border-radius: 6px; background: #000;"
+                                                   t-att-src="'/web/content/ir.attachment/%s/datas' % vid.id"/>
+                                        </t>
+                                    </div>
+                                </div>
+                            </t>
                             <div class="mb-3">
                                 <label for="incident_images" class="form-label">Add More Photos</label>
                                 <input type="file" class="form-control" id="incident_images" name="incident_images" accept="image/*" multiple="multiple" onchange="previewIncidentImages(this)"/>
                                 <small class="form-text text-muted">You can select multiple images</small>
                                 <div id="image-preview-container" class="mt-2" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="incident_videos" class="form-label">Add More Videos</label>
+                                <input type="file" class="form-control" id="incident_videos" name="incident_videos" accept="video/*" multiple="multiple"/>
+                                <small class="form-text text-muted">Optional; separate from photos</small>
                             </div>
                         </div>
                     </div>
@@ -3923,6 +4151,20 @@
                                 <i class="fa fa-chevron-right text-muted small"/>
                             </div>
                         </a>
+                        <a href="/guardpro/mobile/compliance" t-if="show_compliance_audits" class="list-group-item list-group-item-action border-0 py-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-secondary bg-opacity-10 text-secondary d-flex align-items-center justify-content-center me-3" style="width: 42px; height: 42px;">
+                                        <i class="fa fa-clipboard-check fs-5"/>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">Compliance audits</div>
+                                        <small class="text-muted">Supervisor / manager</small>
+                                    </div>
+                                </div>
+                                <i class="fa fa-chevron-right text-muted small"/>
+                            </div>
+                        </a>
                         <a href="/mobile/training" class="list-group-item list-group-item-action border-0 py-3">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center">
@@ -4053,6 +4295,256 @@
                         <i class="fa fa-sign-out-alt me-2"/>Logout
                     </a>
                 </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Compliance audits (assigned to guard as auditor) -->
+    <template id="mobile_compliance_list" name="Guard Pro Mobile Compliance List">
+        <t t-call="guardpro.mobile_base">
+            <div class="container-fluid p-3">
+                <div class="d-flex align-items-center mb-3">
+                    <a href="/guardpro/mobile" class="btn btn-outline-primary rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;" title="Home">
+                        <i class="fa fa-chevron-left"/>
+                    </a>
+                    <div>
+                        <h3 class="mb-0 fw-bold">Compliance audits</h3>
+                        <p class="text-muted small mb-0">Assigned to you by your supervisor</p>
+                    </div>
+                </div>
+                <div class="alert alert-light border small mb-3">
+                    <i class="fa fa-info-circle me-1"/>
+                    Open audits for sites you can access (supervisor / manager login).
+                </div>
+                <t t-if="audits">
+                    <div class="list-group list-group-flush shadow-sm">
+                        <t t-foreach="audits" t-as="audit">
+                            <a t-attf-href="/guardpro/mobile/compliance/{{audit.id}}" class="list-group-item list-group-item-action py-3">
+                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                    <div>
+                                        <div class="fw-bold"><t t-esc="audit.name"/></div>
+                                        <small class="text-muted d-block">
+                                            <t t-esc="compliance_audit_type_label(audit.audit_type)"/>
+                                            <t t-if="audit.site_id"> · <t t-esc="audit.site_id.name"/></t>
+                                        </small>
+                                        <small class="text-muted d-block">
+                                            <i class="fa fa-calendar me-1"/>
+                                            <t t-esc="audit.audit_date or ''"/>
+                                        </small>
+                                    </div>
+                                    <span t-attf-class="badge bg-{{audit.state == 'draft' and 'secondary' or audit.state == 'in_progress' and 'primary' or audit.state == 'requires_action' and 'warning' or 'info'}}">
+                                        <t t-esc="str(audit.state or '').replace('_', ' ').title()"/>
+                                    </span>
+                                </div>
+                            </a>
+                        </t>
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="card shadow-sm">
+                        <div class="card-body text-center text-muted py-5">
+                            <i class="fa fa-clipboard-check fa-3x mb-3 d-block opacity-50"/>
+                            <p class="mb-0">No open audits assigned to you.</p>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <template id="mobile_compliance_detail" name="Guard Pro Mobile Compliance Detail">
+        <t t-call="guardpro.mobile_base">
+            <div class="container-fluid p-3">
+                <div class="d-flex align-items-center mb-3">
+                    <a href="/guardpro/mobile/compliance" class="btn btn-outline-primary rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;" title="Back">
+                        <i class="fa fa-chevron-left"/>
+                    </a>
+                    <div class="flex-grow-1">
+                        <h3 class="mb-0 fw-bold text-break"><t t-esc="audit.name"/></h3>
+                        <small class="text-muted">
+                            <t t-esc="compliance_audit_type_label(audit.audit_type)"/>
+                            <t t-if="audit.site_id"> · <t t-esc="audit.site_id.name"/></t>
+                        </small>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body py-3">
+                        <div class="row text-center small">
+                            <div class="col-4">
+                                <div class="text-muted">Status</div>
+                                <strong><t t-esc="str(audit.state or '').replace('_', ' ').title()"/></strong>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-muted">Score</div>
+                                <strong>
+                                    <t t-esc="int(round(audit.compliance_score or 0))"/>%
+                                </strong>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-muted">Items</div>
+                                <strong><t t-esc="audit.total_items or 0"/></strong>
+                            </div>
+                        </div>
+                        <t t-if="can_edit and audit.state == 'draft'">
+                            <form t-attf-action="/guardpro/mobile/compliance/{{audit.id}}/start" method="post" class="d-grid mt-3">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-play me-1"/>Start audit
+                                </button>
+                            </form>
+                        </t>
+                        <t t-if="can_edit and audit.state in ('in_progress', 'requires_action')">
+                            <form t-attf-action="/guardpro/mobile/compliance/{{audit.id}}/complete" method="post" class="d-grid mt-3">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <t t-if="pending_items == 0">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fa fa-check me-1"/>Submit audit
+                                    </button>
+                                </t>
+                                <t t-else="">
+                                    <button type="button" class="btn btn-success" disabled="disabled">
+                                        <i class="fa fa-check me-1"/>Submit audit
+                                    </button>
+                                </t>
+                            </form>
+                            <t t-if="pending_items">
+                                <p class="text-warning small mb-0 mt-2">
+                                    <i class="fa fa-exclamation-triangle me-1"/>
+                                    <t t-esc="pending_items"/> item(s) still need Pass, Fail, or N/A.
+                                </p>
+                            </t>
+                        </t>
+                    </div>
+                </div>
+
+                <h5 class="mb-2">Checklist</h5>
+                <t t-if="not audit.checklist_ids">
+                    <p class="text-muted small">No checklist lines yet. Your supervisor must add a template with items.</p>
+                </t>
+                <t t-foreach="audit.checklist_ids" t-as="item">
+                    <div class="card shadow-sm mb-3">
+                        <div class="card-header bg-white py-2">
+                            <strong class="small"><t t-esc="item.name"/></strong>
+                            <t t-if="item.regulation_reference">
+                                <span class="badge bg-light text-dark ms-1 opacity-75"><t t-esc="item.regulation_reference"/></span>
+                            </t>
+                        </div>
+                        <div class="card-body">
+                            <t t-if="item.description">
+                                <p class="small text-muted mb-2"><t t-esc="item.description"/></p>
+                            </t>
+                            <t t-if="item.result">
+                                <div class="mb-2">
+                                    <span t-attf-class="badge bg-{{item.result == 'pass' and 'success' or item.result == 'fail' and 'danger' or 'secondary'}}">
+                                        <t t-esc="str(item.result).upper()"/>
+                                    </span>
+                                </div>
+                            </t>
+                            <t t-if="item.photo_ids">
+                                <div class="d-flex flex-wrap gap-1 mb-2">
+                                    <t t-foreach="item.photo_ids" t-as="att">
+                                        <a t-attf-href="/web/image/ir.attachment/{{att.id}}/datas" target="_blank" rel="noopener" class="d-block">
+                                            <img t-attf-src="/web/image/ir.attachment/{{att.id}}/datas" alt="" class="rounded border" style="max-height: 72px; max-width: 96px; object-fit: cover;"/>
+                                        </a>
+                                    </t>
+                                </div>
+                            </t>
+                            <t t-if="can_edit">
+                                <form t-attf-action="/guardpro/mobile/compliance/item/{{item.id}}/save" method="post" enctype="multipart/form-data">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <div class="mb-2">
+                                        <label class="form-label small mb-0">Result</label>
+                                        <select name="result" class="form-select form-select-sm">
+                                            <t t-if="not item.result">
+                                                <option value="" selected="selected">—</option>
+                                                <option value="pass">Pass</option>
+                                                <option value="fail">Fail</option>
+                                                <option value="na">N/A</option>
+                                            </t>
+                                            <t t-elif="item.result == 'pass'">
+                                                <option value="">—</option>
+                                                <option value="pass" selected="selected">Pass</option>
+                                                <option value="fail">Fail</option>
+                                                <option value="na">N/A</option>
+                                            </t>
+                                            <t t-elif="item.result == 'fail'">
+                                                <option value="">—</option>
+                                                <option value="pass">Pass</option>
+                                                <option value="fail" selected="selected">Fail</option>
+                                                <option value="na">N/A</option>
+                                            </t>
+                                            <t t-else="">
+                                                <option value="">—</option>
+                                                <option value="pass">Pass</option>
+                                                <option value="fail">Fail</option>
+                                                <option value="na" selected="selected">N/A</option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small mb-0">Notes</label>
+                                        <textarea name="notes" class="form-control form-control-sm" rows="2" placeholder="Optional observations"><t t-esc="item.notes or ''"/></textarea>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small mb-0">Severity (if failed)</label>
+                                        <select name="severity" class="form-select form-select-sm">
+                                            <t t-if="not item.severity">
+                                                <option value="" selected="selected">—</option>
+                                                <option value="low">Low</option>
+                                                <option value="medium">Medium</option>
+                                                <option value="high">High</option>
+                                                <option value="critical">Critical</option>
+                                            </t>
+                                            <t t-elif="item.severity == 'low'">
+                                                <option value="">—</option>
+                                                <option value="low" selected="selected">Low</option>
+                                                <option value="medium">Medium</option>
+                                                <option value="high">High</option>
+                                                <option value="critical">Critical</option>
+                                            </t>
+                                            <t t-elif="item.severity == 'medium'">
+                                                <option value="">—</option>
+                                                <option value="low">Low</option>
+                                                <option value="medium" selected="selected">Medium</option>
+                                                <option value="high">High</option>
+                                                <option value="critical">Critical</option>
+                                            </t>
+                                            <t t-elif="item.severity == 'high'">
+                                                <option value="">—</option>
+                                                <option value="low">Low</option>
+                                                <option value="medium">Medium</option>
+                                                <option value="high" selected="selected">High</option>
+                                                <option value="critical">Critical</option>
+                                            </t>
+                                            <t t-else="">
+                                                <option value="">—</option>
+                                                <option value="low">Low</option>
+                                                <option value="medium">Medium</option>
+                                                <option value="high">High</option>
+                                                <option value="critical" selected="selected">Critical</option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="requires_action" t-attf-id="req_action_{{item.id}}" value="on" t-att-checked="item.requires_action"/>
+                                        <label class="form-check-label small" t-attf-for="req_action_{{item.id}}">Requires corrective action</label>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small mb-0">Add photo (optional)</label>
+                                        <input type="file" name="photo" class="form-control form-control-sm" accept="image/*"/>
+                                    </div>
+                                    <button type="submit" class="btn btn-sm btn-outline-primary w-100">
+                                        <i class="fa fa-save me-1"/>Save line
+                                    </button>
+                                </form>
+                            </t>
+                            <t t-else="">
+                                <p class="text-muted small mb-0">Read-only (audit closed or not editable).</p>
+                            </t>
+                        </div>
+                    </div>
+                </t>
             </div>
         </t>
     </template>

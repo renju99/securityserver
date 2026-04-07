@@ -10,8 +10,10 @@ import json
 import base64
 from odoo import http, fields
 from odoo.http import request
+from odoo.exceptions import UserError, AccessError
 from datetime import datetime, timedelta
 from ..common.video_optimizer import VideoOptimizer
+from ..common.image_optimizer import ImageOptimizer
 
 _logger = logging.getLogger(__name__)
 
@@ -48,6 +50,67 @@ class GuardProPWASimple(http.Controller):
                 ], limit=1)
         
         return guard
+
+    def _mobile_no_guard_render_vals(self):
+        """Context for the no-guard profile screen (includes supervisor compliance entry)."""
+        user = request.env.user
+        return {
+            'user': user,
+            'show_compliance_audits': self._user_can_access_mobile_compliance(user),
+        }
+
+    def _compliance_user_is_assigned_auditor(self, audit, user):
+        """True if user is lead auditor or on the audit team."""
+        if not audit or not user:
+            return False
+        if audit.auditor_id and audit.auditor_id.id == user.id:
+            return True
+        return user.id in audit.auditor_team_ids.ids
+
+    def _user_can_access_mobile_compliance(self, user):
+        """Compliance mobile UI/API: GuardPro Supervisor / Manager / Admin (not guard-only portal)."""
+        if not user or user._is_public():
+            return False
+        return (
+            user.has_group('guardpro.group_guardpro_supervisor')
+            or user.has_group('guardpro.group_guardpro_manager')
+            or user.has_group('guardpro.group_guardpro_admin')
+        )
+
+    def _compliance_user_can_write_audit(self, audit, user):
+        """Whether user may start, edit checklist, or complete this audit (open states only)."""
+        if not audit or not user or audit.state not in ('draft', 'in_progress', 'requires_action'):
+            return False
+        if user.has_group('guardpro.group_guardpro_admin'):
+            return True
+        if self._compliance_user_is_assigned_auditor(audit, user):
+            return True
+        if audit.site_id and audit.site_id.id in user.site_ids.ids:
+            if (
+                user.has_group('guardpro.group_guardpro_supervisor')
+                or user.has_group('guardpro.group_guardpro_manager')
+                or user.has_group('guardpro.group_guardpro_admin')
+            ):
+                return True
+        return False
+
+    def _compliance_open_audits_domain_staff(self):
+        """Open audits; record rules scope to the user's allowed sites / assignments."""
+        return [('state', 'in', ['draft', 'in_progress', 'requires_action'])]
+
+    def _compliance_audit_type_label(self, audit_type):
+        labels = {
+            'site': 'Site Audit',
+            'guard': 'Guard Performance',
+            'equipment': 'Equipment',
+            'training': 'Training Compliance',
+            'safety': 'Safety',
+            'security': 'Security Procedures',
+            'operational': 'Operational Compliance',
+            'regulatory': 'Regulatory Compliance',
+            'quality': 'Quality Assurance',
+        }
+        return labels.get(audit_type or '', audit_type or '')
 
     def _normalize_signature_data(self, value):
         """Normalize data URL/base64 signature input for Binary fields."""
@@ -119,9 +182,7 @@ class GuardProPWASimple(http.Controller):
         
         if not guard:
             _logger.warning('[Guard Pro Mobile] No guard profile found for user: %s', request.env.user.name)
-            return request.render('guardpro.mobile_no_guard', {
-                'user': request.env.user,
-            })
+            return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
         
         # Get today's data
         today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -147,15 +208,25 @@ class GuardProPWASimple(http.Controller):
         recent_incidents = request.env['incident.report'].sudo().search([
             ('guard_id', '=', guard.id),
         ], limit=5, order='incident_datetime desc')
+
+        user = request.env.user
+        show_compliance_audits = self._user_can_access_mobile_compliance(user)
+        compliance_open_count = 0
+        if show_compliance_audits:
+            compliance_open_count = request.env['compliance.audit'].search_count(
+                self._compliance_open_audits_domain_staff()
+            )
         
         return request.render('guardpro.mobile_dashboard', {
             'guard': guard,
-            'user': request.env.user,
+            'user': user,
             'shifts_today': shifts_today,
             'active_tasks': active_tasks,
             'is_checked_in': bool(active_attendance),
             'active_attendance': active_attendance,
             'recent_incidents': recent_incidents,
+            'show_compliance_audits': show_compliance_audits,
+            'compliance_open_count': compliance_open_count,
             'format_datetime_tz': self._format_datetime_tz,
         })
 
@@ -408,9 +479,7 @@ class GuardProPWASimple(http.Controller):
         guard = self._get_guard_from_user()
         
         if not guard:
-            return request.render('guardpro.mobile_no_guard', {
-                'user': request.env.user,
-            })
+            return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
         
         # Get shifts - today, upcoming, and past
         # Use Odoo's Datetime utilities for proper UTC handling
@@ -474,9 +543,7 @@ class GuardProPWASimple(http.Controller):
         if not guard:
             _logger.warning('[Mobile Tours] No guard profile found for user %s (ID: %s)', 
                           user.name, user.id)
-            return request.render('guardpro.mobile_no_guard', {
-                'user': request.env.user,
-            })
+            return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
         
         _logger.info('[Mobile Tours] Guard found: %s (ID: %s)', guard.name, guard.id)
         
@@ -622,9 +689,7 @@ class GuardProPWASimple(http.Controller):
         guard = self._get_guard_from_user()
         
         if not guard:
-            return request.render('guardpro.mobile_no_guard', {
-                'user': request.env.user,
-            })
+            return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
         
         # Get tasks by state
         tasks_assigned = request.env['guard.task'].sudo().search([
@@ -656,9 +721,7 @@ class GuardProPWASimple(http.Controller):
         guard = self._get_guard_from_user()
         
         if not guard:
-            return request.render('guardpro.mobile_no_guard', {
-                'user': request.env.user,
-            })
+            return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
         
         # Get incidents
         open_incidents = request.env['incident.report'].sudo().search([
@@ -863,9 +926,7 @@ class GuardProPWASimple(http.Controller):
         guard = self._get_guard_from_user()
         
         if not guard:
-            return request.render('guardpro.mobile_no_guard', {
-                'user': request.env.user,
-            })
+            return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
         
         # Get incident - ensure it belongs to this guard
         incident = request.env['incident.report'].sudo().search([
@@ -1278,9 +1339,7 @@ class GuardProPWASimple(http.Controller):
             _logger.info('[GuardPro Mobile] Guard profile found: %s', guard.name if guard else 'None')
             
             if not guard:
-                return request.render('guardpro.mobile_no_guard', {
-                    'user': request.env.user,
-                })
+                return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
                 
             return request.render('guardpro.mobile_profile_template', {
                 'guard': guard,
@@ -1296,9 +1355,7 @@ class GuardProPWASimple(http.Controller):
         guard = self._get_guard_from_user()
         
         if not guard:
-            return request.render('guardpro.mobile_no_guard', {
-                'user': request.env.user,
-            })
+            return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
             
         try:
             site = guard.current_site_id if guard else None
@@ -1344,9 +1401,7 @@ class GuardProPWASimple(http.Controller):
         guard = self._get_guard_from_user()
         
         if not guard:
-            return request.render('guardpro.mobile_no_guard', {
-                'user': request.env.user,
-            })
+            return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
             
         site = guard.current_site_id if guard else None
         
@@ -1379,9 +1434,7 @@ class GuardProPWASimple(http.Controller):
         guard = self._get_guard_from_user()
         
         if not guard:
-            return request.render('guardpro.mobile_no_guard', {
-                'user': request.env.user,
-            })
+            return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
         
         # Get user statistics
         total_shifts = request.env['guard.shift'].sudo().search_count([
@@ -1416,17 +1469,172 @@ class GuardProPWASimple(http.Controller):
     @http.route('/guardpro/mobile/more', type='http', auth='user', website=True)
     def mobile_more(self, **kwargs):
         """More menu screen - Additional options and features."""
+        user = request.env.user
         guard = self._get_guard_from_user()
-        
-        if not guard:
-            return request.render('guardpro.mobile_no_guard', {
-                'user': request.env.user,
-            })
-        
+        show_compliance = self._user_can_access_mobile_compliance(user)
+        if not guard and not show_compliance:
+            return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
         return request.render('guardpro.mobile_more', {
             'guard': guard,
-            'user': request.env.user,
+            'user': user,
+            'show_compliance_audits': show_compliance,
         })
+
+    @http.route('/guardpro/mobile/compliance', type='http', auth='user', website=True)
+    def mobile_compliance_audits(self, **kwargs):
+        """Compliance audits for supervisor / manager / admin (not guard portal)."""
+        user = request.env.user
+        if not self._user_can_access_mobile_compliance(user):
+            return request.redirect('/guardpro/mobile?error=compliance_staff_only')
+        guard = self._get_guard_from_user()
+        audits = request.env['compliance.audit'].search(
+            self._compliance_open_audits_domain_staff(),
+            order='audit_date desc, id desc',
+            limit=80,
+        )
+        return request.render('guardpro.mobile_compliance_list', {
+            'guard': guard,
+            'user': user,
+            'audits': audits,
+            'compliance_audit_type_label': self._compliance_audit_type_label,
+        })
+
+    @http.route('/guardpro/mobile/compliance/<int:audit_id>', type='http', auth='user', website=True)
+    def mobile_compliance_audit_detail(self, audit_id, **kwargs):
+        """Run checklist for one audit."""
+        user = request.env.user
+        if not self._user_can_access_mobile_compliance(user):
+            return request.redirect('/guardpro/mobile?error=compliance_staff_only')
+        guard = self._get_guard_from_user()
+        audit = request.env['compliance.audit'].search([('id', '=', audit_id)], limit=1)
+        if not audit:
+            return request.redirect('/guardpro/mobile/compliance?error=audit_not_found')
+        can_edit = self._compliance_user_can_write_audit(audit, user)
+        pending_items = len(audit.checklist_ids.filtered(lambda i: not i.result))
+        return request.render('guardpro.mobile_compliance_detail', {
+            'guard': guard,
+            'user': user,
+            'audit': audit,
+            'can_edit': can_edit,
+            'pending_items': pending_items,
+            'compliance_audit_type_label': self._compliance_audit_type_label,
+        })
+
+    @http.route('/guardpro/mobile/compliance/<int:audit_id>/start', type='http', auth='user', methods=['POST'], csrf=True)
+    def mobile_compliance_audit_start(self, audit_id, **kwargs):
+        user = request.env.user
+        if not self._user_can_access_mobile_compliance(user):
+            return request.redirect('/guardpro/mobile?error=compliance_staff_only')
+        audit = request.env['compliance.audit'].search([('id', '=', audit_id)], limit=1)
+        if not audit or not self._compliance_user_can_write_audit(audit, user):
+            return request.redirect('/guardpro/mobile/compliance?error=audit_access_denied')
+        try:
+            audit.action_start_audit()
+        except UserError as e:
+            _logger.warning('[Mobile Compliance] Start blocked: %s', e)
+            return request.redirect('/guardpro/mobile/compliance/%s?error=audit_start_failed' % audit_id)
+        except AccessError:
+            return request.redirect('/guardpro/mobile/compliance?error=audit_access_denied')
+        return request.redirect('/guardpro/mobile/compliance/%s?success=audit_started' % audit_id)
+
+    @http.route('/guardpro/mobile/compliance/<int:audit_id>/complete', type='http', auth='user', methods=['POST'], csrf=True)
+    def mobile_compliance_audit_complete(self, audit_id, **kwargs):
+        user = request.env.user
+        if not self._user_can_access_mobile_compliance(user):
+            return request.redirect('/guardpro/mobile?error=compliance_staff_only')
+        audit = request.env['compliance.audit'].search([('id', '=', audit_id)], limit=1)
+        if not audit or not self._compliance_user_can_write_audit(audit, user):
+            return request.redirect('/guardpro/mobile/compliance?error=audit_access_denied')
+        try:
+            audit.action_complete_audit()
+        except UserError as e:
+            _logger.warning('[Mobile Compliance] Complete blocked: %s', e)
+            return request.redirect(
+                '/guardpro/mobile/compliance/%s?error=audit_complete_failed' % audit_id
+            )
+        except AccessError:
+            return request.redirect('/guardpro/mobile/compliance?error=audit_access_denied')
+        return request.redirect('/guardpro/mobile/compliance/%s?success=audit_completed' % audit_id)
+
+    @http.route(
+        '/guardpro/mobile/compliance/item/<int:item_id>/save',
+        type='http',
+        auth='user',
+        methods=['POST'],
+        csrf=True,
+    )
+    def mobile_compliance_item_save(self, item_id, result=None, notes=None, **kwargs):
+        """Save one checklist line (result, notes, optional photo)."""
+        user = request.env.user
+        if not self._user_can_access_mobile_compliance(user):
+            return request.redirect('/guardpro/mobile?error=compliance_staff_only')
+        item = request.env['compliance.audit.item'].search([('id', '=', item_id)], limit=1)
+        if not item:
+            return request.redirect('/guardpro/mobile/compliance?error=audit_not_found')
+        audit = item.audit_id
+        if not self._compliance_user_can_write_audit(audit, user):
+            return request.redirect('/guardpro/mobile/compliance?error=audit_access_denied')
+        if audit.state not in ('draft', 'in_progress', 'requires_action'):
+            return request.redirect(
+                '/guardpro/mobile/compliance/%s?error=audit_invalid_state' % audit.id
+            )
+
+        vals = {}
+        if result in ('pass', 'fail', 'na'):
+            vals['result'] = result
+        elif result in ('', None, False):
+            vals['result'] = False
+
+        if notes is not None:
+            vals['notes'] = notes or ''
+
+        if 'requires_action' in kwargs:
+            vals['requires_action'] = kwargs.get('requires_action') in ('on', 'true', 'True', '1', True)
+
+        sev = kwargs.get('severity')
+        if sev in ('low', 'medium', 'high', 'critical'):
+            vals['severity'] = sev
+        elif sev in ('', None):
+            vals['severity'] = False
+
+        uploaded = request.httprequest.files.get('photo')
+        if uploaded and uploaded.filename:
+            try:
+                raw = uploaded.read()
+                datas_b64 = base64.b64encode(raw).decode()
+                try:
+                    datas_b64 = ImageOptimizer.optimize_image(
+                        datas_b64,
+                        max_dimension=1200,
+                        target_format='JPEG',
+                    )
+                except Exception as opt_err:
+                    _logger.debug('[Mobile Compliance] Photo optimize skipped: %s', opt_err)
+                att = request.env['ir.attachment'].sudo().create({
+                    'name': uploaded.filename or 'audit_evidence.jpg',
+                    'type': 'binary',
+                    'datas': datas_b64,
+                    'res_model': 'compliance.audit.item',
+                    'res_id': item.id,
+                    'mimetype': (uploaded.content_type or 'image/jpeg').lower(),
+                })
+                vals['photo_ids'] = [(4, att.id)]
+            except Exception as e:
+                _logger.exception('[Mobile Compliance] Photo upload failed')
+                return request.redirect(
+                    '/guardpro/mobile/compliance/%s?error=audit_photo_failed' % audit.id
+                )
+
+        try:
+            if vals:
+                item.write(vals)
+        except (AccessError, UserError) as e:
+            _logger.warning('[Mobile Compliance] Item save failed: %s', e)
+            return request.redirect(
+                '/guardpro/mobile/compliance/%s?error=audit_item_save_failed' % audit.id
+            )
+
+        return request.redirect('/guardpro/mobile/compliance/%s?success=audit_item_saved' % audit.id)
 
     @http.route('/guardpro/mobile/training', type='http', auth='user', website=True)
     def mobile_training(self, **kwargs):
@@ -1437,9 +1645,7 @@ class GuardProPWASimple(http.Controller):
         """View details of a specific training enrollment."""
         guard = self._get_guard_from_user()
         if not guard:
-            return request.render('guardpro.mobile_no_guard', {
-                'user': request.env.user,
-            })
+            return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
             
         enrollment = request.env['slide.channel.partner'].sudo().browse(enrollment_id)
         if not enrollment.exists() or enrollment.guard_id.id != guard.id:

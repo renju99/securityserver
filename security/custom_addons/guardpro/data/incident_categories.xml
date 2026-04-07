@@ -64,6 +64,36 @@
             <field name="sequence">90</field>
             <field name="color">7</field>
         </record>
+        <record id="incident_cat_abandoned_vehicle" model="incident.category">
+            <field name="name">Abandoned Vehicle</field>
+            <field name="code">ABND_VEH</field>
+            <field name="sequence">91</field>
+            <field name="color">7</field>
+        </record>
+        <record id="incident_cat_long_term_parked_vehicle" model="incident.category">
+            <field name="name">Long-Term Parked Vehicle</field>
+            <field name="code">LT_PARK</field>
+            <field name="sequence">92</field>
+            <field name="color">7</field>
+        </record>
+        <record id="incident_cat_equipment_handover" model="incident.category">
+            <field name="name">Equipment Handover</field>
+            <field name="code">EQ_HO</field>
+            <field name="sequence">93</field>
+            <field name="color">5</field>
+        </record>
+        <record id="incident_cat_cctv_handover" model="incident.category">
+            <field name="name">CCTV Handover</field>
+            <field name="code">CCTV_HO</field>
+            <field name="sequence">94</field>
+            <field name="color">4</field>
+        </record>
+        <record id="incident_cat_local_authority_visit" model="incident.category">
+            <field name="name">Local Authority Visit</field>
+            <field name="code">AUTH_VISIT</field>
+            <field name="sequence">95</field>
+            <field name="color">6</field>
+        </record>
 
         <record id="incident_cat_weather" model="incident.category">
             <field name="name">Weather/Natural</field>

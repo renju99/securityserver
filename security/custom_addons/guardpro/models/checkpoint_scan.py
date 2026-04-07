@@ -4,7 +4,10 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 import logging
+import base64
 from datetime import timedelta
+
+from ..common.video_optimizer import VideoOptimizer
 
 _logger = logging.getLogger(__name__)
 
@@ -141,6 +144,14 @@ class CheckpointScan(models.Model):
         'scan_id',
         'attachment_id',
         string='Photos'
+    )
+    video_ids = fields.Many2many(
+        'ir.attachment',
+        'checkpoint_scan_video_rel',
+        'scan_id',
+        'attachment_id',
+        string='Videos',
+        help='Optional video evidence for this scan (never required by checkpoint rules).',
     )
     
     # Notes
@@ -598,9 +609,116 @@ class CheckpointScan(models.Model):
         return R * c
 
     @api.model
+    def _is_video_payload_dict(self, payload):
+        """Detect JSON attachment dict as video (same rules as mobile incident API)."""
+        if not payload or not isinstance(payload, dict):
+            return False
+        name = (payload.get('name') or '').lower()
+        mimetype = (payload.get('mimetype') or payload.get('content_type') or '').lower()
+        if mimetype.startswith('video/'):
+            return True
+        return name.endswith(('.mp4', '.mov', '.avi', '.mkv', '.webm', '.m4v', '.3gp'))
+
+    @api.model
+    def _video_attachment_ids_from_payloads(self, videos_payloads):
+        """Create ir.attachment rows from mobile JSON video payloads; returns attachment ids."""
+        if not videos_payloads:
+            return []
+        ids = []
+        Attachment = self.env['ir.attachment'].sudo()
+        for payload in videos_payloads:
+            if not payload or not isinstance(payload, dict):
+                continue
+            if not self._is_video_payload_dict(payload):
+                continue
+            payload_name = payload.get('name') or 'checkpoint_video'
+            payload_data = payload.get('data')
+            if not payload_data:
+                continue
+            mimetype = (
+                payload.get('mimetype')
+                or payload.get('content_type')
+                or 'application/octet-stream'
+            )
+            attachment_data = payload_data
+            optimized, compressed = VideoOptimizer.optimize_video(
+                attachment_data,
+                filename=payload_name,
+            )
+            if compressed:
+                mimetype = 'video/mp4'
+            b64_datas = optimized
+            if isinstance(b64_datas, bytes):
+                b64_datas = b64_datas.decode()
+            att = Attachment.create({
+                'name': payload_name,
+                'datas': b64_datas,
+                'res_model': 'checkpoint.scan',
+                'mimetype': mimetype,
+            })
+            ids.append(att.id)
+        return ids
+
+    @api.model
+    def _photo_attachment_ids_from_payloads(self, photo_payloads):
+        """Create image (non-video) attachments from mobile/JSON payloads; return new attachment ids."""
+        if not photo_payloads:
+            return []
+        ids = []
+        Attachment = self.env['ir.attachment'].sudo()
+        for payload in photo_payloads:
+            if not payload or not isinstance(payload, dict):
+                continue
+            if self._is_video_payload_dict(payload):
+                continue
+            payload_name = payload.get('name') or 'checkpoint_photo.jpg'
+            payload_data = payload.get('data')
+            if not payload_data:
+                continue
+            mimetype = (
+                payload.get('mimetype')
+                or payload.get('content_type')
+                or 'image/jpeg'
+            )
+            datas = payload_data
+            if isinstance(datas, bytes):
+                try:
+                    datas = datas.decode('ascii')
+                except Exception:
+                    datas = base64.b64encode(datas).decode()
+            att = Attachment.create({
+                'name': payload_name,
+                'datas': datas,
+                'res_model': 'checkpoint.scan',
+                'mimetype': mimetype,
+            })
+            ids.append(att.id)
+        return ids
+
+    def append_post_scan_evidence(self, photos_payload=None, videos_payload=None, observations_text=None):
+        """Attach optional photos/videos and append observations after the scan is recorded."""
+        self.ensure_one()
+        photo_ids_new = self._photo_attachment_ids_from_payloads(photos_payload or [])
+        video_ids_new = self._video_attachment_ids_from_payloads(videos_payload or [])
+        obs = (observations_text or '').strip()
+        vals = {}
+        if photo_ids_new:
+            vals['photo_ids'] = [(4, i) for i in photo_ids_new]
+        if video_ids_new:
+            vals['video_ids'] = [(4, i) for i in video_ids_new]
+        if obs:
+            if self.observations:
+                vals['observations'] = (self.observations or '') + '\n' + obs
+            else:
+                vals['observations'] = obs
+        if vals:
+            self.write(vals)
+        return True
+
+    @api.model
     def scan_checkpoint(self, checkpoint_id, guard_id, scan_data,
                         latitude=None, longitude=None, tour_log_id=None,
-                        photo=None, notes=None):
+                        photo=None, notes=None, videos=None):
         """
         API method for mobile app to scan checkpoint.
         
@@ -613,7 +731,8 @@ class CheckpointScan(models.Model):
             tour_log_id (int): Tour log ID if part of tour
             photo (bytes): Photo data
             notes (str): Scan notes
-            
+            videos (list): Optional list of dicts with name, data (base64), mimetype
+
         Returns:
             dict: Scan result
         """
@@ -705,7 +824,10 @@ class CheckpointScan(models.Model):
             'photo': photo,
             'notes': notes
         }
-        
+        video_att_ids = self._video_attachment_ids_from_payloads(videos or [])
+        if video_att_ids:
+            scan_vals['video_ids'] = [(6, 0, video_att_ids)]
+
         try:
             scan = self.create(scan_vals)
             

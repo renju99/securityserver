@@ -36,6 +36,26 @@ class MobileAPIController(http.Controller):
             return True
         return name.endswith(('.mp4', '.mov', '.avi', '.mkv', '.webm', '.m4v', '.3gp'))
 
+    def _incident_photos_videos_payload(self, incident):
+        """Build photo/video metadata for native app (relative paths; prepend base URL on device)."""
+        photos = []
+        for att in incident.photo_ids:
+            photos.append({
+                'id': att.id,
+                'name': att.name,
+                'mimetype': att.mimetype or 'image/jpeg',
+                'url': '/web/image/ir.attachment/%s/datas' % att.id,
+            })
+        videos = []
+        for att in incident.video_ids:
+            videos.append({
+                'id': att.id,
+                'name': att.name,
+                'mimetype': att.mimetype or 'video/mp4',
+                'url': '/web/content/ir.attachment/%s/datas?download=true' % att.id,
+            })
+        return photos, videos
+
     @http.route('/guardpro/api/guard/profile', type='json', auth='user', methods=['POST'], csrf=False)
     def get_guard_profile(self):
         """Get current guard profile."""
@@ -347,7 +367,7 @@ class MobileAPIController(http.Controller):
     @rate_limit(max_requests=100, window_seconds=60)  # Max 100 scans per minute (tours have many checkpoints)
     @http.route('/guardpro/api/checkpoint/scan', type='json', auth='user', methods=['POST'], csrf=False)
     def scan_checkpoint(self, checkpoint_id, scan_data, latitude=None, longitude=None,
-                        tour_log_id=None, photo=None, notes=None):
+                        tour_log_id=None, photo=None, notes=None, videos=None):
         """Scan a checkpoint."""
         _logger.info('[API Checkpoint Scan] Received scan request: checkpoint_id=%s, tour_log_id=%s, scan_data=%s (type: %s)',
                     checkpoint_id, tour_log_id, scan_data, type(scan_data).__name__)
@@ -412,7 +432,8 @@ class MobileAPIController(http.Controller):
                 longitude=longitude,
                 tour_log_id=tour_log_id,
                 photo=photo,
-                notes=notes
+                notes=notes,
+                videos=videos,
             )
             _logger.info('[API Checkpoint Scan] Scan result: %s', result)
             
@@ -428,6 +449,62 @@ class MobileAPIController(http.Controller):
         except Exception as e:
             _logger.error('[API Checkpoint Scan] Exception: %s', str(e), exc_info=True)
             return {'success': False, 'error': str(e), 'message': 'An unexpected error occurred. Please try again.'}
+
+    @rate_limit(max_requests=60, window_seconds=60)
+    @http.route('/guardpro/api/checkpoint/scan/evidence', type='json', auth='user', methods=['POST'], csrf=False)
+    def checkpoint_scan_append_evidence(self, scan_id, photos=None, videos=None, observations=None):
+        """Add optional photos, videos, and observation text to an existing checkpoint scan (same guard only)."""
+        guard = request.env['guard.profile'].search([
+            ('user_id', '=', request.env.user.id)
+        ], limit=1)
+        if not guard:
+            return {
+                'success': False,
+                'error': 'guard_not_found',
+                'message': 'Guard profile not found',
+            }
+        if not scan_id:
+            return {
+                'success': False,
+                'error': 'scan_id_required',
+                'message': 'Scan ID is required',
+            }
+        try:
+            scan_id = int(scan_id)
+        except (TypeError, ValueError):
+            return {
+                'success': False,
+                'error': 'invalid_scan_id',
+                'message': 'Invalid scan ID',
+            }
+
+        photos = photos or []
+        videos = videos or []
+        obs = (observations or '').strip() if observations else ''
+        if not photos and not videos and not obs:
+            return {'success': True, 'message': 'Nothing to attach'}
+
+        scan = request.env['checkpoint.scan'].browse(scan_id)
+        if not scan.exists() or scan.guard_id.id != guard.id:
+            return {
+                'success': False,
+                'error': 'scan_not_found',
+                'message': 'Scan not found or access denied',
+            }
+
+        try:
+            scan.append_post_scan_evidence(
+                photos_payload=photos,
+                videos_payload=videos,
+                observations_text=obs or None,
+            )
+            return {'success': True, 'message': 'Findings saved'}
+        except (AccessError, ValidationError) as e:
+            _logger.warning('[API Checkpoint Evidence] %s', str(e))
+            return {'success': False, 'error': 'validation', 'message': str(e)}
+        except Exception as e:
+            _logger.exception('[API Checkpoint Evidence] Unexpected error')
+            return {'success': False, 'error': 'unexpected', 'message': str(e)}
 
     @http.route('/guardpro/api/shifts/tours', type='json', auth='user', methods=['POST'], csrf=False)
     def get_shift_tours(self, shift_id=None):
@@ -954,6 +1031,8 @@ class MobileAPIController(http.Controller):
                     'escalated': incident.escalated,
                     'has_photos': len(incident.photo_ids) > 0,
                     'photo_count': len(incident.photo_ids),
+                    'has_videos': len(incident.video_ids) > 0,
+                    'video_count': len(incident.video_ids),
                     'requires_followup': incident.requires_followup,
                     'followup_completed': incident.followup_completed
                 })
@@ -968,6 +1047,496 @@ class MobileAPIController(http.Controller):
         except Exception as e:
             _logger.error('Get incident reports error: %s', str(e))
             return {'error': str(e)}
+
+    @http.route('/guardpro/api/incidents/detail', type='json', auth='user', methods=['POST'], csrf=False)
+    def get_incident_detail(self, incident_id):
+        """Single incident with photo/video lists for the mobile app."""
+        if not incident_id:
+            return {'success': False, 'error': 'incident_id is required'}
+        try:
+            incident_id = int(incident_id)
+        except (TypeError, ValueError):
+            return {'success': False, 'error': 'Invalid incident_id'}
+
+        user = request.env.user
+        incident = request.env['incident.report'].search([
+            ('id', '=', incident_id),
+            ('site_id', 'in', user.site_ids.ids),
+        ], limit=1)
+        if not incident:
+            return {'success': False, 'error': 'Incident not found'}
+
+        photos, videos = self._incident_photos_videos_payload(incident)
+        return {
+            'success': True,
+            'incident': {
+                'id': incident.id,
+                'incident_number': incident.name,
+                'title': incident.title,
+                'description': incident.description,
+                'severity': incident.severity,
+                'status': incident.status,
+                'incident_datetime': incident.incident_datetime.isoformat() + 'Z' if incident.incident_datetime else None,
+                'reported_datetime': incident.reported_datetime.isoformat() + 'Z' if incident.reported_datetime else None,
+                'site_name': incident.site_id.name if incident.site_id else 'Unknown Site',
+                'location': incident.location,
+                'latitude': incident.latitude,
+                'longitude': incident.longitude,
+                'category': incident.category_id.name if incident.category_id else None,
+                'priority': incident.priority,
+                'escalated': incident.escalated,
+                'has_photos': len(photos) > 0,
+                'photo_count': len(photos),
+                'has_videos': len(videos) > 0,
+                'video_count': len(videos),
+                'photos': photos,
+                'videos': videos,
+                'requires_followup': incident.requires_followup,
+                'followup_completed': incident.followup_completed,
+            },
+        }
+
+    # --- Compliance audits (supervisor / manager / admin only; not guard portal) ---
+
+    def _compliance_normalize_base64_data(self, payload_data):
+        """Normalize JSON attachment data to a base64 string (strip data-URI prefix)."""
+        if payload_data is None:
+            return None
+        if isinstance(payload_data, bytes):
+            try:
+                return payload_data.decode('ascii')
+            except Exception:
+                return base64.b64encode(payload_data).decode()
+        s = str(payload_data).strip()
+        if s.startswith('data:'):
+            comma = s.find(',')
+            if comma != -1:
+                s = s[comma + 1 :].strip()
+        return s
+
+    def _compliance_user_is_assigned_auditor(self, audit, user):
+        """True if the user is the lead auditor or a member of the audit team."""
+        self_auditor = audit.auditor_id and audit.auditor_id.id == user.id
+        in_team = user.id in audit.auditor_team_ids.ids
+        return bool(self_auditor or in_team)
+
+    def _compliance_api_staff_only(self, user):
+        """GuardPro supervisor, manager, or admin."""
+        if not user or user._is_public():
+            return False
+        return (
+            user.has_group('guardpro.group_guardpro_supervisor')
+            or user.has_group('guardpro.group_guardpro_manager')
+            or user.has_group('guardpro.group_guardpro_admin')
+        )
+
+    def _compliance_api_staff_denied(self):
+        return {
+            'success': False,
+            'error': 'access_denied',
+            'message': 'Compliance is only available for supervisor or manager accounts.',
+        }
+
+    def _compliance_user_can_write_audit(self, audit, user):
+        """May start, edit checklist, or complete (open states). Mirrors mobile PWA rules."""
+        if not audit or not user or audit.state not in ('draft', 'in_progress', 'requires_action'):
+            return False
+        if user.has_group('guardpro.group_guardpro_admin'):
+            return True
+        if self._compliance_user_is_assigned_auditor(audit, user):
+            return True
+        if audit.site_id and audit.site_id.id in user.site_ids.ids:
+            if (
+                user.has_group('guardpro.group_guardpro_supervisor')
+                or user.has_group('guardpro.group_guardpro_manager')
+                or user.has_group('guardpro.group_guardpro_admin')
+            ):
+                return True
+        return False
+
+    def _compliance_item_photo_urls(self, item):
+        """Photo metadata for one checklist line (for native app)."""
+        photos = []
+        for att in item.photo_ids:
+            photos.append({
+                'id': att.id,
+                'name': att.name,
+                'mimetype': att.mimetype or 'image/jpeg',
+                'url': '/web/image/ir.attachment/%s/datas' % att.id,
+            })
+        return photos
+
+    def _compliance_create_item_photo_attachments(self, item, photo_payloads):
+        """Create image attachments linked to compliance.audit.item; returns new attachment ids."""
+        if not photo_payloads:
+            return []
+        ids = []
+        Attachment = request.env['ir.attachment'].sudo()
+        for payload in photo_payloads:
+            if not payload or not isinstance(payload, dict):
+                continue
+            if self._is_video_payload(payload):
+                _logger.warning(
+                    '[Compliance API] Skipping video payload on audit item %s (photos only)',
+                    item.id,
+                )
+                continue
+            payload_name = payload.get('name') or 'audit_item_photo.jpg'
+            raw = self._compliance_normalize_base64_data(payload.get('data'))
+            if not raw:
+                continue
+            mimetype = (
+                payload.get('mimetype')
+                or payload.get('content_type')
+                or 'image/jpeg'
+            )
+            att = Attachment.create({
+                'name': payload_name,
+                'datas': raw,
+                'res_model': 'compliance.audit.item',
+                'res_id': item.id,
+                'mimetype': mimetype,
+            })
+            ids.append(att.id)
+        return ids
+
+    def _compliance_serialize_audit_row(self, audit, user):
+        assigned = self._compliance_user_is_assigned_auditor(audit, user)
+        can_execute = self._compliance_user_can_write_audit(audit, user)
+        return {
+            'id': audit.id,
+            'name': audit.name,
+            'audit_type': audit.audit_type,
+            'state': audit.state,
+            'audit_date': fields.Date.to_string(audit.audit_date) if audit.audit_date else None,
+            'site_id': audit.site_id.id if audit.site_id else None,
+            'site_name': audit.site_id.name if audit.site_id else None,
+            'template_id': audit.template_id.id if audit.template_id else None,
+            'template_name': audit.template_id.name if audit.template_id else None,
+            'auditor_id': audit.auditor_id.id if audit.auditor_id else None,
+            'auditor_name': audit.auditor_id.name if audit.auditor_id else None,
+            'total_items': audit.total_items,
+            'passed_items': audit.passed_items,
+            'failed_items': audit.failed_items,
+            'na_items': audit.na_items,
+            'compliance_score': audit.compliance_score,
+            'rating': audit.rating,
+            'is_assigned_auditor': assigned,
+            'can_execute': can_execute,
+        }
+
+    def _compliance_serialize_item(self, item):
+        return {
+            'id': item.id,
+            'sequence': item.sequence,
+            'name': item.name,
+            'description': item.description,
+            'category': item.category,
+            'regulation_reference': item.regulation_reference,
+            'result': item.result,
+            'notes': item.notes,
+            'requires_action': item.requires_action,
+            'severity': item.severity,
+            'photo_count': item.photo_count,
+            'photos': self._compliance_item_photo_urls(item),
+        }
+
+    @rate_limit(max_requests=60, window_seconds=60)
+    @http.route('/guardpro/api/compliance/audits/list', type='json', auth='user', methods=['POST'], csrf=False)
+    def compliance_audits_list(self, scope='visible', states=None, limit=50, offset=0):
+        """List compliance audits (supervisor/manager/admin). Record rules apply."""
+        user = request.env.user
+        if not self._compliance_api_staff_only(user):
+            return self._compliance_api_staff_denied()
+
+        try:
+            limit = int(limit or 50)
+            offset = int(offset or 0)
+        except (TypeError, ValueError):
+            return {'success': False, 'error': 'invalid_pagination', 'message': 'Invalid limit or offset'}
+
+        if scope not in ('assigned', 'site', 'visible'):
+            scope = 'visible'
+
+        if states is not None and not isinstance(states, (list, tuple)):
+            states = None
+        if not states:
+            if scope == 'site':
+                states = ['draft', 'in_progress', 'requires_action', 'completed']
+            else:
+                states = ['draft', 'in_progress', 'requires_action']
+
+        domain = [('state', 'in', list(states))]
+        if scope == 'assigned':
+            domain = [
+                '&',
+                '|',
+                ('auditor_id', '=', user.id),
+                ('auditor_team_ids', 'in', user.id),
+            ] + domain
+        elif scope == 'site':
+            domain.append(('site_id', 'in', user.site_ids.ids))
+
+        try:
+            Audit = request.env['compliance.audit']
+            audits = Audit.search(domain, order='audit_date desc, id desc', limit=limit, offset=offset)
+            rows = [self._compliance_serialize_audit_row(a, user) for a in audits]
+            return {
+                'success': True,
+                'audits': rows,
+                'total_count': len(rows),
+                'scope': scope,
+            }
+        except Exception as e:
+            _logger.exception('[Compliance API] List failed')
+            return {'success': False, 'error': 'unexpected', 'message': str(e)}
+
+    @rate_limit(max_requests=60, window_seconds=60)
+    @http.route('/guardpro/api/compliance/audit/detail', type='json', auth='user', methods=['POST'], csrf=False)
+    def compliance_audit_detail(self, audit_id=None):
+        """Full audit with checklist for mobile."""
+        user = request.env.user
+        if not self._compliance_api_staff_only(user):
+            return self._compliance_api_staff_denied()
+
+        if not audit_id:
+            return {'success': False, 'error': 'audit_id_required', 'message': 'audit_id is required'}
+        try:
+            audit_id = int(audit_id)
+        except (TypeError, ValueError):
+            return {'success': False, 'error': 'invalid_audit_id', 'message': 'Invalid audit_id'}
+
+        try:
+            audit = request.env['compliance.audit'].search([('id', '=', audit_id)], limit=1)
+            if not audit:
+                return {'success': False, 'error': 'not_found', 'message': 'Audit not found'}
+
+            row = self._compliance_serialize_audit_row(audit, user)
+            items = [
+                self._compliance_serialize_item(i)
+                for i in audit.checklist_ids
+            ]
+            return {
+                'success': True,
+                'audit': row,
+                'items': items,
+                'notes': audit.notes or '',
+                'audit_start_time': audit.audit_start_time.isoformat() if audit.audit_start_time else None,
+                'audit_end_time': audit.audit_end_time.isoformat() if audit.audit_end_time else None,
+            }
+        except Exception as e:
+            _logger.exception('[Compliance API] Detail failed')
+            return {'success': False, 'error': 'unexpected', 'message': str(e)}
+
+    @rate_limit(max_requests=30, window_seconds=60)
+    @http.route('/guardpro/api/compliance/audit/start', type='json', auth='user', methods=['POST'], csrf=False)
+    def compliance_audit_start(self, audit_id=None):
+        """Move audit from draft to in_progress."""
+        user = request.env.user
+        if not self._compliance_api_staff_only(user):
+            return self._compliance_api_staff_denied()
+
+        if not audit_id:
+            return {'success': False, 'error': 'audit_id_required', 'message': 'audit_id is required'}
+        try:
+            audit_id = int(audit_id)
+        except (TypeError, ValueError):
+            return {'success': False, 'error': 'invalid_audit_id', 'message': 'Invalid audit_id'}
+
+        audit = request.env['compliance.audit'].search([('id', '=', audit_id)], limit=1)
+        if not audit:
+            return {'success': False, 'error': 'not_found', 'message': 'Audit not found'}
+
+        if not self._compliance_user_can_write_audit(audit, user):
+            return {
+                'success': False,
+                'error': 'access_denied',
+                'message': 'You cannot start this audit',
+            }
+
+        try:
+            audit.action_start_audit()
+            return {
+                'success': True,
+                'message': 'Audit started',
+                'audit': self._compliance_serialize_audit_row(audit, user),
+            }
+        except UserError as e:
+            return {'success': False, 'error': 'user_error', 'message': str(e)}
+        except (AccessError, ValidationError) as e:
+            _logger.warning('[Compliance API] Start access/validation: %s', e)
+            return {'success': False, 'error': 'validation', 'message': str(e)}
+        except Exception as e:
+            _logger.exception('[Compliance API] Start failed')
+            return {'success': False, 'error': 'unexpected', 'message': str(e)}
+
+    @rate_limit(max_requests=30, window_seconds=60)
+    @http.route('/guardpro/api/compliance/audit/complete', type='json', auth='user', methods=['POST'], csrf=False)
+    def compliance_audit_complete(self, audit_id=None):
+        """Complete audit (all checklist lines must have a result)."""
+        user = request.env.user
+        if not self._compliance_api_staff_only(user):
+            return self._compliance_api_staff_denied()
+
+        if not audit_id:
+            return {'success': False, 'error': 'audit_id_required', 'message': 'audit_id is required'}
+        try:
+            audit_id = int(audit_id)
+        except (TypeError, ValueError):
+            return {'success': False, 'error': 'invalid_audit_id', 'message': 'Invalid audit_id'}
+
+        audit = request.env['compliance.audit'].search([('id', '=', audit_id)], limit=1)
+        if not audit:
+            return {'success': False, 'error': 'not_found', 'message': 'Audit not found'}
+
+        if not self._compliance_user_can_write_audit(audit, user):
+            return {
+                'success': False,
+                'error': 'access_denied',
+                'message': 'You cannot complete this audit',
+            }
+
+        try:
+            audit.action_complete_audit()
+            return {
+                'success': True,
+                'message': 'Audit completed',
+                'audit': self._compliance_serialize_audit_row(audit, user),
+            }
+        except UserError as e:
+            return {'success': False, 'error': 'user_error', 'message': str(e)}
+        except (AccessError, ValidationError) as e:
+            _logger.warning('[Compliance API] Complete access/validation: %s', e)
+            return {'success': False, 'error': 'validation', 'message': str(e)}
+        except Exception as e:
+            _logger.exception('[Compliance API] Complete failed')
+            return {'success': False, 'error': 'unexpected', 'message': str(e)}
+
+    @rate_limit(max_requests=45, window_seconds=60)
+    @http.route('/guardpro/api/compliance/audit/items/save', type='json', auth='user', methods=['POST'], csrf=False)
+    def compliance_audit_items_save(self, audit_id=None, items=None):
+        """Batch update checklist lines and append photos."""
+        user = request.env.user
+        if not self._compliance_api_staff_only(user):
+            return self._compliance_api_staff_denied()
+
+        if not audit_id:
+            return {'success': False, 'error': 'audit_id_required', 'message': 'audit_id is required'}
+        try:
+            audit_id = int(audit_id)
+        except (TypeError, ValueError):
+            return {'success': False, 'error': 'invalid_audit_id', 'message': 'Invalid audit_id'}
+
+        items = items or []
+        if not isinstance(items, list):
+            return {'success': False, 'error': 'invalid_items', 'message': 'items must be a list'}
+
+        audit = request.env['compliance.audit'].search([('id', '=', audit_id)], limit=1)
+        if not audit:
+            return {'success': False, 'error': 'not_found', 'message': 'Audit not found'}
+
+        if not self._compliance_user_can_write_audit(audit, user):
+            return {
+                'success': False,
+                'error': 'access_denied',
+                'message': 'You cannot update this audit',
+            }
+
+        if audit.state not in ('draft', 'in_progress', 'requires_action'):
+            return {
+                'success': False,
+                'error': 'invalid_state',
+                'message': 'Checklist can only be edited while the audit is open',
+            }
+
+        Item = request.env['compliance.audit.item']
+        updated = []
+        try:
+            for entry in items:
+                if not isinstance(entry, dict):
+                    continue
+                raw_id = entry.get('item_id', entry.get('id'))
+                if raw_id is None:
+                    continue
+                try:
+                    item_id = int(raw_id)
+                except (TypeError, ValueError):
+                    return {'success': False, 'error': 'invalid_item_id', 'message': 'Invalid checklist item id'}
+
+                item = Item.search([('id', '=', item_id), ('audit_id', '=', audit.id)], limit=1)
+                if not item:
+                    return {
+                        'success': False,
+                        'error': 'item_not_found',
+                        'message': 'Checklist item %s not found for this audit' % item_id,
+                    }
+
+                vals = {}
+                if 'result' in entry:
+                    r = entry['result']
+                    if r in (False, None, ''):
+                        vals['result'] = False
+                    elif r in ('pass', 'fail', 'na'):
+                        vals['result'] = r
+                    else:
+                        return {
+                            'success': False,
+                            'error': 'invalid_result',
+                            'message': 'result must be pass, fail, na, or empty',
+                        }
+
+                if 'notes' in entry:
+                    vals['notes'] = (entry.get('notes') or '') if entry.get('notes') is not None else ''
+
+                if 'requires_action' in entry:
+                    vals['requires_action'] = bool(entry.get('requires_action'))
+
+                if 'severity' in entry and entry.get('severity') is not None:
+                    sev = entry.get('severity')
+                    if sev in (False, '', None):
+                        vals['severity'] = False
+                    elif sev in ('low', 'medium', 'high', 'critical'):
+                        vals['severity'] = sev
+                    else:
+                        return {
+                            'success': False,
+                            'error': 'invalid_severity',
+                            'message': 'severity must be low, medium, high, critical, or empty',
+                        }
+
+                photo_cmds = []
+                photo_payloads = entry.get('photos') or []
+                if photo_payloads:
+                    if not isinstance(photo_payloads, list):
+                        return {'success': False, 'error': 'invalid_photos', 'message': 'photos must be a list'}
+                    new_ids = self._compliance_create_item_photo_attachments(item, photo_payloads)
+                    if new_ids:
+                        photo_cmds = [(4, i) for i in new_ids]
+
+                if photo_cmds:
+                    vals['photo_ids'] = photo_cmds
+
+                if vals:
+                    item.write(vals)
+                updated.append(item.id)
+
+            audit.invalidate_recordset()
+            return {
+                'success': True,
+                'message': 'Checklist updated',
+                'updated_item_ids': updated,
+                'audit': self._compliance_serialize_audit_row(audit, user),
+                'items': [
+                    self._compliance_serialize_item(i)
+                    for i in audit.checklist_ids
+                ],
+            }
+        except (AccessError, ValidationError) as e:
+            _logger.warning('[Compliance API] Items save access/validation: %s', e)
+            return {'success': False, 'error': 'validation', 'message': str(e)}
+        except Exception as e:
+            _logger.exception('[Compliance API] Items save failed')
+            return {'success': False, 'error': 'unexpected', 'message': str(e)}
 
     # Debug endpoint removed for production use
     # @http.route('/guardpro/api/debug/user-info', type='json', auth='user', methods=['POST'], csrf=False)
