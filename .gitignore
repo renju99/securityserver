@@ -55,6 +55,9 @@ build/
 vendor-registration/uploads.backup.*
 vendor-registration/uploads.*
 
+# RA08 listener: face/device captures (local only)
+attendance/ra08-listener/captures/
+
 # Android SDK
 Android/
 .git/

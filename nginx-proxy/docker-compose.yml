@@ -12,6 +12,7 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro # Contains security, esign, .htpasswd
       # Mount separate configs for other apps
       - ../security/nginx-config/security.berkeleyuae.com.conf:/etc/nginx/extra.d/security.berkeleyuae.com.conf:ro
+      - ../sales/nginx-config/sales.berkeleyuae.com.conf:/etc/nginx/extra.d/sales.berkeleyuae.com.conf:ro
       - ../attendance/nginx-config/attendance.berkeleyuae.com.conf:/etc/nginx/extra.d/attendance.berkeleyuae.com.conf:ro
       - ../vendor-registration/nginx-config/vendor.berkeleyuae.com.conf:/etc/nginx/extra.d/vendor.berkeleyuae.com.conf:ro
       - ../cleaner-v2/nginx-config/cleaning.berkeleyuae.com.conf:/etc/nginx/extra.d/cleaning.berkeleyuae.com.conf:ro
