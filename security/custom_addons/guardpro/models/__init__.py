@@ -2,6 +2,7 @@
 """GuardPro Models."""
 
 from . import website_fix  # Fix for REQUEST_URI KeyError in website module
+from . import ir_rule
 from . import photo_attachment_mixin  # Mixin for photo attachments
 from . import mail_activity  # Suppress noisy activity assignment emails
 from . import mail_mail  # mail.mail retention (optional cron)

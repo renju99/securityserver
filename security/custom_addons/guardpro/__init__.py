@@ -3,7 +3,10 @@
 
 
 def post_init_hook(cr, registry):
-    """Fail module install/upgrade if handover model did not register (stale or partial deploy)."""
+    """On first install only: fail if handover model did not register.
+
+    Odoo does not run post_init_hook on module upgrade, only on *install*.
+    """
     if 'equipment.handover' not in registry:
         raise RuntimeError(
             "guardpro: model 'equipment.handover' is missing from the Odoo registry. "
