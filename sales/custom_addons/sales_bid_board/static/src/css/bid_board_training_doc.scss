@@ -162,5 +162,19 @@
         .o_bid_board_doc_main strong {
             color: var(--bb-doc-text);
         }
+
+        .o_bid_board_doc_pre {
+            margin: 0 0 1rem;
+            padding: 0.85rem 1rem;
+            font-size: 0.8125rem;
+            line-height: 1.45;
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+            background: rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--bb-doc-border);
+            border-radius: 6px;
+            color: var(--bb-doc-text);
+        }
     }
 }

@@ -13,9 +13,18 @@ class BidProjectStage(models.Model):
     _description = "Bid Project Stage"
     _order = "sequence, id"
 
-    name = fields.Char(required=True)
-    sequence = fields.Integer(default=10)
-    fold = fields.Boolean(default=False)
+    name = fields.Char(
+        required=True,
+        help="Name of this pipeline stage (e.g. Qualification, Proposal). Shown on enquiries.",
+    )
+    sequence = fields.Integer(
+        default=10,
+        help="Order of stages in the pipeline: lower numbers appear first.",
+    )
+    fold = fields.Boolean(
+        default=False,
+        help="If enabled, this stage can be collapsed in Kanban-style views to reduce clutter.",
+    )
 
 
 class BidProject(models.Model):
@@ -24,12 +33,59 @@ class BidProject(models.Model):
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = "create_date desc"
 
-    name = fields.Char(required=True, tracking=True)
-    code = fields.Char(required=True, copy=False, default="New", tracking=True)
-    client_name = fields.Char(required=True, tracking=True)
-    sales_rep = fields.Many2one("res.users", tracking=True, default=lambda self: self.env.user)
-    project_lead_id = fields.Many2one("res.users", tracking=True, default=lambda self: self.env.user)
-    team_member_ids = fields.Many2many("bid.team.member", string="Team Members")
+    # Standard scorecard rows applied when an enquiry has no lines (create, duplicate, manual action).
+    _SCORECARD_TEMPLATE_ROWS = (
+        ("strategy", "Strategic importance", "Low", "Medium", "High"),
+        ("strategy", "Domain of Berkeley's activities", "<40% alignment", "40%-70% alignment", ">70% alignment"),
+        ("strategy", "Potential for additional works", "No plans", "Limited plans", "Clear expansion plans"),
+        ("customer", "Strategic customer", "Non-strategic", "Important", "Strategic"),
+        ("customer", "Customer size / structure", "Small", "Medium", "Large"),
+        ("customer", "Customer track record", "No wins", "Lost at final stage", "Existing client"),
+        ("commercial", "Term of contract", "<2 years", "2-3 years", ">3 years"),
+        ("commercial", "RFP documents quality", "Insufficient details", "Partial details", "Detailed with asset list"),
+        ("commercial", "Competitive advantage", "No advantage", "Equal", "High"),
+        ("finance", "Estimated GM", "<10%", "10%-12%", ">12%"),
+        ("finance", "Payment terms", ">60 days", "30-60 days", "30 days"),
+        ("finance", "Penalties", ">5% value", "<5% value", "No penalty"),
+        ("operations", "Condition at contract start", ">10 years", "<10 years", "New/refurbished"),
+        ("operations", "Mobilization period", "<4 weeks", "4-8 weeks", ">8 weeks"),
+        ("operations", "Similar experience", "Tendered only", "Few contracts", "Numerous contracts"),
+    )
+
+    name = fields.Char(
+        required=True,
+        tracking=True,
+        help="Descriptive name of the opportunity or tender (e.g. project or RFP title).",
+    )
+    code = fields.Char(
+        required=True,
+        copy=False,
+        default="New",
+        tracking=True,
+        help="Unique enquiry code assigned when the record is first saved.",
+    )
+    client_name = fields.Char(
+        required=True,
+        tracking=True,
+        help="Client or organisation issuing or receiving the bid.",
+    )
+    sales_rep = fields.Many2one(
+        "res.users",
+        tracking=True,
+        default=lambda self: self.env.user,
+        help="Salesperson accountable for the opportunity and customer contact.",
+    )
+    project_lead_id = fields.Many2one(
+        "res.users",
+        tracking=True,
+        default=lambda self: self.env.user,
+        help="Internal owner coordinating the bid preparation and submission.",
+    )
+    team_member_ids = fields.Many2many(
+        "bid.team.member",
+        string="Team Members",
+        help="Bid team members (from the configured team list) working on this enquiry.",
+    )
     emirate = fields.Selection(
         [
             ("abudhabi", "Abu Dhabi"),
@@ -43,6 +99,7 @@ class BidProject(models.Model):
         required=True,
         default="dubai",
         tracking=True,
+        help="Emirate where the site or client is primarily located.",
     )
     industry = fields.Selection(
         [
@@ -57,60 +114,108 @@ class BidProject(models.Model):
         required=True,
         default="real_estate",
         tracking=True,
+        help="Industry sector of the client or asset (reporting and filtering).",
     )
     contract_duration = fields.Selection(
         [("1y", "1 year"), ("2y", "2 years"), ("3y", "3 years"), ("3y_plus", "3+ years")],
         required=True,
         default="1y",
         tracking=True,
+        help="Expected contract length category used in scoring and planning.",
     )
-    contract_value = fields.Float(required=True, default=0.0, tracking=True)
-    deadline_date = fields.Date(tracking=True)
-    deadline_datetime = fields.Datetime(tracking=True)
+    contract_value = fields.Float(
+        required=True,
+        default=0.0,
+        tracking=True,
+        help="Estimated total contract value (use your standard currency, e.g. AED).",
+    )
+    deadline_date = fields.Date(
+        tracking=True,
+        help="Submission or decision date (date only). Can mirror the deadline date part of the datetime.",
+    )
+    deadline_datetime = fields.Datetime(
+        tracking=True,
+        help="Full submission deadline including time, for reminders and governance.",
+    )
     contract_type = fields.Selection(
         [("ifm", "IFM"), ("bundled", "Bundled Services"), ("single", "Single Service")],
         required=True,
         default="ifm",
         tracking=True,
+        help="Contract shape: IFM (integrated), bundled services, or single service line.",
     )
     threshold = fields.Selection(
         [("low", "Low"), ("medium", "Medium"), ("high", "High")],
         required=True,
         default="medium",
         tracking=True,
+        help="Internal priority or materiality band for management attention.",
     )
     tender_bond = fields.Selection(
         [("none", "Not Required"), ("lt5", "< 5%"), ("5to10", "5% to 10%"), ("gt10", "> 10%")],
         required=True,
         default="none",
         tracking=True,
+        help="Bid or tender security (bond) as a percentage of contract value, if required.",
     )
     performance_bond = fields.Selection(
         [("none", "Not Required"), ("lt5", "< 5%"), ("5to10", "5% to 10%"), ("gt10", "> 10%")],
         required=True,
         default="none",
         tracking=True,
+        help="Performance security after award, as a percentage of contract value, if applicable.",
     )
     kpi = fields.Selection(
         [("yes", "Yes"), ("partial", "Partial"), ("no", "No")],
         required=True,
         default="yes",
         tracking=True,
+        help="Whether the RFP includes clear KPIs: full, partial, or none.",
     )
-    scope_cleaning = fields.Float(default=0.0)
-    scope_maintenance = fields.Float(default=0.0)
-    scope_security = fields.Float(default=0.0)
-    scope_landscaping = fields.Float(default=0.0)
-    scope_laundry = fields.Float(default=0.0)
-    scope_support = fields.Float(default=0.0)
-    scope_others = fields.Float(default=0.0)
-    scope_total = fields.Float(compute="_compute_scope_total", store=True)
-    progress = fields.Integer(default=30, tracking=True)
+    scope_cleaning = fields.Float(
+        default=0.0,
+        help="Share of scope or fee attributed to cleaning (use % so all scope lines sum to 100).",
+    )
+    scope_maintenance = fields.Float(
+        default=0.0,
+        help="Share of scope or fee attributed to maintenance (%).",
+    )
+    scope_security = fields.Float(
+        default=0.0,
+        help="Share of scope or fee attributed to security (%).",
+    )
+    scope_landscaping = fields.Float(
+        default=0.0,
+        help="Share of scope or fee attributed to landscaping (%).",
+    )
+    scope_laundry = fields.Float(
+        default=0.0,
+        help="Share of scope or fee attributed to laundry (%).",
+    )
+    scope_support = fields.Float(
+        default=0.0,
+        help="Share of scope or fee attributed to support services (%).",
+    )
+    scope_others = fields.Float(
+        default=0.0,
+        help="Share of scope or fee for any other service lines (%).",
+    )
+    scope_total = fields.Float(
+        compute="_compute_scope_total",
+        store=True,
+        help="Automatic sum of all scope percentage lines (should typically equal 100%).",
+    )
+    progress = fields.Integer(
+        default=30,
+        tracking=True,
+        help="Rough completion % of bid preparation (0–100), for tracking only.",
+    )
     stage_id = fields.Many2one(
         "bid.project.stage",
         required=True,
         tracking=True,
         default=lambda self: self.env["bid.project.stage"].search([], order="sequence", limit=1),
+        help="Current stage in your internal bid pipeline.",
     )
     state = fields.Selection(
         [
@@ -121,23 +226,65 @@ class BidProject(models.Model):
         ],
         default="active",
         tracking=True,
+        help="High-level enquiry state: active work, completed win, declined, or priority flag.",
     )
-    description = fields.Text()
-    criteria_line_ids = fields.One2many("bid.project.criteria", "project_id", string="Scorecard")
-
-    score_strategy = fields.Float(compute="_compute_scores", store=True)
-    score_customer = fields.Float(compute="_compute_scores", store=True)
-    score_commercial = fields.Float(compute="_compute_scores", store=True)
-    score_finance = fields.Float(compute="_compute_scores", store=True)
-    score_operations = fields.Float(compute="_compute_scores", store=True)
-    score_overall = fields.Float(compute="_compute_scores", store=True, tracking=True)
-
-    decision_auto = fields.Selection(
-        [("bid", "Bid"), ("no_bid", "No Bid")], compute="_compute_decisions", store=True
+    description = fields.Text(
+        help="Free-text notes: scope summary, risks, links, or anything the team should know.",
     )
-    decision_override = fields.Selection([("bid", "Bid"), ("no_bid", "No Bid")])
+    crm_lead_id = fields.Many2one(
+        "crm.lead",
+        string="Source Lead",
+        tracking=True,
+        copy=False,
+        ondelete="set null",
+        index=True,
+        help="CRM lead this enquiry was created from, if any.",
+    )
+    criteria_line_ids = fields.One2many(
+        "bid.project.criteria",
+        "project_id",
+        string="Scorecard",
+        help="Bid / no-bid scorecard lines. Scores drive the overall % and CSO recommendation.",
+    )
+
+    score_strategy = fields.Float(
+        compute="_compute_scores",
+        store=True,
+        help="Weighted score for the Strategy category (computed from scorecard).",
+    )
+    score_customer = fields.Float(
+        compute="_compute_scores",
+        store=True,
+        help="Weighted score for the Customer category.",
+    )
+    score_commercial = fields.Float(
+        compute="_compute_scores",
+        store=True,
+        help="Weighted score for the Commercial category.",
+    )
+    score_finance = fields.Float(
+        compute="_compute_scores",
+        store=True,
+        help="Weighted score for the Finance category.",
+    )
+    score_operations = fields.Float(
+        compute="_compute_scores",
+        store=True,
+        help="Weighted score for the Operations category.",
+    )
+    score_overall = fields.Float(
+        compute="_compute_scores",
+        store=True,
+        tracking=True,
+        help="Overall scorecard percentage (average of category scores). Feeds Bid vs No Bid recommendation.",
+    )
+
     decision_final = fields.Selection(
-        [("bid", "Bid"), ("no_bid", "No Bid")], compute="_compute_decisions", store=True, tracking=True
+        [("bid", "Bid"), ("no_bid", "No Bid")],
+        compute="_compute_decisions",
+        store=True,
+        tracking=True,
+        help="System recommendation from the score: Bid if overall score meets the threshold, otherwise No Bid.",
     )
     review_status = fields.Selection(
         [
@@ -149,38 +296,121 @@ class BidProject(models.Model):
         ],
         default="draft",
         tracking=True,
+        help="CSO workflow: Draft, pending review, approved, declined, or changes requested.",
     )
-    recommendation_text = fields.Char(compute="_compute_decisions", store=True)
-    recommendation_note = fields.Char(compute="_compute_decisions", store=True)
-    override_reason = fields.Text()
+    recommendation_text = fields.Char(
+        compute="_compute_decisions",
+        store=True,
+        help="Short label for the recommended decision (Bid / No Bid wording).",
+    )
+    recommendation_note = fields.Char(
+        compute="_compute_decisions",
+        store=True,
+        help="One-line explanation shown with the recommendation.",
+    )
 
-    submission_ids = fields.One2many("bid.submission", "project_id")
-    notification_ids = fields.One2many("bid.notification", "project_id")
-    change_request_ids = fields.One2many("bid.change.request", "project_id")
-    reviewed_by_id = fields.Many2one("res.users", tracking=True)
-    reviewed_on = fields.Datetime(tracking=True)
-    can_cso_review = fields.Boolean(compute="_compute_ui_permissions")
-    can_non_cso_actions = fields.Boolean(compute="_compute_ui_permissions")
-    can_submit_for_review = fields.Boolean(compute="_compute_ui_permissions")
+    submission_ids = fields.One2many(
+        "bid.submission",
+        "project_id",
+        help="History of submissions to CSO review for this enquiry.",
+    )
+    notification_ids = fields.One2many(
+        "bid.notification",
+        "project_id",
+        help="Scheduled deadline reminders linked to this enquiry.",
+    )
+    change_request_ids = fields.One2many(
+        "bid.change.request",
+        "project_id",
+        help="CSO change requests that must be resolved before re-submission.",
+    )
+    proposal_ids = fields.One2many(
+        "bid.proposal",
+        "project_id",
+        string="Proposals",
+        help="Formal proposals created after a Bid approval (see Proposals menu).",
+    )
+    proposal_count = fields.Integer(
+        compute="_compute_proposal_count",
+        store=True,
+        help="Number of proposal records linked to this enquiry.",
+    )
+    reviewed_by_id = fields.Many2one(
+        "res.users",
+        tracking=True,
+        help="CSO (or delegate) who last completed an approval, decline, or change request action.",
+    )
+    reviewed_on = fields.Datetime(
+        tracking=True,
+        help="Timestamp of that last CSO review action.",
+    )
+    can_cso_review = fields.Boolean(
+        compute="_compute_ui_permissions",
+        help="True when the current user is allowed to approve, decline, or request changes (CSO role).",
+    )
+    can_non_cso_actions = fields.Boolean(
+        compute="_compute_ui_permissions",
+        help="True when draft-style actions (e.g. save draft) are available for this enquiry and user.",
+    )
+    can_submit_for_review = fields.Boolean(
+        compute="_compute_ui_permissions",
+        help="True when the score meets the minimum required to submit for CSO review.",
+    )
+    can_show_submit_review_button = fields.Boolean(
+        compute="_compute_ui_permissions",
+        help="True when the Submit for Review button should be visible (may still show even if score is low).",
+    )
 
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get("code", "New") == "New":
                 vals["code"] = self.env["ir.sequence"].next_by_code("bid.project") or "New"
-        return super().create(vals_list)
+        records = super().create(vals_list)
+        records._ensure_default_scorecard()
+        return records
 
     def write(self, vals):
         for project in self:
-            if project.review_status == "approved" and not project._is_cso_user():
-                raise ValidationError("Approved projects are locked. Only CSO can modify them.")
+            if project._is_review_outcome_locked() and not project._can_bypass_approved_project_lock():
+                raise ValidationError(
+                    "Approved or declined projects are locked. Only CSO, Bid Board managers, or administrators "
+                    "can modify them."
+                )
         return super().write(vals)
 
     def unlink(self):
         for project in self:
-            if project.review_status == "approved" and not project._is_cso_user():
-                raise ValidationError("Approved projects are locked. Only CSO can delete them.")
+            if project._is_review_outcome_locked() and not project._can_bypass_approved_project_lock():
+                raise ValidationError(
+                    "Approved or declined projects are locked. Only CSO, Bid Board managers, or administrators "
+                    "can delete them."
+                )
         return super().unlink()
+
+    def copy(self, default=None):
+        """Duplicate starts as a new draft enquiry, not an approved clone."""
+        default = dict(default or {})
+        if "review_status" not in default:
+            default["review_status"] = "draft"
+        if "reviewed_by_id" not in default:
+            default["reviewed_by_id"] = False
+        if "reviewed_on" not in default:
+            default["reviewed_on"] = False
+        if "state" not in default:
+            default["state"] = "active"
+        # Do not clone CSO workflow history or reminder rows
+        if "submission_ids" not in default:
+            default["submission_ids"] = []
+        if "notification_ids" not in default:
+            default["notification_ids"] = []
+        if "change_request_ids" not in default:
+            default["change_request_ids"] = []
+        if "proposal_ids" not in default:
+            default["proposal_ids"] = []
+        copied = super().copy(default)
+        copied._ensure_default_scorecard()
+        return copied
 
     @api.depends("criteria_line_ids.score", "criteria_line_ids.weight", "criteria_line_ids.category")
     def _compute_scores(self):
@@ -210,17 +440,21 @@ class BidProject(models.Model):
 
             project.score_overall = sum(category_values) / len(category_values) if category_values else 0.0
 
-    @api.depends("score_overall", "decision_override")
+    @api.depends("score_overall")
     def _compute_decisions(self):
         for project in self:
-            project.decision_auto = "bid" if project.score_overall >= 70.0 else "no_bid"
-            project.decision_final = project.decision_override or project.decision_auto
+            project.decision_final = "bid" if project.score_overall >= 70.0 else "no_bid"
             if project.decision_final == "bid":
                 project.recommendation_text = "BID RECOMMENDED"
                 project.recommendation_note = "Proceed with Bid"
             else:
                 project.recommendation_text = "NO BID RECOMMENDED"
                 project.recommendation_note = "Do not proceed with Bid"
+
+    @api.depends("proposal_ids")
+    def _compute_proposal_count(self):
+        for project in self:
+            project.proposal_count = len(project.proposal_ids)
 
     @api.depends(
         "scope_cleaning",
@@ -243,18 +477,42 @@ class BidProject(models.Model):
                 + project.scope_others
             )
 
-    @api.depends("review_status", "score_overall")
+    @api.depends(
+        "review_status",
+        "score_overall",
+        "criteria_line_ids",
+        "criteria_line_ids.score",
+        "criteria_line_ids.weight",
+    )
     @api.depends_context("uid")
     def _compute_ui_permissions(self):
         min_score = self._get_submit_review_min_score()
         for project in self:
             is_cso = project._is_cso_user()
+            user = project.env.user
+            settings_privileged = (
+                user.has_group("sales_bid_board.group_bid_board_cso")
+                or user.has_group("sales_bid_board.group_bid_board_manager")
+                or user.has_group("base.group_system")
+            )
             project.can_cso_review = is_cso and project.review_status in (
                 "pending_review",
                 "change_requested",
             )
-            project.can_non_cso_actions = not is_cso
-            project.can_submit_for_review = (not is_cso) and (project.score_overall >= min_score)
+            # Save draft: team always; CSO approvers only if also Bid Board manager/admin and still editing.
+            project.can_non_cso_actions = (not is_cso) or (
+                settings_privileged
+                and project.review_status in ("draft", "change_requested")
+            )
+            project.can_show_submit_review_button = (
+                project.review_status in ("draft", "change_requested")
+                and ((not is_cso) or settings_privileged)
+            )
+            # Eligibility including score (e.g. extensions, dashboards); form button uses can_show_submit_review_button.
+            project.can_submit_for_review = (
+                project.can_show_submit_review_button
+                and (project.score_overall >= min_score)
+            )
 
     @api.constrains(
         "scope_cleaning",
@@ -276,43 +534,32 @@ class BidProject(models.Model):
             if project.deadline_datetime:
                 project.deadline_date = fields.Date.to_date(project.deadline_datetime)
 
-    def action_load_default_scorecard(self):
-        default_lines = [
-            ("strategy", "Strategic importance", "Low", "Medium", "High"),
-            ("strategy", "Domain of Berkeley's activities", "<40% alignment", "40%-70% alignment", ">70% alignment"),
-            ("strategy", "Potential for additional works", "No plans", "Limited plans", "Clear expansion plans"),
-            ("customer", "Strategic customer", "Non-strategic", "Important", "Strategic"),
-            ("customer", "Customer size / structure", "Small", "Medium", "Large"),
-            ("customer", "Customer track record", "No wins", "Lost at final stage", "Existing client"),
-            ("commercial", "Term of contract", "<2 years", "2-3 years", ">3 years"),
-            ("commercial", "RFP documents quality", "Insufficient details", "Partial details", "Detailed with asset list"),
-            ("commercial", "Competitive advantage", "No advantage", "Equal", "High"),
-            ("finance", "Estimated GM", "<10%", "10%-12%", ">12%"),
-            ("finance", "Payment terms", ">60 days", "30-60 days", "30 days"),
-            ("finance", "Penalties", ">5% value", "<5% value", "No penalty"),
-            ("operations", "Condition at contract start", ">10 years", "<10 years", "New/refurbished"),
-            ("operations", "Mobilization period", "<4 weeks", "4-8 weeks", ">8 weeks"),
-            ("operations", "Similar experience", "Tendered only", "Few contracts", "Numerous contracts"),
+    def _ensure_default_scorecard(self):
+        commands = [
+            (
+                0,
+                0,
+                {
+                    "category": category,
+                    "name": name,
+                    "option_1_text": option_1,
+                    "option_2_text": option_2,
+                    "option_3_text": option_3,
+                    # Default 3/3 so overall score meets the usual submit threshold until users tune lines.
+                    "score": "3",
+                    "weight": 1.0,
+                },
+            )
+            for category, name, option_1, option_2, option_3 in self._SCORECARD_TEMPLATE_ROWS
         ]
         for project in self:
             if project.criteria_line_ids:
                 continue
-            project.criteria_line_ids = [
-                (
-                    0,
-                    0,
-                    {
-                        "category": category,
-                        "name": name,
-                        "option_1_text": option_1,
-                        "option_2_text": option_2,
-                        "option_3_text": option_3,
-                        "score": "2",
-                        "weight": 1.0,
-                    },
-                )
-                for category, name, option_1, option_2, option_3 in default_lines
-            ]
+            project.write({"criteria_line_ids": commands})
+
+    def action_load_default_scorecard(self):
+        """Backward-compatible; scorecard is usually added automatically on create/copy."""
+        self._ensure_default_scorecard()
 
     def action_save_draft(self):
         for project in self:
@@ -320,7 +567,19 @@ class BidProject(models.Model):
 
     def action_submit_for_review(self):
         min_score = self._get_submit_review_min_score()
+        user = self.env.user
         for project in self:
+            if project._is_cso_user() and not (
+                user.has_group("sales_bid_board.group_bid_board_cso")
+                or user.has_group("sales_bid_board.group_bid_board_manager")
+                or user.has_group("base.group_system")
+            ):
+                raise ValidationError(
+                    _(
+                        "CSO approvers (your email is on the approver list) cannot submit for review unless "
+                        "you are also a Bid Board manager or administrator."
+                    )
+                )
             if project.score_overall < min_score:
                 raise ValidationError(
                     _(
@@ -465,6 +724,85 @@ class BidProject(models.Model):
                     body=body,
                 )
 
+    def _prepare_proposal_default_values(self):
+        """Map enquiry fields into proposal defaults (spreadsheet-aligned)."""
+        self.ensure_one()
+        emirate_labels = dict(self._fields["emirate"].selection)
+        city = emirate_labels.get(self.emirate, "")
+        duration_months_map = {"1y": 12, "2y": 24, "3y": 36, "3y_plus": 48}
+        months = duration_months_map.get(self.contract_duration) or 12
+        service_parts = []
+        if self.scope_cleaning:
+            service_parts.append("Cleaning")
+        if self.scope_maintenance:
+            service_parts.append("Maintenance")
+        if self.scope_security:
+            service_parts.append("Security")
+        if self.scope_landscaping:
+            service_parts.append("Landscaping")
+        if self.scope_laundry:
+            service_parts.append("Laundry")
+        if self.scope_support:
+            service_parts.append("Support")
+        if self.scope_others:
+            service_parts.append("Other")
+        annual = 0.0
+        if months and self.contract_value:
+            annual = (self.contract_value / float(months)) * 12.0
+        sales = self.sales_rep
+        key_name = (sales.name or "").strip() if sales else ""
+        return {
+            "project_id": self.id,
+            "sales_user_id": sales.id if sales else False,
+            "partner_company": self.client_name,
+            "project_description": self.description or self.name,
+            "industry": self.industry,
+            "city": city,
+            "services_offered": ", ".join(service_parts) if service_parts else False,
+            "contract_volume_total": self.contract_value,
+            "contract_duration_months": months,
+            "contract_volume_annual": annual,
+            "key_account_name": key_name or False,
+        }
+
+    def action_create_proposal(self):
+        self.ensure_one()
+        if not self.env.context.get("from_bid_no_bid"):
+            raise ValidationError(
+                "Create proposal is only available when the enquiry is opened from Bid / No Bid."
+            )
+        if self.review_status != "approved" or self.decision_final != "bid":
+            raise ValidationError(
+                "You can only create a proposal after the enquiry is approved with a Bid decision."
+            )
+        defaults = self._prepare_proposal_default_values()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Proposal"),
+            "res_model": "bid.proposal",
+            "view_mode": "form",
+            "target": "current",
+            "context": {"default_%s" % k: v for k, v in defaults.items() if v is not False},
+        }
+
+    def action_view_proposals(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Proposals"),
+            "res_model": "bid.proposal",
+            "view_mode": "list,form",
+            "domain": [("project_id", "=", self.id)],
+            "context": {
+                "default_project_id": self.id,
+                **{
+                    "default_%s" % k: v
+                    for k, v in self._prepare_proposal_default_values().items()
+                    if k != "project_id" and v is not False
+                },
+            },
+        }
+
     def action_open_change_request_wizard(self):
         self.ensure_one()
         self._require_open_cso_review()
@@ -544,13 +882,31 @@ class BidProject(models.Model):
     def _split_emails(self, raw):
         if not raw:
             return []
-        return [email.strip() for email in raw.split(",") if email.strip()]
+        return [email.strip().lower() for email in raw.split(",") if email and email.strip()]
 
     def _is_cso_user(self):
+        user = self.env.user
+        if user.has_group("sales_bid_board.group_bid_board_cso"):
+            return True
         settings = self.env["bid.board.settings"].sudo().get_singleton()
         allowed_emails = set(self._split_emails(settings.cso_approver_emails))
-        current_email = (self.env.user.email or "").strip()
+        current_email = (user.email or "").strip().lower()
         return bool(current_email and current_email in allowed_emails)
+
+    def _is_review_outcome_locked(self):
+        """CSO has closed the review (approved or declined)."""
+        self.ensure_one()
+        return self.review_status in ("approved", "declined")
+
+    def _can_bypass_approved_project_lock(self):
+        """Who may edit or delete enquiries locked after CSO approval or decline."""
+        user = self.env.user
+        return (
+            user.has_group("sales_bid_board.group_bid_board_cso")
+            or user.has_group("sales_bid_board.group_bid_board_manager")
+            or user.has_group("base.group_system")
+            or self._is_cso_user()
+        )
 
     def _get_submit_review_min_score(self):
         raw_value = (
@@ -568,8 +924,8 @@ class BidProject(models.Model):
         for project in self:
             if not project._is_cso_user():
                 raise ValidationError(
-                    "Only configured CSO/CFO approver email(s) can perform this action. "
-                    "Please update Bid Board Settings if needed."
+                    "Only users in the Bid Board / CSO security group or listed as CSO approver "
+                    "emails in Bid Board Settings can perform this action."
                 )
             if project.review_status not in ("pending_review", "change_requested"):
                 raise ValidationError(
@@ -698,17 +1054,37 @@ class BidProject(models.Model):
                 body=body,
             )
 
+class CrmLead(models.Model):
+    """Inverse relation for enquiries linked to a CRM lead (optional UI / reporting)."""
+
+    _inherit = "crm.lead"
+
+    bid_project_ids = fields.One2many(
+        "bid.project",
+        "crm_lead_id",
+        string="Bid / No-Bid Enquiries",
+    )
+
+
 class BidChangeRequestWizard(models.TransientModel):
     _name = "bid.change.request.wizard"
     _description = "Bid Change Request Wizard"
 
-    project_id = fields.Many2one("bid.project", required=True)
+    project_id = fields.Many2one(
+        "bid.project",
+        required=True,
+        help="Enquiry the CSO is asking to update before approval.",
+    )
     priority = fields.Selection(
         [("low", "Low"), ("medium", "Medium"), ("high", "High")],
         default="medium",
         required=True,
+        help="How urgent the requested changes are for the bid team.",
     )
-    comments = fields.Text(required=True)
+    comments = fields.Text(
+        required=True,
+        help="Describe what must change on the decision sheet or supporting information.",
+    )
 
     def action_submit_change_request(self):
         self.ensure_one()
@@ -720,11 +1096,29 @@ class BidProjectCreateWizard(models.TransientModel):
     _name = "bid.project.create.wizard"
     _description = "Bid Project Create Wizard"
 
-    name = fields.Char(required=True)
-    client_name = fields.Char(required=True)
-    project_lead_id = fields.Many2one("res.users", required=True, default=lambda self: self.env.user)
-    team_member_ids = fields.Many2many("bid.team.member", string="Team Members")
-    deadline_datetime = fields.Datetime(required=True)
+    name = fields.Char(
+        required=True,
+        help="Working title for the new enquiry.",
+    )
+    client_name = fields.Char(
+        required=True,
+        help="Client name as it should appear on the enquiry.",
+    )
+    project_lead_id = fields.Many2one(
+        "res.users",
+        required=True,
+        default=lambda self: self.env.user,
+        help="Default project lead and sales rep for the new enquiry.",
+    )
+    team_member_ids = fields.Many2many(
+        "bid.team.member",
+        string="Team Members",
+        help="Optional team members to attach immediately.",
+    )
+    deadline_datetime = fields.Datetime(
+        required=True,
+        help="First submission or review deadline (date and time).",
+    )
     state = fields.Selection(
         [
             ("active", "Active"),
@@ -734,8 +1128,12 @@ class BidProjectCreateWizard(models.TransientModel):
         ],
         default="active",
         required=True,
+        help="Initial status flag for the enquiry after creation.",
     )
-    progress = fields.Integer(default=30)
+    progress = fields.Integer(
+        default=30,
+        help="Initial % complete for preparation tracking.",
+    )
 
     def action_create_project(self):
         self.ensure_one()
@@ -767,8 +1165,16 @@ class BidProjectCriteria(models.Model):
     _description = "Bid Project Criteria"
     _order = "category, id"
 
-    project_id = fields.Many2one("bid.project", required=True, ondelete="cascade")
-    name = fields.Char(required=True)
+    project_id = fields.Many2one(
+        "bid.project",
+        required=True,
+        ondelete="cascade",
+        help="Parent enquiry this scorecard line belongs to.",
+    )
+    name = fields.Char(
+        required=True,
+        help="Criterion text (e.g. from the standard scorecard row).",
+    )
     category = fields.Selection(
         [
             ("strategy", "Strategy"),
@@ -779,10 +1185,30 @@ class BidProjectCriteria(models.Model):
         ],
         required=True,
         default="strategy",
+        help="Scorecard pillar. Category scores are averaged into the overall percentage.",
     )
-    score = fields.Selection([("1", "1"), ("2", "2"), ("3", "3")], required=True, default="2")
-    option_1_text = fields.Char(string="1")
-    option_2_text = fields.Char(string="2")
-    option_3_text = fields.Char(string="3")
-    weight = fields.Float(default=1.0)
-    comment = fields.Char()
+    score = fields.Selection(
+        [("1", "1"), ("2", "2"), ("3", "3")],
+        required=True,
+        default="2",
+        help="Pick 1 (low), 2 (medium), or 3 (high) against the three options shown for this row.",
+    )
+    option_1_text = fields.Char(
+        string="1",
+        help="Label for the lowest score option on this row.",
+    )
+    option_2_text = fields.Char(
+        string="2",
+        help="Label for the middle score option.",
+    )
+    option_3_text = fields.Char(
+        string="3",
+        help="Label for the highest score option.",
+    )
+    weight = fields.Float(
+        default=1.0,
+        help="Importance of this row within its category (higher weight counts more in the category score).",
+    )
+    comment = fields.Char(
+        help="Optional note for reviewers (risks, assumptions, or evidence).",
+    )

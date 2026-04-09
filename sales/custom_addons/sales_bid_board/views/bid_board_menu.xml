@@ -5,22 +5,22 @@
               web_icon="sales_bid_board,static/description/icon.png"
               action="action_bid_projects"
               sequence="10"
-              groups="sales_bid_board.group_bid_board_user,sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+              groups="sales_bid_board.group_bid_board_salesperson"/>
 
     <!-- Projects & intake -->
     <menuitem id="menu_bid_board_projects"
-              name="All Projects"
+              name="Enquiries"
               parent="menu_bid_board_root"
               action="action_bid_projects"
               sequence="15"
-              groups="sales_bid_board.group_bid_board_user,sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+              groups="sales_bid_board.group_bid_board_salesperson"/>
 
-    <menuitem id="menu_bid_board_new_project"
-              name="New Project"
+    <menuitem id="menu_bid_board_leads"
+              name="Leads"
               parent="menu_bid_board_root"
-              action="action_bid_new_project_wizard"
-              sequence="20"
-              groups="sales_bid_board.group_bid_board_user,sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+              action="action_bid_board_leads"
+              sequence="10"
+              groups="sales_bid_board.group_bid_board_salesperson"/>
 
     <!-- Decision & governance -->
     <menuitem id="menu_bid_board_bid_no_bid"
@@ -28,14 +28,21 @@
               parent="menu_bid_board_root"
               action="action_bid_no_bid"
               sequence="40"
-              groups="sales_bid_board.group_bid_board_user,sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+              groups="sales_bid_board.group_bid_board_salesperson"/>
+
+    <menuitem id="menu_bid_board_proposals"
+              name="Proposals"
+              parent="menu_bid_board_root"
+              action="action_bid_proposals"
+              sequence="45"
+              groups="sales_bid_board.group_bid_board_salesperson"/>
 
     <menuitem id="menu_bid_board_review"
               name="Review Queue"
               parent="menu_bid_board_root"
               action="action_bid_reviewer_queue"
               sequence="50"
-              groups="sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+              groups="sales_bid_board.group_bid_board_sales_manager"/>
 
     <!-- Submissions & reminders -->
     <menuitem id="menu_bid_board_submissions"
@@ -43,62 +50,49 @@
               parent="menu_bid_board_root"
               action="action_bid_submissions"
               sequence="60"
-              groups="sales_bid_board.group_bid_board_user,sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+              groups="sales_bid_board.group_bid_board_salesperson"/>
 
     <menuitem id="menu_bid_board_notifications"
               name="Deadline Reminders"
               parent="menu_bid_board_root"
               action="action_bid_notifications"
               sequence="70"
-              groups="sales_bid_board.group_bid_board_user,sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+              groups="sales_bid_board.group_bid_board_salesperson"/>
 
     <!-- Insights & reporting -->
     <menuitem id="menu_bid_board_reports"
               name="Reports"
               parent="menu_bid_board_root"
               sequence="80"
-              groups="sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+              groups="sales_bid_board.group_bid_board_sales_manager"/>
 
     <menuitem id="menu_bid_board_reports_dashboard"
               name="Project Reports"
               parent="menu_bid_board_reports"
               action="action_bid_reports"
               sequence="10"
-              groups="sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+              groups="sales_bid_board.group_bid_board_sales_manager"/>
 
-    <menuitem id="menu_bid_board_dashboards"
-              name="Analytics"
+    <menuitem id="menu_bid_board_unified_analytics"
+              name="Bid Board Analytics"
               parent="menu_bid_board_root"
+              action="action_bid_board_unified_analytics"
               sequence="85"
-              groups="sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+              groups="sales_bid_board.group_bid_board_salesperson"/>
 
-    <menuitem id="menu_bid_board_analytics_dashboard"
-              name="Sales Analytics"
-              parent="menu_bid_board_dashboards"
-              action="action_sales_bid_board_dashboard_client"
-              sequence="10"
-              groups="sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
-
-    <menuitem id="menu_bid_board_salesperson_analytics_dashboard"
-              name="Salesperson Analytics"
-              parent="menu_bid_board_dashboards"
-              action="action_sales_bid_board_salesperson_dashboard_client"
-              sequence="20"
-              groups="sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
-
-    <!-- Administration (managers) -->
+    <!-- Configuration: CSO+ for business settings; technical items remain Administrator-only. -->
     <menuitem id="menu_bid_board_configuration"
               name="Configuration"
               parent="menu_bid_board_root"
               sequence="100"
-              groups="sales_bid_board.group_bid_board_manager"/>
+              groups="sales_bid_board.group_bid_board_cso"/>
 
     <menuitem id="menu_bid_board_settings"
               name="Settings"
               parent="menu_bid_board_configuration"
               action="action_bid_board_settings"
               sequence="10"
-              groups="sales_bid_board.group_bid_board_manager"/>
+              groups="sales_bid_board.group_bid_board_cso"/>
 
     <menuitem id="menu_bid_board_email_crons"
               name="Email Schedule"
@@ -119,7 +113,7 @@
               parent="menu_bid_board_configuration"
               action="action_bid_team_members"
               sequence="30"
-              groups="sales_bid_board.group_bid_board_manager"/>
+              groups="sales_bid_board.group_bid_board_cso"/>
 
     <menuitem id="menu_bid_board_bid_no_bid_training"
               name="Documentation"
@@ -127,5 +121,5 @@
               action="action_bid_board_training_client"
               sequence="110"
               active="True"
-              groups="sales_bid_board.group_bid_board_user,sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"/>
+              groups="sales_bid_board.group_bid_board_salesperson"/>
 </odoo>

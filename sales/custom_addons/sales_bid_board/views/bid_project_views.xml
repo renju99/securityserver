@@ -7,6 +7,7 @@
             <list>
                 <field name="code"/>
                 <field name="name"/>
+                <field name="crm_lead_id" optional="hide"/>
                 <field name="client_name"/>
                 <field name="sales_rep"/>
                 <field name="review_status"/>
@@ -17,6 +18,7 @@
                 <field name="score_overall"/>
                 <field name="decision_final"/>
                 <field name="state"/>
+                <field name="contract_value" string="Contract value" sum="Total" optional="show"/>
             </list>
         </field>
     </record>
@@ -27,6 +29,11 @@
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <!-- Non-stored computes must appear in the arch or OWL never loads them and header modifiers stay wrong. -->
+                    <field name="can_non_cso_actions" invisible="1"/>
+                    <field name="can_submit_for_review" invisible="1"/>
+                    <field name="can_show_submit_review_button" invisible="1"/>
+                    <field name="can_cso_review" invisible="1"/>
                     <button name="action_save_draft"
                             string="Save Draft"
                             type="object"
@@ -36,29 +43,42 @@
                             string="Submit for Review"
                             type="object"
                             class="btn-primary"
-                            invisible="not can_non_cso_actions"/>
+                            invisible="not can_show_submit_review_button"/>
                     <button name="action_open_change_request_wizard"
                             string="Request Change"
                             type="object"
                             class="btn-secondary"
-                            groups="sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"
+                            groups="sales_bid_board.group_bid_board_salesperson"
                             invisible="not can_cso_review"/>
                     <button name="action_decline_review"
                             string="Decline"
                             type="object"
                             class="btn-secondary"
-                            groups="sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"
+                            groups="sales_bid_board.group_bid_board_salesperson"
                             invisible="not can_cso_review"/>
                     <button name="action_approve_review"
                             string="Approve"
                             type="object"
                             class="btn-primary"
-                            groups="sales_bid_board.group_bid_board_reviewer,sales_bid_board.group_bid_board_manager"
+                            groups="sales_bid_board.group_bid_board_salesperson"
                             invisible="not can_cso_review"/>
+                    <button name="action_create_proposal"
+                            string="Create proposal"
+                            type="object"
+                            class="btn-secondary"
+                            groups="sales_bid_board.group_bid_board_salesperson"
+                            invisible="not context.get('from_bid_no_bid') or review_status != 'approved' or decision_final != 'bid'"/>
                     <field name="review_status" widget="statusbar"
                            statusbar_visible="draft,pending_review,change_requested,approved,declined"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_proposals"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-file-text-o"
+                                string="Proposals"/>
+                    </div>
                     <notebook>
                         <page string="Project Info">
                             <group col="3">
@@ -78,6 +98,7 @@
                                 </group>
                                 <group>
                                     <field name="name"/>
+                                    <field name="crm_lead_id" readonly="1"/>
                                     <field name="industry"/>
                                     <field name="deadline_date"/>
                                     <field name="tender_bond"/>
@@ -108,11 +129,6 @@
                             </group>
                         </page>
                         <page string="Scorecard">
-                            <button name="action_load_default_scorecard"
-                                    string="Load Default Scorecard"
-                                    type="object"
-                                    class="btn-secondary"
-                                    invisible="criteria_line_ids"/>
                             <field name="criteria_line_ids">
                                 <list editable="bottom">
                                     <field name="category"/>
@@ -127,41 +143,21 @@
                             </field>
                         </page>
                         <page string="Decision Sheet">
-                            <group col="5">
-                                <group>
-                                    <div class="o_form_label">Strategy</div>
-                                    <field name="score_strategy" readonly="1"/>
-                                </group>
-                                <group>
-                                    <div class="o_form_label">Customer</div>
-                                    <field name="score_customer" readonly="1"/>
-                                </group>
-                                <group>
-                                    <div class="o_form_label">Commercial</div>
-                                    <field name="score_commercial" readonly="1"/>
-                                </group>
-                                <group>
-                                    <div class="o_form_label">Finance</div>
-                                    <field name="score_finance" readonly="1"/>
-                                </group>
-                                <group>
-                                    <div class="o_form_label">Operation</div>
-                                    <field name="score_operations" readonly="1"/>
-                                </group>
+                            <!-- Standard stacked fields (not col=5); narrow viewports stay readable. -->
+                            <group string="Category scores">
+                                <field name="score_strategy" string="Strategy" readonly="1"/>
+                                <field name="score_customer" string="Customer" readonly="1"/>
+                                <field name="score_commercial" string="Commercial" readonly="1"/>
+                                <field name="score_finance" string="Finance" readonly="1"/>
+                                <field name="score_operations" string="Operations" readonly="1"/>
                             </group>
 
                             <group string="Overall Recommendation">
                                 <field name="score_overall" readonly="1"/>
                                 <field name="recommendation_text" readonly="1"/>
                                 <field name="recommendation_note" readonly="1"/>
-                                <field name="decision_auto" readonly="1"/>
-                                <field name="decision_override"/>
                                 <field name="decision_final" readonly="1"/>
                                 <field name="review_status" readonly="1"/>
-                            </group>
-
-                            <group>
-                                <field name="override_reason" placeholder="Required when overriding auto decision"/>
                             </group>
                         </page>
                         <page string="Change Requests">
@@ -185,6 +181,38 @@
                                     <field name="notes"/>
                                 </list>
                             </field>
+                        </page>
+                        <page string="Proposals" name="proposals">
+                            <!-- No embedded One2many here: avoids web client "field undefined" when workers/registry lag. -->
+                            <group>
+                                <group>
+                                    <button name="action_view_proposals"
+                                            type="object"
+                                            string="View proposals for this enquiry"
+                                            class="btn-primary"
+                                            colspan="2"/>
+                                </group>
+                                <group>
+                                    <button name="action_create_proposal"
+                                            type="object"
+                                            string="Create proposal"
+                                            class="btn-secondary"
+                                            colspan="2"
+                                            groups="sales_bid_board.group_bid_board_salesperson"
+                                            invisible="not context.get('from_bid_no_bid') or review_status != 'approved' or decision_final != 'bid'"/>
+                                </group>
+                            </group>
+                            <div class="alert alert-secondary mb-2" role="alert"
+                                 invisible="context.get('from_bid_no_bid') or review_status != 'approved' or decision_final != 'bid'">
+                                To use <strong>Create proposal</strong>, open this enquiry from the
+                                <strong>Bid / No Bid</strong> menu (after CSO approval with a Bid decision).
+                            </div>
+                            <div class="alert alert-info mb-0" role="alert"
+                                 invisible="review_status == 'approved' and decision_final == 'bid'">
+                                Proposals are available after CSO approves a <strong>Bid</strong> decision.
+                                Open the enquiry from <strong>Bid / No Bid</strong> to create one, or use
+                                <strong>View proposals</strong> to open the list for this enquiry.
+                            </div>
                         </page>
                         <page string="Notifications">
                             <field name="notification_ids">
@@ -211,6 +239,7 @@
             <search string="Project Search">
                 <field name="name"/>
                 <field name="client_name"/>
+                <field name="crm_lead_id"/>
                 <field name="project_lead_id"/>
                 <field name="emirate"/>
                 <field name="industry"/>
@@ -235,7 +264,7 @@
         <field name="name">bid.project.create.wizard.form</field>
         <field name="model">bid.project.create.wizard</field>
         <field name="arch" type="xml">
-            <form string="New Project">
+            <form string="New Enquiry">
                 <group>
                     <field name="name"/>
                     <field name="client_name"/>
@@ -246,7 +275,7 @@
                     <field name="progress"/>
                 </group>
                 <footer>
-                    <button name="action_create_project" string="Save Project" type="object" class="btn-primary"/>
+                    <button name="action_create_project" string="Save Enquiry" type="object" class="btn-primary"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
@@ -272,7 +301,7 @@
     </record>
 
     <record id="action_bid_projects" model="ir.actions.act_window">
-        <field name="name">Projects</field>
+        <field name="name">Enquiries</field>
         <field name="res_model">bid.project</field>
         <field name="view_mode">list,form</field>
     </record>
@@ -281,7 +310,7 @@
         <field name="name">Bid / No Bid</field>
         <field name="res_model">bid.project</field>
         <field name="view_mode">list,form</field>
-        <field name="context">{'search_default_filter_all': 1}</field>
+        <field name="context">{'search_default_filter_all': 1, 'from_bid_no_bid': 1}</field>
         <field name="search_view_id" ref="view_bid_project_search"/>
     </record>
 
@@ -301,9 +330,17 @@
     </record>
 
     <record id="action_bid_new_project_wizard" model="ir.actions.act_window">
-        <field name="name">New Project</field>
+        <field name="name">New Enquiry</field>
         <field name="res_model">bid.project.create.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
+    </record>
+
+    <record id="action_bid_board_leads" model="ir.actions.act_window">
+        <field name="name">Leads</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">list,form,kanban,activity</field>
+        <field name="domain">[('type', '=', 'lead')]</field>
+        <field name="context">{'default_type': 'lead'}</field>
     </record>
 </odoo>

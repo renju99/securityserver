@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Lead / opportunity → Bid Board enquiry -->
+    <record id="bid_crm_lead_form_bid_board_actions" model="ir.ui.view">
+        <field name="name">crm.lead.form.bid.board.link</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button
+                    name="sales_bid_board.action_server_open_bid_enquiries_from_lead"
+                    type="action"
+                    class="oe_stat_button"
+                    icon="fa-folder-open"
+                    string="Enquiries"
+                    groups="sales_bid_board.group_bid_board_salesperson"
+                    invisible="type not in ('lead', 'opportunity')"
+                    help="Open bid / no-bid enquiries linked to this record."/>
+            </xpath>
+            <xpath expr="//header" position="inside">
+                <button
+                    name="sales_bid_board.action_server_create_bid_enquiry_from_lead"
+                    type="action"
+                    string="Create Enquiry"
+                    class="btn-secondary"
+                    data-hotkey="shift+q"
+                    groups="sales_bid_board.group_bid_board_salesperson"
+                    invisible="type not in ('lead', 'opportunity')"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="bid_crm_lead_form_hide_extra_info" model="ir.ui.view">
+        <field name="name">crm.lead.form.bid.board.hide.extra.info</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='extra']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- FM intake: mandatory customer fields on leads -->
+    <record id="bid_crm_lead_form_fm_mandatory_fields" model="ir.ui.view">
+        <field name="name">crm.lead.form.fm.mandatory.lead.fields</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='lead_partner']//field[@name='partner_id']" position="attributes">
+                <attribute name="required">type == 'lead'</attribute>
+            </xpath>
+            <xpath expr="//group[@name='lead_partner']//field[@name='partner_name']" position="attributes">
+                <attribute name="required">type == 'lead'</attribute>
+                <attribute name="string">Customer Name</attribute>
+            </xpath>
+            <xpath expr="//field[@name='contact_name']" position="attributes">
+                <attribute name="required">type == 'lead'</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Quick create: show Customer Name & Contact Name for leads (kanban + list). -->
+    <record id="bid_crm_lead_quick_create_fm_fields" model="ir.ui.view">
+        <field name="name">crm.lead.quick.create.fm.lead.fields</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.quick_create_opportunity_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="required">type == 'lead'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='partner_name']" position="attributes">
+                <attribute name="invisible">type == 'opportunity'</attribute>
+                <attribute name="required">type == 'lead'</attribute>
+                <attribute name="string">Customer Name</attribute>
+            </xpath>
+            <xpath expr="//field[@name='contact_name']" position="attributes">
+                <attribute name="invisible">type == 'opportunity'</attribute>
+                <attribute name="required">type == 'lead'</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Hide probability UI for records of type lead (sales intake from Bid Board "Leads" menu). -->
+    <record id="bid_crm_lead_form_hide_probability_for_leads" model="ir.ui.view">
+        <field name="name">crm.lead.form.hide.probability.leads</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@class='col-auto'][.//div[@id='probability']]" position="attributes">
+                <attribute name="invisible">type == 'lead'</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="bid_crm_lead_tree_leads_hide_probability" model="ir.ui.view">
+        <field name="name">crm.lead.tree.leads.hide.probability</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_leads"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='probability']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Extra lead fields inside standard CRM groups (no separate Intake section). -->
+    <record id="bid_crm_lead_form_intake_tab" model="ir.ui.view">
+        <field name="name">crm.lead.form.bid.board.intake.embedded</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="priority">32</field>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='lead_partner']//field[@name='website']" position="attributes">
+                <attribute name="invisible">type == 'lead'</attribute>
+            </xpath>
+            <xpath expr="//group[@name='lead_info']//field[@name='email_cc']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//group[@name='lead_info']//field[@name='function']" position="attributes">
+                <attribute name="string">Designation</attribute>
+            </xpath>
+            <xpath expr="//group[@name='lead_partner']//field[@name='partner_name']" position="after">
+                <field name="bid_intake_scope_of_work" invisible="type != 'lead'"/>
+                <field name="bid_intake_location" invisible="type != 'lead'"/>
+                <field name="bid_intake_comments_source" invisible="type != 'lead'" placeholder="How did this lead come in?"/>
+            </xpath>
+            <!-- After the mobile o_row div, not after the field (otherwise widgets sit inside the same row). -->
+            <xpath expr="//group[@name='lead_info']/div[contains(@class,'o_row')][.//field[@name='mobile']]" position="after">
+                <field name="bid_intake_opportunity_date" invisible="type != 'lead'"/>
+                <field name="bid_intake_opportunity_month" invisible="type != 'lead'"/>
+                <field name="bid_intake_details_remarks" invisible="type != 'lead'" placeholder="Additional details..."/>
+                <field name="bid_intake_status" invisible="type != 'lead'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="bid_crm_lead_tree_intake_optional" model="ir.ui.view">
+        <field name="name">crm.lead.tree.bid.board.intake.optional</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_leads"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="bid_intake_location" optional="hide"/>
+                <field name="bid_intake_opportunity_date" optional="hide"/>
+                <field name="bid_intake_opportunity_month" optional="hide"/>
+                <field name="bid_intake_status" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

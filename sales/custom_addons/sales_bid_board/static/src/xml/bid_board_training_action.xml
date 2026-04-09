@@ -17,6 +17,7 @@
                             <li><a href="#bb-intro">What is Bid Board?</a></li>
                             <li><a href="#bb-roles">Your role &amp; CSO approvers</a></li>
                             <li><a href="#bb-menu-map">Where to find things</a></li>
+                            <li><a href="#bb-workflow">Workflow: start to finish</a></li>
                             <li><a href="#bb-concepts">Statuses &amp; decisions</a></li>
                             <li><a href="#bb-flow">Step-by-step workflow</a></li>
                             <li><a href="#bb-project">Project screen (tabs &amp; buttons)</a></li>
@@ -63,19 +64,71 @@
                         <h2 id="bb-menu-map">Where to find things</h2>
                         <p>Under the <strong>Bid Board</strong> app, the main entries are:</p>
                         <ul>
-                            <li><strong>New Project</strong> — quick start: name, client, lead, team, deadline, and progress.</li>
-                            <li><strong>All Projects</strong> — full list of projects; open any record from here.</li>
+                            <li><strong>Leads</strong> — CRM leads and opportunities (intake before an enquiry exists).</li>
+                            <li><strong>New Enquiry</strong> — quick start: name, client, lead, team, deadline, and progress.</li>
+                            <li><strong>Enquiries</strong> — full list of enquiries; open any record from here.</li>
                             <li><strong>Bid / No Bid</strong> — same projects, handy for focusing on the decision workflow and filters.</li>
                             <li><strong>Review Queue</strong> — only projects that are <strong>Pending review</strong> or <strong>Change requested</strong> (for approvers).</li>
                             <li><strong>Submissions</strong> — history of times projects were submitted for review.</li>
                             <li><strong>Deadline Reminders</strong> — reminder records used for emails before submission deadlines.</li>
                             <li><strong>Reports → Project Reports</strong> — charts and tables to analyse projects (for reviewers/managers).</li>
-                            <li><strong>Analytics</strong> — dashboards for overall sales bid metrics and per–sales rep views (reviewers/managers).</li>
+                            <li><strong>Analytics</strong> — one unified <strong>Bid Board Analytics</strong> screen with tabs: Leads, Enquiries, By sales rep, Proposals, and Activity &amp; reminders.</li>
                             <li><strong>Configuration → Settings</strong> — who gets emails, CSO list, and related options (managers).</li>
                             <li><strong>Configuration → Email Schedule</strong> — when automated reminder jobs run (managers).</li>
                             <li><strong>Configuration → Team</strong> — people you can tag on projects (name, department, role, email).</li>
                             <li><strong>Documentation</strong> — this help page (last item in the bar).</li>
                         </ul>
+
+                        <h2 id="bb-workflow">Workflow: start to finish</h2>
+                        <p>
+                            This is the <strong>end-to-end path</strong> for one opportunity: where it <strong>starts</strong>, how it moves through <strong>review</strong>,
+                            how the <strong>enquiry</strong> <strong>ends</strong>, and (when you pursue the tender) how <strong>proposals</strong> close the commercial loop.
+                        </p>
+
+                        <h3>1. Start</h3>
+                        <p>Work always converges on an <strong>enquiry</strong> (a Bid Board project). Typical starting points:</p>
+                        <ul>
+                            <li><strong>Bid Board → Leads</strong> — intake in CRM; use your configured server actions to create a linked enquiry when ready.</li>
+                            <li><strong>New Enquiry</strong> / <strong>Enquiries → New</strong> — create the enquiry directly.</li>
+                            <li><strong>Enquiries</strong> or <strong>Bid / No Bid</strong> — open an existing record to continue (Bid / No Bid is the same data with a decision-focused context).</li>
+                        </ul>
+                        <p><strong>First to complete:</strong> <strong>Project info</strong> (client, value, duration, scope-of-work % ≤ 100%, deadlines, team) and the <strong>Scorecard</strong> (overall score drives the Bid / No bid recommendation; default rule uses <strong>70%</strong> as the Bid threshold).</p>
+
+                        <h3>2. Submit and review</h3>
+                        <ol>
+                            <li>Bid team: <strong>Submit for review</strong> → <strong>Pending review</strong>. Each submit is logged under <strong>Submissions</strong>.</li>
+                            <li>CSO (email on <strong>Configuration → Settings → CSO approvers</strong>): <strong>Approve</strong>, <strong>Decline</strong>, or <strong>Request change</strong>. Use <strong>Review Queue</strong> if you have access.</li>
+                            <li>If <strong>Request change</strong>: team edits, then <strong>Submit for review</strong> again.</li>
+                        </ol>
+                        <p>If your organisation enabled a <strong>submit threshold</strong>, submission may be blocked until the overall score reaches the minimum.</p>
+
+                        <h3>3. How the enquiry ends</h3>
+                        <ul>
+                            <li><strong>Approved + Bid</strong> — review is <strong>Approved</strong>; final decision <strong>Bid</strong>; project <strong>state</strong> becomes <strong>Completed</strong>. You may create <strong>proposals</strong> next.</li>
+                            <li><strong>Approved + No bid</strong> — approved with <strong>No bid</strong>; project <strong>state</strong> <strong>Declined</strong>. No proposal path.</li>
+                            <li><strong>Review declined</strong> — CSO <strong>Declined</strong> the submission; record is locked for typical users per your access rules.</li>
+                            <li><strong>No submission</strong> — enquiry stays in <strong>Draft</strong> or is left inactive (operational choice).</li>
+                        </ul>
+
+                        <h3>4. Proposals (after Bid)</h3>
+                        <p>When the enquiry is <strong>Approved</strong> with <strong>Bid</strong>, open it from <strong>Bid / No Bid</strong> and use <strong>Create proposal</strong>. Defaults (including <strong>Scope of work from enquiry</strong>) flow from the enquiry.</p>
+                        <p><strong>End of proposal workflow:</strong> set outcome to <strong>Won</strong> or <strong>Lost</strong> on the proposal. The enquiry remains the permanent Bid / No bid record.</p>
+
+                        <h3>5. Diagram (overview)</h3>
+                        <pre class="o_bid_board_doc_pre">START → Lead / New enquiry / Open enquiry
+          ↓
+     Project info + Scorecard
+          ↓
+     Submit for review → Pending review
+          ↓
+   ┌─────┴─────┬──────────────┐
+   ↓           ↓              ↓
+Decline    Request change    Approve
+   ↓           ↓              ↓
+ END       edit &amp; re-submit   final decision Bid or No bid
+                 ↓                    ↓
+                loop          No bid → END (enquiry declined)
+                                    Bid → Create proposal → Open → Won/Lost → END</pre>
 
                         <h2 id="bb-concepts">Statuses &amp; decisions</h2>
                         <h3>Pipeline stage</h3>
@@ -96,21 +149,19 @@
                             <li><strong>Pending review</strong> — submitted to CSO; waiting for Approve, Decline, or Request change.</li>
                             <li><strong>Change requested</strong> — CSO asked for updates; adjust the project and submit again.</li>
                             <li><strong>Approved</strong> — CSO signed off; the project may be read-only for the team until a CSO edits it.</li>
-                            <li><strong>Declined</strong> — CSO rejected at review.</li>
+                            <li><strong>Declined</strong> (review) — CSO rejected the submission; the record is locked like an approved one (only CSO, Bid Board managers, or administrators can change or delete it).</li>
                         </ul>
                         <h3>Bid vs No bid</h3>
                         <ul>
-                            <li>The app calculates an <strong>automatic recommendation</strong>: usually <strong>Bid</strong> from <strong>70%</strong> overall score upward, otherwise <strong>No bid</strong>.</li>
-                            <li>A manager can set an <strong>override</strong> to the other side and must explain why in <strong>Override reason</strong>.</li>
-                            <li>The <strong>final decision</strong> is the override if present, otherwise the automatic recommendation. It drives the wording on the sheet and what happens after approval.</li>
+                            <li>The app sets <strong>Bid</strong> when the overall score is at least <strong>70%</strong>, otherwise <strong>No bid</strong>. That <strong>final decision</strong> drives the wording on the sheet and what happens after approval.</li>
                         </ul>
 
                         <h2 id="bb-flow">Step-by-step workflow</h2>
                         <ol>
                             <li><strong>Create a project</strong> — use <strong>New Project</strong> or copy an existing one. The app assigns a reference code such as <strong>BID-#####</strong>.</li>
                             <li><strong>Project info tab</strong> — fill client, location (emirate), industry, contract details, bonds, KPI, scope percentages (they must add up to at most <strong>100%</strong>), deadlines, team, and notes.</li>
-                            <li><strong>Scorecard tab</strong> — add lines or use <strong>Load default scorecard</strong> once (only when the scorecard is empty). Pick level <strong>1</strong>, <strong>2</strong>, or <strong>3</strong> per line and set weights; add short comments if helpful.</li>
-                            <li><strong>Decision sheet tab</strong> — check category scores, overall score, and the suggested Bid / No bid. Add an override only if leadership disagrees with the suggestion.</li>
+                            <li><strong>Scorecard tab</strong> — lines are added automatically for new enquiries (defaults start at the top score so you can submit once content is right; lower any row to reflect risk). Pick <strong>1</strong>, <strong>2</strong>, or <strong>3</strong> per line and weights; add short comments if helpful.</li>
+                            <li><strong>Decision sheet tab</strong> — check category scores, overall score, and the Bid / No bid recommendation from the score rule.</li>
                             <li><strong>Submit for review</strong> — sends the project to CSO. A line appears in <strong>Submissions</strong>. CSO may get an email depending on your company settings (see below).</li>
                             <li><strong>CSO</strong> chooses <strong>Approve</strong>, <strong>Decline</strong>, or <strong>Request change</strong> (with comments and priority). Approving notifies commercial/bid contacts and optionally the person who created the project.</li>
                             <li><strong>After approval</strong> — status becomes <strong>Completed</strong> if the final decision is Bid, or <strong>Declined</strong> if it is No bid. Any open change requests are closed.</li>
@@ -141,13 +192,12 @@
                             Each row has three wording options (columns 1–3); you pick the level <strong>1</strong>, <strong>2</strong>, or <strong>3</strong> that best matches the opportunity and set a <strong>weight</strong> if some factors matter more.
                         </p>
                         <p>
-                            The app turns that into category scores and one <strong>overall score</strong>. If the scorecard is empty, <strong>Load default scorecard</strong> adds a standard set of rows you can adjust.
+                            The app turns that into category scores and one <strong>overall score</strong>. New and duplicated enquiries get a standard set of scorecard rows automatically; you can edit them as needed.
                         </p>
 
                         <h2 id="bb-decision">Decision sheet</h2>
                         <p>
-                            Here you see the five category scores (read-only), the <strong>overall score</strong>, short recommendation text, the <strong>automatic</strong> Bid / No bid,
-                            any <strong>override</strong>, the <strong>final decision</strong>, and <strong>review status</strong>. If you override the automatic side, always complete <strong>Override reason</strong> so there is a clear audit trail.
+                            Here you see the five category scores (read-only), the <strong>overall score</strong>, short recommendation text, the <strong>Bid / No bid</strong> outcome from the score rule, and <strong>review status</strong>.
                         </p>
 
                         <h2 id="bb-review">CSO: Approve, decline, or request changes</h2>
@@ -218,7 +268,11 @@
                             <strong>Project reports</strong> lets you build pivot tables, charts, and lists of projects—filter by status, review stage, group by pipeline stage or lead, and so on.
                         </p>
                         <p>
-                            <strong>Sales analytics</strong> and <strong>Salesperson analytics</strong> are visual dashboards for leadership: totals, averages, date ranges, and filters such as industry and emirate—without exporting to Excel first.
+                            <strong>Bid Board Analytics</strong> is a single tabbed dashboard for leadership. Each tab supports filters and drill-down to lists/forms from KPIs, charts, and table rows:
+                            Leads, Enquiries, By sales rep, Proposals, and Activity &amp; reminders.
+                        </p>
+                        <p>
+                            <strong>Proposals</strong> also show <strong>Scope of work (from enquiry)</strong>, which flows from the linked Bid / No Bid enquiry so commercial users always see the same scope split.
                         </p>
                     </main>
                 </div>

@@ -35,7 +35,7 @@
                                 type="object"
                                 string="Send test email"
                                 class="btn-primary ms-2"
-                                groups="sales_bid_board.group_bid_board_manager"
+                                groups="sales_bid_board.group_bid_board_cso"
                             />
                         </div>
                         <field name="cso_approver_emails"/>

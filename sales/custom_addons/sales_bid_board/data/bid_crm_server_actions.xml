@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Use server actions so buttons do not rely on crm.lead object methods (avoids RPC when CrmLead extension is missing). -->
+    <record id="action_server_create_bid_enquiry_from_lead" model="ir.actions.server">
+        <field name="name">Bid Board: Create Enquiry</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="state">code</field>
+        <field name="groups_id" eval="[(4, ref('sales_bid_board.group_bid_board_salesperson'))]"/>
+        <field name="code"><![CDATA[
+# Inlined so this works even if server addon code is behind the DB (no bid.project helper required).
+if len(records) != 1:
+    raise UserError("Please open a single lead or opportunity.")
+lead = records
+if lead.type not in ("lead", "opportunity"):
+    raise UserError("Only leads or opportunities can create an enquiry.")
+client_name = (lead.partner_name or "").strip()
+if not client_name and lead.partner_id:
+    client_name = (
+        lead.partner_id.commercial_partner_id.name or lead.partner_id.name or ""
+    ).strip()
+if not client_name:
+    client_name = lead.name or "Unknown customer"
+description = ""
+if lead.description:
+    desc = lead.description
+    out = []
+    i = 0
+    while i < len(desc):
+        if desc[i] == "<":
+            j = desc.find(">", i)
+            if j == -1:
+                break
+            i = j + 1
+        else:
+            out.append(desc[i])
+            i += 1
+    description = "".join(out).strip()
+vals = {
+    "name": lead.name or "Enquiry from CRM",
+    "client_name": client_name,
+    "crm_lead_id": lead.id,
+}
+if description:
+    vals["description"] = description
+if lead.date_deadline:
+    vals["deadline_date"] = lead.date_deadline
+    vals["deadline_datetime"] = datetime.datetime.combine(
+        lead.date_deadline, datetime.time.min
+    )
+if lead.expected_revenue is not None:
+    vals["contract_value"] = float(lead.expected_revenue)
+if lead.user_id:
+    vals["sales_rep"] = lead.user_id.id
+    vals["project_lead_id"] = lead.user_id.id
+Project = env["bid.project"]
+project = Project.create(vals)
+lead.message_post(
+    body='Bid / no-bid enquiry "' + (project.display_name or "") + '" was created.',
+    subtype_xmlid="mail.mt_note",
+)
+project.message_post(
+    body='Created from CRM lead/opportunity "' + (lead.display_name or "") + '".',
+    subtype_xmlid="mail.mt_note",
+)
+action = {
+    "type": "ir.actions.act_window",
+    "res_model": "bid.project",
+    "res_id": project.id,
+    "view_mode": "form",
+    "target": "current",
+}
+]]></field>
+    </record>
+
+    <record id="action_server_open_bid_enquiries_from_lead" model="ir.actions.server">
+        <field name="name">Bid Board: Open Enquiries</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="state">code</field>
+        <field name="groups_id" eval="[(4, ref('sales_bid_board.group_bid_board_salesperson'))]"/>
+        <field name="code"><![CDATA[
+if len(records) != 1:
+    raise UserError("Please open a single lead or opportunity.")
+lead = records
+Project = env["bid.project"]
+projects = Project.search([("crm_lead_id", "=", lead.id)])
+if len(projects) == 1:
+    action = {
+        "type": "ir.actions.act_window",
+        "res_model": "bid.project",
+        "res_id": projects.id,
+        "view_mode": "form",
+        "target": "current",
+    }
+else:
+    action = {
+        "type": "ir.actions.act_window",
+        "name": "Enquiries",
+        "res_model": "bid.project",
+        "view_mode": "list,form",
+        "domain": [("crm_lead_id", "=", lead.id)],
+        "context": {"default_crm_lead_id": lead.id},
+        "target": "current",
+    }
+]]></field>
+    </record>
+</odoo>

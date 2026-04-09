@@ -50,6 +50,55 @@ class SalesBidBoardSalespersonDashboard(models.Model):
         return domain
 
     @api.model
+    def _act_window_list(self, name, res_model, domain):
+        return {
+            "type": "ir.actions.act_window",
+            "name": name,
+            "res_model": res_model,
+            "view_mode": "list,form",
+            "views": [[False, "list"], [False, "form"]],
+            "target": "current",
+            "domain": domain,
+        }
+
+    @api.model
+    def action_kpi_rep_active_reps(self, filter_params=None):
+        """Users who are sales rep on at least one project in the current filters."""
+        clean = self._sanitize(filter_params or {})
+        project = self.env["bid.project"]
+        domain = self._domain(clean)
+        rep_groups = project.read_group(domain, ["id:count"], ["sales_rep"], lazy=False)
+        user_ids = [r["sales_rep"][0] for r in rep_groups if r.get("sales_rep")]
+        if not user_ids:
+            udom = [("id", "=", False)]
+        else:
+            udom = [("id", "in", user_ids)]
+        return self._act_window_list("Active sales reps", "res.users", udom)
+
+    @api.model
+    def action_kpi_rep_total_projects(self, filter_params=None):
+        clean = self._sanitize(filter_params or {})
+        return self._act_window_list("Projects", "bid.project", self._domain(clean))
+
+    @api.model
+    def action_kpi_rep_pipeline_value(self, filter_params=None):
+        clean = self._sanitize(filter_params or {})
+        return self._act_window_list(
+            "Projects with contract value",
+            "bid.project",
+            self._domain(clean) + [("contract_value", ">", 0)],
+        )
+
+    @api.model
+    def action_kpi_rep_avg_score(self, filter_params=None):
+        clean = self._sanitize(filter_params or {})
+        return self._act_window_list(
+            "Scored projects",
+            "bid.project",
+            self._domain(clean) + [("score_overall", ">", 0)],
+        )
+
+    @api.model
     def get_dashboard_data(self, dashboard_id=None, context=None, filter_params=None):
         clean = self._sanitize(filter_params)
         project = self.env["bid.project"]
@@ -78,6 +127,11 @@ class SalesBidBoardSalespersonDashboard(models.Model):
         avg_score = self._metric_value(agg_row, "score_overall", "avg")
         active_reps = len(rows)
 
+        rep_chart_meta = {
+            "action_model": "bid.project",
+            "action_domain_field": "sales_rep",
+            "action_type": "many2one",
+        }
         charts = [
             {
                 "type": "bar",
@@ -85,6 +139,7 @@ class SalesBidBoardSalespersonDashboard(models.Model):
                 "labels": [r["sales_rep"][1] for r in top_by_count] or ["No Data"],
                 "keys": [r["sales_rep"][0] for r in top_by_count] or [0],
                 "datasets": [{"label": "Projects", "data": [r.get("__count", 0) for r in top_by_count] or [0]}],
+                **rep_chart_meta,
             },
             {
                 "type": "bar",
@@ -98,6 +153,7 @@ class SalesBidBoardSalespersonDashboard(models.Model):
                         or [0],
                     }
                 ],
+                **rep_chart_meta,
             },
             {
                 "type": "bar",
@@ -111,6 +167,7 @@ class SalesBidBoardSalespersonDashboard(models.Model):
                         or [0],
                     }
                 ],
+                **rep_chart_meta,
             },
         ]
 
@@ -143,10 +200,36 @@ class SalesBidBoardSalespersonDashboard(models.Model):
 
         return {
             "kpis": [
-                {"name": "Active Sales Reps", "value": active_reps, "icon": "fa-users"},
-                {"name": "Total Projects", "value": total_projects, "icon": "fa-folder-open"},
-                {"name": "Total Pipeline Value", "value": round(total_value, 2), "suffix": " AED", "icon": "fa-money"},
-                {"name": "Team Avg Score", "value": round(avg_score, 2), "suffix": "%", "icon": "fa-line-chart"},
+                {
+                    "name": "Active Sales Reps",
+                    "value": active_reps,
+                    "icon": "fa-users",
+                    "action": "action_kpi_rep_active_reps",
+                    "rpc_model": "sales_bid_board.salesperson.dashboard",
+                },
+                {
+                    "name": "Total Projects",
+                    "value": total_projects,
+                    "icon": "fa-folder-open",
+                    "action": "action_kpi_rep_total_projects",
+                    "rpc_model": "sales_bid_board.salesperson.dashboard",
+                },
+                {
+                    "name": "Total Pipeline Value",
+                    "value": round(total_value, 2),
+                    "suffix": " AED",
+                    "icon": "fa-money",
+                    "action": "action_kpi_rep_pipeline_value",
+                    "rpc_model": "sales_bid_board.salesperson.dashboard",
+                },
+                {
+                    "name": "Team Avg Score",
+                    "value": round(avg_score, 2),
+                    "suffix": "%",
+                    "icon": "fa-line-chart",
+                    "action": "action_kpi_rep_avg_score",
+                    "rpc_model": "sales_bid_board.salesperson.dashboard",
+                },
             ],
             "charts": charts,
             "tables": [
@@ -154,6 +237,7 @@ class SalesBidBoardSalespersonDashboard(models.Model):
                     "title": "Sales Rep Performance Breakdown",
                     "columns": ["Sales Rep", "Projects", "Bid", "No Bid", "Approved", "Pending", "Bid Rate %", "Value (AED)", "Avg Score %"],
                     "rows": table_rows,
+                    "list_drill": {"model": "bid.project", "field": "sales_rep"},
                 }
             ],
             "filter_options": {

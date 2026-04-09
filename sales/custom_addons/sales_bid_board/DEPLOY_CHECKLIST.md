@@ -71,17 +71,35 @@ Prevent upgrade failures like:
 4. Verify:
    - no traceback in upgrade output
    - key menus open (`Bid Board`, `Documentation`, `Settings`)
-   - key actions run (`Submit for Review`, CSO actions)
+   - key actions run (`Submit for Review`, CSO actions, server actions on CRM if used)
+   - `Bid Board -> Analytics -> Bid Board Analytics` opens without action-registry errors
+   - KPI / chart / table drill-down opens target lists and forms
+
+### Recommended local command (docker-compose stack)
+
+If `odoo_sales` is already running, avoid port bind conflicts by running upgrade in a one-off container:
+
+```bash
+cd /home/azureuser/sales
+docker-compose stop odoo_sales
+docker-compose run --rm --no-deps odoo_sales odoo -c /etc/odoo/odoo.conf -d sales -u sales_bid_board --stop-after-init
+docker-compose start odoo_sales
+```
 
 ---
 
 ## Post-Deployment Functional Checks
 
 - Open `Bid Board -> Configuration -> Settings`.
-- Open a project form and confirm header buttons render correctly.
+- Open `Bid Board -> Leads` and a lead form: intake fields (scope of work, location, opportunity date, etc.) load; required customer / name fields behave as expected.
+- Open a project (enquiry) form and confirm header buttons render correctly, including proposal-related actions when the enquiry is in an allowed state.
 - Confirm `Submit for Review` behavior:
   - visible/hidden as expected
   - blocked server-side if below threshold (if enabled in this release)
+- Open `Bid Board -> Proposals` (list loads); from an approved **Bid** enquiry, exercise **Create proposal** / view proposals if your release includes that flow.
+- Open a proposal linked to an enquiry and verify **Scope of work (from enquiry)** values match the source enquiry.
+- In proposal and Bid/No Bid list views, verify contract value columns are visible and positioned as expected.
+- Open `Bid Board -> Reports -> Project Reports` and run a print/report on a sample enquiry if applicable.
 - Open `Documentation` page.
 - Confirm no new JS/Owl errors in browser console.
 

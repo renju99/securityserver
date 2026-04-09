@@ -225,7 +225,8 @@ class SalesBidBoardDashboard(models.Model):
                 stage_values.append(self._count_value(row))
 
         trend_groups = project_model.read_group(domain, ["id:count"], ["create_date:month"])
-        trend_labels, trend_keys, trend_values = [], [], []
+        trend_labels, trend_keys, trend_values, trend_period_domains = [], [], [], []
+        UA = self.env["sales_bid_board.unified.analytics"]
         for row in trend_groups:
             label = row.get("create_date:month")
             if label:
@@ -233,6 +234,7 @@ class SalesBidBoardDashboard(models.Model):
                 trend_labels.append(label_str)
                 trend_keys.append(label_str)
                 trend_values.append(self._count_value(row))
+                trend_period_domains.append(UA._month_domain_from_bucket(label, "create_date"))
 
         charts = [
             {
@@ -303,6 +305,7 @@ class SalesBidBoardDashboard(models.Model):
                 "action_model": "bid.project",
                 "action_domain_field": "create_date",
                 "action_type": "date_period",
+                "period_domains": trend_period_domains,
                 "datasets": [{"label": "Bids", "data": trend_values or [0]}],
             },
         ]

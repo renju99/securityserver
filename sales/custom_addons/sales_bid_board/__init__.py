@@ -79,8 +79,9 @@ def post_init_hook(cr, registry):
     if not icp.get_param("sales_bid_board.submit_review_min_score"):
         icp.set_param("sales_bid_board.submit_review_min_score", "70")
 
-    # Cached web client bundles can omit newly added addon JS until regenerated; drop them on upgrade.
-    env["ir.attachment"].sudo().search(
+    # Cached web client bundles can omit newly added addon JS until regenerated; drop them on install.
+    att = env["ir.attachment"].sudo()
+    att.search(
         [
             (
                 "name",
@@ -94,8 +95,15 @@ def post_init_hook(cr, registry):
                     "web.assets_web.min.js.map",
                     "web.assets_web.css.map",
                     "web.assets_web.min.css.map",
+                    "web.assets_backend.js",
+                    "web.assets_backend.min.js",
+                    "web.assets_backend.css",
+                    "web.assets_backend.min.css",
                 ),
             ),
         ]
     ).unlink()
+    att.search([("name", "=like", "web.assets_web%.xml")]).unlink()
+    att.search([("name", "=like", "web.assets_web.bundle%")]).unlink()
+    att.search([("name", "=like", "web.assets_backend%.xml")]).unlink()
     registry.clear_cache()
