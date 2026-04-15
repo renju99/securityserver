@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Sentry - Security Guard Management',
-    'version': '18.0.1.1.27',
+    'version': '18.0.1.1.49',
     'category': 'Services/Security',
     'summary': 'Win premium guard contracts with an Odoo-native suite for mobile patrols, SLA automation, client portals, and analytics.',
     'description': """
@@ -286,6 +286,7 @@ Support & Roadmap
         'reports/incident_statement_report_template.xml',
         'reports/incident_lost_found_forms_report_template.xml',
         'reports/incident_community_violation_report_template.xml',
+        'reports/incident_fm_uae_report_template.xml',
         'reports/incident_additional_categories_report_template.xml',
         'reports/package_management_report_template.xml',
         'reports/lost_found_report_template.xml',
@@ -392,6 +393,7 @@ Support & Roadmap
             'markdown',  # Documentation rendering
             'cryptography>=41.0.0',  # Biometric encryption (Fernet, PBKDF2)
             'requests>=2.28.0',  # webhooks, API calls
+            'pytesseract',  # Optional: Emirates ID camera OCR (requires tesseract-ocr system package)
         ],
     },
     'assets': {
@@ -422,6 +424,7 @@ Support & Roadmap
             'guardpro/static/src/js/guardpro_tours_dashboard.js',
             'guardpro/static/src/js/push_to_talk.js',  # Push-to-Talk widget
             'guardpro/static/src/js/eid_reader_core_v7.js',  # Emirates ID toolkit integration (V5.1 - Final - Renamed)
+            'guardpro/static/src/js/emirates_id_camera_scan.js',  # Emirates ID camera scan + server OCR
             'guardpro/static/src/xml/dashboard_templates.xml',
             'guardpro/static/src/xml/dashboard_refresh_template.xml',
             'guardpro/static/src/xml/checkpoint_map_creator.xml',
@@ -447,7 +450,11 @@ Support & Roadmap
             'guardpro/static/src/js/mobile_navigation.js',
             'guardpro/static/src/js/guard_elearning_navigation.js',  # Back to Mobile button for guards
             'guardpro/static/src/js/tour_scanner.js',  # QR/NFC scanning for tours
+            'guardpro/static/src/js/mobile_emergency_broadcast.js',  # Poll and show emergency broadcasts in mobile PWA
+            'guardpro/static/src/js/mobile_patrol_reminder.js',  # Patrol 30/10 min reminders + acknowledge
+            'guardpro/static/src/js/mobile_guard_messages.js',  # Text chat inbox (guard.message + channels)
             'guardpro/static/src/js/mobile_push_to_talk.js',  # Push-to-Talk for mobile interface
+            'guardpro/static/src/js/mobile_emirates_id_camera_scan.js',  # Emirates ID camera OCR on mobile PWA
             # Note: biometric_capture.js removed from frontend and backend assets
             
             # Note: Old complex PWA files removed

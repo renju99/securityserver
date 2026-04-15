@@ -2,6 +2,9 @@ package com.berkeleyuae.guardpro
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -17,15 +20,20 @@ import android.webkit.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
+import org.json.JSONObject
 
 class TwaLauncherActivity : AppCompatActivity() {
 
     private val PERMISSION_REQUEST_CODE = 1001
+    private val WEBVIEW_MEDIA_PERMISSION_REQUEST_CODE = 1002
+    private val NOTIFICATION_PERM_REQUEST = 1003
     private lateinit var webView: WebView
     private var nfcAdapter: NfcAdapter? = null
-    
+    private var pendingWebPermissionRequest: PermissionRequest? = null
+
     // Configure URL here - Use Security domain
     private val START_URL = "https://security.berkeleyuae.com/guardpro/mobile"
     private val ALLOWED_HOST = "security.berkeleyuae.com"
@@ -42,6 +50,7 @@ class TwaLauncherActivity : AppCompatActivity() {
         // Check and request permissions
         if (checkPermissions()) {
             startLocationService()
+            requestPostNotificationsIfNeeded()
         } else {
             requestPermissions()
         }
@@ -147,11 +156,36 @@ class TwaLauncherActivity : AppCompatActivity() {
                 callback.invoke(origin, true, false)
             }
             
-            override fun onPermissionRequest(request: android.webkit.PermissionRequest?) {
-                // Grant all requested permissions (Browser-level)
-                request?.resources?.let {
-                    request.grant(it)
+            override fun onPermissionRequest(request: PermissionRequest?) {
+                if (request == null) return
+                val resources = request.resources
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    val wantsVideo = resources.contains(PermissionRequest.RESOURCE_VIDEO_CAPTURE)
+                    val wantsAudio = resources.contains(PermissionRequest.RESOURCE_AUDIO_CAPTURE)
+                    val camOk =
+                        checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+                    val micOk =
+                        checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+                    if (wantsVideo && !camOk) {
+                        pendingWebPermissionRequest = request
+                        ActivityCompat.requestPermissions(
+                            this@TwaLauncherActivity,
+                            arrayOf(Manifest.permission.CAMERA),
+                            WEBVIEW_MEDIA_PERMISSION_REQUEST_CODE
+                        )
+                        return
+                    }
+                    if (wantsAudio && !micOk) {
+                        pendingWebPermissionRequest = request
+                        ActivityCompat.requestPermissions(
+                            this@TwaLauncherActivity,
+                            arrayOf(Manifest.permission.RECORD_AUDIO),
+                            WEBVIEW_MEDIA_PERMISSION_REQUEST_CODE
+                        )
+                        return
+                    }
                 }
+                request.grant(resources)
             }
 
             override fun onConsoleMessage(consoleMessage: android.webkit.ConsoleMessage?): Boolean {
@@ -302,6 +336,100 @@ class TwaLauncherActivity : AppCompatActivity() {
                 prefs.edit().putString("auth_token", token).apply()
             }
         }
+
+        /**
+         * Called from [mobile_emergency_broadcast.js] when a pending broadcast is detected.
+         * Uses a real Android notification because WebView does not reliably support the Web Notifications API.
+         */
+        @JavascriptInterface
+        fun postEmergencyNotification(jsonPayload: String) {
+            val activity = this@TwaLauncherActivity
+            try {
+                val obj = JSONObject(jsonPayload)
+                val title = obj.optString("title", "EMERGENCY ALERT").take(200)
+                val message = obj.optString("message", "").take(4000)
+                activity.runOnUiThread {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        if (ActivityCompat.checkSelfPermission(
+                                activity,
+                                Manifest.permission.POST_NOTIFICATIONS
+                            ) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            Log.w("AndroidBridge", "POST_NOTIFICATIONS not granted; emergency tray banner skipped")
+                            return@runOnUiThread
+                        }
+                    }
+                    val nm =
+                        activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    activity.ensureEmergencyNotificationChannel(nm)
+                    val launchIntent = Intent(activity, TwaLauncherActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    }
+                    val pi = PendingIntent.getActivity(
+                        activity,
+                        0,
+                        launchIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                    val iconRes = activity.applicationInfo.icon
+                    val smallIcon =
+                        if (iconRes != 0) iconRes else android.R.drawable.stat_sys_warning
+                    val notif = NotificationCompat.Builder(activity, EMERGENCY_CHANNEL_ID)
+                        .setSmallIcon(smallIcon)
+                        .setContentTitle(title)
+                        .setContentText(message.take(500))
+                        .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+                        .setPriority(NotificationCompat.PRIORITY_MAX)
+                        .setCategory(NotificationCompat.CATEGORY_ALARM)
+                        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                        .setAutoCancel(true)
+                        .setContentIntent(pi)
+                        .build()
+                    nm.notify(EMERGENCY_NOTIF_ID, notif)
+                }
+            } catch (e: Exception) {
+                Log.e("AndroidBridge", "postEmergencyNotification failed: ${e.message}", e)
+            }
+        }
+
+        @JavascriptInterface
+        fun dismissEmergencyNotification() {
+            val activity = this@TwaLauncherActivity
+            activity.runOnUiThread {
+                val nm =
+                    activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                nm.cancel(EMERGENCY_NOTIF_ID)
+            }
+        }
+    }
+
+    private fun ensureEmergencyNotificationChannel(nm: NotificationManager) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        if (nm.getNotificationChannel(EMERGENCY_CHANNEL_ID) != null) return
+        val ch = NotificationChannel(
+            EMERGENCY_CHANNEL_ID,
+            "Emergency broadcasts",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "Urgent messages from your control room (GuardPro)."
+            enableVibration(true)
+        }
+        nm.createNotificationChannel(ch)
+    }
+
+    /** Android 13+: runtime permission for posting emergency notifications from the WebView bridge. */
+    private fun requestPostNotificationsIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+            NOTIFICATION_PERM_REQUEST
+        )
     }
 
     private fun checkPermissions(): Boolean {
@@ -327,17 +455,35 @@ class TwaLauncherActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == WEBVIEW_MEDIA_PERMISSION_REQUEST_CODE) {
+            val pending = pendingWebPermissionRequest
+            pendingWebPermissionRequest = null
+            if (pending != null) {
+                val granted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                if (granted) {
+                    pending.grant(pending.resources)
+                } else {
+                    pending.deny()
+                }
+            }
+            return
+        }
+        if (requestCode == NOTIFICATION_PERM_REQUEST) {
+            return
+        }
         if (requestCode == PERMISSION_REQUEST_CODE) {
-            val allGranted = grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+            val allGranted = grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }
             if (allGranted) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                         showBackgroundPermissionRationale()
                     } else {
                         startLocationService()
+                        requestPostNotificationsIfNeeded()
                     }
                 } else {
                     startLocationService()
+                    requestPostNotificationsIfNeeded()
                 }
             } else {
                 showPermissionRequiredDialog()
@@ -385,5 +531,10 @@ class TwaLauncherActivity : AppCompatActivity() {
         } else {
             super.onBackPressed()
         }
+    }
+
+    private companion object {
+        private const val EMERGENCY_NOTIF_ID = 94002
+        private const val EMERGENCY_CHANNEL_ID = "guardpro_emergency_broadcast"
     }
 }

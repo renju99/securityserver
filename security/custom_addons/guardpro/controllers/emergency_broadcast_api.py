@@ -20,10 +20,13 @@ class EmergencyBroadcastAPIController(http.Controller):
             user = request.env.user
             
             # Get pending acknowledgments for this user
-            acknowledgments = request.env['emergency.broadcast.acknowledgment'].sudo().search([
-                ('user_id', '=', user.id),
-                ('is_acknowledged', '=', False)
-            ])
+            acknowledgments = request.env['emergency.broadcast.acknowledgment'].sudo().search(
+                [
+                    ('user_id', '=', user.id),
+                    ('is_acknowledged', '=', False),
+                ],
+                order='create_date desc',
+            )
 
             broadcasts = []
             for ack in acknowledgments:
@@ -36,17 +39,23 @@ class EmergencyBroadcastAPIController(http.Controller):
                     'sent_date': ack.broadcast_id.sent_date.isoformat() if ack.broadcast_id.sent_date else None,
                 })
 
-            return request.make_json_response({
-                'success': True,
-                'broadcasts': broadcasts
-            })
+            return request.make_json_response(
+                {
+                    'success': True,
+                    'broadcasts': broadcasts,
+                },
+                headers=[('Cache-Control', 'no-store, no-cache, must-revalidate')],
+            )
 
         except Exception as e:
             _logger.error('Failed to get pending broadcasts: %s', str(e))
-            return request.make_json_response({
-                'success': False,
-                'error': str(e)
-            }, status=500)
+            return request.make_json_response(
+                {
+                    'success': False,
+                    'error': str(e),
+                },
+                status=500,
+            )
 
     @http.route('/guardpro/api/emergency_broadcasts/acknowledge', 
                 type='http', auth='user', methods=['POST'], csrf=False)
