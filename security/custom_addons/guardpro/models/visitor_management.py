@@ -96,6 +96,14 @@ class VisitorManagement(models.Model):
         string='Occupation',
         help='Occupation (from Emirates ID)'
     )
+    employer_name = fields.Char(
+        string='Employer',
+        help='Employer name as shown on Emirates ID (back)'
+    )
+    issuing_place = fields.Char(
+        string='Issuing Place',
+        help='Issuing place as shown on Emirates ID (back)'
+    )
     visa_number = fields.Char(
         string='Visa Number',
         help='Visa number (from Emirates ID)'
@@ -734,6 +742,10 @@ class VisitorManagement(models.Model):
         Placeholder for Emirates ID reading.
         The actual logic is handled in JavaScript (emirates_id_reader.js)
         """
+        return True
+
+    def action_scan_emirates_id_camera(self):
+        """Camera scan + OCR is handled in ``emirates_id_camera_scan.js``."""
         return True
 
 

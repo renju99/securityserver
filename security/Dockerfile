@@ -15,6 +15,9 @@ RUN apt-get update && apt-get install -y \
     g++ \
     make \
     swig \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    tesseract-ocr-ara \
     && rm -rf /var/lib/apt/lists/* && \
     mkdir -p /scripts /var/cache/custom_addons_repo && chown -R odoo:odoo /scripts /var/cache/custom_addons_repo
 

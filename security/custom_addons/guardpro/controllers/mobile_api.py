@@ -1857,75 +1857,127 @@ class MobileAPIController(http.Controller):
     @http.route('/guardpro/api/emergency/check', type='json', auth='user', methods=['POST'], csrf=False)
     def check_emergency_broadcasts(self):
         """Check for pending emergency broadcasts for the current guard."""
-        guard = request.env['guard.profile'].search([
-            ('user_id', '=', request.env.user.id)
-        ], limit=1)
-        
-        if not guard:
-            return {'emergency': False}
-        
-        # Check for recent emergency messages (last 5 minutes)
-        from datetime import datetime, timedelta
-        cutoff_time = datetime.now() - timedelta(minutes=5)
-        
-        # Look for recent messages on the guard's profile
-        recent_messages = request.env['mail.message'].search([
-            ('res_id', '=', guard.id),
-            ('model', '=', 'guard.profile'),
-            ('create_date', '>=', cutoff_time),
-            ('body', 'ilike', 'EMERGENCY ALERT'),
-            ('message_type', '=', 'notification')
+        # Use acknowledgment records as source of truth for pending broadcasts.
+        # This matches the emergency.broadcast send flow and avoids dependence on
+        # chatter message formatting/timing.
+        pending_ack = request.env['emergency.broadcast.acknowledgment'].sudo().search([
+            ('user_id', '=', request.env.user.id),
+            ('is_acknowledged', '=', False),
         ], order='create_date desc', limit=1)
-        
-        if recent_messages:
-            message = recent_messages[0]
-            # Extract title and message from HTML
-            import re
-            from bs4 import BeautifulSoup
-            
-            try:
-                # Use BeautifulSoup to properly parse HTML
-                soup = BeautifulSoup(message.body, 'html.parser')
-                
-                # Extract title from h3 tag
-                h3_tag = soup.find('h3')
-                title = h3_tag.get_text(strip=True) if h3_tag else 'EMERGENCY ALERT'
-                
-                # Extract message from p tag
-                p_tag = soup.find('p')
-                message_text = p_tag.get_text(strip=True) if p_tag else 'Emergency notification'
-                
-                # Clean up any HTML entities and emojis
-                title = title.replace('🚨', '').strip()
-                message_text = message_text.replace('<br/>', '\n').replace('<br>', '\n')
-                
-            except ImportError:
-                # Fallback to regex if BeautifulSoup is not available
-                _logger.info('BeautifulSoup not available, using regex fallback for HTML parsing')
-                title_match = re.search(r'<h3[^>]*>([^<]+)</h3>', message.body)
-                title = title_match.group(1) if title_match else 'EMERGENCY ALERT'
-                
-                message_match = re.search(r'<p[^>]*>([^<]+)</p>', message.body)
-                message_text = message_match.group(1) if message_match else 'Emergency notification'
-                
-                # Clean up HTML entities and emojis
-                title = title.replace('🚨', '').strip()
-                message_text = message_text.replace('<br/>', '\n').replace('<br>', '\n')
-                
-            except Exception as e:
-                _logger.warning('Error parsing emergency message HTML: %s', str(e))
-                # Fallback to simple text extraction
-                title = 'EMERGENCY ALERT'
-                message_text = 'Emergency notification received'
-            
-            return {
-                'emergency': True,
-                'title': title,
-                'message': message_text,
-                'priority': 'urgent'  # Default to urgent for emergency broadcasts
-            }
-        
-        return {'emergency': False}
+
+        if not pending_ack:
+            return {'emergency': False}
+
+        broadcast = pending_ack.broadcast_id
+        return {
+            'emergency': True,
+            'ack_id': pending_ack.id,
+            'broadcast_id': broadcast.id,
+            'title': broadcast.title or 'EMERGENCY ALERT',
+            'message': broadcast.message or 'Emergency notification received',
+            'priority': broadcast.priority or 'urgent',
+            'sent_date': broadcast.sent_date.isoformat() if broadcast.sent_date else False,
+        }
+
+    @http.route('/guardpro/api/patrol_reminders/check', type='json', auth='user', methods=['POST'], csrf=False)
+    def check_patrol_reminders(self):
+        """Pending patrol reminder for the logged-in guard only (must acknowledge in app)."""
+        rem = request.env['tour.patrol.reminder'].get_pending_mobile_reminder(request.env.user)
+        if not rem:
+            return {'patrol_reminder': False}
+        return {
+            'patrol_reminder': True,
+            'reminder_id': rem.id,
+            'tour_name': rem.tour_id.name or '',
+            'site_name': rem.shift_id.site_id.name if rem.shift_id.site_id else '',
+            'scheduled_start_iso': rem.scheduled_start.isoformat() if rem.scheduled_start else False,
+            'minutes_before': rem.reminder_type,
+        }
+
+    @http.route(
+        '/guardpro/api/patrol_reminders/pending',
+        type='http',
+        auth='user',
+        methods=['GET'],
+        csrf=False,
+        website=True,
+    )
+    def get_pending_patrol_reminder(self, **kwargs):
+        """Plain JSON endpoint for TWA/mobile reminder polling."""
+        try:
+            rem = request.env['tour.patrol.reminder'].get_pending_mobile_reminder(request.env.user)
+            if not rem:
+                return request.make_json_response(
+                    {
+                        'success': True,
+                        'patrol_reminder': False,
+                    },
+                    headers=[('Cache-Control', 'no-store, no-cache, must-revalidate')],
+                )
+
+            return request.make_json_response(
+                {
+                    'success': True,
+                    'patrol_reminder': True,
+                    'reminder_id': rem.id,
+                    'tour_name': rem.tour_id.name or '',
+                    'site_name': rem.shift_id.site_id.name if rem.shift_id.site_id else '',
+                    'scheduled_start_iso': rem.scheduled_start.isoformat() if rem.scheduled_start else False,
+                    'minutes_before': rem.reminder_type,
+                },
+                headers=[('Cache-Control', 'no-store, no-cache, must-revalidate')],
+            )
+        except Exception as e:
+            _logger.error('Patrol reminder pending failed: %s', str(e))
+            return request.make_json_response(
+                {
+                    'success': False,
+                    'error': str(e),
+                },
+                status=500,
+            )
+
+    @http.route(
+        '/guardpro/api/patrol_reminders/acknowledge',
+        type='http',
+        auth='user',
+        methods=['POST'],
+        csrf=False,
+        website=True,
+    )
+    def acknowledge_patrol_reminder(self, **kwargs):
+        """Acknowledge a patrol reminder popup (JSON body: reminder_id)."""
+        try:
+            user = request.env.user
+            data = json.loads(request.httprequest.data.decode('utf-8') or '{}')
+            reminder_id = data.get('reminder_id')
+            if not reminder_id:
+                return request.make_json_response({
+                    'success': False,
+                    'error': 'reminder_id is required',
+                }, status=400)
+            reminder = request.env['tour.patrol.reminder'].search([
+                ('id', '=', int(reminder_id)),
+                ('user_id', '=', user.id),
+            ], limit=1)
+            if not reminder:
+                return request.make_json_response({
+                    'success': False,
+                    'error': 'Reminder not found or not authorized',
+                }, status=404)
+            reminder.action_acknowledge()
+            return request.make_json_response({'success': True})
+        except ValueError:
+            return request.make_json_response({
+                'success': False,
+                'error': 'Invalid reminder_id',
+            }, status=400)
+        except Exception as e:
+            _logger.error('Patrol reminder acknowledge failed: %s', str(e))
+            return request.make_json_response({
+                'success': False,
+                'error': str(e),
+            }, status=500)
 
     @http.route('/guardpro/api/buddy/assistance-requests', type='json', auth='user', methods=['POST'], csrf=False)
     def get_assistance_requests(self, **kwargs):

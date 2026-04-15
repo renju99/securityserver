@@ -17,5 +17,6 @@ from . import documentation
 from . import pwa_controller
 from . import pwa_simple
 from . import offline_sync_api
+from . import visitor_ocr_api
 
 

@@ -23,6 +23,9 @@ websocket-client>=1.6.0
 # Smart card reader support for Emirates ID card reading (PC/SC standard)
 pyscard>=2.0.0
 
+# Emirates ID camera scan OCR (requires tesseract-ocr in Docker/system — see security/Dockerfile)
+pytesseract>=0.3.10
+
 # Biometric integration (optional - for enhanced facial recognition)
 # Note: face-recognition requires dlib which may need additional system dependencies
 # These are installed and working. Uncomment if you want them in requirements.txt:

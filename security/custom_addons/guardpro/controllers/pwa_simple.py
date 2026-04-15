@@ -51,6 +51,26 @@ class GuardProPWASimple(http.Controller):
         
         return guard
 
+    def _resolve_guard_operation_site_id(self, guard):
+        """Site for mobile guard actions: active attendance, then latest shift, then user's sites."""
+        if not guard:
+            return None
+        active_attendance = request.env['guard.attendance'].sudo().search([
+            ('guard_id', '=', guard.id),
+            ('checkout_time', '=', False),
+        ], limit=1, order='checkin_time desc')
+        if active_attendance and active_attendance.site_id:
+            return active_attendance.site_id.id
+        latest_shift = request.env['guard.shift'].sudo().search([
+            ('guard_id', '=', guard.id),
+        ], limit=1, order='start_datetime desc')
+        if latest_shift and latest_shift.site_id:
+            return latest_shift.site_id.id
+        user_sites = guard.user_id.site_ids
+        if user_sites:
+            return user_sites[0].id
+        return None
+
     def _mobile_no_guard_render_vals(self):
         """Context for the no-guard profile screen (includes supervisor compliance entry)."""
         user = request.env.user
@@ -348,6 +368,91 @@ class GuardProPWASimple(http.Controller):
         attendance.write(vals)
         
         return request.redirect('/guardpro/mobile?success=checked_out')
+
+    @http.route('/guardpro/mobile/visitors/register', type='http', auth='user', website=True, methods=['GET'])
+    def mobile_visitor_register(self, **kwargs):
+        """Mobile PWA: register a visitor (pre-registered) with optional Emirates ID camera OCR."""
+        guard = self._get_guard_from_user()
+        if not guard:
+            return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
+        site_id = self._resolve_guard_operation_site_id(guard)
+        site_name = ''
+        if site_id:
+            site = request.env['client.site'].sudo().browse(site_id)
+            if site.exists():
+                site_name = site.name
+        return request.render('guardpro.mobile_visitor_register', {
+            'guard': guard,
+            'user': request.env.user,
+            'resolved_site_id': site_id,
+            'resolved_site_name': site_name,
+        })
+
+    @http.route('/guardpro/mobile/visitors/register', type='http', auth='user', methods=['POST'], website=True, csrf=True)
+    def mobile_visitor_register_submit(self, **kwargs):
+        """Create visitor.management from mobile form."""
+        guard = self._get_guard_from_user()
+        if not guard:
+            return request.redirect('/guardpro/mobile/visitors/register?error=no_guard')
+        post = request.httprequest.form
+        name = (post.get('name') or '').strip()
+        host_name = (post.get('host_name') or '').strip()
+        visit_purpose = (post.get('visit_purpose') or '').strip()
+        if not name or not host_name or not visit_purpose:
+            return request.redirect('/guardpro/mobile/visitors/register?error=visitor_register_missing_fields')
+        site_id = self._resolve_guard_operation_site_id(guard)
+        if not site_id:
+            return request.redirect('/guardpro/mobile/visitors/register?error=visitor_register_no_site')
+
+        def _strip_or_false(key):
+            v = post.get(key)
+            if v is None:
+                return False
+            s = str(v).strip()
+            return s if s else False
+
+        vals = {
+            'name': name,
+            'visitor_type': _strip_or_false('visitor_type') or 'visitor',
+            'id_type': _strip_or_false('id_type') or 'emirates_id',
+            'visit_date': _strip_or_false('visit_date') or fields.Date.today(),
+            'host_name': host_name,
+            'visit_purpose': visit_purpose,
+            'site_id': site_id,
+        }
+        optional_char = [
+            'id_number', 'nationality', 'occupation', 'employer_name', 'issuing_place',
+            'mobile_number', 'email', 'company',
+            'purpose_details', 'host_phone', 'host_email', 'vehicle_number',
+        ]
+        for key in optional_char:
+            v = _strip_or_false(key)
+            if v:
+                vals[key] = v
+        for key in ('date_of_birth', 'id_expiry_date', 'id_issue_date'):
+            v = _strip_or_false(key)
+            if v:
+                vals[key] = v
+        gender = _strip_or_false('gender')
+        if gender in ('male', 'female'):
+            vals['gender'] = gender
+        id_photo = post.get('id_photo')
+        if id_photo and str(id_photo).strip():
+            vals['id_photo'] = str(id_photo).strip()
+
+        Visitor = request.env['visitor.management']
+        try:
+            Visitor.create(vals)
+        except AccessError:
+            _logger.warning(
+                'Mobile visitor register: access denied for user %s',
+                request.env.user.id,
+            )
+            return request.redirect('/guardpro/mobile/visitors/register?error=visitor_register_no_access')
+        except Exception as e:
+            _logger.exception('Mobile visitor register failed: %s', str(e))
+            return request.redirect('/guardpro/mobile/visitors/register?error=visitor_register_failed')
+        return request.redirect('/guardpro/mobile/visitors/register?success=visitor_registered')
 
     @http.route('/guardpro/mobile/task/start/<int:task_id>', type='http', auth='user', methods=['POST'], csrf=True)
     def mobile_task_start(self, task_id, **kwargs):
@@ -1480,6 +1585,52 @@ class GuardProPWASimple(http.Controller):
             'show_compliance_audits': show_compliance,
         })
 
+    @http.route('/guardpro/mobile/messages', type='http', auth='user', website=True)
+    def mobile_messages(self, **kwargs):
+        """WhatsApp-style inbox: direct chats and team channels."""
+        guard = self._get_guard_from_user()
+        if not guard:
+            return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
+        return request.render('guardpro.mobile_messages', {
+            'guard': guard,
+            'user': request.env.user,
+        })
+
+    @http.route('/guardpro/mobile/messages/new', type='http', auth='user', website=True)
+    def mobile_messages_new(self, **kwargs):
+        """Start a new direct chat (supervisor or guard)."""
+        guard = self._get_guard_from_user()
+        if not guard:
+            return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
+        return request.render('guardpro.mobile_messages_new', {
+            'guard': guard,
+            'user': request.env.user,
+        })
+
+    @http.route('/guardpro/mobile/messages/chat/<int:conversation_id>', type='http', auth='user', website=True)
+    def mobile_messages_chat(self, conversation_id, **kwargs):
+        """Direct / 1:1 conversation thread."""
+        guard = self._get_guard_from_user()
+        if not guard:
+            return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
+        return request.render('guardpro.mobile_messages_chat', {
+            'guard': guard,
+            'user': request.env.user,
+            'conversation_id': conversation_id,
+        })
+
+    @http.route('/guardpro/mobile/messages/channel/<int:channel_id>', type='http', auth='user', website=True)
+    def mobile_messages_channel(self, channel_id, **kwargs):
+        """Team channel thread."""
+        guard = self._get_guard_from_user()
+        if not guard:
+            return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
+        return request.render('guardpro.mobile_messages_channel', {
+            'guard': guard,
+            'user': request.env.user,
+            'channel_id': channel_id,
+        })
+
     @http.route('/guardpro/mobile/compliance', type='http', auth='user', website=True)
     def mobile_compliance_audits(self, **kwargs):
         """Compliance audits for supervisor / manager / admin (not guard portal)."""
@@ -1665,7 +1816,7 @@ class GuardProPWASimple(http.Controller):
         """Minimal service worker for offline support."""
         sw_content = """
 // GuardPro Mobile - Minimal Service Worker (Odoo 18)
-const CACHE_VERSION = 'v2.0.5';
+const CACHE_VERSION = 'v2.0.7';
 const CACHE_NAME = 'guardpro-mobile-' + CACHE_VERSION;
 
 // Install event

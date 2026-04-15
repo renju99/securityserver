@@ -2,6 +2,7 @@
 """GuardPro Models."""
 
 from . import website_fix  # Fix for REQUEST_URI KeyError in website module
+from . import ir_http  # Permissions-Policy for mobile PWA (camera)
 from . import ir_rule
 from . import photo_attachment_mixin  # Mixin for photo attachments
 from . import mail_activity  # Suppress noisy activity assignment emails
@@ -69,6 +70,7 @@ from . import equipment
 # from . import equipment_maintenance  # Equipment using native maintenance module
 from . import cctv_camera  # CCTV Camera management
 from . import tour_log
+from . import tour_patrol_reminder
 from . import checkpoint_scan
 from . import webhook
 from . import client_feedback

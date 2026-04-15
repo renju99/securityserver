@@ -43,6 +43,27 @@ class TwaLauncherActivity : AppCompatActivity() {
     private var emergencyNativeHttpInFlight = false
     @Volatile
     private var lastNativeNotifiedAckId: String? = null
+    @Volatile
+    private var patrolNativeHttpInFlight = false
+    @Volatile
+    private var lastNativePatrolReminderId: String? = null
+    private val pttNativeKickHandler = Handler(Looper.getMainLooper())
+    private val pttNativeKickIntervalMs = 1000L
+    private val pttNativeKickRunnable = object : Runnable {
+        override fun run() {
+            try {
+                if (::webView.isInitialized) {
+                    webView.evaluateJavascript(
+                        "(function(){ if(window.__gpCheckPttFromNative){ window.__gpCheckPttFromNative(); } })();",
+                        null
+                    )
+                }
+            } catch (e: Exception) {
+                Log.d(TAG_GUARDPRO_PTT, "PTT native kick failed: ${e.message}")
+            }
+            pttNativeKickHandler.postDelayed(this, pttNativeKickIntervalMs)
+        }
+    }
 
     /**
      * WebView throttles JS timers in the background (~30s). Native timers keep emergency
@@ -55,7 +76,7 @@ class TwaLauncherActivity : AppCompatActivity() {
             try {
                 if (::webView.isInitialized) {
                     webView.evaluateJavascript(
-                        "(function(){ if(window.__gpPollEmergencyFromNative){ window.__gpPollEmergencyFromNative(); } })();",
+                        "(function(){ if(window.__gpPollEmergencyFromNative){ window.__gpPollEmergencyFromNative(); } if(window.__gpPollPatrolReminderFromNative){ window.__gpPollPatrolReminderFromNative(); } })();",
                         null
                     )
                 }
@@ -63,6 +84,7 @@ class TwaLauncherActivity : AppCompatActivity() {
                 Log.d("WebView", "Emergency poll inject: ${e.message}")
             }
             pollEmergencyViaSessionCookie()
+            pollPatrolReminderViaSessionCookie()
             emergencyWebPollHandler.postDelayed(this, emergencyWebPollIntervalMs)
         }
     }
@@ -77,6 +99,9 @@ class TwaLauncherActivity : AppCompatActivity() {
 
     private fun pendingEmergencyUrl(): String =
         "${apiOrigin()}/guardpro/api/emergency_broadcasts/pending?_=${System.currentTimeMillis()}"
+
+    private fun pendingPatrolReminderUrl(): String =
+        "${apiOrigin()}/guardpro/api/patrol_reminders/pending?_=${System.currentTimeMillis()}"
 
     private fun cookieHeaderForApi(): String? {
         try {
@@ -115,6 +140,7 @@ class TwaLauncherActivity : AppCompatActivity() {
         super.onResume()
         enableNfcForegroundDispatch()
         startNativeEmergencyBridgePolling()
+        startNativePushToTalkPolling()
     }
 
     override fun onPause() {
@@ -124,6 +150,7 @@ class TwaLauncherActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         stopNativeEmergencyBridgePolling()
+        stopNativePushToTalkPolling()
         super.onDestroy()
     }
 
@@ -134,6 +161,15 @@ class TwaLauncherActivity : AppCompatActivity() {
 
     private fun stopNativeEmergencyBridgePolling() {
         emergencyWebPollHandler.removeCallbacks(emergencyWebPollRunnable)
+    }
+
+    private fun startNativePushToTalkPolling() {
+        pttNativeKickHandler.removeCallbacks(pttNativeKickRunnable)
+        pttNativeKickHandler.post(pttNativeKickRunnable)
+    }
+
+    private fun stopNativePushToTalkPolling() {
+        pttNativeKickHandler.removeCallbacks(pttNativeKickRunnable)
     }
 
     /**
@@ -208,6 +244,74 @@ class TwaLauncherActivity : AppCompatActivity() {
             } finally {
                 conn?.disconnect()
                 emergencyNativeHttpInFlight = false
+            }
+        }.start()
+    }
+
+    private fun pollPatrolReminderViaSessionCookie() {
+        if (patrolNativeHttpInFlight) return
+        patrolNativeHttpInFlight = true
+        Thread {
+            var conn: HttpURLConnection? = null
+            try {
+                val cookie = cookieHeaderForApi()
+                if (cookie.isNullOrBlank()) {
+                    Log.d(TAG_GUARDPRO_PATROL, "No WebView session cookie yet; skip native poll")
+                    return@Thread
+                }
+                val url = URL(pendingPatrolReminderUrl())
+                conn = (url.openConnection() as HttpURLConnection).apply {
+                    requestMethod = "GET"
+                    connectTimeout = 8000
+                    readTimeout = 8000
+                    instanceFollowRedirects = true
+                    setRequestProperty("Accept", "application/json")
+                    setRequestProperty("Cookie", cookie)
+                    setRequestProperty("Cache-Control", "no-cache")
+                }
+                val code = conn.responseCode
+                val body = try {
+                    conn.inputStream.bufferedReader().use { it.readText() }
+                } catch (_: Exception) {
+                    conn.errorStream?.bufferedReader()?.use { it.readText() }.orEmpty()
+                }
+                if (code !in 200..299) {
+                    Log.w(TAG_GUARDPRO_PATROL, "pending HTTP $code body=${body.take(300)}")
+                    return@Thread
+                }
+                val obj = try {
+                    JSONObject(body)
+                } catch (e: Exception) {
+                    Log.w(TAG_GUARDPRO_PATROL, "pending not JSON: ${e.message} body=${body.take(400)}")
+                    return@Thread
+                }
+                if (!obj.optBoolean("success", false)) {
+                    Log.w(TAG_GUARDPRO_PATROL, "pending success=false: ${body.take(400)}")
+                    return@Thread
+                }
+                val hasPending = obj.optBoolean("patrol_reminder", false)
+                if (hasPending) {
+                    val reminderId = obj.opt("reminder_id")?.toString()
+                    if (!reminderId.isNullOrBlank() && reminderId != lastNativePatrolReminderId) {
+                        val minutes = if (obj.optString("minutes_before") == "30") "30" else "10"
+                        val title = "Shift starts in $minutes minutes"
+                        val message = listOf(
+                            obj.optString("tour_name", "").takeIf { it.isNotBlank() }?.let { "Tour: $it" },
+                            obj.optString("site_name", "").takeIf { it.isNotBlank() }?.let { "Site: $it" },
+                        ).filterNotNull().joinToString("\n")
+                        showPatrolReminderNotification(title, message.ifBlank { "You have a scheduled patrol." })
+                        lastNativePatrolReminderId = reminderId
+                    }
+                } else {
+                    lastNativePatrolReminderId = null
+                    val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    nm.cancel(PATROL_REMINDER_NOTIF_ID)
+                }
+            } catch (e: Exception) {
+                Log.w(TAG_GUARDPRO_PATROL, "native poll error: ${e.message}", e)
+            } finally {
+                conn?.disconnect()
+                patrolNativeHttpInFlight = false
             }
         }.start()
     }
@@ -514,6 +618,42 @@ class TwaLauncherActivity : AppCompatActivity() {
                 nm.cancel(EMERGENCY_NOTIF_ID)
             }
         }
+
+        @JavascriptInterface
+        fun postPatrolReminderNotification(jsonPayload: String) {
+            val activity = this@TwaLauncherActivity
+            try {
+                val obj = JSONObject(jsonPayload)
+                val title = obj.optString("title", "Patrol reminder").take(200)
+                val message = obj.optString("message", "").take(4000)
+                activity.showPatrolReminderNotification(title, message)
+            } catch (e: Exception) {
+                Log.e("AndroidBridge", "postPatrolReminderNotification failed: ${e.message}", e)
+            }
+        }
+
+        @JavascriptInterface
+        fun dismissPatrolReminderNotification() {
+            val activity = this@TwaLauncherActivity
+            activity.runOnUiThread {
+                val nm =
+                    activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                nm.cancel(PATROL_REMINDER_NOTIF_ID)
+            }
+        }
+
+        @JavascriptInterface
+        fun postPushToTalkNotification(jsonPayload: String) {
+            val activity = this@TwaLauncherActivity
+            try {
+                val obj = JSONObject(jsonPayload)
+                val title = obj.optString("title", "Push-to-Talk").take(200)
+                val message = obj.optString("message", "").take(4000)
+                activity.showPushToTalkNotification(title, message)
+            } catch (e: Exception) {
+                Log.e("AndroidBridge", "postPushToTalkNotification failed: ${e.message}", e)
+            }
+        }
     }
 
     private fun ensureEmergencyNotificationChannel(nm: NotificationManager) {
@@ -530,6 +670,28 @@ class TwaLauncherActivity : AppCompatActivity() {
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
             description = "Urgent messages from your control room (GuardPro)."
+            enableVibration(true)
+            enableLights(true)
+            setSound(soundUri, attrs)
+            lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+        }
+        nm.createNotificationChannel(ch)
+    }
+
+    private fun ensurePatrolReminderNotificationChannel(nm: NotificationManager) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        if (nm.getNotificationChannel(PATROL_REMINDER_CHANNEL_ID) != null) return
+        val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        val attrs = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+        val ch = NotificationChannel(
+            PATROL_REMINDER_CHANNEL_ID,
+            "Patrol reminders",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "Upcoming patrol and shift start reminders."
             enableVibration(true)
             enableLights(true)
             setSound(soundUri, attrs)
@@ -574,6 +736,92 @@ class TwaLauncherActivity : AppCompatActivity() {
                 .build()
             nm.notify(EMERGENCY_NOTIF_ID, notif)
         }
+    }
+
+    private fun showPatrolReminderNotification(title: String, message: String) {
+        runOnUiThread {
+            if (!canPostNotifications()) {
+                Log.w("AndroidBridge", "POST_NOTIFICATIONS not granted; patrol tray banner skipped")
+                return@runOnUiThread
+            }
+            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            ensurePatrolReminderNotificationChannel(nm)
+            val launchIntent = Intent(this, TwaLauncherActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            val pi = PendingIntent.getActivity(
+                this,
+                0,
+                launchIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            val notif = NotificationCompat.Builder(this, PATROL_REMINDER_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_stat_emergency)
+                .setContentTitle(title)
+                .setContentText(message.take(500))
+                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setAutoCancel(true)
+                .setContentIntent(pi)
+                .build()
+            nm.notify(PATROL_REMINDER_NOTIF_ID, notif)
+        }
+    }
+
+    private fun showPushToTalkNotification(title: String, message: String) {
+        runOnUiThread {
+            if (!canPostNotifications()) {
+                Log.w("AndroidBridge", "POST_NOTIFICATIONS not granted; push-to-talk tray banner skipped")
+                return@runOnUiThread
+            }
+            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            ensurePushToTalkNotificationChannel(nm)
+            val launchIntent = Intent(this, TwaLauncherActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            val pi = PendingIntent.getActivity(
+                this,
+                0,
+                launchIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            val notif = NotificationCompat.Builder(this, PUSH_TO_TALK_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_stat_emergency)
+                .setContentTitle(title)
+                .setContentText(message.take(500))
+                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setCategory(NotificationCompat.CATEGORY_CALL)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setAutoCancel(true)
+                .setContentIntent(pi)
+                .build()
+            nm.notify(PUSH_TO_TALK_NOTIF_ID, notif)
+        }
+    }
+
+    private fun ensurePushToTalkNotificationChannel(nm: NotificationManager) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        if (nm.getNotificationChannel(PUSH_TO_TALK_CHANNEL_ID) != null) return
+        val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        val attrs = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_INSTANT)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+        val ch = NotificationChannel(
+            PUSH_TO_TALK_CHANNEL_ID,
+            "Push-to-Talk",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "Incoming push-to-talk voice messages."
+            enableVibration(true)
+            enableLights(true)
+            setSound(soundUri, attrs)
+            lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+        }
+        nm.createNotificationChannel(ch)
     }
 
     /** Android 13+: runtime permission for posting emergency notifications from the WebView bridge. */
@@ -694,8 +942,14 @@ class TwaLauncherActivity : AppCompatActivity() {
 
     private companion object {
         private const val TAG_GUARDPRO_EM = "GuardProEmergency"
+        private const val TAG_GUARDPRO_PATROL = "GuardProPatrol"
+        private const val TAG_GUARDPRO_PTT = "GuardProPTT"
         private const val EMERGENCY_NOTIF_ID = 94002
+        private const val PATROL_REMINDER_NOTIF_ID = 94003
+        private const val PUSH_TO_TALK_NOTIF_ID = 94004
         /** New id so devices pick up IMPORTANCE_HIGH (old channel may have been muted/low). */
         private const val EMERGENCY_CHANNEL_ID = "guardpro_emergency_alerts"
+        private const val PATROL_REMINDER_CHANNEL_ID = "guardpro_patrol_reminders"
+        private const val PUSH_TO_TALK_CHANNEL_ID = "guardpro_push_to_talk"
     }
 }

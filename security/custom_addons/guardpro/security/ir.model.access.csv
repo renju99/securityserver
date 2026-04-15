@@ -638,3 +638,7 @@ access_guardpro_tours_dashboard_manager,guardpro.tours.dashboard.manager,model_g
 access_guardpro_tours_dashboard_admin,guardpro.tours.dashboard.admin,model_guardpro_tours_dashboard,group_guardpro_admin,1,1,1,1
 access_guardpro_tours_dashboard_client_user,guardpro.tours.dashboard.client.user,model_guardpro_tours_dashboard,group_guardpro_client_user,1,1,1,0
 access_guardpro_tours_dashboard_guard_portal,guardpro.tours.dashboard.guard.portal,model_guardpro_tours_dashboard,group_guardpro_guard_portal,1,0,0,0
+access_tour_patrol_reminder_guard_portal,tour.patrol.reminder.guard.portal,model_tour_patrol_reminder,group_guardpro_guard_portal,1,1,0,0
+access_tour_patrol_reminder_supervisor,tour.patrol.reminder.supervisor,model_tour_patrol_reminder,group_guardpro_supervisor,1,0,0,0
+access_tour_patrol_reminder_manager,tour.patrol.reminder.manager,model_tour_patrol_reminder,group_guardpro_manager,1,1,1,1
+access_tour_patrol_reminder_admin,tour.patrol.reminder.admin,model_tour_patrol_reminder,group_guardpro_admin,1,1,1,1

@@ -1,7 +1,7 @@
 /**
  * Mobile Push-to-Talk Widget for Guard Mobile Interface
  * Simple, touch-optimized push-to-talk functionality
- * Version: 2.3 - Seamless hold-to-talk with pre-warmed stream, no delays or distortion
+ * Version: 2.4 - Mic only while holding PTT; no pre-warm on app open (privacy / OS indicator)
  * Cache-bust: 2026-02-20-15-25
  */
 
@@ -41,6 +41,7 @@
             this.hasGuardProfile = true; // Will be updated when channels are loaded
             this.lastMessageId = 0; // Track last message ID for walkie-talkie functionality
             this.playedMessageIds = new Set(); // Track played messages to avoid duplicates
+            this.lastIncomingNotifiedMessageId = 0;
 
             this.activeStreams = new Map(); // message_id -> { buffer: [], isPlaying: false, audioEl: null }
             this.minPlaybackBufferChunks = 2;
@@ -81,7 +82,7 @@
         }
 
         /**
-         * Pre-warm microphone access to reduce start latency
+         * Acquire microphone (called on first press, or after camera handoff).
          */
         async preWarmMicrophone() {
             // If stream already exists and tracks are active, nothing to do
@@ -110,14 +111,67 @@
             }
         }
 
+        /**
+         * Drop mic stream when not recording so the OS does not show "mic in use".
+         */
+        releaseMicrophoneWhenIdle() {
+            if (this.isRecording || this._starting) {
+                return;
+            }
+            if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+                return;
+            }
+            if (this.audioStream) {
+                try {
+                    this.audioStream.getTracks().forEach(function (t) {
+                        t.stop();
+                    });
+                } catch (e) {
+                    console.debug('[Push-to-Talk] track stop', e);
+                }
+                this.audioStream = null;
+            }
+            this.mediaRecorder = null;
+        }
+
+        /**
+         * Stop mic stream while another feature uses the camera (e.g. Emirates ID scan).
+         * Otherwise Android/WebView often keeps the mic indicator on and may conflict.
+         */
+        releaseMicrophoneForCamera() {
+            this.isRecording = false;
+            try {
+                if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+                    this.mediaRecorder.stop();
+                }
+            } catch (e) {
+                console.debug('[Push-to-Talk] recorder stop during camera handoff', e);
+            }
+            this.mediaRecorder = null;
+            this.audioChunks = [];
+            if (this.audioStream) {
+                this.audioStream.getTracks().forEach(function (t) {
+                    t.stop();
+                });
+                this.audioStream = null;
+            }
+        }
+
+        /** Re-open mic after camera UI closes (short delay avoids permission races). */
+        resumeMicrophoneAfterCamera() {
+            var self = this;
+            setTimeout(function () {
+                self.preWarmMicrophone();
+            }, 500);
+        }
+
         async setup() {
             console.log('[Push-to-Talk] Setting up v2.2 (Optimized)...');
 
             // Set up push-to-talk button first (so it's always available)
             this.setupPushToTalkButton();
 
-            // Pre-warm microphone for instant start
-            this.preWarmMicrophone();
+            // Do not open the microphone until the guard presses PTT (avoids "mic always on").
 
             // Load channels (non-blocking - button will work even if this fails)
             this.loadChannels().catch(err => {
@@ -138,6 +192,20 @@
 
             // Set up message listener (Bus based)
             this.setupBusListener();
+            window.__gpCheckPttFromNative = () => this.checkNewMessages();
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    this.checkNewMessages().catch(() => { });
+                }
+            });
+            window.addEventListener('focus', () => {
+                this.checkNewMessages().catch(() => { });
+            });
+
+            const self = this;
+            window.addEventListener('pagehide', function () {
+                self.releaseMicrophoneForCamera();
+            });
 
             console.log('[Push-to-Talk] Setup complete');
         }
@@ -586,6 +654,9 @@
             } catch (error) {
                 console.error('[Push-to-Talk] Recording failed:', error);
                 this.showNotification('Microphone error: ' + error.message, 'error');
+                if (!this.isRecording) {
+                    this.releaseMicrophoneWhenIdle();
+                }
             } finally {
                 this._starting = false;
             }
@@ -610,7 +681,6 @@
                     // request final data chunk before stopping
                     try { this.mediaRecorder.requestData(); } catch (_) { }
                     this.mediaRecorder.stop();
-                    // NOTE: DO NOT stop audioStream tracks – stream is reused for next recording
                 }
 
                 this.isRecording = false;
@@ -628,6 +698,7 @@
 
         async processRecording() {
             if (this.audioChunks.length === 0) {
+                this.releaseMicrophoneWhenIdle();
                 return;
             }
 
@@ -645,6 +716,8 @@
 
             } catch (error) {
                 console.error('Error processing recording:', error);
+            } finally {
+                this.releaseMicrophoneWhenIdle();
             }
         }
 
@@ -765,8 +838,25 @@
         }
 
         setupBusListener() {
-            // Standard Odoo Bus listener pattern for version 18
-            const bus = window.odoo && window.odoo.__session_info__ && window.odoo.__session_info__.bus_id;
+            const onIncomingChunk = (payload) => {
+                if (!payload) return;
+                this.onChunkReceived(payload);
+            };
+
+            const onIncomingMessage = (payload) => {
+                if (!payload || payload.channel_id !== this.currentChannel?.id) return;
+                this.checkNewMessages().catch(() => { });
+            };
+
+            // Preferred path when bus service is available in the page context.
+            if (window.bus_service && typeof window.bus_service.addEventListener === 'function') {
+                window.bus_service.addEventListener('push_to_talk_chunk', (notification) => {
+                    onIncomingChunk(notification && notification.data);
+                });
+                window.bus_service.addEventListener('push_to_talk_message', (notification) => {
+                    onIncomingMessage(notification && notification.data);
+                });
+            }
 
             // Listen for 'bus_notification' which is dispatched by Odoo's bus service
             document.addEventListener('bus_notification', (event) => {
@@ -775,7 +865,9 @@
 
                 notifications.forEach(notif => {
                     if (notif.type === 'push_to_talk_chunk') {
-                        this.onChunkReceived(notif.payload);
+                        onIncomingChunk(notif.payload);
+                    } else if (notif.type === 'push_to_talk_message') {
+                        onIncomingMessage(notif.payload);
                     }
                 });
             });
@@ -785,7 +877,24 @@
                 if (this.currentChannel && !this.isRecording) {
                     await this.checkNewMessages();
                 }
-            }, 3000); // Slower polling as fallback
+            }, 1000);
+        }
+
+        notifyAndroidIncoming(senderName) {
+            try {
+                const bridge = window.AndroidBridge;
+                if (!bridge || typeof bridge.postPushToTalkNotification !== 'function') {
+                    return;
+                }
+                bridge.postPushToTalkNotification(JSON.stringify({
+                    title: senderName ? `Push-to-Talk: ${senderName}` : 'Push-to-Talk',
+                    message: this.currentChannel?.name
+                        ? `Incoming on ${this.currentChannel.name}`
+                        : 'Incoming voice message'
+                }));
+            } catch (_e) {
+                // Native bridge not available.
+            }
         }
 
         async onChunkReceived(chunkData) {
@@ -796,6 +905,7 @@
             if (!stream) {
                 console.log('[Push-to-Talk] Incoming stream from', chunkData.sender_name);
                 this.showNotification(`Incoming: ${chunkData.sender_name}`, 'info');
+                this.notifyAndroidIncoming(chunkData.sender_name);
                 stream = { buffer: [], isPlaying: false };
                 this.activeStreams.set(chunkData.message_id, stream);
             }
@@ -882,6 +992,10 @@
                             this.lastMessageId = Math.max(...newMsgs.map(m => m.id));
                             for (const msg of newMsgs) {
                                 if (!this.playedMessageIds.has(msg.id)) {
+                                    if (msg.id > this.lastIncomingNotifiedMessageId) {
+                                        this.lastIncomingNotifiedMessageId = msg.id;
+                                        this.notifyAndroidIncoming(msg.sender_name);
+                                    }
                                     this.playedMessageIds.add(msg.id);
                                     await this.playMessage(msg.id, msg.audio_url);
                                 }

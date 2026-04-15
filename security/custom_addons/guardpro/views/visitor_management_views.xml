@@ -74,6 +74,11 @@
                             <group>
                                 <group string="ID Details">
                                     <field name="id_type"/>
+                                    <button name="action_scan_emirates_id_camera"
+                                            string="Scan Emirates ID (Camera)"
+                                            type="object"
+                                            class="btn-primary mb-2"
+                                            invisible="id_type != 'emirates_id'"/>
                                     <button name="action_read_emirates_id" 
                                             string="Read Emirates ID" 
                                             type="object" 
@@ -84,17 +89,20 @@
                                     <field name="id_issue_date"/>
                                 </group>
                                 <group string="Personal Details">
-                                    <field name="name_arabic"/>
                                     <field name="nationality"/>
                                     <field name="date_of_birth"/>
                                     <field name="gender"/>
+                                </group>
+                                <group string="Emirates ID (back)">
                                     <field name="occupation"/>
+                                    <field name="employer_name"/>
+                                    <field name="issuing_place"/>
                                 </group>
                             </group>
                             <group>
                                 <group string="Additional Info">
-                                    <field name="passport_number"/>
-                                    <field name="visa_number"/>
+                                    <field name="passport_number" optional="hide"/>
+                                    <field name="visa_number" optional="hide"/>
                                 </group>
                                 <group string="Identification Scan">
                                     <field name="id_photo" widget="image" options="{'size': [200, 200]}"/>

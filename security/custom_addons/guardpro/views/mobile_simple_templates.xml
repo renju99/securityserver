@@ -59,6 +59,9 @@
                         <t t-elif="request.params.get('success') == 'audit_item_saved'">
                             <i class="fa fa-check-circle me-2"/>Checklist line saved.
                         </t>
+                        <t t-elif="request.params.get('success') == 'visitor_registered'">
+                            <i class="fa fa-check-circle me-2"/>Visitor registered successfully.
+                        </t>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"/>
                     </div>
                 </t>
@@ -115,6 +118,18 @@
                         </t>
                         <t t-elif="request.params.get('error') == 'compliance_staff_only'">
                             <i class="fa fa-exclamation-circle me-2"/>Compliance audits are only available for supervisor or manager logins
+                        </t>
+                        <t t-elif="request.params.get('error') == 'visitor_register_missing_fields'">
+                            <i class="fa fa-exclamation-circle me-2"/>Please enter visitor name, host name, and visit purpose.
+                        </t>
+                        <t t-elif="request.params.get('error') == 'visitor_register_no_site'">
+                            <i class="fa fa-exclamation-circle me-2"/>No site could be determined. Check in to a shift or contact your supervisor.
+                        </t>
+                        <t t-elif="request.params.get('error') == 'visitor_register_no_access'">
+                            <i class="fa fa-exclamation-circle me-2"/>You do not have permission to register visitors.
+                        </t>
+                        <t t-elif="request.params.get('error') == 'visitor_register_failed'">
+                            <i class="fa fa-exclamation-circle me-2"/>Could not save the visitor. Try again or use the back office.
                         </t>
                         <t t-else="">
                             <i class="fa fa-exclamation-circle me-2"/>An error occurred
@@ -303,6 +318,8 @@
                 });
                 ]]>
             </script>
+
+            <!-- Emergency broadcast: loaded via web.assets_frontend only (avoid duplicate pollers) -->
 
             <style>
                 .guardpro-mobile-header {
@@ -729,6 +746,24 @@
                                 <i class="fa fa-exclamation-triangle fa-3x text-warning mb-2"/>
                                 <h6 class="mb-1">Incidents</h6>
                                 <p class="text-muted small mb-0"><t t-esc="len(recent_incidents)"/> recent</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="/guardpro/mobile/messages" class="card text-decoration-none h-100 hover-shadow">
+                            <div class="card-body text-center">
+                                <i class="fa fa-comments fa-3x text-info mb-2"/>
+                                <h6 class="mb-1">Messages</h6>
+                                <p class="text-muted small mb-0">Chats &amp; channels</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="/guardpro/mobile/visitors/register" class="card text-decoration-none h-100 hover-shadow">
+                            <div class="card-body text-center">
+                                <i class="fa fa-id-card fa-3x text-primary mb-2"/>
+                                <h6 class="mb-1">Visitors</h6>
+                                <p class="text-muted small mb-0">Register &amp; EID scan</p>
                             </div>
                         </a>
                     </div>
@@ -2721,6 +2756,171 @@
         </t>
     </template>
 
+    <!-- Visitor registration (mobile PWA + Emirates ID camera OCR) -->
+    <template id="mobile_visitor_register" name="Guard Pro Mobile Visitor Register">
+        <t t-call="guardpro.mobile_base">
+            <div class="container-fluid p-3">
+                <div class="mb-3">
+                    <a href="/guardpro/mobile" class="btn btn-outline-secondary">
+                        <i class="fa fa-arrow-left me-2"/>Home
+                    </a>
+                </div>
+                <div class="mb-3">
+                    <h4 class="mb-1">Register visitor</h4>
+                    <p class="text-muted small mb-0">Pre-register a visitor. Use camera scan to fill Emirates ID fields when ID type is Emirates ID.</p>
+                </div>
+                <t t-if="resolved_site_name">
+                    <p class="small text-muted mb-3"><i class="fa fa-map-marker-alt me-1"/><strong>Site:</strong> <t t-esc="resolved_site_name"/></p>
+                </t>
+
+                <form id="guardpro-mobile-visitor-form" action="/guardpro/mobile/visitors/register" method="post">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="id_photo" value=""/>
+
+                    <button type="button" id="guardpro-eid-scan-btn"
+                            class="btn btn-outline-primary w-100 mb-3 py-2"
+                            data-guardpro-eid-scan="1"
+                            style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(113,75,103,0.25); cursor: pointer; position: relative; z-index: 6;"
+                            onclick="return window.guardproEidTriggerScan ? window.guardproEidTriggerScan(event, this) : (alert('Refresh the page and try again.'), false);">
+                        <i class="fa fa-camera me-2"/>Scan Emirates ID (camera)
+                    </button>
+
+                    <div class="mb-3">
+                        <label class="form-label">Visitor name *</label>
+                        <input type="text" class="form-control" name="name" required="required" placeholder="Full name"/>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Visitor type</label>
+                            <select class="form-select" name="visitor_type">
+                                <option value="visitor" selected="selected">Visitor</option>
+                                <option value="contractor">Contractor</option>
+                                <option value="vendor">Vendor</option>
+                                <option value="delivery">Delivery</option>
+                                <option value="job_applicant">Job applicant</option>
+                                <option value="vip">VIP</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">ID type</label>
+                            <select class="form-select" name="id_type">
+                                <option value="emirates_id" selected="selected">Emirates ID</option>
+                                <option value="passport">Passport</option>
+                                <option value="driving_license">Driving license</option>
+                                <option value="labor_card">Labor card</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ID number</label>
+                        <input type="text" class="form-control" name="id_number" placeholder="Emirates ID / document number"/>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Nationality</label>
+                            <input type="text" class="form-control" name="nationality"/>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Gender</label>
+                            <select class="form-select" name="gender">
+                                <option value="" selected="selected">—</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Date of birth</label>
+                            <input type="date" class="form-control" name="date_of_birth"/>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Visit date</label>
+                            <input type="date" class="form-control" name="visit_date"/>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label">ID issue</label>
+                            <input type="date" class="form-control" name="id_issue_date"/>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">ID expiry</label>
+                            <input type="date" class="form-control" name="id_expiry_date"/>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Occupation</label>
+                        <input type="text" class="form-control" name="occupation"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Employer (from ID)</label>
+                        <input type="text" class="form-control" name="employer_name" placeholder="As on Emirates ID back"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Issuing place (from ID)</label>
+                        <input type="text" class="form-control" name="issuing_place" placeholder="e.g. Dubai"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mobile</label>
+                        <input type="text" class="form-control" name="mobile_number"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Company</label>
+                        <input type="text" class="form-control" name="company"/>
+                    </div>
+                    <hr class="my-3"/>
+                    <div class="mb-3">
+                        <label class="form-label">Host name *</label>
+                        <input type="text" class="form-control" name="host_name" required="required" placeholder="Person being visited"/>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Host phone</label>
+                            <input type="text" class="form-control" name="host_phone"/>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Host email</label>
+                            <input type="email" class="form-control" name="host_email"/>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Visit purpose *</label>
+                        <select class="form-select" name="visit_purpose" required="required">
+                            <option value="">— Select —</option>
+                            <option value="meeting">Meeting</option>
+                            <option value="delivery">Delivery</option>
+                            <option value="contractor_work">Contractor work</option>
+                            <option value="maintenance">Maintenance</option>
+                            <option value="interview">Interview</option>
+                            <option value="inspection">Inspection</option>
+                            <option value="training">Training</option>
+                            <option value="event">Event</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Purpose details</label>
+                        <textarea class="form-control" name="purpose_details" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Vehicle number</label>
+                        <input type="text" class="form-control" name="vehicle_number"/>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 btn-lg">
+                        <i class="fa fa-save me-2"/>Save visitor
+                    </button>
+                </form>
+            </div>
+        </t>
+    </template>
+
     <!-- Incidents Screen -->
     <template id="mobile_incidents" name="Guard Pro Mobile Incidents">
         <t t-call="guardpro.mobile_base">
@@ -4151,6 +4351,34 @@
                                 <i class="fa fa-chevron-right text-muted small"/>
                             </div>
                         </a>
+                        <a href="/guardpro/mobile/messages" class="list-group-item list-group-item-action border-0 py-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center me-3" style="width: 42px; height: 42px;">
+                                        <i class="fa fa-comments fs-5"/>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">Messages</div>
+                                        <small class="text-muted">Chat with supervisors, guards &amp; channels</small>
+                                    </div>
+                                </div>
+                                <i class="fa fa-chevron-right text-muted small"/>
+                            </div>
+                        </a>
+                        <a href="/guardpro/mobile/visitors/register" class="list-group-item list-group-item-action border-0 py-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-3" style="width: 42px; height: 42px;">
+                                        <i class="fa fa-id-card fs-5"/>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">Visitor registration</div>
+                                        <small class="text-muted">Emirates ID camera scan</small>
+                                    </div>
+                                </div>
+                                <i class="fa fa-chevron-right text-muted small"/>
+                            </div>
+                        </a>
                         <a href="/guardpro/mobile/compliance" t-if="show_compliance_audits" class="list-group-item list-group-item-action border-0 py-3">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center">
@@ -4296,6 +4524,123 @@
                     </a>
                 </div>
             </div>
+        </t>
+    </template>
+
+    <!-- Mobile text messaging (guard.message / channels) -->
+    <template id="mobile_messages" name="Guard Pro Mobile Messages Inbox">
+        <t t-call="guardpro.mobile_base">
+            <div class="container-fluid p-0 gp-msg-page">
+                <div class="p-3 border-bottom bg-white d-flex align-items-center justify-content-between sticky-top" style="top: 0; z-index: 1020;">
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="/guardpro/mobile" class="btn btn-outline-secondary btn-sm rounded-circle" title="Home" style="width: 36px; height: 36px;">
+                            <i class="fa fa-chevron-left"/>
+                        </a>
+                        <h4 class="mb-0 fw-bold">Messages</h4>
+                    </div>
+                    <a href="/guardpro/mobile/messages/new" class="btn btn-primary btn-sm rounded-pill px-3">
+                        <i class="fa fa-plus me-1"/>New
+                    </a>
+                </div>
+                <div class="btn-group w-100 px-3 pt-3" role="group">
+                    <button type="button" class="btn btn-outline-primary active" id="gp-msg-tab-chats">Chats</button>
+                    <button type="button" class="btn btn-outline-primary" id="gp-msg-tab-channels">Channels</button>
+                </div>
+                <div id="gp-msg-pane-chats" class="pb-4">
+                    <div id="gp-msg-inbox-loading" class="text-center text-muted py-5 small">Loading…</div>
+                    <div id="gp-msg-inbox-chats" class="list-group list-group-flush"></div>
+                    <div id="gp-msg-inbox-chats-empty" class="text-center text-muted py-5 small" style="display: none;">No conversations yet. Tap <strong>New</strong> to message a supervisor or guard.</div>
+                </div>
+                <div id="gp-msg-pane-channels" class="pb-4" style="display: none;">
+                    <div id="gp-msg-inbox-channels-loading" class="text-center text-muted py-5 small" style="display: none;">Loading…</div>
+                    <div id="gp-msg-inbox-channels-list" class="list-group list-group-flush"></div>
+                    <div id="gp-msg-inbox-channels-empty" class="text-center text-muted py-5 small" style="display: none;">No channels available for your site.</div>
+                </div>
+                <div id="gp-msg-inbox-error" class="alert alert-danger m-3" style="display: none;"></div>
+            </div>
+            <script type="text/javascript" src="/guardpro/static/src/js/mobile_guard_messages.js"></script>
+        </t>
+    </template>
+
+    <template id="mobile_messages_new" name="Guard Pro Mobile New Message">
+        <t t-call="guardpro.mobile_base">
+            <div class="container-fluid p-3 gp-msg-page">
+                <div class="d-flex align-items-center mb-3">
+                    <a href="/guardpro/mobile/messages" class="btn btn-outline-secondary btn-sm rounded-circle me-2" style="width: 36px; height: 36px;">
+                        <i class="fa fa-chevron-left"/>
+                    </a>
+                    <h4 class="mb-0 fw-bold">New message</h4>
+                </div>
+                <ul class="nav nav-pills mb-3 gap-2" id="gp-msg-new-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active rounded-pill px-3" id="gp-msg-new-tab-sup" type="button">Supervisor</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill px-3" id="gp-msg-new-tab-grd" type="button">Guard</button>
+                    </li>
+                </ul>
+                <div id="gp-msg-new-list-sup" class="list-group list-group-flush shadow-sm rounded mb-3"></div>
+                <div id="gp-msg-new-list-grd" class="list-group list-group-flush shadow-sm rounded mb-3" style="display: none;"></div>
+                <div id="gp-msg-new-compose" style="display: none;">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <div class="small text-muted mb-2" id="gp-msg-new-compose-label"></div>
+                            <textarea id="gp-msg-new-body" class="form-control mb-2" rows="3" placeholder="Type your message…"></textarea>
+                            <button type="button" class="btn btn-success w-100" id="gp-msg-new-send">
+                                <i class="fa fa-paper-plane me-1"/>Send
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="gp-msg-new-error" class="alert alert-danger" style="display: none;"></div>
+                <div id="gp-msg-new-loading" class="text-center text-muted py-4 small">Loading contacts…</div>
+            </div>
+            <script type="text/javascript" src="/guardpro/static/src/js/mobile_guard_messages.js"></script>
+        </t>
+    </template>
+
+    <template id="mobile_messages_chat" name="Guard Pro Mobile Message Chat">
+        <t t-call="guardpro.mobile_base">
+            <div class="container-fluid p-0 d-flex flex-column gp-msg-page" id="gp-msg-chat-root" t-att-data-conversation-id="conversation_id" style="min-height: 55vh;">
+                <div class="p-2 border-bottom bg-white d-flex align-items-center sticky-top" style="z-index: 1020;">
+                    <a href="/guardpro/mobile/messages" class="btn btn-link text-decoration-none px-2">
+                        <i class="fa fa-chevron-left"/> Back
+                    </a>
+                    <span class="fw-bold text-truncate flex-grow-1 text-center pe-5" id="gp-msg-chat-title">Chat</span>
+                </div>
+                <div id="gp-msg-chat-scroll" class="flex-grow-1 overflow-auto px-2 py-2" style="max-height: calc(100vh - 260px);"></div>
+                <div id="gp-msg-chat-compose" class="p-2 border-top bg-white">
+                    <div class="input-group">
+                        <textarea id="gp-msg-chat-input" class="form-control" rows="1" placeholder="Message…"></textarea>
+                        <button class="btn btn-success" id="gp-msg-chat-send" type="button"><i class="fa fa-paper-plane"/></button>
+                    </div>
+                </div>
+                <div id="gp-msg-chat-error" class="alert alert-danger m-2 py-2 small" style="display: none;"></div>
+            </div>
+            <script type="text/javascript" src="/guardpro/static/src/js/mobile_guard_messages.js"></script>
+        </t>
+    </template>
+
+    <template id="mobile_messages_channel" name="Guard Pro Mobile Message Channel">
+        <t t-call="guardpro.mobile_base">
+            <div class="container-fluid p-0 d-flex flex-column gp-msg-page" id="gp-msg-channel-root" t-att-data-channel-id="channel_id" style="min-height: 55vh;">
+                <div class="p-2 border-bottom bg-white d-flex align-items-center sticky-top" style="z-index: 1020;">
+                    <a href="/guardpro/mobile/messages" class="btn btn-link text-decoration-none px-2">
+                        <i class="fa fa-chevron-left"/> Back
+                    </a>
+                    <span class="fw-bold text-truncate flex-grow-1 text-center pe-5" id="gp-msg-channel-title">Channel</span>
+                </div>
+                <div id="gp-msg-channel-scroll" class="flex-grow-1 overflow-auto px-2 py-2" style="max-height: calc(100vh - 260px);"></div>
+                <div id="gp-msg-channel-compose" class="p-2 border-top bg-white">
+                    <div class="input-group">
+                        <textarea id="gp-msg-channel-input" class="form-control" rows="1" placeholder="Message…"></textarea>
+                        <button class="btn btn-success" id="gp-msg-channel-send" type="button"><i class="fa fa-paper-plane"/></button>
+                    </div>
+                </div>
+                <div id="gp-msg-channel-readonly" class="p-2 small text-muted text-center border-top bg-light" style="display: none;">Read-only channel</div>
+                <div id="gp-msg-channel-error" class="alert alert-danger m-2 py-2 small" style="display: none;"></div>
+            </div>
+            <script type="text/javascript" src="/guardpro/static/src/js/mobile_guard_messages.js"></script>
         </t>
     </template>
 
