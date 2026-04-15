@@ -11,9 +11,9 @@ You can begin in any of these places; all paths converge on an **enquiry** (`bid
 | Start here | Typical use |
 |------------|-------------|
 | **Bid Board → Leads** | Intake in CRM: capture customer, scope, dates, then use server actions (where configured) to **create a Bid Board enquiry** linked to the lead. |
-| **Bid Board → New Enquiry** (or **Enquiries → New**) | Create an enquiry directly when there is no lead, or after verbal / email intake. |
-| **Bid Board → Enquiries** | Open an existing enquiry to continue work. |
-| **Bid Board → Bid / No Bid** | Same records as Enquiries, filtered for the decision workflow (scorecard, review, decision). |
+| **Bid Board → New Enquiry** (or **Bid / No Bid → All Records → New**) | Create an enquiry directly when there is no lead, or after verbal / email intake. |
+| **Bid Board → Bid / No Bid** | Opens the decision-focused list (default filters for the scorecard / review workflow). |
+| **Bid Board → Bid / No Bid → All Records** | Same model as Bid / No Bid; full list with no default decision filters. |
 
 **First things to complete on the enquiry**
 
@@ -30,7 +30,7 @@ Optional: use **Save draft** while the bid team is still editing.
 
 1. When the scorecard and project info are ready, click **Submit for review**.
 2. **Review status** becomes **Pending review**.
-3. A row appears under **Bid Board → Submissions** (audit trail).
+3. A row appears under **Bid Board → Bid / No Bid → Submissions** (audit trail).
 
 **Submit threshold** (if enabled): submission may be blocked until the overall score reaches the minimum set in configuration.
 
@@ -46,7 +46,7 @@ From an enquiry in **Pending review** or **Change requested**, a CSO can:
 | **Decline** | Review is **Declined**; project is treated as declined per your rules; notifications per settings. |
 | **Request change** | **Review status** → **Change requested**; bid team edits and **Submit for review** again. |
 
-Approvers often work from **Bid Board → Review Queue** (if their role includes it).
+Approvers often work from **Bid Board → Review & reminders → Review Queue** (if their role includes it).
 
 ---
 

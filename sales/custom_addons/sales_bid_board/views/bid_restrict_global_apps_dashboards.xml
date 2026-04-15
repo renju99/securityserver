@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="0">
+    <!--
+        Main app bar: hide Odoo Dashboards + Apps for all internal users (incl. Bid Board / Salesperson).
+        Administrators open them from Settings (parent menu already restricted to ERP manager / system).
+    -->
+    <record id="base.menu_management" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+    </record>
+
+    <record id="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+    </record>
+
+    <menuitem id="menu_bid_board_apps_under_settings"
+              name="Apps"
+              parent="base.menu_administration"
+              sequence="15"
+              groups="base.group_system">
+        <menuitem id="menu_bid_board_apps_under_settings_main"
+                  name="Main Apps"
+                  action="base.open_module_tree"
+                  sequence="5"/>
+        <menuitem id="menu_bid_board_apps_under_settings_theme"
+                  name="Theme Store"
+                  action="base.action_theme_store"
+                  sequence="10"/>
+        <menuitem id="menu_bid_board_apps_under_settings_third_party"
+                  name="Third-Party Apps"
+                  action="base.action_third_party"
+                  sequence="20"/>
+    </menuitem>
+
+    <menuitem id="menu_bid_board_dashboards_under_settings"
+              name="Dashboards"
+              parent="base.menu_administration"
+              action="spreadsheet_dashboard.ir_actions_dashboard_action"
+              sequence="25"
+              groups="base.group_system,base.group_erp_manager"/>
+
+    <menuitem id="menu_bid_board_spreadsheet_dashboard_config_under_settings"
+              name="Dashboard configuration"
+              parent="base.menu_administration"
+              action="spreadsheet_dashboard.spreadsheet_dashboard_action_configuration_dashboards"
+              sequence="26"
+              groups="base.group_system"/>
+</odoo>

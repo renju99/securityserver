@@ -9,7 +9,7 @@
                     <t t-set="logo_data" t-value="company.logo_web or company.logo"/>
                     <t t-set="decision_label" t-value="dict(o._fields['decision_final'].selection).get(o.decision_final, o.decision_final or '')"/>
                     <t t-set="review_status_label" t-value="dict(o._fields['review_status'].selection).get(o.review_status, o.review_status or '')"/>
-                    <t t-set="state_label" t-value="dict(o._fields['state'].selection).get(o.state, o.state or '')"/>
+                    <t t-set="outcome_label" t-value="dict(o._fields['outcome_status'].selection).get(o.outcome_status, o.outcome_status or '')"/>
                     <div class="page">
                         <div style="border:1px solid #dbe5f2; border-radius:12px; margin-bottom:14px; overflow:hidden;">
                             <table style="width:100%; border-collapse:collapse; background:#ffffff;">
@@ -57,7 +57,12 @@
                                     </td>
                                     <td style="width:25%; border:1px solid #dbe5f2; border-radius:10px; padding:12px 12px;">
                                         <div style="font-size:11px; color:#64748b; text-transform:uppercase;">Deadline</div>
-                                        <div style="font-size:16px; color:#0f172a; margin-top:4px;" t-esc="o.deadline_date or '-'"/>
+                                        <div style="font-size:16px; color:#0f172a; margin-top:4px;">
+                                            <t t-if="o.deadline_datetime">
+                                                <span t-field="o.deadline_datetime"/>
+                                            </t>
+                                            <t t-else="">-</t>
+                                        </div>
                                     </td>
                                 </tr>
                             </table>
@@ -127,7 +132,7 @@
                                 </tr>
                             </table>
                             <div style="margin-top:12px; border-top:1px solid #edf2f7; padding-top:10px; color:#64748b; font-size:12px;">
-                                Current workflow: <strong t-esc="review_status_label"/> | Project state: <strong t-esc="state_label"/>
+                                Current workflow: <strong t-esc="review_status_label"/> | Bid status: <strong t-esc="outcome_label"/><t t-if="o.is_priority"> (priority)</t>
                             </div>
                         </div>
                     </div>

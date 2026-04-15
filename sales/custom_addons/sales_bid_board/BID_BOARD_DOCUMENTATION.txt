@@ -69,18 +69,13 @@ Under the Bid Board app, the main entries are:
 
   • New Enquiry — quick start: name, client, lead, team, deadline, and progress.
 
-  • Enquiries — full list of enquiries; open any record from here.
+  • Bid / No Bid — opens the decision-focused list (default filters and
+    workflow context). Sub-menus: All Records — complete list of enquiries;
+    Submissions — history of times projects were submitted for review.
 
-  • Bid / No Bid — same projects, handy for focusing on the decision workflow
-    and filters.
-
-  • Review Queue — only projects that are Pending review or Change requested
-    (for approvers).
-
-  • Submissions — history of times projects were submitted for review.
-
-  • Deadline Reminders — reminder records used for emails before submission
-    deadlines.
+  • Review & reminders — sub-menus: Review Queue (only projects that are
+    Pending review or Change requested, for approvers); Deadline Reminders
+    (reminder records used for emails before submission deadlines).
 
   • Reports → Project Reports — charts and tables to analyse projects (for
     reviewers/managers).
@@ -114,10 +109,10 @@ points:
   • Bid Board → Leads — intake in CRM; use your configured server actions to
     create a linked enquiry when ready.
 
-  • New Enquiry / Enquiries → New — create the enquiry directly.
+  • New Enquiry / Bid / No Bid → All Records → New — create the enquiry directly.
 
-  • Enquiries or Bid / No Bid — open an existing record to continue (Bid / No
-    Bid is the same data with a decision-focused context).
+  • Bid / No Bid or Bid / No Bid → All Records — open an existing record (parent
+    menu uses decision-focused defaults; All Records lists every enquiry).
 
 First to complete: Project info (client, value, duration, scope-of-work % ≤
 100%, deadlines, team) and the Scorecard (overall score drives the Bid / No
@@ -126,10 +121,10 @@ bid recommendation; default rule uses 70% as the Bid threshold).
 4.2 Submit and review
 ---------------------
   1. Bid team: Submit for review → Pending review. Each submit is logged under
-     Submissions.
+     Bid / No Bid → Submissions.
 
   2. CSO (email on Configuration → Settings → CSO approvers): Approve,
-     Decline, or Request change. Use Review Queue if you have access.
+     Decline, or Request change. Use Review & reminders → Review Queue if you have access.
 
   3. If Request change: team edits, then Submit for review again.
 
@@ -239,7 +234,7 @@ final decision drives the wording on the sheet and what happens after approval.
      No bid recommendation from the score rule.
 
   5. Submit for review — sends the project to CSO. A line appears in
-     Submissions. CSO may get an email depending on your company settings (see
+     Bid / No Bid → Submissions. CSO may get an email depending on your company settings (see
      below).
 
   6. CSO chooses Approve, Decline, or Request change (with comments and
@@ -323,7 +318,7 @@ corrected.
 Submissions
 -----------
 Each time someone clicks Submit for review, a submission line is created with the
-date and owner. View the list under Submissions or on the project’s
+date and owner. View the list under Bid / No Bid → Submissions or on the project’s
 Submissions tab.
 
 Change requests
@@ -436,8 +431,8 @@ All paths converge on an enquiry (bid.project).
   Bid Board → Leads                       Intake in CRM; server actions can
                                           create a linked enquiry.
   Bid Board → New Enquiry                 Create enquiry directly.
-  Bid Board → Enquiries                   Continue an existing enquiry.
-  Bid Board → Bid / No Bid                Same data; decision-focused filters.
+  Bid Board → Bid / No Bid                Decision-focused default list.
+  Bid Board → Bid / No Bid → All Records  Full list; continue any enquiry.
 
 First on the enquiry: Project info (client, team, contract value/duration,
 scope % ≤ 100%, deadlines, industry, emirate, notes). Scorecard: complete

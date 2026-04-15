@@ -66,11 +66,8 @@
                         <ul>
                             <li><strong>Leads</strong> — CRM leads and opportunities (intake before an enquiry exists).</li>
                             <li><strong>New Enquiry</strong> — quick start: name, client, lead, team, deadline, and progress.</li>
-                            <li><strong>Enquiries</strong> — full list of enquiries; open any record from here.</li>
-                            <li><strong>Bid / No Bid</strong> — same projects, handy for focusing on the decision workflow and filters.</li>
-                            <li><strong>Review Queue</strong> — only projects that are <strong>Pending review</strong> or <strong>Change requested</strong> (for approvers).</li>
-                            <li><strong>Submissions</strong> — history of times projects were submitted for review.</li>
-                            <li><strong>Deadline Reminders</strong> — reminder records used for emails before submission deadlines.</li>
+                            <li><strong>Bid / No Bid</strong> — opens the decision-focused list (default filters and workflow context). Sub-menus: <strong>All Records</strong> (complete list of enquiries); <strong>Submissions</strong> (submit-for-review history).</li>
+                            <li><strong>Review &amp; reminders</strong> — <strong>Review Queue</strong> (projects <strong>Pending review</strong> or <strong>Change requested</strong>, for approvers) and <strong>Deadline Reminders</strong> (reminder records for submission-deadline emails).</li>
                             <li><strong>Reports → Project Reports</strong> — charts and tables to analyse projects (for reviewers/managers).</li>
                             <li><strong>Analytics</strong> — one unified <strong>Bid Board Analytics</strong> screen with tabs: Leads, Enquiries, By sales rep, Proposals, and Activity &amp; reminders.</li>
                             <li><strong>Configuration → Settings</strong> — who gets emails, CSO list, and related options (managers).</li>
@@ -89,23 +86,23 @@
                         <p>Work always converges on an <strong>enquiry</strong> (a Bid Board project). Typical starting points:</p>
                         <ul>
                             <li><strong>Bid Board → Leads</strong> — intake in CRM; use your configured server actions to create a linked enquiry when ready.</li>
-                            <li><strong>New Enquiry</strong> / <strong>Enquiries → New</strong> — create the enquiry directly.</li>
-                            <li><strong>Enquiries</strong> or <strong>Bid / No Bid</strong> — open an existing record to continue (Bid / No Bid is the same data with a decision-focused context).</li>
+                            <li><strong>New Enquiry</strong> / <strong>Bid / No Bid → All Records → New</strong> — create the enquiry directly.</li>
+                            <li><strong>Bid / No Bid</strong> or <strong>Bid / No Bid → All Records</strong> — open an existing record (parent menu uses decision-focused defaults; All Records lists every enquiry).</li>
                         </ul>
                         <p><strong>First to complete:</strong> <strong>Project info</strong> (client, value, duration, scope-of-work % ≤ 100%, deadlines, team) and the <strong>Scorecard</strong> (overall score drives the Bid / No bid recommendation; default rule uses <strong>70%</strong> as the Bid threshold).</p>
 
                         <h3>2. Submit and review</h3>
                         <ol>
-                            <li>Bid team: <strong>Submit for review</strong> → <strong>Pending review</strong>. Each submit is logged under <strong>Submissions</strong>.</li>
-                            <li>CSO (email on <strong>Configuration → Settings → CSO approvers</strong>): <strong>Approve</strong>, <strong>Decline</strong>, or <strong>Request change</strong>. Use <strong>Review Queue</strong> if you have access.</li>
+                            <li>Bid team: <strong>Submit for review</strong> → <strong>Pending review</strong>. Each submit is logged under <strong>Bid / No Bid → Submissions</strong>.</li>
+                            <li>CSO (email on <strong>Configuration → Settings → CSO approvers</strong>): <strong>Approve</strong>, <strong>Decline</strong>, or <strong>Request change</strong>. Use <strong>Review &amp; reminders → Review Queue</strong> if you have access.</li>
                             <li>If <strong>Request change</strong>: team edits, then <strong>Submit for review</strong> again.</li>
                         </ol>
                         <p>If your organisation enabled a <strong>submit threshold</strong>, submission may be blocked until the overall score reaches the minimum.</p>
 
                         <h3>3. How the enquiry ends</h3>
                         <ul>
-                            <li><strong>Approved + Bid</strong> — review is <strong>Approved</strong>; final decision <strong>Bid</strong>; project <strong>state</strong> becomes <strong>Completed</strong>. You may create <strong>proposals</strong> next.</li>
-                            <li><strong>Approved + No bid</strong> — approved with <strong>No bid</strong>; project <strong>state</strong> <strong>Declined</strong>. No proposal path.</li>
+                            <li><strong>Approved + Bid</strong> — review is <strong>Approved</strong>; final decision <strong>Bid</strong>; <strong>Bid status</strong> stays <strong>Open</strong> until you mark <strong>Won</strong>, <strong>Lost</strong>, or <strong>Closed</strong>. You may create <strong>proposals</strong> next.</li>
+                            <li><strong>Approved + No bid</strong> — approved with <strong>No bid</strong>; <strong>Bid status</strong> is set to <strong>Closed</strong>. No proposal path.</li>
                             <li><strong>Review declined</strong> — CSO <strong>Declined</strong> the submission; record is locked for typical users per your access rules.</li>
                             <li><strong>No submission</strong> — enquiry stays in <strong>Draft</strong> or is left inactive (operational choice).</li>
                         </ul>
@@ -162,7 +159,7 @@ Decline    Request change    Approve
                             <li><strong>Project info tab</strong> — fill client, location (emirate), industry, contract details, bonds, KPI, scope percentages (they must add up to at most <strong>100%</strong>), deadlines, team, and notes.</li>
                             <li><strong>Scorecard tab</strong> — lines are added automatically for new enquiries (defaults start at the top score so you can submit once content is right; lower any row to reflect risk). Pick <strong>1</strong>, <strong>2</strong>, or <strong>3</strong> per line and weights; add short comments if helpful.</li>
                             <li><strong>Decision sheet tab</strong> — check category scores, overall score, and the Bid / No bid recommendation from the score rule.</li>
-                            <li><strong>Submit for review</strong> — sends the project to CSO. A line appears in <strong>Submissions</strong>. CSO may get an email depending on your company settings (see below).</li>
+                            <li><strong>Submit for review</strong> — sends the project to CSO. A line appears in <strong>Bid / No Bid → Submissions</strong>. CSO may get an email depending on your company settings (see below).</li>
                             <li><strong>CSO</strong> chooses <strong>Approve</strong>, <strong>Decline</strong>, or <strong>Request change</strong> (with comments and priority). Approving notifies commercial/bid contacts and optionally the person who created the project.</li>
                             <li><strong>After approval</strong> — status becomes <strong>Completed</strong> if the final decision is Bid, or <strong>Declined</strong> if it is No bid. Any open change requests are closed.</li>
                             <li>If CSO <strong>requests changes</strong>, you get an email, update the project, and click <strong>Submit for review</strong> again.</li>
@@ -213,7 +210,7 @@ Decline    Request change    Approve
                         <h2 id="bb-related">Submissions, changes &amp; deadline reminders</h2>
                         <h3>Submissions</h3>
                         <p>
-                            Each time someone clicks <strong>Submit for review</strong>, a submission line is created with the date and owner. View the list under <strong>Submissions</strong> or on the project’s <strong>Submissions</strong> tab.
+                            Each time someone clicks <strong>Submit for review</strong>, a submission line is created with the date and owner. View the list under <strong>Bid / No Bid → Submissions</strong> or on the project’s <strong>Submissions</strong> tab.
                         </p>
                         <h3>Change requests</h3>
                         <p>When CSO asks for changes, those requests appear on the project with priority and comments. They are marked resolved when the review is completed.</p>

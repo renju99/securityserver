@@ -927,8 +927,16 @@ class IncidentReport(models.Model):
             'target': 'current'
         }
 
+    def _parse_notification_emails(self, raw_emails):
+        """Parse email strings accepting commas, semicolons, and new lines."""
+        return [
+            email.strip()
+            for email in (raw_emails or '').replace(';', ',').replace('\n', ',').split(',')
+            if email.strip()
+        ]
+
     def _send_incident_notification(self):
-        """Send incident submission emails configured per category."""
+        """Send category and high-priority incident submission notifications."""
         default_template = self.env.ref(
             'guardpro.incident_category_submit_email_template',
             raise_if_not_found=False,
@@ -940,22 +948,19 @@ class IncidentReport(models.Model):
             if not category:
                 continue
 
-            raw_recipients = (category.notification_emails or '').strip()
-            if not raw_recipients:
-                _logger.info(
-                    'Incident %s: category %s has no notification emails configured',
-                    incident.name,
-                    category.name,
+            recipients = self._parse_notification_emails(category.notification_emails)
+            is_high_priority = incident.priority in ('2', '3')
+            if is_high_priority and category.high_priority_notification_enabled:
+                high_priority_emails = self._parse_notification_emails(
+                    category.high_priority_notification_emails
                 )
-                continue
-
-            # Accept comma/semicolon/newline separated addresses.
-            recipients = [
-                e.strip()
-                for e in raw_recipients.replace(';', ',').replace('\n', ',').split(',')
-                if e.strip()
-            ]
+                if high_priority_emails:
+                    recipients = list(dict.fromkeys(recipients + high_priority_emails))
             if not recipients:
+                _logger.info(
+                    'Incident %s: no recipients configured for category/high-priority notifications',
+                    incident.name,
+                )
                 continue
 
             template = default_template
@@ -1640,6 +1645,15 @@ class IncidentCategory(models.Model):
     notification_emails = fields.Text(
         string='Submission Notification Emails',
         help='Recipients notified when incidents in this category are submitted. Use comma, semicolon, or new line separators.',
+    )
+    high_priority_notification_enabled = fields.Boolean(
+        string='High Priority Notifications',
+        default=False,
+        help='When enabled, incidents in this category with High priority also notify the high-priority recipient list.',
+    )
+    high_priority_notification_emails = fields.Text(
+        string='High Priority Notification Emails',
+        help='Recipients for high-priority incidents in this category. Use comma, semicolon, or new line separators.',
     )
     attach_report_to_notification = fields.Boolean(
         string='Attach Incident Report PDF',

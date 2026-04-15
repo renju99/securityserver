@@ -14,15 +14,6 @@
         <field name="groups" eval="[(4, ref('sales_bid_board.group_bid_board_salesperson'))]"/>
     </record>
 
-    <record id="rule_crm_lead_bid_board_team_leader_scope" model="ir.rule">
-        <field name="name">CRM Lead Bid Board Team Leader (team pipeline)</field>
-        <field name="model_id" ref="crm.model_crm_lead"/>
-        <field name="domain_force">
-            [('team_id.user_id','=',user.id)]
-        </field>
-        <field name="groups" eval="[(4, ref('sales_bid_board.group_bid_board_team_leader'))]"/>
-    </record>
-
     <record id="rule_crm_lead_bid_board_sales_manager_all" model="ir.rule">
         <field name="name">CRM Lead Bid Board Sales Manager (all)</field>
         <field name="model_id" ref="crm.model_crm_lead"/>

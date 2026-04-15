@@ -3,18 +3,19 @@
     <menuitem id="menu_bid_board_root"
               name="Bid Board"
               web_icon="sales_bid_board,static/description/icon.png"
-              action="action_bid_projects"
+              action="action_bid_board_unified_analytics"
               sequence="10"
               groups="sales_bid_board.group_bid_board_salesperson"/>
 
-    <!-- Projects & intake -->
-    <menuitem id="menu_bid_board_projects"
-              name="Enquiries"
+    <!-- Insights first in the fly-out; same action as clicking the app root. -->
+    <menuitem id="menu_bid_board_unified_analytics"
+              name="Bid Board Analytics"
               parent="menu_bid_board_root"
-              action="action_bid_projects"
-              sequence="15"
+              action="action_bid_board_unified_analytics"
+              sequence="5"
               groups="sales_bid_board.group_bid_board_salesperson"/>
 
+    <!-- Projects & intake -->
     <menuitem id="menu_bid_board_leads"
               name="Leads"
               parent="menu_bid_board_root"
@@ -22,41 +23,67 @@
               sequence="10"
               groups="sales_bid_board.group_bid_board_salesperson"/>
 
-    <!-- Decision & governance -->
+    <!-- Decision & governance: parent opens decision-focused list; All Records = full list -->
     <menuitem id="menu_bid_board_bid_no_bid"
               name="Bid / No Bid"
               parent="menu_bid_board_root"
               action="action_bid_no_bid"
-              sequence="40"
+              sequence="15"
+              groups="sales_bid_board.group_bid_board_salesperson"/>
+
+    <menuitem id="menu_bid_board_projects"
+              name="All Records"
+              parent="menu_bid_board_bid_no_bid"
+              action="action_bid_projects"
+              sequence="10"
+              groups="sales_bid_board.group_bid_board_salesperson"/>
+
+    <menuitem id="menu_bid_board_submissions"
+              name="Submissions"
+              parent="menu_bid_board_bid_no_bid"
+              action="action_bid_submissions"
+              sequence="20"
+              groups="sales_bid_board.group_bid_board_salesperson"/>
+
+    <menuitem id="menu_bid_board_proposals_parent"
+              name="Proposals"
+              parent="menu_bid_board_root"
+              sequence="45"
               groups="sales_bid_board.group_bid_board_salesperson"/>
 
     <menuitem id="menu_bid_board_proposals"
-              name="Proposals"
-              parent="menu_bid_board_root"
+              name="All proposals"
+              parent="menu_bid_board_proposals_parent"
               action="action_bid_proposals"
-              sequence="45"
+              sequence="10"
+              groups="sales_bid_board.group_bid_board_salesperson"/>
+
+    <menuitem id="menu_bid_board_proposals_active_contracts"
+              name="Active contracts"
+              parent="menu_bid_board_proposals_parent"
+              action="action_bid_proposals_active_contracts"
+              sequence="20"
+              groups="sales_bid_board.group_bid_board_salesperson"/>
+
+    <!-- Review queue (managers) + deadline reminder records (team); folder has no action -->
+    <menuitem id="menu_bid_board_review_reminders_parent"
+              name="Review &amp; reminders"
+              parent="menu_bid_board_root"
+              sequence="50"
               groups="sales_bid_board.group_bid_board_salesperson"/>
 
     <menuitem id="menu_bid_board_review"
               name="Review Queue"
-              parent="menu_bid_board_root"
+              parent="menu_bid_board_review_reminders_parent"
               action="action_bid_reviewer_queue"
-              sequence="50"
+              sequence="10"
               groups="sales_bid_board.group_bid_board_sales_manager"/>
-
-    <!-- Submissions & reminders -->
-    <menuitem id="menu_bid_board_submissions"
-              name="Submissions"
-              parent="menu_bid_board_root"
-              action="action_bid_submissions"
-              sequence="60"
-              groups="sales_bid_board.group_bid_board_salesperson"/>
 
     <menuitem id="menu_bid_board_notifications"
               name="Deadline Reminders"
-              parent="menu_bid_board_root"
+              parent="menu_bid_board_review_reminders_parent"
               action="action_bid_notifications"
-              sequence="70"
+              sequence="20"
               groups="sales_bid_board.group_bid_board_salesperson"/>
 
     <!-- Insights & reporting -->
@@ -72,13 +99,6 @@
               action="action_bid_reports"
               sequence="10"
               groups="sales_bid_board.group_bid_board_sales_manager"/>
-
-    <menuitem id="menu_bid_board_unified_analytics"
-              name="Bid Board Analytics"
-              parent="menu_bid_board_root"
-              action="action_bid_board_unified_analytics"
-              sequence="85"
-              groups="sales_bid_board.group_bid_board_salesperson"/>
 
     <!-- Configuration: CSO+ for business settings; technical items remain Administrator-only. -->
     <menuitem id="menu_bid_board_configuration"

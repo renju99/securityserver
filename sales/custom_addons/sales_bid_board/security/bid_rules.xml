@@ -1,16 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <delete id="rule_bid_project_user_scope" model="ir.rule"/>
-    <delete id="rule_bid_project_reviewer_all" model="ir.rule"/>
-    <delete id="rule_bid_submission_user_scope" model="ir.rule"/>
-    <delete id="rule_bid_submission_reviewer_all" model="ir.rule"/>
-    <delete id="rule_bid_notification_user_scope" model="ir.rule"/>
-    <delete id="rule_bid_notification_reviewer_all" model="ir.rule"/>
-    <delete id="rule_bid_change_request_user_scope" model="ir.rule"/>
-    <delete id="rule_bid_change_request_reviewer_all" model="ir.rule"/>
-    <delete id="rule_bid_proposal_user_scope" model="ir.rule"/>
-    <delete id="rule_bid_proposal_reviewer_all" model="ir.rule"/>
-
     <!-- Record visibility: rules for groups a user has are OR-combined. -->
     <!-- Salesperson: own enquiries (creator or assigned sales rep). -->
     <record id="rule_bid_project_salesperson_scope" model="ir.rule">
@@ -20,16 +9,6 @@
             ['|',('create_uid','=',user.id),('sales_rep','=',user.id)]
         </field>
         <field name="groups" eval="[(4, ref('sales_bid_board.group_bid_board_salesperson'))]"/>
-    </record>
-
-    <!-- Team leader: enquiries tied to their CRM sales team (rep’s team or source lead’s team). -->
-    <record id="rule_bid_project_team_leader_scope" model="ir.rule">
-        <field name="name">Bid Project Team Leader Scope</field>
-        <field name="model_id" ref="model_bid_project"/>
-        <field name="domain_force">
-            ['|',('sales_rep.crm_team_member_ids.crm_team_id.user_id','=',user.id),('crm_lead_id.team_id.user_id','=',user.id)]
-        </field>
-        <field name="groups" eval="[(4, ref('sales_bid_board.group_bid_board_team_leader'))]"/>
     </record>
 
     <record id="rule_bid_project_sales_manager_all" model="ir.rule">
@@ -48,15 +27,6 @@
         <field name="groups" eval="[(4, ref('sales_bid_board.group_bid_board_salesperson'))]"/>
     </record>
 
-    <record id="rule_bid_submission_team_leader_scope" model="ir.rule">
-        <field name="name">Bid Submission Team Leader Scope</field>
-        <field name="model_id" ref="model_bid_submission"/>
-        <field name="domain_force">
-            ['|',('project_id.sales_rep.crm_team_member_ids.crm_team_id.user_id','=',user.id),('project_id.crm_lead_id.team_id.user_id','=',user.id)]
-        </field>
-        <field name="groups" eval="[(4, ref('sales_bid_board.group_bid_board_team_leader'))]"/>
-    </record>
-
     <record id="rule_bid_submission_sales_manager_all" model="ir.rule">
         <field name="name">Bid Submission Sales Manager All</field>
         <field name="model_id" ref="model_bid_submission"/>
@@ -71,15 +41,6 @@
             ['|',('project_id.create_uid','=',user.id),('project_id.sales_rep','=',user.id)]
         </field>
         <field name="groups" eval="[(4, ref('sales_bid_board.group_bid_board_salesperson'))]"/>
-    </record>
-
-    <record id="rule_bid_notification_team_leader_scope" model="ir.rule">
-        <field name="name">Bid Notification Team Leader Scope</field>
-        <field name="model_id" ref="model_bid_notification"/>
-        <field name="domain_force">
-            ['|',('project_id.sales_rep.crm_team_member_ids.crm_team_id.user_id','=',user.id),('project_id.crm_lead_id.team_id.user_id','=',user.id)]
-        </field>
-        <field name="groups" eval="[(4, ref('sales_bid_board.group_bid_board_team_leader'))]"/>
     </record>
 
     <record id="rule_bid_notification_sales_manager_all" model="ir.rule">
@@ -98,15 +59,6 @@
         <field name="groups" eval="[(4, ref('sales_bid_board.group_bid_board_salesperson'))]"/>
     </record>
 
-    <record id="rule_bid_change_request_team_leader_scope" model="ir.rule">
-        <field name="name">Bid Change Request Team Leader Scope</field>
-        <field name="model_id" ref="model_bid_change_request"/>
-        <field name="domain_force">
-            ['|',('project_id.sales_rep.crm_team_member_ids.crm_team_id.user_id','=',user.id),('project_id.crm_lead_id.team_id.user_id','=',user.id)]
-        </field>
-        <field name="groups" eval="[(4, ref('sales_bid_board.group_bid_board_team_leader'))]"/>
-    </record>
-
     <record id="rule_bid_change_request_sales_manager_all" model="ir.rule">
         <field name="name">Bid Change Request Sales Manager All</field>
         <field name="model_id" ref="model_bid_change_request"/>
@@ -121,15 +73,6 @@
             ['|',('project_id.create_uid','=',user.id),('project_id.sales_rep','=',user.id)]
         </field>
         <field name="groups" eval="[(4, ref('sales_bid_board.group_bid_board_salesperson'))]"/>
-    </record>
-
-    <record id="rule_bid_proposal_team_leader_scope" model="ir.rule">
-        <field name="name">Bid Proposal Team Leader Scope</field>
-        <field name="model_id" ref="model_bid_proposal"/>
-        <field name="domain_force">
-            ['|',('project_id.sales_rep.crm_team_member_ids.crm_team_id.user_id','=',user.id),('project_id.crm_lead_id.team_id.user_id','=',user.id)]
-        </field>
-        <field name="groups" eval="[(4, ref('sales_bid_board.group_bid_board_team_leader'))]"/>
     </record>
 
     <record id="rule_bid_proposal_sales_manager_all" model="ir.rule">

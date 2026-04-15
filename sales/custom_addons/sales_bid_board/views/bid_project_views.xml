@@ -8,16 +8,28 @@
                 <field name="code"/>
                 <field name="name"/>
                 <field name="crm_lead_id" optional="hide"/>
+                <field name="sector" optional="hide"/>
+                <field name="industry" optional="hide"/>
+                <field name="emirate" optional="hide"/>
+                <field name="contract_type" optional="hide"/>
+                <field name="contract_duration" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="reviewed_on" optional="hide"/>
                 <field name="client_name"/>
                 <field name="sales_rep"/>
                 <field name="review_status"/>
                 <field name="stage_id"/>
-                <field name="deadline_date"/>
+                <field name="deadline_datetime"/>
                 <field name="project_lead_id"/>
                 <field name="progress"/>
                 <field name="score_overall"/>
                 <field name="decision_final"/>
-                <field name="state"/>
+                <field name="outcome_status" widget="badge"
+                       decoration-success="outcome_status == 'won'"
+                       decoration-danger="outcome_status == 'lost'"
+                       decoration-info="outcome_status == 'open'"
+                       decoration-muted="outcome_status == 'closed'"/>
+                <field name="is_priority" optional="show"/>
                 <field name="contract_value" string="Contract value" sum="Total" optional="show"/>
             </list>
         </field>
@@ -48,28 +60,31 @@
                             string="Request Change"
                             type="object"
                             class="btn-secondary"
-                            groups="sales_bid_board.group_bid_board_salesperson"
+                            groups="sales_bid_board.group_bid_board_cso,base.group_system"
                             invisible="not can_cso_review"/>
-                    <button name="action_decline_review"
+                    <button name="action_open_decline_review_wizard"
                             string="Decline"
                             type="object"
                             class="btn-secondary"
-                            groups="sales_bid_board.group_bid_board_salesperson"
+                            groups="sales_bid_board.group_bid_board_cso,base.group_system"
                             invisible="not can_cso_review"/>
                     <button name="action_approve_review"
                             string="Approve"
                             type="object"
                             class="btn-primary"
-                            groups="sales_bid_board.group_bid_board_salesperson"
+                            groups="sales_bid_board.group_bid_board_cso,base.group_system"
                             invisible="not can_cso_review"/>
                     <button name="action_create_proposal"
                             string="Create proposal"
                             type="object"
                             class="btn-secondary"
                             groups="sales_bid_board.group_bid_board_salesperson"
-                            invisible="not context.get('from_bid_no_bid') or review_status != 'approved' or decision_final != 'bid'"/>
+                            invisible="review_status != 'approved' or decision_final != 'bid'"/>
                     <field name="review_status" widget="statusbar"
                            statusbar_visible="draft,pending_review,change_requested,approved,declined"/>
+                    <field name="outcome_status" widget="statusbar"
+                           options="{'clickable': true}"
+                           statusbar_visible="open,won,lost,closed"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -81,51 +96,82 @@
                     </div>
                     <notebook>
                         <page string="Project Info">
-                            <group col="3">
-                                <group>
-                                    <field name="sales_rep"/>
+                            <!-- col="2" throughout keeps column edges aligned with RFP, scope, and team blocks. -->
+                            <group string="Overview" col="2">
+                                <group string="Project">
+                                    <field name="name"/>
+                                    <field name="code" readonly="1"/>
                                     <field name="client_name"/>
+                                    <field name="sector"/>
+                                    <field name="crm_lead_id" readonly="1"/>
+                                    <field name="sales_rep"/>
+                                </group>
+                                <group string="Commercial &amp; deadlines">
+                                    <field name="emirate"/>
+                                    <field name="industry"/>
                                     <field name="contract_duration"/>
                                     <field name="contract_type"/>
-                                    <field name="performance_bond"/>
-                                </group>
-                                <group>
-                                    <field name="code" readonly="1"/>
-                                    <field name="emirate"/>
-                                    <field name="contract_value"/>
                                     <field name="threshold"/>
-                                    <field name="kpi"/>
-                                </group>
-                                <group>
-                                    <field name="name"/>
-                                    <field name="crm_lead_id" readonly="1"/>
-                                    <field name="industry"/>
-                                    <field name="deadline_date"/>
-                                    <field name="tender_bond"/>
-                                    <field name="state"/>
+                                    <field name="contract_value"/>
+                                    <field name="is_priority"/>
+                                    <field name="deadline_datetime"/>
                                 </group>
                             </group>
-                            <group col="2">
+                            <group string="RFP &amp; site" col="2">
+                                <group>
+                                    <field name="rfp_received_date"/>
+                                    <field name="site_visit_date"/>
+                                </group>
+                                <group>
+                                    <field name="project_structure"/>
+                                    <field name="age_of_facility"/>
+                                </group>
+                            </group>
+                            <group string="Scope &amp; delivery" col="2">
+                                <group string="Scope inputs">
+                                    <field name="assets_list_provided"/>
+                                    <field name="spare_consumables"/>
+                                    <field name="subcontractors"/>
+                                </group>
+                                <group string="Commercial terms">
+                                    <field name="input_output_based"/>
+                                    <field name="tender_bond"/>
+                                    <field name="performance_bond"/>
+                                </group>
+                            </group>
+                            <group string="KPI &amp; penalties">
+                                <field name="kpi_penalty_mechanism"
+                                       string="KPI / penalty mechanism"
+                                       placeholder="Maximum penalty caps, KPI definitions, and penalty mechanism as in the RFP."/>
+                            </group>
+                            <group string="Team" col="2">
                                 <group>
                                     <field name="project_lead_id"/>
                                 </group>
                                 <group>
                                     <field name="team_member_ids" widget="many2many_tags"/>
-                                    <field name="progress"/>
                                 </group>
                             </group>
-                            <group string="Scope of Work (%)" col="4">
-                                <field name="scope_cleaning"/>
-                                <field name="scope_maintenance"/>
-                                <field name="scope_security"/>
-                                <field name="scope_landscaping"/>
-                                <field name="scope_laundry"/>
-                                <field name="scope_support"/>
-                                <field name="scope_others"/>
-                                <field name="scope_total" readonly="1"/>
+                            <group string="Preparation progress">
+                                <field name="progress" nolabel="1"
+                                       placeholder="e.g. 30% — scope drafted; waiting on commercial sign-off"/>
                             </group>
-                            <group>
-                                <field name="description" placeholder="Project notes and remarks..."/>
+                            <group string="Scope of work (%)" col="2">
+                                <group>
+                                    <field name="scope_cleaning"/>
+                                    <field name="scope_security"/>
+                                    <field name="scope_laundry"/>
+                                    <field name="scope_others"/>
+                                </group>
+                                <group>
+                                    <field name="scope_maintenance"/>
+                                    <field name="scope_landscaping"/>
+                                    <field name="scope_support"/>
+                                    <field name="scope_total" readonly="1"/>
+                                </group>
+                            </group>
+                            <group string="Notes">
+                                <field name="description" nolabel="1" placeholder="Project notes and remarks..."/>
                             </group>
                         </page>
                         <page string="Scorecard">
@@ -158,6 +204,11 @@
                                 <field name="recommendation_note" readonly="1"/>
                                 <field name="decision_final" readonly="1"/>
                                 <field name="review_status" readonly="1"/>
+                                <field name="outcome_status" readonly="1"/>
+                                <field name="is_priority" readonly="1"/>
+                            </group>
+                            <group string="CSO decline" invisible="review_status != 'declined'">
+                                <field name="cso_decline_justification" readonly="1" nolabel="1"/>
                             </group>
                         </page>
                         <page string="Change Requests">
@@ -199,19 +250,14 @@
                                             class="btn-secondary"
                                             colspan="2"
                                             groups="sales_bid_board.group_bid_board_salesperson"
-                                            invisible="not context.get('from_bid_no_bid') or review_status != 'approved' or decision_final != 'bid'"/>
+                                            invisible="review_status != 'approved' or decision_final != 'bid'"/>
                                 </group>
                             </group>
-                            <div class="alert alert-secondary mb-2" role="alert"
-                                 invisible="context.get('from_bid_no_bid') or review_status != 'approved' or decision_final != 'bid'">
-                                To use <strong>Create proposal</strong>, open this enquiry from the
-                                <strong>Bid / No Bid</strong> menu (after CSO approval with a Bid decision).
-                            </div>
                             <div class="alert alert-info mb-0" role="alert"
                                  invisible="review_status == 'approved' and decision_final == 'bid'">
-                                Proposals are available after CSO approves a <strong>Bid</strong> decision.
-                                Open the enquiry from <strong>Bid / No Bid</strong> to create one, or use
-                                <strong>View proposals</strong> to open the list for this enquiry.
+                                After CSO approves with a <strong>Bid</strong> decision, use
+                                <strong>Create proposal</strong> (header or this tab) or
+                                <strong>View proposals</strong> for this enquiry.
                             </div>
                         </page>
                         <page string="Notifications">
@@ -244,19 +290,92 @@
                 <field name="emirate"/>
                 <field name="industry"/>
                 <field name="review_status"/>
+                <field name="outcome_status"/>
                 <filter name="filter_all" string="All" domain="[]"/>
-                <filter name="filter_active" string="Active" domain="[('state','=','active')]"/>
-                <filter name="filter_completed" string="Completed" domain="[('state','=','completed')]"/>
-                <filter name="filter_declined" string="Declined" domain="[('state','=','declined')]"/>
-                <filter name="filter_priority" string="Priority" domain="[('state','=','priority')]"/>
+                <filter name="filter_outcome_open" string="Bid: Open" domain="[('outcome_status','=','open')]"/>
+                <filter name="filter_outcome_won" string="Bid: Won" domain="[('outcome_status','=','won')]"/>
+                <filter name="filter_outcome_lost" string="Bid: Lost" domain="[('outcome_status','=','lost')]"/>
+                <filter name="filter_outcome_closed" string="Bid: Closed" domain="[('outcome_status','=','closed')]"/>
+                <filter name="filter_priority" string="Priority" domain="[('is_priority','=',True)]"/>
                 <separator/>
                 <filter name="filter_pending_review" string="Pending Review" domain="[('review_status','=','pending_review')]"/>
                 <filter name="filter_change_requested" string="Change Requested" domain="[('review_status','=','change_requested')]"/>
                 <separator/>
                 <filter name="group_stage" string="Stage" context="{'group_by':'stage_id'}"/>
-                <filter name="group_state" string="Status" context="{'group_by':'state'}"/>
+                <filter name="group_outcome_status" string="Bid status" context="{'group_by':'outcome_status'}"/>
                 <filter name="group_lead" string="Project Lead" context="{'group_by':'project_lead_id'}"/>
+                <separator/>
+                <filter name="group_sales_rep" string="Sales Rep" context="{'group_by':'sales_rep'}"/>
+                <filter name="group_review_status" string="Review Status" context="{'group_by':'review_status'}"/>
+                <filter name="group_decision_final" string="Bid / No Bid (system)" context="{'group_by':'decision_final'}"/>
+                <filter name="group_industry" string="Industry" context="{'group_by':'industry'}"/>
+                <filter name="group_emirate" string="Emirate" context="{'group_by':'emirate'}"/>
+                <filter name="group_contract_type" string="Contract Type" context="{'group_by':'contract_type'}"/>
+                <filter name="group_contract_duration" string="Contract Duration" context="{'group_by':'contract_duration'}"/>
+                <filter name="group_threshold" string="Threshold" context="{'group_by':'threshold'}"/>
+                <filter name="group_tender_bond" string="Tender Bond" context="{'group_by':'tender_bond'}"/>
+                <filter name="group_performance_bond" string="Performance Bond" context="{'group_by':'performance_bond'}"/>
+                <filter name="group_kpi" string="KPI in RFP" context="{'group_by':'kpi'}"/>
+                <filter name="group_reviewed_by" string="CSO Reviewer" context="{'group_by':'reviewed_by_id'}"/>
+                <separator/>
+                <filter name="group_create_month" string="Created (month)" context="{'group_by':'create_date:month'}"/>
+                <filter name="group_deadline_month" string="Deadline (month)" context="{'group_by':'deadline_datetime:month'}"/>
+                <filter name="group_reviewed_on_month" string="Review date (month)" context="{'group_by':'reviewed_on:month'}"/>
             </search>
+        </field>
+    </record>
+
+    <record id="view_bid_project_pivot" model="ir.ui.view">
+        <field name="name">bid.project.pivot</field>
+        <field name="model">bid.project</field>
+        <field name="arch" type="xml">
+            <pivot string="Bid / No Bid Projects" sample="1">
+                <field name="stage_id" type="row"/>
+                <field name="review_status" type="col"/>
+                <field name="contract_value" type="measure"/>
+                <field name="score_overall" type="measure"/>
+                <field name="proposal_count" type="measure" invisible="1"/>
+                <field name="scope_total" type="measure" invisible="1"/>
+                <field name="scope_cleaning" type="measure" invisible="1"/>
+                <field name="scope_maintenance" type="measure" invisible="1"/>
+                <field name="scope_security" type="measure" invisible="1"/>
+                <field name="scope_landscaping" type="measure" invisible="1"/>
+                <field name="scope_laundry" type="measure" invisible="1"/>
+                <field name="scope_support" type="measure" invisible="1"/>
+                <field name="scope_others" type="measure" invisible="1"/>
+                <field name="score_strategy" type="measure" invisible="1"/>
+                <field name="score_customer" type="measure" invisible="1"/>
+                <field name="score_commercial" type="measure" invisible="1"/>
+                <field name="score_finance" type="measure" invisible="1"/>
+                <field name="score_operations" type="measure" invisible="1"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_bid_project_graph" model="ir.ui.view">
+        <field name="name">bid.project.graph</field>
+        <field name="model">bid.project</field>
+        <field name="arch" type="xml">
+            <graph string="Bid / No Bid Projects" type="bar" sample="1">
+                <field name="stage_id"/>
+                <field name="review_status"/>
+                <field name="contract_value" type="measure"/>
+                <field name="score_overall" type="measure" invisible="1"/>
+                <field name="proposal_count" type="measure" invisible="1"/>
+                <field name="scope_total" type="measure" invisible="1"/>
+                <field name="scope_cleaning" type="measure" invisible="1"/>
+                <field name="scope_maintenance" type="measure" invisible="1"/>
+                <field name="scope_security" type="measure" invisible="1"/>
+                <field name="scope_landscaping" type="measure" invisible="1"/>
+                <field name="scope_laundry" type="measure" invisible="1"/>
+                <field name="scope_support" type="measure" invisible="1"/>
+                <field name="scope_others" type="measure" invisible="1"/>
+                <field name="score_strategy" type="measure" invisible="1"/>
+                <field name="score_customer" type="measure" invisible="1"/>
+                <field name="score_commercial" type="measure" invisible="1"/>
+                <field name="score_finance" type="measure" invisible="1"/>
+                <field name="score_operations" type="measure" invisible="1"/>
+            </graph>
         </field>
     </record>
 
@@ -266,13 +385,13 @@
         <field name="arch" type="xml">
             <form string="New Enquiry">
                 <group>
-                    <field name="name"/>
+                    <field name="name" string="Project Name"/>
                     <field name="client_name"/>
                     <field name="project_lead_id"/>
                     <field name="team_member_ids" widget="many2many_tags"/>
                     <field name="deadline_datetime"/>
-                    <field name="state"/>
-                    <field name="progress"/>
+                    <field name="is_priority"/>
+                    <field name="progress" placeholder="e.g. Starting — outline next steps"/>
                 </group>
                 <footer>
                     <button name="action_create_project" string="Save Enquiry" type="object" class="btn-primary"/>
@@ -300,8 +419,26 @@
         </field>
     </record>
 
+    <record id="view_bid_decline_review_wizard_form" model="ir.ui.view">
+        <field name="name">bid.decline.review.wizard.form</field>
+        <field name="model">bid.decline.review.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Decline enquiry">
+                <group>
+                    <field name="project_id" invisible="1"/>
+                    <field name="justification"
+                           placeholder="Explain why this enquiry is being declined. This will be stored and shared with notified contacts."/>
+                </group>
+                <footer>
+                    <button name="action_confirm_decline" string="Decline" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
     <record id="action_bid_projects" model="ir.actions.act_window">
-        <field name="name">Enquiries</field>
+        <field name="name">All Records</field>
         <field name="res_model">bid.project</field>
         <field name="view_mode">list,form</field>
     </record>
@@ -327,6 +464,26 @@
         <field name="res_model">bid.project</field>
         <field name="view_mode">pivot,graph,list</field>
         <field name="search_view_id" ref="view_bid_project_search"/>
+        <field name="context">{'search_default_filter_all': 1}</field>
+    </record>
+
+    <record id="action_bid_reports_view_pivot" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="view_bid_project_pivot"/>
+        <field name="act_window_id" ref="action_bid_reports"/>
+    </record>
+    <record id="action_bid_reports_view_graph" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="view_bid_project_graph"/>
+        <field name="act_window_id" ref="action_bid_reports"/>
+    </record>
+    <record id="action_bid_reports_view_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="3"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_bid_project_tree"/>
+        <field name="act_window_id" ref="action_bid_reports"/>
     </record>
 
     <record id="action_bid_new_project_wizard" model="ir.actions.act_window">
@@ -339,8 +496,9 @@
     <record id="action_bid_board_leads" model="ir.actions.act_window">
         <field name="name">Leads</field>
         <field name="res_model">crm.lead</field>
-        <field name="view_mode">list,form,kanban,activity</field>
+        <field name="view_mode">list,kanban,calendar,form,activity</field>
         <field name="domain">[('type', '=', 'lead')]</field>
         <field name="context">{'default_type': 'lead'}</field>
+        <field name="search_view_id" ref="crm.view_crm_case_leads_filter"/>
     </record>
 </odoo>

@@ -5,6 +5,7 @@ from . import bid_salesperson_dashboard
 from . import bid_unified_analytics
 from . import bid_notification
 from . import bid_project
+from . import bid_project_bid_status
 from . import bid_proposal
 from . import bid_crm_lead
 from . import bid_settings

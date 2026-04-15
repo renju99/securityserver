@@ -11,11 +11,13 @@ class SalesBidBoardDashboard(models.Model):
 
     @api.model
     def _sanitize_filter_params(self, filter_params):
-        filter_params = filter_params or {}
+        filter_params = self.env["sales_bid_board.unified.analytics"].analytics_clamp_filter_params_for_salesperson(
+            filter_params or {}
+        )
         allowed = {
             "date_from",
             "date_to",
-            "state",
+            "outcome_status",
             "review_status",
             "decision_final",
             "sales_rep_id",
@@ -38,8 +40,8 @@ class SalesBidBoardDashboard(models.Model):
             domain.append(("create_date", ">=", clean["date_from"]))
         if clean.get("date_to"):
             domain.append(("create_date", "<=", clean["date_to"]))
-        if clean.get("state"):
-            domain.append(("state", "=", clean["state"]))
+        if clean.get("outcome_status"):
+            domain.append(("outcome_status", "=", clean["outcome_status"]))
         if clean.get("review_status"):
             domain.append(("review_status", "=", clean["review_status"]))
         if clean.get("decision_final"):
@@ -54,6 +56,7 @@ class SalesBidBoardDashboard(models.Model):
             domain.append(("emirate", "=", clean["emirate"]))
         if clean.get("stage_id"):
             domain.append(("stage_id", "=", int(clean["stage_id"])))
+        domain += self.env["sales_bid_board.unified.analytics"].analytics_extra_domain_bid_project()
         return domain
 
     @api.model
@@ -106,14 +109,26 @@ class SalesBidBoardDashboard(models.Model):
         project = self.env["bid.project"]
         users = self.env["res.users"]
         stages = self.env["bid.project.stage"].search([], order="sequence")
+        ua = self.env["sales_bid_board.unified.analytics"]
+        scope = ua.analytics_extra_domain_bid_project()
 
-        sales_rep_ids = [g["sales_rep"][0] for g in project.read_group([], ["sales_rep"], ["sales_rep"]) if g.get("sales_rep")]
-        lead_ids = [g["project_lead_id"][0] for g in project.read_group([], ["project_lead_id"], ["project_lead_id"]) if g.get("project_lead_id")]
+        sales_rep_ids = [
+            g["sales_rep"][0]
+            for g in project.read_group(scope, ["sales_rep"], ["sales_rep"])
+            if g.get("sales_rep")
+        ]
+        lead_ids = [
+            g["project_lead_id"][0]
+            for g in project.read_group(scope, ["project_lead_id"], ["project_lead_id"])
+            if g.get("project_lead_id")
+        ]
         sales_reps = users.browse(sales_rep_ids)
         leads = users.browse(lead_ids)
 
         return {
-            "states": [{"value": k, "label": v} for k, v in dict(project._fields["state"].selection).items()],
+            "outcome_statuses": [
+                {"value": k, "label": v} for k, v in dict(project._fields["outcome_status"].selection).items()
+            ],
             "review_statuses": [{"value": k, "label": v} for k, v in dict(project._fields["review_status"].selection).items()],
             "decisions": [{"value": k, "label": v} for k, v in dict(project._fields["decision_final"].selection).items()],
             "industries": [{"value": k, "label": v} for k, v in dict(project._fields["industry"].selection).items()],
@@ -239,6 +254,16 @@ class SalesBidBoardDashboard(models.Model):
         charts = [
             {
                 "type": "doughnut",
+                "title": "Bid/No Bid Status",
+                "labels": decision_labels or ["No Data"],
+                "keys": decision_keys or [""],
+                "action_model": "bid.project",
+                "action_domain_field": "decision_final",
+                "action_type": "selection",
+                "datasets": [{"label": "Projects", "data": decision_values or [0]}],
+            },
+            {
+                "type": "pie",
                 "title": "Review Status Distribution",
                 "labels": status_labels or ["No Data"],
                 "keys": status_keys or [""],
@@ -246,16 +271,6 @@ class SalesBidBoardDashboard(models.Model):
                 "action_domain_field": "review_status",
                 "action_type": "selection",
                 "datasets": [{"label": "Projects", "data": status_values or [0]}],
-            },
-            {
-                "type": "pie",
-                "title": "Bid / No Bid Split",
-                "labels": decision_labels or ["No Data"],
-                "keys": decision_keys or [""],
-                "action_model": "bid.project",
-                "action_domain_field": "decision_final",
-                "action_type": "selection",
-                "datasets": [{"label": "Projects", "data": decision_values or [0]}],
             },
             {
                 "type": "bar",
@@ -312,15 +327,33 @@ class SalesBidBoardDashboard(models.Model):
 
         top_rows = project_model.search_read(
             domain + [("review_status", "in", ("draft", "pending_review", "change_requested"))],
-            ["id", "code", "name", "client_name", "sales_rep", "review_status", "score_overall", "contract_value", "deadline_date"],
+            [
+                "id",
+                "code",
+                "name",
+                "client_name",
+                "sales_rep",
+                "review_status",
+                "score_overall",
+                "contract_value",
+                "deadline_datetime",
+            ],
             limit=10,
-            order="deadline_date asc, id desc",
+            order="deadline_datetime asc, id desc",
         )
         upcoming_rows = project_model.search_read(
-            domain + [("deadline_date", "!=", False)],
-            ["id", "code", "name", "deadline_date", "project_lead_id", "decision_final", "review_status"],
+            domain + [("deadline_datetime", "!=", False)],
+            [
+                "id",
+                "code",
+                "name",
+                "deadline_datetime",
+                "project_lead_id",
+                "decision_final",
+                "review_status",
+            ],
             limit=10,
-            order="deadline_date asc",
+            order="deadline_datetime asc",
         )
         project_ids = project_model.search(domain).ids
         submission_domain = (
@@ -361,7 +394,7 @@ class SalesBidBoardDashboard(models.Model):
                             review_sel.get(row.get("review_status"), row.get("review_status") or ""),
                             round(row.get("score_overall") or 0.0, 2),
                             round(row.get("contract_value") or 0.0, 2),
-                            row.get("deadline_date") or "",
+                            row.get("deadline_datetime") or "",
                         ],
                     }
                     for row in top_rows
@@ -377,7 +410,7 @@ class SalesBidBoardDashboard(models.Model):
                         "data": [
                             row.get("code") or "",
                             row.get("name") or "",
-                            row.get("deadline_date") or "",
+                            row.get("deadline_datetime") or "",
                             (row.get("project_lead_id") and row["project_lead_id"][1]) or "",
                             decision_sel.get(row.get("decision_final"), row.get("decision_final") or ""),
                             review_sel.get(row.get("review_status"), row.get("review_status") or ""),

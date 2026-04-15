@@ -58,7 +58,11 @@ class BidNotification(models.Model):
         notifications = self.search([("state", "!=", "done")])
         for notification in notifications:
             project = notification.project_id
-            if project.review_status in ("approved", "declined") or project.state == "declined":
+            if project.review_status in ("approved", "declined") or project.outcome_status in (
+                "won",
+                "lost",
+                "closed",
+            ):
                 notification.state = "done"
                 continue
             deadline_date = notification._deadline_date_for_reminder()
@@ -73,7 +77,7 @@ class BidNotification(models.Model):
             recipients = notification._reminder_recipients()
             if not recipients:
                 continue
-            deadline_value = project.deadline_datetime or project.deadline_date or "N/A"
+            deadline_value = project.deadline_datetime or "N/A"
             base_url = notification.env["ir.config_parameter"].sudo().get_param("web.base.url", "")
             project_link = (
                 f"{base_url}/web#id={project.id}&model=bid.project&view_type=form" if base_url else ""

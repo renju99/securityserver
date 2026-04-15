@@ -80,11 +80,11 @@
 
                         <div t-if="state.activeTab === 'enquiries'" class="row g-2 border-top pt-2">
                             <div class="col-12 small text-muted mb-1">Enquiry-specific</div>
-                            <div class="col-lg-2 col-md-4"><label class="form-label small">State</label>
-                                <select class="form-select form-select-sm" t-on-change="(ev) => this.onEnquiryChange('state', ev.target.value)">
+                            <div class="col-lg-2 col-md-4"><label class="form-label small">Bid status</label>
+                                <select class="form-select form-select-sm" t-on-change="(ev) => this.onEnquiryChange('outcome_status', ev.target.value)">
                                     <option value="">All</option>
-                                    <t t-foreach="state.filterOptions.states" t-as="o" t-key="o.value">
-                                        <option t-att-value="o.value" t-att-selected="state.enquiryFilters.state === o.value"><t t-esc="o.label"/></option>
+                                    <t t-foreach="state.filterOptions.outcome_statuses" t-as="o" t-key="o.value">
+                                        <option t-att-value="o.value" t-att-selected="state.enquiryFilters.outcome_status === o.value"><t t-esc="o.label"/></option>
                                     </t>
                                 </select></div>
                             <div class="col-lg-3 col-md-6"><label class="form-label small">Review status</label>
@@ -154,11 +154,11 @@
                                         <option t-att-value="o.value" t-att-selected="state.enquiryFilters.emirate === o.value"><t t-esc="o.label"/></option>
                                     </t>
                                 </select></div>
-                            <div class="col-lg-2 col-md-4"><label class="form-label small">State</label>
-                                <select class="form-select form-select-sm" t-on-change="(ev) => this.onEnquiryChange('state', ev.target.value)">
+                            <div class="col-lg-2 col-md-4"><label class="form-label small">Bid status</label>
+                                <select class="form-select form-select-sm" t-on-change="(ev) => this.onEnquiryChange('outcome_status', ev.target.value)">
                                     <option value="">All</option>
-                                    <t t-foreach="state.filterOptions.states" t-as="o" t-key="o.value">
-                                        <option t-att-value="o.value" t-att-selected="state.enquiryFilters.state === o.value"><t t-esc="o.label"/></option>
+                                    <t t-foreach="state.filterOptions.outcome_statuses" t-as="o" t-key="o.value">
+                                        <option t-att-value="o.value" t-att-selected="state.enquiryFilters.outcome_status === o.value"><t t-esc="o.label"/></option>
                                     </t>
                                 </select></div>
                             <div class="col-lg-3 col-md-6"><label class="form-label small">Focus sales rep</label>

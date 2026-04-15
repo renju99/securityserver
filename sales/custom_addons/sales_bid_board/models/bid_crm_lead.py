@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
@@ -32,6 +34,40 @@ class CrmLead(models.Model):
     )
     bid_intake_details_remarks = fields.Text(string="Details / Remarks", tracking=True)
     bid_intake_status = fields.Char(string="Status", tracking=True)
+    bid_calendar_start = fields.Datetime(
+        string="Calendar date",
+        compute="_compute_bid_lead_calendar",
+        store=True,
+        help="Expected closing date if set, otherwise lead created on (intake).",
+    )
+    bid_calendar_color = fields.Integer(
+        string="Calendar color",
+        compute="_compute_bid_lead_calendar",
+        store=True,
+        help="By deadline urgency when date_deadline is set; else by salesperson color.",
+    )
+
+    @api.depends("date_deadline", "create_date", "user_id")
+    def _compute_bid_lead_calendar(self):
+        today = fields.Date.context_today(self)
+        for lead in self:
+            if lead.date_deadline:
+                lead.bid_calendar_start = fields.Datetime.to_datetime(lead.date_deadline)
+                anchor = lead.date_deadline
+                if anchor < today:
+                    lead.bid_calendar_color = 1
+                elif anchor <= today + timedelta(days=7):
+                    lead.bid_calendar_color = 2
+                elif anchor <= today + timedelta(days=30):
+                    lead.bid_calendar_color = 3
+                else:
+                    lead.bid_calendar_color = 4
+            elif lead.create_date:
+                lead.bid_calendar_start = lead.create_date
+                lead.bid_calendar_color = (lead.user_id.id or 0) % 11 + 1 if lead.user_id else 8
+            else:
+                lead.bid_calendar_start = False
+                lead.bid_calendar_color = 0
 
     @api.depends("bid_intake_opportunity_date")
     def _compute_bid_intake_opportunity_month(self):
@@ -92,6 +128,12 @@ class CrmLead(models.Model):
             if patch:
                 lead.with_context(bid_board_lead_sync=True).write(patch)
         return res
+
+    @api.depends("email_from", "probability", "iap_enrich_done", "reveal_id")
+    def _compute_show_enrich_button(self):
+        """Bid Board: hide IAP Enrich on leads/opportunities (intake uses Create Bid/No Bid)."""
+        for lead in self:
+            lead.show_enrich_button = False
 
     @api.depends_context("uid")
     @api.depends("partner_id", "type")

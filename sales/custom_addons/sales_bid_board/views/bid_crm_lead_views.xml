@@ -12,21 +12,49 @@
                     type="action"
                     class="oe_stat_button"
                     icon="fa-folder-open"
-                    string="Enquiries"
+                    string="Bid/No Bids"
                     groups="sales_bid_board.group_bid_board_salesperson"
                     invisible="type not in ('lead', 'opportunity')"
-                    help="Open bid / no-bid enquiries linked to this record."/>
+                    help="Open Bid/No Bid records linked to this lead or opportunity."/>
             </xpath>
             <xpath expr="//header" position="inside">
                 <button
                     name="sales_bid_board.action_server_create_bid_enquiry_from_lead"
                     type="action"
-                    string="Create Enquiry"
+                    string="Create Bid/No Bid"
                     class="btn-secondary"
                     data-hotkey="shift+q"
                     groups="sales_bid_board.group_bid_board_salesperson"
                     invisible="type not in ('lead', 'opportunity')"/>
             </xpath>
+        </field>
+    </record>
+
+    <!-- Bid Board intake: no convert-to-opportunity; Won available on leads (same as opps). -->
+    <record id="bid_crm_lead_form_header_bid_intake" model="ir.ui.view">
+        <field name="name">crm.lead.form.bid.board.header.intake</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <button name="%(crm.action_crm_lead2opportunity_partner)d" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </button>
+            <button name="action_set_won_rainbowman" position="attributes">
+                <attribute name="invisible">not active or probability == 100</attribute>
+            </button>
+        </field>
+    </record>
+
+    <!-- Strip IAP Enrich header buttons (compute can be bypassed by caching / merged views). -->
+    <record id="bid_crm_lead_form_strip_iap_enrich" model="ir.ui.view">
+        <field name="name">crm.lead.form.strip.iap.enrich</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm_iap_enrich.crm_lead_view_form"/>
+        <field name="priority">200</field>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='iap_enrich']" position="replace"/>
+            <xpath expr="//button[@name='iap_enrich']" position="replace"/>
         </field>
     </record>
 
@@ -87,7 +115,7 @@
         <field name="model">crm.lead</field>
         <field name="inherit_id" ref="crm.crm_lead_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//div[@class='col-auto'][.//div[@id='probability']]" position="attributes">
+            <xpath expr="//div[hasclass('col-auto')][.//div[@id='probability']]" position="attributes">
                 <attribute name="invisible">type == 'lead'</attribute>
             </xpath>
         </field>
@@ -126,7 +154,7 @@
                 <field name="bid_intake_comments_source" invisible="type != 'lead'" placeholder="How did this lead come in?"/>
             </xpath>
             <!-- After the mobile o_row div, not after the field (otherwise widgets sit inside the same row). -->
-            <xpath expr="//group[@name='lead_info']/div[contains(@class,'o_row')][.//field[@name='mobile']]" position="after">
+            <xpath expr="//group[@name='lead_info']/div[hasclass('o_row')][.//field[@name='mobile']]" position="after">
                 <field name="bid_intake_opportunity_date" invisible="type != 'lead'"/>
                 <field name="bid_intake_opportunity_month" invisible="type != 'lead'"/>
                 <field name="bid_intake_details_remarks" invisible="type != 'lead'" placeholder="Additional details..."/>

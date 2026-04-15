@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
+    <!--
+        Compatibility seed file:
+        Keep this file present so upgrades do not fail in environments that
+        still reference it from an older manifest.
+    -->
+    <data noupdate="0">
         <record id="incident_cat_fire_emergency" model="incident.category">
             <field name="name">Fire Alarm Emergency</field>
             <field name="code">FIRE_EMG</field>
             <field name="sequence">65</field>
             <field name="color">1</field>
+            <field name="description">Fire alarm emergency event requiring immediate response, alarm verification, evacuation control, and authority coordination.</field>
         </record>
     </data>
 </odoo>

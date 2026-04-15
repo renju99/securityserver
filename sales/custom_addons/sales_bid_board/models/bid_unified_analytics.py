@@ -11,6 +11,51 @@ class SalesBidBoardUnifiedAnalytics(models.TransientModel):
     name = fields.Char(default="Analytics", required=True)
 
     @api.model
+    def analytics_is_sales_manager_or_above(self):
+        """Bid Board / Sales Manager (or any implied higher role) sees org-wide analytics."""
+        return self.env.user.has_group("sales_bid_board.group_bid_board_sales_manager")
+
+    @api.model
+    def analytics_clamp_filter_params_for_salesperson(self, filter_params):
+        """Salesperson-only users cannot scope analytics to another rep (RPC / UI tampering)."""
+        fp = dict(filter_params or {})
+        if self.analytics_is_sales_manager_or_above():
+            return fp
+        uid = self.env.uid
+        srid = fp.get("sales_rep_id")
+        if srid not in (None, "", False):
+            try:
+                if int(srid) != uid:
+                    fp["sales_rep_id"] = uid
+            except (TypeError, ValueError):
+                fp.pop("sales_rep_id", None)
+        return fp
+
+    @api.model
+    def analytics_extra_domain_bid_project(self):
+        """AND with bid.project queries; matches ir.rule salesperson scope."""
+        if self.analytics_is_sales_manager_or_above():
+            return []
+        u = self.env.uid
+        return ["|", ("create_uid", "=", u), ("sales_rep", "=", u)]
+
+    @api.model
+    def analytics_extra_domain_project_m2o(self, field="project_id"):
+        """AND on models linked to bid.project; matches bid_* ir.rule salesperson scope."""
+        if self.analytics_is_sales_manager_or_above():
+            return []
+        u = self.env.uid
+        return ["|", (f"{field}.create_uid", "=", u), (f"{field}.sales_rep", "=", u)]
+
+    @api.model
+    def analytics_extra_domain_crm_lead(self):
+        """AND on crm.lead analytics — overrides OR of conflicting CRM group rules."""
+        if self.analytics_is_sales_manager_or_above():
+            return []
+        u = self.env.uid
+        return ["|", ("user_id", "=", u), ("create_uid", "=", u)]
+
+    @api.model
     def _count_value(self, row):
         if not row:
             return 0
@@ -79,15 +124,20 @@ class SalesBidBoardUnifiedAnalytics(models.TransientModel):
 
     @api.model
     def _crm_lead_leads_domain(self, filter_params):
-        domain = [("type", "=", "lead")] + self._domain_create_date(filter_params)
-        if filter_params.get("sales_rep_id"):
+        fp = self.analytics_clamp_filter_params_for_salesperson(dict(filter_params or {}))
+        domain = (
+            [("type", "=", "lead")]
+            + self._domain_create_date(fp)
+            + self.analytics_extra_domain_crm_lead()
+        )
+        if fp.get("sales_rep_id"):
             try:
-                domain.append(("user_id", "=", int(filter_params["sales_rep_id"])))
+                domain.append(("user_id", "=", int(fp["sales_rep_id"])))
             except (TypeError, ValueError):
                 pass
-        if filter_params.get("team_id"):
+        if fp.get("team_id"):
             try:
-                domain.append(("team_id", "=", int(filter_params["team_id"])))
+                domain.append(("team_id", "=", int(fp["team_id"])))
             except (TypeError, ValueError):
                 pass
         return domain
@@ -137,7 +187,10 @@ class SalesBidBoardUnifiedAnalytics(models.TransientModel):
     def action_kpi_proposals_open(self, filter_params=None):
         fp = dict(filter_params or {})
         return self._act_window_list(
-            "Open proposals", "bid.proposal", self._proposal_domain(fp) + [("outcome_status", "=", "open")]
+            "Pipeline proposals",
+            "bid.proposal",
+            self._proposal_domain(fp)
+            + [("outcome_status", "in", ("open", "submitted", "revision"))],
         )
 
     @api.model
@@ -184,40 +237,46 @@ class SalesBidBoardUnifiedAnalytics(models.TransientModel):
 
     @api.model
     def _proposal_domain(self, filter_params):
-        domain = list(self._domain_create_date(filter_params))
-        if filter_params.get("industry"):
-            domain.append(("project_id.industry", "=", filter_params["industry"]))
-        if filter_params.get("emirate"):
-            domain.append(("project_id.emirate", "=", filter_params["emirate"]))
-        if filter_params.get("sales_rep_id"):
+        fp = self.analytics_clamp_filter_params_for_salesperson(dict(filter_params or {}))
+        domain = list(self._domain_create_date(fp)) + self.analytics_extra_domain_project_m2o("project_id")
+        if fp.get("industry"):
+            domain.append(("project_id.industry", "=", fp["industry"]))
+        if fp.get("emirate"):
+            domain.append(("project_id.emirate", "=", fp["emirate"]))
+        if fp.get("sales_rep_id"):
             try:
-                domain.append(("sales_user_id", "=", int(filter_params["sales_rep_id"])))
+                domain.append(("sales_user_id", "=", int(fp["sales_rep_id"])))
             except (TypeError, ValueError):
                 pass
         return domain
 
     @api.model
     def _submission_domain(self, filter_params):
-        domain = []
-        if filter_params.get("date_from"):
-            domain.append(("submitted_date", ">=", filter_params["date_from"]))
-        if filter_params.get("date_to"):
-            domain.append(("submitted_date", "<=", filter_params["date_to"]))
+        fp = self.analytics_clamp_filter_params_for_salesperson(dict(filter_params or {}))
+        domain = list(self.analytics_extra_domain_project_m2o("project_id"))
+        if fp.get("date_from"):
+            domain.append(("submitted_date", ">=", fp["date_from"]))
+        if fp.get("date_to"):
+            domain.append(("submitted_date", "<=", fp["date_to"]))
         return domain
 
     @api.model
     def _change_domain(self, filter_params):
-        return list(self._domain_create_date(filter_params))
+        fp = self.analytics_clamp_filter_params_for_salesperson(dict(filter_params or {}))
+        return list(self._domain_create_date(fp)) + self.analytics_extra_domain_project_m2o("project_id")
 
     @api.model
     def _tab_leads(self, filter_params):
         Lead = self.env["crm.lead"]
-        domain = self._crm_lead_leads_domain(filter_params)
+        fp = self.analytics_clamp_filter_params_for_salesperson(dict(filter_params or {}))
+        domain = self._crm_lead_leads_domain(fp)
 
         total = Lead.search_count(domain)
         unassigned = Lead.search_count(domain + [("user_id", "=", False)])
 
-        project_with_lead = self.env["bid.project"].search([("crm_lead_id", "!=", False)])
+        project_with_lead = self.env["bid.project"].search(
+            [("crm_lead_id", "!=", False)] + self.analytics_extra_domain_bid_project()
+        )
         linked_ids = project_with_lead.mapped("crm_lead_id").ids
         with_enquiry = Lead.search_count(domain + [("id", "in", linked_ids)])
 
@@ -353,7 +412,9 @@ class SalesBidBoardUnifiedAnalytics(models.TransientModel):
         domain = self._proposal_domain(filter_params)
 
         total = Proposal.search_count(domain)
-        open_c = Proposal.search_count(domain + [("outcome_status", "=", "open")])
+        pipeline_c = Proposal.search_count(
+            domain + [("outcome_status", "in", ("open", "submitted", "revision"))]
+        )
         won_c = Proposal.search_count(domain + [("outcome_status", "=", "won")])
         lost_c = Proposal.search_count(domain + [("outcome_status", "=", "lost")])
 
@@ -433,8 +494,8 @@ class SalesBidBoardUnifiedAnalytics(models.TransientModel):
                     "rpc_model": "sales_bid_board.unified.analytics",
                 },
                 {
-                    "name": "Open",
-                    "value": open_c,
+                    "name": "Pipeline",
+                    "value": pipeline_c,
                     "icon": "fa-folder-open",
                     "action": "action_kpi_proposals_open",
                     "rpc_model": "sales_bid_board.unified.analytics",
@@ -518,18 +579,16 @@ class SalesBidBoardUnifiedAnalytics(models.TransientModel):
 
     @api.model
     def _tab_activity(self, filter_params):
+        fp = self.analytics_clamp_filter_params_for_salesperson(dict(filter_params or {}))
         Sub = self.env["bid.submission"]
         Chg = self.env["bid.change.request"]
         Notif = self.env["bid.notification"]
 
-        sub_dom = []
-        if filter_params.get("date_from"):
-            sub_dom.append(("submitted_date", ">=", filter_params["date_from"]))
-        if filter_params.get("date_to"):
-            sub_dom.append(("submitted_date", "<=", filter_params["date_to"]))
+        sub_dom = self._submission_domain(fp)
 
-        chg_dom = self._domain_create_date(filter_params)
-        notif_dom = self._domain_create_date(filter_params)
+        chg_dom = self._change_domain(fp)
+
+        notif_dom = list(self._domain_create_date(fp)) + self.analytics_extra_domain_project_m2o("project_id")
 
         sub_total = Sub.search_count(sub_dom)
         status_groups = Sub.read_group(sub_dom, ["id:count"], ["status"], lazy=False)
@@ -689,14 +748,14 @@ class SalesBidBoardUnifiedAnalytics(models.TransientModel):
     @api.model
     def get_tab_data(self, tab, filter_params=None):
         """Return one tab payload: kpis, charts, tables, filter_options (optional)."""
-        fp = dict(filter_params or {})
+        fp = self.analytics_clamp_filter_params_for_salesperson(dict(filter_params or {}))
         tab = (tab or "enquiries").strip()
         if tab == "enquiries":
             return self.env["sales_bid_board.dashboard"].get_dashboard_data(False, {}, fp)
         if tab == "by_rep":
             rep_fp = {
                 k: fp[k]
-                for k in ("date_from", "date_to", "industry", "emirate", "state", "sales_rep_id")
+                for k in ("date_from", "date_to", "industry", "emirate", "outcome_status", "sales_rep_id")
                 if k in fp and fp[k] not in (None, "", False)
             }
             return self.env["sales_bid_board.salesperson.dashboard"].get_dashboard_data(False, {}, rep_fp)

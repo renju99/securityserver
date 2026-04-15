@@ -19,9 +19,11 @@ class SalesBidBoardSalespersonDashboard(models.Model):
 
     @api.model
     def _sanitize(self, filter_params):
-        filter_params = filter_params or {}
+        filter_params = self.env["sales_bid_board.unified.analytics"].analytics_clamp_filter_params_for_salesperson(
+            filter_params or {}
+        )
         clean = {}
-        for key in ("date_from", "date_to", "industry", "emirate", "state"):
+        for key in ("date_from", "date_to", "industry", "emirate", "outcome_status"):
             if filter_params.get(key):
                 clean[key] = filter_params[key]
         raw_rep = filter_params.get("sales_rep_id")
@@ -43,10 +45,11 @@ class SalesBidBoardSalespersonDashboard(models.Model):
             domain.append(("industry", "=", clean["industry"]))
         if clean.get("emirate"):
             domain.append(("emirate", "=", clean["emirate"]))
-        if clean.get("state"):
-            domain.append(("state", "=", clean["state"]))
+        if clean.get("outcome_status"):
+            domain.append(("outcome_status", "=", clean["outcome_status"]))
         if clean.get("sales_rep_id"):
             domain.append(("sales_rep", "=", clean["sales_rep_id"]))
+        domain += self.env["sales_bid_board.unified.analytics"].analytics_extra_domain_bid_project()
         return domain
 
     @api.model
@@ -243,13 +246,19 @@ class SalesBidBoardSalespersonDashboard(models.Model):
             "filter_options": {
                 "industries": [{"value": k, "label": v} for k, v in dict(project._fields["industry"].selection).items()],
                 "emirates": [{"value": k, "label": v} for k, v in dict(project._fields["emirate"].selection).items()],
-                "states": [{"value": k, "label": v} for k, v in dict(project._fields["state"].selection).items()],
+                "outcome_statuses": [
+                    {"value": k, "label": v} for k, v in dict(project._fields["outcome_status"].selection).items()
+                ],
                 "sales_reps": [
                     {"value": user.id, "label": user.name}
                     for user in self.env["res.users"].browse(
                         [
                             g["sales_rep"][0]
-                            for g in project.read_group([], ["sales_rep"], ["sales_rep"])
+                            for g in project.read_group(
+                                self.env["sales_bid_board.unified.analytics"].analytics_extra_domain_bid_project(),
+                                ["sales_rep"],
+                                ["sales_rep"],
+                            )
                             if g.get("sales_rep")
                         ]
                     )

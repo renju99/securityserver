@@ -53,7 +53,7 @@ class BidBoardUnifiedAnalytics extends Component {
                 emirate: "",
             },
             enquiryFilters: {
-                state: "",
+                outcome_status: "",
                 review_status: "",
                 decision_final: "",
                 industry: "",
@@ -66,7 +66,7 @@ class BidBoardUnifiedAnalytics extends Component {
                 teams: [],
                 industries: [],
                 emirates: [],
-                states: [],
+                outcome_statuses: [],
                 review_statuses: [],
                 decisions: [],
                 stages: [],
@@ -111,7 +111,7 @@ class BidBoardUnifiedAnalytics extends Component {
         }
         if (tab === "enquiries") {
             Object.assign(base, {
-                state: e.state,
+                outcome_status: e.outcome_status,
                 review_status: e.review_status,
                 decision_final: e.decision_final,
                 industry: e.industry,
@@ -125,7 +125,7 @@ class BidBoardUnifiedAnalytics extends Component {
             Object.assign(base, {
                 industry: e.industry || g.industry,
                 emirate: e.emirate || g.emirate,
-                state: e.state,
+                outcome_status: e.outcome_status,
                 sales_rep_id: e.sales_rep_id || g.sales_rep_id,
             });
         }
@@ -198,7 +198,7 @@ class BidBoardUnifiedAnalytics extends Component {
             emirate: "",
         };
         this.state.enquiryFilters = {
-            state: "",
+            outcome_status: "",
             review_status: "",
             decision_final: "",
             industry: "",
@@ -261,8 +261,8 @@ class BidBoardUnifiedAnalytics extends Component {
                 if (params.emirate) {
                     domain.push(["emirate", "=", params.emirate]);
                 }
-                if (params.state) {
-                    domain.push(["state", "=", params.state]);
+                if (params.outcome_status) {
+                    domain.push(["outcome_status", "=", params.outcome_status]);
                 }
             }
             this.action.doAction({
@@ -390,8 +390,8 @@ class BidBoardUnifiedAnalytics extends Component {
             if (params.emirate) {
                 fd.push(["emirate", "=", params.emirate]);
             }
-            if (params.state) {
-                fd.push(["state", "=", params.state]);
+            if (params.outcome_status) {
+                fd.push(["outcome_status", "=", params.outcome_status]);
             }
             if (params.sales_rep_id) {
                 fd.push(["sales_rep", "=", parseInt(params.sales_rep_id, 10)]);
@@ -399,8 +399,8 @@ class BidBoardUnifiedAnalytics extends Component {
         }
         if (this.state.activeTab === "enquiries" && chartData.action_model === "bid.project") {
             const e = this.state.enquiryFilters;
-            if (e.state) {
-                fd.push(["state", "=", e.state]);
+            if (e.outcome_status) {
+                fd.push(["outcome_status", "=", e.outcome_status]);
             }
             if (e.review_status) {
                 fd.push(["review_status", "=", e.review_status]);

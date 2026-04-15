@@ -26,6 +26,10 @@ cd /home/azureuser/sales
 docker compose down
 ```
 
+## Bad Gateway (502) behind `nginx-proxy`
+
+If `sales.berkeleyuae.com` returns **502** after restarting **`odoo_sales`**, nginx may still be using an **old container IP**. The sales vhost uses Docker DNS with a short TTL so upstream is re-resolved automatically. If you change nginx config, run **`docker exec nginx-proxy nginx -s reload`**.
+
 ## First-time DB initialization
 
 On first launch, create the `sales` database in Odoo web UI if it is not auto-created.
@@ -45,7 +49,7 @@ Application code lives under `custom_addons/`. Install or upgrade modules from *
 - **Purpose:** Manage **enquiries** (`bid.project`) through stages, governance (review queue, submit-for-review rules), **submissions**, **deadline reminders**, and **analytics** dashboards. Depends on `sale_management`, `crm`, `mail`, `web`, and `auth_oauth`.
 - **CRM leads:** Standard `crm.lead` records gain **bid intake** fields (scope of work, location, opportunity date, remarks, and related tracking). Leads require customer, customer name, and contact name when `type` is `lead`. Server actions support creating a **Bid Board enquiry** from a lead or opportunity and link the enquiry back to CRM.
 - **Proposals:** Model `bid.proposal` records formal proposals after a **Bid** decision on an enquiry. Enquiries expose smart buttons and actions to open or create proposals when the workflow allows (typically from **Bid / No Bid**).
-- **Menus (high level):** **Bid Board** root → All Enquiries, New Enquiry, Leads, Bid / No Bid, Proposals, Review Queue, Submissions, Deadline Reminders; **Reports** → Project Reports; **Analytics** → **Bid Board Analytics** (single tabbed action: Leads, Enquiries, By sales rep, Proposals, Activity & reminders); **Configuration** (managers) → Settings, Email Schedule, Submit Threshold, Team; **Documentation** (in-app training content).
+- **Menus (high level):** **Bid Board** root → Leads, **Bid / No Bid** (All Records, **Submissions**), Proposals, **Review & reminders** (Review Queue, Deadline Reminders); **Reports** → Project Reports; **Analytics** → **Bid Board Analytics** (single tabbed action: Leads, Enquiries, By sales rep, Proposals, Activity & reminders); **Configuration** (managers) → Settings, Email Schedule, Submit Threshold, Team; **Documentation** (in-app training content).
 - **Proposal flow-through:** Proposal records inherit key context from the linked enquiry, including services text and scope-of-work percentages (Cleaning, Maintenance, Security, Landscaping, Laundry, Support, Others, Total).
 
 Module-specific upgrade and rollout steps (including two-phase field rollouts) are documented in [custom_addons/sales_bid_board/DEPLOY_CHECKLIST.md](custom_addons/sales_bid_board/DEPLOY_CHECKLIST.md).

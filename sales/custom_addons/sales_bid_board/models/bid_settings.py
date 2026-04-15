@@ -20,7 +20,9 @@ class BidBoardSettings(models.Model):
     )
     cso_approver_emails = fields.Char(
         string="CSO (Email Approvers)",
-        help="Comma-separated addresses for CSO review emails and governance SLA reminders. "
+        help="Comma-separated addresses that receive CSO review notifications and governance SLA reminders. "
+        "This does not grant Approve / Decline / Request change in Odoo — assign the Bid Board / CSO "
+        "security group to users who may perform those actions. "
         "Submit-for-review emails follow “Notify CSO on every submission” below.",
     )
     notify_cso_on_all_submissions = fields.Boolean(

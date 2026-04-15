@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+      Decline wizard ACLs use search on ir.model instead of model_id:id in CSV.
+      Odoo only creates ir.model XML ids like model_bid_decline_review_wizard when
+      model._module matches this addon; this wizard can miss that, which breaks CSV load.
+    -->
+    <data>
+        <record id="access_bid_decline_review_wizard_cso" model="ir.model.access">
+            <field name="name">bid.decline.review.wizard cso</field>
+            <field name="model_id" model="ir.model" search="[('model', '=', 'bid.decline.review.wizard')]"/>
+            <field name="group_id" ref="sales_bid_board.group_bid_board_cso"/>
+            <field name="perm_read" eval="1"/>
+            <field name="perm_write" eval="1"/>
+            <field name="perm_create" eval="1"/>
+            <field name="perm_unlink" eval="1"/>
+        </record>
+        <record id="access_bid_decline_review_wizard_system" model="ir.model.access">
+            <field name="name">bid.decline.review.wizard system</field>
+            <field name="model_id" model="ir.model" search="[('model', '=', 'bid.decline.review.wizard')]"/>
+            <field name="group_id" ref="base.group_system"/>
+            <field name="perm_read" eval="1"/>
+            <field name="perm_write" eval="1"/>
+            <field name="perm_create" eval="1"/>
+            <field name="perm_unlink" eval="1"/>
+        </record>
+    </data>
+</odoo>

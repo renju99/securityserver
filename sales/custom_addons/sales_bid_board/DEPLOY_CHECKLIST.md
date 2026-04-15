@@ -2,6 +2,24 @@
 
 Use this checklist whenever you deploy `sales_bid_board`, especially when adding/changing model fields.
 
+## Troubleshooting: upgrade “hangs” or Docker looks stuck
+
+- **`OSError: [Errno 98] Address already in use`** (or the command never finishes): you started a **second** Odoo process **inside the same container** while the main app is already listening on **8069** (multi-worker mode). The upgrade process tries to bind that port and fails or blocks.
+
+  **Fix — pick one:**
+
+  1. **In-place upgrade (container keeps running):** always pass **`--no-http`** so the upgrade process does not start HTTP:
+
+     ```bash
+     docker exec odoo_sales odoo -c /etc/odoo/odoo.conf -d sales -u sales_bid_board --stop-after-init --no-http
+     ```
+
+  2. **One-off container (no second listener on 8069):** stop the app container, run upgrade, start again (see “Recommended local command” below).
+
+- **Upgrading from Odoo Apps UI:** the server may sit on “loading” for a while during registry reload; that is normal on large databases. If it never completes, check `/var/lib/odoo/odoo.log` in the container for tracebacks.
+
+---
+
 ## Goal
 
 Prevent upgrade failures like:
@@ -32,7 +50,7 @@ Prevent upgrade failures like:
 4. Run upgrade:
 
    ```bash
-   docker exec odoo_sales odoo server -c /etc/odoo/odoo.conf -d sales -u sales_bid_board --no-http --stop-after-init
+   docker exec odoo_sales odoo -c /etc/odoo/odoo.conf -d sales -u sales_bid_board --stop-after-init --no-http
    ```
 
 5. Verify parameter key is readable (Odoo shell):
@@ -50,7 +68,7 @@ Prevent upgrade failures like:
 3. Run upgrade again:
 
    ```bash
-   docker exec odoo_sales odoo server -c /etc/odoo/odoo.conf -d sales -u sales_bid_board --no-http --stop-after-init
+   docker exec odoo_sales odoo -c /etc/odoo/odoo.conf -d sales -u sales_bid_board --stop-after-init --no-http
    ```
 
 4. Hard refresh browser (`Ctrl+Shift+R`).
@@ -65,7 +83,7 @@ Prevent upgrade failures like:
 3. Upgrade module:
 
    ```bash
-   docker exec odoo_sales odoo server -c /etc/odoo/odoo.conf -d sales -u sales_bid_board --no-http --stop-after-init
+   docker exec odoo_sales odoo -c /etc/odoo/odoo.conf -d sales -u sales_bid_board --stop-after-init --no-http
    ```
 
 4. Verify:
