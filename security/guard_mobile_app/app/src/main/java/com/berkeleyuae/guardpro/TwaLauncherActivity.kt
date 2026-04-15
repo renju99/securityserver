@@ -25,6 +25,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
+import java.net.HttpURLConnection
+import java.net.URL
 import org.json.JSONObject
 
 class TwaLauncherActivity : AppCompatActivity() {
@@ -35,6 +37,10 @@ class TwaLauncherActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private var nfcAdapter: NfcAdapter? = null
     private var pendingWebPermissionRequest: PermissionRequest? = null
+    @Volatile
+    private var emergencyNativeHttpInFlight = false
+    @Volatile
+    private var lastNativeNotifiedAckId: String? = null
 
     /**
      * WebView throttles JS timers in the background (~30s). Native timers keep emergency
@@ -54,6 +60,7 @@ class TwaLauncherActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 Log.d("WebView", "Emergency poll inject: ${e.message}")
             }
+            pollEmergencyViaSessionCookie()
             emergencyWebPollHandler.postDelayed(this, emergencyWebPollIntervalMs)
         }
     }
@@ -70,6 +77,7 @@ class TwaLauncherActivity : AppCompatActivity() {
 
         // Initialize NFC
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+        requestPostNotificationsIfNeeded()
 
         // Check and request permissions
         if (checkPermissions()) {
@@ -103,6 +111,59 @@ class TwaLauncherActivity : AppCompatActivity() {
 
     private fun stopNativeEmergencyBridgePolling() {
         emergencyWebPollHandler.removeCallbacks(emergencyWebPollRunnable)
+    }
+
+    /**
+     * Fallback native poll path for WebView throttling cases.
+     * Uses authenticated session cookie from WebView to query pending broadcasts.
+     */
+    private fun pollEmergencyViaSessionCookie() {
+        if (emergencyNativeHttpInFlight) return
+        emergencyNativeHttpInFlight = true
+        Thread {
+            var conn: HttpURLConnection? = null
+            try {
+                val cookie = CookieManager.getInstance().getCookie(START_URL)
+                if (cookie.isNullOrBlank()) {
+                    return@Thread
+                }
+                val url = URL("https://security.berkeleyuae.com/guardpro/api/emergency_broadcasts/pending?_=${System.currentTimeMillis()}")
+                conn = (url.openConnection() as HttpURLConnection).apply {
+                    requestMethod = "GET"
+                    connectTimeout = 5000
+                    readTimeout = 5000
+                    setRequestProperty("Accept", "application/json")
+                    setRequestProperty("Cookie", cookie)
+                    setRequestProperty("Cache-Control", "no-cache")
+                }
+                val code = conn.responseCode
+                if (code !in 200..299) {
+                    return@Thread
+                }
+                val body = conn.inputStream.bufferedReader().use { it.readText() }
+                val obj = JSONObject(body)
+                val rows = obj.optJSONArray("broadcasts")
+                if (obj.optBoolean("success", false) && rows != null && rows.length() > 0) {
+                    val row = rows.optJSONObject(0) ?: return@Thread
+                    val ackId = row.opt("ack_id")?.toString()
+                    if (!ackId.isNullOrBlank() && ackId != lastNativeNotifiedAckId) {
+                        val title = row.optString("title", "EMERGENCY ALERT").take(200)
+                        val message = row.optString("message", "").take(4000)
+                        showEmergencyNotification(title, message)
+                        lastNativeNotifiedAckId = ackId
+                    }
+                } else {
+                    lastNativeNotifiedAckId = null
+                    val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    nm.cancel(EMERGENCY_NOTIF_ID)
+                }
+            } catch (e: Exception) {
+                Log.d("WebView", "Emergency native HTTP poll skipped: ${e.message}")
+            } finally {
+                conn?.disconnect()
+                emergencyNativeHttpInFlight = false
+            }
+        }.start()
     }
 
     private fun enableNfcForegroundDispatch() {
@@ -387,45 +448,7 @@ class TwaLauncherActivity : AppCompatActivity() {
                 val obj = JSONObject(jsonPayload)
                 val title = obj.optString("title", "EMERGENCY ALERT").take(200)
                 val message = obj.optString("message", "").take(4000)
-                activity.runOnUiThread {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        if (ActivityCompat.checkSelfPermission(
-                                activity,
-                                Manifest.permission.POST_NOTIFICATIONS
-                            ) != PackageManager.PERMISSION_GRANTED
-                        ) {
-                            Log.w("AndroidBridge", "POST_NOTIFICATIONS not granted; emergency tray banner skipped")
-                            return@runOnUiThread
-                        }
-                    }
-                    val nm =
-                        activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                    activity.ensureEmergencyNotificationChannel(nm)
-                    val launchIntent = Intent(activity, TwaLauncherActivity::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    }
-                    val pi = PendingIntent.getActivity(
-                        activity,
-                        0,
-                        launchIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                    )
-                    val iconRes = activity.applicationInfo.icon
-                    val smallIcon =
-                        if (iconRes != 0) iconRes else android.R.drawable.stat_sys_warning
-                    val notif = NotificationCompat.Builder(activity, EMERGENCY_CHANNEL_ID)
-                        .setSmallIcon(smallIcon)
-                        .setContentTitle(title)
-                        .setContentText(message.take(500))
-                        .setStyle(NotificationCompat.BigTextStyle().bigText(message))
-                        .setPriority(NotificationCompat.PRIORITY_MAX)
-                        .setCategory(NotificationCompat.CATEGORY_ALARM)
-                        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                        .setAutoCancel(true)
-                        .setContentIntent(pi)
-                        .build()
-                    nm.notify(EMERGENCY_NOTIF_ID, notif)
-                }
+                activity.showEmergencyNotification(title, message)
             } catch (e: Exception) {
                 Log.e("AndroidBridge", "postEmergencyNotification failed: ${e.message}", e)
             }
@@ -454,6 +477,46 @@ class TwaLauncherActivity : AppCompatActivity() {
             enableVibration(true)
         }
         nm.createNotificationChannel(ch)
+    }
+
+    private fun canPostNotifications(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun showEmergencyNotification(title: String, message: String) {
+        runOnUiThread {
+            if (!canPostNotifications()) {
+                Log.w("AndroidBridge", "POST_NOTIFICATIONS not granted; emergency tray banner skipped")
+                return@runOnUiThread
+            }
+            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            ensureEmergencyNotificationChannel(nm)
+            val launchIntent = Intent(this, TwaLauncherActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            val pi = PendingIntent.getActivity(
+                this,
+                0,
+                launchIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            val iconRes = applicationInfo.icon
+            val smallIcon = if (iconRes != 0) iconRes else android.R.drawable.stat_sys_warning
+            val notif = NotificationCompat.Builder(this, EMERGENCY_CHANNEL_ID)
+                .setSmallIcon(smallIcon)
+                .setContentTitle(title)
+                .setContentText(message.take(500))
+                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setAutoCancel(true)
+                .setContentIntent(pi)
+                .build()
+            nm.notify(EMERGENCY_NOTIF_ID, notif)
+        }
     }
 
     /** Android 13+: runtime permission for posting emergency notifications from the WebView bridge. */
