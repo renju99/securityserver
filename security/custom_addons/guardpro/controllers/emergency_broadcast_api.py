@@ -12,8 +12,14 @@ _logger = logging.getLogger(__name__)
 class EmergencyBroadcastAPIController(http.Controller):
     """API endpoints for emergency broadcast functionality."""
 
-    @http.route('/guardpro/api/emergency_broadcasts/pending', 
-                type='http', auth='user', methods=['GET'], csrf=False)
+    @http.route(
+        '/guardpro/api/emergency_broadcasts/pending',
+        type='http',
+        auth='user',
+        methods=['GET'],
+        csrf=False,
+        website=True,
+    )
     def get_pending_broadcasts(self, **kwargs):
         """Get all pending (unacknowledged) emergency broadcasts for the current user."""
         try:
@@ -57,8 +63,14 @@ class EmergencyBroadcastAPIController(http.Controller):
                 status=500,
             )
 
-    @http.route('/guardpro/api/emergency_broadcasts/acknowledge', 
-                type='http', auth='user', methods=['POST'], csrf=False)
+    @http.route(
+        '/guardpro/api/emergency_broadcasts/acknowledge',
+        type='http',
+        auth='user',
+        methods=['POST'],
+        csrf=False,
+        website=True,
+    )
     def acknowledge_broadcast(self, **kwargs):
         """Acknowledge an emergency broadcast."""
         try:

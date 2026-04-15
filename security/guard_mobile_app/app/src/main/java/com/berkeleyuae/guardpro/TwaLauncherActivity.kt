@@ -8,6 +8,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.AudioAttributes
+import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -69,6 +71,27 @@ class TwaLauncherActivity : AppCompatActivity() {
     private val START_URL = "https://security.berkeleyuae.com/guardpro/mobile"
     private val ALLOWED_HOST = "security.berkeleyuae.com"
 
+    /** Scheme + host (+ port) for API and CookieManager lookups (must match START_URL). */
+    private fun apiOrigin(): String =
+        Uri.parse(START_URL).let { "${it.scheme}://${it.authority}" }
+
+    private fun pendingEmergencyUrl(): String =
+        "${apiOrigin()}/guardpro/api/emergency_broadcasts/pending?_=${System.currentTimeMillis()}"
+
+    private fun cookieHeaderForApi(): String? {
+        try {
+            CookieManager.getInstance().flush()
+        } catch (_: Exception) {
+            /* ignore */
+        }
+        val cm = CookieManager.getInstance()
+        var header = cm.getCookie(START_URL).orEmpty()
+        if (header.isBlank()) {
+            header = cm.getCookie(apiOrigin()).orEmpty()
+        }
+        return header.ifBlank { null }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -123,28 +146,51 @@ class TwaLauncherActivity : AppCompatActivity() {
         Thread {
             var conn: HttpURLConnection? = null
             try {
-                val cookie = CookieManager.getInstance().getCookie(START_URL)
+                val cookie = cookieHeaderForApi()
                 if (cookie.isNullOrBlank()) {
+                    Log.d(TAG_GUARDPRO_EM, "No WebView session cookie yet; skip native poll")
                     return@Thread
                 }
-                val url = URL("https://security.berkeleyuae.com/guardpro/api/emergency_broadcasts/pending?_=${System.currentTimeMillis()}")
+                val url = URL(pendingEmergencyUrl())
                 conn = (url.openConnection() as HttpURLConnection).apply {
                     requestMethod = "GET"
-                    connectTimeout = 5000
-                    readTimeout = 5000
+                    connectTimeout = 8000
+                    readTimeout = 8000
+                    instanceFollowRedirects = true
                     setRequestProperty("Accept", "application/json")
                     setRequestProperty("Cookie", cookie)
                     setRequestProperty("Cache-Control", "no-cache")
                 }
                 val code = conn.responseCode
+                val body = try {
+                    conn.inputStream.bufferedReader().use { it.readText() }
+                } catch (_: Exception) {
+                    conn.errorStream?.bufferedReader()?.use { it.readText() }.orEmpty()
+                }
                 if (code !in 200..299) {
+                    Log.w(
+                        TAG_GUARDPRO_EM,
+                        "pending HTTP $code body=${body.take(300)}"
+                    )
                     return@Thread
                 }
-                val body = conn.inputStream.bufferedReader().use { it.readText() }
-                val obj = JSONObject(body)
+                val obj = try {
+                    JSONObject(body)
+                } catch (e: Exception) {
+                    Log.w(
+                        TAG_GUARDPRO_EM,
+                        "pending not JSON: ${e.message} body=${body.take(400)}"
+                    )
+                    return@Thread
+                }
+                if (!obj.optBoolean("success", false)) {
+                    Log.w(TAG_GUARDPRO_EM, "pending success=false: ${body.take(400)}")
+                    return@Thread
+                }
                 val rows = obj.optJSONArray("broadcasts")
-                if (obj.optBoolean("success", false) && rows != null && rows.length() > 0) {
-                    val row = rows.optJSONObject(0) ?: return@Thread
+                val hasPending = rows != null && rows.length() > 0
+                if (hasPending) {
+                    val row = rows?.optJSONObject(0) ?: return@Thread
                     val ackId = row.opt("ack_id")?.toString()
                     if (!ackId.isNullOrBlank() && ackId != lastNativeNotifiedAckId) {
                         val title = row.optString("title", "EMERGENCY ALERT").take(200)
@@ -158,7 +204,7 @@ class TwaLauncherActivity : AppCompatActivity() {
                     nm.cancel(EMERGENCY_NOTIF_ID)
                 }
             } catch (e: Exception) {
-                Log.d("WebView", "Emergency native HTTP poll skipped: ${e.message}")
+                Log.w(TAG_GUARDPRO_EM, "native poll error: ${e.message}", e)
             } finally {
                 conn?.disconnect()
                 emergencyNativeHttpInFlight = false
@@ -232,6 +278,11 @@ class TwaLauncherActivity : AppCompatActivity() {
     private fun setupWebView() {
         webView = WebView(this)
         setContentView(webView)
+
+        CookieManager.getInstance().setAcceptCookie(true)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
+        }
 
         val settings = webView.settings
         settings.javaScriptEnabled = true
@@ -468,6 +519,11 @@ class TwaLauncherActivity : AppCompatActivity() {
     private fun ensureEmergencyNotificationChannel(nm: NotificationManager) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         if (nm.getNotificationChannel(EMERGENCY_CHANNEL_ID) != null) return
+        val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        val attrs = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
         val ch = NotificationChannel(
             EMERGENCY_CHANNEL_ID,
             "Emergency broadcasts",
@@ -475,6 +531,9 @@ class TwaLauncherActivity : AppCompatActivity() {
         ).apply {
             description = "Urgent messages from your control room (GuardPro)."
             enableVibration(true)
+            enableLights(true)
+            setSound(soundUri, attrs)
+            lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
         }
         nm.createNotificationChannel(ch)
     }
@@ -502,10 +561,8 @@ class TwaLauncherActivity : AppCompatActivity() {
                 launchIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            val iconRes = applicationInfo.icon
-            val smallIcon = if (iconRes != 0) iconRes else android.R.drawable.stat_sys_warning
             val notif = NotificationCompat.Builder(this, EMERGENCY_CHANNEL_ID)
-                .setSmallIcon(smallIcon)
+                .setSmallIcon(R.drawable.ic_stat_emergency)
                 .setContentTitle(title)
                 .setContentText(message.take(500))
                 .setStyle(NotificationCompat.BigTextStyle().bigText(message))
@@ -636,7 +693,9 @@ class TwaLauncherActivity : AppCompatActivity() {
     }
 
     private companion object {
+        private const val TAG_GUARDPRO_EM = "GuardProEmergency"
         private const val EMERGENCY_NOTIF_ID = 94002
-        private const val EMERGENCY_CHANNEL_ID = "guardpro_emergency_broadcast"
+        /** New id so devices pick up IMPORTANCE_HIGH (old channel may have been muted/low). */
+        private const val EMERGENCY_CHANNEL_ID = "guardpro_emergency_alerts"
     }
 }
