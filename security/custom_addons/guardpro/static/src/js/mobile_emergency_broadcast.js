@@ -9,7 +9,8 @@
 (function () {
     "use strict";
 
-    const POLL_INTERVAL_MS = 8000;
+    /** Foreground poll; WebView may throttle this to ~30s when app is in background. */
+    const POLL_INTERVAL_MS = 2500;
     let pollingTimer = null;
     let activeAckId = null;
 
@@ -161,7 +162,10 @@
 
     async function pollEmergency() {
         try {
-            const response = await fetch("/guardpro/api/emergency_broadcasts/pending", {
+            const url =
+                "/guardpro/api/emergency_broadcasts/pending?_=" +
+                String(Date.now());
+            const response = await fetch(url, {
                 method: "GET",
                 credentials: "same-origin",
                 headers: { Accept: "application/json" },
@@ -195,17 +199,33 @@
         }
     }
 
+    function scheduleRapidRechecks() {
+        window.setTimeout(pollEmergency, 300);
+        window.setTimeout(pollEmergency, 900);
+        window.setTimeout(pollEmergency, 2000);
+    }
+
     function start() {
         if (!isGuardMobilePage()) return;
         // Only one poller even if this file is loaded twice (assets + template).
         if (window.__gpEmergencyBroadcastSingleton) return;
         window.__gpEmergencyBroadcastSingleton = true;
         if (pollingTimer) return;
+        window.__gpPollEmergencyFromNative = pollEmergency;
         pollEmergency();
+        scheduleRapidRechecks();
         pollingTimer = window.setInterval(pollEmergency, POLL_INTERVAL_MS);
         document.addEventListener("visibilitychange", function () {
             if (!document.hidden) {
                 pollEmergency();
+                scheduleRapidRechecks();
+            }
+        });
+        window.addEventListener("focus", pollEmergency);
+        window.addEventListener("pageshow", function (ev) {
+            if (ev.persisted) {
+                pollEmergency();
+                scheduleRapidRechecks();
             }
         });
     }

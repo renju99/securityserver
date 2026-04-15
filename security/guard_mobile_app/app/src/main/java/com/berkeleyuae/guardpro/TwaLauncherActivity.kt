@@ -11,6 +11,8 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.Ndef
@@ -33,6 +35,28 @@ class TwaLauncherActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private var nfcAdapter: NfcAdapter? = null
     private var pendingWebPermissionRequest: PermissionRequest? = null
+
+    /**
+     * WebView throttles JS timers in the background (~30s). Native timers keep emergency
+     * polling responsive while the TWA is open (foreground or background).
+     */
+    private val emergencyWebPollHandler = Handler(Looper.getMainLooper())
+    private val emergencyWebPollIntervalMs = 4000L
+    private val emergencyWebPollRunnable = object : Runnable {
+        override fun run() {
+            try {
+                if (::webView.isInitialized) {
+                    webView.evaluateJavascript(
+                        "(function(){ if(window.__gpPollEmergencyFromNative){ window.__gpPollEmergencyFromNative(); } })();",
+                        null
+                    )
+                }
+            } catch (e: Exception) {
+                Log.d("WebView", "Emergency poll inject: ${e.message}")
+            }
+            emergencyWebPollHandler.postDelayed(this, emergencyWebPollIntervalMs)
+        }
+    }
 
     // Configure URL here - Use Security domain
     private val START_URL = "https://security.berkeleyuae.com/guardpro/mobile"
@@ -59,11 +83,26 @@ class TwaLauncherActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         enableNfcForegroundDispatch()
+        startNativeEmergencyBridgePolling()
     }
 
     override fun onPause() {
         super.onPause()
         disableNfcForegroundDispatch()
+    }
+
+    override fun onDestroy() {
+        stopNativeEmergencyBridgePolling()
+        super.onDestroy()
+    }
+
+    private fun startNativeEmergencyBridgePolling() {
+        emergencyWebPollHandler.removeCallbacks(emergencyWebPollRunnable)
+        emergencyWebPollHandler.post(emergencyWebPollRunnable)
+    }
+
+    private fun stopNativeEmergencyBridgePolling() {
+        emergencyWebPollHandler.removeCallbacks(emergencyWebPollRunnable)
     }
 
     private fun enableNfcForegroundDispatch() {
