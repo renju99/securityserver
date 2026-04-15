@@ -30,17 +30,6 @@ class ResUsers(models.Model):
         string='Guard Profile',
         help='Guard profile associated with this user'
     )
-    
-    sidebar_type = fields.Selection(
-        [
-            ('invisible', 'Invisible'),
-            ('small', 'Small'),
-            ('large', 'Large'),
-        ],
-        string='Sidebar Type',
-        default='invisible',
-        help='Sidebar display type for the web client'
-    )
 
     @api.model_create_multi
     def create(self, vals_list):

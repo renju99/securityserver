@@ -1,819 +1,1051 @@
-<?xml version="1.0"?>
-<odoo>
+<?xml version="1.0" encoding="utf-8"?>
+<data>
+    <!-- ================================================================
+         GUARDPRO MENU STRUCTURE - Logically Organized
+         ================================================================ -->
 
-    <!-- ROOT MENU -->
+    <!-- ROOT MENU (visible to Sentry / GuardPro users; not technical-only) -->
     <menuitem id="menu_guardpro_root"
-        name="Sentry"
-        sequence="10"
-        web_icon="guardpro,static/description/icon.png"
-        groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin,group_guardpro_guard_portal"/>
+              name="Sentry"
+              sequence="10"
+              web_icon="guardpro,static/description/icon.png"
+              groups="base.group_no_one"/>
 
     <!-- ================================================================
-     1. DASHBOARD - Quick Overview & Real-Time Status
-     ================================================================ -->
+         CCTV MONITORING - Live Camera Viewing
+         ================================================================ -->
+    <menuitem id="menu_guardpro_cctv"
+              name="CCTV Monitoring"
+              parent="menu_guardpro_tracking"
+              sequence="5"
+              action="guardpro.action_cctv_monitoring"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <menuitem id="menu_cctv_manage_cameras"
+              name="Manage Cameras"
+              parent="menu_guardpro_cctv"
+              action="guardpro.action_cctv_camera"
+              sequence="20"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <!-- ================================================================
+         1. DASHBOARD - Quick Overview & Real-Time Status
+         ================================================================ -->
     <menuitem id="menu_guardpro_dashboard"
-        name="Dashboard"
-        parent="menu_guardpro_root"
-        sequence="10"
-        action="action_guardpro_analytics_dashboard_client"
-        web_icon="board,static/description/icon.png"
-        groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Dashboard"
+              sequence="10"
+              action="action_guardpro_analytics_dashboard_client"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_guardpro_documentation"
-        name="Documentation"
-        parent="menu_guardpro_root"
-        action="action_guardpro_documentation"
-        sequence="999"
-        groups="group_guardpro_admin"/>
+              name="User Documentation"
+              parent="menu_guardpro_training_knowledge"
+              action="guardpro.action_guardpro_documentation"
+              sequence="15"
+              groups="group_guardpro_admin"/>
+
+    <menuitem id="menu_client_contracts_documents"
+              name="Client Contracts"
+              parent="menu_guardpro_training_knowledge"
+              action="action_client_site"
+              sequence="10"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- Command Center menu removed - replaced by Analytics Dashboard -->
     <!--
     <menuitem id="menu_guardpro_dashboard_main"
-        name="Command Center"
-        parent="menu_guardpro_dashboard"
-        action="action_guardpro_dashboard"
-        sequence="10"
-        groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Command Center"
+              parent="menu_guardpro_dashboard"
+              action="action_guardpro_dashboard"
+              sequence="10"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
     -->
 
-
     <menuitem id="menu_guardpro_analytics_dashboard"
-        name="Analytics Dashboard"
-        parent="menu_guardpro_dashboard"
-        action="action_guardpro_analytics_dashboard_client"
-        sequence="10"
-        groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Analytics Dashboard"
+              parent="menu_guardpro_dashboard"
+              action="action_guardpro_analytics_dashboard_client"
+              sequence="10"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <menuitem id="menu_guardpro_tours_dashboard"
+              name="Tours Dashboard"
+              parent="menu_guardpro_dashboard"
+              action="action_guardpro_tours_dashboard_client"
+              sequence="15"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_guards_map"
-        name="Live Guard Map"
-        parent="menu_guardpro_dashboard"
-        action="action_guards_map"
-        sequence="20"
-        groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Live Guard Map"
+              parent="menu_guardpro_dashboard"
+              action="action_guards_map"
+              sequence="10"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- ================================================================
-    2. OPERATIONS - Daily Guard Operations
-    ================================================================ -->
+         2. OPERATIONS - Daily Guard Operations
+         ================================================================ -->
     <menuitem id="menu_guardpro_operations"
-        name="Operations"
-        parent="menu_guardpro_root"
-        sequence="20"
-        web_icon="mrp,static/description/icon.png"/>
+              name="Operations"
+              sequence="20"/>
 
     <!-- 2.1 Shifts & Scheduling -->
     <menuitem id="menu_operations_scheduling"
-        name="Shifts &amp; Scheduling"
-        parent="menu_guardpro_operations"
-        sequence="10"/>
+              name="Shifts &amp; Scheduling"
+              parent="menu_guardpro_operations"
+              sequence="10"/>
 
     <menuitem id="menu_guard_shift_legacy"
-        name="Shifts"
-        parent="menu_operations_scheduling"
-        action="action_guard_shift"
-        sequence="10"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Shifts"
+              parent="menu_operations_scheduling"
+              action="action_guard_shift"
+              sequence="10"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_shift_swap_request"
-        name="Shift Swaps"
-        parent="menu_operations_scheduling"
-        action="action_shift_swap_request"
-        sequence="20"
-        groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Shift Swaps"
+              parent="menu_operations_scheduling"
+              action="action_shift_swap_request"
+              sequence="20"
+              groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_shift_template"
-        name="Shift Templates"
-        parent="menu_operations_scheduling"
-        action="action_shift_template"
-        sequence="30"
-        groups="group_guardpro_manager,group_guardpro_admin"/>
+              name="Shift Templates"
+              parent="menu_operations_scheduling"
+              action="action_shift_template"
+              sequence="30"
+              groups="group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- OPTIONAL: HR-Based Attendance (requires hr_attendance module) -->
     <!--
     <menuitem id="menu_guard_shift_planning"
-        name="HR Shift Planning"
-        parent="menu_operations_scheduling"
-        action="action_guard_shift_plan"
-        sequence="15"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="HR Shift Planning"
+              parent="menu_operations_scheduling"
+              action="action_guard_shift_plan"
+              sequence="15"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_guard_shift_template"
-        name="HR Shift Templates"
-        parent="menu_operations_scheduling"
-        action="action_guard_shift_template"
-        sequence="25"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="HR Shift Templates"
+              parent="menu_operations_scheduling"
+              action="action_guard_shift_template"
+              sequence="25"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
     -->
 
     <!-- 2.2 Attendance & Time Tracking -->
     <menuitem id="menu_operations_attendance"
-        name="Time &amp; Attendance"
-        parent="menu_guardpro_operations"
-        sequence="20"/>
+              name="Time &amp; Attendance"
+              parent="menu_guardpro_operations"
+              sequence="20"/>
 
     <menuitem id="menu_guard_attendance_legacy"
-        name="Attendance Records"
-        parent="menu_operations_attendance"
-        action="action_guard_attendance"
-        sequence="10"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Attendance Records"
+              parent="menu_operations_attendance"
+              action="action_guard_attendance"
+              sequence="10"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- OPTIONAL: HR Attendance Integration -->
     <!--
     <menuitem id="menu_hr_attendance_guard"
-        name="HR Attendance"
-        parent="menu_operations_attendance"
-        action="action_hr_attendance_guard"
-        sequence="20"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="HR Attendance"
+              parent="menu_operations_attendance"
+              action="action_hr_attendance_guard"
+              sequence="20"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
     -->
 
     <!-- 2.3 Tasks & Duties -->
     <menuitem id="menu_operations_tasks"
-        name="Tasks &amp; Post Orders"
-        parent="menu_guardpro_operations"
-        sequence="30"/>
+              name="Tasks &amp; Post Orders"
+              parent="menu_guardpro_operations"
+              sequence="30"/>
 
     <menuitem id="menu_guard_tasks"
-        name="All Tasks"
-        parent="menu_operations_tasks"
-        action="action_guard_task"
-        sequence="10"
-        groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="All Tasks"
+              parent="menu_operations_tasks"
+              action="action_guard_task"
+              sequence="10"
+              groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_guard_task_templates"
-        name="Task Templates"
-        parent="menu_operations_tasks"
-        action="action_guard_task_template"
-        sequence="20"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Task Templates"
+              parent="menu_operations_tasks"
+              action="action_guard_task_template"
+              sequence="20"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- OPTIONAL: Project-based Tasks -->
     <!--
     <menuitem id="menu_guard_task_project"
-        name="Tasks (Kanban)"
-        parent="menu_operations_tasks"
-        action="action_guard_task_project"
-        sequence="15"
-        groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Tasks (Kanban)"
+              parent="menu_operations_tasks"
+              action="action_guard_task_project"
+              sequence="15"
+              groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
     -->
 
     <!-- 2.4 Tours & Patrols -->
     <menuitem id="menu_operations_tours"
-        name="Tours &amp; Patrols"
-        parent="menu_guardpro_operations"
-        sequence="40"/>
+              name="Tours &amp; Patrols"
+              parent="menu_guardpro_operations"
+              sequence="10"/>
 
     <menuitem id="menu_security_tour"
-        name="Security Tours"
-        parent="menu_operations_tours"
-        action="action_security_tour"
-        sequence="10"
-        groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Security Tours"
+              parent="menu_operations_tours"
+              action="action_security_tour"
+              sequence="10"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_tour_log"
-        name="Tour Logs"
-        parent="menu_operations_tours"
-        action="action_tour_log"
-        sequence="20"
-        groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Tour Logs"
+              parent="menu_operations_tours"
+              action="action_tour_log"
+              sequence="20"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_checkpoint_scan"
-        name="Checkpoint Scans"
-        parent="menu_operations_tours"
-        action="action_checkpoint_scan"
-        sequence="30"
-        groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Checkpoint Scans"
+              parent="menu_operations_tours"
+              action="action_checkpoint_scan"
+              sequence="30"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- ================================================================
-    3. SITE MANAGEMENT - Site-Level Operations
-    ================================================================ -->
+         3. SITE MANAGEMENT - Site-Level Operations
+         ================================================================ -->
     <menuitem id="menu_guardpro_site_management"
-        name="Site Management"
-        parent="menu_guardpro_root"
-        sequence="30"
-        web_icon="stock,static/description/icon.png"
-        groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Visitor Management"
+              sequence="30"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_visitor_management"
-        name="Visitors &amp; Contractors"
-        parent="menu_guardpro_site_management"
-        action="action_visitor_management"
-        sequence="10"
-        groups="group_guardpro_guard_portal,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Visitors &amp; Contractors"
+              parent="menu_guardpro_site_management"
+              action="action_visitor_management"
+              sequence="10"
+              groups="group_guardpro_guard_portal,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_visitor_watchlist"
-        name="Watchlist"
-        parent="menu_guardpro_site_management"
-        action="action_visitor_watchlist"
-        sequence="15"
-        groups="group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Watchlist"
+              parent="menu_guardpro_site_management"
+              action="action_visitor_watchlist"
+              sequence="15"
+              groups="group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <menuitem id="menu_visitor_hosts"
+              name="Host Information"
+              parent="menu_guardpro_site_management"
+              action="action_visitor_hosts"
+              sequence="18"
+              groups="group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_package_management"
-        name="Package &amp; Deliveries"
-        parent="menu_guardpro_site_management"
-        action="action_package_management"
-        sequence="20"
-        groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
-
-    <menuitem id="menu_lost_found"
-        name="Lost &amp; Found"
-        parent="menu_guardpro_site_management"
-        action="action_lost_found_item"
-        sequence="30"
-        groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Package &amp; Deliveries"
+              parent="menu_guardpro_site_management"
+              action="action_package_management"
+              sequence="20"
+              groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_key_management"
-        name="Key Management"
-        parent="menu_guardpro_site_management"
-        action="action_key_register"
-        sequence="40"
-        groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Key Management"
+              parent="menu_guardpro_site_management"
+              action="action_key_register"
+              sequence="40"
+              groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_residents_tenants_root"
-        name="Residents &amp; Tenants"
-        parent="menu_guardpro_site_management"
-        sequence="60"/>
+              name="Residents &amp; Tenants"
+              parent="menu_guardpro_site_management"
+              sequence="60"/>
 
     <menuitem id="tenant_resident_menu"
-        name="Residents/Tenants"
-        parent="menu_residents_tenants_root"
-        action="tenant_resident_action"
-        sequence="10"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Residents/Tenants"
+              parent="menu_residents_tenants_root"
+              action="tenant_resident_action"
+              sequence="10"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_resident_complaint"
-        name="Resident Complaints"
-        parent="menu_residents_tenants_root"
-        action="action_resident_complaint"
-        sequence="20"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Resident Complaints"
+              parent="menu_residents_tenants_root"
+              action="action_resident_complaint"
+              sequence="20"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- ================================================================
-    4. INCIDENTS & EMERGENCY - Critical Events
-    ================================================================ -->
+         4. INCIDENTS & EMERGENCY - Critical Events
+         ================================================================ -->
     <menuitem id="menu_guardpro_incidents_emergency"
-        name="Incidents &amp; Emergency"
-        parent="menu_guardpro_root"
-        sequence="40"
-        web_icon="repair,static/description/icon.png"/>
+              name="Incidents &amp; Emergency"
+              sequence="40"/>
 
     <!-- 4.1 Incident Management -->
     <menuitem id="menu_incidents_submenu"
-        name="Incident Management"
-        parent="menu_guardpro_incidents_emergency"
-        sequence="10"/>
+              name="Incident Management"
+              parent="menu_guardpro_incidents_emergency"
+              sequence="10"/>
 
     <menuitem id="menu_incident_report"
-        name="Incident Reports"
-        parent="menu_incidents_submenu"
-        action="action_incident_report"
-        sequence="10"
-        groups="group_guardpro_guard_portal,group_guardpro_reception,group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Incident Reports"
+              parent="menu_incidents_submenu"
+              action="action_incident_report"
+              sequence="10"
+              groups="group_guardpro_guard_portal,group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="incident_status_update_menu"
-        name="Status Updates"
-        parent="menu_incidents_submenu"
-        action="incident_status_update_action"
-        sequence="12"/>
+              name="Status Updates"
+              parent="menu_incidents_submenu"
+              action="incident_status_update_action"
+              sequence="12"/>
 
     <menuitem id="menu_incident_escalation_log"
-        name="Escalation History"
-        parent="menu_incidents_submenu"
-        action="action_incident_escalation_log"
-        sequence="14"/>
+              name="Escalation History"
+              parent="menu_incidents_submenu"
+              action="action_incident_escalation_log"
+              sequence="14"/>
 
     <menuitem id="menu_incident_investigation"
-        name="Investigations"
-        parent="menu_incidents_submenu"
-        action="action_incident_investigation"
-        sequence="16"/>
+              name="Investigations"
+              parent="menu_incidents_submenu"
+              action="action_incident_investigation"
+              sequence="16"/>
 
     <menuitem id="menu_incident_investigation_template"
-        name="Investigation Templates"
-        parent="menu_incidents_submenu"
-        action="action_incident_investigation_template"
-        sequence="17"/>
+              name="Investigation Templates"
+              parent="menu_incidents_submenu"
+              action="action_incident_investigation_template"
+              sequence="17"/>
 
     <menuitem id="menu_incident_category"
-        name="Incident Categories"
-        parent="menu_incidents_submenu"
-        action="action_incident_category"
-        sequence="20"
-        groups="group_guardpro_manager,group_guardpro_admin"/>
+              name="Incident Categories"
+              parent="menu_incidents_submenu"
+              action="action_incident_category"
+              sequence="20"
+              groups="group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_incident_sla_policy"
-        name="SLA Policies"
-        parent="menu_incidents_submenu"
-        action="action_incident_sla_policy"
-        sequence="30"/>
+              name="SLA Policies"
+              parent="menu_incidents_submenu"
+              action="action_incident_sla_policy"
+              sequence="30"/>
 
     <!-- 4.2 Emergency Management -->
     <menuitem id="menu_emergency_submenu"
-        name="Emergency Management"
-        parent="menu_guardpro_incidents_emergency"
-        sequence="20"/>
+              name="Emergency Management"
+              parent="menu_guardpro_incidents_emergency"
+              sequence="20"/>
 
     <menuitem id="menu_emergency_procedure"
-        name="Emergency Procedures"
-        parent="menu_emergency_submenu"
-        action="action_emergency_procedure"
-        sequence="10"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Emergency Procedures"
+              parent="menu_emergency_submenu"
+              action="action_emergency_procedure"
+              sequence="10"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_emergency_checklist_execution"
-        name="Active Emergencies"
-        parent="menu_emergency_submenu"
-        action="action_emergency_checklist_execution"
-        sequence="20"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Active Emergencies"
+              parent="menu_emergency_submenu"
+              action="action_emergency_checklist_execution"
+              sequence="20"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_send_emergency_broadcast_main"
-        name="Send Emergency Broadcast"
-        parent="menu_emergency_submenu"
-        action="action_emergency_broadcast_wizard"
-        sequence="30"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Send Emergency Broadcast"
+              parent="menu_emergency_submenu"
+              action="action_emergency_broadcast_wizard"
+              sequence="30"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_emergency_broadcast_history"
-        name="Broadcast History"
-        parent="menu_emergency_submenu"
-        action="action_emergency_broadcast"
-        sequence="40"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Broadcast History"
+              parent="menu_emergency_submenu"
+              action="action_emergency_broadcast"
+              sequence="40"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- ================================================================
-    5. COMPLIANCE & QUALITY - Audits, DARs, SLA
-    ================================================================ -->
+         5. COMPLIANCE & QUALITY - Audits, DARs, SLA
+         ================================================================ -->
     <menuitem id="menu_guardpro_compliance"
-        name="Compliance &amp; Quality"
-        parent="menu_guardpro_root"
-        sequence="50"
-        web_icon="survey,static/description/icon.png"/>
+              name="Compliance &amp; Quality"
+              sequence="50"/>
 
     <!-- 5.1 Audits & Compliance -->
     <menuitem id="menu_compliance_submenu"
-        name="Audits &amp; Inspections"
-        parent="menu_guardpro_compliance"
-        sequence="10"/>
+              name="Audits &amp; Inspections"
+              parent="menu_guardpro_compliance"
+              sequence="10"/>
 
     <menuitem id="menu_compliance_audit"
-        name="Compliance Audits"
-        parent="menu_compliance_submenu"
-        action="action_compliance_audit"
-        sequence="10"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Compliance Audits"
+              parent="menu_compliance_submenu"
+              action="action_compliance_audit"
+              sequence="10"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_compliance_audit_templates"
-        name="Audit Templates"
-        parent="menu_compliance_submenu"
-        action="action_compliance_audit_template"
-        sequence="20"
-        groups="group_guardpro_manager,group_guardpro_admin"/>
+              name="Audit Templates"
+              parent="menu_compliance_submenu"
+              action="action_compliance_audit_template"
+              sequence="20"
+              groups="group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_compliance_corrective_action"
-        name="Corrective Actions"
-        parent="menu_compliance_submenu"
-        action="action_compliance_corrective_action"
-        sequence="30"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Corrective Actions"
+              parent="menu_compliance_submenu"
+              action="action_compliance_corrective_action"
+              sequence="30"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- 5.2 Daily Activity Reports -->
     <menuitem id="menu_daily_activity_report"
-        name="Daily Activity Reports (DARs)"
-        parent="menu_guardpro_compliance"
-        action="action_daily_activity_report"
-        sequence="20"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Daily Activity Reports (DARs)"
+              parent="menu_guardpro_compliance"
+              action="action_daily_activity_report"
+              sequence="20"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- 5.3 SLA Management -->
     <menuitem id="menu_sla_submenu"
-        name="SLA Management"
-        parent="menu_guardpro_compliance"
-        sequence="30"/>
+              name="SLA Management"
+              parent="menu_guardpro_compliance"
+              sequence="30"/>
 
     <menuitem id="menu_sla_template"
-        name="SLA Templates"
-        parent="menu_sla_submenu"
-        action="action_sla_template"
-        sequence="5"
-        groups="group_guardpro_manager,group_guardpro_admin"/>
+              name="SLA Templates"
+              parent="menu_sla_submenu"
+              action="action_sla_template"
+              sequence="5"
+              groups="group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_sla_definition"
-        name="SLA Definitions"
-        parent="menu_sla_submenu"
-        action="action_sla_definition"
-        sequence="10"
-        groups="group_guardpro_manager,group_guardpro_admin"/>
+              name="SLA Definitions"
+              parent="menu_sla_submenu"
+              action="action_sla_definition"
+              sequence="10"
+              groups="group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_sla_performance"
-        name="SLA Performance"
-        parent="menu_sla_submenu"
-        action="action_sla_performance"
-        sequence="20"
-        groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="SLA Performance"
+              parent="menu_sla_submenu"
+              action="action_sla_performance"
+              sequence="20"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- ================================================================
-    6. RESOURCES - Master Data & Personnel
-    ================================================================ -->
+         6. RESOURCES - Master Data & Personnel
+         ================================================================ -->
     <menuitem id="menu_guardpro_resources"
-        name="Resources"
-        parent="menu_guardpro_root"
-        sequence="60"
-        web_icon="hr,static/description/icon.png"/>
+              name="Resources"
+              sequence="60"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_guard_profile"
-        name="Guards"
-        parent="menu_guardpro_resources"
-        action="action_guard_profile"
-        sequence="10"
-        groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Guards"
+              parent="menu_guardpro_resources"
+              action="action_guard_profile"
+              sequence="10"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
+    <menuitem id="menu_client_site"
+              name="Sites"
+              parent="menu_guardpro_resources"
+              sequence="20"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <menuitem id="menu_client_sites_view"
+              name="View Sites"
+              parent="menu_client_site"
+              action="action_client_site"
+              sequence="5"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <menuitem id="menu_location_hierarchy"
+              name="Location Hierarchy"
+              parent="menu_client_site"
+              sequence="10"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <menuitem id="menu_buildings"
+              name="Buildings"
+              parent="menu_location_hierarchy"
+              action="action_site_buildings"
+              sequence="10"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <menuitem id="menu_floors"
+              name="Floors"
+              parent="menu_location_hierarchy"
+              action="action_building_floors"
+              sequence="20"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <menuitem id="menu_areas"
+              name="Areas/Rooms"
+              parent="menu_location_hierarchy"
+              action="action_floor_areas"
+              sequence="30"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_checkpoint"
-        name="Checkpoints"
-        parent="menu_guardpro_resources"
-        action="action_checkpoint"
-        sequence="30"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Checkpoints"
+              parent="menu_guardpro_resources"
+              action="action_checkpoint"
+              sequence="30"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_checkpoint_map_creator"
-        name="Create Checkpoints on Map"
-        parent="menu_guardpro_resources"
-        action="action_checkpoint_map_creator_url"
-        sequence="31"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Create Checkpoints on Map"
+              parent="menu_guardpro_resources"
+              action="action_checkpoint_map_creator_url"
+              sequence="31"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <!-- Equipment: folder under Resources with registry + handovers -->
+    <menuitem id="menu_guardpro_equipment_section"
+              name="Equipment"
+              parent="menu_guardpro_resources"
+              sequence="40"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_equipment"
-        name="Equipment"
-        parent="menu_guardpro_resources"
-        action="action_equipment"
-        sequence="40"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Equipment"
+              parent="menu_guardpro_equipment_section"
+              action="action_equipment"
+              sequence="10"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <menuitem id="menu_equipment_handover_resources"
+              name="Handovers"
+              parent="menu_guardpro_equipment_section"
+              action="guardpro.action_equipment_handover"
+              sequence="20"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
 
     <!-- Performance Management -->
     <menuitem id="menu_performance_management"
-        name="Performance"
-        parent="menu_guardpro_resources"
-        sequence="50"/>
+              name="Performance"
+              parent="menu_guardpro_resources"
+              sequence="50"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_performance_review"
-        name="Reviews"
-        parent="menu_performance_management"
-        action="action_guard_performance_review"
-        sequence="10"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Reviews"
+              parent="menu_performance_management"
+              action="action_guard_performance_review"
+              sequence="10"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_performance_metric"
-        name="Metrics"
-        parent="menu_performance_management"
-        action="action_guard_performance_metric"
-        sequence="20"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Metrics"
+              parent="menu_performance_management"
+              action="action_guard_performance_metric"
+              sequence="20"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_performance_badge"
-        name="Badges"
-        parent="menu_performance_management"
-        action="action_guard_performance_badge"
-        sequence="30"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Badges"
+              parent="menu_performance_management"
+              action="action_guard_performance_badge"
+              sequence="30"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_performance_criteria"
-        name="Criteria"
-        parent="menu_performance_management"
-        action="action_guard_performance_criteria"
-        sequence="40"
-        groups="group_guardpro_manager,group_guardpro_admin"/>
+              name="Criteria"
+              parent="menu_performance_management"
+              action="action_guard_performance_criteria"
+              sequence="40"
+              groups="group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- Credentials & Compliance Management -->
     <menuitem id="menu_credentials_compliance"
-        name="Credentials &amp; Compliance"
-        parent="menu_guardpro_resources"
-        sequence="60"/>
+              name="Credentials &amp; Compliance"
+              parent="menu_guardpro_resources"
+              sequence="60"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_guard_credential"
-        name="Credentials"
-        parent="menu_credentials_compliance"
-        action="action_guard_credential"
-        sequence="10"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Credentials"
+              parent="menu_credentials_compliance"
+              action="action_guard_credential"
+              sequence="10"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_guard_background_check"
-        name="Background Checks"
-        parent="menu_credentials_compliance"
-        action="action_guard_background_check"
-        sequence="20"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Background Checks"
+              parent="menu_credentials_compliance"
+              action="action_guard_background_check"
+              sequence="20"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_guard_drug_test"
-        name="Drug/Alcohol Tests"
-        parent="menu_credentials_compliance"
-        action="action_guard_drug_test"
-        sequence="30"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Drug/Alcohol Tests"
+              parent="menu_credentials_compliance"
+              action="action_guard_drug_test"
+              sequence="30"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_guard_vaccination"
-        name="Vaccinations"
-        parent="menu_credentials_compliance"
-        action="action_guard_vaccination"
-        sequence="40"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Vaccinations"
+              parent="menu_credentials_compliance"
+              action="action_guard_vaccination"
+              sequence="40"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_credential_type"
-        name="Credential Types"
-        parent="menu_credentials_compliance"
-        action="action_credential_type"
-        sequence="50"
-        groups="group_guardpro_manager,group_guardpro_admin"/>
+              name="Credential Types"
+              parent="menu_credentials_compliance"
+              action="action_credential_type"
+              sequence="50"
+              groups="group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- OPTIONAL: Native Maintenance Equipment -->
     <!--
     <menuitem id="menu_guard_equipment"
-        name="Equipment (Maintenance)"
-        parent="menu_guardpro_resources"
-        action="action_guard_equipment"
-        sequence="45"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Equipment (Maintenance)"
+              parent="menu_guardpro_resources"
+              action="action_guard_equipment"
+              sequence="45"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_guard_equipment_assignment_history"
-        name="Assignment History"
-        parent="menu_guard_equipment"
-        action="action_guard_equipment_assignment_history"
-        sequence="10"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Assignment History"
+              parent="menu_guard_equipment"
+              action="action_guard_equipment_assignment_history"
+              sequence="10"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
     -->
 
     <!-- ================================================================
-    7. TRAINING & KNOWLEDGE - Learning & Documentation
-    ================================================================ -->
+         7. TRAINING & KNOWLEDGE - Learning & Documentation
+         ================================================================ -->
     <menuitem id="menu_guardpro_training_knowledge"
-        name="Training &amp; Knowledge"
-        parent="menu_guardpro_root"
-        sequence="70"
-        web_icon="website_slides,static/description/icon.png"/>
+              name="Training &amp; Knowledge"
+              sequence="70"/>
 
     <!-- 7.1 Training (eLearning) -->
     <menuitem id="menu_training_submenu"
-        name="Training Management"
-        parent="menu_guardpro_training_knowledge"
-        sequence="10"/>
+              name="Learning Management"
+              parent="menu_guardpro_training_knowledge"
+              sequence="10"/>
 
     <menuitem id="menu_guard_training_elearning"
-        name="eLearning Courses"
-        parent="menu_training_submenu"
-        action="action_guard_elearning_courses"
-        sequence="5"
-        groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="eLearning Courses"
+              parent="menu_training_submenu"
+              action="action_guard_elearning_courses"
+              sequence="5"
+              groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_guard_training_enrollments"
-        name="eLearning Enrollments"
-        parent="menu_training_submenu"
-        action="action_guard_elearning_enrollments"
-        sequence="15"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="eLearning Enrollments"
+              parent="menu_training_submenu"
+              action="action_guard_elearning_enrollments"
+              sequence="15"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_mandatory_training_status"
-        name="Mandatory Training Status"
-        parent="menu_training_submenu"
-        action="action_mandatory_training_status"
-        sequence="25"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Mandatory Training Status"
+              parent="menu_training_submenu"
+              action="action_mandatory_training_status"
+              sequence="25"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_expiring_certifications"
-        name="Expiring Certifications"
-        parent="menu_training_submenu"
-        action="action_expiring_certifications"
-        sequence="30"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Expiring Certifications"
+              parent="menu_training_submenu"
+              action="action_expiring_certifications"
+              sequence="30"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- 7.2 Knowledge Base & SOPs -->
     <menuitem id="menu_knowledge_submenu"
-        name="Knowledge &amp; SOPs"
-        parent="menu_guardpro_training_knowledge"
-        sequence="20"/>
+              name="Knowledge &amp; SOPs"
+              parent="menu_guardpro_training_knowledge"
+              sequence="30"/>
 
     <menuitem id="menu_knowledge_article"
-        name="Knowledge Base"
-        parent="menu_knowledge_submenu"
-        action="action_knowledge_article"
-        sequence="10"
-        groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Knowledge Base"
+              parent="menu_knowledge_submenu"
+              action="action_knowledge_article"
+              sequence="10"
+              groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_knowledge_sop"
-        name="Standard Operating Procedures"
-        parent="menu_knowledge_submenu"
-        action="action_knowledge_sop"
-        sequence="20"
-        groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Standard Operating Procedures"
+              parent="menu_knowledge_submenu"
+              action="action_knowledge_sop"
+              sequence="20"
+              groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_knowledge_guard_role"
-        name="Guard Roles &amp; SIRA Grades"
-        parent="menu_knowledge_submenu"
-        action="action_knowledge_guard_role"
-        sequence="30"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Guard Roles &amp; SIRA Grades"
+              parent="menu_knowledge_submenu"
+              action="action_knowledge_guard_role"
+              sequence="30"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- ================================================================
-    8. TRACKING & MONITORING - Location & Activity Tracking
-    ================================================================ -->
+         8. TRACKING & MONITORING - Location & Activity Tracking
+         ================================================================ -->
     <menuitem id="menu_guardpro_tracking"
-        name="Tracking &amp; Monitoring"
-        parent="menu_guardpro_root"
-        sequence="80"
-        web_icon="fleet,static/description/icon.png"/>
+              name="Command Center"
+              sequence="80"/>
 
     <menuitem id="menu_guard_location_history"
-        name="Location History"
-        parent="menu_guardpro_tracking"
-        action="action_guard_location_history"
-        sequence="20"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Location History"
+              parent="menu_guardpro_tracking"
+              action="action_guard_location_history"
+              sequence="20"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_geofence_alerts"
-        name="Geofence Alerts"
-        parent="menu_guardpro_tracking"
-        action="action_geofence_alert"
-        sequence="30"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Geofence Alerts"
+              parent="menu_guardpro_tracking"
+              action="action_geofence_alert"
+              sequence="30"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_route_optimizer"
-        name="Route Optimizer"
-        parent="menu_guardpro_tracking"
-        action="action_route_optimizer_wizard"
-        sequence="40"
-        groups="group_guardpro_manager,group_guardpro_admin"/>
+              name="Route Optimizer"
+              parent="menu_operations_tours"
+              action="action_route_optimizer_wizard"
+              sequence="35"
+              groups="group_guardpro_manager,group_guardpro_admin"/>
 
 
     <!-- ================================================================
-    9. FEEDBACK & COMMUNICATION - Client & Guard Feedback
-    ================================================================ -->
+         9. FEEDBACK & COMMUNICATION - Client & Guard Feedback
+         ================================================================ -->
+    <!-- Top-level app: Odoo Settings / Access Rights admins only -->
     <menuitem id="menu_guardpro_feedback"
-        name="Feedback &amp; Communication"
-        parent="menu_guardpro_root"
-        sequence="90"
-        web_icon="mail,static/description/icon.png"/>
+              name="Feedback &amp; Communication"
+              sequence="90"
+              groups="base.group_system,base.group_erp_manager"/>
+
+    <menuitem id="menu_operations_feedback_section"
+              name="Client Feedback &amp; Comms"
+              parent="menu_guardpro_operations"
+              sequence="93"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_client_feedback"
-        name="Client Feedback"
-        parent="menu_guardpro_feedback"
-        action="action_client_feedback"
-        sequence="10"
-        groups="group_guardpro_client_user,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Client Feedback"
+              parent="menu_operations_feedback_section"
+              action="action_client_feedback"
+              sequence="10"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- Push-to-Talk Channels (for supervisors/managers to manage) -->
     <menuitem id="menu_push_to_talk_channels"
-        name="Push-to-Talk Channels"
-        parent="menu_guardpro_feedback"
-        action="action_push_to_talk_channel"
-        sequence="16"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+              name="Push-to-Talk Channels"
+              parent="menu_operations_feedback_section"
+              action="action_push_to_talk_channel"
+              sequence="16"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- Push-to-Talk Messages (for supervisors/managers to view) -->
     <menuitem id="menu_push_to_talk_messages"
-        name="Push-to-Talk Messages"
-        parent="menu_guardpro_feedback"
-        action="action_push_to_talk_message"
-        sequence="17"
-        groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
-
+              name="Push-to-Talk Messages"
+              parent="menu_operations_feedback_section"
+              action="action_push_to_talk_message"
+              sequence="17"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+    
     <!-- Note: Push-to-Talk widget is only available in mobile interface (/guardpro/mobile) -->
 
-    <menuitem id="menu_webhook"
-        name="Webhooks &amp; Integrations"
-        parent="menu_guardpro_feedback"
-        action="action_webhook"
-        sequence="20"
-        groups="group_guardpro_admin"/>
+    <!-- ================================================================
+         MESSAGING - Internal Communication System
+         ================================================================ -->
+    <menuitem id="menu_guardpro_messaging"
+              name="Messaging"
+              parent="menu_guardpro_operations"
+              sequence="95"
+              groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <menuitem id="menu_guard_messages"
+              name="Messages"
+              parent="menu_guardpro_messaging"
+              action="action_guard_message"
+              sequence="10"
+              groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <menuitem id="menu_guard_conversations"
+              name="Conversations"
+              parent="menu_guardpro_messaging"
+              action="action_guard_conversation"
+              sequence="20"
+              groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <menuitem id="menu_guard_message_channels"
+              name="Channels"
+              parent="menu_guardpro_messaging"
+              action="action_guard_message_channel"
+              sequence="30"
+              groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <menuitem id="menu_guard_message_templates"
+              name="Message Templates"
+              parent="menu_guardpro_messaging"
+              action="action_guard_message_template"
+              sequence="40"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- ================================================================
-    10. CONFIGURATION - Settings & Administration
-    ================================================================ -->
+         BIOMETRIC - Identity Verification System
+         ================================================================ -->
+    <menuitem id="menu_guardpro_biometric"
+              name="Biometric Verification"
+              parent="menu_guardpro_operations"
+              sequence="96"
+              groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <menuitem id="menu_guard_biometric_templates"
+              name="Biometric Templates"
+              parent="menu_guardpro_biometric"
+              action="action_guard_biometric_template"
+              sequence="10"
+              groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <menuitem id="menu_guard_biometric_verifications"
+              name="Verification History"
+              parent="menu_guardpro_biometric"
+              action="action_guard_biometric_verification"
+              sequence="20"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <menuitem id="menu_guard_biometric_devices"
+              name="Devices"
+              parent="menu_guardpro_biometric"
+              action="action_guard_biometric_device"
+              sequence="30"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <!-- ================================================================
+         10. CONFIGURATION - Settings & Administration
+         ================================================================ -->
     <menuitem id="menu_guardpro_configuration"
-        name="Configuration"
-        parent="menu_guardpro_root"
-        sequence="100"
-        web_icon="project,static/description/icon.png"
-        groups="group_guardpro_manager,group_guardpro_admin"/>
+              name="Configuration"
+              sequence="100"
+              groups="base.group_system,base.group_erp_manager"/>
 
     <!-- 11.1 Settings -->
     <!-- Note: Settings accessed via Settings app > Documentation section -->
     <!--
     <menuitem id="menu_guardpro_settings"
-        name="Settings"
-        parent="menu_guardpro_configuration"
-        action="action_guardpro_config_settings"
-        sequence="5"
-        groups="group_guardpro_admin"/>
+              name="Settings"
+              parent="menu_guardpro_configuration"
+              action="action_guardpro_config_settings"
+              sequence="5"
+              groups="group_guardpro_admin"/>
     -->
 
     <!-- 11.2 User Management -->
     <menuitem id="menu_config_users"
-        name="User Management"
-        parent="menu_guardpro_configuration"
-        action="action_guardpro_system_users"
-        sequence="10"
-        groups="group_guardpro_admin"/>
+              name="User Management"
+              parent="menu_guardpro_configuration"
+              action="action_guardpro_system_users"
+              sequence="10"
+              groups="group_guardpro_admin"/>
 
     <menuitem id="menu_guard_user_wizard"
-        name="Create Guard User"
-        parent="menu_config_users"
-        action="action_guard_user_wizard"
-        sequence="5"
-        groups="group_guardpro_admin"/>
+              name="Create Guard User"
+              parent="menu_config_users"
+              action="action_guard_user_wizard"
+              sequence="5"
+              groups="group_guardpro_admin"/>
 
     <menuitem id="menu_guard_portal_users"
-        name="Guard Portal Users"
-        parent="menu_config_users"
-        action="action_guard_portal_users"
-        sequence="10"
-        groups="group_guardpro_admin"/>
+              name="Guard Portal Users"
+              parent="menu_config_users"
+              action="action_guard_portal_users"
+              sequence="10"
+              groups="group_guardpro_admin"/>
 
     <menuitem id="menu_guardpro_system_users"
-        name="System Users"
-        parent="menu_config_users"
-        action="action_guardpro_system_users"
-        sequence="20"
-        groups="group_guardpro_admin"/>
+              name="System Users"
+              parent="menu_config_users"
+              action="action_guardpro_system_users"
+              sequence="20"
+              groups="group_guardpro_admin"/>
 
     <menuitem id="menu_client_users"
-        name="Client Users"
-        parent="menu_config_users"
-        action="action_client_users"
-        sequence="30"
-        groups="group_guardpro_admin"/>
+              name="Client Users"
+              parent="menu_config_users"
+              action="action_client_users"
+              sequence="30"
+              groups="group_guardpro_admin"/>
 
     <!-- 11.3 Master Data -->
     <menuitem id="menu_config_master_data"
-        name="Master Data"
-        parent="menu_guardpro_configuration"
-        action="action_guard_skill"
-        sequence="20"
-        groups="group_guardpro_manager,group_guardpro_admin"/>
+              name="Master Data"
+              parent="menu_guardpro_configuration"
+              action="action_guard_skill"
+              sequence="20"
+              groups="group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_guard_skill"
-        name="Guard Skills"
-        parent="menu_config_master_data"
-        action="action_guard_skill"
-        sequence="10"
-        groups="group_guardpro_manager,group_guardpro_admin"/>
+              name="Guard Skills"
+              parent="menu_config_master_data"
+              action="action_guard_skill"
+              sequence="10"
+              groups="group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- 11.4 Security & Compliance -->
     <menuitem id="menu_config_security"
-        name="API &amp; Security"
-        parent="menu_guardpro_configuration"
-        action="action_api_key"
-        sequence="30"
-        groups="group_guardpro_admin"/>
+              name="API &amp; Security"
+              parent="menu_guardpro_configuration"
+              action="action_api_key"
+              sequence="30"
+              groups="group_guardpro_admin"/>
 
     <menuitem id="menu_api_key"
-        name="API Keys"
-        parent="menu_config_security"
-        action="action_api_key"
-        sequence="10"
-        groups="group_guardpro_admin"/>
+              name="API Keys"
+              parent="menu_config_security"
+              action="action_api_key"
+              sequence="10"
+              groups="group_guardpro_admin"/>
 
     <menuitem id="menu_audit_log"
-        name="Audit Logs"
-        parent="menu_config_security"
-        action="action_audit_log"
-        sequence="20"
-        groups="base.group_system"/>
+              name="Audit Logs"
+              parent="menu_config_security"
+              action="action_audit_log"
+              sequence="20"
+              groups="base.group_system"/>
 
     <!-- 11.5 GDPR & Data Privacy -->
     <menuitem id="menu_gdpr_submenu"
-        name="GDPR &amp; Privacy"
-        parent="menu_guardpro_configuration"
-        action="action_gdpr_data_export"
-        sequence="40"
-        groups="group_guardpro_admin"/>
+              name="GDPR &amp; Privacy"
+              parent="menu_guardpro_configuration"
+              action="action_gdpr_data_export"
+              sequence="40"
+              groups="group_guardpro_admin"/>
 
     <menuitem id="menu_gdpr_export"
-        name="Data Export"
-        parent="menu_gdpr_submenu"
-        action="action_gdpr_data_export"
-        sequence="10"
-        groups="group_guardpro_admin"/>
+              name="Data Export"
+              parent="menu_gdpr_submenu"
+              action="action_gdpr_data_export"
+              sequence="10"
+              groups="group_guardpro_admin"/>
 
     <menuitem id="menu_gdpr_anonymize"
-        name="Data Anonymization"
-        parent="menu_gdpr_submenu"
-        action="action_gdpr_anonymization"
-        sequence="20"
-        groups="group_guardpro_admin"/>
+              name="Data Anonymization"
+              parent="menu_gdpr_submenu"
+              action="action_gdpr_anonymization"
+              sequence="20"
+              groups="group_guardpro_admin"/>
 
     <!-- 11.6 Diagnostic Tools -->
     <menuitem id="menu_gps_diagnostic"
-        name="GPS Diagnostic"
-        parent="menu_guardpro_configuration"
-        action="action_gps_diagnostic"
-        sequence="50"
-        groups="group_guardpro_manager,group_guardpro_admin"/>
+              name="GPS Diagnostic"
+              parent="menu_guardpro_configuration"
+              action="action_gps_diagnostic"
+              sequence="50"
+              groups="group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- 11.7 Email QA -->
     <menuitem id="menu_email_template_tester"
-        name="Test Email Templates"
-        parent="menu_guardpro_configuration"
-        action="action_email_template_tester"
-        sequence="60"
-        groups="group_guardpro_manager,group_guardpro_admin"/>
+              name="Test Email Templates"
+              parent="menu_guardpro_configuration"
+              action="guardpro.action_email_template_tester"
+              sequence="60"
+              groups="group_guardpro_manager,group_guardpro_admin"/>
 
-</odoo>
+
+    <menuitem id="menu_webhook"
+              name="Webhooks &amp; Integrations"
+              parent="menu_guardpro_configuration"
+              action="action_webhook"
+              sequence="25"
+              groups="group_guardpro_admin"/>
+
+    <!-- ==========================================
+         STANDARD ODOO MENU RESTRICTIONS
+         Hide standard menus from internal users
+         Use record override to properly restrict menu visibility
+         ========================================== -->
+
+    <!-- Apps menu only for settings admin -->
+    <!-- Using record to properly override groups while preserving name -->
+    <record id="base.menu_management" model="ir.ui.menu">
+        <field name="name">Apps</field>
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_system'), ref('base.group_erp_manager')])]"/>
+    </record>
+
+    <!-- Hide Employees menu from internal users (only settings admin) -->
+    <!-- Using record to properly override groups while preserving name -->
+    <record id="hr.menu_hr_root" model="ir.ui.menu">
+        <field name="name">Employees</field>
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_system'), ref('base.group_erp_manager')])]"/>
+    </record>
+
+    <!-- Website app (Odoo 18 root is menu_website_configuration; menu_website_root may also exist) -->
+    <record id="website.menu_website_configuration" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_system'), ref('base.group_erp_manager')])]"/>
+    </record>
+    <record id="website.menu_website_root" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_system'), ref('base.group_erp_manager')])]"/>
+    </record>
+    <record id="utm.menu_link_tracker_root" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_system'), ref('base.group_erp_manager')])]"/>
+    </record>
+
+    <record id="base.menu_administration" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_system'), ref('base.group_erp_manager')])]"/>
+    </record>
+
+    <record id="mail.menu_root_discuss" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_system'), ref('base.group_erp_manager')])]"/>
+    </record>
+
+    <record id="mail.menu_configuration" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_system'), ref('base.group_erp_manager')])]"/>
+    </record>
+
+    <record id="project_todo.menu_todo_todos" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_system'), ref('base.group_erp_manager')])]"/>
+    </record>
+
+    <!-- Contacts app: Odoo admins only -->
+    <record id="contacts.menu_contacts" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_system'), ref('base.group_erp_manager')])]"/>
+    </record>
+
+    <!-- GuardPro Configuration root: only Odoo Settings / Access Rights (not GuardPro roles) -->
+    <record id="menu_guardpro_configuration" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_system'), ref('base.group_erp_manager')])]"/>
+    </record>
+
+    <!-- GuardPro Dashboard menu - exclude reception users (visible to manager, supervisor, client users, admin) -->
+    <record id="menu_guardpro_dashboard" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('group_guardpro_client_user'), ref('group_guardpro_supervisor'), ref('group_guardpro_manager'), ref('group_guardpro_admin')])]"/>
+    </record>
+
+    <!-- Place Live Guard Map under Command Centre -->
+    <record id="menu_guards_map" model="ir.ui.menu">
+        <field name="parent_id" ref="menu_guardpro_tracking"/>
+    </record>
+
+    <!-- Open Location History when clicking Command Centre -->
+    <record id="menu_guardpro_tracking" model="ir.ui.menu">
+        <field name="action" eval="'ir.actions.act_window,%d' % ref('action_guard_location_history')"/>
+    </record>
+
+    <!-- Ensure requested labels and visibility persist -->
+    <record id="menu_visitor_hosts" model="ir.ui.menu">
+        <field name="name">Host Information</field>
+    </record>
+
+    <record id="menu_guardpro_documentation" model="ir.ui.menu">
+        <field name="name">User Documentation</field>
+        <field name="groups_id" eval="[(6, 0, [ref('group_guardpro_client_user'), ref('group_guardpro_supervisor'), ref('group_guardpro_manager'), ref('group_guardpro_admin')])]"/>
+    </record>
+
+    <!-- Hide standard Dashboard menu from internal users (only settings admin) -->
+    <!-- Note: board.menu_board_root not available - board module not installed -->
+
+    
+</data>

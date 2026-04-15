@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Sentry - Security Guard Management',
-    'version': '18.0.1.1.53',
+    'version': '18.0.1.1.62',
     'category': 'Services/Security',
     'summary': 'Win premium guard contracts with an Odoo-native suite for mobile patrols, SLA automation, client portals, and analytics.',
     'description': """
@@ -73,10 +73,12 @@ Support & Roadmap
     'depends': [
         'base',
         'web',
+        'muk_web_appsbar',  # Apps sidebar; owns res.users.sidebar_type (do not redefine in guardpro)
         'website',  # Required for PWA routes
         'hr',
         # 'hr_attendance',  # Optional - For guard check-in/out tracking integration
         'project',
+        'project_todo',
         'contacts',
         'mail',
         'portal',
@@ -364,8 +366,8 @@ Support & Roadmap
         # Biometric actions (menus reference action_guard_biometric_*)
         'views/guard_biometric_views.xml',
 
-        # Views - Menus (MUST be loaded AFTER actions)
-        'views/guardpro_menus.xml',
+        # Menus (data/ — Odoo 18 validates views/*.xml with a schema that rejects menuitem)
+        'data/guardpro_menus.xml',
 
         # Portal Enhancement Templates
         'views/portal_enhanced_templates.xml',

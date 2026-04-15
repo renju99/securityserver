@@ -105,7 +105,7 @@ class ResConfigSettings(models.TransientModel):
         help='How long to keep mail.mail rows (outgoing/sent/exception queue) before the daily job '
              'removes them. Chatter messages on documents (mail.message) are not deleted.'
     )
-    
+
     # ====================================================
     # GEOFENCING SETTINGS
     # ====================================================

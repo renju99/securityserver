@@ -286,7 +286,7 @@
     <menuitem id="menu_audit_root" 
               name="Audit &amp; Compliance" 
               sequence="100"
-              groups="base.group_system"
+              groups="base.group_system,base.group_erp_manager"
               web_icon="account,static/description/icon.png"/>
     
     <menuitem id="menu_audit_logs" 
@@ -294,34 +294,34 @@
               parent="menu_audit_root" 
               action="action_audit_log" 
               sequence="10"
-              groups="base.group_system"/>
+              groups="base.group_system,base.group_erp_manager"/>
     
     <menuitem id="menu_audit_dashboard" 
               name="Audit Dashboard"
               parent="menu_audit_root" 
               action="action_audit_dashboard" 
               sequence="20"
-              groups="base.group_system"/>
+              groups="base.group_system,base.group_erp_manager"/>
     
     <menuitem id="menu_audit_tampered" 
               name="⚠ Integrity Alerts"
               parent="menu_audit_root" 
               action="action_audit_log_tampered" 
               sequence="30"
-              groups="base.group_system"/>
+              groups="base.group_system,base.group_erp_manager"/>
     
     <menuitem id="menu_audit_by_model" 
               name="By Model"
               parent="menu_audit_root" 
               action="action_audit_log_by_model" 
               sequence="40"
-              groups="base.group_system"/>
+              groups="base.group_system,base.group_erp_manager"/>
     
     <menuitem id="menu_audit_by_user" 
               name="By User"
               parent="menu_audit_root" 
               action="action_audit_log_by_user" 
               sequence="50"
-              groups="base.group_system"/>
+              groups="base.group_system,base.group_erp_manager"/>
 
 </odoo>

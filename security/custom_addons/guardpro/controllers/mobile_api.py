@@ -881,7 +881,7 @@ class MobileAPIController(http.Controller):
                 'title': '🚨 PANIC BUTTON ACTIVATED - EMERGENCY 🚨',
                 'description': notes or 'Guard activated panic button - IMMEDIATE RESPONSE REQUIRED',
                 'severity': 'critical',
-                'priority': '3',
+                'priority': '2',
                 'latitude': latitude,
                 'longitude': longitude,
                 'status': 'submitted'

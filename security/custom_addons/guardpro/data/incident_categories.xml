@@ -7,6 +7,7 @@
             <field name="code">SEC</field>
             <field name="sequence">10</field>
             <field name="color">1</field>
+            <field name="description">Unauthorized access, intrusion, or compromise of physical or operational security controls at the site.</field>
         </record>
 
         <record id="incident_cat_theft" model="incident.category">
@@ -14,6 +15,7 @@
             <field name="code">THEFT</field>
             <field name="sequence">20</field>
             <field name="color">2</field>
+            <field name="description">Theft, burglary, or unlawful taking of property belonging to the client, residents, or visitors.</field>
         </record>
 
         <record id="incident_cat_vandalism" model="incident.category">
@@ -21,6 +23,7 @@
             <field name="code">VAND</field>
             <field name="sequence">30</field>
             <field name="color">3</field>
+            <field name="description">Deliberate damage, graffiti, or destruction of property or common-area assets.</field>
         </record>
 
         <record id="incident_cat_safety" model="incident.category">
@@ -28,6 +31,7 @@
             <field name="code">SAFE</field>
             <field name="sequence">40</field>
             <field name="color">9</field>
+            <field name="description">Unsafe conditions posing risk of injury (e.g. slips, trips, exposed wiring, blocked exits, unsafe works).</field>
         </record>
 
         <record id="incident_cat_medical" model="incident.category">
@@ -35,6 +39,7 @@
             <field name="code">MED</field>
             <field name="sequence">50</field>
             <field name="color">2</field>
+            <field name="description">Medical emergency requiring first aid, ambulance, or coordination with health services.</field>
         </record>
 
         <record id="incident_cat_fire" model="incident.category">
@@ -42,6 +47,7 @@
             <field name="code">FIRE</field>
             <field name="sequence">60</field>
             <field name="color">1</field>
+            <field name="description">Fire, smoke, heat alarm activation, or related emergency response involving Civil Defence or evacuation.</field>
         </record>
 
         <record id="incident_cat_disturbance" model="incident.category">
@@ -49,6 +55,7 @@
             <field name="code">DIST</field>
             <field name="sequence">70</field>
             <field name="color">9</field>
+            <field name="description">Noise complaints, disorderly conduct, or disruption affecting residents, tenants, or site operations.</field>
         </record>
 
         <record id="incident_cat_trespassing" model="incident.category">
@@ -56,6 +63,7 @@
             <field name="code">TRESP</field>
             <field name="sequence">80</field>
             <field name="color">3</field>
+            <field name="description">Unauthorized persons on site or in restricted areas after warnings or without valid access.</field>
         </record>
 
         <record id="incident_cat_vehicle" model="incident.category">
@@ -63,36 +71,42 @@
             <field name="code">VEH</field>
             <field name="sequence">90</field>
             <field name="color">7</field>
+            <field name="description">Road traffic or parking incident involving a motor vehicle (collision, damage, or dispute on site).</field>
         </record>
         <record id="incident_cat_abandoned_vehicle" model="incident.category">
             <field name="name">Abandoned Vehicle</field>
             <field name="code">ABND_VEH</field>
             <field name="sequence">91</field>
             <field name="color">7</field>
+            <field name="description">Vehicle left unattended in violation of site rules, blocking access, or presenting a security concern.</field>
         </record>
         <record id="incident_cat_long_term_parked_vehicle" model="incident.category">
             <field name="name">Long-Term Parked Vehicle</field>
             <field name="code">LT_PARK</field>
             <field name="sequence">92</field>
             <field name="color">7</field>
+            <field name="description">Vehicle parked beyond permitted duration or in prohibited parking zones requiring FM or enforcement action.</field>
         </record>
         <record id="incident_cat_equipment_handover" model="incident.category">
             <field name="name">Equipment Handover</field>
             <field name="code">EQ_HO</field>
             <field name="sequence">93</field>
             <field name="color">5</field>
+            <field name="description">Formal handover of security or operational equipment between shifts, teams, or contractors.</field>
         </record>
         <record id="incident_cat_cctv_handover" model="incident.category">
             <field name="name">CCTV Handover</field>
             <field name="code">CCTV_HO</field>
             <field name="sequence">94</field>
             <field name="color">4</field>
+            <field name="description">Handover or status report for CCTV monitoring, recording integrity, or control-room continuity.</field>
         </record>
         <record id="incident_cat_local_authority_visit" model="incident.category">
             <field name="name">Local Authority Visit</field>
             <field name="code">AUTH_VISIT</field>
             <field name="sequence">95</field>
             <field name="color">6</field>
+            <field name="description">Official visit or inspection by police, municipality, or other government authority (document agency, purpose, outcome).</field>
         </record>
 
         <record id="incident_cat_weather" model="incident.category">
@@ -100,6 +114,7 @@
             <field name="code">WEATH</field>
             <field name="sequence">100</field>
             <field name="color">10</field>
+            <field name="description">Storm, flooding, extreme heat, sandstorm, or other natural event impacting building or site safety.</field>
         </record>
 
         <record id="incident_cat_equipment" model="incident.category">
@@ -107,6 +122,7 @@
             <field name="code">EQUIP</field>
             <field name="sequence">110</field>
             <field name="color">9</field>
+            <field name="description">Failure or unsafe operation of building systems or security equipment requiring maintenance or vendor attendance.</field>
         </record>
 
         <record id="incident_cat_suspicious" model="incident.category">
@@ -114,6 +130,7 @@
             <field name="code">SUSP</field>
             <field name="sequence">120</field>
             <field name="color">9</field>
+            <field name="description">Unconfirmed but concerning behaviour, loitering, or reconnaissance warranting observation and reporting.</field>
         </record>
 
         <record id="incident_cat_statement" model="incident.category">
@@ -121,6 +138,7 @@
             <field name="code">STMT</field>
             <field name="sequence">130</field>
             <field name="color">4</field>
+            <field name="description">Formal written statement from a witness or involved party related to an incident or investigation.</field>
         </record>
 
         <record id="incident_cat_found_item" model="incident.category">
@@ -128,6 +146,7 @@
             <field name="code">FOUND</field>
             <field name="sequence">140</field>
             <field name="color">5</field>
+            <field name="description">Item found on site and logged for safekeeping pending owner identification and return.</field>
         </record>
 
         <record id="incident_cat_return_form" model="incident.category">
@@ -135,6 +154,7 @@
             <field name="code">RETURN</field>
             <field name="sequence">150</field>
             <field name="color">6</field>
+            <field name="description">Return of a previously found lost item to its owner with handover documentation.</field>
         </record>
 
         <record id="incident_cat_short_term_letting" model="incident.category">
@@ -142,6 +162,7 @@
             <field name="code">SHORT_LET</field>
             <field name="sequence">160</field>
             <field name="color">8</field>
+            <field name="description">Unauthorized short-term letting, misuse of staff accommodation, or unapproved commercial activity on the property.</field>
         </record>
 
         <record id="incident_cat_illegal_household_staff" model="incident.category">
@@ -149,6 +170,7 @@
             <field name="code">ILL_STAFF</field>
             <field name="sequence">170</field>
             <field name="color">8</field>
+            <field name="description">Domestic or household staff employed or housed in breach of regulations or community rules.</field>
         </record>
 
         <record id="incident_cat_violation_moving_policy" model="incident.category">
@@ -156,6 +178,7 @@
             <field name="code">MOVE_POL</field>
             <field name="sequence">180</field>
             <field name="color">8</field>
+            <field name="description">Breach of community rules for moving in or moving out (timing, lifts, damage, access).</field>
         </record>
 
         <record id="incident_cat_violation_sales_policy" model="incident.category">
@@ -163,6 +186,7 @@
             <field name="code">SALE_POL</field>
             <field name="sequence">190</field>
             <field name="color">8</field>
+            <field name="description">Breach of sales or leasing restrictions (e.g. unauthorized brokerage, advertising, or unit use).</field>
         </record>
 
         <record id="incident_cat_violation_animal_rules" model="incident.category">
@@ -170,6 +194,7 @@
             <field name="code">ANIMAL</field>
             <field name="sequence">200</field>
             <field name="color">8</field>
+            <field name="description">Breach of pet or animal keeping rules (unauthorized species, noise, waste, or leash rules).</field>
         </record>
 
         <record id="incident_cat_damage_recreation" model="incident.category">
@@ -177,6 +202,7 @@
             <field name="code">DMG_REC</field>
             <field name="sequence">210</field>
             <field name="color">8</field>
+            <field name="description">Damage or misuse of parks, playgrounds, or other outdoor recreation facilities.</field>
         </record>
 
         <record id="incident_cat_damage_common_areas" model="incident.category">
@@ -184,6 +210,7 @@
             <field name="code">DMG_COM</field>
             <field name="sequence">220</field>
             <field name="color">8</field>
+            <field name="description">Damage or misuse of shared corridors, lobbies, amenities, or other common spaces.</field>
         </record>
 
         <record id="incident_cat_damage_sports_leisure" model="incident.category">
@@ -191,6 +218,7 @@
             <field name="code">DMG_SPT</field>
             <field name="sequence">230</field>
             <field name="color">8</field>
+            <field name="description">Damage or misuse of gym, courts, or leisure amenities including equipment and booking rules.</field>
         </record>
 
         <record id="incident_cat_damage_pools" model="incident.category">
@@ -198,6 +226,7 @@
             <field name="code">DMG_POOL</field>
             <field name="sequence">240</field>
             <field name="color">8</field>
+            <field name="description">Damage or misuse of swimming pool, pool deck, or related safety and hygiene rules.</field>
         </record>
 
         <record id="incident_cat_damage_plants" model="incident.category">
@@ -205,6 +234,7 @@
             <field name="code">DMG_PLNT</field>
             <field name="sequence">250</field>
             <field name="color">8</field>
+            <field name="description">Damage to landscaping, trees, planters, or irrigation affecting community appearance or safety.</field>
         </record>
 
         <record id="incident_cat_poor_garden_maintenance" model="incident.category">
@@ -212,6 +242,7 @@
             <field name="code">GARDEN</field>
             <field name="sequence">260</field>
             <field name="color">8</field>
+            <field name="description">Poor upkeep of assigned garden or landscape areas affecting community standards or pest risk.</field>
         </record>
 
         <record id="incident_cat_improper_home_appearance" model="incident.category">
@@ -219,6 +250,7 @@
             <field name="code">HOME_APP</field>
             <field name="sequence">270</field>
             <field name="color">8</field>
+            <field name="description">Unit exterior or facade not maintained to community appearance or hygiene standards.</field>
         </record>
 
         <record id="incident_cat_unauth_exterior_major" model="incident.category">
@@ -226,6 +258,7 @@
             <field name="code">EXT_MAJ</field>
             <field name="sequence">280</field>
             <field name="color">8</field>
+            <field name="description">Major unauthorized exterior changes (structures, cladding, extensions) without approval.</field>
         </record>
 
         <record id="incident_cat_unauth_exterior_minor" model="incident.category">
@@ -233,6 +266,7 @@
             <field name="code">EXT_MIN</field>
             <field name="sequence">290</field>
             <field name="color">8</field>
+            <field name="description">Minor unauthorized exterior changes (satellite dishes, awnings, fixtures) without approval.</field>
         </record>
 
         <record id="incident_cat_signage_violation" model="incident.category">
@@ -240,6 +274,7 @@
             <field name="code">SIGNAGE</field>
             <field name="sequence">300</field>
             <field name="color">8</field>
+            <field name="description">Unauthorized, oversized, or prohibited signage or advertising visible from common areas or exterior.</field>
         </record>
 
         <record id="incident_cat_terrace_balconies" model="incident.category">
@@ -247,6 +282,7 @@
             <field name="code">TERRACE</field>
             <field name="sequence">310</field>
             <field name="color">8</field>
+            <field name="description">Unsafe or prohibited use of terraces and balconies (BBQ, storage over rail, climbing hazard, etc.).</field>
         </record>
 
         <record id="incident_cat_inadequate_pest_control" model="incident.category">
@@ -254,6 +290,7 @@
             <field name="code">PEST</field>
             <field name="sequence">320</field>
             <field name="color">8</field>
+            <field name="description">Inadequate pest control, infestation, or conditions attracting vermin requiring FM or vendor action.</field>
         </record>
 
         <record id="incident_cat_misuse_garage" model="incident.category">
@@ -261,6 +298,7 @@
             <field name="code">GARAGE</field>
             <field name="sequence">330</field>
             <field name="color">8</field>
+            <field name="description">Misuse of parking garage lanes, storage, or vehicle maintenance in prohibited areas.</field>
         </record>
 
         <record id="incident_cat_retail_violation" model="incident.category">
@@ -268,6 +306,7 @@
             <field name="code">RETAIL</field>
             <field name="sequence">340</field>
             <field name="color">8</field>
+            <field name="description">Breach of retail or F&amp;B lease or license conditions affecting the development or other tenants.</field>
         </record>
 
         <record id="incident_cat_other" model="incident.category">
@@ -275,6 +314,7 @@
             <field name="code">OTHER</field>
             <field name="sequence">999</field>
             <field name="color">0</field>
+            <field name="description">Incident not covered by a specific category; document circumstances clearly in the report narrative.</field>
         </record>
 
         <!-- Incident Tags -->
@@ -304,5 +344,3 @@
         </record>
     </data>
 </odoo>
-
-
