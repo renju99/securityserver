@@ -22,7 +22,6 @@ class BidBoardSettingsMarketAnalysis(models.Model):
     _MARKET_ANALYSIS_PROMPT_TEMPLATE_KEY = "sales_bid_board.market_analysis_prompt_template"
     _EXTERNAL_MARKET_ENABLED_KEY = "sales_bid_board.external_market_enabled"
     _EXTERNAL_MARKET_PROVIDER_KEY = "sales_bid_board.external_market_provider"
-    _EXTERNAL_MARKET_GEMINI_DIRECT_KEY = "sales_bid_board.external_market_gemini_direct"
     _EXTERNAL_MARKET_API_KEY = "sales_bid_board.external_market_api_key"
     _EXTERNAL_MARKET_NEWS_LIMIT_KEY = "sales_bid_board.external_market_news_limit"
     _EXTERNAL_MARKET_TIMEOUT_KEY = "sales_bid_board.external_market_timeout_seconds"
@@ -85,14 +84,6 @@ class BidBoardSettingsMarketAnalysis(models.Model):
         help="When enabled, refreshes the external / strategic intelligence block on the project before "
         "combined analysis. Use “Gemini only” to skip search APIs.",
     )
-    external_market_gemini_direct = fields.Boolean(
-        string="Gemini only (no web search)",
-        compute="_compute_market_analysis_settings",
-        inverse="_inverse_market_analysis_settings",
-        readonly=False,
-        help="When enabled, strategic intelligence is generated with Google Gemini using only this bid record "
-        "(and optional client website as text). No Serper, Google Search API, or RSS calls.",
-    )
     external_market_provider = fields.Selection(
         [
             ("google_search_api", "Google Search API"),
@@ -137,7 +128,6 @@ class BidBoardSettingsMarketAnalysis(models.Model):
             rec.market_analysis_prompt_version = rec.get_market_analysis_prompt_version()
             rec.market_analysis_prompt_template = rec.get_market_analysis_prompt_template()
             rec.external_market_enabled = rec.get_external_market_enabled()
-            rec.external_market_gemini_direct = rec.get_external_market_gemini_direct()
             rec.external_market_provider = rec.get_external_market_provider()
             rec.external_market_api_key = rec.get_external_market_api_key()
             rec.external_market_news_limit = rec.get_external_market_news_limit()
@@ -164,7 +154,6 @@ class BidBoardSettingsMarketAnalysis(models.Model):
                 rec.set_market_analysis_prompt_template(incoming_prompt_template)
 
             rec.set_external_market_enabled(bool(rec.external_market_enabled))
-            rec.set_external_market_gemini_direct(bool(rec.external_market_gemini_direct))
             rec.set_external_market_provider(
                 (rec.external_market_provider or rec.get_external_market_provider())
             )
@@ -312,21 +301,6 @@ class BidBoardSettingsMarketAnalysis(models.Model):
     def set_external_market_enabled(self, value):
         self.env["ir.config_parameter"].sudo().set_param(
             self._EXTERNAL_MARKET_ENABLED_KEY, "True" if bool(value) else "False"
-        )
-
-    @api.model
-    def get_external_market_gemini_direct(self):
-        raw = (
-            self.env["ir.config_parameter"]
-            .sudo()
-            .get_param(self._EXTERNAL_MARKET_GEMINI_DIRECT_KEY, default="False")
-        )
-        return str(raw).strip().lower() in ("1", "true", "yes", "on")
-
-    @api.model
-    def set_external_market_gemini_direct(self, value):
-        self.env["ir.config_parameter"].sudo().set_param(
-            self._EXTERNAL_MARKET_GEMINI_DIRECT_KEY, "True" if bool(value) else "False"
         )
 
     @api.model
