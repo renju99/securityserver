@@ -8,8 +8,7 @@
     <menuitem id="menu_apps_under_settings"
               name="Apps"
               parent="base.menu_administration"
-              sequence="15"
-              groups="base.group_system">
+              sequence="15">
         <menuitem id="menu_apps_under_settings_main"
                   name="Main Apps"
                   action="base.open_module_tree"
@@ -34,14 +33,12 @@
               name="Dashboards"
               parent="base.menu_administration"
               action="spreadsheet_dashboard.ir_actions_dashboard_action"
-              sequence="25"
-              groups="base.group_system,base.group_erp_manager"/>
+              sequence="25"/>
 
-    <!-- Technical configuration (dashboard groups) — system administrators -->
+    <!-- Technical configuration (dashboard groups) — inherits Administration visibility -->
     <menuitem id="menu_spreadsheet_dashboard_config_under_settings"
               name="Dashboard configuration"
               parent="base.menu_administration"
               action="spreadsheet_dashboard.spreadsheet_dashboard_action_configuration_dashboards"
-              sequence="26"
-              groups="base.group_system"/>
+              sequence="26"/>
 </odoo>

@@ -1,6 +1,6 @@
 {
     "name": "Dashboards & Apps under Settings (admin only)",
-    "version": "18.0.1.0.1",
+    "version": "18.0.1.0.2",
     "summary": "Hide Dashboards and Apps from the main app bar; expose them from Settings for administrators.",
     "category": "Administration",
     "author": "Berkeley UAE",
