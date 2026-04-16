@@ -9,7 +9,6 @@ class BidBoardSettings(models.Model):
     _description = "Bid Board Settings"
     _order = "id"
     _SUBMIT_REVIEW_THRESHOLD_KEY = "sales_bid_board.submit_review_min_score"
-    _EXTERNAL_MARKET_GEMINI_DIRECT_KEY = "sales_bid_board.external_market_gemini_direct"
 
     name = fields.Char(default="Default Settings", required=True)
     notification_email_from = fields.Char(
@@ -53,38 +52,6 @@ class BidBoardSettings(models.Model):
         default="ranjith.krishnan@berkeleyuae.com",
         help="Address used by “Send test email” (Bid Board notification path).",
     )
-    external_market_gemini_direct = fields.Boolean(
-        string="Gemini only (no web search)",
-        compute="_compute_external_market_gemini_direct",
-        inverse="_inverse_external_market_gemini_direct",
-        readonly=False,
-        help="When enabled, external strategic intelligence uses Google Gemini with only the bid record "
-        "(and optional client website as text). No Serper, Google Search API, or RSS. "
-        "Configure the AI API key and Gemini model under Market Analysis.",
-    )
-
-    def _compute_external_market_gemini_direct(self):
-        for rec in self:
-            rec.external_market_gemini_direct = rec.get_external_market_gemini_direct()
-
-    def _inverse_external_market_gemini_direct(self):
-        for rec in self:
-            rec.set_external_market_gemini_direct(bool(rec.external_market_gemini_direct))
-
-    @api.model
-    def get_external_market_gemini_direct(self):
-        raw = (
-            self.env["ir.config_parameter"]
-            .sudo()
-            .get_param(self._EXTERNAL_MARKET_GEMINI_DIRECT_KEY, default="False")
-        )
-        return str(raw).strip().lower() in ("1", "true", "yes", "on")
-
-    @api.model
-    def set_external_market_gemini_direct(self, value):
-        self.env["ir.config_parameter"].sudo().set_param(
-            self._EXTERNAL_MARKET_GEMINI_DIRECT_KEY, "True" if bool(value) else "False"
-        )
 
     @api.model_create_multi
     def create(self, vals_list):
