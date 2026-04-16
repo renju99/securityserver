@@ -5,7 +5,7 @@
         <field name="sequence">40</field>
     </record>
 
-    <!-- Role stack (low → high). Assign “Bid Board / Sales Manager” for org-wide visibility; CSO / Admin above that. -->
+    <!-- Role stack (low → high): Salesperson → Sales Manager → CSO → Administrator -->
     <record id="group_bid_board_salesperson" model="res.groups">
         <field name="name">Bid Board / Salesperson</field>
         <field name="category_id" ref="sales_bid_board.module_category_bid_board"/>
@@ -20,28 +20,6 @@
         <field name="implied_ids" eval="[(4, ref('sales_bid_board.group_bid_board_salesperson'))]"/>
     </record>
 
-    <!-- Deprecated XML IDs: kept so existing user assignments keep working; each implies Sales Manager only. -->
-    <record id="group_bid_board_team_leader" model="res.groups">
-        <field name="name">Bid Board / Team Leader (deprecated)</field>
-        <field name="category_id" ref="sales_bid_board.module_category_bid_board"/>
-        <field name="comment">Deprecated — same access as Sales Manager. Remove this role and assign “Bid Board / Sales Manager” only.</field>
-        <field name="implied_ids" eval="[(4, ref('sales_bid_board.group_bid_board_sales_manager'))]"/>
-    </record>
-
-    <record id="group_bid_board_bid_manager" model="res.groups">
-        <field name="name">Bid Board / Bid Manager (deprecated)</field>
-        <field name="category_id" ref="sales_bid_board.module_category_bid_board"/>
-        <field name="comment">Deprecated — same access as Sales Manager. Remove this role and assign “Bid Board / Sales Manager” only.</field>
-        <field name="implied_ids" eval="[(4, ref('sales_bid_board.group_bid_board_sales_manager'))]"/>
-    </record>
-
-    <record id="group_bid_board_commercial_manager" model="res.groups">
-        <field name="name">Bid Board / Commercial Manager (deprecated)</field>
-        <field name="category_id" ref="sales_bid_board.module_category_bid_board"/>
-        <field name="comment">Deprecated — same access as Sales Manager. Remove this role and assign “Bid Board / Sales Manager” only.</field>
-        <field name="implied_ids" eval="[(4, ref('sales_bid_board.group_bid_board_sales_manager'))]"/>
-    </record>
-
     <record id="group_bid_board_cso" model="res.groups">
         <field name="name">Bid Board / CSO</field>
         <field name="category_id" ref="sales_bid_board.module_category_bid_board"/>
@@ -54,20 +32,5 @@
         <field name="category_id" ref="sales_bid_board.module_category_bid_board"/>
         <field name="comment">Technical admin on top of CSO: email crons, submit-threshold system parameter.</field>
         <field name="implied_ids" eval="[(4, ref('sales_bid_board.group_bid_board_cso'))]"/>
-    </record>
-
-    <!-- Legacy XML IDs (keep for upgrades). -->
-    <record id="group_bid_board_user" model="res.groups">
-        <field name="name">Bid Board / User (legacy)</field>
-        <field name="category_id" ref="sales_bid_board.module_category_bid_board"/>
-        <field name="comment">Deprecated alias — same as Sales Manager. Assign Bid Board / Sales Manager instead.</field>
-        <field name="implied_ids" eval="[(4, ref('sales_bid_board.group_bid_board_sales_manager'))]"/>
-    </record>
-
-    <record id="group_bid_board_reviewer" model="res.groups">
-        <field name="name">Bid Board / Reviewer (legacy)</field>
-        <field name="category_id" ref="sales_bid_board.module_category_bid_board"/>
-        <field name="comment">Deprecated alias — same as Sales Manager. Assign Bid Board / Sales Manager instead.</field>
-        <field name="implied_ids" eval="[(4, ref('sales_bid_board.group_bid_board_sales_manager'))]"/>
     </record>
 </odoo>
