@@ -1,6 +1,6 @@
 {
     "name": "Sales Bid Board",
-    "version": "18.0.1.1.36",
+    "version": "18.0.2.0.1",
     "summary": "Bid/No-Bid pipeline and decision management",
     "category": "Sales",
     "author": "Berkeley UAE",

@@ -1,5 +1,9 @@
+import io
 import json
+import re
 from unittest.mock import patch
+from urllib import error as urllib_error
+from urllib import request as urllib_request
 
 from odoo.exceptions import UserError
 from odoo.tests import TransactionCase, tagged
@@ -11,17 +15,14 @@ class TestBidMarketAnalysis(TransactionCase):
         super().setUp()
         self.settings = self.env["bid.board.settings"].sudo().get_singleton()
         self.settings.set_market_analysis_enabled(True)
-        self.settings.set_market_analysis_provider("openrouter")
-        self.settings.set_market_analysis_model("qwen/qwen-2.5-7b-instruct:free")
-        self.settings.set_market_analysis_api_key("test-key")
+        self.settings.set_market_analysis_model("gemini-1.5-flash")
+        self.settings.set_market_analysis_api_key("AIza-test-market-analysis-key")
         self.settings.set_market_analysis_timeout_seconds(30)
         self.settings.set_market_analysis_prompt_version("v-test")
         self.settings.set_market_analysis_prompt_template("")
         self.settings.set_external_market_enabled(False)
-        self.settings.set_external_market_gemini_direct(False)
-        self.settings.set_external_market_provider("google_search_api")
-        self.settings.set_external_market_api_key("external-test-key")
-        self.settings.set_external_market_news_limit(5)
+        self.settings.set_external_market_gemini_api_key("")
+        self.settings.set_external_market_gemini_model("gemini-1.5-flash")
         self.settings.set_external_market_timeout_seconds(20)
         self.project = self.env["bid.project"].create(
             {
@@ -42,6 +43,23 @@ class TestBidMarketAnalysis(TransactionCase):
             }
         )
 
+    def test_market_analysis_api_key_read_normalizes_quotes_and_bom(self):
+        icp = self.env["ir.config_parameter"].sudo()
+        icp.set_param("sales_bid_board.market_analysis_api_key", '\ufeff"AIza-test-normalize"')
+        self.assertEqual(self.settings.get_market_analysis_api_key(), "AIza-test-normalize")
+
+    def test_clearing_external_gemini_api_key_via_write_persists_empty(self):
+        """Clearing the External Gemini key in the UI must clear storage so AI Market Analysis can be reused."""
+        self.settings.set_external_market_gemini_api_key("AIza-should-be-cleared")
+        self.assertEqual(self.settings.get_external_market_gemini_api_key(), "AIza-should-be-cleared")
+        self.settings.write({"external_market_gemini_api_key": ""})
+        self.assertEqual(self.settings.get_external_market_gemini_api_key(), "")
+
+    def test_clearing_market_analysis_api_key_via_write_persists_empty(self):
+        self.settings.set_market_analysis_api_key("AIza-clear-me")
+        self.settings.write({"market_analysis_api_key": ""})
+        self.assertEqual(self.settings.get_market_analysis_api_key(), "")
+
     def test_market_analysis_snapshot_uses_internal_fields(self):
         snapshot = self.project._market_analysis_build_snapshot()
 
@@ -53,62 +71,36 @@ class TestBidMarketAnalysis(TransactionCase):
         self.assertNotIn("market_analysis_output_json", snapshot)
         self.assertIn("scorecard_signals", snapshot)
 
-    def test_build_external_queries_include_company_research_queries(self):
-        queries = self.env["bid.market.analysis.service"]._build_external_queries(self.project)
-        query_texts = [row["query"] for row in queries]
-
-        self.assertTrue(any("official website" in query for query in query_texts))
-        self.assertTrue(any("services" in query for query in query_texts))
-        self.assertTrue(any("projects clients" in query or "projects" in query for query in query_texts))
-        self.assertTrue(any("case studies" in query for query in query_texts))
-        self.assertTrue(any("awards news" in query for query in query_texts))
-
-    def test_build_external_queries_prefer_client_domain_when_set(self):
-        self.project.client_website = "https://exampleclient.ae"
-
-        queries = self.env["bid.market.analysis.service"]._build_external_queries(self.project)
-        query_texts = [row["query"] for row in queries]
-
-        self.assertTrue(all(query.startswith("site:exampleclient.ae ") for query in query_texts))
-        self.assertTrue(any("about" in query for query in query_texts))
-        self.assertTrue(any("services" in query for query in query_texts))
-
     def test_analyze_project_parses_structured_response_and_uses_prompt_version(self):
         service = self.env["bid.market.analysis.service"]
-        fake_response = {
-            "choices": [
-                {
-                    "message": {
-                        "content": json.dumps(
-                            {
-                                "summary": "Competitive but winnable opportunity.",
-                                "opportunity_signals": [
-                                    "Large multi-year contract value.",
-                                    "Balanced IFM scope mix.",
-                                ],
-                                "risk_signals": ["Penalty exposure needs review."],
-                                "competition_view": "Likely moderate competition.",
-                                "pricing_pressure_view": "Medium pricing pressure expected.",
-                                "bid_recommendation_support": "Internal score supports proceeding.",
-                                "missing_information": ["Named competitor list"],
-                                "confidence_level": "high",
-                                "disclaimer": "Based only on internal project fields.",
-                            }
-                        )
-                    }
-                }
-            ]
-        }
-        with patch.object(type(service), "_call_openrouter", return_value=fake_response) as mocked_call:
+        gemini_payload = json.dumps(
+            {
+                "summary": "Competitive but winnable opportunity.",
+                "opportunity_signals": [
+                    "Large multi-year contract value.",
+                    "Balanced IFM scope mix.",
+                ],
+                "risk_signals": ["Penalty exposure needs review."],
+                "competition_view": "Likely moderate competition.",
+                "pricing_pressure_view": "Medium pricing pressure expected.",
+                "bid_recommendation_support": "Internal score supports proceeding.",
+                "missing_information": ["Named competitor list"],
+                "confidence_level": "high",
+                "disclaimer": "Based only on internal project fields.",
+            }
+        )
+        with patch.object(
+            type(service), "_call_gemini_generate_content", return_value=gemini_payload
+        ) as mocked_call:
             values = service.analyze_project(self.project)
 
         args = mocked_call.call_args[0]
-        messages = args[3]
-        self.assertIn("Prompt version: v-test", messages[1]["content"])
+        prompt_text = args[3]
+        self.assertIn("Prompt version: v-test", prompt_text)
         self.assertEqual(values["market_analysis_summary"], "Competitive but winnable opportunity.")
         self.assertIn("- Large multi-year contract value.", values["market_analysis_opportunity_signals"])
         self.assertEqual(values["market_analysis_confidence"], "high")
-        self.assertEqual(values["market_analysis_model"], "qwen/qwen-2.5-7b-instruct:free")
+        self.assertEqual(values["market_analysis_model"], "gemini-1.5-flash")
         self.assertIn('"project_name": "Airport IFM Tender"', values["market_analysis_input_json"])
 
     def test_action_generate_market_analysis_marks_failure_on_user_error(self):
@@ -131,112 +123,14 @@ class TestBidMarketAnalysis(TransactionCase):
         self.assertFalse(self.settings.get_market_analysis_enabled())
         self.assertFalse(self.settings.get_external_market_enabled())
 
-    def test_collect_external_market_data_curates_summary_and_hides_raw_queries(self):
+    def test_collect_external_market_data_uses_external_gemini_only(self):
         service = self.env["bid.market.analysis.service"]
         self.settings.set_external_market_enabled(True)
-        fake_items = [
-            {
-                "title": "Example Client",
-                "link": "https://exampleclient.ae",
-                "published_at": "",
-                "source": "Google Knowledge Graph",
-                "snippet": "Facilities management company in Dubai. Headquarters: Dubai; Website: exampleclient.ae",
-            },
-            {
-                "title": "Sales & Commercial Manager - Berkeley Services UAE LLC - LinkedIn",
-                "link": "https://linkedin.com/jobs/view/123",
-                "published_at": "",
-                "source": "LinkedIn",
-                "snippet": "Hiring job post.",
-            },
-            {
-                "title": "UAE real estate sector enters 2026 from position of strength",
-                "link": "https://www.zawya.com/en/markets/real-estate/uae-real-estate-sector",
-                "published_at": "2026-01-15",
-                "source": "Zawya",
-                "snippet": "The UAE real estate market continues to show strong demand and project activity.",
-            },
-            {
-                "title": "Dubai Housing Market 2026",
-                "link": "https://youtube.com/watch?v=demo",
-                "published_at": "",
-                "source": "YouTube",
-                "snippet": "Video commentary.",
-            },
-        ]
-        fake_brief_response = {
-            "choices": [
-                {
-                    "message": {
-                        "content": json.dumps(
-                            {
-                                "title": "Example Client - Strategic Intel",
-                                "position": "Established FM operator in Dubai with evidence of local operating presence.",
-                                "key_contract_wins_focus_areas": [
-                                    "No named contracts were verified in the fetched evidence.",
-                                    "Company profile evidence points to Dubai-based FM operations.",
-                                ],
-                                "good": [
-                                    "Visible company profile data was found.",
-                                    "Market backdrop indicates active sector demand.",
-                                ],
-                                "bad": [
-                                    "Fetched evidence did not confirm flagship contracts.",
-                                ],
-                                "research_gaps": [
-                                    "Named reference clients still need direct validation.",
-                                ],
-                                "execution_prompt": (
-                                    "Act as a commercial strategy analyst for UAE FM bids.\\n"
-                                    "Provide sector-specific SWOT for Example Client in IFM.\\n"
-                                    "List top contracts and renewal timing from public evidence.\\n"
-                                    "Assess pricing posture (premium vs share-buying).\\n"
-                                    "Highlight delivery or workforce risk signals from recent sources."
-                                ),
-                                "strategic_tip": "Position the bid around proven delivery controls until reference accounts are verified.",
-                                "bottom_line": "Useful initial signal, but contract proof still needs direct verification.",
-                            }
-                        )
-                    }
-                }
-            ]
-        }
-        fetched_page_text = (
-            "Example Client provides integrated facilities management services in Dubai, "
-            "including cleaning, manpower, and technical operations. Case studies mention "
-            "large multi-site delivery programs and aviation-related service environments."
-        )
-        with patch.object(type(service), "_fetch_google_search_api", return_value=fake_items), patch.object(
-            type(service), "_fetch_webpage_text", return_value=fetched_page_text
-        ), patch.object(type(service), "_call_openrouter", return_value=fake_brief_response) as mocked_call:
-            values = service.collect_external_market_data(self.project)
-
-        messages = mocked_call.call_args[0][3]
-        self.assertEqual(values["market_external_provider"], "Google Search API")
-        self.assertFalse(values["market_external_query"])
-        self.assertIn("Example Client - Strategic Intel", values["market_external_summary"])
-        self.assertIn("Position:", values["market_external_summary"])
-        self.assertIn("Key Contract Wins & Focus Areas:", values["market_external_summary"])
-        self.assertIn("The Good:", values["market_external_summary"])
-        self.assertIn("The Bad:", values["market_external_summary"])
-        self.assertIn("Research Gaps:", values["market_external_summary"])
-        self.assertIn("Execution Prompt for Deep Research:", values["market_external_summary"])
-        self.assertIn("Strategic Tip for Your Bid:", values["market_external_summary"])
-        self.assertIn("Bottom line:", values["market_external_summary"])
-        self.assertIn("aviation-related service environments", messages[1]["content"])
-        self.assertNotIn("LinkedIn", values["market_external_summary"])
-        self.assertNotIn("YouTube", values["market_external_summary"])
-
-    def test_collect_external_gemini_direct_skips_search_apis(self):
-        service = self.env["bid.market.analysis.service"]
-        self.settings.set_external_market_enabled(True)
-        self.settings.set_external_market_gemini_direct(True)
-        self.settings.set_external_market_provider("google_search_api")
-        self.settings.set_market_analysis_api_key("AIza-test-key-for-gemini-direct")
-        self.settings.set_market_analysis_model("gemini-2.5-flash-lite")
+        self.settings.set_external_market_gemini_api_key("AIza-test-key-external-gemini")
+        self.settings.set_external_market_gemini_model("gemini-1.5-flash")
         gemini_json = json.dumps(
             {
-                "title": "Example Client - Direct Gemini",
+                "title": "Wrong title from model (must be overwritten server-side).",
                 "position": "Internal snapshot only; no web search.",
                 "key_contract_wins_focus_areas": ["Snapshot mentions IFM scope mix."],
                 "good": ["Structured internal scoring is available."],
@@ -248,13 +142,116 @@ class TestBidMarketAnalysis(TransactionCase):
             }
         )
         with patch.object(
-            type(service), "_fetch_google_search_api", side_effect=AssertionError("Serper must not be called")
-        ), patch.object(
             type(service), "_call_gemini_generate_content", return_value=gemini_json
         ) as mocked_gemini:
             values = service.collect_external_market_data(self.project)
 
         self.assertTrue(mocked_gemini.called)
+        args = mocked_gemini.call_args[0]
+        self.assertRegex(args[0], r"^(AIza|AQ\.)", "Gemini call must use the external Gemini API key.")
+        self.assertEqual(args[1], "gemini-1.5-flash")
         self.assertEqual(values["market_external_provider"], "Google Gemini (direct)")
-        self.assertIn("Example Client - Direct Gemini", values["market_external_summary"])
-        self.assertIn("Key Contract Wins & Focus Areas:", values["market_external_summary"])
+        summary = values["market_external_summary"]
+        self.assertNotIn("Wrong title from model", summary)
+        en = "\u2013"
+        self.assertRegex(
+            summary,
+            re.compile(rf"Example Client: Strategic Intel \(\d{{4}}{en}\d{{4}}\)"),
+        )
+        self.assertIn("Key Contract Wins & Focus Areas", summary)
+        self.assertRegex(summary, r"1\.\s+Key Contract Wins")
+        self.assertIn("Execution Prompt for Deep Research", values["market_external_summary"])
+        self.assertIn("Strategic Tip for Your Bid", values["market_external_summary"])
+
+    def test_collect_external_requires_external_gemini_credentials(self):
+        service = self.env["bid.market.analysis.service"]
+        self.settings.set_market_analysis_api_key("sk-not-google")
+        self.settings.set_market_analysis_model("vendor/other-model")
+        self.settings.set_external_market_enabled(True)
+        self.settings.set_external_market_gemini_api_key("")
+        self.settings.set_external_market_gemini_model("gemini-1.5-flash")
+        with self.assertRaises(UserError):
+            service.collect_external_market_data(self.project)
+
+    def test_external_gemini_reuses_market_analysis_aiza_when_external_key_empty(self):
+        """If External Gemini key is empty but AI Market Analysis has AIza + Gemini, use that pair."""
+        service = self.env["bid.market.analysis.service"]
+        self.settings.set_external_market_enabled(True)
+        self.settings.set_external_market_gemini_api_key("")
+        self.settings.set_external_market_gemini_model("gemini-1.5-flash")
+        self.settings.set_market_analysis_api_key("AIza-shared-key-test")
+        self.settings.set_market_analysis_model("gemini-1.5-flash")
+        gemini_json = json.dumps(
+            {
+                "title": "Brief",
+                "good": ["ok"],
+                "bad": [],
+                "key_contract_wins_focus_areas": [],
+                "research_gaps": [],
+                "execution_prompt": "x",
+                "strategic_tip": "y",
+                "bottom_line": "z",
+            }
+        )
+        with patch.object(
+            type(service), "_call_gemini_generate_content", return_value=gemini_json
+        ) as mocked:
+            service.collect_external_market_data(self.project)
+        args = mocked.call_args[0]
+        self.assertEqual(args[0], "AIza-shared-key-test")
+        self.assertEqual(args[1], "gemini-1.5-flash")
+
+    def test_gemini_http_429_raises_guidance_user_error(self):
+        service = self.env["bid.market.analysis.service"]
+        body = b'{"error":{"code":429,"message":"Quota exceeded for test"}}'
+        http_exc = urllib_error.HTTPError(
+            "https://generativelanguage.googleapis.com/v1beta/models/x:generateContent",
+            429,
+            "Too Many Requests",
+            {},
+            io.BytesIO(body),
+        )
+
+        def _raise(*_a, **_kw):
+            raise http_exc
+
+        with patch.object(urllib_request, "urlopen", side_effect=_raise):
+            with self.assertRaises(UserError) as cm:
+                service._call_gemini_generate_content(
+                    "AIza-test", "gemini-2.0-flash", 30, "{}", response_mime_json=True
+                )
+        err = str(cm.exception).lower()
+        self.assertIn("quota", err)
+        self.assertIn("rate limit", err)
+        self.assertIn("gemini-2.5-flash", err)
+
+    def test_collect_external_usererror_diagnosis_non_aiza_key(self):
+        service = self.env["bid.market.analysis.service"]
+        self.settings.set_external_market_enabled(True)
+        self.settings.set_external_market_gemini_api_key("")
+        self.settings.set_external_market_gemini_model("gemini-1.5-flash")
+        self.settings.set_market_analysis_api_key("not-a-google-ai-studio-key-12345")
+        self.settings.set_market_analysis_model("vendor/other-model")
+        with self.assertRaises(UserError) as cm:
+            service.collect_external_market_data(self.project)
+        err = str(cm.exception)
+        self.assertIn("Google AI Studio", err)
+        self.assertRegex(err, r"AIza|AQ\.")
+
+    def test_aq_api_key_accepted_for_gemini_credentials(self):
+        """Google AI Studio can issue AQ.… keys; they must pass the same checks as AIza keys."""
+        service = self.env["bid.market.analysis.service"]
+        self.assertTrue(
+            service._is_direct_gemini_model("gemini-1.5-flash", "AQ.Ab8RN6FakeSuffixForTest")
+        )
+        self.settings.set_market_analysis_api_key("")
+        self.settings.set_market_analysis_model("gemini-1.5-flash")
+        self.settings.set_external_market_gemini_api_key("AQ.Ab8RN6FakeSuffixForTest")
+        self.settings.set_external_market_gemini_model("gemini-1.5-flash")
+        settings = self.env["bid.board.settings"].sudo().get_singleton()
+        self.assertIsNone(
+            service._api_key_mismatch_explanation("External Market Data", "AQ.Ab8RN6FakeSuffixForTest")
+        )
+        diag = service._gemini_credentials_diagnosis(settings)
+        self.assertIn("gemini", diag.lower())
+        self.assertNotIn("sk-", diag.lower())

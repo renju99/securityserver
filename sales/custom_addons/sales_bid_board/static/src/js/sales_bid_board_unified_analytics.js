@@ -211,14 +211,11 @@ class BidBoardUnifiedAnalytics extends Component {
     }
 
     async exportPdf() {
-        if (this.state.activeTab !== "enquiries") {
-            return;
-        }
         try {
             const action = await this.orm.call(
                 "sales_bid_board.unified.analytics",
                 "action_print_enquiries_pdf",
-                [this.buildRpcParams()]
+                [{ ...this.buildRpcParams(), analytics_tab: this.state.activeTab }]
             );
             if (action) {
                 await this.action.doAction(action);

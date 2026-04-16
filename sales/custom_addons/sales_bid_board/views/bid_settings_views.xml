@@ -40,13 +40,13 @@
                     <group string="Decision Controls">
                         <field name="submit_review_min_score"/>
                     </group>
-                    <group string="AI Market Analysis">
+                    <group string="AI Market Analysis (Google Gemini)">
                         <field name="market_analysis_enabled"/>
-                        <field name="market_analysis_provider" readonly="not market_analysis_enabled"/>
                         <field name="market_analysis_model" readonly="not market_analysis_enabled"/>
                         <field name="market_analysis_api_key"
                                password="True"
-                               readonly="not market_analysis_enabled"/>
+                               readonly="not market_analysis_enabled"
+                               force_save="1"/>
                         <field name="market_analysis_timeout_seconds"
                                readonly="not market_analysis_enabled"/>
                         <field name="market_analysis_prompt_version"
@@ -54,15 +54,13 @@
                         <field name="market_analysis_prompt_template"
                                placeholder="Optional system prompt override for advanced tuning."
                                readonly="not market_analysis_enabled"/>
-                        <separator string="External Market Data"/>
+                        <separator string="External Market Data (Gemini only)"/>
                         <field name="external_market_enabled"/>
-                        <field name="external_market_gemini_direct" readonly="not external_market_enabled"/>
-                        <field name="external_market_provider"
-                               readonly="not external_market_enabled or external_market_gemini_direct"/>
-                        <field name="external_market_api_key"
+                        <field name="external_market_gemini_api_key"
                                password="True"
-                               readonly="not external_market_enabled or external_market_gemini_direct or external_market_provider != 'google_search_api'"/>
-                        <field name="external_market_news_limit" readonly="not external_market_enabled"/>
+                               readonly="not external_market_enabled"
+                               force_save="1"/>
+                        <field name="external_market_gemini_model" readonly="not external_market_enabled"/>
                         <field name="external_market_timeout_seconds" readonly="not external_market_enabled"/>
                     </group>
                     <group string="Automation">

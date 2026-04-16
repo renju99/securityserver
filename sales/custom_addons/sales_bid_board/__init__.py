@@ -76,14 +76,28 @@ def post_init_hook(cr, registry):
 
     # Ensure submit threshold parameter exists for score-gated submit checks.
     icp = env["ir.config_parameter"].sudo()
+    icp.search([("key", "=", "sales_bid_board.market_analysis_provider")]).unlink()
+    mk_migrate = (icp.get_param("sales_bid_board.market_analysis_api_key") or "").strip()
+    mm_migrate = (icp.get_param("sales_bid_board.market_analysis_model") or "").strip()
+    if (mk_migrate.startswith("AIza") or mk_migrate.startswith("AQ.")) and mm_migrate and "/" in mm_migrate:
+        icp.set_param("sales_bid_board.market_analysis_model", "gemini-1.5-flash")
+
     if not icp.get_param("sales_bid_board.submit_review_min_score"):
         icp.set_param("sales_bid_board.submit_review_min_score", "70")
 
-    # Legacy: Selection value "gemini_direct" was stored in ir.config_parameter; newer builds use a boolean instead.
-    ext_prov = (icp.get_param("sales_bid_board.external_market_provider") or "").strip().lower()
-    if ext_prov == "gemini_direct":
-        icp.set_param("sales_bid_board.external_market_provider", "google_search_api")
-        icp.set_param("sales_bid_board.external_market_gemini_direct", "True")
+    # External market uses Gemini only: seed dedicated params from legacy AI Market Analysis Gemini config.
+    if not (icp.get_param("sales_bid_board.external_market_gemini_api_key") or "").strip():
+        mk = (icp.get_param("sales_bid_board.market_analysis_api_key") or "").strip()
+        mm = (icp.get_param("sales_bid_board.market_analysis_model") or "").strip()
+        if (mk.startswith("AIza") or mk.startswith("AQ.")) and mm.lower().startswith("gemini"):
+            icp.set_param("sales_bid_board.external_market_gemini_api_key", mk)
+            icp.set_param("sales_bid_board.external_market_gemini_model", mm)
+    if not (icp.get_param("sales_bid_board.external_market_gemini_api_key") or "").strip():
+        leg = (icp.get_param("sales_bid_board.external_market_api_key") or "").strip()
+        if leg.startswith("AIza") or leg.startswith("AQ."):
+            icp.set_param("sales_bid_board.external_market_gemini_api_key", leg)
+    if not (icp.get_param("sales_bid_board.external_market_gemini_model") or "").strip():
+        icp.set_param("sales_bid_board.external_market_gemini_model", "gemini-1.5-flash")
 
     # Cached web client bundles can omit newly added addon JS until regenerated; drop them on install.
     att = env["ir.attachment"].sudo()

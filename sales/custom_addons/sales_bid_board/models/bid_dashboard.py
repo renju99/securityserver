@@ -506,6 +506,9 @@ class SalesBidBoardDashboard(models.Model):
 
     @api.model
     def get_report_data(self, filter_params=None):
+        tab = self.env.context.get("bid_board_analytics_tab")
+        if tab:
+            return self.env["sales_bid_board.unified.analytics"].get_pdf_report_payload(tab, filter_params)
         dashboard_data = self.get_dashboard_data(dashboard_id=None, context=None, filter_params=dict(filter_params or {}))
         return {
             "kpis": dashboard_data.get("kpis", []),

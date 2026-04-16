@@ -1,3 +1,12 @@
+# Production: custom_addons (including sales_bid_board) is bind-mounted at /mnt/extra-addons.
+# After git pull / copy new addon code, upgrade the module and restart Odoo:
+#   docker compose --profile tools run --rm odoo_upgrade_bid_board
+#   docker compose restart odoo_sales
+# Or: bash scripts/upgrade-bid-board.sh
+#
+# If Apps still shows "Latest Version 18.0.1.1.42", either (1) this host's ./custom_addons is not what the
+# container mounts—run: bash scripts/verify-bid-board-mount.sh—or (2) Odoo cached the list: enable Developer Mode,
+# Apps → Update Apps List, hard-refresh the browser.
 services:
   db:
     image: postgres:15
@@ -33,6 +42,30 @@ services:
       - sales-odoo-network
       - web-proxy-net
     restart: unless-stopped
+
+  # One-shot: loads ./config and ./custom_addons, runs -u sales_bid_board --stop-after-init (see header comment).
+  odoo_upgrade_bid_board:
+    profiles: [tools]
+    image: odoo:18
+    container_name: odoo_sales_upgrade_bid_board
+    depends_on:
+      - db
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=odoo
+    volumes:
+      - sales-odoo-web-data:/var/lib/odoo
+      - ./config:/etc/odoo
+      - ./custom_addons:/mnt/extra-addons
+    networks:
+      - sales-odoo-network
+    command:
+      - odoo
+      - --config=/etc/odoo/odoo.conf
+      - -u
+      - sales_bid_board
+      - --stop-after-init
 
 volumes:
   sales-odoo-db-data:

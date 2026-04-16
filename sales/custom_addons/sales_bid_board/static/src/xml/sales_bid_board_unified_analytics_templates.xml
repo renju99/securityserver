@@ -9,8 +9,14 @@
                         <div class="text-white" style="font-size: 13px; opacity: 0.9;">Leads, enquiries, proposals, performance, and activity in one place</div>
                     </div>
                     <div class="d-flex flex-wrap gap-2">
-                        <button t-if="state.activeTab === 'enquiries'" class="btn btn-outline-light" t-on-click="exportPdf" t-att-disabled="state.loading">
-                            <i class="fa fa-file-pdf-o me-1"/>Export PDF (enquiries)
+                        <button class="btn btn-outline-light" t-on-click="exportPdf" t-att-disabled="state.loading">
+                            <i class="fa fa-file-pdf-o me-1"/>
+                            <t t-if="state.activeTab === 'enquiries'">Export PDF (enquiries)</t>
+                            <t t-elif="state.activeTab === 'leads'">Export PDF (leads)</t>
+                            <t t-elif="state.activeTab === 'by_rep'">Export PDF (by sales rep)</t>
+                            <t t-elif="state.activeTab === 'proposals'">Export PDF (proposals)</t>
+                            <t t-elif="state.activeTab === 'activity'">Export PDF (activity)</t>
+                            <t t-else="">Export PDF</t>
                         </button>
                         <button class="btn btn-outline-light" t-on-click="clearFilters" t-att-disabled="state.loading"><i class="fa fa-eraser me-1"/>Reset</button>
                         <button class="btn btn-outline-light" t-on-click="loadActiveTab" t-att-disabled="state.loading"><i class="fa fa-refresh me-1"/>Refresh</button>

@@ -14,7 +14,6 @@ from . import bid_project_bid_status
 from . import bid_proposal
 from . import bid_crm_lead
 from . import bid_settings
-from . import bid_board_settings_market_flags
 from . import bid_submission
 from . import bid_team_member
 from . import oauth_provider
