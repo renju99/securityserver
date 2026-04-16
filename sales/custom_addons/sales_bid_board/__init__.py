@@ -113,13 +113,4 @@ def post_init_hook(cr, registry):
     att.search([("name", "=like", "web.assets_web.bundle%")]).unlink()
     att.search([("name", "=like", "web.assets_backend%.xml")]).unlink()
 
-    # Keep Dashboards / Apps off the main app bar (see views/bid_restrict_global_apps_dashboards.xml).
-    for menu_xmlid in (
-        "spreadsheet_dashboard.spreadsheet_dashboard_menu_root",
-        "base.menu_management",
-    ):
-        menu = env.ref(menu_xmlid, raise_if_not_found=False)
-        if menu:
-            menu.sudo().write({"active": False})
-
     registry.clear_cache()

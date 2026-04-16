@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo noupdate="0">
     <!--
-        Main app bar: hide Odoo Dashboards + Apps for all internal users (incl. Bid Board / Salesperson).
-        Administrators open them from Settings (parent menu already restricted to ERP manager / system).
+        Main app bar: Apps + Dashboards only for Settings administrators (ERP Manager / System).
+        Other internal users use Bid Board / Sales without those top-level apps.
+        Duplicates under Settings remain for convenience.
     -->
     <record id="base.menu_management" model="ir.ui.menu">
-        <field name="active" eval="False"/>
-        <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+        <field name="active" eval="True"/>
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_erp_manager'), ref('base.group_system')])]"/>
     </record>
 
     <record id="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" model="ir.ui.menu">
-        <field name="active" eval="False"/>
-        <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+        <field name="active" eval="True"/>
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_erp_manager'), ref('base.group_system')])]"/>
     </record>
 
     <menuitem id="menu_bid_board_apps_under_settings"
               name="Apps"
               parent="base.menu_administration"
               sequence="15"
-              groups="base.group_system">
+              groups="base.group_erp_manager,base.group_system">
         <menuitem id="menu_bid_board_apps_under_settings_main"
                   name="Main Apps"
                   action="base.open_module_tree"
@@ -45,5 +46,5 @@
               parent="base.menu_administration"
               action="spreadsheet_dashboard.spreadsheet_dashboard_action_configuration_dashboards"
               sequence="26"
-              groups="base.group_system"/>
+              groups="base.group_erp_manager,base.group_system"/>
 </odoo>
