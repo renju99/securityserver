@@ -79,6 +79,12 @@ def post_init_hook(cr, registry):
     if not icp.get_param("sales_bid_board.submit_review_min_score"):
         icp.set_param("sales_bid_board.submit_review_min_score", "70")
 
+    # Legacy: Selection value "gemini_direct" was stored in ir.config_parameter; newer builds use a boolean instead.
+    ext_prov = (icp.get_param("sales_bid_board.external_market_provider") or "").strip().lower()
+    if ext_prov == "gemini_direct":
+        icp.set_param("sales_bid_board.external_market_provider", "google_search_api")
+        icp.set_param("sales_bid_board.external_market_gemini_direct", "True")
+
     # Cached web client bundles can omit newly added addon JS until regenerated; drop them on install.
     att = env["ir.attachment"].sudo()
     att.search(

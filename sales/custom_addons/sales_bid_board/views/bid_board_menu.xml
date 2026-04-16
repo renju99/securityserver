@@ -121,19 +121,14 @@
               sequence="20"
               groups="sales_bid_board.group_bid_board_manager"/>
 
-    <menuitem id="menu_bid_board_submit_threshold"
-              name="Submit Threshold"
-              parent="menu_bid_board_configuration"
-              action="action_bid_board_submit_threshold_param"
-              sequence="25"
-              groups="sales_bid_board.group_bid_board_manager"/>
-
     <menuitem id="menu_bid_board_team"
               name="Team"
               parent="menu_bid_board_configuration"
               action="action_bid_team_members"
               sequence="30"
               groups="sales_bid_board.group_bid_board_cso"/>
+
+    <delete id="menu_bid_board_submit_threshold" model="ir.ui.menu"/>
 
     <menuitem id="menu_bid_board_bid_no_bid_training"
               name="Documentation"

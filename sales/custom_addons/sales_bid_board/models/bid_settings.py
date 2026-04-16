@@ -8,6 +8,7 @@ class BidBoardSettings(models.Model):
     _name = "bid.board.settings"
     _description = "Bid Board Settings"
     _order = "id"
+    _SUBMIT_REVIEW_THRESHOLD_KEY = "sales_bid_board.submit_review_min_score"
 
     name = fields.Char(default="Default Settings", required=True)
     notification_email_from = fields.Char(
@@ -105,22 +106,35 @@ class BidBoardSettings(models.Model):
         return settings
 
     def _compute_submit_review_min_score(self):
-        icp = self.env["ir.config_parameter"].sudo()
         for rec in self:
-            raw = icp.get_param("sales_bid_board.submit_review_min_score", default="70")
-            try:
-                value = float(raw)
-            except (TypeError, ValueError):
-                value = 70.0
-            rec.submit_review_min_score = max(0.0, min(100.0, value))
+            rec.submit_review_min_score = self.get_submit_review_min_score()
 
     def _inverse_submit_review_min_score(self):
-        icp = self.env["ir.config_parameter"].sudo()
         for rec in self:
-            value = float(rec.submit_review_min_score or 0.0)
-            if value < 0.0 or value > 100.0:
-                raise ValidationError(_("Minimum Overall Score for Submit must be between 0 and 100."))
-            icp.set_param("sales_bid_board.submit_review_min_score", f"{value:.2f}")
+            rec.set_submit_review_min_score(rec.submit_review_min_score)
+
+    @api.model
+    def get_submit_review_min_score(self):
+        raw = (
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param(self._SUBMIT_REVIEW_THRESHOLD_KEY, default="70")
+        )
+        try:
+            value = float(raw)
+        except (TypeError, ValueError):
+            value = 70.0
+        return max(0.0, min(100.0, value))
+
+    @api.model
+    def set_submit_review_min_score(self, value):
+        value = float(value or 0.0)
+        if value < 0.0 or value > 100.0:
+            raise ValidationError(_("Minimum Overall Score for Submit must be between 0 and 100."))
+        self.env["ir.config_parameter"].sudo().set_param(
+            self._SUBMIT_REVIEW_THRESHOLD_KEY,
+            f"{value:.2f}",
+        )
 
     def resolve_notification_email_from(self):
         self.ensure_one()

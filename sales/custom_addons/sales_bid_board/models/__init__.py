@@ -5,6 +5,11 @@ from . import bid_salesperson_dashboard
 from . import bid_unified_analytics
 from . import bid_notification
 from . import bid_project
+from . import bid_project_scoring
+from . import bid_project_workflow
+from . import bid_project_wizard_change_request
+from . import bid_project_wizard_decline_review
+from . import bid_project_wizard_create
 from . import bid_project_bid_status
 from . import bid_proposal
 from . import bid_crm_lead
@@ -13,3 +18,4 @@ from . import bid_submission
 from . import bid_team_member
 from . import oauth_provider
 from . import res_users
+from . import bid_market_analysis

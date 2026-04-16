@@ -24,7 +24,5 @@ access_bid_change_request_user,bid.change.request user,model_bid_change_request,
 access_bid_change_request_manager,bid.change.request cso,model_bid_change_request,sales_bid_board.group_bid_board_cso,1,1,1,1
 access_bid_proposal_user,bid.proposal user,model_bid_proposal,sales_bid_board.group_bid_board_salesperson,1,1,1,0
 access_bid_proposal_manager,bid.proposal cso,model_bid_proposal,sales_bid_board.group_bid_board_cso,1,1,1,1
-access_bid_board_settings_user,bid.board.settings user,model_bid_board_settings,sales_bid_board.group_bid_board_salesperson,1,0,0,0
 access_bid_board_settings_manager,bid.board.settings cso,model_bid_board_settings,sales_bid_board.group_bid_board_cso,1,1,1,1
 access_ir_cron_bid_board_manager,ir.cron bid board email jobs,base.model_ir_cron,sales_bid_board.group_bid_board_manager,1,1,0,0
-access_ir_config_parameter_bid_board_manager,ir.config_parameter bid board threshold,base.model_ir_config_parameter,sales_bid_board.group_bid_board_manager,1,1,1,0

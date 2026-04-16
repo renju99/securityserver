@@ -170,8 +170,9 @@ class SalesBidBoardUnifiedAnalytics(models.TransientModel):
     def action_kpi_leads_linked_enquiry(self, filter_params=None):
         fp = dict(filter_params or {})
         domain = self._crm_lead_leads_domain(fp)
-        project_with_lead = self.env["bid.project"].search([("crm_lead_id", "!=", False)])
-        linked_ids = project_with_lead.mapped("crm_lead_id").ids
+        project_domain = [("crm_lead_id", "!=", False)] + self.analytics_extra_domain_bid_project()
+        linked_ids = self.env["bid.project"].search(project_domain).mapped("crm_lead_id").ids
+        linked_ids = list(set(linked_ids))
         if not linked_ids:
             domain.append(("id", "=", False))
         else:

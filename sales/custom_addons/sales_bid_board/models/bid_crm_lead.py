@@ -7,6 +7,12 @@ from odoo.exceptions import ValidationError
 class CrmLead(models.Model):
     _inherit = "crm.lead"
 
+    bid_project_ids = fields.One2many(
+        "bid.project",
+        "crm_lead_id",
+        string="Bid / No-Bid Enquiries",
+    )
+
     bid_intake_scope_of_work = fields.Selection(
         [
             ("ifm", "IFM"),
