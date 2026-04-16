@@ -30,7 +30,7 @@
     <record id="group_bid_board_manager" model="res.groups">
         <field name="name">Bid Board / Administrator</field>
         <field name="category_id" ref="sales_bid_board.module_category_bid_board"/>
-        <field name="comment">Technical admin on top of CSO: email crons, submit-threshold system parameter.</field>
+        <field name="comment">Full Bid Board access (same as CSO) plus technical items: Bid Board email crons, submit-threshold parameter, ir.cron maintenance.</field>
         <field name="implied_ids" eval="[(4, ref('sales_bid_board.group_bid_board_cso'))]"/>
     </record>
 </odoo>

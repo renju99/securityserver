@@ -100,19 +100,19 @@
               sequence="10"
               groups="sales_bid_board.group_bid_board_sales_manager"/>
 
-    <!-- Configuration: CSO+ for business settings; technical items remain Administrator-only. -->
+    <!-- Configuration: CSO + Bid Board Administrator (same business access). -->
     <menuitem id="menu_bid_board_configuration"
               name="Configuration"
               parent="menu_bid_board_root"
               sequence="100"
-              groups="sales_bid_board.group_bid_board_cso"/>
+              groups="sales_bid_board.group_bid_board_cso,sales_bid_board.group_bid_board_manager"/>
 
     <menuitem id="menu_bid_board_settings"
               name="Settings"
               parent="menu_bid_board_configuration"
               action="action_bid_board_settings"
               sequence="10"
-              groups="sales_bid_board.group_bid_board_cso"/>
+              groups="sales_bid_board.group_bid_board_cso,sales_bid_board.group_bid_board_manager"/>
 
     <menuitem id="menu_bid_board_email_crons"
               name="Email Schedule"
@@ -126,7 +126,7 @@
               parent="menu_bid_board_configuration"
               action="action_bid_team_members"
               sequence="30"
-              groups="sales_bid_board.group_bid_board_cso"/>
+              groups="sales_bid_board.group_bid_board_cso,sales_bid_board.group_bid_board_manager"/>
 
     <delete id="menu_bid_board_submit_threshold" model="ir.ui.menu"/>
 
