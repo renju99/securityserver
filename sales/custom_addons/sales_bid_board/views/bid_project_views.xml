@@ -212,51 +212,31 @@
                                 <field name="cso_decline_justification" readonly="1" nolabel="1"/>
                             </group>
                         </page>
-                        <page string="Market Analysis">
-                            <field name="market_analysis_status" invisible="1"/>
+                        <page string="External market">
                             <field name="market_external_status" invisible="1"/>
-                            <group string="Generation" col="2">
-                                <group>
-                                    <field name="market_analysis_status" readonly="1"/>
-                                    <field name="market_analysis_generated_on" readonly="1"/>
-                                    <field name="market_analysis_generated_by" readonly="1"/>
-                                    <field name="market_analysis_model" readonly="1"/>
-                                    <field name="market_analysis_confidence" readonly="1"/>
-                                    <field name="market_analysis_includes_external" readonly="1"/>
-                                </group>
-                                <group>
-                                    <button name="action_generate_market_analysis"
-                                            string="Generate Analysis"
-                                            type="object"
-                                            class="btn-primary"
-                                            invisible="market_analysis_status == 'ready'"/>
-                                    <button name="action_generate_market_analysis"
-                                            string="Regenerate Analysis"
-                                            type="object"
-                                            class="btn-secondary"
-                                            invisible="market_analysis_status != 'ready'"/>
-                                    <button name="action_fetch_external_market_data"
-                                            string="Fetch External Market Data"
-                                            type="object"
-                                            class="btn-secondary"
-                                            invisible="market_external_status == 'ready'"/>
-                                    <button name="action_fetch_external_market_data"
-                                            string="Refresh External Data"
-                                            type="object"
-                                            class="btn-secondary"
-                                            invisible="market_external_status != 'ready'"/>
-                                    <button name="action_generate_combined_market_analysis"
-                                            string="Generate Combined Analysis"
-                                            type="object"
-                                            class="btn-primary"
-                                            invisible="market_external_status != 'ready'"/>
-                                </group>
+                            <group string="Strategic intelligence">
+                                <div class="text-muted" colspan="2">
+                                    Gemini generates a short brief from this bid’s fields (and optional client website).
+                                    Enable the feature under Bid Board Settings → External market intelligence. This does
+                                    not change the scorecard decision.
+                                </div>
+                                <button name="action_fetch_external_market_data"
+                                        string="Fetch strategic intelligence"
+                                        type="object"
+                                        class="btn-primary"
+                                        invisible="market_external_status == 'ready'"/>
+                                <button name="action_fetch_external_market_data"
+                                        string="Refresh strategic intelligence"
+                                        type="object"
+                                        class="btn-secondary"
+                                        invisible="market_external_status != 'ready'"/>
                             </group>
-                            <div class="alert alert-info" role="alert">
-                                This analysis is AI-assisted. It uses internal enquiry fields and, when enabled,
-                                curated external market signals. It does not override the scorecard decision.
+                            <div class="alert alert-secondary" role="alert">
+                                <strong>Deeper desk research</strong> (named contracts, news, verified figures) still
+                                needs your own follow-up—for example search-backed Gemini or manual research—then add
+                                notes on the bid.
                             </div>
-                            <group string="External Market Intelligence">
+                            <group string="External market intelligence">
                                 <field name="market_external_fetched_on" readonly="1"/>
                                 <field name="market_external_provider" readonly="1"/>
                                 <field name="market_external_summary" readonly="1" nolabel="1"/>
@@ -264,33 +244,6 @@
                                        readonly="1"
                                        nolabel="1"
                                        invisible="market_external_status != 'failed'"/>
-                            </group>
-                            <group string="Summary">
-                                <field name="market_analysis_summary" readonly="1" nolabel="1"/>
-                            </group>
-                            <group string="Opportunity Signals">
-                                <field name="market_analysis_opportunity_signals" readonly="1" nolabel="1"/>
-                            </group>
-                            <group string="Risk Signals">
-                                <field name="market_analysis_risk_signals" readonly="1" nolabel="1"/>
-                            </group>
-                            <group string="Competition View">
-                                <field name="market_analysis_competition_view" readonly="1" nolabel="1"/>
-                            </group>
-                            <group string="Pricing Pressure View">
-                                <field name="market_analysis_pricing_view" readonly="1" nolabel="1"/>
-                            </group>
-                            <group string="Decision Support">
-                                <field name="market_analysis_bid_support" readonly="1" nolabel="1"/>
-                            </group>
-                            <group string="Missing Information">
-                                <field name="market_analysis_missing_info" readonly="1" nolabel="1"/>
-                            </group>
-                            <group string="Disclaimer">
-                                <field name="market_analysis_disclaimer" readonly="1" nolabel="1"/>
-                            </group>
-                            <group string="Last Error" invisible="market_analysis_status != 'failed'">
-                                <field name="market_analysis_last_error" readonly="1" nolabel="1"/>
                             </group>
                         </page>
                         <page string="Change Requests">

@@ -99,6 +99,11 @@ def post_init_hook(cr, registry):
     if not (icp.get_param("sales_bid_board.external_market_gemini_model") or "").strip():
         icp.set_param("sales_bid_board.external_market_gemini_model", "gemini-1.5-flash")
 
+    # Product default: internal AI market analysis is off; external strategic intelligence only (once per DB).
+    if not (icp.get_param("sales_bid_board._external_only_market_intel_migrated") or "").strip():
+        icp.set_param("sales_bid_board.market_analysis_enabled", "False")
+        icp.set_param("sales_bid_board._external_only_market_intel_migrated", "1")
+
     # Cached web client bundles can omit newly added addon JS until regenerated; drop them on install.
     att = env["ir.attachment"].sudo()
     att.search(

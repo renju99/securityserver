@@ -136,7 +136,6 @@ class TestBidMarketAnalysis(TransactionCase):
                 "good": ["Structured internal scoring is available."],
                 "bad": ["No live web evidence in this mode."],
                 "research_gaps": ["Validate assumptions with primary sources."],
-                "execution_prompt": "Deep research prompt lines.",
                 "strategic_tip": "Anchor pricing to internal scorecard signals.",
                 "bottom_line": "Useful orientation from internal fields only.",
             }
@@ -151,6 +150,7 @@ class TestBidMarketAnalysis(TransactionCase):
         self.assertRegex(args[0], r"^(AIza|AQ\.)", "Gemini call must use the external Gemini API key.")
         self.assertEqual(args[1], "gemini-1.5-flash")
         self.assertEqual(values["market_external_provider"], "Google Gemini (direct)")
+        self.assertTrue(values.get("market_external_brief_json"))
         summary = values["market_external_summary"]
         self.assertNotIn("Wrong title from model", summary)
         en = "\u2013"
@@ -158,10 +158,37 @@ class TestBidMarketAnalysis(TransactionCase):
             summary,
             re.compile(rf"Example Client: Strategic Intel \(\d{{4}}{en}\d{{4}}\)"),
         )
-        self.assertIn("Key Contract Wins & Focus Areas", summary)
-        self.assertRegex(summary, r"1\.\s+Key Contract Wins")
-        self.assertIn("Execution Prompt for Deep Research", values["market_external_summary"])
-        self.assertIn("Strategic Tip for Your Bid", values["market_external_summary"])
+        self.assertIn("Wins & focus", summary)
+        self.assertIn("- Snapshot mentions IFM scope mix.", summary)
+        self.assertNotIn("Execution Prompt", summary)
+        self.assertIn("Bid tip", summary)
+        self.project.write(values)
+        self.assertIn("Wins & focus", self.project.market_external_summary)
+        snap = self.project._market_analysis_external_snapshot()
+        self.assertIn("strategic_brief", snap)
+        self.assertNotIn("summary", snap)
+
+    def test_external_intel_clamping_shortens_verbose_model_output(self):
+        service = self.env["bid.market.analysis.service"]
+        long = "word " * 60
+        parsed = {
+            "title": "ignored",
+            "key_contract_wins_focus_areas": [long + " more words after cap.", "short"],
+            "good": ["ok"],
+            "bad": ["n"],
+            "research_gaps": ["g"],
+            "strategic_tip": "First sentence here. Second sentence stays. Third sentence must be dropped.",
+            "bottom_line": "Closing only. Extra sentence should be removed by clamp.",
+            "execution_prompt": "must not appear in formatted summary",
+        }
+        clamped = service._clamp_external_intel_brief_dict(parsed)
+        self.assertNotIn("execution_prompt", clamped)
+        self.assertLessEqual(len(clamped["key_contract_wins_focus_areas"][0]), 135)
+        self.assertNotIn("Third sentence", clamped["strategic_tip"])
+        self.assertNotIn("Extra sentence", clamped["bottom_line"])
+        summary = service._format_external_brief(clamped)
+        self.assertNotIn("Execution Prompt", summary)
+        self.assertIn("Wins & focus", summary)
 
     def test_collect_external_requires_external_gemini_credentials(self):
         service = self.env["bid.market.analysis.service"]
@@ -188,7 +215,6 @@ class TestBidMarketAnalysis(TransactionCase):
                 "bad": [],
                 "key_contract_wins_focus_areas": [],
                 "research_gaps": [],
-                "execution_prompt": "x",
                 "strategic_tip": "y",
                 "bottom_line": "z",
             }

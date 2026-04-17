@@ -108,7 +108,8 @@ class BidBoardSettingsMarketAnalysis(models.Model):
         inverse="_inverse_external_market_gemini_api_key",
         readonly=False,
         help="Google AI Studio Gemini API key (typically AIza… or AQ…) for external market intelligence. "
-        "If empty, the AI Market Analysis API key is used when it is also a valid AI Studio key with a Gemini model.",
+        "If empty, the server may reuse the legacy Gemini key in system parameters when it is a valid AI Studio "
+        "Gemini pair.",
     )
     external_market_gemini_model = fields.Char(
         string="External Gemini model",
@@ -391,9 +392,10 @@ class BidMarketAnalysisService(models.AbstractModel):
             "summary, opportunity_signals, risk_signals, competition_view, pricing_pressure_view, "
             "bid_recommendation_support, missing_information, confidence_level, disclaimer. "
             "Use concise business language. "
+            "The summary field must stay under 120 words—plain prose, no numbered memo layout. "
             "Always anchor the analysis to the exact client_name provided in input. "
             "If client_name is missing, mention it under missing_information. "
-            "opportunity_signals and risk_signals must be arrays of short strings. "
+            "opportunity_signals and risk_signals must be arrays of short strings (one line each, max 6 items). "
             "missing_information must be an array of short strings. "
             "confidence_level must be one of: low, medium, high."
         )
@@ -422,6 +424,10 @@ class BidMarketAnalysisService(models.AbstractModel):
             "Analyze this bid/project using both internal and external current market signals.\n"
             "Clearly separate externally observed facts from internal assumptions.\n"
             "Use source-backed evidence from the provided external payload only.\n"
+            "Output discipline: summary must be at most 120 words in plain prose (no numbered memo, no pasted "
+            "section headings). opportunity_signals and risk_signals: arrays of one-line items (max 6 each, "
+            "under 140 characters per line). Do not echo or expand execution prompts or long strategic briefs "
+            "from the external JSON—synthesize your own short views.\n"
             f"Prompt version: {prompt_version}\n\n"
             f"Client name (must be used as the primary account context): {client_name}\n\n"
             "INTERNAL PROJECT SNAPSHOT JSON:\n"
@@ -430,44 +436,45 @@ class BidMarketAnalysisService(models.AbstractModel):
             f"{json.dumps(external_snapshot, indent=2, sort_keys=True)}"
         )
 
+    def _gemini_direct_intel_system_instruction(self):
+        """High-priority style rules sent as Gemini systemInstruction (brief key points only)."""
+        return (
+            "You are Gemini: UAE IFM / soft-services bid strategist. The bid team only wants scannable key "
+            "points—no essays, no long paragraphs, no filler, no numbered tutorial steps.\n"
+            "Every array item must be ONE tight line (aim under 120 characters). At most 6 items per array. "
+            "Do not put newline characters inside any JSON array element string.\n\n"
+            "Hard bans (any JSON string value):\n"
+            "- Never \"Theme:\" or theme-as-label.\n"
+            "- Never: internal snapshot, the snapshot, scorecard, Odoo, perfect score, 100% score, "
+            "allocation to cleaning.\n"
+            "- Do not dump scope percentages as headline facts; at most one short qualitative line on mix.\n"
+            "- Do not invent named contracts, AED amounts, rankings, or audited financials.\n"
+            "- Do not claim you browsed the web.\n"
+        )
+
     def _gemini_direct_intel_prompt(self, project, external_snapshot):
         client_name = (project.client_name or "").strip() or "Unknown client"
         industry = project._market_analysis_selection_display("industry") or "target sector"
         contract_type = project._market_analysis_selection_display("contract_type") or "contract"
         title_example = self._external_intel_canonical_title(project)
         return (
-            "You are a commercial strategy analyst supporting UAE facilities and soft-services bids.\n\n"
-            "Create a competitor-focused strategic intelligence brief for a bid team, written like a polished "
-            "internal memo (numbered sections, narrative paragraphs, and clear thematic labels).\n"
-            "You do not have live web search results. Use only the INTERNAL_PROJECT_SNAPSHOT JSON inside the payload "
-            "(and treat client_website as an optional label only—do not claim you retrieved that website).\n"
-            "You may add cautious UAE / sector perspective where it helps the bid; label it clearly when it is not "
-            "from the snapshot.\n"
-            "Do not invent named contracts, clients, rankings, or audited financials.\n\n"
-            "Return strict JSON with exactly these keys: "
-            "title, key_contract_wins_focus_areas, good, bad, research_gaps, execution_prompt, strategic_tip, bottom_line.\n"
-            "Optional key \"position\" is allowed as a short paragraph (string) for scope/context before section 1.\n\n"
+            "Task: return ONE JSON object (no markdown fences): a tight competitor / client intel brief—key points only.\n\n"
+            "Strict JSON keys exactly: "
+            "title, key_contract_wins_focus_areas, good, bad, research_gaps, strategic_tip, bottom_line.\n"
+            "Optional key \"position\": at most one sentence of context (or omit).\n\n"
             f"The JSON field \"title\" MUST be exactly this string (including the en dash between years): {json.dumps(title_example)}\n\n"
-            "Field requirements:\n"
-            "- key_contract_wins_focus_areas: array of strings. Do NOT paste internal scope_mix percentages "
-            "(cleaning/security splits) as if they were named contract wins—use the snapshot only to infer where "
-            "the competitor likely concentrates effort, framed as cautious narrative. First item(s) should orient the "
-            "reader; later items should use \"Theme: paragraph\" when helpful (for example \"Recent Wins: …\", "
-            "\"Anchor Clients: …\", \"Technology Edge: …\"). Each string may be several sentences.\n"
-            "- good: array of strings for competitive advantages; prefer \"Theme: paragraph\" lines (for example "
-            "\"Sustainability Leadership: …\").\n"
-            "- bad: array of strings for weaknesses or risks to exploit; prefer \"Theme: paragraph\" lines.\n"
-            "- research_gaps: array of short strings listing what still needs validation (optional but preferred).\n"
-            "- execution_prompt: one multi-line string that a human can paste into a search-capable tool. Include "
-            "placeholders in square brackets such as [Insert Sector] or [Insert Service] where the bid team must "
-            "substitute context.\n"
-            "- strategic_tip: one multi-line string with concrete bid positioning (you may use short paragraphs or "
-            "\"If the client values …\" framing).\n"
-            "- bottom_line: one sharp closing sentence.\n\n"
-            f"Client name: {client_name}\n"
+            "Field rules (brevity is mandatory):\n"
+            "- key_contract_wins_focus_areas: array of 3–6 one-line bullets; label: fact where helpful "
+            "(e.g. \"Focus: …\"). No multi-sentence items; no \"Theme:\" prefix.\n"
+            "- good: array of 3–5 one-line strengths (e.g. \"Ops: …\").\n"
+            "- bad: array of 3–5 one-line risks or angles to pressure-test (no separate framing essay).\n"
+            "- research_gaps: 3–5 one-line items a researcher should verify externally.\n"
+            "- strategic_tip: exactly two sentences maximum; actionable for the bid team only.\n"
+            "- bottom_line: one sentence; no repeat of strategic_tip.\n\n"
+            f"Client name (competitor): {client_name}\n"
             f"Sector context: {industry}\n"
             f"Contract context: {contract_type}\n\n"
-            "PAYLOAD JSON:\n"
+            "PAYLOAD JSON (your only factual anchor besides general UAE sector knowledge):\n"
             f"{json.dumps(external_snapshot, indent=2, sort_keys=True)}"
         )
 
@@ -556,7 +563,14 @@ class BidMarketAnalysisService(models.AbstractModel):
         )
 
     def _call_gemini_generate_content(
-        self, api_key, model_name, timeout_seconds, prompt_text, response_mime_json=False
+        self,
+        api_key,
+        model_name,
+        timeout_seconds,
+        prompt_text,
+        response_mime_json=False,
+        system_instruction=None,
+        temperature=None,
     ):
         model = (model_name or "gemini-1.5-flash").strip()
         if model.startswith("models/"):
@@ -566,13 +580,15 @@ class BidMarketAnalysisService(models.AbstractModel):
             "https://generativelanguage.googleapis.com/v1beta/models/"
             f"{model}:generateContent?key={safe_key}"
         )
-        generation_config = {"temperature": 0.35}
+        generation_config = {"temperature": 0.35 if temperature is None else float(temperature)}
         if response_mime_json:
             generation_config["responseMimeType"] = "application/json"
         payload = {
             "contents": [{"parts": [{"text": prompt_text}]}],
             "generationConfig": generation_config,
         }
+        if system_instruction and str(system_instruction).strip():
+            payload["systemInstruction"] = {"parts": [{"text": str(system_instruction).strip()}]}
         req = request.Request(
             endpoint,
             data=json.dumps(payload).encode("utf-8"),
@@ -602,17 +618,101 @@ class BidMarketAnalysisService(models.AbstractModel):
             raise UserError(_("Gemini returned an empty strategic intelligence response."))
         return content
 
-    def _external_brief_push_body_lines(self, lines, items):
-        """Append narrative body: one paragraph per item, blank line between items."""
-        first = True
-        for raw in items:
-            chunk = (raw or "").strip()
-            if not chunk:
+    def _external_brief_normalize_item(self, chunk):
+        """Strip accidental 'Theme:' prefixes the model may still emit."""
+        t = (chunk or "").strip()
+        if not t:
+            return ""
+        prev = None
+        while prev != t:
+            prev = t
+            t = re.sub(r"(?i)\btheme\s*:\s*", "", t)
+        return t.strip()
+
+    def _clamp_intel_first_line(self, text, max_chars=132):
+        """One scannable line for bullet fields (first line only, hard length cap)."""
+        s = self._external_brief_normalize_item(text)
+        if not s:
+            return ""
+        s = s.replace("\r\n", "\n").split("\n", 1)[0].strip()
+        if len(s) <= max_chars:
+            return s
+        cut = s[: max_chars - 1]
+        if " " in cut:
+            cut = cut.rsplit(" ", 1)[0]
+        return cut + "…"
+
+    def _clamp_intel_paragraph_sentences(self, text, max_sentences, max_chars):
+        """Limit prose fields to a few short sentences (strategic tip / bottom line)."""
+        s = self._external_brief_normalize_item(text)
+        if not s:
+            return ""
+        parts = re.split(r"(?<=[.!?])\s+", s)
+        acc = []
+        for p in parts:
+            p = p.strip()
+            if not p:
                 continue
-            if not first:
-                lines.append("")
-            lines.append(chunk)
-            first = False
+            acc.append(p)
+            if len(acc) >= max_sentences:
+                break
+        r = " ".join(acc).strip()
+        if len(r) > max_chars:
+            cut = r[: max_chars - 1]
+            if " " in cut:
+                cut = cut.rsplit(" ", 1)[0]
+            r = cut + "…"
+        return r
+
+    def _clamp_external_intel_brief_dict(self, parsed):
+        """Force concise stored briefs even when the model ignores prompt brevity rules."""
+        if not isinstance(parsed, dict):
+            return parsed
+        out = dict(parsed)
+        out.pop("execution_prompt", None)
+        list_keys = (
+            "key_contract_wins_focus_areas",
+            "notable_contracts_clients",
+            "good",
+            "strengths",
+            "bad",
+            "weak_points",
+            "research_gaps",
+        )
+        for key in list_keys:
+            if key not in out:
+                continue
+            raw = out[key]
+            items = raw if isinstance(raw, list) else self._normalize_bullets(raw)
+            cl = []
+            for item in items[:6]:
+                line = self._clamp_intel_first_line(item, max_chars=132)
+                if line:
+                    cl.append(line)
+            out[key] = cl
+        tip = (out.get("strategic_tip") or out.get("verdict") or "").strip()
+        if tip:
+            out["strategic_tip"] = self._clamp_intel_paragraph_sentences(tip, max_sentences=2, max_chars=360)
+        else:
+            out["strategic_tip"] = ""
+        out.pop("verdict", None)
+        if out.get("bottom_line"):
+            out["bottom_line"] = self._clamp_intel_paragraph_sentences(
+                out["bottom_line"], max_sentences=1, max_chars=220
+            )
+        if out.get("position"):
+            out["position"] = self._clamp_intel_first_line(out["position"], max_chars=160)
+        return out
+
+    def _append_external_brief_bullets(self, lines, heading, items):
+        """Append a short section: heading then '- ' lines (key points only)."""
+        normalized = [self._external_brief_normalize_item(x) for x in items if str(x).strip()]
+        if not normalized:
+            return
+        lines.append(heading)
+        for chunk in normalized:
+            lines.append(f"- {chunk}")
+        lines.append("")
 
     def _format_external_brief(self, brief):
         title = (brief.get("title") or "").strip()
@@ -623,8 +723,9 @@ class BidMarketAnalysisService(models.AbstractModel):
         strengths = self._normalize_bullets(brief.get("good") or brief.get("strengths"))
         weak_points = self._normalize_bullets(brief.get("bad") or brief.get("weak_points"))
         research_gaps = self._normalize_bullets(brief.get("research_gaps"))
-        execution_prompt = (brief.get("execution_prompt") or "").strip()
-        strategic_tip = (brief.get("strategic_tip") or brief.get("verdict") or "").strip()
+        strategic_tip = self._external_brief_normalize_item(
+            (brief.get("strategic_tip") or brief.get("verdict") or "").strip()
+        )
         bottom_line = (brief.get("bottom_line") or "").strip()
 
         lines = []
@@ -632,66 +733,29 @@ class BidMarketAnalysisService(models.AbstractModel):
             lines.append(title)
             lines.append("")
         if position:
-            lines.append(position)
+            lines.append(self._external_brief_normalize_item(position))
             lines.append("")
 
-        section_num = 1
-        if wins_focus:
-            lines.append(
-                _("%(n)d. Key Contract Wins & Focus Areas")
-                % {"n": section_num}
-            )
-            section_num += 1
-            lines.append("")
-            self._external_brief_push_body_lines(lines, wins_focus)
-            lines.append("")
-
-        if strengths:
-            lines.append(
-                _("%(n)d. The \"Good\" (Their Competitive Advantages)")
-                % {"n": section_num}
-            )
-            section_num += 1
-            lines.append("")
-            self._external_brief_push_body_lines(lines, strengths)
-            lines.append("")
-
-        if weak_points:
-            lines.append(
-                _("%(n)d. The \"Bad\" (Potential Weaknesses to Capitalize On)")
-                % {"n": section_num}
-            )
-            section_num += 1
-            lines.append("")
-            self._external_brief_push_body_lines(lines, weak_points)
-            lines.append("")
-
-        if research_gaps:
-            lines.append(_("Research gaps to validate"))
-            lines.append("")
-            self._external_brief_push_body_lines(lines, research_gaps)
-            lines.append("")
-
-        if execution_prompt:
-            lines.append(_("Execution Prompt for Deep Research"))
-            lines.append("")
-            intro = _(
-                "Use this prompt in a dedicated search tool or an AI with live web access to get the "
-                "\"nitty-gritty\" details for your specific sector:"
-            )
-            lines.append(intro)
-            lines.append("")
-            lines.append(execution_prompt)
-            lines.append("")
+        self._append_external_brief_bullets(
+            lines, _("Wins & focus"), wins_focus
+        )
+        self._append_external_brief_bullets(
+            lines, _("Strengths"), strengths
+        )
+        self._append_external_brief_bullets(
+            lines, _("Risks / angles"), weak_points
+        )
+        self._append_external_brief_bullets(
+            lines, _("Validate externally"), research_gaps
+        )
 
         if strategic_tip:
-            lines.append(_("Strategic Tip for Your Bid"))
-            lines.append("")
+            lines.append(_("Bid tip"))
             lines.append(strategic_tip)
             lines.append("")
 
         if bottom_line:
-            lines.append(bottom_line.strip())
+            lines.append(self._external_brief_normalize_item(bottom_line.strip()))
 
         return "\n".join(lines).strip()
 
@@ -724,6 +788,35 @@ class BidMarketAnalysisService(models.AbstractModel):
         if value in (False, None, ""):
             return []
         return [str(value).strip()]
+
+    def _truncate_plain_text_block(self, text, max_chars):
+        s = (text or "").strip()
+        if not s or len(s) <= max_chars:
+            return s
+        cut = s[: max_chars - 1]
+        if " " in cut:
+            cut = cut.rsplit(" ", 1)[0]
+        return cut + "…"
+
+    def _finalize_market_analysis_text_caps(self, values):
+        """Hard caps on stored combined / internal analysis text (model often overwrites otherwise)."""
+        if not isinstance(values, dict):
+            return values
+        out = dict(values)
+        caps = {
+            "market_analysis_summary": 1400,
+            "market_analysis_opportunity_signals": 1200,
+            "market_analysis_risk_signals": 1200,
+            "market_analysis_competition_view": 900,
+            "market_analysis_pricing_view": 900,
+            "market_analysis_bid_support": 900,
+            "market_analysis_missing_info": 1500,
+            "market_analysis_disclaimer": 800,
+        }
+        for key, mx in caps.items():
+            if out.get(key):
+                out[key] = self._truncate_plain_text_block(out[key], mx)
+        return out
 
     def _parse_analysis_content(self, content):
         json_text = self._extract_json_block(content)
@@ -831,7 +924,7 @@ class BidMarketAnalysisService(models.AbstractModel):
         content = self._call_gemini_generate_content(
             api_key, model_name, timeout_seconds, prompt_text, response_mime_json=True
         )
-        values = self._parse_analysis_content(content)
+        values = self._finalize_market_analysis_text_caps(self._parse_analysis_content(content))
         values.update(
             {
                 "market_analysis_status": "ready",
@@ -884,14 +977,22 @@ class BidMarketAnalysisService(models.AbstractModel):
                 _("Set a client name on the project before generating strategic market intelligence.")
             )
         snapshot = project._market_analysis_build_snapshot()
+        company = project.env.company
         external_snapshot = {
             "mode": "direct_gemini_no_web",
             "client_website": (project.client_website or "").strip(),
+            "bidding_company_name": (company.name or "").strip(),
             "internal_project_snapshot": snapshot,
         }
         prompt = self._gemini_direct_intel_prompt(project, external_snapshot)
         content = self._call_gemini_generate_content(
-            api_key, model_name, timeout_seconds, prompt, response_mime_json=True
+            api_key,
+            model_name,
+            timeout_seconds,
+            prompt,
+            response_mime_json=True,
+            system_instruction=self._gemini_direct_intel_system_instruction(),
+            temperature=0.22,
         )
         try:
             parsed = json.loads(self._extract_json_block(content))
@@ -899,14 +1000,17 @@ class BidMarketAnalysisService(models.AbstractModel):
             raise UserError(_("Gemini returned invalid JSON for strategic intelligence: %s") % exc) from exc
         if not isinstance(parsed, dict):
             raise UserError(_("Gemini strategic intelligence response was not a JSON object."))
+        parsed = self._clamp_external_intel_brief_dict(parsed)
         parsed["title"] = self._external_intel_canonical_title(project)
         highlights = self._format_external_brief(parsed)
+        brief_json = json.dumps(parsed, ensure_ascii=False, sort_keys=True)
         sources = [{"scope": "direct_gemini", "query": "", "items": []}]
         return {
             "market_external_status": "ready",
             "market_external_provider": self._provider_display_name("gemini_direct"),
             "market_external_query": False,
             "market_external_sources_json": json.dumps(sources, indent=2, sort_keys=True),
+            "market_external_brief_json": brief_json,
             "market_external_summary": highlights,
             "market_external_fetched_on": fields.Datetime.now(),
             "market_external_last_error": False,
@@ -947,7 +1051,7 @@ class BidMarketAnalysisService(models.AbstractModel):
         content = self._call_gemini_generate_content(
             api_key, model_name, timeout_seconds, prompt_text, response_mime_json=True
         )
-        values = self._parse_analysis_content(content)
+        values = self._finalize_market_analysis_text_caps(self._parse_analysis_content(content))
         values.update(
             {
                 "market_analysis_status": "ready",
@@ -1011,6 +1115,10 @@ class BidProjectMarketAnalysis(models.Model):
     market_external_provider = fields.Char(copy=False)
     market_external_query = fields.Text(copy=False)
     market_external_summary = fields.Text(copy=False)
+    market_external_brief_json = fields.Text(
+        copy=False,
+        help="Structured Gemini brief (JSON) used for combined analysis context and optional re-formatting.",
+    )
     market_external_sources_json = fields.Text(copy=False)
     market_external_last_error = fields.Text(copy=False)
 
@@ -1126,6 +1234,41 @@ class BidProjectMarketAnalysis(models.Model):
                     }
                 )
         condensed_sources = condensed_sources[:12]
+        brief_payload = None
+        if self.market_external_brief_json:
+            try:
+                brief_payload = json.loads(self.market_external_brief_json)
+            except (json.JSONDecodeError, TypeError, ValueError):
+                brief_payload = None
+        if isinstance(brief_payload, dict):
+            strategic = {
+                "title": (brief_payload.get("title") or "")[:200],
+                "key_contract_wins_focus_areas": (brief_payload.get("key_contract_wins_focus_areas") or [])[:6],
+                "good": (brief_payload.get("good") or [])[:6],
+                "bad": (brief_payload.get("bad") or [])[:6],
+                "research_gaps": (brief_payload.get("research_gaps") or [])[:6],
+                "strategic_tip": self.env["bid.market.analysis.service"]._truncate_plain_text_block(
+                    brief_payload.get("strategic_tip") or "", 400
+                ),
+                "bottom_line": self.env["bid.market.analysis.service"]._truncate_plain_text_block(
+                    brief_payload.get("bottom_line") or "", 220
+                ),
+            }
+            return self._market_analysis_prune_empty(
+                {
+                    "provider": self.market_external_provider,
+                    "fetched_on": fields.Datetime.to_string(self.market_external_fetched_on)
+                    if self.market_external_fetched_on
+                    else "",
+                    "query": self.market_external_query,
+                    "strategic_brief": self._market_analysis_prune_empty(strategic),
+                    "sources": condensed_sources,
+                }
+            )
+        legacy = (self.market_external_summary or "").strip()
+        excerpt = ""
+        if legacy:
+            excerpt = legacy[:700] + ("…" if len(legacy) > 700 else "")
         return self._market_analysis_prune_empty(
             {
                 "provider": self.market_external_provider,
@@ -1133,7 +1276,7 @@ class BidProjectMarketAnalysis(models.Model):
                 if self.market_external_fetched_on
                 else "",
                 "query": self.market_external_query,
-                "summary": self.market_external_summary,
+                "legacy_summary_excerpt": excerpt,
                 "sources": condensed_sources,
             }
         )
@@ -1184,9 +1327,18 @@ class BidProjectMarketAnalysis(models.Model):
         self._market_analysis_check_editable()
         settings = self.env["bid.board.settings"].sudo().get_singleton()
         service = self.env["bid.market.analysis.service"]
+        if not settings.get_market_analysis_enabled():
+            if settings.get_external_market_enabled():
+                return self.action_fetch_external_market_data()
+            return self._market_analysis_notification_action(
+                _("Market analysis"),
+                _("Enable external market intelligence in Bid Board Settings, or turn internal analysis back on via "
+                  "system parameters if your deployment still uses it."),
+                message_type="warning",
+                sticky=True,
+            )
         try:
             if settings.get_external_market_enabled():
-                # Keep combined analysis current by refreshing external signals on each regenerate.
                 external_values = service.collect_external_market_data(self)
                 self.write(external_values)
                 values = service.analyze_project_combined(self)
@@ -1249,9 +1401,37 @@ class BidProjectMarketAnalysis(models.Model):
     def action_generate_combined_market_analysis(self):
         self.ensure_one()
         self._market_analysis_check_editable()
+        settings = self.env["bid.board.settings"].sudo().get_singleton()
         service = self.env["bid.market.analysis.service"]
+        if not settings.get_market_analysis_enabled():
+            if settings.get_external_market_enabled():
+                try:
+                    external_values = service.collect_external_market_data(self)
+                    self.write(external_values)
+                except UserError as exc:
+                    self.write(
+                        {
+                            "market_external_status": "failed",
+                            "market_external_last_error": str(exc),
+                        }
+                    )
+                    return self._market_analysis_notification_action(
+                        _("External Market Data"), str(exc), message_type="warning", sticky=True
+                    )
+                return self._market_analysis_notification_action(
+                    _("External market"),
+                    _("Strategic intelligence refreshed. Combined internal+external analysis is disabled in this "
+                      "deployment."),
+                    reload_after=True,
+                )
+            return self._market_analysis_notification_action(
+                _("Market analysis"),
+                _("Enable external market intelligence in Bid Board Settings, or turn internal analysis back on via "
+                  "system parameters if your deployment still uses it."),
+                message_type="warning",
+                sticky=True,
+            )
         try:
-            # Always refresh external market snapshot before combined generation.
             external_values = service.collect_external_market_data(self)
             self.write(external_values)
             values = service.analyze_project_combined(self)

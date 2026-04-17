@@ -1227,7 +1227,11 @@ class GuardShift(models.Model):
                         'Guard %s has not started their shift at %s. '
                         'Shift was scheduled to start at %s.'
                     ) % (shift.guard_id.name, shift.site_id.name, shift.start_datetime),
-                    user_id=shift.site_id.supervisor_id.id if shift.site_id.supervisor_id else self.env.user.id
+                    user_id=(
+                        shift.site_id.manager_id.user_ids[:1].id
+                        if shift.site_id.manager_id and shift.site_id.manager_id.user_ids
+                        else self.env.user.id
+                    )
                 )
                 
                 # Update shift status

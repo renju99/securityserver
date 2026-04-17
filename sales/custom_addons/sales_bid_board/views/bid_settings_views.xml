@@ -40,21 +40,15 @@
                     <group string="Decision Controls">
                         <field name="submit_review_min_score"/>
                     </group>
-                    <group string="AI Market Analysis (Google Gemini)">
-                        <field name="market_analysis_enabled"/>
-                        <field name="market_analysis_model" readonly="not market_analysis_enabled"/>
-                        <field name="market_analysis_api_key"
-                               password="True"
-                               readonly="not market_analysis_enabled"
-                               force_save="1"/>
-                        <field name="market_analysis_timeout_seconds"
-                               readonly="not market_analysis_enabled"/>
-                        <field name="market_analysis_prompt_version"
-                               readonly="not market_analysis_enabled"/>
-                        <field name="market_analysis_prompt_template"
-                               placeholder="Optional system prompt override for advanced tuning."
-                               readonly="not market_analysis_enabled"/>
-                        <separator string="External Market Data (Gemini only)"/>
+                    <group string="External market intelligence (Google Gemini)">
+                        <div class="text-muted" colspan="2">
+                            Strategic briefs on each bid’s External market tab. Gemini uses the bid snapshot only
+                            (no live web search in this build). If the dedicated fields below are empty, the server
+                            may reuse the legacy Gemini key stored in system parameters
+                            (system parameters sales_bid_board.market_analysis_api_key and
+                            sales_bid_board.market_analysis_model) when those values are a valid Google AI Studio
+                            Gemini pair.
+                        </div>
                         <field name="external_market_enabled"/>
                         <field name="external_market_gemini_api_key"
                                password="True"

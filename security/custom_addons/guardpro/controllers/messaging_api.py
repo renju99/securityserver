@@ -638,19 +638,17 @@ class GuardProMessagingAPI(http.Controller):
                 ('user_id', '=', request.env.user.id)
             ], limit=1)
             
-            # Get active guards (excluding current user), scoped by shared site assignment
-            domain = [
-                ('status', '=', 'active'),
-                ('id', '!=', current_guard.id if current_guard else False)
-            ]
-            guards = request.env['guard.profile'].search(domain)
             user = request.env.user
+
+            # Build domain using guard.profile/site_ids so guards can fetch peers
+            # without tripping res.users record rules on other user records.
+            domain = [('status', '=', 'active')]
+            if current_guard:
+                domain.append(('id', '!=', current_guard.id))
             if user.site_ids:
-                allowed = set(user.site_ids.ids)
-                guards = guards.filtered(
-                    lambda g: g.user_id and g.user_id.site_ids
-                    and bool(allowed & set(g.user_id.site_ids.ids))
-                )
+                domain.append(('site_ids', 'in', user.site_ids.ids))
+
+            guards = request.env['guard.profile'].sudo().search(domain)
             
             guards_list = []
             for guard in guards:

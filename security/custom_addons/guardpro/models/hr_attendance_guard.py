@@ -199,7 +199,11 @@ class HrAttendanceGuard(models.Model):
                                 'Guard %s checked in outside the geofence for site %s. '
                                 'Please verify and approve.'
                             ) % (record.employee_id.name, record.site_id.name),
-                            user_id=record.site_id.supervisor_id.id if record.site_id.supervisor_id else self.env.user.id
+                            user_id=(
+                                record.site_id.manager_id.user_ids[:1].id
+                                if record.site_id.manager_id and record.site_id.manager_id.user_ids
+                                else self.env.user.id
+                            )
                         )
     
     def action_view_incidents(self):
