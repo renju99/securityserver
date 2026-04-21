@@ -7,6 +7,7 @@ import android.location.Location
 import android.os.*
 import android.provider.Settings
 import android.util.Log
+import android.webkit.CookieManager
 import androidx.core.app.NotificationCompat
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
@@ -16,106 +17,161 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
-import android.content.IntentFilter
 import android.os.BatteryManager
 
 /**
  * Guard Pro Background Location Service
- * Optimized for Odoo Backend Integration
+ *
+ * Continuously streams GPS fixes from [FusedLocationProviderClient] to the Odoo
+ * backend at [API_ENDPOINT]. Designed to keep working while the TWA WebView is
+ * backgrounded, screen off, or after the launcher activity is destroyed.
+ *
+ * Auth strategy: reuse the WebView's `session_id` cookie (captured by
+ * [TwaLauncherActivity] via `CookieManager`) so that Odoo's `auth='user'`
+ * session check accepts the request. Bearer tokens are not supported by Odoo's
+ * standard JSON-RPC routes, so they are intentionally not used.
+ *
+ * Offline resilience: if an HTTP attempt fails we persist the payload to
+ * encrypted prefs and replay it on the next successful ping. This keeps
+ * the server-side location history dense even across network blackouts
+ * (elevators, basements, patchy LTE).
  */
 class LocationService : Service() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
-    private val TAG = "GuardLocationService"
-    private val CHANNEL_ID = "guard_tracking_channel"
-    private val NOTIFICATION_ID = 1001
-    
+
     private var wakeLock: PowerManager.WakeLock? = null
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private lateinit var deviceId: String
+    private var isTracking = false
 
-    // API Configuration - Set to Security domain
-    private val API_BASE_URL = "https://security.berkeleyuae.com/guardpro/api"
+    // Shared OkHttp client - connection pool + keepalive keeps pings light.
+    private val httpClient: OkHttpClient by lazy {
+        OkHttpClient.Builder()
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(10, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(true)
+            .build()
+    }
 
     override fun onCreate() {
         super.onCreate()
         try {
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-            deviceId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-            
+            deviceId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: ""
+
             val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "GuardPro::LocationWakeLock")
-            
+            wakeLock = powerManager.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK,
+                "GuardPro::LocationWakeLock"
+            ).apply { setReferenceCounted(false) }
+
             createNotificationChannel()
-            
+
             locationCallback = object : LocationCallback() {
                 override fun onLocationResult(locationResult: LocationResult) {
                     locationResult.lastLocation?.let { location ->
                         handleLocationUpdate(location)
                     }
                 }
+
+                override fun onLocationAvailability(availability: LocationAvailability) {
+                    if (!availability.isLocationAvailable) {
+                        Log.w(TAG, "Location temporarily unavailable (GPS off / no fix)")
+                    }
+                }
             }
+
             Log.d(TAG, "GuardPro Location Service Created")
         } catch (e: Exception) {
-            Log.e(TAG, "Error in onCreate: ${e.message}")
-        }
-    }
-
-    private fun getAuthToken(): String? {
-        return try {
-            val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-            val sharedPreferences = EncryptedSharedPreferences.create(
-                "secure_prefs",
-                masterKeyAlias,
-                this,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            )
-            sharedPreferences.getString("auth_token", null)
-        } catch (e: Exception) {
-            val prefs = getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-            prefs.getString("auth_token", null)
+            Log.e(TAG, "Error in onCreate: ${e.message}", e)
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
-            // Hold CPU awake specifically for tracking startup
-            wakeLock?.acquire(60 * 1000L)
-            
+            // Hold a partial wake lock for the duration of the service so the
+            // process does not get paused between fixes. Foreground-service +
+            // wake lock together are what actually keeps updates flowing while
+            // the screen is off.
+            if (wakeLock?.isHeld != true) {
+                wakeLock?.acquire(WAKELOCK_TIMEOUT_MS)
+            }
+
             val notification = createNotification()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                startForeground(NOTIFICATION_ID, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION)
+                startForeground(
+                    NOTIFICATION_ID,
+                    notification,
+                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+                )
             } else {
                 startForeground(NOTIFICATION_ID, notification)
             }
-            
-            requestLocationUpdates()
+
+            if (!isTracking) {
+                requestLocationUpdates()
+                isTracking = true
+            }
+
+            // Opportunistically drain any queued (offline) pings.
+            serviceScope.launch { flushQueue() }
+
             Log.d(TAG, "Service Started and Tracking Requested")
         } catch (e: Exception) {
-            Log.e(TAG, "Error starting service: ${e.message}")
+            Log.e(TAG, "Error starting service: ${e.message}", e)
         }
         return START_STICKY
     }
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        // When the user swipes the TWA out of recents, Android would normally
+        // stop this service. Relaunch ourselves so tracking stays alive - the
+        // guard is still on shift regardless of app visibility.
+        try {
+            val restartIntent = Intent(applicationContext, LocationService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                applicationContext.startForegroundService(restartIntent)
+            } else {
+                applicationContext.startService(restartIntent)
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "onTaskRemoved self-restart failed: ${e.message}")
+        }
+        super.onTaskRemoved(rootIntent)
+    }
+
     private fun requestLocationUpdates() {
-        // Log current permission status
-        val fine = checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        val fine = checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+            android.content.pm.PackageManager.PERMISSION_GRANTED
         Log.d(TAG, "Permission Status: Fine=$fine")
 
-        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, TimeUnit.SECONDS.toMillis(30))
-            .setMinUpdateIntervalMillis(TimeUnit.SECONDS.toMillis(15))
-            .setWaitForAccurateLocation(true)
+        // - setWaitForAccurateLocation(false): do NOT block the stream waiting
+        //   for a high-accuracy fix; indoor / dense-urban guards would see zero
+        //   pings for minutes otherwise.
+        // - setMinUpdateDistanceMeters(0): deliver every interval tick even if
+        //   the guard is stationary. The backend relies on heartbeats to know
+        //   the guard is still on post.
+        val locationRequest = LocationRequest.Builder(
+            Priority.PRIORITY_HIGH_ACCURACY,
+            TimeUnit.SECONDS.toMillis(LOCATION_INTERVAL_SEC)
+        )
+            .setMinUpdateIntervalMillis(TimeUnit.SECONDS.toMillis(LOCATION_FASTEST_SEC))
+            .setMaxUpdateDelayMillis(TimeUnit.SECONDS.toMillis(LOCATION_MAX_DELAY_SEC))
+            .setMinUpdateDistanceMeters(0f)
+            .setWaitForAccurateLocation(false)
             .build()
-        
+
         try {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 location?.let { handleLocationUpdate(it) }
             }
-            
+
             fusedLocationClient.requestLocationUpdates(
                 locationRequest,
                 locationCallback,
@@ -124,102 +180,256 @@ class LocationService : Service() {
         } catch (e: SecurityException) {
             Log.e(TAG, "Missing location permissions: ${e.message}")
         } catch (e: Exception) {
-            Log.e(TAG, "Error requesting updates: ${e.message}")
+            Log.e(TAG, "Error requesting updates: ${e.message}", e)
         }
     }
 
     private fun getBatteryLevel(): Int {
-        val bm = getSystemService(Context.BATTERY_SERVICE) as BatteryManager
-        return bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+        return try {
+            val bm = getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+            bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+        } catch (_: Exception) {
+            -1
+        }
     }
 
     private fun handleLocationUpdate(location: Location) {
-        Log.d(TAG, "Location received: ${location.latitude},${location.longitude}")
-        
-        // Refresh wake lock for processing
-        if (wakeLock?.isHeld == true) wakeLock?.release()
-        wakeLock?.acquire(10 * 1000L)
-        
-        val payload = LocationPayload(
-            lat = location.latitude,
-            lng = location.longitude,
-            ts = System.currentTimeMillis() / 1000,
-            hwId = deviceId,
-            accuracy = location.accuracy,
-            speed = location.speed,
-            heading = location.bearing,
-            battery = getBatteryLevel()
+        Log.d(
+            TAG,
+            "Location received: ${location.latitude},${location.longitude} " +
+                "acc=${location.accuracy}m"
         )
-        
+
+        val payload = buildPayloadJson(location)
+
         serviceScope.launch {
-            sendLocationWithRetry(payload)
+            val ok = sendLocationWithRetry(payload)
+            if (!ok) {
+                enqueue(payload)
+            } else {
+                // A good ping is the best signal to try draining anything we
+                // buffered earlier.
+                flushQueue()
+            }
         }
     }
 
-    private suspend fun sendLocationWithRetry(payload: LocationPayload) {
+    private fun buildPayloadJson(location: Location): JSONObject {
+        val params = JSONObject().apply {
+            put("latitude", location.latitude)
+            put("longitude", location.longitude)
+            put("accuracy", location.accuracy)
+            put("speed", location.speed)
+            put("heading", location.bearing)
+            put("battery_level", getBatteryLevel())
+            put("device_info", "Android ${Build.VERSION.RELEASE} / ${Build.MODEL}")
+            put("device_id", deviceId)
+            // Client-side capture time - useful when we flush queued fixes late.
+            put("client_timestamp", System.currentTimeMillis() / 1000)
+        }
+        // Odoo `type='json'` controllers require a JSON-RPC 2.0 envelope. A
+        // flat body silently results in all kwargs being None on the server.
+        return JSONObject().apply {
+            put("jsonrpc", "2.0")
+            put("method", "call")
+            put("params", params)
+        }
+    }
+
+    private suspend fun sendLocationWithRetry(envelope: JSONObject): Boolean {
         var currentDelay = 1000L
         var attempts = 0
         val maxAttempts = 3
-        val client = OkHttpClient()
 
         while (attempts < maxAttempts) {
             try {
-                // Construct JSON to match Odoo backend requirements
-                val json = JSONObject()
-                json.put("latitude", payload.lat)
-                json.put("longitude", payload.lng)
-                json.put("accuracy", payload.accuracy)
-                json.put("speed", payload.speed)
-                json.put("heading", payload.heading)
-                json.put("battery_level", payload.battery)
-                json.put("device_info", "Android ${Build.VERSION.RELEASE} / ${Build.MODEL}")
-                
-                // Add device ID as well for tracking
-                json.put("device_id", payload.hwId)
-                
-                val body = json.toString().toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
-                
+                val body = envelope.toString()
+                    .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+
                 val requestBuilder = Request.Builder()
-                    .url("$API_BASE_URL/location/update") // Matches our new endpoint
+                    .url(API_ENDPOINT)
                     .post(body)
                     .header("User-Agent", "Berkeley-GuardPro-App-v1.0")
+                    .header("Accept", "application/json")
+                    .header("X-Requested-With", "XMLHttpRequest")
 
-                // Add Auth Token
-                val token = getAuthToken()
-                if (!token.isNullOrEmpty()) {
-                    // Note: Odoo standard auth often uses Cookie (session_id) but for API 
-                    // we might need to assume the token is a session ID or Bearer depending on auth setup.
-                    // If the token IS the session_id (which it often is in these hybrid apps), we pass it as Cookie.
-                    // If it is an API key, we pass Authorization.
-                    // Based on Attendance app, it used "Bearer". We will stick to that but also add Cookie just in case.
-                    requestBuilder.header("Authorization", "Bearer $token")
-                    // requestBuilder.header("Cookie", "session_id=$token") 
+                val cookie = getSessionCookieHeader()
+                if (!cookie.isNullOrBlank()) {
+                    requestBuilder.header("Cookie", cookie)
                 } else {
-                    Log.w(TAG, "No auth token available for location update")
+                    Log.w(TAG, "No session cookie yet - location will be queued offline")
+                    return false
                 }
-                
+
                 val response = withContext(Dispatchers.IO) {
-                    client.newCall(requestBuilder.build()).execute()
+                    httpClient.newCall(requestBuilder.build()).execute()
                 }
-                
-                if (response.isSuccessful) {
-                    Log.d(TAG, "Location ping successful: ${response.code}")
-                    return
-                } else {
-                    Log.w(TAG, "Server error (${response.code}). Aborting retry if 4xx/5xx.")
-                    if (response.code == 401 || response.code == 403) {
-                         // Auth failed - stop retrying to avoid spamming
-                         return
+
+                response.use { resp ->
+                    if (!resp.isSuccessful) {
+                        Log.w(TAG, "Server error HTTP ${resp.code}")
+                        // Session expired / forbidden - don't spam, queue & wait
+                        // for the activity to refresh the cookie.
+                        if (resp.code == 401 || resp.code == 403) return false
+                        // 4xx other than auth: probably a bad payload; don't retry.
+                        if (resp.code in 400..499) return false
+                        // 5xx: retry with backoff below.
+                    } else {
+                        val respBody = try { resp.body?.string().orEmpty() } catch (_: Exception) { "" }
+                        // Odoo returns HTTP 200 even for JSON-RPC errors; inspect body.
+                        if (respBody.isNotBlank()) {
+                            try {
+                                val parsed = JSONObject(respBody)
+                                if (parsed.has("error")) {
+                                    Log.w(TAG, "JSON-RPC error: ${parsed.optJSONObject("error")}")
+                                    // Session expired reported as JSON-RPC error.
+                                    val msg = parsed.optJSONObject("error")
+                                        ?.optJSONObject("data")?.optString("message").orEmpty()
+                                    if (msg.contains("Session", ignoreCase = true)) {
+                                        return false
+                                    }
+                                    return false
+                                }
+                                val result = parsed.optJSONObject("result")
+                                if (result != null && result.has("error")) {
+                                    Log.w(TAG, "App-level error: ${result.optString("error")}")
+                                    return false
+                                }
+                            } catch (_: Exception) {
+                                // Non-JSON 200 body - treat as success.
+                            }
+                        }
+                        Log.d(TAG, "Location ping successful: HTTP ${resp.code}")
+                        return true
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Network failure: ${e.message}")
+                Log.e(TAG, "Network failure (attempt ${attempts + 1}): ${e.message}")
             }
             attempts++
-            delay(currentDelay)
-            currentDelay *= 2
+            if (attempts < maxAttempts) {
+                delay(currentDelay)
+                currentDelay *= 2
+            }
+        }
+        return false
+    }
+
+    /**
+     * Pulls the WebView's `session_id` cookie for [API_ORIGIN]. The activity
+     * mirrors this cookie into encrypted prefs on every authenticated page
+     * load so the service can still authenticate after a reboot (before the
+     * activity has been re-opened).
+     */
+    private fun getSessionCookieHeader(): String? {
+        // Primary: live cookies from WebView's CookieManager (activity running).
+        val live: String? = try {
+            CookieManager.getInstance().flush()
+            val cm = CookieManager.getInstance()
+            cm.getCookie(API_ORIGIN) ?: cm.getCookie(API_BASE_URL)
+        } catch (_: Exception) {
+            null
+        }
+
+        if (!live.isNullOrBlank() && live.contains("session_id", ignoreCase = true)) {
+            return live
+        }
+
+        // Fallback: last known session cookie that the activity persisted.
+        val cached = readCachedSessionCookie()
+        if (!cached.isNullOrBlank()) {
+            return if (cached.startsWith("session_id=", ignoreCase = true)) {
+                cached
+            } else {
+                "session_id=$cached"
+            }
+        }
+
+        // Last resort: legacy bearer token flow (kept only for backward compat).
+        val token = getAuthToken()
+        if (!token.isNullOrBlank()) {
+            return "session_id=$token"
+        }
+        return null
+    }
+
+    private fun readCachedSessionCookie(): String? {
+        return try {
+            val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+            val sp = EncryptedSharedPreferences.create(
+                "secure_prefs",
+                masterKeyAlias,
+                this,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+            sp.getString("session_cookie", null)
+        } catch (_: Exception) {
+            getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getString("session_cookie", null)
         }
     }
+
+    private fun getAuthToken(): String? {
+        return try {
+            val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+            val sp = EncryptedSharedPreferences.create(
+                "secure_prefs",
+                masterKeyAlias,
+                this,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+            sp.getString("auth_token", null)
+        } catch (_: Exception) {
+            getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                .getString("auth_token", null)
+        }
+    }
+
+    // -------------------------- Offline queue --------------------------
+
+    private fun enqueue(envelope: JSONObject) {
+        try {
+            val sp = getSharedPreferences(QUEUE_PREFS, Context.MODE_PRIVATE)
+            val raw = sp.getString(QUEUE_KEY, "[]").orEmpty()
+            val arr = try { JSONArray(raw) } catch (_: Exception) { JSONArray() }
+            // Cap the queue so a long outage doesn't balloon storage.
+            while (arr.length() >= MAX_QUEUE) {
+                arr.remove(0)
+            }
+            arr.put(envelope)
+            sp.edit().putString(QUEUE_KEY, arr.toString()).apply()
+            Log.d(TAG, "Queued offline ping; queue size=${arr.length()}")
+        } catch (e: Exception) {
+            Log.w(TAG, "enqueue failed: ${e.message}")
+        }
+    }
+
+    private suspend fun flushQueue() {
+        val sp = getSharedPreferences(QUEUE_PREFS, Context.MODE_PRIVATE)
+        val raw = sp.getString(QUEUE_KEY, "[]").orEmpty()
+        val arr = try { JSONArray(raw) } catch (_: Exception) { return }
+        if (arr.length() == 0) return
+
+        Log.d(TAG, "Flushing offline queue (${arr.length()} items)")
+        val remaining = JSONArray()
+        for (i in 0 until arr.length()) {
+            val item = arr.optJSONObject(i) ?: continue
+            val ok = sendLocationWithRetry(item)
+            if (!ok) {
+                remaining.put(item)
+                // Stop draining on first failure to avoid hammering the server.
+                for (j in (i + 1) until arr.length()) {
+                    remaining.put(arr.optJSONObject(j))
+                }
+                break
+            }
+        }
+        sp.edit().putString(QUEUE_KEY, remaining.toString()).apply()
+    }
+
+    // -------------------------- Notification --------------------------
 
     private fun createNotification(): Notification {
         val notificationIntent = Intent(this, TwaLauncherActivity::class.java)
@@ -230,11 +440,13 @@ class LocationService : Service() {
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Guard Pro Active")
-            .setContentText("Monitoring location for safety and attendance")
+            .setContentText("Sharing live location for safety and attendance")
             .setSmallIcon(android.R.drawable.ic_menu_mylocation)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            // LOW importance: the service must be persistent but it shouldn't
+            // buzz on every tick - the emergency channel handles alerts.
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .build()
     }
@@ -243,9 +455,14 @@ class LocationService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val serviceChannel = NotificationChannel(
                 CHANNEL_ID,
-                "Guard Tracking Channel",
-                NotificationManager.IMPORTANCE_HIGH
-            )
+                "Guard Tracking",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Ongoing location sharing while on duty."
+                setShowBadge(false)
+                enableVibration(false)
+                setSound(null, null)
+            }
             val manager = getSystemService(NotificationManager::class.java)
             manager?.createNotificationChannel(serviceChannel)
         }
@@ -254,9 +471,33 @@ class LocationService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        isTracking = false
         serviceScope.cancel()
-        if (wakeLock?.isHeld == true) wakeLock?.release()
-        fusedLocationClient.removeLocationUpdates(locationCallback)
+        try {
+            if (wakeLock?.isHeld == true) wakeLock?.release()
+        } catch (_: Exception) { /* no-op */ }
+        try {
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+        } catch (_: Exception) { /* no-op */ }
         super.onDestroy()
+    }
+
+    companion object {
+        private const val TAG = "GuardLocationService"
+        private const val CHANNEL_ID = "guard_tracking_channel"
+        private const val NOTIFICATION_ID = 1001
+
+        private const val API_BASE_URL = "https://security.berkeleyuae.com/guardpro/mobile"
+        private const val API_ORIGIN = "https://security.berkeleyuae.com"
+        private const val API_ENDPOINT = "$API_ORIGIN/guardpro/api/location/update"
+
+        private const val LOCATION_INTERVAL_SEC = 30L
+        private const val LOCATION_FASTEST_SEC = 15L
+        private const val LOCATION_MAX_DELAY_SEC = 60L
+
+        private const val QUEUE_PREFS = "gp_location_queue"
+        private const val QUEUE_KEY = "pending"
+        private const val MAX_QUEUE = 500
+        private const val WAKELOCK_TIMEOUT_MS = 30 * 60 * 1000L
     }
 }

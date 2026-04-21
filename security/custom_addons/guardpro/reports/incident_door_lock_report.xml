@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="incident_door_lock_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <style>
+                    .emg-page { font-family: 'Helvetica', 'Arial', sans-serif; padding: 0; margin: 0; color: #333; }
+                    .red-bar { background-color: #941818; color: white; text-align: right; padding: 5px 20px; font-size: 14px; font-weight: bold; }
+                    .blue-bar { background-color: #0E91CF; color: white; text-align: right; padding: 5px 20px; font-size: 14px; font-weight: bold; }
+                    .emg-header { margin-top: 20px; margin-bottom: 20px; }
+                    .emg-logo { max-height: 70px; }
+                    .emg-post-name { text-align: right; font-size: 18px; color: #333; font-weight: bold; }
+                    .emg-formal-title { text-align: center; font-size: 22px; font-weight: bold; text-transform: uppercase; margin: 25px 0; color: #333; }
+                    
+                    .emg-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #E0E0E0; }
+                    .emg-table td { padding: 10px 15px; border: 1px solid #E0E0E0; font-size: 14px; vertical-align: middle; }
+                    .emg-label { background-color: #F2F2F2; font-weight: bold; width: 320px; color: #333; }
+                    .emg-value { width: auto; color: #000; }
+                    
+                    .emg-section-header { font-size: 24px; font-weight: bold; color: #333; margin: 30px 0 10px 0; }
+                    .emg-instruction { background-color: #F2F2F2; padding: 10px 15px; border: 1px solid #E0E0E0; font-size: 14px; font-weight: bold; margin-bottom: -1px; }
+                    
+                    .emg-text-content { font-size: 14px; line-height: 1.6; color: #000; padding: 5px 0; white-space: pre-wrap; }
+                    .emg-sig-box { width: 100%; border: none; padding: 10px 0; }
+                    .emg-sig-img { max-height: 100px; display: block; margin-bottom: 5px; }
+                    .emg-sig-line { border-top: 1px solid #000; width: 250px; }
+                    .emg-sig-text { font-weight: bold; font-size: 14px; margin-top: 5px; }
+                    
+                    .emg-picture-box { margin-bottom: 25px; border: 1px solid #E0E0E0; }
+                    .emg-picture-label { background-color: #F2F2F2; padding: 12px 15px; font-weight: bold; font-size: 14px; border-bottom: 1px solid #E0E0E0; width: 320px; float: left; height: 100%; min-height: 300px; }
+                    .emg-picture-content { padding: 15px; text-align: center; overflow: hidden; }
+                    .emg-picture-img { max-width: 100%; max-height: 450px; }
+                    
+                    .no-break { page-break-inside: avoid; }
+                    .mt-4 { margin-top: 30px; }
+                </style>
+
+                <div class="emg-page">
+                    <!-- Top Colored Bars -->
+                    <div class="red-bar">
+                        This report contains personal data. It must be deleted on or before <span t-esc="(doc.incident_datetime + datetime.timedelta(days=365*5)).strftime('%d/%m/%Y') if doc.incident_datetime else ''"/>
+                    </div>
+                    <div class="blue-bar">
+                        New Activity // <span t-field="doc.name"/>
+                    </div>
+
+                    <div class="container" style="padding: 20px 40px;">
+                        <!-- Header with Logo and Post -->
+                        <div class="row emg-header">
+                            <div class="col-6">
+                                <img t-if="res_company.logo" t-att-src="image_data_uri(res_company.logo)" class="emg-logo"/>
+                            </div>
+                            <div class="col-6 emg-post-name">
+                                <span t-field="doc.site_id.name"/>
+                            </div>
+                        </div>
+
+                        <!-- Formal Title -->
+                        <div class="emg-formal-title">
+                            DOOR LOCK INCIDENT REPORT
+                        </div>
+
+                        <!-- 1. Incident Details -->
+                        <div class="no-break">
+                            <div class="emg-section-header">12. Door Lock</div>
+                            <div class="emg-section-header" style="font-size: 18px; margin-top: 10px;">&gt; Incident Details</div>
+                            <table class="emg-table">
+                                <tr>
+                                    <td class="emg-label">• Incident Date</td>
+                                    <td class="emg-value"><span t-field="doc.incident_datetime" t-options='{"widget": "date"}'/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">• Incident Time</td>
+                                    <td class="emg-value"><span t-field="doc.incident_datetime" t-options='{"widget": "datetime", "time_only": True}'/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">• Community name as per salesforce</td>
+                                    <td class="emg-value"><span t-field="doc.door_lock_community_name"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">• Unit Number</td>
+                                    <td class="emg-value"><span t-field="doc.door_lock_unit_number"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">• Incident Type</td>
+                                    <td class="emg-value"><span t-field="doc.door_lock_incident_type"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">• Location of the lock</td>
+                                    <td class="emg-value"><span t-field="doc.door_lock_location"/></td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- 2. Resident Details -->
+                        <div class="no-break">
+                            <div class="emg-section-header" style="font-size: 18px;">&gt; Resident Details/ Real Estate Agency (Holiday Homes)</div>
+                            <table class="emg-table">
+                                <tr>
+                                    <td class="emg-label">• EID front</td>
+                                    <td class="emg-value">
+                                        <img t-if="doc.door_lock_resident_eid_front" t-att-src="image_data_uri(doc.door_lock_resident_eid_front)" style="max-height: 100px;"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">• EID back</td>
+                                    <td class="emg-value">
+                                        <img t-if="doc.door_lock_resident_eid_back" t-att-src="image_data_uri(doc.door_lock_resident_eid_back)" style="max-height: 100px;"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">• Ejari/Title deed</td>
+                                    <td class="emg-value">
+                                        <span t-if="doc.door_lock_resident_ejari">[Document Attached]</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">• DTCM Permit (Holiday Homes)</td>
+                                    <td class="emg-value">
+                                        <span t-if="doc.door_lock_resident_dtcm">[Document Attached]</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">• Signature</td>
+                                    <td class="emg-value">
+                                        <div class="emg-sig-box" t-if="doc.door_lock_resident_signature">
+                                            <img t-att-src="image_data_uri(doc.door_lock_resident_signature)" class="emg-sig-img"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- 3. Locksmith Details -->
+                        <div class="no-break">
+                            <div class="emg-section-header" style="font-size: 18px;">&gt; Locksmith Details</div>
+                            <table class="emg-table">
+                                <tr>
+                                    <td class="emg-label">• EID front/back</td>
+                                    <td class="emg-value">
+                                        <img t-if="doc.door_lock_locksmith_eid_front" t-att-src="image_data_uri(doc.door_lock_locksmith_eid_front)" style="max-height: 80px; margin-right: 10px;"/>
+                                        <img t-if="doc.door_lock_locksmith_eid_back" t-att-src="image_data_uri(doc.door_lock_locksmith_eid_back)" style="max-height: 80px;"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">• Work Permit</td>
+                                    <td class="emg-value">
+                                        <span t-if="doc.door_lock_locksmith_work_permit">[Document Attached]</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">• Signature</td>
+                                    <td class="emg-value">
+                                        <div class="emg-sig-box" t-if="doc.door_lock_locksmith_signature">
+                                            <img t-att-src="image_data_uri(doc.door_lock_locksmith_signature)" class="emg-sig-img"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- 4. Local Authorities Information -->
+                        <div class="no-break">
+                            <div class="emg-section-header" style="font-size: 18px;">&gt; Local Authorities Information</div>
+                            <table class="emg-table">
+                                <tr>
+                                    <td class="emg-label">• Did the local authorities report the incident scene?</td>
+                                    <td class="emg-value"><span t-field="doc.door_lock_local_authorities_reported" style="text-transform: uppercase;"/></td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- 5. Narrative Report -->
+                        <div class="no-break">
+                            <div class="emg-section-header" style="font-size: 18px;">&gt; Narrative Report</div>
+                            <table class="emg-table">
+                                <tr>
+                                    <td class="emg-label">• Detailed Incident report</td>
+                                    <td class="emg-value">
+                                        <div class="emg-text-content">
+                                            <span t-field="doc.description"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- 6. Incident Report Made by -->
+                        <div class="no-break">
+                            <div class="emg-section-header" style="font-size: 18px;">&gt; Incident Report Made by</div>
+                            <table class="emg-table">
+                                <tr>
+                                    <td class="emg-label">• Designation</td>
+                                    <td class="emg-value"><span t-field="doc.door_lock_made_by_designation"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="emg-label">• Signature</td>
+                                    <td class="emg-value">
+                                        <div class="emg-sig-box" t-if="doc.security_officer_signature">
+                                            <img t-att-src="image_data_uri(doc.security_officer_signature)" class="emg-sig-img"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Action for Door Lock -->
+    <record id="action_report_incident_door_lock" model="ir.actions.report">
+        <field name="name">Door Lock Incident Report</field>
+        <field name="model">incident.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.incident_door_lock_pdf_template</field>
+        <field name="report_file">guardpro.incident_door_lock_pdf_template</field>
+        <field name="print_report_name">'Door_Lock_%s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_incident_report"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

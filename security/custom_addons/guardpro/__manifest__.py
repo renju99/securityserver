@@ -146,6 +146,7 @@ Support & Roadmap
         'data/investigation_templates_data.xml',
         'data/investigation_checklist_items_data.xml',
         'data/fire_emergency_category.xml',
+        'data/door_lock_category.xml',
         
         # Guard Task Templates - UAE Standards (Jan 2026)
         'data/guard_task_templates_uae.xml',
@@ -312,6 +313,7 @@ Support & Roadmap
         'reports/analytics_dashboard_report.xml',
         'reports/tours_dashboard_report.xml',
         'reports/incident_fire_emergency_report.xml',
+        'reports/incident_door_lock_report.xml',
         # Phase 2 PDF Reports - New templates (Nov 2025)
         'reports/incident_investigation_report_template.xml',  # Incident investigation comprehensive report
         'reports/training_certificate_template.xml',  # Training course completion certificates

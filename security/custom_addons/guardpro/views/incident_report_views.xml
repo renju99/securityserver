@@ -93,6 +93,7 @@
                         <field name="is_vehicle_incident" invisible="1"/>
                         <field name="is_safety_incident" invisible="1"/>
                         <field name="is_statement_incident" invisible="1"/>
+                        <field name="is_door_lock_incident" invisible="1"/>
                         <!-- Removed legacy toggles no longer present on model -->
                         
                         <div class="oe_title">
@@ -487,6 +488,67 @@
                                 </group>
                             </page>
                             
+                            <!-- DOOR LOCK INCIDENT SPECIFIC -->
+                            <page string="Door Lock" name="door_lock_details" 
+                                  invisible="not is_door_lock_incident">
+                                <separator string="Incident Details"/>
+                                <group>
+                                    <group>
+                                        <field name="incident_datetime" string="Incident Date/Time" readonly="1"/>
+                                        <field name="door_lock_community_name"/>
+                                        <field name="door_lock_unit_number"/>
+                                    </group>
+                                    <group>
+                                        <field name="door_lock_incident_type"/>
+                                        <field name="door_lock_location"/>
+                                    </group>
+                                </group>
+                                
+                                <separator string="Resident Details/ Real Estate Agency (Holiday Homes)"/>
+                                <group>
+                                    <group>
+                                        <field name="door_lock_resident_eid_front" widget="image" options="{'size': [200, 150]}"/>
+                                        <field name="door_lock_resident_eid_back" widget="image" options="{'size': [200, 150]}"/>
+                                    </group>
+                                    <group>
+                                        <field name="door_lock_resident_ejari" widget="binary"/>
+                                        <field name="door_lock_resident_dtcm" widget="binary"/>
+                                        <label for="door_lock_resident_signature" string="Signature"/>
+                                        <field name="door_lock_resident_signature" widget="signature" nolabel="1"/>
+                                    </group>
+                                </group>
+                                
+                                <separator string="Locksmith Details"/>
+                                <group>
+                                    <group>
+                                        <field name="door_lock_locksmith_eid_front" widget="image" options="{'size': [200, 150]}"/>
+                                        <field name="door_lock_locksmith_eid_back" widget="image" options="{'size': [200, 150]}"/>
+                                    </group>
+                                    <group>
+                                        <field name="door_lock_locksmith_work_permit" widget="binary"/>
+                                        <label for="door_lock_locksmith_signature" string="Signature"/>
+                                        <field name="door_lock_locksmith_signature" widget="signature" nolabel="1"/>
+                                    </group>
+                                </group>
+                                
+                                <separator string="Local Authorities Information"/>
+                                <group>
+                                    <field name="door_lock_local_authorities_reported" widget="radio" options="{'horizontal': true}"/>
+                                </group>
+                                
+                                <separator string="Narrative Report"/>
+                                <field name="description" widget="html" placeholder="Detailed Incident report..."/>
+                                
+                                <separator string="Incident Report Made by"/>
+                                <group>
+                                    <group>
+                                        <field name="door_lock_made_by_designation"/>
+                                        <label for="security_officer_signature" string="Signature"/>
+                                        <field name="security_officer_signature" widget="signature" nolabel="1" required="is_door_lock_incident"/>
+                                    </group>
+                                </group>
+                            </page>
+                            
                             <!-- PEOPLE INVOLVED - Visible for non-specific categories -->
                             <page string="People Involved" name="people" 
                                   invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_safety_incident or is_statement_incident or is_found_item_incident or is_return_form_incident or is_community_violation_incident">
@@ -500,14 +562,14 @@
                             
                             <!-- ACTIONS TAKEN - For general incidents -->
                             <page string="Actions Taken" name="actions" 
-                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_safety_incident or is_statement_incident or is_found_item_incident or is_return_form_incident or is_community_violation_incident">
+                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_safety_incident or is_statement_incident or is_found_item_incident or is_return_form_incident or is_community_violation_incident or is_door_lock_incident">
                                 <field name="immediate_actions" widget="text" 
                                        placeholder="Describe all actions taken in response to this incident..."/>
                             </page>
                             
                             <!-- EMERGENCY SERVICES - For general incidents -->
                             <page string="Emergency Services" name="emergency" 
-                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident">
+                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_door_lock_incident">
                                 <group>
                                     <group>
                                         <field name="police_notified"/>
@@ -525,7 +587,7 @@
                             
                             <!-- INJURIES/DAMAGE - For general incidents -->
                             <page string="Injuries/Damage" name="injuries_damage" 
-                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_safety_incident or is_statement_incident or is_found_item_incident or is_return_form_incident or is_community_violation_incident">
+                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_safety_incident or is_statement_incident or is_found_item_incident or is_return_form_incident or is_community_violation_incident or is_door_lock_incident">
                                 <group>
                                     <group>
                                         <field name="injuries"/>

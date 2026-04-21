@@ -15,6 +15,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.Ndef
@@ -36,6 +37,7 @@ class TwaLauncherActivity : AppCompatActivity() {
     private val PERMISSION_REQUEST_CODE = 1001
     private val WEBVIEW_MEDIA_PERMISSION_REQUEST_CODE = 1002
     private val NOTIFICATION_PERM_REQUEST = 1003
+    private val BACKGROUND_LOCATION_REQUEST_CODE = 1004
     private lateinit var webView: WebView
     private var nfcAdapter: NfcAdapter? = null
     private var pendingWebPermissionRequest: PermissionRequest? = null
@@ -131,6 +133,7 @@ class TwaLauncherActivity : AppCompatActivity() {
         if (checkPermissions()) {
             startLocationService()
             requestPostNotificationsIfNeeded()
+            requestBatteryOptimizationExemptionIfNeeded()
         } else {
             requestPermissions()
         }
@@ -455,7 +458,14 @@ class TwaLauncherActivity : AppCompatActivity() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 Log.d("WebView", "Page finished loading: $url")
-                
+
+                // Keep the native LocationService authenticated with the
+                // freshest Odoo session cookie.
+                persistSessionCookie()
+                // Also make sure the location service is up - if the user
+                // killed it from the notification shade we want it back.
+                startLocationService()
+
                 // Polyfill for NDEFReader to handle the "permission request denied" issue in WebView
                 val nfcPolyfill = """
                     (function() {
@@ -850,14 +860,120 @@ class TwaLauncherActivity : AppCompatActivity() {
         return fineLocation && coarseLocation && backgroundLocation && recordAudio
     }
 
+    /**
+     * Step 1: request foreground (fine/coarse) location + mic. On Android 11+
+     * you are NOT allowed to ask for ACCESS_BACKGROUND_LOCATION in the same
+     * call - the system silently drops it. We deal with background location in
+     * [requestBackgroundLocationIfNeeded] which is invoked after step 1 succeeds.
+     */
     private fun requestPermissions() {
         val permissions = mutableListOf(
-            Manifest.permission.ACCESS_FINE_LOCATION, 
+            Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.RECORD_AUDIO
         )
-        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        // Only Android 10 (API 29) accepts background location in the same batch
+        // as foreground location. API 30+ requires a separate call and user
+        // action in Settings.
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+            permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        }
         ActivityCompat.requestPermissions(this, permissions.toTypedArray(), PERMISSION_REQUEST_CODE)
+    }
+
+    private fun requestBackgroundLocationIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED) {
+            return
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // API 30+: show rationale; the OS only allows us to deep-link into Settings.
+            showBackgroundPermissionRationale()
+        } else {
+            // API 29: runtime prompt is still available.
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                BACKGROUND_LOCATION_REQUEST_CODE
+            )
+        }
+    }
+
+    /**
+     * Doze / App-Standby will eventually kill the foreground location service
+     * on most OEM skins (Xiaomi/Oppo/Realme/Samsung), so we explicitly ask the
+     * user to exempt us. This is the single biggest cause of "location went
+     * silent after the guard pocketed the phone" in the field.
+     */
+    private fun requestBatteryOptimizationExemptionIfNeeded() {
+        try {
+            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+            if (pm.isIgnoringBatteryOptimizations(packageName)) return
+
+            AlertDialog.Builder(this)
+                .setTitle("Keep Location Tracking Alive")
+                .setMessage(
+                    "To make sure your live location keeps updating when the app is in " +
+                        "the background or the screen is off, please allow Guard Pro to " +
+                        "ignore battery optimizations on the next screen."
+                )
+                .setPositiveButton("Allow") { _, _ ->
+                    try {
+                        @SuppressLint("BatteryLife")
+                        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                            data = Uri.parse("package:$packageName")
+                        }
+                        startActivity(intent)
+                    } catch (e: Exception) {
+                        Log.w("BatteryOpt", "Failed to open battery settings: ${e.message}")
+                        try {
+                            startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+                        } catch (_: Exception) { /* nothing else we can do */ }
+                    }
+                }
+                .setNegativeButton("Later") { d, _ -> d.dismiss() }
+                .show()
+        } catch (e: Exception) {
+            Log.w("BatteryOpt", "Battery-opt check failed: ${e.message}")
+        }
+    }
+
+    /**
+     * Mirrors the WebView's `session_id` cookie into EncryptedSharedPreferences
+     * so the background [LocationService] can authenticate with Odoo even
+     * when the activity hasn't been opened yet (e.g. post-reboot).
+     */
+    private fun persistSessionCookie() {
+        try {
+            val cm = CookieManager.getInstance()
+            cm.flush()
+            val raw = cm.getCookie(START_URL) ?: cm.getCookie(apiOrigin()) ?: return
+            if (raw.isBlank() || !raw.contains("session_id", ignoreCase = true)) return
+            val sessionPart = raw.split(";")
+                .map { it.trim() }
+                .firstOrNull { it.startsWith("session_id=", ignoreCase = true) }
+                ?: return
+            val value = sessionPart.substringAfter("=")
+            if (value.isBlank()) return
+
+            try {
+                val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+                val sp = EncryptedSharedPreferences.create(
+                    "secure_prefs",
+                    masterKeyAlias,
+                    this,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                )
+                sp.edit().putString("session_cookie", value).apply()
+            } catch (_: Exception) {
+                getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+                    .edit().putString("session_cookie", value).apply()
+            }
+        } catch (e: Exception) {
+            Log.w("SessionCookie", "persistSessionCookie failed: ${e.message}")
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -878,20 +994,23 @@ class TwaLauncherActivity : AppCompatActivity() {
         if (requestCode == NOTIFICATION_PERM_REQUEST) {
             return
         }
+        if (requestCode == BACKGROUND_LOCATION_REQUEST_CODE) {
+            // User accepted or denied background location from the second-step
+            // prompt. Either way we start the service - the service will simply
+            // be less useful without background permission, but we keep trying.
+            startLocationService()
+            requestBatteryOptimizationExemptionIfNeeded()
+            return
+        }
         if (requestCode == PERMISSION_REQUEST_CODE) {
             val allGranted = grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }
             if (allGranted) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        showBackgroundPermissionRationale()
-                    } else {
-                        startLocationService()
-                        requestPostNotificationsIfNeeded()
-                    }
-                } else {
-                    startLocationService()
-                    requestPostNotificationsIfNeeded()
-                }
+                startLocationService()
+                requestPostNotificationsIfNeeded()
+                // Android 11+: now that foreground is granted we may ask for
+                // "Allow all the time" as a separate step.
+                requestBackgroundLocationIfNeeded()
+                requestBatteryOptimizationExemptionIfNeeded()
             } else {
                 showPermissionRequiredDialog()
             }

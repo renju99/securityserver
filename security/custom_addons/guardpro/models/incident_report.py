@@ -435,6 +435,10 @@ class IncidentReport(models.Model):
         compute='_compute_incident_type',
         string='Is Community Violation Incident'
     )
+    is_door_lock_incident = fields.Boolean(
+        compute='_compute_incident_type',
+        string='Is Door Lock Incident'
+    )
 
     # Statement Form Specific Fields
     statement_person_name = fields.Char(string='Full Name (Person Writing Statement)')
@@ -536,6 +540,23 @@ class IncidentReport(models.Model):
     violation_notice_issued = fields.Boolean(string='Notice Issued')
     violation_repeat_offense = fields.Boolean(string='Repeat Offense')
     violation_fine_amount = fields.Float(string='Fine Amount', digits=(10, 2))
+    
+    # Door Lock Form Specific Fields
+    door_lock_community_name = fields.Char(string='Community name as per salesforce')
+    door_lock_unit_number = fields.Char(string='Unit Number')
+    door_lock_incident_type = fields.Char(string='Incident Type')
+    door_lock_location = fields.Char(string='Location of the lock')
+    door_lock_resident_eid_front = fields.Image(string='Resident EID front')
+    door_lock_resident_eid_back = fields.Image(string='Resident EID back')
+    door_lock_resident_ejari = fields.Binary(string='Resident Ejari/Title deed')
+    door_lock_resident_dtcm = fields.Binary(string='Resident DTCM Permit (Holiday Homes)')
+    door_lock_resident_signature = fields.Binary(string='Resident Signature')
+    door_lock_locksmith_eid_front = fields.Image(string='Locksmith EID front')
+    door_lock_locksmith_eid_back = fields.Image(string='Locksmith EID back')
+    door_lock_locksmith_work_permit = fields.Binary(string='Locksmith Work Permit')
+    door_lock_locksmith_signature = fields.Binary(string='Locksmith Signature')
+    door_lock_local_authorities_reported = fields.Selection([('yes', 'Yes'), ('no', 'No')], string='Did the local authorities report the incident scene?')
+    door_lock_made_by_designation = fields.Char(string='Designation')
     
     statement_expiry_date = fields.Date(
         string='Statement Expiry Date',
@@ -809,6 +830,9 @@ class IncidentReport(models.Model):
                 'DMG_PLNT', 'GARDEN', 'HOME_APP', 'EXT_MAJ', 'EXT_MIN',
                 'SIGNAGE', 'TERRACE', 'PEST', 'GARAGE', 'RETAIL',
             ]
+
+            # Door Lock incidents
+            record.is_door_lock_incident = category_code == 'DOOR_LOCK'
 
     @api.constrains('incident_datetime', 'reported_datetime')
     def _check_dates(self):

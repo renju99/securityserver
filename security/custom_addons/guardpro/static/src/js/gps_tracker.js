@@ -5,17 +5,22 @@
 
 class GPSTracker {
     constructor() {
-        this.intervalId = null;
+        this.watchId = null;
+        this.heartbeatId = null; // Heartbeat to force updates if stationary
         this.currentPosition = null;
         this.tracking = false;
-        this.updateInterval = 60000; // 1 minute (60000ms) - responsive tracking
+        this.updateInterval = 25000; // Lowered to 25s (requested 25-30 range)
         this.isUpdating = false; // Prevent concurrent updates
         this.lastUpdateTime = 0; // Track last update timestamp
         this.options = {
             enableHighAccuracy: true,
-            timeout: 10000,
+            timeout: 25000,
             maximumAge: 0
         };
+
+        // Bind visibility change handler to refresh tracking if backgrounded
+        this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
+        document.addEventListener('visibilitychange', this.handleVisibilityChange);
     }
 
     /**
@@ -32,21 +37,17 @@ class GPSTracker {
         this.checkPermission().then((hasPermission) => {
             if (hasPermission) {
                 this.tracking = true;
+                
+                // Initialize active tracking (watchPosition)
+                this._initWatch();
 
-                // Get initial position
-                this.updatePosition();
+                // Initialize heartbeat (setInterval) to ensure 30s pings if Stationary
+                // Note: Background throttling may affect this, but watchPosition helps keep it alive
+                this._initHeartbeat();
 
-                // Set up interval for continuous updates
-                // Note: Actual server updates are rate-limited to MIN_UPDATE_INTERVAL in updateServer()
-                this.intervalId = setInterval(() => {
-                    this.updatePosition();
-                }, this.updateInterval);
-
-                const intervalMinutes = Math.floor(this.updateInterval / 60000);
-                console.debug(`[GPS Tracker] Tracking started with ${intervalMinutes} minute interval`);
-
+                console.debug(`[GPS Tracker] Tracking started (25s targeted interval)`);
                 this.showNotification('GPS Tracking Enabled',
-                    `Location will be updated every ${intervalMinutes} minutes. Your location is being tracked.`,
+                    'Your location is being tracked every 25-30 seconds.',
                     'success');
             } else {
                 console.warn('[GPS Tracker] Cannot start tracking - permission not granted');
@@ -57,6 +58,59 @@ class GPSTracker {
         });
 
         return true;
+    }
+
+    /**
+     * Initialize the watchPosition listener
+     */
+    _initWatch() {
+        if (this.watchId) {
+            navigator.geolocation.clearWatch(this.watchId);
+        }
+
+        this.watchId = navigator.geolocation.watchPosition(
+            (position) => this.onSuccess(position),
+            (error) => this.onError(error),
+            this.options
+        );
+    }
+
+    /**
+     * Initialize heartbeat to ensure consistent pings
+     */
+    _initHeartbeat() {
+        if (this.heartbeatId) {
+            clearInterval(this.heartbeatId);
+        }
+        
+        // Target consistent pulses
+        this.heartbeatId = setInterval(() => {
+            if (this.tracking) {
+                const now = Date.now();
+                const timeSinceLast = now - this.lastUpdateTime;
+                
+                // If more than 23s has passed without a successful server update
+                // We force a refresh and also re-init watch to 'wake up' the OS service
+                if (timeSinceLast >= 23000) {
+                    console.debug(`[GPS Tracker] Heartbeat: ${timeSinceLast/1000}s since last update. Re-initializing...`);
+                    this._initWatch(); // Restart watch to wake up stationary GPS
+                    this.forceUpdate();
+                }
+            }
+        }, 8000); // Check every 8s for increased responsiveness
+    }
+
+    /**
+     * Handle page visibility changes (Foreground/Background)
+     */
+    handleVisibilityChange() {
+        if (document.visibilityState === 'visible' && this.tracking) {
+            console.debug('[GPS Tracker] App returned to foreground, refreshing GPS watch...');
+            // Force a server update check
+            this.forceUpdate();
+            // Re-sync the watch if needed
+            this._initWatch();
+        }
     }
 
     /**
@@ -110,12 +164,16 @@ class GPSTracker {
      * Stop GPS tracking
      */
     stopTracking() {
-        if (this.intervalId) {
-            clearInterval(this.intervalId);
-            this.intervalId = null;
-            this.tracking = false;
-            console.debug('[GPS Tracker] GPS tracking stopped');
+        if (this.watchId) {
+            navigator.geolocation.clearWatch(this.watchId);
+            this.watchId = null;
         }
+        if (this.heartbeatId) {
+            clearInterval(this.heartbeatId);
+            this.heartbeatId = null;
+        }
+        this.tracking = false;
+        console.debug('[GPS Tracker] GPS tracking stopped');
     }
 
     /**
@@ -179,28 +237,26 @@ class GPSTracker {
     }
 
     /**
-     * Update position using getCurrentPosition
+     * Update position using watchPosition (re-init) or getCurrentPosition
      * Includes concurrency control to prevent overlapping updates
      */
     updatePosition() {
-        // Skip if an update is already in progress
-        if (this.isUpdating) {
-            console.debug('Skipping GPS update - previous update still in progress');
-            return;
+        if (this.tracking) {
+            this._initWatch();
+        } else {
+            this.isUpdating = true;
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    this.onSuccess(position);
+                    this.isUpdating = false;
+                },
+                (error) => {
+                    this.onError(error);
+                    this.isUpdating = false;
+                },
+                this.options
+            );
         }
-
-        this.isUpdating = true;
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                this.onSuccess(position);
-                this.isUpdating = false;
-            },
-            (error) => {
-                this.onError(error);
-                this.isUpdating = false;
-            },
-            this.options
-        );
     }
 
     /**
@@ -289,13 +345,13 @@ class GPSTracker {
      * Includes rate limiting to prevent too frequent updates
      */
     async updateServer(position) {
-        // Rate limiting: Ensure at least 3 seconds between server updates
+        // Rate limiting: Permissive threshold to ensure we hit the 25-30s window reliably
         const now = Date.now();
         const timeSinceLastUpdate = now - this.lastUpdateTime;
-        const MIN_UPDATE_INTERVAL = 3000; // 3 seconds
+        const MIN_UPDATE_INTERVAL = 20000; // 20s (for 25s target)
 
-        if (timeSinceLastUpdate < MIN_UPDATE_INTERVAL) {
-            console.debug(`[GPS Tracker] Skipping server update - too soon (${timeSinceLastUpdate}ms < ${MIN_UPDATE_INTERVAL}ms)`);
+        if (this.lastUpdateTime > 0 && timeSinceLastUpdate < MIN_UPDATE_INTERVAL) {
+            console.debug(`[GPS Tracker] Skipping server update - too soon (${(timeSinceLastUpdate/1000).toFixed(1)}s < 20s)`);
             return;
         }
 
@@ -373,8 +429,20 @@ class GPSTracker {
             }
             console.debug('[GPS Tracker] Server response:', data);
 
+            if (data.error) {
+                console.error('[GPS Tracker] JSON-RPC Error:', data.error);
+                if (data.error.code === 100 || (data.error.message && data.error.message.includes('Session Expired'))) {
+                    console.warn('[GPS Tracker] Session EXPIRED! Stopping tracking and notifying user.');
+                    this.showNotification('Login Required', 
+                        'Your session has expired. Please log back in to resume GPS tracking.', 
+                        'error');
+                    this.stopTracking();
+                }
+                return;
+            }
+
             if (data.result && data.result.error) {
-                console.error('[GPS Tracker] Server returned error:', data.result.error);
+                console.error('[GPS Tracker] Server returned logic error:', data.result.error);
                 console.error('[GPS Tracker] Error details:', data.result.details || 'No details provided');
 
                 // Trigger error event with details

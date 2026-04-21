@@ -235,17 +235,29 @@ function openDB() {
         try:
             from datetime import datetime
             
-            # Get all active guards
+            # Log user context
+            user_sites = request.env.user.site_ids.ids
+            _logger.info('Live Map Request - User: %s, Assigned Sites: %s, Groups: %s', 
+                         request.env.user.name, user_sites, request.env.user.groups_id.mapped('name'))
+            
+            # Get all active guards (this search is already filtered by Odoo record rules for the user)
             guards = request.env['guard.profile'].search([
                 ('status', '=', 'active')
             ])
             
+            _logger.info('Found %d active guards visible to user %s', len(guards), request.env.user.name)
+            
             locations = []
             GuardLocationHistory = request.env['guard.location.history']
             
+            from odoo import fields
+            now_utc = fields.Datetime.now()
+            
             for guard in guards:
                 # Get the most recent location from location history (exclude archived)
-                last_location = GuardLocationHistory.search([
+                # Using sudo() here because guards list is already securely filtered, 
+                # but location history record rules can be complex with many2many joins
+                last_location = GuardLocationHistory.sudo().search([
                     ('guard_id', '=', guard.id),
                     ('is_archived', '=', False)
                 ], order='timestamp desc', limit=1)
@@ -254,8 +266,9 @@ function openDB() {
                     # Calculate time since last update
                     time_since_update = None
                     if last_location.timestamp:
-                        delta = datetime.now() - last_location.timestamp
+                        delta = now_utc - last_location.timestamp
                         time_since_update = int(delta.total_seconds() / 60)  # minutes
+                        _logger.debug('Guard %s: Last location at %s, Delta: %d mins', guard.name, last_location.timestamp, time_since_update)
                     
                     # Only include recent locations (within last 30 minutes)
                     if time_since_update is not None and time_since_update <= 30:
@@ -273,6 +286,7 @@ function openDB() {
                             'status': guard.status,
                         })
             
+            _logger.info('Returning %d guard locations for user %s', len(locations), request.env.user.name)
             return {'success': True, 'locations': locations}
         except Exception as e:
             _logger.error('Error fetching guard locations: %s', str(e))

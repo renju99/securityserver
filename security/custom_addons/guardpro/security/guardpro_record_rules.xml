@@ -1275,7 +1275,7 @@
         <record id="rule_guard_location_history_assigned_sites" model="ir.rule">
             <field name="name">Non-Admin/Non-Guard/Non-Manager: Location History at Assigned Sites</field>
             <field name="model_id" ref="model_guard_location_history"/>
-            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="domain_force">['|', ('site_id', 'in', user.site_ids.ids), ('guard_id.site_ids', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
@@ -1287,7 +1287,7 @@
         <record id="rule_guard_location_history_manager" model="ir.rule">
             <field name="name">Manager: Full Access to Location History at Assigned Sites</field>
             <field name="model_id" ref="model_guard_location_history"/>
-            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="domain_force">['|', ('site_id', 'in', user.site_ids.ids), ('guard_id.site_ids', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>

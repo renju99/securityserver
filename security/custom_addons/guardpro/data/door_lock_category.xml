@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="incident_cat_door_lock" model="incident.category">
+            <field name="name">Door Lock</field>
+            <field name="code">DOOR_LOCK</field>
+            <field name="sequence">66</field>
+            <field name="color">5</field>
+            <field name="description">Door lock incident requiring locksmith and authority notification.</field>
+        </record>
+    </data>
+</odoo>
