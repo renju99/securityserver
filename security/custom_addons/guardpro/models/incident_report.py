@@ -28,13 +28,17 @@ class IncidentReport(models.Model):
         default=lambda self: _('New'),
         index=True
     )
+    # Incidents are legal-audit records. A deleted guard/site/shift must
+    # NOT vaporise the incident history: SET NULL the guard/shift so we
+    # keep the body of the report, and RESTRICT on the (required) site
+    # so a site with open incidents cannot be deleted silently.
     guard_id = fields.Many2one(
         'guard.profile',
         string='Reporting Guard',
         required=False,
         tracking=True,
         index=True,
-        ondelete='cascade',
+        ondelete='set null',
         help='Guard who reported the incident (if applicable)'
     )
     site_id = fields.Many2one(
@@ -43,13 +47,13 @@ class IncidentReport(models.Model):
         required=True,
         tracking=True,
         index=True,
-        ondelete='cascade'
+        ondelete='restrict'
     )
     shift_id = fields.Many2one(
         'guard.shift',
         string='Related Shift',
         tracking=True,
-        ondelete='cascade'
+        ondelete='set null'
     )
     
     # Incident Details
@@ -544,8 +548,24 @@ class IncidentReport(models.Model):
     # Door Lock Form Specific Fields
     door_lock_community_name = fields.Char(string='Community name as per salesforce')
     door_lock_unit_number = fields.Char(string='Unit Number')
-    door_lock_incident_type = fields.Char(string='Incident Type')
-    door_lock_location = fields.Char(string='Location of the lock')
+    door_lock_incident_type = fields.Selection([
+        ('break', 'Break'),
+        ('replacement', 'Replacement'),
+        ('new', 'New'),
+    ], string='Incident Type')
+    door_lock_location = fields.Selection([
+        ('main_entrance', 'Main Entrance'),
+        ('bedroom', 'Bedroom'),
+        ('living_room', 'Living Room'),
+        ('toilets', 'Toilets'),
+        ('balcony', 'Balcony'),
+        ('maid_room', 'Maid Room'),
+        ('store_room', 'Store Room'),
+        ('pump_room', 'Pump Room'),
+        ('roof_access', 'Roof Access'),
+        ('garden_gate', 'Garden Gate'),
+        ('terrace_gate', 'Terrace Gate'),
+    ], string='Location of the lock')
     door_lock_resident_eid_front = fields.Image(string='Resident EID front')
     door_lock_resident_eid_back = fields.Image(string='Resident EID back')
     door_lock_resident_ejari = fields.Binary(string='Resident Ejari/Title deed')
@@ -859,25 +879,60 @@ class IncidentReport(models.Model):
             'reviewed_by': self.env.user.id,
             'review_datetime': fields.Datetime.now()
         }
-        
+
         # Track first response
         if not self.first_response_datetime:
             vals['first_response_datetime'] = fields.Datetime.now()
             vals['responded_by'] = self.env.user.id
-        
+
         self.write(vals)
+        self._push_lifecycle_mobile_notification(
+            _('Incident under review: %s') % self.name,
+            _('%s marked your incident "%s" as under review.') % (
+                self.env.user.name, self.name,
+            ),
+        )
 
     def action_investigate(self):
         """Mark incident for investigation."""
         self.write({'status': 'investigating'})
+        self._push_lifecycle_mobile_notification(
+            _('Incident investigation started: %s') % self.name,
+            _('Your incident "%s" is now being formally investigated.') % self.name,
+        )
 
     def action_resolve(self):
         """Mark incident as resolved."""
         self.write({'status': 'resolved'})
+        self._push_lifecycle_mobile_notification(
+            _('Incident resolved: %s') % self.name,
+            _('Your incident "%s" has been resolved.') % self.name,
+        )
 
     def action_close(self):
         """Close incident report."""
         self.write({'status': 'closed'})
+        self._push_lifecycle_mobile_notification(
+            _('Incident closed: %s') % self.name,
+            _('Your incident "%s" is now closed.') % self.name,
+        )
+
+    def _push_lifecycle_mobile_notification(self, title, body):
+        """Ping the reporting guard's phone when incident status changes."""
+        for incident in self:
+            if not incident.guard_id or not incident.guard_id.user_id:
+                continue
+            self.env['guardpro.mobile.outbox'].sudo().push(
+                user=incident.guard_id.user_id,
+                kind='incident_lifecycle',
+                title=title,
+                body=body,
+                priority='normal',
+                res_model='incident.report',
+                res_id=incident.id,
+                deep_link='/guardpro/mobile/incidents/%s' % incident.id,
+                dedup_key='incident_lifecycle:%s:%s' % (incident.id, incident.status),
+            )
 
     def action_panic(self):
         """Handle panic button activation."""
@@ -1038,11 +1093,84 @@ class IncidentReport(models.Model):
                 )
 
     def _send_panic_alert(self):
-        """Send emergency alert for panic button."""
-        # Send to supervisor, site manager, and emergency contacts
-        _logger.info('PANIC ALERT: Incident %s at site %s',
-                     self.name, self.site_id.name)
-        # Implementation for push notifications, SMS, etc.
+        """Fire the highest-priority mobile notification to every
+        supervisor/manager covering this site, plus any user explicitly
+        flagged on the site as emergency contact."""
+        self.ensure_one()
+
+        recipients = self.env['res.users']
+
+        # 1. Site-scoped supervisors + managers
+        try:
+            supervisor_group = self.env.ref(
+                'guardpro.group_guardpro_supervisor', raise_if_not_found=False
+            )
+            manager_group = self.env.ref(
+                'guardpro.group_guardpro_manager', raise_if_not_found=False
+            )
+            groups = self.env['res.groups']
+            if supervisor_group:
+                groups |= supervisor_group
+            if manager_group:
+                groups |= manager_group
+            if groups:
+                candidate_users = self.env['res.users'].sudo().search([
+                    ('groups_id', 'in', groups.ids),
+                    ('active', '=', True),
+                ])
+                for user in candidate_users:
+                    # site_ids is the record-rule field used elsewhere;
+                    # empty set means "all sites".
+                    user_sites = getattr(user, 'site_ids', None)
+                    if user_sites is None or not user_sites or (
+                        self.site_id and self.site_id.id in user_sites.ids
+                    ):
+                        recipients |= user
+        except Exception as e:
+            _logger.warning('panic recipients resolution failed: %s', e)
+
+        # 2. Site emergency contact user (if configured)
+        site = self.site_id
+        if site:
+            for attr in ('supervisor_id', 'emergency_contact_user_id',
+                         'site_manager_id', 'account_manager_id'):
+                candidate = getattr(site, attr, False)
+                if candidate and candidate._name == 'res.users':
+                    recipients |= candidate
+
+        # 3. The reporting guard gets a confirmation ping so they see
+        # their panic was received.
+        if self.guard_id and self.guard_id.user_id:
+            recipients |= self.guard_id.user_id
+
+        _logger.warning(
+            'PANIC ALERT: Incident %s at site %s -> notifying users %s',
+            self.name, site.name if site else '-', recipients.ids,
+        )
+
+        if recipients:
+            self.env['guardpro.mobile.outbox'].sudo().push(
+                user=recipients,
+                kind='incident_panic',
+                title=_('PANIC / SOS: %s') % (
+                    self.guard_id.name if self.guard_id else self.name,
+                ),
+                body=_('Site: %s\nIncident: %s\nCategory: %s\nSeverity: %s') % (
+                    site.name if site else '-',
+                    self.name,
+                    self.category_id.name if self.category_id else '-',
+                    dict(self._fields['severity'].selection).get(
+                        self.severity, self.severity or ''
+                    ) if 'severity' in self._fields else '-',
+                ),
+                priority='urgent',
+                res_model='incident.report',
+                res_id=self.id,
+                deep_link='/guardpro/mobile/incidents/%s' % self.id,
+                dedup_key='incident_panic:%s' % self.id,
+                # Panic alerts never auto-expire quietly.
+                expires_in_hours=24,
+            )
     
     def get_recommended_report(self):
         """Get recommended report template based on incident category.
@@ -1594,12 +1722,42 @@ class IncidentReport(models.Model):
             
             body_html += _('</tbody></table>')
             
-            # Email notifications are disabled globally; keep report generation only.
+            # Email is disabled globally; push the SLA breach summary
+            # into each manager's mobile outbox instead so it reaches
+            # them on their phone.
+            Outbox = self.env['guardpro.mobile.outbox'].sudo()
+            short_body = _(
+                '%(total)d SLA breach(es) recorded yesterday (%(date)s). '
+                'Open the app for full details.'
+            ) % {
+                'total': total_breaches,
+                'date': yesterday.strftime('%Y-%m-%d'),
+            }
+            # One dedup row per manager + date - re-running the cron
+            # within the same day does not stack duplicate cards.
+            dedup_base = 'sla_breach:%s' % yesterday.strftime('%Y%m%d')
             for user in manager_group.users:
-                if user.email:
-                    _logger.info(
-                        'Email notifications are disabled: skipped SLA breach report for %s',
-                        user.email
+                if not user.active:
+                    continue
+                try:
+                    Outbox.push(
+                        user=user,
+                        kind='sla_breach',
+                        title=_('SLA breaches: %d yesterday') % total_breaches,
+                        body=short_body,
+                        priority='high',
+                        res_model='incident.report',
+                        res_id=0,
+                        deep_link='/guardpro/mobile/incidents?filter=sla_breach',
+                        dedup_key='%s:%d' % (dedup_base, user.id),
+                        # SLA reports age out quickly - a stale card at
+                        # the top of the list helps nobody.
+                        expires_in_hours=36,
+                    )
+                except Exception as e:  # pragma: no cover - defensive
+                    _logger.warning(
+                        'incident.report: SLA outbox push failed for '
+                        'user %s: %s', user.login, e,
                     )
         
         _logger.info('Generated daily SLA breach report: %d breaches on %s',

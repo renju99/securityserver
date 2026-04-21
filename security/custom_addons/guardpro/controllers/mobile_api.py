@@ -1571,10 +1571,70 @@ class MobileAPIController(http.Controller):
                 'error': str(e)
             }
 
+    # Location pings are the single highest-volume endpoint in the
+    # system (native LocationService pings every 30 s and the WebView
+    # polls on top of that). Cap at 120/min/user - normal usage hits
+    # 2-4/min, so this leaves 30x+ headroom for queued offline flush
+    # bursts while blocking runaway loops or spoof-at-scale attempts.
+    @rate_limit(max_requests=120, window_seconds=60,
+                error_code='LOCATION_RATE_LIMITED')
     @http.route('/guardpro/api/location/update', type='json', auth='user', methods=['POST'], csrf=False)
     def update_location(self, latitude, longitude, accuracy=None, speed=None, heading=None, 
                        battery_level=None, device_id=None, device_info=None, **kwargs):
         """Update guard's current GPS location with extended device telemetry."""
+        # Reject nonsense coordinates before they hit the DB. A stuck
+        # sensor can easily report 0/0 or NaN; a hostile client could
+        # spoof (89.9, 179). We want the location history to be usable
+        # for geofencing / incident forensics, so filter aggressively.
+        #
+        # IMPORTANT: on rejection we return ``success=True`` rather
+        # than surfacing an error. The native LocationService treats
+        # any error response as "queue and retry", which would cause
+        # an infinite re-upload loop for a payload the server will
+        # keep refusing. We'd rather silently drop the bad fix and
+        # let the next real one through.
+        import math
+
+        def _drop(reason, **extra):
+            _logger.warning(
+                '[GPS] Dropping fix from user %s: %s (%s)',
+                request.env.user.id, reason, extra,
+            )
+            return {
+                'success': True,
+                'dropped': True,
+                'drop_reason': reason,
+                'timestamp': fields.Datetime.now().isoformat(),
+            }
+
+        try:
+            lat_f = float(latitude)
+            lon_f = float(longitude)
+        except (TypeError, ValueError):
+            return _drop('bad_coord_type', lat=latitude, lon=longitude)
+        if not (math.isfinite(lat_f) and math.isfinite(lon_f)):
+            return _drop('non_finite', lat=lat_f, lon=lon_f)
+        if not (-90.0 <= lat_f <= 90.0) or not (-180.0 <= lon_f <= 180.0):
+            return _drop('out_of_range', lat=lat_f, lon=lon_f)
+        # (0,0) is the "null island" sentinel Android's fused provider
+        # occasionally returns during cold-start before a real fix is
+        # available. Drop it so the guard's path isn't polluted with
+        # an imaginary trip to the Atlantic.
+        if lat_f == 0.0 and lon_f == 0.0:
+            return _drop('null_island')
+        # Reject wildly-poor accuracy fixes (> 5 km). A real GPS/cell
+        # fix is usually <= 100 m; anything beyond a few hundred metres
+        # is cell-tower guesswork and just adds noise to the history.
+        if accuracy is not None:
+            try:
+                acc_f = float(accuracy)
+                if math.isfinite(acc_f) and acc_f > 5000.0:
+                    return _drop('low_accuracy', accuracy=acc_f)
+            except (TypeError, ValueError):
+                accuracy = None
+        latitude = lat_f
+        longitude = lon_f
+
         # Log the request for debugging
         _logger.info(
             '[GPS] Location update from %s (ID: %s) - lat: %s, lon: %s, acc: %s, bat: %s',

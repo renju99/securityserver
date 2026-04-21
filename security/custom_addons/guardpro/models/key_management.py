@@ -38,7 +38,9 @@ class KeyRegister(models.Model):
         required=True,
         tracking=True,
         index=True,
-        ondelete='cascade'
+        # Keys are physical assets whose chain-of-custody must survive
+        # site archival for audit - block cascade deletion.
+        ondelete='restrict'
     )
     location = fields.Char(
         string='Location/Room Number',

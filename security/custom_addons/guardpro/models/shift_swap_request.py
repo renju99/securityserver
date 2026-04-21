@@ -134,7 +134,24 @@ class ShiftSwapRequest(models.Model):
             raise ValidationError(_('Shift swap must be requested at least 24 hours in advance.'))
         
         self.status = 'pending'
-        
+
+        # Mobile push to the target guard.
+        if self.target_guard_id and self.target_guard_id.user_id:
+            self.env['guardpro.mobile.outbox'].sudo().push(
+                user=self.target_guard_id.user_id,
+                kind='shift_swap_decision',
+                title=_('Shift swap request'),
+                body=_('%s wants to swap the shift on %s at %s.') % (
+                    self.requesting_guard_id.name or '-',
+                    self.shift_id.start_datetime or '-',
+                    self.shift_id.site_id.name if self.shift_id.site_id else '-',
+                ),
+                priority='high',
+                res_model='shift.swap.request',
+                res_id=self.id,
+                dedup_key='swap_submit:%s' % self.id,
+            )
+
         # Send notification to target guard
         if self.target_guard_id.user_id:
             self.message_post(
@@ -200,9 +217,22 @@ class ShiftSwapRequest(models.Model):
             raise ValidationError(_('Only pending requests can be rejected.'))
         
         self.status = 'rejected'
-        
+
         # Notify requesting guard
         if self.requesting_guard_id.user_id:
+            self.env['guardpro.mobile.outbox'].sudo().push(
+                user=self.requesting_guard_id.user_id,
+                kind='shift_swap_decision',
+                title=_('Shift swap rejected'),
+                body=_('%s rejected your swap request.\nResponse: %s') % (
+                    self.target_guard_id.name or '-',
+                    self.guard_response or _('No reason provided'),
+                ),
+                priority='normal',
+                res_model='shift.swap.request',
+                res_id=self.id,
+                dedup_key='swap_reject_guard:%s' % self.id,
+            )
             self.message_post(
                 body=Markup('Shift swap request rejected by %s.<br/>Response: %s') % (
                     Markup.escape(self.target_guard_id.name or ''),
@@ -244,7 +274,25 @@ class ShiftSwapRequest(models.Model):
             'status': 'completed',
             'supervisor_id': self.env.user.id
         })
-        
+
+        # Mobile push both guards.
+        swap_users = self.env['res.users']
+        if original_guard.user_id:
+            swap_users |= original_guard.user_id
+        if target_guard.user_id:
+            swap_users |= target_guard.user_id
+        if swap_users:
+            self.env['guardpro.mobile.outbox'].sudo().push(
+                user=swap_users,
+                kind='shift_swap_decision',
+                title=_('Shift swap approved'),
+                body=_('Supervisor %s approved the swap.') % self.env.user.name,
+                priority='high',
+                res_model='shift.swap.request',
+                res_id=self.id,
+                dedup_key='swap_approved:%s' % self.id,
+            )
+
         # Notify both guards
         partner_ids = []
         if original_guard.user_id:
@@ -280,14 +328,32 @@ class ShiftSwapRequest(models.Model):
             raise ValidationError(_('Only accepted requests can be rejected by supervisor.'))
         
         self.status = 'rejected'
-        
+
+        # Mobile push to both guards.
+        swap_users = self.env['res.users']
+        if self.requesting_guard_id.user_id:
+            swap_users |= self.requesting_guard_id.user_id
+        if self.target_guard_id.user_id:
+            swap_users |= self.target_guard_id.user_id
+        if swap_users:
+            self.env['guardpro.mobile.outbox'].sudo().push(
+                user=swap_users,
+                kind='shift_swap_decision',
+                title=_('Shift swap rejected by supervisor'),
+                body=self.supervisor_notes or _('No reason provided'),
+                priority='normal',
+                res_model='shift.swap.request',
+                res_id=self.id,
+                dedup_key='swap_rejected_sup:%s' % self.id,
+            )
+
         # Notify both guards
         partner_ids = []
         if self.requesting_guard_id.user_id:
             partner_ids.append(self.requesting_guard_id.user_id.partner_id.id)
         if self.target_guard_id.user_id:
             partner_ids.append(self.target_guard_id.user_id.partner_id.id)
-        
+
         if partner_ids:
             self.message_post(
                 body=Markup('Shift swap request rejected by supervisor.<br/>Reason: %s') % (

@@ -55,7 +55,10 @@ class TenantResident(models.Model):
         required=True,
         tracking=True,
         index=True,
-        ondelete='cascade'
+        # Residents are real people - block site deletion while any
+        # resident record is attached so the admin must explicitly
+        # migrate/archive them first.
+        ondelete='restrict'
     )
     
     client_id = fields.Many2one(
@@ -227,14 +230,44 @@ class TenantResident(models.Model):
     def action_grant_portal_access(self):
         """Grant portal access to resident."""
         self.ensure_one()
-        
+
+        was_active = bool(self.user_id and self.user_id.active)
         if not self.user_id:
             self._create_portal_user()
         else:
             self.user_id.active = True
-        
+
         self.portal_access = True
-        
+
+        # If the account was previously deactivated (i.e. the resident
+        # already had a password set up), drop a welcome-back ping in
+        # their mobile outbox so next time they open the TWA they know
+        # they can log in again. We skip this for brand-new accounts
+        # because the user still needs to complete signup before any
+        # session / outbox fetch will authenticate - email delivery
+        # (when re-enabled) handles that path.
+        if self.user_id and was_active is False and self.user_id.active \
+                and self.user_id.login and self.user_id.has_group('base.group_portal'):
+            try:
+                self.env['guardpro.mobile.outbox'].sudo().push(
+                    user=self.user_id,
+                    kind='portal_access',
+                    title=_('Portal access restored'),
+                    body=_('Your access to the %s community portal is active again. '
+                           'You can sign back in now.') % (self.site_id.name or _('resident')),
+                    priority='normal',
+                    res_model='tenant.resident',
+                    res_id=self.id,
+                    deep_link='/guardpro/mobile',
+                    dedup_key='portal_access:%d' % self.id,
+                    expires_in_hours=72,
+                )
+            except Exception as e:  # pragma: no cover - defensive, never block grant
+                _logger.warning(
+                    'tenant.resident: outbox push for portal grant failed '
+                    'for resident %s: %s', self.id, e,
+                )
+
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',

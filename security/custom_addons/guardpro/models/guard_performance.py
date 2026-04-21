@@ -800,12 +800,59 @@ class GuardPerformanceReview(models.Model):
         return details
 
     def _send_review_notification(self):
-        """Send review notification to guard."""
+        """Push an approved performance review to the guard's mobile app.
+
+        Called from ``action_approve_review``. Email is disabled globally
+        so the mobile outbox is the only channel the guard actually sees
+        without logging into the portal on a desktop.
+        """
         self.ensure_one()
-        _logger.info(
-            'Email notifications are disabled: skipped performance review email for %s',
-            self.id
-        )
+        guard_user = self.guard_id.user_id if self.guard_id else False
+        if not guard_user:
+            _logger.info(
+                'guard.performance.review: guard %s has no portal user; '
+                'skipping mobile push for review %s.',
+                self.guard_id.display_name if self.guard_id else '?', self.id,
+            )
+            return
+
+        # Be conservative with the score - it may be False / 0 on draft
+        # reviews that were approved without metric calculation.
+        score_bits = []
+        overall = getattr(self, 'overall_rating', None) or getattr(self, 'overall_score', None)
+        if overall:
+            score_bits.append(_('Overall: %s') % overall)
+        period = ''
+        if self.period_start and self.period_end:
+            period = _('%(start)s to %(end)s') % {
+                'start': self.period_start, 'end': self.period_end,
+            }
+
+        body_parts = [_('Your performance review has been approved.')]
+        if period:
+            body_parts.append(_('Period: %s.') % period)
+        if score_bits:
+            body_parts.append(' '.join(score_bits) + '.')
+        body_parts.append(_('Open the app to view feedback and scores.'))
+
+        try:
+            self.env['guardpro.mobile.outbox'].sudo().push(
+                user=guard_user,
+                kind='performance_review',
+                title=_('New performance review available'),
+                body=' '.join(body_parts),
+                priority='normal',
+                res_model='guard.performance.review',
+                res_id=self.id,
+                deep_link='/guardpro/mobile/performance/%d' % self.id,
+                dedup_key='performance_review:%d' % self.id,
+                expires_in_hours=720,  # 30 days - reviews are long-lived
+            )
+        except Exception as e:  # pragma: no cover - defensive
+            _logger.warning(
+                'guard.performance.review: outbox push failed for review '
+                '%s: %s', self.id, e,
+            )
 
     @api.model
     def _cron_calculate_monthly_performance(self):

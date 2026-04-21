@@ -264,12 +264,16 @@ class GuardMessage(models.Model):
         help='Guards who received this broadcast'
     )
     
+    # A user being deleted/archived must NOT destroy the inbox of
+    # everyone they ever messaged. Block deletion while they still
+    # have sent messages (required FK = restrict); for received
+    # messages we can SET NULL and show "Deleted User".
     sender_id = fields.Many2one(
         'res.users',
         string='Sender',
         required=True,
         default=lambda self: self.env.user,
-        ondelete='cascade',
+        ondelete='restrict',
         index=True
     )
     sender_guard_id = fields.Many2one(
@@ -282,7 +286,7 @@ class GuardMessage(models.Model):
     receiver_id = fields.Many2one(
         'res.users',
         string='Receiver',
-        ondelete='cascade',
+        ondelete='set null',
         help='Direct message receiver (for 1-on-1 conversations)'
     )
     
@@ -452,27 +456,32 @@ class GuardMessage(models.Model):
     def create_notification(self):
         """Create notification for receiver(s)."""
         self.ensure_one()
-        
+
         recipients = []
-        
+        recipient_users = self.env['res.users']
+
         # Direct message
         if self.receiver_id:
             recipients.append(self.receiver_id.partner_id.id)
-        
+            recipient_users |= self.receiver_id
+
         # Channel message - notify all channel members
         elif self.channel_id:
             for member in self.channel_id.member_ids:
                 if member.user_id and member.user_id.partner_id:
                     recipients.append(member.user_id.partner_id.id)
-        
+                    if member.user_id.id != self.sender_id.id:
+                        recipient_users |= member.user_id
+
         # Broadcast message - notify all recipients
         elif self.is_broadcast and self.broadcast_recipient_ids:
             for guard in self.broadcast_recipient_ids:
                 if guard.user_id and guard.user_id.partner_id:
                     recipients.append(guard.user_id.partner_id.id)
-        
+                    recipient_users |= guard.user_id
+
         if recipients:
-            # Create Odoo notification
+            # Create Odoo notification (inbox / chatter)
             self.env['mail.message'].sudo().create({
                 'message_type': 'notification',
                 'subtype_id': self.env.ref('mail.mt_comment').id,
@@ -483,13 +492,31 @@ class GuardMessage(models.Model):
                 ) % (
                     self.sender_id.name,
                     self.content[:200] if self.content else '[Media Message]',
-                    '<p style="color: red;"><strong>⚠️ URGENT</strong></p>' if self.is_urgent else ''
+                    '<p style="color: red;"><strong>&#9888; URGENT</strong></p>' if self.is_urgent else ''
                 ),
                 'author_id': self.sender_id.partner_id.id,
                 'model': 'guard.message',
                 'res_id': self.id,
                 'partner_ids': [(6, 0, recipients)]
             })
+
+        # Mobile push (TWA outbox) - one row per recipient so each
+        # guard can dismiss independently.
+        if recipient_users:
+            preview = (self.content or '[Media]')[:300]
+            self.env['guardpro.mobile.outbox'].sudo().push(
+                user=recipient_users,
+                kind='message_received',
+                title=_('Message from %s') % (self.sender_id.name or 'GuardPro'),
+                body=preview,
+                priority='high' if self.is_urgent else 'normal',
+                res_model='guard.message',
+                res_id=self.id,
+                deep_link='/guardpro/mobile/messages',
+                # Dedup per (recipient, message) - the helper already
+                # scopes by user, so message id alone is fine.
+                dedup_key='guard_message:%s' % self.id,
+            )
     
     @api.model
     def send_broadcast(self, content, broadcast_type='all_guards', recipient_ids=None, 
@@ -578,7 +605,9 @@ class GuardStatusUpdate(models.Model):
         'guard.profile',
         string='Guard',
         required=True,
-        ondelete='cascade',
+        # Status timeline feeds payroll/attendance reports - do not
+        # silently wipe it when the guard record is later cleaned up.
+        ondelete='restrict',
         index=True
     )
     status = fields.Selection([

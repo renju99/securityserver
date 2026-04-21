@@ -94,5 +94,6 @@ from . import auto_followers_mixin  # Load before audit_log
 from . import audit_log  # Must be after models it inherits from
 from . import res_config_settings
 from . import performance_indexes  # Performance optimization indexes
+from . import mobile_outbox  # Unified TWA push notification outbox
 
 

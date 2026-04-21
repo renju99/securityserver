@@ -1608,5 +1608,31 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
+        <!-- ================================================================ -->
+        <!-- MOBILE OUTBOX RECORD RULES                                       -->
+        <!-- ================================================================ -->
+        <!-- Every user only ever sees their own pending phone notifications. -->
+        <record id="rule_mobile_outbox_own" model="ir.rule">
+            <field name="name">Mobile Outbox: Own Rows Only</field>
+            <field name="model_id" ref="model_guardpro_mobile_outbox"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+        <!-- Managers/admins can inspect the whole outbox for support. -->
+        <record id="rule_mobile_outbox_manager" model="ir.rule">
+            <field name="name">Mobile Outbox: Manager Read-All</field>
+            <field name="model_id" ref="model_guardpro_mobile_outbox"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager')), (4, ref('group_guardpro_admin'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
     </data>
 </odoo>

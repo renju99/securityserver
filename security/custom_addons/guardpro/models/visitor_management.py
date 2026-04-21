@@ -116,7 +116,9 @@ class VisitorManagement(models.Model):
         required=False,
         tracking=True,
         index=True,
-        ondelete='cascade',
+        # Visitor logs are security-audit records - keep the log even
+        # if the site is later deleted (SET NULL rather than cascade).
+        ondelete='set null',
         help='Site being visited'
     )
     visit_date = fields.Date(
@@ -659,23 +661,105 @@ class VisitorManagement(models.Model):
         return True
 
     def action_notify_host(self):
-        """Send notification to host"""
+        """Ping the host on their mobile app that a visitor has arrived.
+
+        Delivery strategy:
+        * Resolve the host's ``res.users`` record (via matching resident
+          portal user or any user with the same email on the same site).
+        * Drop a row in the unified mobile outbox so their phone shows
+          an in-app card + a tray notification. The TWA natively polls
+          the outbox every few seconds - the host hears about the
+          visitor without having to open the app first.
+        * Keep the legacy ``host_notified`` flag for backward compat
+          so dashboards / filters that rely on it still work.
+        """
         self.ensure_one()
-        
+
         if not self.host_email:
             raise UserError(_('Host email is not provided.'))
-        
-        _logger.info(
-            'Email notifications are disabled: skipped visitor-arrival host email for visitor %s',
-            self.name
-        )
-        
+
+        # Find the resident portal user tied to this host_email at this
+        # site. If a resident has moved or the email doesn't match, fall
+        # back to any res.users record with that login so manager-level
+        # hosts still get pinged.
+        host_user = self._resolve_host_user()
+
+        if host_user:
+            visitor_name = self.name or _('a visitor')
+            try:
+                company = self.company_name
+            except AttributeError:
+                company = False
+            detail_bits = [visitor_name]
+            if company:
+                detail_bits.append('(%s)' % company)
+            visit_purpose = getattr(self, 'purpose', '') or ''
+            if visit_purpose:
+                detail_bits.append('- %s' % visit_purpose)
+            body = _('%(visitor)s has arrived at %(site)s reception.') % {
+                'visitor': ' '.join(detail_bits),
+                'site': self.site_id.name if self.site_id else _('the gate'),
+            }
+
+            self.env['guardpro.mobile.outbox'].sudo().push(
+                user=host_user,
+                kind='visitor_arrival',
+                title=_('Visitor at reception: %s') % visitor_name,
+                body=body,
+                priority='high',
+                res_model='visitor.management',
+                res_id=self.id,
+                deep_link='/guardpro/mobile/visitors/%d' % self.id,
+                # One dedup row per live visitor record - re-running the
+                # notify button does not stack cards.
+                dedup_key='visitor_arrival:%d' % self.id,
+                # Visitor sessions are short - expire the ping in 12h
+                # so it doesn't linger past the visit itself.
+                expires_in_hours=12,
+            )
+        else:
+            _logger.info(
+                'visitor.management: no portal user resolved for host '
+                'email %s on visitor %s - skipping mobile push.',
+                self.host_email, self.name,
+            )
+
         self.write({
             'host_notified': True,
             'host_notification_date': fields.Datetime.now()
         })
-        
+
         return True
+
+    def _resolve_host_user(self):
+        """Return the best ``res.users`` recordset to ping for
+        ``self.host_email`` on ``self.site_id`` - or an empty recordset
+        if nobody is matched."""
+        self.ensure_one()
+        Users = self.env['res.users']
+        email = (self.host_email or '').strip().lower()
+        if not email:
+            return Users
+
+        # 1) Site-scoped resident portal user.
+        Resident = self.env.get('tenant.resident')
+        if Resident is not None and self.site_id:
+            candidates = Resident.sudo().search([
+                ('site_id', '=', self.site_id.id),
+                '|',
+                    ('user_id.login', '=ilike', email),
+                    ('partner_id.email', '=ilike', email),
+            ], limit=1)
+            if candidates and candidates.user_id:
+                return candidates.user_id
+
+        # 2) Any active user with this login - covers building / site
+        # managers who are hosts but aren't modelled as residents.
+        user = Users.sudo().search([
+            ('login', '=ilike', email),
+            ('active', '=', True),
+        ], limit=1)
+        return user or Users
 
     def action_deny_access(self):
         """Deny visitor access"""

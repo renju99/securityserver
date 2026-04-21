@@ -12,6 +12,8 @@ from . import client_portal
 from . import portal_resident
 from . import api_v1
 from . import emergency_broadcast_api
+from . import task_assignment_api
+from . import mobile_outbox_api
 from . import notification_api
 from . import documentation
 from . import pwa_controller

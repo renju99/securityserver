@@ -45,7 +45,10 @@ class GuardProOfflineSyncAPI(http.Controller):
     def sync_attendance_checkin(self, **kwargs):
         """Sync check-in from offline queue."""
         try:
-            data = request.jsonrequest
+            # Odoo 18: ``type='json'`` routes decode the JSON-RPC ``params``
+            # dict straight into kwargs. ``request.jsonrequest`` was removed
+            # in Odoo 17, so we read from kwargs instead.
+            data = kwargs
             guard_id = data.get('guard_id')
             
             # Validate guard ownership
@@ -99,7 +102,7 @@ class GuardProOfflineSyncAPI(http.Controller):
     def sync_attendance_checkout(self, **kwargs):
         """Sync check-out from offline queue."""
         try:
-            data = request.jsonrequest
+            data = kwargs
             guard_id = data.get('guard_id')
             
             # Validate guard ownership
@@ -152,7 +155,7 @@ class GuardProOfflineSyncAPI(http.Controller):
     def sync_incident(self, **kwargs):
         """Sync incident report from offline queue."""
         try:
-            data = request.jsonrequest
+            data = kwargs
             guard_id = data.get('guard_id')
             
             # Validate guard ownership
@@ -216,7 +219,7 @@ class GuardProOfflineSyncAPI(http.Controller):
     def sync_checkpoint_scan(self, **kwargs):
         """Sync checkpoint scan from offline queue."""
         try:
-            data = request.jsonrequest
+            data = kwargs
             guard_id = data.get('guard_id')
             
             # Validate guard ownership
@@ -278,7 +281,7 @@ class GuardProOfflineSyncAPI(http.Controller):
     def sync_gps_locations(self, **kwargs):
         """Sync GPS locations in batch from offline queue."""
         try:
-            data = request.jsonrequest
+            data = kwargs
             locations = data.get('locations', [])
             
             current_guard = self._get_current_guard()
@@ -322,7 +325,7 @@ class GuardProOfflineSyncAPI(http.Controller):
     def resolve_conflict(self, **kwargs):
         """Resolve a sync conflict."""
         try:
-            data = request.jsonrequest
+            data = kwargs
             resolution = data.get('resolution')  # 'local', 'server', 'merge'
             local_record = data.get('local_record')
             server_record = data.get('server_record')

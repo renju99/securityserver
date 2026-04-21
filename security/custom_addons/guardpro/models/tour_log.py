@@ -28,13 +28,17 @@ class TourLog(models.Model):
         default=lambda self: _('New'),
         index=True
     )
+    # Tour logs are compliance records. Keep them even if the tour
+    # definition is later edited/retired (RESTRICT), and when the
+    # guard/shift disappears we still retain the log (SET NULL on
+    # non-required fields, RESTRICT on required).
     tour_id = fields.Many2one(
         'security.tour',
         string='Tour',
         required=True,
         tracking=True,
         index=True,
-        ondelete='cascade'
+        ondelete='restrict'
     )
     guard_id = fields.Many2one(
         'guard.profile',
@@ -42,20 +46,20 @@ class TourLog(models.Model):
         required=True,
         tracking=True,
         index=True,
-        ondelete='cascade'
+        ondelete='restrict'
     )
     site_id = fields.Many2one(
         'client.site',
         string='Site',
         required=True,
         tracking=True,
-        ondelete='cascade'
+        ondelete='restrict'
     )
     shift_id = fields.Many2one(
         'guard.shift',
         string='Related Shift',
         tracking=True,
-        ondelete='cascade'
+        ondelete='set null'
     )
 
     # Location Hierarchy (inherited from tour or can be specific to this execution)

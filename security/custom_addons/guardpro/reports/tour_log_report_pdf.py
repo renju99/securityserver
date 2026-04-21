@@ -14,7 +14,7 @@ class TourLogReportPdf(models.AbstractModel):
     def _get_report_values(self, docids, data=None):
         """Get values for the tour log report."""
         docs = self.env['tour.log'].browse(docids)
-        
+
         return {
             'doc_ids': docids,
             'doc_model': 'tour.log',

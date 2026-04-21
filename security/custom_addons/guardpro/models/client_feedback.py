@@ -33,12 +33,16 @@ class ClientFeedback(models.Model):
         tracking=True
     )
     
+    # Feedback is an audit record. Required FKs use RESTRICT so the target
+    # cannot be silently deleted while feedback is attached; optional FKs
+    # use SET NULL so the feedback body survives archival of peripheral
+    # records (guards rotate, shifts close, residents move out).
     site_id = fields.Many2one(
         'client.site',
         string='Site',
         required=True,
         tracking=True,
-        ondelete='cascade'
+        ondelete='restrict'
     )
     
     # Resident/Tenant Support
@@ -46,7 +50,7 @@ class ClientFeedback(models.Model):
         'tenant.resident',
         string='Resident/Tenant',
         tracking=True,
-        ondelete='cascade',
+        ondelete='set null',
         help='Resident who submitted this feedback (for community sites)'
     )
     
@@ -60,7 +64,7 @@ class ClientFeedback(models.Model):
         string='Guard',
         required=False,
         tracking=True,
-        ondelete='cascade',
+        ondelete='set null',
         help='Optional: Leave blank for general service feedback'
     )
     
@@ -68,7 +72,7 @@ class ClientFeedback(models.Model):
         'guard.shift',
         string='Related Shift',
         tracking=True,
-        ondelete='cascade'
+        ondelete='set null'
     )
     
     feedback_date = fields.Date(
@@ -228,13 +232,23 @@ class ClientFeedback(models.Model):
         return records
     
     def _notify_management_complaint(self):
-        """Notify management of complaints."""
+        """Notify management AND the subject guard (so they can respond)
+        of a new complaint."""
         self.ensure_one()
-        
+
+        title = _('New client complaint')
+        body = _('From: %s\nGuard: %s\nSite: %s') % (
+            self.client_id.name if self.client_id else '-',
+            self.guard_id.name if self.guard_id else '-',
+            self.site_id.name if self.site_id else '-',
+        )
+        if self.comments:
+            body += '\n\n' + self.comments[:1000]
+
         try:
             manager_group = self.env.ref('guardpro.group_guardpro_manager')
             managers = self.env['res.users'].search([('groups_id', 'in', manager_group.id)])
-            
+
             if managers:
                 self.message_post(
                     body=_('New complaint received from %s about guard %s at %s') % (
@@ -245,8 +259,31 @@ class ClientFeedback(models.Model):
                     partner_ids=managers.mapped('partner_id').ids,
                     message_type='notification'
                 )
+                self.env['guardpro.mobile.outbox'].sudo().push(
+                    user=managers,
+                    kind='complaint_received',
+                    title=title,
+                    body=body,
+                    priority='high',
+                    res_model='client.feedback',
+                    res_id=self.id,
+                    dedup_key='complaint_mgr:%s' % self.id,
+                )
         except Exception as e:
             _logger.warning('Could not send complaint notification: %s', str(e))
+
+        # Ping the subject guard directly so they know.
+        if self.guard_id and self.guard_id.user_id:
+            self.env['guardpro.mobile.outbox'].sudo().push(
+                user=self.guard_id.user_id,
+                kind='complaint_received',
+                title=_('Client complaint recorded'),
+                body=body,
+                priority='high',
+                res_model='client.feedback',
+                res_id=self.id,
+                dedup_key='complaint_guard:%s' % self.id,
+            )
     
     def action_respond(self):
         """Mark as responded."""
@@ -288,6 +325,18 @@ class ClientFeedback(models.Model):
                     ),
                     partner_ids=self.guard_id.user_id.partner_id.ids,
                     message_type='notification'
+                )
+                self.env['guardpro.mobile.outbox'].sudo().push(
+                    user=self.guard_id.user_id,
+                    kind='feedback_received',
+                    title=_('Positive feedback from %s') % (
+                        self.client_id.name if self.client_id else 'a client'
+                    ),
+                    body=self.comments or _('(no comment)'),
+                    priority='normal',
+                    res_model='client.feedback',
+                    res_id=self.id,
+                    dedup_key='feedback_share:%s' % self.id,
                 )
                 self.shared_with_guard = True
             except Exception as e:

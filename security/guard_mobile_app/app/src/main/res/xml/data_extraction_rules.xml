@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Android 12+ data-extraction / cloud-backup rules.
+
+    Both <cloud-backup> and <device-transfer> are explicitly disabled
+    because the app stores a live Odoo ``session_id`` cookie and a queue
+    of offline GPS fixes on disk - material we do NOT want to follow a
+    user across devices or live in Google Drive backups.
+
+    This file is referenced from AndroidManifest.xml via
+    ``android:dataExtractionRules``. Combined with ``allowBackup="false"``
+    and ``fullBackupContent="false"`` it covers every Android version
+    we target (minSdk 24 through 34+).
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </device-transfer>
+</data-extraction-rules>

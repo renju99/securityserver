@@ -24,9 +24,29 @@ class GPSTracker {
     }
 
     /**
-     * Start GPS tracking with permission check
+     * Start GPS tracking with permission check.
+     *
+     * Inside the Guard Pro TWA the native ``LocationService`` is the
+     * canonical GPS source - it runs as a foreground service, survives
+     * the app being backgrounded, and uploads fixes directly to the
+     * server via the Odoo session cookie. If we also ran the browser
+     * geolocation path here we'd get:
+     *   * duplicate fixes uploaded every ~25s;
+     *   * conflicting low-accuracy fallback vs the native fused
+     *     provider (which includes Wi-Fi + GPS + sensors);
+     *   * extra battery drain.
+     * So when the ``AndroidBridge`` is present we short-circuit and
+     * let the native service own GPS entirely. In a plain browser /
+     * Chrome PWA the bridge is undefined and this path stays active.
      */
     startTracking() {
+        if (typeof window !== 'undefined' && window.AndroidBridge) {
+            console.debug('[GPS Tracker] AndroidBridge present - ' +
+                          'native LocationService owns GPS; JS tracker disabled.');
+            this.tracking = false;
+            return false;
+        }
+
         if (!navigator.geolocation) {
             console.error('[GPS Tracker] Geolocation is not supported');
             this.showNotification('GPS Not Supported', 'Your browser does not support GPS location tracking.', 'error');

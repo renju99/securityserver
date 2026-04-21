@@ -102,7 +102,8 @@ class LostFoundItem(models.Model):
         required=True,
         tracking=True,
         index=True,
-        ondelete='cascade',
+        # Lost-and-found entries are property-custody records.
+        ondelete='restrict',
         help='Site where item was found'
     )
     location_found = fields.Char(

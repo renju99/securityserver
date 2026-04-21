@@ -150,19 +150,35 @@ class GuardProfile(models.Model):
         ])
         
         enrolled_count = 0
+        newly_enrolled_names = []
         for course in mandatory_courses:
             # Check if already enrolled
             existing = self.training_enrollment_ids.filtered(
                 lambda e: e.channel_id == course
             )
-            
+
             if not existing:
                 self.env['slide.channel.partner'].create({
                     'channel_id': course.id,
                     'partner_id': self.partner_id.id,
                 })
                 enrolled_count += 1
-        
+                newly_enrolled_names.append(course.name)
+
+        # Mobile push so the guard actually knows they were enrolled.
+        if enrolled_count and self.user_id:
+            self.env['guardpro.mobile.outbox'].sudo().push(
+                user=self.user_id,
+                kind='training_enrolled',
+                title=_('%s mandatory courses assigned') % enrolled_count,
+                body='\n'.join('- ' + n for n in newly_enrolled_names[:10]),
+                priority='normal',
+                res_model='guard.profile',
+                res_id=self.id,
+                deep_link='/guardpro/mobile/training',
+                dedup_key='training_enroll:%s:%s' % (self.id, fields.Date.today()),
+            )
+
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',

@@ -19,8 +19,17 @@
 
     <uses-feature android:name="android.hardware.nfc" android:required="false" />
 
+    <!--
+        allowBackup=false: the app stores a live Odoo ``session_id`` cookie
+        and a queue of offline GPS fixes on device. Enrolling those in ADB /
+        cloud auto-backup would let a device-level attacker resurrect an
+        authenticated session on a different phone. Set to false per the
+        standard posture for apps holding bearer credentials.
+    -->
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
@@ -38,12 +47,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!--
+                App-link filter for https://security.berkeleyuae.com/guardpro/*
+                Must match the host used by TwaLauncherActivity.START_URL and
+                LocationService.API_ORIGIN - otherwise notification deep-links,
+                outbox links, and email CTAs bounce to Chrome instead of the app.
+            -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
-                    android:host="attendance.berkeleyuae.com"
+                    android:host="security.berkeleyuae.com"
                     android:pathPrefix="/guardpro"
                     android:scheme="https" />
             </intent-filter>

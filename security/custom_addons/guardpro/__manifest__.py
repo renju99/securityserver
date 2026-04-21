@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Sentry - Security Guard Management',
-    'version': '18.0.1.1.62',
+    'version': '18.0.1.1.67',
     'category': 'Services/Security',
     'summary': 'Win premium guard contracts with an Odoo-native suite for mobile patrols, SLA automation, client portals, and analytics.',
     'description': """
@@ -162,6 +162,7 @@ Support & Roadmap
         'data/credential_cron.xml',
         'data/portal_enhancement_cron.xml',
         'data/sla_escalation_cron.xml',  # SLA-based escalation cron jobs
+        'data/mobile_outbox_cron.xml',  # Unified mobile outbox purge
         'data/tour_manual_generation_server_actions.xml',
         # 'data/populate_quiz_data_action.xml',  # Populate test quiz question data - DISABLED (has syntax issue)
         # OPTIONAL: Requires hr_attendance module
@@ -456,6 +457,8 @@ Support & Roadmap
             'guardpro/static/src/js/tour_scanner.js',  # QR/NFC scanning for tours
             'guardpro/static/src/js/mobile_emergency_broadcast.js',  # Poll and show emergency broadcasts in mobile PWA
             'guardpro/static/src/js/mobile_patrol_reminder.js',  # Patrol 30/10 min reminders + acknowledge
+            'guardpro/static/src/js/mobile_task_assignment.js',  # Task assignment alerts + acknowledge
+            'guardpro/static/src/js/mobile_outbox.js',  # Unified notification outbox (shifts, incidents, credentials, messages...)
             'guardpro/static/src/js/mobile_guard_messages.js',  # Text chat inbox (guard.message + channels)
             'guardpro/static/src/js/mobile_push_to_talk.js',  # Push-to-Talk for mobile interface
             'guardpro/static/src/js/mobile_emirates_id_camera_scan.js',  # Emirates ID camera OCR on mobile PWA

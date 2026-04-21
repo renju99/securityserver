@@ -440,29 +440,35 @@ class IncidentInvestigation(models.Model):
                 ) or _('New')
         
         records = super().create(vals_list)
-        
+
         # Create initial timeline entry and generate checklist
         for record in records:
             record._create_timeline_entry(
                 'investigation_started',
                 _('Investigation started by %s') % record.lead_investigator_id.name
             )
-            
+
             # Generate checklist from template if not already provided (e.g., from UI onchange)
             if record.template_id and record.template_id.checklist_item_ids and not record.checklist_ids:
                 record._generate_checklist_from_template()
-        
+
+            record._push_investigation_assignment_notification()
+
         return records
-    
+
     def write(self, vals):
         """Track status changes in timeline and handle template changes"""
+        assignment_changed = (
+            'lead_investigator_id' in vals or 'investigator_ids' in vals
+        )
+
         # Track status changes
         if 'status' in vals:
             old_status = self.status
             new_status = vals['status']
-            
+
             result = super().write(vals)
-            
+
             if old_status != new_status:
                 status_labels = dict(self._fields['status'].selection)
                 self._create_timeline_entry(
@@ -472,9 +478,13 @@ class IncidentInvestigation(models.Model):
                         status_labels.get(new_status, new_status)
                     )
                 )
-            
+
+            if assignment_changed:
+                for record in self:
+                    record._push_investigation_assignment_notification()
+
             return result
-        
+
         # Handle template changes
         if 'template_id' in vals and vals['template_id']:
             result = super().write(vals)
@@ -484,9 +494,49 @@ class IncidentInvestigation(models.Model):
                     if record.template_id and record.template_id.checklist_item_ids:
                         # Clear existing checklist items and generate new
                         record._generate_checklist_from_template()
+            if assignment_changed:
+                for record in self:
+                    record._push_investigation_assignment_notification()
             return result
-        
-        return super().write(vals)
+
+        result = super().write(vals)
+        if assignment_changed:
+            for record in self:
+                record._push_investigation_assignment_notification()
+        return result
+
+    def _push_investigation_assignment_notification(self):
+        """Buzz the phones of the lead + team when an investigation is
+        assigned (on create, reassignment, or team change)."""
+        self.ensure_one()
+        recipients = self.env['res.users']
+        if self.lead_investigator_id:
+            recipients |= self.lead_investigator_id
+        for user in (self.investigator_ids or []):
+            recipients |= user
+        if not recipients:
+            return
+        incident = self.incident_id if 'incident_id' in self._fields else False
+        title = _('Investigation assigned: %s') % (self.name or '-')
+        body_parts = []
+        if incident:
+            body_parts.append(_('Incident: %s') % incident.name)
+        if self.lead_investigator_id:
+            body_parts.append(_('Lead: %s') % self.lead_investigator_id.name)
+        if self.investigator_ids:
+            body_parts.append(_('Team: %s') % ', '.join(
+                u.name for u in self.investigator_ids
+            ))
+        self.env['guardpro.mobile.outbox'].sudo().push(
+            user=recipients,
+            kind='incident_investigation',
+            title=title,
+            body='\n'.join(body_parts),
+            priority='high',
+            res_model='incident.investigation',
+            res_id=self.id,
+            dedup_key='incident_investigation:%s' % self.id,
+        )
     
     def action_start_investigation(self):
         """Start investigation"""

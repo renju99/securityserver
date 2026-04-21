@@ -24,13 +24,17 @@ class GuardShift(models.Model):
         compute='_compute_name',
         store=True
     )
+    # Shifts are payroll + attendance records. Block deletion of the
+    # underlying guard/site while shifts exist - the admin must archive
+    # instead. Otherwise a simple "delete user" wipes every attendance
+    # entry for that guard across the year.
     guard_id = fields.Many2one(
         'guard.profile',
         string='Guard',
         required=True,
         tracking=True,
         index=True,
-        ondelete='cascade'
+        ondelete='restrict'
     )
     site_id = fields.Many2one(
         'client.site',
@@ -38,7 +42,7 @@ class GuardShift(models.Model):
         required=True,
         tracking=True,
         index=True,
-        ondelete='cascade'
+        ondelete='restrict'
     )
     
     # Timing
@@ -795,23 +799,140 @@ class GuardShift(models.Model):
             if record.has_conflict and not record.conflict_override:
                 # Open conflict wizard instead of just confirming
                 return record.action_open_conflict_wizard()
-        
+
         self.write({'status': 'confirmed'})
+        for shift in self:
+            shift._push_shift_mobile_notification(
+                kind='shift_assigned',
+                title=_('Shift confirmed'),
+                body_extra=_('Your shift has been confirmed.'),
+                priority='high',
+            )
 
     def action_cancel(self):
         """Cancel the shift."""
         self.write({'status': 'cancelled'})
-        
-        # Send cancellation email to guard
+
+        # Fire the mobile notification to the assigned guard.
         self._send_shift_change_email()
-    
-    def _send_shift_change_email(self):
-        """Send email notification about shift changes/cancellations."""
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Ping the assigned guard when a new shift is scheduled for them."""
+        records = super().create(vals_list)
+        for record in records:
+            if record.guard_id and record.guard_id.user_id:
+                record._push_shift_mobile_notification(
+                    kind='shift_assigned',
+                    title=_('New shift assigned'),
+                    priority='high',
+                )
+        return records
+
+    def write(self, vals):
+        """Detect shift reassignment or schedule changes and notify the
+        guards involved."""
+        trigger_fields = {
+            'guard_id', 'start_datetime', 'end_datetime', 'site_id', 'status',
+        }
+        before = {}
+        if trigger_fields & set(vals.keys()):
+            for rec in self:
+                before[rec.id] = {
+                    'guard_id': rec.guard_id.id,
+                    'start_datetime': rec.start_datetime,
+                    'end_datetime': rec.end_datetime,
+                    'site_id': rec.site_id.id,
+                    'status': rec.status,
+                }
+
+        result = super().write(vals)
+
+        for rec in self:
+            prev = before.get(rec.id)
+            if not prev:
+                continue
+            # Reassigned: notify new guard AND old guard (if different).
+            if 'guard_id' in vals and prev['guard_id'] != rec.guard_id.id:
+                if rec.guard_id and rec.guard_id.user_id:
+                    rec._push_shift_mobile_notification(
+                        kind='shift_assigned',
+                        title=_('Shift reassigned to you'),
+                        priority='high',
+                    )
+                # Tell the previous guard the shift was taken off them.
+                if prev['guard_id']:
+                    prev_user = self.env['guard.profile'].sudo().browse(
+                        prev['guard_id']
+                    ).user_id
+                    if prev_user:
+                        self.env['guardpro.mobile.outbox'].sudo().push(
+                            user=prev_user,
+                            kind='shift_changed',
+                            title=_('Shift reassigned to another guard'),
+                            body=_('Shift on %s at %s is no longer yours.') % (
+                                rec.start_datetime or '-',
+                                rec.site_id.name if rec.site_id else '-',
+                            ),
+                            priority='normal',
+                            res_model='guard.shift',
+                            res_id=rec.id,
+                            dedup_key='shift_unassigned:%s:%s' % (rec.id, prev['guard_id']),
+                        )
+                continue
+            # Time or site changed on the same guard.
+            schedule_changed = (
+                prev['start_datetime'] != rec.start_datetime
+                or prev['end_datetime'] != rec.end_datetime
+                or prev['site_id'] != (rec.site_id.id if rec.site_id else False)
+            )
+            if schedule_changed and rec.guard_id and rec.guard_id.user_id:
+                rec._push_shift_mobile_notification(
+                    kind='shift_changed',
+                    title=_('Shift updated'),
+                    priority='normal',
+                )
+        return result
+
+    def _push_shift_mobile_notification(self, kind, title, body_extra=None,
+                                        priority='normal'):
+        """Shared helper used by create/write/action_confirm/action_cancel."""
         self.ensure_one()
-        _logger.info(
-            'Email notifications are disabled: skipped shift change email for shift %s',
-            self.id
+        if not self.guard_id or not self.guard_id.user_id:
+            return
+        body_parts = []
+        if self.site_id:
+            body_parts.append(_('Site: %s') % self.site_id.name)
+        if self.start_datetime:
+            body_parts.append(_('Start: %s') % self.start_datetime)
+        if self.end_datetime:
+            body_parts.append(_('End: %s') % self.end_datetime)
+        if body_extra:
+            body_parts.append(body_extra)
+        self.env['guardpro.mobile.outbox'].sudo().push(
+            user=self.guard_id.user_id,
+            kind=kind,
+            title=title,
+            body='\n'.join(body_parts),
+            priority=priority,
+            res_model='guard.shift',
+            res_id=self.id,
+            deep_link='/guardpro/mobile/shifts',
+            dedup_key='shift:%s:%s' % (self.id, kind),
         )
+
+    def _send_shift_change_email(self):
+        """Fire a mobile outbox notification about the shift change."""
+        for shift in self:
+            if not shift.guard_id or not shift.guard_id.user_id:
+                continue
+            kind = 'shift_cancelled' if shift.status == 'cancelled' else 'shift_changed'
+            title = _('Shift cancelled') if kind == 'shift_cancelled' else _('Shift updated')
+            shift._push_shift_mobile_notification(
+                kind=kind,
+                title=title,
+                priority='high' if kind == 'shift_cancelled' else 'normal',
+            )
 
     def action_checkin(self, latitude=None, longitude=None, checkpoint_scan_id=None, photo=None,
                       biometric_type=None, biometric_data=None, device_id=None):

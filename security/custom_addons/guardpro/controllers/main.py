@@ -119,41 +119,17 @@ class GuardProController(http.Controller):
     #     # Redirected to /guardpro/pwa/
     #     pass
 
-    @http.route('/guardpro/manifest.json', type='http', auth='public')
-    def pwa_manifest(self):
-        """PWA manifest file."""
-        manifest = {
-            "name": "GuardPro",
-            "short_name": "GuardPro",
-            "description": "Security Guard Management System",
-            "start_url": "/guardpro/pwa/",
-            "display": "standalone",
-            "background_color": "#1f2937",
-            "theme_color": "#3b82f6",
-            "orientation": "portrait",
-            "icons": [
-                {
-                    "src": "/guardpro/static/src/img/icon-192.png",
-                    "sizes": "192x192",
-                    "type": "image/png"
-                },
-                {
-                    "src": "/guardpro/static/src/img/icon-512.png",
-                    "sizes": "512x512",
-                    "type": "image/png"
-                }
-            ]
-        }
-        
-        return request.make_response(
-            json.dumps(manifest),
-            headers=[('Content-Type', 'application/json')]
-        )
-
-    @http.route('/guardpro/service-worker.js', type='http', auth='public')
-    def service_worker(self):
-        """Service worker for PWA offline functionality."""
-        sw_content = """
+    # NOTE: ``/guardpro/manifest.json`` and ``/guardpro/service-worker.js``
+    # used to also live here. They were duplicates of the canonical
+    # routes in ``pwa_controller.py`` (which return richer manifest
+    # metadata and load the real service worker from
+    # ``static/pwa/service-worker.js``). Odoo picks one of the two
+    # duplicates non-deterministically based on module load order,
+    # which caused the PWA install prompt to flicker between two
+    # different app identities and the offline cache to occasionally
+    # be served the stale inline stub. The canonical definitions are
+    # the only ones kept; do NOT re-add these routes here.
+    _DUPLICATE_ROUTES_REMOVED = """
 const CACHE_NAME = 'guardpro-v1';
 const urlsToCache = [
   '/guardpro/pwa/',
@@ -224,10 +200,6 @@ function openDB() {
   });
 }
 """
-        return request.make_response(
-            sw_content,
-            headers=[('Content-Type', 'application/javascript')]
-        )
 
     @http.route('/guardpro/guards/locations', type='json', auth='user')
     def get_guard_locations(self, **kwargs):

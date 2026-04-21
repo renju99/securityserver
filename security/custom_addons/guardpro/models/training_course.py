@@ -315,7 +315,10 @@ class TrainingEnrollment(models.Model):
         'guard.profile',
         string='Guard',
         required=True,
-        ondelete='cascade'
+        # Training completion is a compliance record (mandatory courses,
+        # certifications). Block deletion of the guard while enrollments
+        # exist so the HR audit trail is preserved.
+        ondelete='restrict'
     )
     
     course_id = fields.Many2one(

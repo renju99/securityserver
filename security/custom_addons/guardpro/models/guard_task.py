@@ -32,7 +32,9 @@ class GuardTask(models.Model):
         required=True,
         tracking=True,
         index=True,
-        ondelete='cascade',
+        # Completed tasks are an auditable record of what was inspected
+        # at a site. Block site deletion while tasks exist.
+        ondelete='restrict',
         help='Site where the task should be performed'
     )
     task_type = fields.Selection([
@@ -60,7 +62,9 @@ class GuardTask(models.Model):
         'guard.shift',
         string='Related Shift',
         tracking=True,
-        ondelete='cascade',
+        # A task's shift can rotate; we still want to keep the task
+        # history if the shift record is later deleted.
+        ondelete='set null',
         help='Shift during which this task should be completed'
     )
     tour_log_ids = fields.Many2many(
@@ -223,6 +227,38 @@ class GuardTask(models.Model):
         readonly=True
     )
 
+    # Mobile assignment notification tracking.
+    #
+    # When a supervisor assigns (or reassigns) a task, we flip
+    # ``mobile_assignment_ack`` to False so the guard's mobile app / TWA
+    # notification poller picks it up. The guard's acknowledge tap calls the
+    # ack endpoint which flips it back to True, dismissing the notification.
+    #
+    # ``default=True`` makes sure existing tasks (loaded before this feature
+    # shipped) do not retroactively flood every guard phone with alerts -
+    # only newly-triggered assignments show up in the pending endpoint.
+    mobile_assignment_ack = fields.Boolean(
+        string='Assignment Acknowledged on Mobile',
+        default=True,
+        copy=False,
+        index=True,
+        help='Cleared when task is assigned to a guard so their mobile app '
+             'can raise a notification; set back to True when the guard '
+             'acknowledges the alert.'
+    )
+    mobile_assignment_notified_on = fields.Datetime(
+        string='Assignment Notified On',
+        readonly=True,
+        copy=False,
+        help='Timestamp when the mobile notification was armed for this task.'
+    )
+    mobile_assignment_acked_on = fields.Datetime(
+        string='Assignment Acknowledged On',
+        readonly=True,
+        copy=False,
+        help='When the assigned guard tapped "Acknowledge" on their phone.'
+    )
+
     @api.depends('due_date', 'state')
     def _compute_is_overdue(self):
         """Check if task is overdue"""
@@ -287,14 +323,50 @@ class GuardTask(models.Model):
         for record in records:
             if record.photo_ids or record.completion_photo:
                 record._optimize_photos()
+            # Arm the mobile notification when the task is born already
+            # assigned (e.g. via wizard, import, or API).
+            if record.state == 'assigned' and record.assigned_to:
+                record._arm_mobile_assignment_notification()
         return records
-    
+
     def write(self, vals):
-        """Override write to optimize photos on update."""
+        """Override write to optimize photos and re-arm mobile notifications
+        whenever an assignment is (re)made."""
+        reassigned = self.env['guard.task']
+        if vals.get('assigned_to') or vals.get('state') == 'assigned':
+            # Any write that creates a fresh active assignment on the task
+            # should (re)fire the mobile notification. We snapshot the
+            # recordset here and react after the write commits.
+            reassigned = self
         result = super().write(vals)
         if 'photo_ids' in vals or 'completion_photo' in vals:
             self._optimize_photos()
+        if reassigned:
+            for task in reassigned:
+                if task.state == 'assigned' and task.assigned_to:
+                    task._arm_mobile_assignment_notification()
         return result
+
+    def _arm_mobile_assignment_notification(self):
+        """Mark the task so the guard's mobile poller surfaces it.
+
+        Kept as a tiny helper so future tweaks (e.g. supervisor opt-out,
+        rate-limiting, push integration) can happen in one place.
+        """
+        self.ensure_one()
+        if self.mobile_assignment_ack:
+            self.sudo().write({
+                'mobile_assignment_ack': False,
+                'mobile_assignment_notified_on': fields.Datetime.now(),
+                'mobile_assignment_acked_on': False,
+            })
+        else:
+            # Already pending - just refresh the armed timestamp so the
+            # guard knows this is a fresh assignment event.
+            self.sudo().write({
+                'mobile_assignment_notified_on': fields.Datetime.now(),
+                'mobile_assignment_acked_on': False,
+            })
     
     def _optimize_photos(self):
         """Optimize photo attachments for storage and PDF rendering."""
@@ -356,15 +428,22 @@ class GuardTask(models.Model):
         self.ensure_one()
         if not self.assigned_to:
             raise UserError(_('Please select a guard to assign this task.'))
-        
+
         self.write({'state': 'assigned'})
-        
-        # Send email notification
+
+        # Send email notification (currently a no-op).
         self._send_assignment_email()
-        
-        # Planned activity intentionally disabled.
-        
-        _logger.info('Task %s assigned to guard %s', self.name, self.assigned_to.name)
+
+        # Arm the mobile notification so the guard's phone rings even if the
+        # write() hook above already did it - cheap idempotent call, and it
+        # covers cases where the task was already in "assigned" state and the
+        # write() branch skipped the arming.
+        self._arm_mobile_assignment_notification()
+
+        _logger.info(
+            'Task %s assigned to guard %s (mobile notification armed)',
+            self.name, self.assigned_to.name
+        )
         return True
 
     def action_start(self):

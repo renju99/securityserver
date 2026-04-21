@@ -359,40 +359,64 @@ class IncidentEscalationLog(models.Model):
         return True
     
     def _send_escalation_notification(self):
-        """Send escalation notification to users"""
+        """Push an escalation alert to each escalated user's phone and
+        post it in the incident chatter so the record has a paper trail."""
         self.ensure_one()
-        
+
         if not self.escalated_to_user_ids:
             return
-        
-        # Create activity for each escalated user
-        for user in self.escalated_to_user_ids:
-            activity_type = self.env.ref('mail.mail_activity_data_urgent', 
-                                        raise_if_not_found=False)
-            if not activity_type:
-                activity_type = self.env.ref('mail.mail_activity_data_todo',
-                                            raise_if_not_found=False)
-            
-            if activity_type:
-                # Planned activity intentionally disabled.
-                continue
-        
-        # Mark notification as sent
+
+        incident = self.incident_id
+        incident_name = incident.name if incident else _('an incident')
+        reason = self.escalation_reason or _('no reason provided')
+        title = _('Incident escalated: %s') % (incident_name,)
+        body_parts = [
+            _('Level: %s') % (self.escalation_level or 1,),
+            _('Reason: %s') % (reason,),
+        ]
+        if incident and incident.category_id:
+            body_parts.append(_('Category: %s') % (incident.category_id.name,))
+        if incident and incident.site_id:
+            body_parts.append(_('Site: %s') % (incident.site_id.name,))
+        body = '\n'.join(filter(None, body_parts))
+
+        deep_link = (
+            '/guardpro/mobile/incidents/%s' % incident.id if incident else None
+        )
+
+        self.env['guardpro.mobile.outbox'].sudo().push(
+            user=self.escalated_to_user_ids,
+            kind='incident_escalation',
+            title=title,
+            body=body,
+            priority='urgent',
+            res_model='incident.report',
+            res_id=incident.id if incident else None,
+            deep_link=deep_link,
+            dedup_key='incident_escalation:%s' % self.id,
+        )
+
+        # Also post to the incident chatter with targeted partner_ids so
+        # the users get the event in their Odoo inbox as well.
+        if incident:
+            partner_ids = [u.partner_id.id for u in self.escalated_to_user_ids if u.partner_id]
+            if partner_ids:
+                incident.message_post(
+                    body=_('<p>Escalated to: %s</p><p>%s</p>') % (
+                        ', '.join(u.name for u in self.escalated_to_user_ids),
+                        reason,
+                    ),
+                    subject=title,
+                    message_type='notification',
+                    partner_ids=partner_ids,
+                )
+
         self.write({
             'notification_sent': True,
             'notification_sent_datetime': fields.Datetime.now()
         })
-        
-        # Email notifications are disabled globally.
-        if self.escalated_to_user_ids:
-            _logger.info(
-                'Email notifications are disabled: skipped escalation emails for incident %s',
-                self.incident_id.name
-            )
-        
         _logger.info(
-            'Sent escalation notification for incident %s to %d users',
-            self.incident_id.name,
-            len(self.escalated_to_user_ids)
+            'Escalation notification pushed for incident %s to %d users',
+            incident_name, len(self.escalated_to_user_ids)
         )
 

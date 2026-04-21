@@ -28,12 +28,15 @@ class ResidentComplaint(models.Model):
         tracking=True
     )
     
+    # Complaints are regulatory-audit records. Keep them even if a resident
+    # moves out or a site is archived - force the admin to archive/merge
+    # the related record rather than silently destroy the complaint trail.
     resident_id = fields.Many2one(
         'tenant.resident',
         string='Resident',
         required=True,
         tracking=True,
-        ondelete='cascade',
+        ondelete='restrict',
         index=True
     )
     
@@ -42,7 +45,7 @@ class ResidentComplaint(models.Model):
         string='Site',
         required=True,
         tracking=True,
-        ondelete='cascade',
+        ondelete='restrict',
         related='resident_id.site_id',
         store=True,
         readonly=True
@@ -365,8 +368,37 @@ class ResidentComplaint(models.Model):
                     message_type='notification',
                     subtype_xmlid='mail.mt_comment'
                 )
+                self.env['guardpro.mobile.outbox'].sudo().push(
+                    user=managers,
+                    kind='complaint_received',
+                    title=_('New resident complaint: %s') % self.name,
+                    body=_('Resident: %s\nCategory: %s\nPriority: %s\nSubject: %s') % (
+                        self.resident_id.name if self.resident_id else '-',
+                        dict(self._fields['category'].selection).get(self.category) or '-',
+                        dict(self._fields['priority'].selection).get(self.priority) or '-',
+                        self.subject or '-',
+                    ),
+                    priority='high' if self.priority in ('high', 'urgent') else 'normal',
+                    res_model='resident.complaint',
+                    res_id=self.id,
+                    dedup_key='resident_complaint:%s' % self.id,
+                )
         except Exception as e:
             _logger.warning('Could not send complaint notification: %s', str(e))
+
+        # Also ping the assigned guard/supervisor if the complaint
+        # already has an owner (on re-submit, this covers that case).
+        if self.assigned_to_id:
+            self.env['guardpro.mobile.outbox'].sudo().push(
+                user=self.assigned_to_id,
+                kind='complaint_received',
+                title=_('Resident complaint assigned: %s') % self.name,
+                body=self.subject or self.description or '-',
+                priority='high',
+                res_model='resident.complaint',
+                res_id=self.id,
+                dedup_key='resident_complaint_assigned:%s:%s' % (self.id, self.assigned_to_id.id),
+            )
     
     def _notify_resident_status_change(self, new_status):
         """Notify resident of status change."""

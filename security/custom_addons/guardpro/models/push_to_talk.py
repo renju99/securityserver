@@ -264,7 +264,9 @@ class PushToTalkMessage(models.Model):
         'guard.profile',
         string='Sender Guard',
         required=True,
-        ondelete='cascade',
+        # Keep the voice-message history if the sender guard is later
+        # archived/deleted - block with restrict.
+        ondelete='restrict',
         index=True
     )
     

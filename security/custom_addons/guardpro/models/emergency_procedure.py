@@ -419,17 +419,70 @@ class EmergencyChecklistExecution(models.Model):
             )
     
     def _notify_authorities(self):
-        """Send notification to authorities."""
+        """Broadcast an urgent alert to every on-duty guard + supervisor
+        at this site so they are instantly aware a major procedure is
+        active. Real SMS/phone dialing to 997/998/999 still has to
+        happen out-of-band (no provider wired) but we log the config
+        so operators can see which numbers would have been called."""
         self.ensure_one()
-        
-        # This would integrate with SMS/email services
-        _logger.info(
-            'Emergency notification for procedure %s at site %s',
-            self.procedure_id.name,
-            self.site_id.name
+
+        procedure = self.procedure_id
+        site = self.site_id
+        _logger.warning(
+            'EMERGENCY PROCEDURE ACTIVE: %s at site %s (phone=%s, email=%s)',
+            procedure.name if procedure else '-',
+            site.name if site else '-',
+            getattr(procedure, 'notify_phone', '') or '-',
+            getattr(procedure, 'notify_email', '') or '-',
         )
-        
-        # TODO: Implement actual notification logic (SMS, email, etc.)
+
+        # Recipients: active guards attached to this site + site managers
+        # + any supervisor/manager user linked to the site.
+        recipients = self.env['res.users']
+        if site:
+            guards = self.env['guard.profile'].sudo().search([
+                ('assigned_site_ids', 'in', site.id),
+                ('active', '=', True),
+            ]) if 'assigned_site_ids' in self.env['guard.profile']._fields else self.env['guard.profile']
+            if not guards:
+                # Fallback for older schemas with singular ``site_id``.
+                if 'site_id' in self.env['guard.profile']._fields:
+                    guards = self.env['guard.profile'].sudo().search([
+                        ('site_id', '=', site.id),
+                        ('active', '=', True),
+                    ])
+            for guard in guards:
+                if guard.user_id:
+                    recipients |= guard.user_id
+            for attr in ('supervisor_id', 'site_manager_id',
+                         'emergency_contact_user_id'):
+                candidate = getattr(site, attr, False)
+                if candidate and candidate._name == 'res.users':
+                    recipients |= candidate
+
+        if not recipients:
+            return
+
+        notify_msg = getattr(procedure, 'notify_message', '') or ''
+        body_parts = [
+            _('Procedure: %s') % (procedure.name if procedure else '-'),
+            _('Site: %s') % (site.name if site else '-'),
+        ]
+        if notify_msg:
+            body_parts.append('')
+            body_parts.append(notify_msg[:1500])
+
+        self.env['guardpro.mobile.outbox'].sudo().push(
+            user=recipients,
+            kind='emergency_procedure',
+            title=_('EMERGENCY PROCEDURE ACTIVE'),
+            body='\n'.join(body_parts),
+            priority='urgent',
+            res_model='emergency.checklist.execution',
+            res_id=self.id,
+            dedup_key='emergency_procedure:%s' % self.id,
+            expires_in_hours=6,
+        )
 
 
 class EmergencyChecklistStepExecution(models.Model):

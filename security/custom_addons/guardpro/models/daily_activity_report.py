@@ -33,7 +33,8 @@ class DailyActivityReport(models.Model):
         required=True,
         tracking=True,
         index=True,
-        ondelete='cascade',
+        # DARs are legal-audit records - block site deletion while DARs exist.
+        ondelete='restrict',
         help='Site for this report'
     )
     report_date = fields.Date(
@@ -271,11 +272,73 @@ class DailyActivityReport(models.Model):
         return records
     
     def write(self, vals):
-        """Override write to optimize photos on update."""
+        """Override write to:
+
+        * optimize freshly attached photos, and
+        * push a mobile outbox ping to the submitting guard when the
+          report transitions to ``rejected`` (regardless of which code
+          path performed the rejection - wizard, automation, API).
+        """
+        # Snapshot pre-write state for change-detection. We only care
+        # when ``state`` is being written and is actually changing.
+        pre_states = {}
+        if 'state' in vals:
+            pre_states = {r.id: r.state for r in self}
+
         result = super().write(vals)
         if 'attachment_ids' in vals:
             self._optimize_attachments()
+
+        if 'state' in vals and vals.get('state') == 'rejected':
+            rejection_reason = self.env.context.get('dar_rejection_reason') or ''
+            for report in self:
+                if pre_states.get(report.id) == 'rejected':
+                    continue  # No actual transition; avoid duplicate push.
+                try:
+                    report._notify_dar_rejected(rejection_reason)
+                except Exception as e:  # pragma: no cover - defensive
+                    _logger.warning(
+                        'daily.activity.report: reject outbox push failed '
+                        'for %s: %s', report.name, e,
+                    )
+
         return result
+
+    def _notify_dar_rejected(self, rejection_reason=''):
+        """Drop a rejection card in the submitting guard's mobile outbox."""
+        self.ensure_one()
+        guard_user = self.submitted_by.user_id if self.submitted_by else False
+        if not guard_user:
+            _logger.info(
+                'daily.activity.report: DAR %s rejected but submitter has '
+                'no portal user; skipping mobile push.', self.name,
+            )
+            return
+
+        body = _('Your DAR for %(site)s on %(date)s was rejected.') % {
+            'site': self.site_id.name if self.site_id else '-',
+            'date': self.report_date,
+        }
+        if rejection_reason:
+            body += '\n' + _('Reason: %s') % rejection_reason
+        body += '\n' + _('Please review the feedback and resubmit.')
+
+        self.env['guardpro.mobile.outbox'].sudo().push(
+            user=guard_user,
+            kind='dar_rejected',
+            title=_('DAR rejected: %s') % (self.name or ''),
+            body=body,
+            priority='high',
+            res_model='daily.activity.report',
+            res_id=self.id,
+            deep_link='/guardpro/mobile/dar/%d' % self.id,
+            # One card per rejection event - if the report is re-rejected
+            # after being resubmitted, a fresh card is posted.
+            dedup_key='dar_rejected:%d:%s' % (
+                self.id, fields.Datetime.now().strftime('%Y%m%d%H%M%S'),
+            ),
+            expires_in_hours=168,
+        )
     
     def _optimize_attachments(self):
         """Optimize photo attachments for storage and PDF rendering."""
@@ -479,6 +542,24 @@ class DailyActivityReport(models.Model):
         if self.auto_send and self.client_email:
             self.action_send_to_client()
 
+        # Ping the guard who submitted this DAR.
+        submitter_user = self.submitted_by.user_id if self.submitted_by else False
+        if submitter_user:
+            self.env['guardpro.mobile.outbox'].sudo().push(
+                user=submitter_user,
+                kind='dar_decision',
+                title=_('DAR approved: %s') % (self.name or ''),
+                body=_('Your daily activity report for %s on %s was approved by %s.') % (
+                    self.site_id.name if self.site_id else '-',
+                    self.report_date,
+                    self.env.user.name,
+                ),
+                priority='normal',
+                res_model='daily.activity.report',
+                res_id=self.id,
+                dedup_key='dar_approved:%s' % self.id,
+            )
+
         _logger.info('DAR %s approved by %s', self.name, self.env.user.name)
         return True
 
@@ -527,6 +608,22 @@ class DailyActivityReport(models.Model):
             'sent_date': fields.Datetime.now(),
             'state': 'sent'
         })
+
+        submitter_user = self.submitted_by.user_id if self.submitted_by else False
+        if submitter_user:
+            self.env['guardpro.mobile.outbox'].sudo().push(
+                user=submitter_user,
+                kind='dar_decision',
+                title=_('DAR sent to client: %s') % (self.name or ''),
+                body=_('Your DAR for %s on %s was sent to the client.') % (
+                    self.site_id.name if self.site_id else '-',
+                    self.report_date,
+                ),
+                priority='low',
+                res_model='daily.activity.report',
+                res_id=self.id,
+                dedup_key='dar_sent:%s' % self.id,
+            )
 
         _logger.info('DAR %s sent to client %s', self.name, self.client_email)
 

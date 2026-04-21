@@ -83,7 +83,9 @@ class PackageManagement(models.Model):
         required=True,
         tracking=True,
         index=True,
-        ondelete='cascade',
+        # Package chain-of-custody is a physical-asset audit record.
+        # Block site deletion while packages exist.
+        ondelete='restrict',
         help='Delivery site'
     )
     building = fields.Char(
@@ -485,13 +487,76 @@ class PackageManagement(models.Model):
                     )
     
     def _send_arrival_email(self):
-        """Send email notification about package arrival."""
+        """Send notification about package arrival.
+
+        Email is disabled globally but we still push a mobile-outbox
+        ping so the resident sees it the moment they open the TWA
+        (or hear the native tray notification that the TWA emits from
+        the outbox poll). If the resident isn't on the portal, we no-op.
+        """
         self.ensure_one()
-        if self.recipient_email and self.state == 'received':
+        if self.state != 'received':
+            return
+        if not self.recipient_email:
+            return
+
+        recipient_user = self._resolve_recipient_user()
+        if not recipient_user:
             _logger.info(
-                'Email notifications are disabled: skipped package arrival email for package %s',
-                self.name
+                'package_management: no portal user resolved for recipient '
+                '%s on package %s - skipping mobile arrival push.',
+                self.recipient_email, self.name,
             )
+            return
+
+        try:
+            self.env['guardpro.mobile.outbox'].sudo().push(
+                user=recipient_user,
+                kind='package_ready',
+                title=_('Package arrived: %s') % (self.name or ''),
+                body=_('%(courier)s has dropped off a package for you at %(site)s. '
+                       'You will be notified again when it is ready to collect.') % {
+                    'courier': self.courier_company or _('A courier'),
+                    'site': self.site_id.name if self.site_id else _('reception'),
+                },
+                priority='normal',
+                res_model='package.management',
+                res_id=self.id,
+                deep_link='/guardpro/mobile/packages/%d' % self.id,
+                dedup_key='package_ready:%d:received' % self.id,
+                expires_in_hours=72,
+            )
+        except Exception as e:  # pragma: no cover - defensive
+            _logger.warning(
+                'package_management: arrival outbox push failed for '
+                'package %s: %s', self.name, e,
+            )
+
+    def _resolve_recipient_user(self):
+        """Resolve ``recipient_email`` -> ``res.users`` scoped to the
+        package's site. Mirrors ``visitor.management._resolve_host_user``."""
+        self.ensure_one()
+        Users = self.env['res.users']
+        email = (self.recipient_email or '').strip().lower()
+        if not email:
+            return Users
+
+        Resident = self.env.get('tenant.resident')
+        if Resident is not None and self.site_id:
+            candidates = Resident.sudo().search([
+                ('site_id', '=', self.site_id.id),
+                '|',
+                    ('user_id.login', '=ilike', email),
+                    ('partner_id.email', '=ilike', email),
+            ], limit=1)
+            if candidates and candidates.user_id:
+                return candidates.user_id
+
+        user = Users.sudo().search([
+            ('login', '=ilike', email),
+            ('active', '=', True),
+        ], limit=1)
+        return user or Users
 
     @api.depends('received_date', 'state')
     def _compute_days_in_storage(self):
@@ -531,14 +596,42 @@ class PackageManagement(models.Model):
         if not self.recipient_email and not self.recipient_phone:
             raise UserError(_('Please provide recipient email or phone number.'))
         
-        # Email notifications are disabled globally.
+        # Email notifications are disabled globally - we rely on the
+        # unified mobile outbox to actually reach the resident.
         notification_sent = False
-        if self.recipient_email:
+        recipient_user = self._resolve_recipient_user()
+        if recipient_user:
+            try:
+                self.env['guardpro.mobile.outbox'].sudo().push(
+                    user=recipient_user,
+                    kind='package_ready',
+                    title=_('Package ready for pickup: %s') % (self.name or ''),
+                    body=_('Your package is ready to collect from %(site)s '
+                           '(storage: %(loc)s). Unit %(unit)s.') % {
+                        'site': self.site_id.name if self.site_id else _('reception'),
+                        'loc': self.storage_location or _('front desk'),
+                        'unit': self.unit_number or '-',
+                    },
+                    priority='normal',
+                    res_model='package.management',
+                    res_id=self.id,
+                    deep_link='/guardpro/mobile/packages/%d' % self.id,
+                    dedup_key='package_ready:%d:notified' % self.id,
+                    expires_in_hours=168,  # one week
+                )
+                notification_sent = True
+            except Exception as e:  # pragma: no cover - defensive
+                _logger.warning(
+                    'package_management: pickup outbox push failed for '
+                    'package %s: %s', self.name, e,
+                )
+        else:
             _logger.info(
-                'Email notifications are disabled: skipped pickup notification email for package %s',
-                self.name
+                'package_management: no portal user resolved for recipient '
+                '%s on package %s - cannot push pickup notification.',
+                self.recipient_email, self.name,
             )
-        
+
         # Update package state
         self.write({
             'state': 'notified',
@@ -559,7 +652,7 @@ class PackageManagement(models.Model):
             _('Email'), self.recipient_email or _('Not provided'),
             _('Phone'), self.recipient_phone or _('Not provided'),
             _('Notification Date'), fields.Datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            _('Status'), _('Email sent successfully') if notification_sent else _('Email not sent (check logs)')
+            _('Status'), _('Mobile push sent') if notification_sent else _('No portal user - push skipped')
         )
         
         self.message_post(

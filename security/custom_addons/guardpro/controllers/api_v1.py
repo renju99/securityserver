@@ -162,7 +162,9 @@ class GuardProAPIv1(http.Controller):
             if not api_key:
                 return {'error': 'Insufficient permissions', 'status': 'error'}
             
-            data = request.jsonrequest
+            # Odoo 18: ``type='json'`` routes surface JSON-RPC ``params`` as
+            # kwargs. ``request.jsonrequest`` was removed in Odoo 17.
+            data = kwargs
             
             shift = request.env['guard.shift'].sudo().create({
                 'guard_id': data.get('guard_id'),
@@ -235,7 +237,7 @@ class GuardProAPIv1(http.Controller):
             return {'error': 'Invalid API key', 'status': 'error'}
         
         try:
-            data = request.jsonrequest
+            data = kwargs
             
             attendance = request.env['guard.attendance'].sudo().create({
                 'guard_id': data['guard_id'],
@@ -262,7 +264,7 @@ class GuardProAPIv1(http.Controller):
             return {'error': 'Invalid API key', 'status': 'error'}
         
         try:
-            data = request.jsonrequest
+            data = kwargs
             
             attendance = request.env['guard.attendance'].sudo().browse(data['attendance_id'])
             

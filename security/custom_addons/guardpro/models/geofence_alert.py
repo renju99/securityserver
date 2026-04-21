@@ -22,7 +22,9 @@ class GeofenceAlert(models.Model):
         'guard.profile',
         string='Guard',
         required=True,
-        ondelete='cascade',
+        # Geofence violations feed HR/disciplinary reviews; keep the
+        # alert history if the guard is later archived or re-created.
+        ondelete='restrict',
         index=True
     )
     site_id = fields.Many2one(
@@ -270,8 +272,8 @@ class GeofenceAlert(models.Model):
         
         # Planned activities for geofence alerts are intentionally disabled
         # to prevent activity backlog and assignment emails.
-        
-        # Keep lightweight in-app bus notification only (no email).
+
+        # Keep lightweight in-app bus notification for the webclient.
         self.env['bus.bus']._sendone(
             users,
             'simple_notification',
@@ -282,7 +284,39 @@ class GeofenceAlert(models.Model):
                 'warning': True
             }
         )
-        
+
+        # Push to the mobile outbox so managers/supervisors see it on
+        # their phones, AND the offending guard is told directly so they
+        # can self-correct (they may have wandered off the perimeter by
+        # accident).
+        recipients = users
+        if self.guard_id and self.guard_id.user_id:
+            recipients |= self.guard_id.user_id
+
+        guard_msg = message
+        if self.guard_id and self.guard_id.user_id:
+            if self.alert_type == 'outside_geofence':
+                guard_msg = _('You are outside the perimeter of %s. '
+                              'Return to your assigned area.') % (
+                    self.site_id.name if self.site_id else _('your assigned site')
+                )
+            elif self.alert_type == 'wrong_site':
+                guard_msg = _('You are at the wrong site. Expected: %s.') % (
+                    self.site_id.name if self.site_id else _('your assigned site')
+                )
+
+        self.env['guardpro.mobile.outbox'].sudo().push(
+            user=recipients,
+            kind='geofence_violation',
+            title=_('Geofence alert'),
+            body=guard_msg,
+            priority='high',
+            res_model='geofence.alert',
+            res_id=self.id,
+            dedup_key='geofence_alert:%s' % self.id,
+            expires_in_hours=4,
+        )
+
         self.notification_sent = True
-        _logger.info('Geofence alert notification sent for guard %s', self.guard_id.name)
+        _logger.info('Geofence alert notification pushed for guard %s', self.guard_id.name)
 

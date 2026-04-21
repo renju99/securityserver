@@ -49,6 +49,13 @@ class TwaLauncherActivity : AppCompatActivity() {
     private var patrolNativeHttpInFlight = false
     @Volatile
     private var lastNativePatrolReminderId: String? = null
+    @Volatile
+    private var taskAssignmentNativeHttpInFlight = false
+    @Volatile
+    private var lastNativeTaskAssignmentId: String? = null
+    @Volatile
+    private var outboxNativeHttpInFlight = false
+    private val outboxNativeIdsBuzzed = mutableSetOf<String>()
     private val pttNativeKickHandler = Handler(Looper.getMainLooper())
     private val pttNativeKickIntervalMs = 1000L
     private val pttNativeKickRunnable = object : Runnable {
@@ -78,7 +85,12 @@ class TwaLauncherActivity : AppCompatActivity() {
             try {
                 if (::webView.isInitialized) {
                     webView.evaluateJavascript(
-                        "(function(){ if(window.__gpPollEmergencyFromNative){ window.__gpPollEmergencyFromNative(); } if(window.__gpPollPatrolReminderFromNative){ window.__gpPollPatrolReminderFromNative(); } })();",
+                        "(function(){ " +
+                            "if(window.__gpPollEmergencyFromNative){ window.__gpPollEmergencyFromNative(); } " +
+                            "if(window.__gpPollPatrolReminderFromNative){ window.__gpPollPatrolReminderFromNative(); } " +
+                            "if(window.__gpPollTaskAssignmentFromNative){ window.__gpPollTaskAssignmentFromNative(); } " +
+                            "if(window.__gpPollOutboxFromNative){ window.__gpPollOutboxFromNative(); } " +
+                            "})();",
                         null
                     )
                 }
@@ -87,6 +99,8 @@ class TwaLauncherActivity : AppCompatActivity() {
             }
             pollEmergencyViaSessionCookie()
             pollPatrolReminderViaSessionCookie()
+            pollTaskAssignmentViaSessionCookie()
+            pollMobileOutboxViaSessionCookie()
             emergencyWebPollHandler.postDelayed(this, emergencyWebPollIntervalMs)
         }
     }
@@ -104,6 +118,58 @@ class TwaLauncherActivity : AppCompatActivity() {
 
     private fun pendingPatrolReminderUrl(): String =
         "${apiOrigin()}/guardpro/api/patrol_reminders/pending?_=${System.currentTimeMillis()}"
+
+    private fun pendingTaskAssignmentUrl(): String =
+        "${apiOrigin()}/guardpro/api/tasks/pending?_=${System.currentTimeMillis()}"
+
+    private fun pendingMobileOutboxUrl(): String =
+        "${apiOrigin()}/guardpro/api/mobile_outbox/pending?_=${System.currentTimeMillis()}"
+
+    /**
+     * Is the ``AndroidBridge`` JavaScript interface currently attached?
+     * ``addJavascriptInterface`` has no "is-attached" getter so we track
+     * the state ourselves alongside the attach/detach calls.
+     */
+    @Volatile
+    private var bridgeAttached: Boolean = false
+
+    /**
+     * Attach or detach the ``AndroidBridge`` JavaScript interface based
+     * on whether ``url`` lives on our own origin. Safe to call from any
+     * thread - Android's ``addJavascriptInterface`` / ``removeJavascriptInterface``
+     * are documented as marshalling to the WebView thread internally.
+     *
+     * We parse the URL with ``android.net.Uri`` and require an exact host
+     * match against [ALLOWED_HOST] on ``https``. Anything else (cross-origin
+     * redirect, about:blank, data: URLs, null/blank urls during init) is
+     * treated as "not our origin" and the bridge stays detached.
+     */
+    private fun ensureBridgeMatchesOrigin(url: String?) {
+        val uri = try {
+            if (url.isNullOrBlank()) null else Uri.parse(url)
+        } catch (_: Exception) {
+            null
+        }
+        val scheme = uri?.scheme?.lowercase()
+        val host = uri?.host?.lowercase()
+        val sameOrigin = scheme == "https" && host == ALLOWED_HOST
+
+        runOnUiThread {
+            try {
+                if (sameOrigin && !bridgeAttached) {
+                    webView.addJavascriptInterface(WebAppInterface(this), "AndroidBridge")
+                    bridgeAttached = true
+                    Log.d("WebViewBridge", "AndroidBridge attached for $host")
+                } else if (!sameOrigin && bridgeAttached) {
+                    webView.removeJavascriptInterface("AndroidBridge")
+                    bridgeAttached = false
+                    Log.w("WebViewBridge", "AndroidBridge detached - off-origin url=$url")
+                }
+            } catch (e: Exception) {
+                Log.e("WebViewBridge", "ensureBridgeMatchesOrigin failed: ${e.message}")
+            }
+        }
+    }
 
     private fun cookieHeaderForApi(): String? {
         try {
@@ -319,6 +385,198 @@ class TwaLauncherActivity : AppCompatActivity() {
         }.start()
     }
 
+    /**
+     * Native fallback poller for task assignment notifications.
+     * WebView JS timers are throttled to ~30s when the TWA is backgrounded,
+     * so we do the HTTP call from native code to keep the guard's phone
+     * ringing within a few seconds of a supervisor clicking "Assign".
+     */
+    private fun pollTaskAssignmentViaSessionCookie() {
+        if (taskAssignmentNativeHttpInFlight) return
+        taskAssignmentNativeHttpInFlight = true
+        Thread {
+            var conn: HttpURLConnection? = null
+            try {
+                val cookie = cookieHeaderForApi()
+                if (cookie.isNullOrBlank()) {
+                    Log.d(TAG_GUARDPRO_TASK, "No WebView session cookie yet; skip native poll")
+                    return@Thread
+                }
+                val url = URL(pendingTaskAssignmentUrl())
+                conn = (url.openConnection() as HttpURLConnection).apply {
+                    requestMethod = "GET"
+                    connectTimeout = 8000
+                    readTimeout = 8000
+                    instanceFollowRedirects = true
+                    setRequestProperty("Accept", "application/json")
+                    setRequestProperty("Cookie", cookie)
+                    setRequestProperty("Cache-Control", "no-cache")
+                }
+                val code = conn.responseCode
+                val body = try {
+                    conn.inputStream.bufferedReader().use { it.readText() }
+                } catch (_: Exception) {
+                    conn.errorStream?.bufferedReader()?.use { it.readText() }.orEmpty()
+                }
+                if (code !in 200..299) {
+                    Log.w(TAG_GUARDPRO_TASK, "pending HTTP $code body=${body.take(300)}")
+                    return@Thread
+                }
+                val obj = try {
+                    JSONObject(body)
+                } catch (e: Exception) {
+                    Log.w(TAG_GUARDPRO_TASK, "pending not JSON: ${e.message} body=${body.take(400)}")
+                    return@Thread
+                }
+                if (!obj.optBoolean("success", false)) {
+                    Log.w(TAG_GUARDPRO_TASK, "pending success=false: ${body.take(400)}")
+                    return@Thread
+                }
+                val rows = obj.optJSONArray("tasks")
+                val hasPending = rows != null && rows.length() > 0
+                if (hasPending) {
+                    val row = rows?.optJSONObject(0) ?: return@Thread
+                    val ackId = row.opt("ack_id")?.toString() ?: row.opt("id")?.toString()
+                    if (!ackId.isNullOrBlank() && ackId != lastNativeTaskAssignmentId) {
+                        val taskName = row.optString("name", "Task").take(200)
+                        val title = "New task assigned: $taskName"
+                        val parts = mutableListOf<String>()
+                        row.optString("site_name", "").takeIf { it.isNotBlank() }
+                            ?.let { parts.add("Site: $it") }
+                        row.optString("priority_label", "").takeIf { it.isNotBlank() }
+                            ?.let { parts.add("Priority: $it") }
+                        row.optString("assigned_by", "").takeIf { it.isNotBlank() }
+                            ?.let { parts.add("By: $it") }
+                        row.optString("due_date", "").takeIf { it.isNotBlank() }
+                            ?.let { parts.add("Due: $it") }
+                        val description = row.optString("description", "").take(500)
+                        if (description.isNotBlank()) {
+                            parts.add("")
+                            parts.add(description)
+                        }
+                        showTaskAssignmentNotification(
+                            title,
+                            parts.joinToString("\n").ifBlank { "You have a new task." }
+                        )
+                        lastNativeTaskAssignmentId = ackId
+                    }
+                } else {
+                    lastNativeTaskAssignmentId = null
+                    val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    nm.cancel(TASK_ASSIGNMENT_NOTIF_ID)
+                }
+            } catch (e: Exception) {
+                Log.w(TAG_GUARDPRO_TASK, "native poll error: ${e.message}", e)
+            } finally {
+                conn?.disconnect()
+                taskAssignmentNativeHttpInFlight = false
+            }
+        }.start()
+    }
+
+    /**
+     * Native fallback poller for the unified mobile outbox.
+     *
+     * Fires an Android tray notification for any *new* row (not seen in
+     * this session) whose priority is high/urgent. Normal/low items are
+     * handled by the in-WebView stacked banner so we don't spam the
+     * system tray with routine updates.
+     */
+    private fun pollMobileOutboxViaSessionCookie() {
+        if (outboxNativeHttpInFlight) return
+        outboxNativeHttpInFlight = true
+        Thread {
+            var conn: HttpURLConnection? = null
+            try {
+                val cookie = cookieHeaderForApi()
+                if (cookie.isNullOrBlank()) {
+                    return@Thread
+                }
+                val url = URL(pendingMobileOutboxUrl())
+                conn = (url.openConnection() as HttpURLConnection).apply {
+                    requestMethod = "GET"
+                    connectTimeout = 8000
+                    readTimeout = 8000
+                    instanceFollowRedirects = true
+                    setRequestProperty("Accept", "application/json")
+                    setRequestProperty("Cookie", cookie)
+                    setRequestProperty("Cache-Control", "no-cache")
+                }
+                val code = conn.responseCode
+                val body = try {
+                    conn.inputStream.bufferedReader().use { it.readText() }
+                } catch (_: Exception) {
+                    conn.errorStream?.bufferedReader()?.use { it.readText() }.orEmpty()
+                }
+                if (code !in 200..299) {
+                    Log.w(TAG_GUARDPRO_OUTBOX, "pending HTTP $code body=${body.take(300)}")
+                    return@Thread
+                }
+                val obj = try { JSONObject(body) } catch (_: Exception) { return@Thread }
+                if (!obj.optBoolean("success", false)) return@Thread
+                val rows = obj.optJSONArray("notifications") ?: return@Thread
+
+                val currentIds = mutableSetOf<String>()
+                var fired = 0
+                for (i in 0 until rows.length()) {
+                    val row = rows.optJSONObject(i) ?: continue
+                    val rowId = row.opt("id")?.toString() ?: continue
+                    currentIds.add(rowId)
+
+                    val priority = row.optString("priority", "normal")
+                    val weight = row.optInt("priority_weight", 1)
+                    // Only buzz for high/urgent OR on first-ever arrival.
+                    val shouldBuzz = weight >= 2 && !outboxNativeIdsBuzzed.contains(rowId)
+                    if (shouldBuzz) {
+                        val title = row.optString("title", "Notification").take(200)
+                        val message = row.optString("body", "").take(4000)
+                        showMobileOutboxNotification(
+                            notifId = outboxNotifIdFor(rowId),
+                            title = title,
+                            message = message.ifBlank { row.optString("kind", "") },
+                            priority = priority,
+                        )
+                        outboxNativeIdsBuzzed.add(rowId)
+                        fired++
+                    }
+                }
+                // Drop ids that are no longer pending so re-assignments
+                // can re-fire later.
+                outboxNativeIdsBuzzed.retainAll(currentIds)
+                if (currentIds.isEmpty()) {
+                    // Nothing pending: clear any lingering group tray
+                    // notifications we posted from native.
+                    cancelMobileOutboxGroup()
+                }
+                if (fired > 0) {
+                    Log.i(TAG_GUARDPRO_OUTBOX, "native fired=$fired tray notifications")
+                }
+            } catch (e: Exception) {
+                Log.w(TAG_GUARDPRO_OUTBOX, "native poll error: ${e.message}", e)
+            } finally {
+                conn?.disconnect()
+                outboxNativeHttpInFlight = false
+            }
+        }.start()
+    }
+
+    /** Stable integer notif id derived from the outbox row id. */
+    private fun outboxNotifIdFor(rowId: String): Int {
+        // Keep within int range; use modular arithmetic to avoid clashes
+        // with our other notification ids (94002-94005).
+        val n = rowId.hashCode()
+        return MOBILE_OUTBOX_NOTIF_BASE + (Math.abs(n) % MOBILE_OUTBOX_NOTIF_RANGE)
+    }
+
+    private fun cancelMobileOutboxGroup() {
+        try {
+            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            for (bucket in 0 until MOBILE_OUTBOX_NOTIF_RANGE) {
+                nm.cancel(MOBILE_OUTBOX_NOTIF_BASE + bucket)
+            }
+        } catch (_: Exception) { /* ignore */ }
+    }
+
     private fun enableNfcForegroundDispatch() {
         val intent = Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
         val pendingIntent = android.app.PendingIntent.getActivity(this, 0, intent, android.app.PendingIntent.FLAG_MUTABLE)
@@ -395,19 +653,42 @@ class TwaLauncherActivity : AppCompatActivity() {
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
         settings.databaseEnabled = true
-        settings.allowFileAccess = true
-        settings.allowContentAccess = true
+        // SECURITY: block the WebView from loading ``file://`` and
+        // ``content://`` URLs. The app only ever loads
+        // https://security.berkeleyuae.com, so there is no legitimate
+        // reason to touch the local filesystem - leaving these enabled
+        // is a classic chain in file-based XSS → session-token
+        // exfiltration exploits.
+        settings.allowFileAccess = false
+        settings.allowContentAccess = false
+        // And explicitly forbid file:// JS from reaching back into
+        // file:// assets or across origins. Deprecated defaults on
+        // newer Android already match, but belt and suspenders.
+        settings.allowFileAccessFromFileURLs = false
+        settings.allowUniversalAccessFromFileURLs = false
         settings.loadWithOverviewMode = true
         settings.useWideViewPort = true
         settings.javaScriptCanOpenWindowsAutomatically = true
         settings.setSupportMultipleWindows(false) // Changed to false for better stability
-        settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+        // Block mixed-content: the Odoo backend is HTTPS-only, so any
+        // mixed subresource would be a misconfiguration worth failing
+        // loudly on rather than silently proxying.
+        settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
         
         settings.cacheMode = WebSettings.LOAD_DEFAULT
         settings.userAgentString = settings.userAgentString + " Berkeley-GuardPro-App-v1.0"
         
-        // Add the Native-to-JS Bridge
-        webView.addJavascriptInterface(WebAppInterface(this), "AndroidBridge")
+        // Native-to-JS bridge.
+        //
+        // SECURITY: ``addJavascriptInterface`` exposes the bridge to
+        // *every* frame the WebView renders, so we only attach it once
+        // the WebView is parked on our own origin. ``onPageStarted`` /
+        // ``onPageFinished`` on the WebViewClient below re-evaluates the
+        // origin on each navigation and reattaches/detaches the bridge
+        // accordingly. Combined with the strict ``shouldOverrideUrlLoading``
+        // allowlist, this means a cross-origin page or iframe can never
+        // see ``window.AndroidBridge``.
+        ensureBridgeMatchesOrigin(START_URL)
 
         webView.webChromeClient = object : WebChromeClient() {
             override fun onGeolocationPermissionsShowPrompt(origin: String, callback: GeolocationPermissions.Callback) {
@@ -455,9 +736,24 @@ class TwaLauncherActivity : AppCompatActivity() {
         }
 
         webView.webViewClient = object : WebViewClient() {
+            override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+                // Re-evaluate bridge exposure on every navigation - before
+                // any JS on the new page runs. Detaches the bridge if we
+                // navigated off our origin (shouldn't happen because
+                // shouldOverrideUrlLoading catches that, but defense in
+                // depth).
+                ensureBridgeMatchesOrigin(url)
+            }
+
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 Log.d("WebView", "Page finished loading: $url")
+
+                // Re-assert bridge state once the page finishes loading;
+                // this is a belt-and-suspenders pass in case a redirect
+                // happened between onPageStarted and now.
+                ensureBridgeMatchesOrigin(url)
 
                 // Keep the native LocationService authenticated with the
                 // freshest Odoo session cookie.
@@ -545,23 +841,40 @@ class TwaLauncherActivity : AppCompatActivity() {
             }
 
             override fun shouldOverrideUrlLoading(view: WebView?, request: android.webkit.WebResourceRequest?): Boolean {
-                val url = request?.url?.toString()
-                if (url != null) {
-                    val isInternal = url.contains(ALLOWED_HOST) || 
-                                   url.contains("/web/login") || 
-                                   url.contains("/web/session") ||
-                                   url.contains("/guardpro/mobile")
-                    
-                    if (isInternal) {
-                        return false // Load in WebView
-                    }
+                // Security: the earlier implementation used
+                // ``url.contains(ALLOWED_HOST)`` / ``url.contains("/guardpro/mobile")``,
+                // which happily accepts ``https://evil.com/?x=security.berkeleyuae.com``
+                // and ``https://evil.com/guardpro/mobile`` - i.e. a page on a
+                // hostile origin could render inside the WebView with access
+                // to the ``AndroidBridge`` JS-interface. We now parse the URL
+                // and require an exact host match. Anything else is kicked
+                // out to the user's default browser.
+                val uri = request?.url ?: return false
+                val scheme = uri.scheme?.lowercase()
+                val host = uri.host?.lowercase()
+
+                if (scheme == "https" && host == ALLOWED_HOST) {
+                    // Same-origin navigation - render inside the TWA.
+                    return false
                 }
-                // Open external links in browser
+
+                // Well-known schemes that the OS should handle directly
+                // (tel:, mailto:, sms:, geo:, intent:, etc.).
+                if (scheme != null && scheme !in setOf("http", "https")) {
+                    try {
+                        startActivity(Intent(Intent.ACTION_VIEW, uri))
+                    } catch (e: Exception) {
+                        Log.e("WebView", "Error opening scheme $scheme: ${e.message}")
+                    }
+                    return true
+                }
+
+                // Cross-origin HTTP/HTTPS: hand to external browser so the
+                // bridge is never exposed to a third-party page.
                 try {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                    startActivity(intent)
+                    startActivity(Intent(Intent.ACTION_VIEW, uri))
                 } catch (e: Exception) {
-                    Log.e("WebView", "Error opening external URL: ${e.message}")
+                    Log.e("WebView", "Error opening external URL ${uri}: ${e.message}")
                 }
                 return true
             }
@@ -663,6 +976,55 @@ class TwaLauncherActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 Log.e("AndroidBridge", "postPushToTalkNotification failed: ${e.message}", e)
             }
+        }
+
+        @JavascriptInterface
+        fun postTaskAssignmentNotification(jsonPayload: String) {
+            val activity = this@TwaLauncherActivity
+            try {
+                val obj = JSONObject(jsonPayload)
+                val title = obj.optString("title", "New task assigned").take(200)
+                val message = obj.optString("message", "").take(4000)
+                activity.showTaskAssignmentNotification(title, message)
+            } catch (e: Exception) {
+                Log.e("AndroidBridge", "postTaskAssignmentNotification failed: ${e.message}", e)
+            }
+        }
+
+        @JavascriptInterface
+        fun dismissTaskAssignmentNotification() {
+            val activity = this@TwaLauncherActivity
+            activity.runOnUiThread {
+                val nm =
+                    activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                nm.cancel(TASK_ASSIGNMENT_NOTIF_ID)
+            }
+        }
+
+        @JavascriptInterface
+        fun postMobileOutboxNotification(jsonPayload: String) {
+            val activity = this@TwaLauncherActivity
+            try {
+                val obj = JSONObject(jsonPayload)
+                val rowId = obj.opt("id")?.toString() ?: return
+                val title = obj.optString("title", "Notification").take(200)
+                val message = obj.optString("message", "").take(4000)
+                val priority = obj.optString("priority", "normal")
+                activity.showMobileOutboxNotification(
+                    notifId = activity.outboxNotifIdFor(rowId),
+                    title = title,
+                    message = message,
+                    priority = priority,
+                )
+            } catch (e: Exception) {
+                Log.e("AndroidBridge", "postMobileOutboxNotification failed: ${e.message}", e)
+            }
+        }
+
+        @JavascriptInterface
+        fun dismissMobileOutboxNotifications() {
+            val activity = this@TwaLauncherActivity
+            activity.runOnUiThread { activity.cancelMobileOutboxGroup() }
         }
     }
 
@@ -777,6 +1139,138 @@ class TwaLauncherActivity : AppCompatActivity() {
                 .setContentIntent(pi)
                 .build()
             nm.notify(PATROL_REMINDER_NOTIF_ID, notif)
+        }
+    }
+
+    private fun ensureTaskAssignmentNotificationChannel(nm: NotificationManager) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        if (nm.getNotificationChannel(TASK_ASSIGNMENT_CHANNEL_ID) != null) return
+        val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        val attrs = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+        val ch = NotificationChannel(
+            TASK_ASSIGNMENT_CHANNEL_ID,
+            "Task assignments",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "New tasks assigned by your supervisor."
+            enableVibration(true)
+            enableLights(true)
+            setSound(soundUri, attrs)
+            lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+        }
+        nm.createNotificationChannel(ch)
+    }
+
+    private fun showTaskAssignmentNotification(title: String, message: String) {
+        runOnUiThread {
+            if (!canPostNotifications()) {
+                Log.w("AndroidBridge", "POST_NOTIFICATIONS not granted; task assignment tray banner skipped")
+                return@runOnUiThread
+            }
+            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            ensureTaskAssignmentNotificationChannel(nm)
+            val launchIntent = Intent(this, TwaLauncherActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            val pi = PendingIntent.getActivity(
+                this,
+                0,
+                launchIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            val notif = NotificationCompat.Builder(this, TASK_ASSIGNMENT_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_stat_emergency)
+                .setContentTitle(title)
+                .setContentText(message.take(500))
+                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setAutoCancel(true)
+                .setContentIntent(pi)
+                .build()
+            nm.notify(TASK_ASSIGNMENT_NOTIF_ID, notif)
+        }
+    }
+
+    private fun ensureMobileOutboxNotificationChannels(nm: NotificationManager) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        if (nm.getNotificationChannel(MOBILE_OUTBOX_HIGH_CHANNEL_ID) == null) {
+            val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            val attrs = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
+            val highCh = NotificationChannel(
+                MOBILE_OUTBOX_HIGH_CHANNEL_ID,
+                "Important alerts",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "High/urgent operational alerts (incidents, credentials, shifts...)."
+                enableVibration(true)
+                enableLights(true)
+                setSound(soundUri, attrs)
+                lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+            }
+            nm.createNotificationChannel(highCh)
+        }
+        if (nm.getNotificationChannel(MOBILE_OUTBOX_DEFAULT_CHANNEL_ID) == null) {
+            val defaultCh = NotificationChannel(
+                MOBILE_OUTBOX_DEFAULT_CHANNEL_ID,
+                "General updates",
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = "Routine app updates (messages, feedback, DAR decisions...)."
+                enableVibration(false)
+                lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+            }
+            nm.createNotificationChannel(defaultCh)
+        }
+    }
+
+    private fun showMobileOutboxNotification(
+        notifId: Int,
+        title: String,
+        message: String,
+        priority: String,
+    ) {
+        runOnUiThread {
+            if (!canPostNotifications()) {
+                Log.w("AndroidBridge", "POST_NOTIFICATIONS not granted; mobile outbox skipped")
+                return@runOnUiThread
+            }
+            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            ensureMobileOutboxNotificationChannels(nm)
+            val launchIntent = Intent(this, TwaLauncherActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            val pi = PendingIntent.getActivity(
+                this,
+                notifId,
+                launchIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            val (channel, ncompatPriority) = when (priority) {
+                "urgent", "high" -> MOBILE_OUTBOX_HIGH_CHANNEL_ID to NotificationCompat.PRIORITY_HIGH
+                "low"            -> MOBILE_OUTBOX_DEFAULT_CHANNEL_ID to NotificationCompat.PRIORITY_LOW
+                else             -> MOBILE_OUTBOX_DEFAULT_CHANNEL_ID to NotificationCompat.PRIORITY_DEFAULT
+            }
+            val notif = NotificationCompat.Builder(this, channel)
+                .setSmallIcon(R.drawable.ic_stat_emergency)
+                .setContentTitle(title)
+                .setContentText(message.take(500))
+                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+                .setPriority(ncompatPriority)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setAutoCancel(true)
+                .setContentIntent(pi)
+                .setGroup(MOBILE_OUTBOX_NOTIF_GROUP)
+                .build()
+            nm.notify(notifId, notif)
         }
     }
 
@@ -1063,12 +1557,27 @@ class TwaLauncherActivity : AppCompatActivity() {
         private const val TAG_GUARDPRO_EM = "GuardProEmergency"
         private const val TAG_GUARDPRO_PATROL = "GuardProPatrol"
         private const val TAG_GUARDPRO_PTT = "GuardProPTT"
+        private const val TAG_GUARDPRO_TASK = "GuardProTask"
+        private const val TAG_GUARDPRO_OUTBOX = "GuardProOutbox"
         private const val EMERGENCY_NOTIF_ID = 94002
         private const val PATROL_REMINDER_NOTIF_ID = 94003
         private const val PUSH_TO_TALK_NOTIF_ID = 94004
+        private const val TASK_ASSIGNMENT_NOTIF_ID = 94005
+
+        // Reserve a block of notification ids for the outbox. Each row
+        // gets a stable id = BASE + (hash(row_id) % RANGE). 1000 buckets
+        // is plenty; collisions just mean one notification replaces
+        // another one from the same bucket, which is acceptable.
+        private const val MOBILE_OUTBOX_NOTIF_BASE = 95000
+        private const val MOBILE_OUTBOX_NOTIF_RANGE = 1000
+        private const val MOBILE_OUTBOX_NOTIF_GROUP = "guardpro_outbox_group"
+
         /** New id so devices pick up IMPORTANCE_HIGH (old channel may have been muted/low). */
         private const val EMERGENCY_CHANNEL_ID = "guardpro_emergency_alerts"
         private const val PATROL_REMINDER_CHANNEL_ID = "guardpro_patrol_reminders"
         private const val PUSH_TO_TALK_CHANNEL_ID = "guardpro_push_to_talk"
+        private const val TASK_ASSIGNMENT_CHANNEL_ID = "guardpro_task_assignments"
+        private const val MOBILE_OUTBOX_HIGH_CHANNEL_ID = "guardpro_outbox_high"
+        private const val MOBILE_OUTBOX_DEFAULT_CHANNEL_ID = "guardpro_outbox_default"
     }
 }

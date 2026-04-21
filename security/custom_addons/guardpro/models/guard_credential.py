@@ -18,7 +18,10 @@ class GuardCredential(models.Model):
         'guard.profile',
         string='Guard',
         required=True,
-        ondelete='cascade',
+        # Credentials are compliance artefacts (licences, clearances,
+        # medicals). Force the operator to archive the guard explicitly
+        # rather than vaporise their credential history via a cascade.
+        ondelete='restrict',
         tracking=True
     )
     
@@ -276,10 +279,12 @@ class GuardCredential(models.Model):
             ('expiry_date', '!=', False)
         ])
         
+        Outbox = self.env['guardpro.mobile.outbox'].sudo()
         for credential in credentials:
             days_until = (credential.expiry_date - today).days
             renewal_days = credential.credential_type_id.renewal_notice_days or 30
-            
+            guard_user = credential.guard_id.user_id if credential.guard_id else False
+
             if days_until <= 0:
                 # Expired
                 credential.state = 'expired'
@@ -287,7 +292,23 @@ class GuardCredential(models.Model):
                     body=_('Credential has expired!'),
                     subtype_xmlid='mail.mt_comment'
                 )
-                # Planned activity intentionally disabled.
+                if guard_user:
+                    Outbox.push(
+                        user=guard_user,
+                        kind='credential_expiring',
+                        title=_('Credential expired: %s') % (
+                            credential.credential_type_id.name or ''
+                        ),
+                        body=_('Your "%s" credential expired on %s. '
+                               'Submit a renewal to remain on-duty.') % (
+                            credential.credential_type_id.name or '-',
+                            credential.expiry_date,
+                        ),
+                        priority='urgent',
+                        res_model='guard.credential',
+                        res_id=credential.id,
+                        dedup_key='credential_expired:%s' % credential.id,
+                    )
             elif days_until <= renewal_days:
                 # Expiring soon
                 if credential.state != 'expiring_soon':
@@ -296,8 +317,31 @@ class GuardCredential(models.Model):
                         body=_('Credential expiring in %d days') % days_until,
                         subtype_xmlid='mail.mt_comment'
                     )
-                    # Planned activity intentionally disabled.
-        
+                if guard_user:
+                    # Re-arm the ping at each of the well-known cliffs
+                    # (30/14/7/3/1 days) so guards get a fresh
+                    # notification as the deadline tightens.
+                    cliffs = [days for days in (30, 14, 7, 3, 1)
+                              if days <= renewal_days]
+                    for cliff in cliffs:
+                        if days_until == cliff:
+                            Outbox.push(
+                                user=guard_user,
+                                kind='credential_expiring',
+                                title=_('Credential expiring in %d day(s)') % days_until,
+                                body=_('Your "%s" credential expires on %s.') % (
+                                    credential.credential_type_id.name or '-',
+                                    credential.expiry_date,
+                                ),
+                                priority='high' if days_until <= 7 else 'normal',
+                                res_model='guard.credential',
+                                res_id=credential.id,
+                                dedup_key='credential_expiring:%s:%s' % (
+                                    credential.id, days_until,
+                                ),
+                            )
+                            break
+
         return True
     
     @api.model
