@@ -37,23 +37,19 @@
             <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
         </config-file>
         
-        <!-- Android 13+ notification permission -->
         <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
             <application android:usesCleartextTraffic="true" />
         </edit-config>
-        
+
         <preference name="android-minSdkVersion" value="24" />
         <preference name="android-targetSdkVersion" value="35" />
         <preference name="android-compileSdkVersion" value="35" />
     </platform>
-    
+
     <preference name="Orientation" value="portrait" />
     <preference name="DisallowOverscroll" value="true" />
     <preference name="BackgroundColor" value="#ffffff" />
     <preference name="SplashScreenDelay" value="0" />
     <preference name="AutoHideSplashScreen" value="true" />
     <preference name="ShowSplashScreenSpinner" value="false" />
-    
-    <!-- Background Geolocation Plugin Config -->
-    <preference name="BackgroundGeolocationFacade" value="@mauron85/cordova-plugin-background-geolocation" />
 </widget>

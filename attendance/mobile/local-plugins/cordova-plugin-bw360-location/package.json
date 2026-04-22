@@ -1,0 +1,22 @@
+{
+  "name": "cordova-plugin-bw360-location",
+  "version": "1.0.0",
+  "description": "Berkeley Workforce 360 foreground-service background location plugin",
+  "main": "www/BW360Location.js",
+  "cordova": {
+    "id": "cordova-plugin-bw360-location",
+    "platforms": [
+      "android"
+    ]
+  },
+  "keywords": [
+    "cordova",
+    "ecosystem:cordova",
+    "cordova-android",
+    "location",
+    "gps",
+    "background"
+  ],
+  "author": "Berkeley UAE",
+  "license": "Apache-2.0"
+}
