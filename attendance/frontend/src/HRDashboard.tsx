@@ -20,6 +20,7 @@ import { LoadingSpinner, TableSkeleton } from './components/LoadingSpinner';
 import AnalyticsCard from './components/AnalyticsCard';
 import FilterPanel from './components/FilterPanel';
 import ReportsView from './components/ReportsView';
+import ErrorBoundary from './components/ErrorBoundary';
 import GeofenceManager from './components/GeofenceManager';
 import RouteTrackingView, { RoutePolyline } from './components/RouteTrackingView';
 import IdleReportingView from './components/IdleReportingView';
@@ -621,6 +622,7 @@ const HRDashboard = () => {
             departmentName: currentUser.departmentName !== undefined ? currentUser.departmentName : currentUser.department_name,
             firstName: currentUser.firstName !== undefined ? currentUser.firstName : currentUser.first_name,
             lastName: currentUser.lastName !== undefined ? currentUser.lastName : currentUser.last_name,
+            shiftId: currentUser.shiftId !== undefined ? currentUser.shiftId : currentUser.shift_id,
             photoHelper: currentUser.photoHelper
         };
 
@@ -1003,7 +1005,8 @@ const HRDashboard = () => {
                 </header>
 
                 <div className="dashboard-layout">
-                    {activeTab === 'map' ? (
+                    <ErrorBoundary label={activeTab}>
+                        {activeTab === 'map' ? (
                         <MapDashboard />
                     ) : activeTab === 'staff' ? (
                         <StaffManager
@@ -1297,7 +1300,8 @@ const HRDashboard = () => {
                             onDelete={handleDeleteBiometricDevice}
                         />
                     ) : null
-                    }
+                        }
+                    </ErrorBoundary>
                 </div >
 
                 {

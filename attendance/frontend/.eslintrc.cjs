@@ -11,6 +11,20 @@ module.exports = {
   parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
   settings: { react: { version: '18.2' } },
   plugins: ['react-refresh'],
+  overrides: [
+    {
+      files: ['**/*.jsx'],
+      rules: {
+        'no-restricted-syntax': [
+          'error',
+          {
+            selector: 'Program',
+            message: 'Use .tsx files for React components; .jsx files are not allowed.',
+          },
+        ],
+      },
+    },
+  ],
   rules: {
     'react-refresh/only-export-components': [
       'warn',

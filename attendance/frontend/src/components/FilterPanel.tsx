@@ -81,22 +81,21 @@ const FilterPanel = () => {
     // Combine all site options including Global
     const allSiteOptions = [
         { id: -1, name: 'Global / Unassigned' },
-        ...sites
+        ...(Array.isArray(sites) ? sites : [])
     ];
 
-    // Filter sites based on search term
+    const safeLower = (v: unknown) => (typeof v === 'string' ? v.toLowerCase() : '');
+
     const filteredSites = allSiteOptions.filter(site =>
-        site.name.toLowerCase().includes(siteSearchTerm.toLowerCase())
+        safeLower(site?.name).includes(safeLower(siteSearchTerm))
     );
 
-    // Filter roles based on search term
-    const filteredRoles = roles.filter(role =>
-        role.name.toLowerCase().includes(roleSearchTerm.toLowerCase())
+    const filteredRoles = (Array.isArray(roles) ? roles : []).filter(role =>
+        safeLower(role?.name).includes(safeLower(roleSearchTerm))
     );
 
-    // Filter shifts based on search term
-    const filteredShifts = shifts.filter(shift =>
-        shift.name.toLowerCase().includes(shiftSearchTerm.toLowerCase())
+    const filteredShifts = (Array.isArray(shifts) ? shifts : []).filter(shift =>
+        safeLower(shift?.name).includes(safeLower(shiftSearchTerm))
     );
 
     return (
