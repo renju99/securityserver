@@ -16,6 +16,7 @@
     "@vis.gl/react-google-maps": "^1.7.1",
     "jspdf": "^4.1.0",
     "jspdf-autotable": "^5.0.7",
+    "luxon": "^3.7.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.30.3",

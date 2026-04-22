@@ -13,6 +13,7 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const authRoutes = require('./routes/auth'); // Added this line
+const { APP_TIMEZONE, isDuringShift } = require('./utils/time');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 
@@ -273,7 +274,7 @@ cron.schedule('0 2 * * *', async () => {
         console.error('[CLEANUP] Daily cleanup error:', err.message);
     }
 }, {
-    timezone: 'Asia/Dubai'  // UTC+4 — adjust if needed
+    timezone: APP_TIMEZONE
 });
 
 /**
@@ -292,10 +293,10 @@ cron.schedule('0 3 * * 0', async () => {
         console.error('[CLEANUP] VACUUM error:', err.message);
     }
 }, {
-    timezone: 'Asia/Dubai'
+    timezone: APP_TIMEZONE
 });
 
-console.log(`[CLEANUP] Scheduled: daily pruning at 02:00, weekly VACUUM at Sunday 03:00 (Asia/Dubai). Retention: ${DATA_RETENTION_DAYS} days.`);
+console.log(`[CLEANUP] Scheduled: daily pruning at 02:00, weekly VACUUM at Sunday 03:00 (${APP_TIMEZONE}). Retention: ${DATA_RETENTION_DAYS} days.`);
 
 // ── Auto Check-Out Cron Job ─────────────────────────────────────────────────
 //
@@ -404,7 +405,7 @@ const runAutoCheckout = async () => {
 };
 
 // Run every 30 minutes
-cron.schedule('*/30 * * * *', runAutoCheckout, { timezone: 'Asia/Dubai' });
+cron.schedule('*/30 * * * *', runAutoCheckout, { timezone: APP_TIMEZONE });
 console.log(`[AUTO-CHECKOUT] Scheduled every 30 min. Grace: ${AUTO_CHECKOUT_GRACE_HOURS}h after shift end. No-shift limit: ${AUTO_CHECKOUT_NO_SHIFT_HOURS}h.`);
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -460,35 +461,6 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 
     const d = R * c; // in metres
     return d;
-};
-
-// Helper: Check if current time is within shift timings (Asia/Dubai)
-const isDuringShift = (startTime, endTime) => {
-    if (!startTime || !endTime) return true;
-
-    try {
-        const dubaiStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Dubai' });
-        const dubaiNow = new Date(dubaiStr);
-        const currentSeconds = dubaiNow.getHours() * 3600 + dubaiNow.getMinutes() * 60 + dubaiNow.getSeconds();
-
-        const toSeconds = (t) => {
-            const [h, m, s] = t.split(':').map(Number);
-            return h * 3600 + (m || 0) * 60 + (s || 0);
-        };
-
-        const start = toSeconds(startTime);
-        const end = toSeconds(endTime);
-
-        if (start <= end) {
-            return currentSeconds >= start && currentSeconds <= end;
-        } else {
-            // crosses midnight
-            return currentSeconds >= start || currentSeconds <= end;
-        }
-    } catch (e) {
-        console.error('Shift check error:', e);
-        return true;
-    }
 };
 
 // Ray-casting algorithm to check if a point is inside a polygon
@@ -618,22 +590,11 @@ io.on('connection', (socket) => {
                 );
 
                 // 5. GEO FENCING CHECK
+                // Only raise geo-fence alerts while the staff is on their assigned shift window.
+                // If no shift is assigned, do not raise alerts — alerts must be tied to shift timings.
                 if (siteId && geofenceEnabled !== false) {
-                    // If shift assigned, only alert during shift window; otherwise alert anytime
-                    let checkGeo = true;
-                    if (startTime && endTime) {
-                        const now = new Date();
-                        const currentTimeVal = now.getHours() * 60 + now.getMinutes();
-                        const [startH, startM] = startTime.split(':').map(Number);
-                        const [endH, endM] = endTime.split(':').map(Number);
-                        const startTimeVal = startH * 60 + startM;
-                        const endTimeVal = endH * 60 + endM;
-                        if (endTimeVal < startTimeVal) {
-                            checkGeo = (currentTimeVal >= startTimeVal) || (currentTimeVal <= endTimeVal);
-                        } else {
-                            checkGeo = (currentTimeVal >= startTimeVal) && (currentTimeVal <= endTimeVal);
-                        }
-                    }
+                    const hasShift = !!(startTime && endTime);
+                    const checkGeo = hasShift && isDuringShift(startTime, endTime);
 
                     if (checkGeo) {
                         let isOutside = false;

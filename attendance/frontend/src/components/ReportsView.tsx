@@ -5,18 +5,17 @@ import FilterPanel from './FilterPanel';
 import { LoadingSpinner } from './LoadingSpinner';
 import { exportToCSV } from '../utils/exportUtils';
 import { useAuthStore } from '../store/useAuthStore';
-import { useDataStore } from '../store/useDataStore';
 import { useUIStore } from '../store/useUIStore';
+import { parseDateInput, toDateInputValue, toLocalDateKey } from '../utils/time';
 
 const ReportsView = () => {
     const { user } = useAuthStore();
-    const { sites, roles } = useDataStore();
     const { showToast } = useUIStore();
 
     // Default to current month
     const now = new Date();
-    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+    const firstDay = toDateInputValue(new Date(now.getFullYear(), now.getMonth(), 1));
+    const lastDay = toDateInputValue(new Date(now.getFullYear(), now.getMonth() + 1, 0));
 
     const [startDate, setStartDate] = useState(firstDay);
     const [endDate, setEndDate] = useState(lastDay);
@@ -47,11 +46,23 @@ const ReportsView = () => {
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });
 
-            if (!res.ok) throw new Error('Failed to fetch report');
+            if (!res.ok) {
+                let detail = '';
+                try { detail = (await res.json())?.error || ''; } catch { /* ignore */ }
+                throw new Error(`Failed to fetch report (${res.status}) ${detail}`.trim());
+            }
 
             const data = await res.json();
-            setReportData(data);
-            showToast('Report generated successfully', 'success');
+            const safe = {
+                employees: Array.isArray(data?.employees) ? data.employees : [],
+                attendance: data?.attendance && typeof data.attendance === 'object' ? data.attendance : {}
+            };
+            setReportData(safe);
+            if (safe.employees.length === 0) {
+                showToast('No employees match these filters', 'info');
+            } else {
+                showToast(`Report generated (${safe.employees.length} staff)`, 'success');
+            }
         } catch (err) {
             console.error(err);
             showToast('Error generating report', 'error');
@@ -61,7 +72,7 @@ const ReportsView = () => {
     };
 
     const generatePDF = () => {
-        if (!reportData || !reportData.employees.length) return;
+        if (!reportData || !Array.isArray(reportData.employees) || !reportData.employees.length) return;
 
         const doc = new jsPDF('l', 'mm', 'a3');
 
@@ -71,8 +82,8 @@ const ReportsView = () => {
         doc.setFontSize(10);
         doc.text(`Period: ${startDate} to ${endDate}`, 14, 22);
 
-        const start = new Date(startDate);
-        const end = new Date(endDate);
+        const start = parseDateInput(startDate);
+        const end = parseDateInput(endDate);
         const dates = [];
         let curr = new Date(start);
         while (curr <= end) {
@@ -90,9 +101,9 @@ const ReportsView = () => {
             const empName = emp.first_name || emp.last_name ? `${emp.first_name || ''} ${emp.last_name || ''}`.trim() : '-';
 
             const days = dates.map(date => {
-                const dateStr = date.toISOString().split('T')[0];
+                const dateStr = toLocalDateKey(date);
                 const dayLogs = empLogs.filter((log: any) => {
-                    return new Date(log.check_in_time).toISOString().split('T')[0] === dateStr;
+                    return toLocalDateKey(new Date(log.check_in_time)) === dateStr;
                 });
 
                 if (dayLogs.length > 0) {
@@ -142,10 +153,10 @@ const ReportsView = () => {
     };
 
     const generateExcel = () => {
-        if (!reportData || !reportData.employees.length) return;
+        if (!reportData || !Array.isArray(reportData.employees) || !reportData.employees.length) return;
 
-        const start = new Date(startDate);
-        const end = new Date(endDate);
+        const start = parseDateInput(startDate);
+        const end = parseDateInput(endDate);
         const dates = [];
         let curr = new Date(start);
         while (curr <= end) {
@@ -169,9 +180,9 @@ const ReportsView = () => {
 
             dates.forEach((date, index) => {
                 const dateHeader = dateHeaders[index];
-                const dateStr = date.toISOString().split('T')[0];
+                const dateStr = toLocalDateKey(date);
                 const dayLogs = empLogs.filter((log: any) => {
-                    return new Date(log.check_in_time).toISOString().split('T')[0] === dateStr;
+                    return toLocalDateKey(new Date(log.check_in_time)) === dateStr;
                 });
 
                 if (dayLogs.length > 0) {

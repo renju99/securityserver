@@ -1,4 +1,35 @@
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
+const { APP_TIMEZONE, normalizeFilterDateToUtcIso } = require('../utils/time');
+
+const uploadsDir = path.join(__dirname, '..', 'uploads');
+
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const saveBase64Image = (base64String, staffId) => {
+    try {
+        if (!base64String || !base64String.startsWith('data:image')) return null;
+
+        const matches = base64String.match(/^data:image\/([A-Za-z-+/]+);base64,(.+)$/);
+        if (!matches || matches.length !== 3) return null;
+
+        const type = matches[1];
+        const data = matches[2];
+        const buffer = Buffer.from(data, 'base64');
+        const safeStaffId = String(staffId || 'user').replace(/[^a-zA-Z0-9_-]/g, '');
+        const fileName = `${safeStaffId}_${Date.now()}.${type}`;
+        const filePath = path.join(uploadsDir, fileName);
+
+        fs.writeFileSync(filePath, buffer);
+        return `/api/uploads/${fileName}`;
+    } catch (err) {
+        console.error('Error saving image:', err);
+        return null;
+    }
+};
 
 module.exports = (pool, authenticateToken, authorizeRole, bcrypt, jwt, JWT_SECRET, getGeofenceAlerts, broadcastGeofenceAlert, io) => {
     const router = express.Router();
@@ -338,19 +369,16 @@ module.exports = (pool, authenticateToken, authorizeRole, bcrypt, jwt, JWT_SECRE
             const attParams = [empIds];
             let attParamIdx = 2; // $1 is empIds
 
-            if (startDate) {
+            const normalizedStartDate = normalizeFilterDateToUtcIso(startDate, false);
+            const normalizedEndDate = normalizeFilterDateToUtcIso(endDate, true);
+
+            if (normalizedStartDate) {
                 attQuery += ` AND check_in_time >= $${attParamIdx++}`;
-                attParams.push(startDate);
+                attParams.push(normalizedStartDate);
             }
-            if (endDate) {
-                // Assume endDate is inclusive end of day if it's just a date string, 
-                // but relying on client to send T23:59:59 or we cast to date. 
-                // Better to cast check_in_time to DATE for comparison if inputs are YYYY-MM-DD
-                // But let's assume inputs are ISO timestamps or YYYY-MM-DD. 
-                // To be safe with YYYY-MM-DD, we can say < endDate + 1 day or similar.
-                // Let's assume the client sends full ISO string or we do string comparison.
+            if (normalizedEndDate) {
                 attQuery += ` AND check_in_time <= $${attParamIdx++}`;
-                attParams.push(endDate);
+                attParams.push(normalizedEndDate);
             }
 
             attQuery += ` ORDER BY check_in_time ASC`;
@@ -427,13 +455,16 @@ module.exports = (pool, authenticateToken, authorizeRole, bcrypt, jwt, JWT_SECRE
                 return res.json({ employees: [], attendance: {} });
             }
 
-            if (startDate) {
+            const normalizedStartDate = normalizeFilterDateToUtcIso(startDate, false);
+            const normalizedEndDate = normalizeFilterDateToUtcIso(endDate, true);
+
+            if (normalizedStartDate) {
                 logQuery += ` AND timestamp >= $${logParamIdx++}`;
-                logParams.push(startDate);
+                logParams.push(normalizedStartDate);
             }
-            if (endDate) {
-                logQuery += ` AND timestamp < ($${logParamIdx++}::date + interval '1 day')`;
-                logParams.push(endDate);
+            if (normalizedEndDate) {
+                logQuery += ` AND timestamp <= $${logParamIdx++}`;
+                logParams.push(normalizedEndDate);
             }
 
             logQuery += ` GROUP BY staff_id, timestamp::date ORDER BY timestamp::date ASC`;
@@ -675,7 +706,7 @@ module.exports = (pool, authenticateToken, authorizeRole, bcrypt, jwt, JWT_SECRE
 
 
     // HR API: Bulk update user fields (Shift, Site, Dept)
-    router.patch('/api/hr/users/bulk-update', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
+    router.patch('/hr/users/bulk-update', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
         const { userIds, shiftId, siteId, departmentName } = req.body;
         if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
             return res.status(400).json({ error: 'Provide an array of user IDs' });
@@ -720,70 +751,6 @@ module.exports = (pool, authenticateToken, authorizeRole, bcrypt, jwt, JWT_SECRE
             res.status(500).json({ error: 'Database error' });
         }
     });
-
-    // HR API: Create/Update user - Updated
-    router.post('/hr/users', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
-        if (!req.body) { return res.status(400).json({ error: 'Missing request body' }); }
-        const { staffId, email, password, roleId, siteId, departmentName, firstName, lastName, shiftId, photoHelper } = req.body;
-        try {
-            let passwordHash = null;
-            if (password) {
-                passwordHash = await bcrypt.hash(password, 10);
-            }
-
-            let photoUrl = null;
-            if (photoHelper) {
-                photoUrl = saveBase64Image(photoHelper, staffId);
-            }
-
-            const query = `
-            INSERT INTO employees (staff_id, email, password_hash, role_id, site_id, department_name, first_name, last_name, shift_id, photo_url)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-            ON CONFLICT (staff_id) DO UPDATE SET
-            email = EXCLUDED.email,
-            password_hash = COALESCE(EXCLUDED.password_hash, employees.password_hash),
-            role_id = EXCLUDED.role_id,
-            site_id = EXCLUDED.site_id,
-            department_name = EXCLUDED.department_name,
-            first_name = EXCLUDED.first_name,
-            last_name = EXCLUDED.last_name,
-            shift_id = EXCLUDED.shift_id,
-            photo_url = COALESCE($10, employees.photo_url)
-            RETURNING *
-        `;
-
-            const sanitizedRoleId = roleId || null;
-            const sanitizedSiteId = siteId || null;
-            const sanitizedDept = departmentName || null;
-            const sanitizedShiftId = shiftId || null;
-
-            const result = await pool.query(query, [
-                staffId,
-                email,
-                passwordHash,
-                sanitizedRoleId,
-                sanitizedSiteId,
-                sanitizedDept,
-                firstName || null,
-                lastName || null,
-                sanitizedShiftId,
-                photoUrl
-            ]);
-            res.json(result.rows[0]);
-        } catch (err) {
-            console.error('Error adding user:', err);
-            if (err.code === '23505') {
-                if (err.constraint === 'employees_email_key') {
-                    return res.status(400).json({ error: 'Email already in use' });
-                }
-                if (err.constraint === 'employees_staff_id_key') {
-                    return res.status(400).json({ error: 'Staff ID already exists' });
-                }
-            }
-            res.status(500).json({ error: 'Database error' });
-        }
-    });
-
     // ── Biometrics API ──────────────────────────────────────────────────────────
 
     router.get('/hr/biometrics/devices', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
@@ -926,7 +893,7 @@ module.exports = (pool, authenticateToken, authorizeRole, bcrypt, jwt, JWT_SECRE
 
             res.json({
                 retentionDays: DATA_RETENTION_DAYS,
-                nextCleanup: 'Daily at 02:00 Asia/Dubai',
+                nextCleanup: `Daily at 02:00 ${APP_TIMEZONE}`,
                 live_logs: {
                     totalRows: parseInt(logsCount.rows[0].count),
                     oldestRecord: logsOldest.rows[0].oldest,
@@ -993,12 +960,15 @@ module.exports = (pool, authenticateToken, authorizeRole, bcrypt, jwt, JWT_SECRE
                 params.push(siteId);
                 conditions.push(`a.site_id = $${params.length}`);
             }
-            if (startDate) {
-                params.push(startDate);
+            const normalizedStartDate = normalizeFilterDateToUtcIso(startDate, false);
+            const normalizedEndDate = normalizeFilterDateToUtcIso(endDate, true);
+
+            if (normalizedStartDate) {
+                params.push(normalizedStartDate);
                 conditions.push(`a.check_in_time >= $${params.length}`);
             }
-            if (endDate) {
-                params.push(endDate + 'T23:59:59');
+            if (normalizedEndDate) {
+                params.push(normalizedEndDate);
                 conditions.push(`a.check_in_time <= $${params.length}`);
             }
 
@@ -1118,14 +1088,17 @@ module.exports = (pool, authenticateToken, authorizeRole, bcrypt, jwt, JWT_SECRE
                 params.push(status);
             }
 
-            if (startDate) {
+            const normalizedStartDate = normalizeFilterDateToUtcIso(startDate, false);
+            const normalizedEndDate = normalizeFilterDateToUtcIso(endDate, true);
+
+            if (normalizedStartDate) {
                 conditions.push(`a.created_at >= $${idx++}`);
-                params.push(startDate);
+                params.push(normalizedStartDate);
             }
 
-            if (endDate) {
+            if (normalizedEndDate) {
                 conditions.push(`a.created_at <= $${idx++}`);
-                params.push(endDate);
+                params.push(normalizedEndDate);
             }
 
             const where = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
@@ -1213,16 +1186,25 @@ module.exports = (pool, authenticateToken, authorizeRole, bcrypt, jwt, JWT_SECRE
         }
 
         if (staffId) {
-            conditions.push(`e.staff_id ILIKE $${idx++}`);
-            params.push(`%${staffId}%`);
+            conditions.push(`(
+                e.staff_id ILIKE $${idx}
+                OR COALESCE(e.first_name, '') ILIKE $${idx}
+                OR COALESCE(e.last_name, '') ILIKE $${idx}
+                OR CONCAT_WS(' ', COALESCE(e.first_name, ''), COALESCE(e.last_name, '')) ILIKE $${idx}
+            )`);
+            params.push(`%${String(staffId).trim()}%`);
+            idx++;
         }
-        if (startDate) {
+        const normalizedStartDate = normalizeFilterDateToUtcIso(startDate, false);
+        const normalizedEndDate = normalizeFilterDateToUtcIso(endDate, true);
+
+        if (normalizedStartDate) {
             conditions.push(`ll.timestamp >= $${idx++}`);
-            params.push(startDate);
+            params.push(normalizedStartDate);
         }
-        if (endDate) {
+        if (normalizedEndDate) {
             conditions.push(`ll.timestamp <= $${idx++}`);
-            params.push(endDate);
+            params.push(normalizedEndDate);
         }
 
         const where = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
@@ -1289,14 +1271,25 @@ module.exports = (pool, authenticateToken, authorizeRole, bcrypt, jwt, JWT_SECRE
             let idx = 1;
 
             if (staffId) {
-                const empRes = await pool.query('SELECT id FROM employees WHERE staff_id ILIKE $1', [`%${staffId}%`]);
+                const empRes = await pool.query(
+                    `SELECT id
+                     FROM employees
+                     WHERE staff_id ILIKE $1
+                        OR COALESCE(first_name, '') ILIKE $1
+                        OR COALESCE(last_name, '') ILIKE $1
+                        OR CONCAT_WS(' ', COALESCE(first_name, ''), COALESCE(last_name, '')) ILIKE $1`,
+                    [`%${String(staffId).trim()}%`]
+                );
                 const empIds = empRes.rows.map(r => r.id);
                 if (empIds.length === 0) return res.json({ message: '0 logs deleted' });
                 conditions.push(`employee_id = ANY($${idx++})`);
                 params.push(empIds);
             }
-            if (startDate) { conditions.push(`timestamp >= $${idx++}`); params.push(startDate); }
-            if (endDate) { conditions.push(`timestamp <= $${idx++}`); params.push(endDate); }
+            const normalizedStartDate = normalizeFilterDateToUtcIso(startDate, false);
+            const normalizedEndDate = normalizeFilterDateToUtcIso(endDate, true);
+
+            if (normalizedStartDate) { conditions.push(`timestamp >= $${idx++}`); params.push(normalizedStartDate); }
+            if (normalizedEndDate) { conditions.push(`timestamp <= $${idx++}`); params.push(normalizedEndDate); }
 
             if (conditions.length === 0) return res.status(400).json({ error: 'Provide at least one filter for bulk delete' });
 
@@ -1320,6 +1313,9 @@ module.exports = (pool, authenticateToken, authorizeRole, bcrypt, jwt, JWT_SECRE
         }
 
         try {
+            const normalizedStartDate = normalizeFilterDateToUtcIso(startDate, false);
+            const normalizedEndDate = normalizeFilterDateToUtcIso(endDate, true);
+
             const empQuery = `
             SELECT e.id, e.staff_id, e.first_name, e.last_name, e.site_id, s.name as site_name
             FROM employees e
@@ -1352,8 +1348,8 @@ module.exports = (pool, authenticateToken, authorizeRole, bcrypt, jwt, JWT_SECRE
 
             const locationResult = await pool.query(locationQuery, [
                 employee.id,
-                startDate,
-                endDate
+                normalizedStartDate || startDate,
+                normalizedEndDate || endDate
             ]);
 
             let locations = locationResult.rows;
@@ -1392,6 +1388,9 @@ module.exports = (pool, authenticateToken, authorizeRole, bcrypt, jwt, JWT_SECRE
         }
 
         try {
+            const normalizedStartDate = normalizeFilterDateToUtcIso(startDate, false);
+            const normalizedEndDate = normalizeFilterDateToUtcIso(endDate, true);
+
             const empQuery = `SELECT id, staff_id, first_name, last_name FROM employees WHERE staff_id = $1`;
             const empResult = await pool.query(empQuery, [staffId]);
             if (empResult.rows.length === 0) return res.status(404).json({ error: 'Employee not found' });
@@ -1401,7 +1400,11 @@ module.exports = (pool, authenticateToken, authorizeRole, bcrypt, jwt, JWT_SECRE
             SELECT ST_Y(current_coords::geometry) as lat, ST_X(current_coords::geometry) as lng, timestamp
             FROM live_logs WHERE employee_id = $1 AND timestamp >= $2 AND timestamp <= $3 ORDER BY timestamp ASC
         `;
-            const locationResult = await pool.query(locationQuery, [employee.id, startDate, endDate]);
+            const locationResult = await pool.query(locationQuery, [
+                employee.id,
+                normalizedStartDate || startDate,
+                normalizedEndDate || endDate
+            ]);
             const rows = locationResult.rows;
 
             // Server-side Idle Detection Logic

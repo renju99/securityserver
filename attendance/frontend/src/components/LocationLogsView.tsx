@@ -48,14 +48,36 @@ const LocationLogsView = () => {
         setLocLogSearch(pendingSearch);
         setLocLogStartDate(pendingStart);
         setLocLogEndDate(pendingEnd);
-        setLocLogPage(1);
+        if (locLogPage === 1) {
+            if (!token) return;
+            fetchLocationLogs(token, {
+                page: 1,
+                limit: LOC_LOG_LIMIT,
+                staffId: pendingSearch,
+                startDate: pendingStart,
+                endDate: pendingEnd
+            });
+        } else {
+            setLocLogPage(1);
+        }
     };
 
     const handleReset = () => {
         setPendingSearch(''); setLocLogSearch('');
         setPendingStart(''); setLocLogStartDate('');
         setPendingEnd(''); setLocLogEndDate('');
-        setLocLogPage(1);
+        if (locLogPage === 1) {
+            if (!token) return;
+            fetchLocationLogs(token, {
+                page: 1,
+                limit: LOC_LOG_LIMIT,
+                staffId: '',
+                startDate: '',
+                endDate: ''
+            });
+        } else {
+            setLocLogPage(1);
+        }
     };
 
     const handleSelectAll = () => {

@@ -3,6 +3,7 @@ import {
     Employee, Site, Role, Shift, AttendanceLogEntry,
     GeoFenceAlert, BiometricDevice, BiometricLog
 } from '../types';
+import { toUtcIso } from '../utils/time';
 
 type Setter<T> = T | ((prev: T) => T);
 
@@ -261,8 +262,8 @@ export const useDataStore = create<DataState>((set, get) => ({
             ...(state.gfSearch && { staffId: state.gfSearch }),
             ...(state.gfSiteFilter && { siteId: state.gfSiteFilter }),
             ...(state.gfStatusFilter && { status: state.gfStatusFilter }),
-            ...(state.gfStartDate && { startDate: state.gfStartDate }),
-            ...(state.gfEndDate && { endDate: state.gfEndDate + 'T23:59:59' }),
+                    ...(state.gfStartDate && { startDate: toUtcIso(state.gfStartDate) }),
+                    ...(state.gfEndDate && { endDate: toUtcIso(state.gfEndDate, true) }),
         });
 
         try {
@@ -356,8 +357,13 @@ export const useDataStore = create<DataState>((set, get) => ({
             limit: params.limit.toString()
         });
         if (params.staffId) query.set('staffId', params.staffId);
-        if (params.startDate) query.set('startDate', params.startDate);
-        if (params.endDate) query.set('endDate', params.endDate);
+        if (params.startDate) query.set('startDate', toUtcIso(params.startDate));
+        if (params.endDate) {
+            const endLocal = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(params.endDate)
+                ? `${params.endDate}:59`
+                : params.endDate;
+                query.set('endDate', toUtcIso(endLocal, true));
+        }
 
         try {
             const res = await fetch(`/api/hr/location-logs?${query}`, {
