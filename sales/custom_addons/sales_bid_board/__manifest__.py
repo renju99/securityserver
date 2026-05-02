@@ -46,6 +46,7 @@
         "views/bid_board_menu.xml",
         "views/bid_restrict_global_apps_dashboards.xml",
         "views/bid_contacts_sidebar_label.xml",
+        "views/bid_contact_approval_views.xml",
     ],
     "assets": {
         "web.assets_backend": [

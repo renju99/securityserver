@@ -205,7 +205,7 @@ export default function StaffManager({
                             <button
                                 className="btn-primary"
                                 onClick={() => {
-                                    setCurrentUser({ staffId: '', email: '', password: '', roleId: 4, siteId: '', departmentName: 'Operations' });
+                                    setCurrentUser({ staffId: '', email: '', password: '', roleId: 4, siteId: '', departmentName: 'Operations', faceAuthEnabled: true, facePin: '' });
                                     setShowUserModal(true);
                                 }}>
                                 + Add New Staff
@@ -218,93 +218,82 @@ export default function StaffManager({
                                     showToast('Staff data exported successfully', 'success');
                                 }}
                             >
-                                📥 Export CSV
+                                Export CSV
                             </button>
                             <button
                                 className={`btn-secondary ${showFilters ? 'active' : ''}`}
                                 onClick={() => setShowFilters(!showFilters)}
-                                style={{ background: showFilters ? '#2563eb' : '', color: showFilters ? 'white' : '' }}
                             >
-                                🔍 Filters {(selectedRoles.length + selectedSites.length) > 0 && `(${selectedRoles.length + selectedSites.length})`}
+                                Filters {(selectedRoles.length + selectedSites.length) > 0 && `(${selectedRoles.length + selectedSites.length})`}
                             </button>
                         </div>
                     </div>
 
                     {selectedUsers.length > 0 && (
-                        <div className="bulk-actions-panel" style={{
-                            background: '#f8fafc',
-                            padding: '1.25rem',
-                            borderRadius: '12px',
-                            marginBottom: '1.5rem',
-                            border: '1px solid #e2e8f0',
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
-                        }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                    <span style={{ background: '#2563eb', color: 'white', padding: '0.25rem 0.6rem', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                        <div className="bulk-actions-panel">
+                            <div className="bulk-actions-header">
+                                <div className="bulk-actions-selected">
+                                    <span className="bulk-selected-pill">
                                         {selectedUsers.length}
                                     </span>
-                                    <span style={{ color: '#1e293b', fontWeight: '600' }}>User(s) Selected</span>
+                                    <span className="bulk-selected-label">User(s) Selected</span>
                                 </div>
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <button className="btn-secondary" onClick={handleBulkExport} style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>📥 Export</button>
-                                    <button className="btn-secondary" onClick={handleBulkArchive} style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem', background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a' }}>📦 Archive</button>
-                                    <button className="btn-secondary" onClick={handleBulkDelete} style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem', background: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca' }}>🗑️ Delete</button>
-                                    <button className="btn-secondary" onClick={() => { setSelectedUsers([]); setSelectAll(false); }} style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>✕ Clear</button>
+                                <div className="bulk-actions-buttons">
+                                    <button className="btn-secondary bulk-btn-sm" onClick={handleBulkExport}>Export</button>
+                                    <button className="btn-secondary bulk-btn-sm bulk-btn-archive" onClick={handleBulkArchive}>Archive</button>
+                                    <button className="btn-secondary bulk-btn-sm bulk-btn-delete" onClick={handleBulkDelete}>Delete</button>
+                                    <button className="btn-secondary bulk-btn-sm" onClick={() => { setSelectedUsers([]); setSelectAll(false); }}>Clear</button>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+                            <div className="bulk-actions-grid">
                                 {/* Bulk Shift */}
-                                <div className="bulk-action-group" style={{ display: 'flex', gap: '0.5rem' }}>
+                                <div className="bulk-action-group">
                                     <select
                                         value={bulkShiftId}
                                         onChange={(e) => setBulkShiftId(e.target.value)}
-                                        style={{ flex: 1, padding: '0.4rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                                     >
                                         <option value="">Select Shift...</option>
                                         {shifts.map(s => <option key={s.id} value={s.id}>{s.name} ({s.start_time} - {s.end_time})</option>)}
                                     </select>
-                                    <button className="btn-secondary" onClick={() => handleBulkUpdate('shift')} style={{ whiteSpace: 'nowrap', padding: '0.4rem 0.8rem' }}>Apply Shift</button>
+                                    <button className="btn-secondary bulk-btn-sm" onClick={() => handleBulkUpdate('shift')}>Apply Shift</button>
                                 </div>
 
                                 {/* Bulk Site */}
-                                <div className="bulk-action-group" style={{ display: 'flex', gap: '0.5rem' }}>
+                                <div className="bulk-action-group">
                                     <select
                                         value={bulkSiteId}
                                         onChange={(e) => setBulkSiteId(e.target.value)}
-                                        style={{ flex: 1, padding: '0.4rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                                     >
                                         <option value="">Select Site...</option>
                                         <option value="-1">Global / Remotely (No Site)</option>
                                         {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                                     </select>
-                                    <button className="btn-secondary" onClick={() => handleBulkUpdate('site')} style={{ whiteSpace: 'nowrap', padding: '0.4rem 0.8rem' }}>Apply Site</button>
+                                    <button className="btn-secondary bulk-btn-sm" onClick={() => handleBulkUpdate('site')}>Apply Site</button>
                                 </div>
 
                                 {/* Bulk Department */}
-                                <div className="bulk-action-group" style={{ display: 'flex', gap: '0.5rem' }}>
+                                <div className="bulk-action-group">
                                     <input
                                         type="text"
                                         placeholder="Dept Name..."
                                         value={bulkDeptName}
                                         onChange={(e) => setBulkDeptName(e.target.value)}
-                                        style={{ flex: 1, padding: '0.4rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                                     />
-                                    <button className="btn-secondary" onClick={() => handleBulkUpdate('dept')} style={{ whiteSpace: 'nowrap', padding: '0.4rem 0.8rem' }}>Apply Dept</button>
+                                    <button className="btn-secondary bulk-btn-sm" onClick={() => handleBulkUpdate('dept')}>Apply Dept</button>
                                 </div>
 
                                 {/* Tracking Flags */}
-                                <div className="bulk-action-group" style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <button className="btn-secondary" onClick={() => handleBulkUpdate('tracking-on')} style={{ flex: 1, padding: '0.4rem 0.8rem', background: '#dcfce7', color: '#166534', border: '1px solid #bbf7d0' }}>Enable Tracking</button>
-                                    <button className="btn-secondary" onClick={() => handleBulkUpdate('tracking-off')} style={{ flex: 1, padding: '0.4rem 0.8rem', background: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca' }}>Disable Tracking</button>
+                                <div className="bulk-action-group">
+                                    <button className="btn-secondary bulk-btn-sm bulk-btn-enable" onClick={() => handleBulkUpdate('tracking-on')}>Enable Tracking</button>
+                                    <button className="btn-secondary bulk-btn-sm bulk-btn-disable" onClick={() => handleBulkUpdate('tracking-off')}>Disable Tracking</button>
                                 </div>
                             </div>
                         </div>
                     )}
 
                     {showFilters && (
-                        <div style={{ marginBottom: '1rem' }}>
+                        <div className="filter-panel-wrap">
                             <FilterPanel />
                         </div>
                     )}
@@ -313,15 +302,15 @@ export default function StaffManager({
                         <table className="mgmt-table">
                             <thead>
                                 <tr>
-                                    <th style={{ width: '40px' }}>
+                                    <th className="table-col-check">
                                         <input
                                             type="checkbox"
                                             checked={selectAll}
                                             onChange={handleSelectAll}
-                                            style={{ cursor: 'pointer' }}
+                                            className="user-checkbox"
                                         />
                                     </th>
-                                    <th style={{ width: '60px' }}>Photo</th>
+                                    <th className="table-col-photo">Photo</th>
                                     <th
                                         onClick={() => {
                                             if (sortField === 'staff_id') {
@@ -331,7 +320,7 @@ export default function StaffManager({
                                                 setSortDirection('asc');
                                             }
                                         }}
-                                        style={{ cursor: 'pointer', userSelect: 'none' }}
+                                        className="sortable-header"
                                     >
                                         Staff ID {sortField === 'staff_id' && (sortDirection === 'asc' ? '↑' : '↓')}
                                     </th>
@@ -345,7 +334,7 @@ export default function StaffManager({
                                                 setSortDirection('asc');
                                             }
                                         }}
-                                        style={{ cursor: 'pointer', userSelect: 'none' }}
+                                        className="sortable-header"
                                     >
                                         Email {sortField === 'email' && (sortDirection === 'asc' ? '↑' : '↓')}
                                     </th>
@@ -358,7 +347,7 @@ export default function StaffManager({
                                                 setSortDirection('asc');
                                             }
                                         }}
-                                        style={{ cursor: 'pointer', userSelect: 'none' }}
+                                        className="sortable-header"
                                     >
                                         Role {sortField === 'role_name' && (sortDirection === 'asc' ? '↑' : '↓')}
                                     </th>
@@ -372,7 +361,7 @@ export default function StaffManager({
                                                 setSortDirection('asc');
                                             }
                                         }}
-                                        style={{ cursor: 'pointer', userSelect: 'none' }}
+                                        className="sortable-header"
                                     >
                                         Department {sortField === 'department_name' && (sortDirection === 'asc' ? '↑' : '↓')}
                                     </th>
@@ -382,15 +371,15 @@ export default function StaffManager({
                             <tbody>
                                 {isMgmtLoading ? (
                                     <tr>
-                                        <td colSpan={9} style={{ padding: 0, border: 'none' }}>
+                                        <td colSpan={9} className="table-cell-clean">
                                             <LoadingSpinner size="medium" text="Loading staff..." />
                                         </td>
                                     </tr>
                                 ) : filteredUsers.length === 0 ? (
                                     <tr>
-                                        <td colSpan={9} style={{ padding: 0, border: 'none' }}>
+                                        <td colSpan={9} className="table-cell-clean">
                                             <div className="empty-state">
-                                                <div className="empty-state-icon">👥</div>
+                                                <div className="empty-state-icon">--</div>
                                                 <h3 className="empty-state-title">No Staff Found</h3>
                                                 <p className="empty-state-message">
                                                     {mgmtSearch ? 'Try adjusting your search' : 'Get started by adding your first staff member'}
@@ -400,20 +389,20 @@ export default function StaffManager({
                                     </tr>
                                 ) : (
                                     filteredUsers.map(u => (
-                                        <tr key={u.id} style={{ background: selectedUsers.includes(u.id) ? '#eff6ff' : '' }}>
+                                        <tr key={u.id} className={selectedUsers.includes(u.id) ? 'table-row-selected' : ''}>
                                             <td>
                                                 <input
                                                     type="checkbox"
                                                     checked={selectedUsers.includes(u.id)}
                                                     onChange={() => handleSelectUser(u.id)}
-                                                    style={{ cursor: 'pointer' }}
+                                                    className="user-checkbox"
                                                 />
                                             </td>
                                             <td>
                                                 {u.photo_url ? (
-                                                    <img src={u.photo_url} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
+                                                    <img src={u.photo_url} alt="" className="avatar-circle-img" />
                                                 ) : (
-                                                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#94a3b8' }}>
+                                                    <div className="avatar-circle-fallback">
                                                         NO IMG
                                                     </div>
                                                 )}
@@ -479,11 +468,11 @@ export default function StaffManager({
                                         <td><strong>#{s.id}</strong></td>
                                         <td>
                                             <div><strong>{s.name}</strong></div>
-                                            {s.latitude && <small style={{ color: '#64748b' }}>{parseFloat(s.latitude).toFixed(4)}, {parseFloat(s.longitude).toFixed(4)}</small>}
+                                            {s.latitude && <small className="site-coords">{parseFloat(s.latitude).toFixed(4)}, {parseFloat(s.longitude).toFixed(4)}</small>}
                                         </td>
                                         <td>{s.location || '-'}</td>
                                         <td>
-                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <div className="inline-actions">
                                                 <button className="btn-edit" onClick={() => {
                                                     setCurrentSite({
                                                         ...s,
@@ -495,11 +484,10 @@ export default function StaffManager({
                                                     setShowSiteModal(true);
                                                 }}>Edit</button>
                                                 <button
-                                                    className="btn-secondary"
-                                                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}
+                                                    className="btn-secondary map-focus-btn"
                                                     onClick={() => handleFocusSite(s)}
                                                 >
-                                                    🌐 View on Map
+                                                    View on Map
                                                 </button>
                                             </div>
                                         </td>
@@ -551,7 +539,7 @@ export default function StaffManager({
                                     </tr>
                                 ))}
                                 {shifts.length === 0 && (
-                                    <tr><td colSpan={4} style={{ textAlign: 'center', padding: '2rem' }}>No shifts defined</td></tr>
+                                    <tr><td colSpan={4} className="empty-row-message">No shifts defined</td></tr>
                                 )}
                             </tbody>
                         </table>

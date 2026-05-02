@@ -2,7 +2,7 @@ import ManualAttendanceView from './components/ManualAttendanceView';
 import BiometricsView from './components/BiometricsView';
 import GeoFenceAlertsView from './components/GeoFenceAlertsView';
 import LocationLogsView from './components/LocationLogsView';
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import AttendanceLog from './components/AttendanceLog';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import StaffManager from './components/StaffManager';
@@ -24,6 +24,12 @@ import ErrorBoundary from './components/ErrorBoundary';
 import GeofenceManager from './components/GeofenceManager';
 import RouteTrackingView, { RoutePolyline } from './components/RouteTrackingView';
 import IdleReportingView from './components/IdleReportingView';
+import LeaveCalendarView from './components/LeaveCalendarView';
+import BiometricDeviceModal from './components/BiometricDeviceModal';
+import MetricsDashboardView from './components/MetricsDashboardView';
+import RosterPlanningView from './components/RosterPlanningView';
+import FaceEnrollmentManager from './components/FaceEnrollmentManager';
+import OdooIntegrationView from './components/OdooIntegrationView';
 import { exportToCSV, formatDataForExport, formatSitesForExport } from './utils/exportUtils';
 import { Employee, Site, Role, Shift, AttendanceLogEntry, GeoFenceAlert, BiometricDevice, BiometricLog } from './types';
 import './App.css';
@@ -44,27 +50,63 @@ const socket = io('/', {
 
 
 const formatPermissionName = (name) => {
-    return name
+    if (name == null || String(name).trim() === '') return 'Permission';
+    return String(name)
         .split('_')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
 };
 
 const getPermissionIcon = (name) => {
-    if (name.includes('dashboard')) return '📊';
-    if (name.includes('map')) return '🗺️';
-    if (name.includes('staff') || name.includes('user')) return '👥';
-    if (name.includes('site')) return '🏢';
-    if (name.includes('report') || name.includes('export')) return '📥';
-    if (name.includes('attendance')) return '🕒';
-    return '🔒';
+    if (name == null || String(name).trim() === '') return 'AC';
+    if (name.includes('dashboard')) return 'DB';
+    if (name.includes('map')) return 'MP';
+    if (name.includes('staff') || name.includes('user')) return 'US';
+    if (name.includes('site')) return 'ST';
+    if (name.includes('report') || name.includes('export')) return 'RP';
+    if (name.includes('attendance')) return 'AT';
+    return 'AC';
+};
+
+const buildDashboardTabs = (role, geoAlertsCount) => {
+    const tabs = [];
+    const canManage = role === 'HR Admin' || role === 'Site Supervisor';
+    if (canManage) {
+        tabs.push(
+            { key: 'attendance', label: 'Attendance Log', group: 'Main' },
+            { key: 'reports', label: 'Reports', group: 'Main' },
+            { key: 'leave_calendar', label: 'Leaves', group: 'Main' },
+            { key: 'rosters', label: 'Shifts & Jobs', group: 'Main' },
+            { key: 'geo_fence_alerts', label: `Alerts & Approvals${geoAlertsCount > 0 ? ` (${geoAlertsCount})` : ''}`, group: 'Main' },
+            { key: 'staff', label: 'Employee Directory', hrOnly: true, group: 'Main' },
+            { key: 'integrations', label: 'Settings', hrOnly: true, group: 'Main' },
+            { key: 'map', label: 'Live Map', group: 'Operations' },
+            { key: 'location_logs', label: 'Location Logs', group: 'Operations' },
+            { key: 'route_tracking', label: 'Route Tracking', group: 'Operations' },
+            { key: 'idle_reporting', label: 'Idle Reporting', group: 'Operations' },
+            { key: 'biometrics', label: 'Biometrics', group: 'Operations' },
+            { key: 'analytics', label: 'Analytics', hrOnly: true, group: 'Advanced' },
+            { key: 'metrics', label: 'Metrics', hrOnly: true, group: 'Advanced' },
+            { key: 'vehicles', label: 'Vehicles', hrOnly: true, group: 'Advanced' },
+            { key: 'access_roles', label: 'Access Roles', hrOnly: true, group: 'Advanced' }
+        );
+    }
+    return tabs.filter((tab) => !tab.hrOnly || role === 'HR Admin');
+};
+
+const BRANDING = {
+    appTitle: 'Workforce Attendance Platform',
+    portalTitle: 'Corporate Attendance',
+    portalSubtitle: 'Workforce Operations',
 };
 
 
 const HRDashboard = () => {
+    const environmentLabel = import.meta.env.PROD ? 'Production' : 'Staging';
     const user = useAuthStore(state => state.user);
     const login = useAuthStore(state => state.login);
     const logout = useAuthStore(state => state.logout);
+    const refreshAccessToken = useAuthStore(state => state.refreshAccessToken);
 
     const employees = useDataStore(state => state.employees);
     const onlineEmployees = useDataStore(state => state.onlineEmployees);
@@ -80,7 +122,6 @@ const HRDashboard = () => {
     const biometricLogs = useDataStore(state => state.biometricLogs);
     const allPermissions = useDataStore(state => state.allPermissions);
     const isMgmtLoading = useDataStore(state => state.isMgmtLoading);
-    const isBiometricLoading = useDataStore(state => state.isBiometricLoading);
     const fetchEmployees = useDataStore(state => state.fetchEmployees);
     const fetchRoles = useDataStore(state => state.fetchRoles);
     const fetchSites = useDataStore(state => state.fetchSites);
@@ -171,9 +212,9 @@ const HRDashboard = () => {
     const [loginData, setLoginData] = useState<any>({ staffId: '', password: '' });
     const [error, setError] = useState('');
 
-    const [activeTab, setActiveTab] = useState('map'); // 'map', 'staff', 'reports', etc.
+    const [activeTab, setActiveTab] = useState('attendance'); // default landing
     const [showUserModal, setShowUserModal] = useState(false);
-    const [currentUser, setCurrentUser] = useState<any>({ staffId: '', email: '', password: '', roleId: 4, siteId: '', departmentName: '', firstName: '', lastName: '' });
+    const [currentUser, setCurrentUser] = useState<any>({ staffId: '', email: '', password: '', roleId: 4, siteId: '', departmentName: '', firstName: '', lastName: '', faceAuthEnabled: true, facePin: '' });
     const [showSiteModal, setShowSiteModal] = useState(false);
     const [currentSite, setCurrentSite] = useState<any>({
         name: '',
@@ -195,10 +236,19 @@ const HRDashboard = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [socketStatus, setSocketStatus] = useState('connecting');
     const [lastHeartbeat, setLastHeartbeat] = useState<string | null>(null);
+    const [checkedInSummary, setCheckedInSummary] = useState<any>({ totalCheckedIn: 0, lateCount: 0, perSiteCounts: {}, records: [] });
 
     // Biometrics state
     const [showBiometricModal, setShowBiometricModal] = useState(false);
-    const [currentBiometricDevice, setCurrentBiometricDevice] = useState<any>({ name: '', deviceKey: '', siteId: '', type: 'RA08', ipAddress: '', port: '' });
+    const [currentBiometricDevice, setCurrentBiometricDevice] = useState<any>({
+        name: '',
+        deviceKey: '',
+        siteId: '',
+        type: 'RA08',
+        ipAddress: '',
+        port: '',
+        config: {},
+    });
 
     const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
@@ -360,123 +410,167 @@ const HRDashboard = () => {
     useEffect(() => {
         if (!user) return;
 
-        // Connect socket with auth
-        if (user.token) {
-            socket.auth = { token: user.token };
-            if (!socket.connected) socket.connect();
-        }
+        let cancelled = false;
 
-        // Join specific Socket room based on role
-        if (user.role === 'HR Admin') {
-            socket.emit('join_hr');
-        } else if (user.role === 'Site Supervisor' && user.siteId) {
-            socket.emit('join_site', user.siteId);
-        }
-
-        // Fetch initial data
-        const headers = { 'Authorization': `Bearer ${user.token}` };
-
-        const checkAuth = (res) => {
-            if (res.status === 401 || res.status === 403) {
-                console.warn('Authentication expired, logging out...');
-                logout();
-                return false;
-            }
-            return true;
+        const applySocketAuth = (token: string) => {
+            socket.auth = { token };
+            if (socket.connected) socket.disconnect();
+            socket.connect();
         };
 
-        fetchEmployees(user.token);
+        const attachSocketHandlers = () => {
+            socket.off('connect');
+            socket.off('disconnect');
+            socket.off('connect_error');
+            socket.off('employee_location');
+            socket.off('attendance_event');
+            socket.off('geo_fence_alert');
+            socket.off('auto_checkout');
 
-        if (user.role === 'HR Admin' || user.role === 'Site Supervisor') {
-            fetchRoles(user.token);
-            fetchAlerts(user.token);
-        }
-        if (user.role === 'HR Admin') {
-            fetchSites(user.token);
-            fetchShifts(user.token);
-        }
+            socket.on('connect', () => {
+                setSocketStatus('connected');
+                console.log('Socket connected to server');
+            });
 
-        fetchAttendance(user.token);
+            socket.on('disconnect', (reason) => {
+                setSocketStatus('disconnected');
+                console.log('Socket disconnected:', reason);
+            });
 
-        // Socket listeners
-        socket.on('connect', () => {
-            setSocketStatus('connected');
-            console.log('Socket connected to server');
-        });
+            socket.on('connect_error', (error) => {
+                setSocketStatus('error');
+                console.error('Socket connection error:', error);
+            });
 
-        socket.on('disconnect', (reason) => {
-            setSocketStatus('disconnected');
-            console.log('Socket disconnected:', reason);
-        });
+            const updateHeartbeat = () => setLastHeartbeat(new Date().toLocaleTimeString());
+            socket.on('employee_location', (data) => {
+                console.log('Online update received:', data);
+                if (!data || !data.employeeId || data.latitude === undefined || data.longitude === undefined) {
+                    console.warn('Malformed location data received:', data);
+                    return;
+                }
+                setOnlineEmployees(prev => ({
+                    ...prev,
+                    [data.employeeId]: {
+                        ...data,
+                        lastSeen: new Date().toLocaleTimeString()
+                    }
+                }));
+                updateHeartbeat();
+            });
 
-        socket.on('connect_error', (error) => {
-            setSocketStatus('error');
-            console.error('Socket connection error:', error);
-        });
+            socket.on('attendance_event', (data) => {
+                console.log('Attendance event:', data);
 
-        // Add heartbeat/ping monitor if server sends any, otherwise use incoming data as proxy
-        const updateHeartbeat = () => setLastHeartbeat(new Date().toLocaleTimeString());
-        socket.on('employee_location', (data) => {
-            console.log('Online update received:', data);
-            if (!data || !data.employeeId || data.latitude === undefined || data.longitude === undefined) {
-                console.warn('Malformed location data received:', data);
+                setAttendanceLogs(prev => {
+                    const logs = [...prev];
+                    if (data.type === 'check_in') {
+                        logs.unshift({
+                            id: 'live-' + Date.now(),
+                            staff_id: data.employeeId,
+                            first_name: data.firstName,
+                            last_name: data.lastName,
+                            check_in_time: data.timestamp,
+                            check_out_time: null,
+                            site_name: data.siteName,
+                            site_id: data.siteId,
+                            is_live: true
+                        });
+                    } else if (data.type === 'check_out') {
+                        const idx = logs.findIndex(l => l.staff_id === data.employeeId && !l.check_out_time);
+                        if (idx >= 0) {
+                            logs[idx] = { ...logs[idx], check_out_time: data.timestamp };
+                        }
+                    }
+                    return logs.slice(0, 100);
+                });
+            });
+
+            socket.on('geo_fence_alert', (data) => {
+                console.warn('Geo Fence Alert:', data);
+                showToast(`Geo-Fence Alert: ${data.first_name || data.staff_id} is outside ${data.site_name || 'site'}.`, 'error');
+                setGeoFenceAlerts(prev => [data, ...prev]);
+            });
+
+            socket.on('auto_checkout', (data) => {
+                console.warn('[AUTO-CHECKOUT] Event received:', data);
+                showToast(
+                    `Auto Check-Out: ${data.name || data.staffId} was automatically checked out. ${data.reason}`,
+                    'warning'
+                );
+            });
+        };
+
+        const loadDashboardData = async () => {
+            const refreshed = await refreshAccessToken();
+            if (cancelled) return;
+
+            let sessionUser = useAuthStore.getState().user;
+            if (!sessionUser?.token) {
+                logout();
                 return;
             }
-            setOnlineEmployees(prev => ({
-                ...prev,
-                [data.employeeId]: {
-                    ...data,
-                    lastSeen: new Date().toLocaleTimeString()
-                }
-            }));
-            updateHeartbeat();
-        });
 
-        socket.on('attendance_event', (data) => {
-            console.log('Attendance event:', data);
-
-            setAttendanceLogs(prev => {
-                const logs = [...prev];
-                // Check if this exact event is already processed (basic dedup)
-                if (data.type === 'check_in') {
-                    // Add new session
-                    logs.unshift({
-                        id: 'live-' + Date.now(),
-                        staff_id: data.employeeId,
-                        first_name: data.firstName,
-                        last_name: data.lastName,
-                        check_in_time: data.timestamp,
-                        check_out_time: null,
-                        site_name: data.siteName,
-                        site_id: data.siteId,
-                        is_live: true
+            if (!refreshed) {
+                try {
+                    const probe = await fetch('/api/hr/employees', {
+                        headers: { Authorization: `Bearer ${sessionUser.token}` },
+                        credentials: 'same-origin',
                     });
-                } else if (data.type === 'check_out') {
-                    // Update active session
-                    const idx = logs.findIndex(l => l.staff_id === data.employeeId && !l.check_out_time);
-                    if (idx >= 0) {
-                        logs[idx] = { ...logs[idx], check_out_time: data.timestamp };
+                    if (cancelled) return;
+                    if (probe.status === 401 || probe.status === 403) {
+                        console.warn('Authentication expired, logging out...');
+                        logout();
+                        return;
                     }
+                } catch {
+                    if (cancelled) return;
                 }
-                return logs.slice(0, 100); // Keep max 100
-            });
-        });
+            }
 
-        socket.on('geo_fence_alert', (data) => {
-            console.warn('Geo Fence Alert:', data);
-            showToast(`⚠️ Geo-Fence Alert: ${data.first_name || data.staff_id} is outside ${data.site_name || 'site'}!`, 'error');
-            setGeoFenceAlerts(prev => [data, ...prev]);
-        });
+            sessionUser = useAuthStore.getState().user;
+            if (cancelled || !sessionUser?.token) return;
 
-        socket.on('auto_checkout', (data) => {
-            console.warn('[AUTO-CHECKOUT] Event received:', data);
-            showToast(
-                `🕐 Auto Check-Out: ${data.name || data.staffId} was automatically checked out. ${data.reason}`,
-                'warning'
-            );
-        });
+            attachSocketHandlers();
+
+            if (sessionUser.token) {
+                socket.auth = { token: sessionUser.token };
+                if (!socket.connected) socket.connect();
+            }
+
+            if (sessionUser.role === 'HR Admin') {
+                socket.emit('join_hr');
+            } else if (sessionUser.role === 'Site Supervisor' && sessionUser.siteId) {
+                socket.emit('join_site', sessionUser.siteId);
+            }
+
+            fetchEmployees(sessionUser.token);
+
+            if (sessionUser.role === 'HR Admin' || sessionUser.role === 'Site Supervisor') {
+                fetchRoles(sessionUser.token);
+                fetchAlerts(sessionUser.token);
+            }
+            if (sessionUser.role === 'HR Admin') {
+                fetchSites(sessionUser.token);
+                fetchShifts(sessionUser.token);
+            }
+
+            fetchAttendance(sessionUser.token);
+        };
+
+        void loadDashboardData();
+
+        const ACCESS_REFRESH_MS = 8 * 60 * 1000;
+        const refreshInterval = setInterval(async () => {
+            const ok = await refreshAccessToken();
+            if (cancelled || !ok) return;
+            const t = useAuthStore.getState().user?.token;
+            if (t) applySocketAuth(t);
+        }, ACCESS_REFRESH_MS);
 
         return () => {
+            cancelled = true;
+            clearInterval(refreshInterval);
             socket.off('connect');
             socket.off('disconnect');
             socket.off('connect_error');
@@ -485,7 +579,7 @@ const HRDashboard = () => {
             socket.off('geo_fence_alert');
             socket.off('auto_checkout');
         };
-    }, [user?.token, user?.role, user?.siteId]); // Only re-run when user identity changes
+    }, [user?.token, user?.role, user?.siteId, refreshAccessToken, logout, fetchEmployees, fetchRoles, fetchSites, fetchShifts, fetchAlerts, fetchAttendance, showToast, setOnlineEmployees, setAttendanceLogs, setGeoFenceAlerts]);
 
     useEffect(() => {
         if (activeTab === 'staff' && user?.role === 'HR Admin') {
@@ -511,42 +605,6 @@ const HRDashboard = () => {
         }
     }, [selectedSites, sites, activeTab, setMapCenter, setZoom]);
 
-
-    const handleSaveBiometricDevice = async (e) => {
-        if (e) e.preventDefault();
-        const method = currentBiometricDevice.id ? 'PATCH' : 'POST';
-        const url = currentBiometricDevice.id
-            ? `/api/hr/biometrics/devices/${currentBiometricDevice.id}`
-            : '/api/hr/biometrics/devices';
-
-        // Prepare payload, ensuring siteId is handled correctly (null if empty)
-        const payload = {
-            ...currentBiometricDevice,
-            siteId: currentBiometricDevice.siteId || null
-        };
-
-        try {
-            const res = await fetch(url, {
-                method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${user.token}`
-                },
-                body: JSON.stringify(payload)
-            });
-
-            if (res.ok) {
-                setShowBiometricModal(false);
-                fetchBiometricDevices(user.token);
-                showToast(currentBiometricDevice.id ? 'Device updated' : 'Device registered', 'success');
-            } else {
-                const error = await res.json();
-                showToast(error.error || 'Failed to save device', 'error');
-            }
-        } catch (err) {
-            showToast('Network error', 'error');
-        }
-    };
 
     const handleDeleteBiometricDevice = async (id: number) => {
         openConfirm({
@@ -580,6 +638,29 @@ const HRDashboard = () => {
         }
     }, [activeTab, fetchBiometricDevices, fetchBiometricLogs, user]);
 
+    useEffect(() => {
+        if (!user?.token || !(user.role === 'HR Admin' || user.role === 'Site Supervisor')) return;
+        let mounted = true;
+        let timer: any = null;
+        const fetchSummary = async () => {
+            try {
+                const res = await fetch('/api/hr/attendance/current-summary', {
+                    headers: { 'Authorization': `Bearer ${user.token}` }
+                });
+                const data = await res.json();
+                if (res.ok && mounted) setCheckedInSummary(data);
+            } catch (err) {
+                console.error('Failed to fetch current attendance summary:', err);
+            }
+        };
+        fetchSummary();
+        timer = setInterval(fetchSummary, 30000);
+        return () => {
+            mounted = false;
+            if (timer) clearInterval(timer);
+        };
+    }, [user?.token, user?.role]);
+
     // Debounced search
     useEffect(() => {
         if (activeTab !== 'staff') return;
@@ -599,6 +680,7 @@ const HRDashboard = () => {
         }
         if (!user.id && !user.password) errors.password = 'Password is required for new users';
         if (user.password && user.password.length < 6) errors.password = 'Password must be at least 6 characters';
+        if (user.facePin && !/^\d{4,10}$/.test(user.facePin)) errors.facePin = 'Face PIN must be 4-10 digits';
         return errors;
     };
 
@@ -623,7 +705,9 @@ const HRDashboard = () => {
             firstName: currentUser.firstName !== undefined ? currentUser.firstName : currentUser.first_name,
             lastName: currentUser.lastName !== undefined ? currentUser.lastName : currentUser.last_name,
             shiftId: currentUser.shiftId !== undefined ? currentUser.shiftId : currentUser.shift_id,
-            photoHelper: currentUser.photoHelper
+            photoHelper: currentUser.photoHelper,
+            faceAuthEnabled: currentUser.faceAuthEnabled !== undefined ? currentUser.faceAuthEnabled : currentUser.face_auth_enabled,
+            facePin: currentUser.facePin
         };
 
         setIsLoading(true);
@@ -640,7 +724,7 @@ const HRDashboard = () => {
             if (res.ok) {
                 setShowUserModal(false);
                 fetchManagementUsers(user?.token || '', mgmtPage, mgmtSearch);
-                setCurrentUser({ staffId: '', email: '', password: '', roleId: 4, siteId: '', departmentName: '', firstName: '', lastName: '' });
+                setCurrentUser({ staffId: '', email: '', password: '', roleId: 4, siteId: '', departmentName: '', firstName: '', lastName: '', faceAuthEnabled: true, facePin: '' });
                 showToast(currentUser.id ? 'User updated successfully' : 'User created successfully', 'success');
             } else {
                 const error = await res.json();
@@ -807,6 +891,7 @@ const HRDashboard = () => {
         try {
             const res = await fetch('/api/auth/login', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(loginData)
             });
@@ -842,12 +927,23 @@ const HRDashboard = () => {
             setSelectedId(empId);
         }
     };
+    const navTabs = useMemo(
+        () => buildDashboardTabs(user?.role, gfTotal || geoFenceAlerts.length),
+        [user?.role, gfTotal, geoFenceAlerts.length]
+    );
+    useEffect(() => {
+        if (!navTabs.some((tab) => tab.key === activeTab)) {
+            setActiveTab('map');
+        }
+    }, [activeTab, navTabs]);
 
     if (!user) {
         return (
             <div className="setup-screen hr-login">
                 <div className="setup-card">
-                    <div className="berkeley-logo-small">Berkeley Workforce 360</div>
+                    <div className="berkeley-logo-small" style={{ marginBottom: '1rem' }}>
+                        <img src="/berkeley-logo.png" alt="Berkeley" style={{ height: '30px', width: 'auto', objectFit: 'contain' }} />
+                    </div>
                     <h2>Dashboard Login</h2>
                     <p>Enter your management credentials.</p>
                     <form onSubmit={handleLogin}>
@@ -878,133 +974,81 @@ const HRDashboard = () => {
     return (
         <div className="hr-dashboard">
             <APIProvider apiKey={GOOGLE_MAPS_API_KEY} libraries={['places', 'drawing', 'geometry']}>
-                <header className="dashboard-header">
-                    {/* Brand */}
-                    <div className="header-left">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
-                            <span className="header-brand-title">Berkeley Workforce 360</span>
-                            <span className="header-brand-sub">
-                                {user.role}{user.siteName ? ` · ${user.siteName}` : (user.siteId ? ` · Site #${user.siteId}` : ' · Global')}
-                            </span>
+                <header className="dashboard-topbar">
+                    <div className="topbar-left">
+                        <div className="topbar-title-row">
+                            <img src="/berkeley-logo.png" alt="Berkeley" className="topbar-logo" />
+                            <div className="topbar-title">{BRANDING.appTitle}</div>
+                        </div>
+                        <div className="topbar-subtitle">
+                            {user.role}{user.siteName ? ` · ${user.siteName}` : (user.siteId ? ` · Site #${user.siteId}` : ' · Global')}
                         </div>
                     </div>
-
-                    {/* Stats + Nav + Logout */}
-                    <div className="header-stats">
-                        <div className="stat-card">
-                            <span className="stat-label">Total Staff</span>
-                            <span className="stat-value">{stats.total}</span>
-                        </div>
-                        <div className="stat-card">
-                            <span className="stat-label">Online Now</span>
-                            <span className="stat-value text-success">{Object.keys(onlineEmployees).length}</span>
-                        </div>
-                        <div className="stat-card socket-status-card">
-                            <span className="stat-label">Live Stream</span>
-                            <span className={`stat-value socket-${socketStatus}`}>
-                                {socketStatus === 'connected' ? '● Live' : '○ Off'}
-                            </span>
-                            {lastHeartbeat && <small className="last-heartbeat">{lastHeartbeat}</small>}
-                        </div>
+                    <div className="topbar-right">
+                        <span className="env-pill">{environmentLabel}</span>
+                        <span className={`live-pill ${socketStatus === 'connected' ? 'online' : 'offline'}`}>
+                            {socketStatus === 'connected' ? 'Live Connected' : 'Offline'}
+                        </span>
+                        <button onClick={handleLogout} className="btn-logout">Logout</button>
                     </div>
-
-                    {/* Navigation */}
-                    <div className="tab-switcher">
-                        <button
-                            className={`tab-btn ${activeTab === 'map' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('map')}
-                        >
-                            Live Map
-                        </button>
-                        {user.role === 'HR Admin' && (
-                            <button
-                                className={`tab-btn ${activeTab === 'staff' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('staff')}
-                            >
-                                Staff & Sites
-                            </button>
-                        )}
-                        {user.role === 'HR Admin' && (
-                            <button className={`tab-btn ${activeTab === 'vehicles' ? 'active' : ''}`} onClick={() => setActiveTab('vehicles')}>Vehicles</button>
-                        )}
-                        {user.role === 'HR Admin' && (
-                            <button
-                                className={`tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('analytics')}
-                            >
-                                Analytics
-                            </button>
-                        )}
-                        {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
-                            <button
-                                className={`tab-btn ${activeTab === 'attendance' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('attendance')}
-                            >
-                                Attendance
-                            </button>
-                        )}
-                        {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
-                            <button
-                                className={`tab-btn ${activeTab === 'reports' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('reports')}
-                            >
-                                Reports
-                            </button>
-                        )}
-                        {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
-                            <button
-                                className={`tab-btn ${activeTab === 'route_tracking' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('route_tracking')}
-                            >
-                                Routes
-                            </button>
-                        )}
-                        {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
-                            <button
-                                className={`tab-btn ${activeTab === 'idle_reporting' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('idle_reporting')}
-                            >
-                                Idle
-                            </button>
-                        )}
-                        {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
-                            <button
-                                className={`tab-btn ${activeTab === 'location_logs' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('location_logs')}
-                            >
-                                Loc. Logs
-                            </button>
-                        )}
-                        {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
-                            <button
-                                className={`tab-btn ${activeTab === 'geo_fence_alerts' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('geo_fence_alerts')}
-                            >
-                                ⚠ Geo Alerts{geoFenceAlerts.length > 0 ? ` (${gfTotal || geoFenceAlerts.length})` : ''}
-                            </button>
-                        )}
-                        {(user.role === 'HR Admin' || user.role === 'Site Supervisor') && (
-                            <button
-                                className={`tab-btn ${activeTab === 'biometrics' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('biometrics')}
-                            >
-                                Biometrics
-                            </button>
-                        )}
-                        {(user.role === 'HR Admin') && (
-                            <button
-                                className={`tab-btn ${activeTab === 'access_roles' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('access_roles')}
-                            >
-                                Access
-                            </button>
-                        )}
-                    </div>
-
-                    <button onClick={handleLogout} className="btn-logout">Logout</button>
                 </header>
 
-                <div className="dashboard-layout">
+                <div className="dashboard-shell">
+                    <aside className="dashboard-nav">
+                        <div className="dashboard-nav-brand">
+                            <img src="/berkeley-logo.png" alt="Berkeley" className="dashboard-nav-logo-image" />
+                            <div>
+                                <div className="dashboard-nav-logo-title">{BRANDING.portalTitle}</div>
+                                <div className="dashboard-nav-logo-sub">{BRANDING.portalSubtitle}</div>
+                            </div>
+                        </div>
+                        {['Main', 'Operations', 'Advanced'].map((group) => {
+                            const groupTabs = navTabs.filter((tab) => tab.group === group);
+                            if (!groupTabs.length) return null;
+                            return (
+                                <div key={group} className="dashboard-nav-group">
+                                    <div className="dashboard-nav-header">{group}</div>
+                                    <div className="dashboard-nav-list">
+                                        {groupTabs.map((tab) => (
+                                            <button
+                                                key={tab.key}
+                                                className={`dashboard-nav-item ${activeTab === tab.key ? 'active' : ''}`}
+                                                onClick={() => setActiveTab(tab.key)}
+                                            >
+                                                <span>{tab.label}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </aside>
+
+                    <main className="dashboard-main">
+                        <div className="kpi-strip">
+                            <div className="kpi-strip-card blue">
+                                <div className="kpi-strip-value">{stats.total}</div>
+                                <div className="kpi-strip-label">Total Employees</div>
+                            </div>
+                            <div className="kpi-strip-card green">
+                                <div className="kpi-strip-value">{checkedInSummary.totalCheckedIn || 0}</div>
+                                <div className="kpi-strip-label">Checked In</div>
+                            </div>
+                            <div className="kpi-strip-card amber">
+                                <div className="kpi-strip-value">{Math.max((checkedInSummary.totalCheckedIn || 0) - (checkedInSummary.lateCount || 0), 0)}</div>
+                                <div className="kpi-strip-label">In-Time</div>
+                            </div>
+                            <div className="kpi-strip-card red">
+                                <div className="kpi-strip-value">{checkedInSummary.lateCount || 0}</div>
+                                <div className="kpi-strip-label">Late</div>
+                            </div>
+                            <div className="kpi-strip-card purple">
+                                <div className="kpi-strip-value">{Object.keys(onlineEmployees).length}</div>
+                                <div className="kpi-strip-label">Online Now</div>
+                            </div>
+                        </div>
+
+                        <div className="dashboard-layout">
                     <ErrorBoundary label={activeTab}>
                         {activeTab === 'map' ? (
                         <MapDashboard />
@@ -1060,8 +1104,12 @@ const HRDashboard = () => {
                         />
                     ) : activeTab === 'reports' ? (
                         <ReportsView />
+                    ) : activeTab === 'leave_calendar' ? (
+                        <LeaveCalendarView />
                     ) : activeTab === 'attendance' ? (
                         <AttendanceLog />
+                    ) : activeTab === 'rosters' ? (
+                        <RosterPlanningView />
                     ) : activeTab === 'geo_fence_alerts' ? (
                         <GeoFenceAlertsView />
                     ) : activeTab === 'location_logs' ? (
@@ -1074,10 +1122,28 @@ const HRDashboard = () => {
                         <IdleReportingView />
                     ) : activeTab === 'biometrics' ? (
                         <BiometricsView
-                            setShowModal={setShowBiometricModal}
-                            setCurrentDevice={setCurrentBiometricDevice}
+                            onAddTerminal={() => {
+                                setCurrentBiometricDevice({
+                                    name: '',
+                                    deviceKey: '',
+                                    siteId: '',
+                                    type: 'RA08',
+                                    ipAddress: '',
+                                    port: '',
+                                    config: {},
+                                });
+                                setShowBiometricModal(true);
+                            }}
+                            onEditTerminal={(device) => {
+                                setCurrentBiometricDevice(device);
+                                setShowBiometricModal(true);
+                            }}
                             onDelete={handleDeleteBiometricDevice}
                         />
+                    ) : activeTab === 'metrics' ? (
+                        <MetricsDashboardView />
+                    ) : activeTab === 'integrations' ? (
+                        <OdooIntegrationView />
                     ) : activeTab === 'access_roles' ? (
                         <div className="management-view">
                             <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '2rem', height: '100%', alignItems: 'start' }}>
@@ -1126,7 +1192,7 @@ const HRDashboard = () => {
                                                             onClick={handleStartEditPermissions}
                                                             style={{ fontSize: '0.875rem', padding: '0.5rem 1rem' }}
                                                         >
-                                                            ✏️ Edit Permissions
+                                                            Edit Permissions
                                                         </button>
                                                     ) : (
                                                         <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -1162,7 +1228,7 @@ const HRDashboard = () => {
                                                         alignItems: 'center',
                                                         gap: '0.5rem'
                                                     }}>
-                                                        <span style={{ fontSize: '1.25rem' }}>🔐</span> Available Screens & Permissions
+                                                        Available Screens & Permissions
                                                     </h4>
 
                                                     {isEditingPermissions ? (
@@ -1202,7 +1268,7 @@ const HRDashboard = () => {
                                                                             flexShrink: 0,
                                                                             marginTop: '2px'
                                                                         }}>
-                                                                            {isChecked && '✓'}
+                                                                            {isChecked && 'OK'}
                                                                         </div>
                                                                         <div>
                                                                             <div style={{ fontWeight: '600', color: '#1e293b', marginBottom: '0.25rem' }}>
@@ -1293,16 +1359,11 @@ const HRDashboard = () => {
                                 </div>
                             </div>
                         </div>
-                    ) : activeTab === 'biometrics' ? (
-                        <BiometricsView
-                            setShowModal={setShowBiometricModal}
-                            setCurrentDevice={setCurrentBiometricDevice}
-                            onDelete={handleDeleteBiometricDevice}
-                        />
-                    ) : null
-                        }
+                    ) : null}
                     </ErrorBoundary>
-                </div >
+                        </div>
+                    </main>
+                </div>
 
                 {
                     showUserModal && (
@@ -1369,6 +1430,19 @@ const HRDashboard = () => {
                                             )}
                                         </div>
                                         <div className="form-group">
+                                            <label>Face PIN (fallback, 4-10 digits)</label>
+                                            <input
+                                                type="password"
+                                                value={currentUser.facePin || ''}
+                                                onChange={(e) => setCurrentUser({ ...currentUser, facePin: e.target.value })}
+                                                placeholder={currentUser.id ? 'Leave blank to keep current PIN' : 'e.g. 1234'}
+                                                className={(validationErrors as any).facePin ? 'input-error' : ''}
+                                            />
+                                            {(validationErrors as any).facePin && (
+                                                <span className="error-message">{(validationErrors as any).facePin}</span>
+                                            )}
+                                        </div>
+                                        <div className="form-group">
                                             <label>Role</label>
                                             <select
                                                 value={currentUser.role_id || currentUser.roleId}
@@ -1406,13 +1480,70 @@ const HRDashboard = () => {
                                             </select>
                                         </div>
                                         <div className="form-group">
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={currentUser.faceAuthEnabled !== false}
+                                                    onChange={(e) => setCurrentUser({ ...currentUser, faceAuthEnabled: e.target.checked })}
+                                                />
+                                                Enable face login for this employee
+                                            </label>
+                                        </div>
+                                        <div className="form-group">
                                             <label>Photo</label>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                {(currentUser.photo_url || currentUser.photoUrl) && !currentUser.photoHelper && (
-                                                    <img src={currentUser.photo_url || currentUser.photoUrl} alt="Current" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
-                                                )}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                                                    <div
+                                                        style={{
+                                                            width: '64px',
+                                                            height: '64px',
+                                                            borderRadius: '50%',
+                                                            border: '1px solid #cbd5e1',
+                                                            background: '#f8fafc',
+                                                            overflow: 'hidden',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center'
+                                                        }}
+                                                    >
+                                                        {(currentUser.photo_url || currentUser.photoUrl) ? (
+                                                            <img
+                                                                src={currentUser.photo_url || currentUser.photoUrl}
+                                                                alt="Current"
+                                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                                onError={(e) => {
+                                                                    e.currentTarget.style.display = 'none';
+                                                                    const fallback = e.currentTarget.parentElement?.querySelector('[data-photo-fallback]') as HTMLElement | null;
+                                                                    if (fallback) fallback.style.display = 'flex';
+                                                                }}
+                                                            />
+                                                        ) : null}
+                                                        <div
+                                                            data-photo-fallback
+                                                            style={{
+                                                                display: (currentUser.photo_url || currentUser.photoUrl) ? 'none' : 'flex',
+                                                                width: '100%',
+                                                                height: '100%',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                fontWeight: 700,
+                                                                color: '#475569',
+                                                                fontSize: '0.95rem',
+                                                                background: '#eef2ff'
+                                                            }}
+                                                        >
+                                                            {`${(currentUser.first_name || currentUser.firstName || '?').toString().charAt(0)}${(currentUser.last_name || currentUser.lastName || '').toString().charAt(0)}`.toUpperCase()}
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                                                        Current saved photo
+                                                    </div>
+                                                </div>
                                                 {currentUser.photoHelper && (
-                                                    <img src={currentUser.photoHelper} alt="Preview" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                                                        <img src={currentUser.photoHelper} alt="Preview" style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #cbd5e1' }} />
+                                                        <div style={{ fontSize: '0.78rem', color: '#64748b' }}>New upload preview</div>
+                                                    </div>
                                                 )}
                                                 <input
                                                     type="file"
@@ -1430,6 +1561,19 @@ const HRDashboard = () => {
                                                 />
                                             </div>
                                         </div>
+                                        <FaceEnrollmentManager
+                                            token={user.token}
+                                            userId={currentUser.id}
+                                            staffId={currentUser.staff_id || currentUser.staffId}
+                                            initialEnrolled={!!currentUser.face_descriptor || !!currentUser.faceEnrolled || !!currentUser.face_enrolled}
+                                            initialEnrollmentImageUrl={currentUser.face_enrollment_photo_url || currentUser.faceEnrollmentPhotoUrl || ''}
+                                            fallbackProfilePhotoUrl={currentUser.photo_url || currentUser.photoUrl || ''}
+                                            onStatusChange={(enrolled, enrollmentImageUrl) => setCurrentUser({
+                                                ...currentUser,
+                                                faceEnrolled: enrolled,
+                                                face_enrollment_photo_url: enrollmentImageUrl || null
+                                            })}
+                                        />
                                     </div>
                                     <div className="modal-footer">
                                         <button type="button" className="btn-secondary" onClick={() => setShowUserModal(false)}>Cancel</button>
@@ -1614,89 +1758,17 @@ const HRDashboard = () => {
                     )
                 }
 
-                {
-                    showBiometricModal && (
-                        <div className="modal-overlay">
-                            <div className="modal-content">
-                                <h3>{currentBiometricDevice.id ? 'Edit' : 'Add'} Biometric Terminal</h3>
-                                <form onSubmit={handleSaveBiometricDevice}>
-                                    <div className="form-grid" style={{ gridTemplateColumns: '1fr' }}>
-                                        <div className="form-group">
-                                            <label>Device Name *</label>
-                                            <input
-                                                type="text"
-                                                value={currentBiometricDevice.name}
-                                                onChange={(e) => setCurrentBiometricDevice({ ...currentBiometricDevice, name: e.target.value })}
-                                                required
-                                                placeholder="e.g. Main Entrance RA08"
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Device Key / Serial Number *</label>
-                                            <input
-                                                type="text"
-                                                value={currentBiometricDevice.deviceKey !== undefined ? currentBiometricDevice.deviceKey : (currentBiometricDevice.device_key || '')}
-                                                onChange={(e) => setCurrentBiometricDevice({ ...currentBiometricDevice, deviceKey: e.target.value })}
-                                                required
-                                                placeholder="e.g. RA08-01234567"
-                                                disabled={!!currentBiometricDevice.id}
-                                            />
-                                            <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
-                                                Unique identifier sent by the device hardware.
-                                            </p>
-                                        </div>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '7fr 3fr', gap: '1rem' }}>
-                                            <div className="form-group">
-                                                <label>IP Address / Hostname</label>
-                                                <input
-                                                    type="text"
-                                                    value={currentBiometricDevice.ipAddress !== undefined ? currentBiometricDevice.ipAddress : (currentBiometricDevice.ip_address || '')}
-                                                    onChange={(e) => setCurrentBiometricDevice({ ...currentBiometricDevice, ipAddress: e.target.value })}
-                                                    placeholder="e.g. head-office.dynalias.com"
-                                                />
-                                            </div>
-                                            <div className="form-group">
-                                                <label>Port</label>
-                                                <input
-                                                    type="number"
-                                                    value={currentBiometricDevice.port !== undefined ? currentBiometricDevice.port : (currentBiometricDevice.port || '')}
-                                                    onChange={(e) => setCurrentBiometricDevice({ ...currentBiometricDevice, port: parseInt(e.target.value) || '' })}
-                                                    placeholder="8092"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Assigned Site</label>
-                                            <select
-                                                value={currentBiometricDevice.siteId !== undefined ? currentBiometricDevice.siteId : (currentBiometricDevice.site_id || '')}
-                                                onChange={(e) => setCurrentBiometricDevice({ ...currentBiometricDevice, siteId: e.target.value })}
-                                            >
-                                                <option value="">Global / Unassigned</option>
-                                                {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                                            </select>
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Terminal Type</label>
-                                            <select
-                                                value={currentBiometricDevice.type || 'RA08'}
-                                                onChange={(e) => setCurrentBiometricDevice({ ...currentBiometricDevice, type: e.target.value })}
-                                            >
-                                                <option value="RA08">RA08 (AIBOX)</option>
-                                                <option value="Generic">Generic Biometric</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div className="modal-footer">
-                                        <button type="button" className="btn-secondary" onClick={() => setShowBiometricModal(false)}>Cancel</button>
-                                        <button type="submit" className="btn-primary" disabled={isBiometricLoading}>
-                                            {isBiometricLoading ? 'Saving...' : 'Save Device'}
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    )
-                }
+                <BiometricDeviceModal
+                    open={showBiometricModal}
+                    onClose={() => setShowBiometricModal(false)}
+                    initial={currentBiometricDevice}
+                    sites={sites}
+                    authToken={user?.token || ''}
+                    onSaved={() => {
+                        if (user?.token) fetchBiometricDevices(user.token);
+                    }}
+                    showToast={showToast}
+                />
 
                 {/* Toast Notifications */}
                 <div className="toast-container">

@@ -62,6 +62,9 @@
                         <t t-elif="request.params.get('success') == 'visitor_registered'">
                             <i class="fa fa-check-circle me-2"/>Visitor registered successfully.
                         </t>
+                        <t t-elif="request.params.get('success') == 'checklist_toggled'">
+                            <i class="fa fa-check-circle me-2"/>Checklist updated.
+                        </t>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"/>
                     </div>
                 </t>
@@ -130,6 +133,30 @@
                         </t>
                         <t t-elif="request.params.get('error') == 'visitor_register_failed'">
                             <i class="fa fa-exclamation-circle me-2"/>Could not save the visitor. Try again or use the back office.
+                        </t>
+                        <t t-elif="request.params.get('error') == 'task_checklist_incomplete'">
+                            <i class="fa fa-exclamation-circle me-2"/>Please tick every mandatory checklist item before completing this task.
+                        </t>
+                        <t t-elif="request.params.get('error') == 'task_complete_failed'">
+                            <i class="fa fa-exclamation-circle me-2"/>Could not complete this task. Please review the checklist and try again.
+                        </t>
+                        <t t-elif="request.params.get('error') == 'task_start_failed'">
+                            <i class="fa fa-exclamation-circle me-2"/>Could not start this task. Please try again.
+                        </t>
+                        <t t-elif="request.params.get('error') == 'task_cannot_start'">
+                            <i class="fa fa-exclamation-circle me-2"/>This task cannot be started (it may already be in progress or completed).
+                        </t>
+                        <t t-elif="request.params.get('error') == 'checklist_item_not_found'">
+                            <i class="fa fa-exclamation-circle me-2"/>Checklist item not found.
+                        </t>
+                        <t t-elif="request.params.get('error') == 'not_authorized'">
+                            <i class="fa fa-exclamation-circle me-2"/>You are not allowed to modify this task.
+                        </t>
+                        <t t-elif="request.params.get('error') == 'task_not_editable'">
+                            <i class="fa fa-exclamation-circle me-2"/>This task can no longer be edited.
+                        </t>
+                        <t t-elif="request.params.get('error') == 'checklist_toggle_failed'">
+                            <i class="fa fa-exclamation-circle me-2"/>Could not update checklist item. Please try again.
                         </t>
                         <t t-else="">
                             <i class="fa fa-exclamation-circle me-2"/>An error occurred
@@ -1532,14 +1559,65 @@
                                                                 <span class="ms-2">
                                                                     <t t-esc="task.state.replace('_', ' ').title()"/>
                                                                 </span>
+                                                                <t t-set="task_pending_mandatory" t-value="sum(1 for _i in task.checklist_ids if _i.mandatory and not _i.completed)"/>
+                                                                <t t-if="task_pending_mandatory">
+                                                                    <span class="badge bg-warning text-dark ms-2" title="Mandatory checklist items left">
+                                                                        <i class="fa fa-list-ul me-1"/>
+                                                                        <t t-esc="task_pending_mandatory"/> left
+                                                                    </span>
+                                                                </t>
                                                             </small>
                                                         </div>
-                                                        <t t-if="task.state not in ['completed', 'cancelled']">
-                                                            <a t-attf-href="/guardpro/mobile/task/complete/{{task.id}}" class="btn btn-sm btn-success">
-                                                                <i class="fa fa-check me-1"/>Complete
-                                                            </a>
+                                                        <t t-if="task.state in ['draft', 'assigned']">
+                                                            <form t-attf-action="/guardpro/mobile/task/start/{{task.id}}" method="post" class="m-0">
+                                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                                <input type="hidden" name="next" value="/guardpro/mobile/tours"/>
+                                                                <button type="submit" class="btn btn-sm btn-primary">
+                                                                    <i class="fa fa-play me-1"/>Start
+                                                                </button>
+                                                            </form>
+                                                        </t>
+                                                        <t t-elif="task.state not in ['completed', 'cancelled']">
+                                                            <!-- Prior implementation rendered this as a plain
+                                                                 <a href="..."> which the browser issues as GET;
+                                                                 the server route is POST-only (csrf=True) so every
+                                                                 tap returned 405 and the task stayed in-progress,
+                                                                 keeping "Complete Tour" locked forever. Submit
+                                                                 via form with CSRF and a ``next`` field so we
+                                                                 land back on the Tours screen. -->
+                                                            <form t-attf-action="/guardpro/mobile/task/complete/{{task.id}}" method="post" class="m-0">
+                                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                                <input type="hidden" name="next" value="/guardpro/mobile/tours"/>
+                                                                <button type="submit" t-att-disabled="'disabled' if task_pending_mandatory else None" t-attf-class="btn btn-sm {{task_pending_mandatory and 'btn-secondary' or 'btn-success'}}">
+                                                                    <i class="fa fa-check me-1"/>Complete
+                                                                </button>
+                                                            </form>
                                                         </t>
                                                     </div>
+                                                    <!-- Mandatory + optional checklist items rendered inline
+                                                         so guards can satisfy ``action_complete`` from inside
+                                                         the Tour card. Without this, any task with a mandatory
+                                                         checklist is un-completable on-device, which blocks
+                                                         the whole tour. -->
+                                                    <t t-if="task.state in ['in_progress', 'assigned'] and task.checklist_ids">
+                                                        <div class="mt-2">
+                                                            <t t-foreach="task.checklist_ids" t-as="item">
+                                                                <form t-attf-action="/guardpro/mobile/task/checklist/{{item.id}}/toggle" method="post" class="d-flex align-items-start mb-1">
+                                                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                                    <input type="hidden" name="next" value="/guardpro/mobile/tours"/>
+                                                                    <button type="submit" t-attf-class="btn btn-sm me-2 {{item.completed and 'btn-success' or (item.mandatory and 'btn-outline-danger' or 'btn-outline-secondary')}}" t-attf-title="{{item.completed and 'Tap to uncheck' or 'Tap to mark done'}}">
+                                                                        <i t-attf-class="fa {{item.completed and 'fa-check-square' or 'fa-square-o'}}"/>
+                                                                    </button>
+                                                                    <span t-attf-class="small flex-grow-1 align-self-center {{item.completed and 'text-muted text-decoration-line-through' or ''}}">
+                                                                        <t t-esc="item.name"/>
+                                                                        <t t-if="item.mandatory and not item.completed">
+                                                                            <span class="badge bg-danger ms-1">Required</span>
+                                                                        </t>
+                                                                    </span>
+                                                                </form>
+                                                            </t>
+                                                        </div>
+                                                    </t>
                                                 </div>
                                             </t>
                                         </div>
@@ -2704,10 +2782,44 @@
                                         </div>
                                         <span class="badge bg-primary">In Progress</span>
                                     </div>
+                                    <!-- Same rationale as the Tour card: expose the
+                                         task checklist so guards can tick off
+                                         mandatory items. ``action_complete``
+                                         raises "Please complete all mandatory
+                                         checklist items" otherwise and the
+                                         page silently bounces to the dashboard
+                                         with no clue why. -->
+                                    <t t-set="task_pending_mandatory" t-value="sum(1 for _i in task.checklist_ids if _i.mandatory and not _i.completed)"/>
+                                    <t t-if="task.checklist_ids">
+                                        <div class="mb-2">
+                                            <t t-foreach="task.checklist_ids" t-as="item">
+                                                <form t-attf-action="/guardpro/mobile/task/checklist/{{item.id}}/toggle" method="post" class="d-flex align-items-start mb-1">
+                                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                    <input type="hidden" name="next" value="/guardpro/mobile/tasks"/>
+                                                    <button type="submit" t-attf-class="btn btn-sm me-2 {{item.completed and 'btn-success' or (item.mandatory and 'btn-outline-danger' or 'btn-outline-secondary')}}" t-attf-title="{{item.completed and 'Tap to uncheck' or 'Tap to mark done'}}">
+                                                        <i t-attf-class="fa {{item.completed and 'fa-check-square' or 'fa-square-o'}}"/>
+                                                    </button>
+                                                    <span t-attf-class="small flex-grow-1 align-self-center {{item.completed and 'text-muted text-decoration-line-through' or ''}}">
+                                                        <t t-esc="item.name"/>
+                                                        <t t-if="item.mandatory and not item.completed">
+                                                            <span class="badge bg-danger ms-1">Required</span>
+                                                        </t>
+                                                    </span>
+                                                </form>
+                                            </t>
+                                            <t t-if="task_pending_mandatory">
+                                                <small class="text-danger d-block mt-1">
+                                                    <i class="fa fa-exclamation-circle me-1"/>
+                                                    <t t-esc="task_pending_mandatory"/> mandatory item(s) left before you can complete this task.
+                                                </small>
+                                            </t>
+                                        </div>
+                                    </t>
                                     <div class="d-flex gap-2">
                                         <form t-attf-action="/guardpro/mobile/task/complete/{{task.id}}" method="post" class="flex-grow-1">
                                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                            <button type="submit" class="btn btn-sm btn-success w-100">
+                                            <input type="hidden" name="next" value="/guardpro/mobile/tasks"/>
+                                            <button type="submit" t-att-disabled="'disabled' if task_pending_mandatory else None" t-attf-class="btn btn-sm w-100 {{task_pending_mandatory and 'btn-secondary' or 'btn-success'}}">
                                                 <i class="fa fa-check me-1"/>Complete
                                             </button>
                                         </form>

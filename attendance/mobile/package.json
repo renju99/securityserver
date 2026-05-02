@@ -5,7 +5,11 @@
   "description": "A sample Apache Cordova application that responds to the deviceready event.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sync:www": "bash ../scripts/sync-frontend-to-cordova-www.sh",
+    "build:android": "npm run sync:www && npx cordova build android",
+    "prepare:android-signing": "node ../scripts/write-android-release-signing.js",
+    "build:android:release": "npm run sync:www && npm run prepare:android-signing && npx cordova compile android --release && cd platforms/android && ./gradlew :app:assembleRelease"
   },
   "keywords": [
     "ecosystem:cordova"

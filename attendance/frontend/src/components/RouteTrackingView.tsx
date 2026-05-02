@@ -138,7 +138,7 @@ const RouteTrackingView = () => {
         <>
             <div className="route-tracking-view sidebar animate-fade-in" style={{ width: '320px', minWidth: '320px', display: 'flex', flexDirection: 'column', padding: '1.2rem', gap: '1.2rem' }}>
                 <div className="filter-section">
-                    <h3>🗺️ Route Tracking</h3>
+                    <h3>Route Tracking</h3>
                     <div className="filter-group">
                         <label>Staff Member</label>
                         <select value={selectedStaff} onChange={(e) => setSelectedStaff(e.target.value)} className="filter-select" disabled={isLoading}>

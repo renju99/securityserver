@@ -2,6 +2,7 @@ package com.berkeleyuae.guardpro
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -13,23 +14,32 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.Ndef
+import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
 import android.webkit.*
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.content.FileProvider
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
+import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import org.json.JSONObject
 
 class TwaLauncherActivity : AppCompatActivity() {
@@ -38,9 +48,31 @@ class TwaLauncherActivity : AppCompatActivity() {
     private val WEBVIEW_MEDIA_PERMISSION_REQUEST_CODE = 1002
     private val NOTIFICATION_PERM_REQUEST = 1003
     private val BACKGROUND_LOCATION_REQUEST_CODE = 1004
+    private val CAMERA_FOR_FILECHOOSER_REQUEST_CODE = 1005
     private lateinit var webView: WebView
     private var nfcAdapter: NfcAdapter? = null
     private var pendingWebPermissionRequest: PermissionRequest? = null
+
+    /**
+     * File-chooser state for ``<input type="file">`` in the WebView.
+     *
+     * Android's WebView routes every file-picker tap through
+     * ``WebChromeClient.onShowFileChooser``; we must call the provided
+     * ``ValueCallback`` exactly once (with the chosen URIs or ``null``
+     * for cancel) or the ``<input>`` stays locked and a second tap is
+     * ignored.
+     *
+     * ``pendingFileChooserCallback`` holds the callback while the
+     * system picker is on screen, and ``pendingCameraOutputUri`` holds
+     * the temp file URI we asked the camera app to write into - we
+     * need to surface that URI back to the WebView if the user took
+     * a fresh photo instead of picking a gallery item.
+     */
+    private var pendingFileChooserCallback: ValueCallback<Array<Uri>>? = null
+    private var pendingCameraOutputUri: Uri? = null
+    private var pendingFileChooserWantsCamera: Boolean = false
+    private var pendingFileChooserParams: WebChromeClient.FileChooserParams? = null
+    private lateinit var fileChooserLauncher: ActivityResultLauncher<Intent>
     @Volatile
     private var emergencyNativeHttpInFlight = false
     @Volatile
@@ -187,7 +219,18 @@ class TwaLauncherActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
+        // Register the ActivityResultLauncher BEFORE the WebView is
+        // attached - it must be registered during onCreate per the
+        // ActivityResultContracts contract and fires for every
+        // ``<input type="file">`` tap routed through our
+        // ``WebChromeClient.onShowFileChooser`` override.
+        fileChooserLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            handleFileChooserResult(result.resultCode, result.data)
+        }
+
         // Setup WebView UI
         setupWebView()
 
@@ -731,6 +774,69 @@ class TwaLauncherActivity : AppCompatActivity() {
                 consoleMessage?.let {
                     Log.d("WebViewConsole", "[${it.messageLevel()}] ${it.message()} -- From line ${it.lineNumber()} of ${it.sourceId()}")
                 }
+                return true
+            }
+
+            /**
+             * Handle ``<input type="file">`` taps inside the WebView.
+             *
+             * Without this override the file chooser silently no-ops
+             * and guards can never attach:
+             *   * incident / DAR / audit photos & videos,
+             *   * lost-and-found item photos,
+             *   * patrol scan evidence.
+             *
+             * We build a chooser that merges two intents:
+             *  - MediaStore.ACTION_IMAGE_CAPTURE (if the input's
+             *    'accept' mentions an image or a generic wildcard and
+             *    the device actually has a camera + we hold the
+             *    CAMERA runtime permission), and
+             *  - the system GET_CONTENT picker (which lets the user
+             *    pick from gallery / Drive / Files).
+             * If the user takes a fresh photo we surface the temp
+             * URI we passed to the camera back up to the WebView.
+             */
+            override fun onShowFileChooser(
+                webViewParam: WebView?,
+                filePathCallback: ValueCallback<Array<Uri>>?,
+                fileChooserParams: FileChooserParams?
+            ): Boolean {
+                if (filePathCallback == null) return false
+
+                // If a previous chooser is still dangling (shouldn't
+                // happen but defensive), cancel it so we never leak
+                // a stuck callback.
+                pendingFileChooserCallback?.onReceiveValue(null)
+                pendingFileChooserCallback = filePathCallback
+                pendingFileChooserParams = fileChooserParams
+
+                val acceptsImage = fileChooserParams?.acceptsImage() ?: false
+                val wantsCameraFirst =
+                    fileChooserParams?.isCaptureEnabled == true
+
+                val hasCameraHw = packageManager.hasSystemFeature(
+                    PackageManager.FEATURE_CAMERA_ANY
+                )
+                val cameraGranted = checkSelfPermission(
+                    Manifest.permission.CAMERA
+                ) == PackageManager.PERMISSION_GRANTED
+
+                pendingFileChooserWantsCamera = acceptsImage && hasCameraHw
+
+                if (acceptsImage && hasCameraHw && !cameraGranted) {
+                    // We can't launch the camera yet - ask for CAMERA
+                    // and resume the chooser from the permission
+                    // callback. The user still sees one prompt,
+                    // then the chooser.
+                    ActivityCompat.requestPermissions(
+                        this@TwaLauncherActivity,
+                        arrayOf(Manifest.permission.CAMERA),
+                        CAMERA_FOR_FILECHOOSER_REQUEST_CODE
+                    )
+                    return true
+                }
+
+                launchFileChooser(acceptsImage && hasCameraHw, wantsCameraFirst)
                 return true
             }
         }
@@ -1485,6 +1591,19 @@ class TwaLauncherActivity : AppCompatActivity() {
             }
             return
         }
+        if (requestCode == CAMERA_FOR_FILECHOOSER_REQUEST_CODE) {
+            // Camera permission decision came back while we were
+            // holding a ``<input type="file">`` open. Fire the
+            // chooser now - if the user denied, we fall back to
+            // gallery-only (no capture intent merged in).
+            val granted = grantResults.isNotEmpty() &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED
+            launchFileChooser(
+                includeCamera = granted && pendingFileChooserWantsCamera,
+                captureFirst = pendingFileChooserParams?.isCaptureEnabled == true
+            )
+            return
+        }
         if (requestCode == NOTIFICATION_PERM_REQUEST) {
             return
         }
@@ -1551,6 +1670,170 @@ class TwaLauncherActivity : AppCompatActivity() {
         } else {
             super.onBackPressed()
         }
+    }
+
+    /**
+     * Does the WebView's 'accept' attribute include an image type?
+     *
+     * Matches 'accept=image/any', 'accept=image/png,image/jpeg',
+     * or 'accept=' / unset (browser treats empty as "any file",
+     * which is effectively "any including images").
+     */
+    private fun WebChromeClient.FileChooserParams.acceptsImage(): Boolean {
+        val types = acceptTypes ?: return true
+        if (types.isEmpty()) return true
+        return types.any { t ->
+            val low = t.lowercase().trim()
+            low.isEmpty() || low == "*/*" ||
+                low.startsWith("image/") ||
+                low == ".jpg" || low == ".jpeg" || low == ".png" ||
+                low == ".gif" || low == ".webp" || low == ".heic"
+        }
+    }
+
+    /**
+     * Build + fire the chooser intent that combines the system file
+     * picker with an optional camera capture intent.
+     *
+     * Called from ``onShowFileChooser`` directly (camera permission
+     * already granted or not needed) and from
+     * ``onRequestPermissionsResult`` (after we prompted for CAMERA).
+     */
+    private fun launchFileChooser(includeCamera: Boolean, captureFirst: Boolean) {
+        val params = pendingFileChooserParams
+        val acceptTypes = params?.acceptTypes?.filter { it.isNotBlank() }?.toTypedArray()
+            ?: emptyArray()
+        val allowMultiple = params?.mode ==
+            WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE
+
+        val pickIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            // Honour the page's ``accept=`` attribute so the picker
+            // hides irrelevant file types (e.g. DAR photo input only
+            // offers images + documents, not audio).
+            if (acceptTypes.isNotEmpty()) {
+                type = acceptTypes.firstOrNull { !it.startsWith(".") } ?: "*/*"
+                putExtra(Intent.EXTRA_MIME_TYPES, acceptTypes)
+            } else {
+                type = "*/*"
+            }
+            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, allowMultiple)
+        }
+
+        // Optional camera capture intent - writes into a temp file we
+        // own, exposed via FileProvider.
+        var cameraIntent: Intent? = null
+        pendingCameraOutputUri = null
+        if (includeCamera) {
+            try {
+                val photoFile = createImageCaptureFile()
+                val uri = FileProvider.getUriForFile(
+                    this,
+                    "$packageName.fileprovider",
+                    photoFile
+                )
+                pendingCameraOutputUri = uri
+                cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                    putExtra(MediaStore.EXTRA_OUTPUT, uri)
+                    addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+            } catch (e: Exception) {
+                Log.w("FileChooser", "Cannot prepare camera capture intent: ${e.message}")
+                cameraIntent = null
+            }
+        }
+
+        val chooser = Intent(Intent.ACTION_CHOOSER).apply {
+            putExtra(
+                Intent.EXTRA_INTENT,
+                if (captureFirst && cameraIntent != null) cameraIntent else pickIntent,
+            )
+            putExtra(Intent.EXTRA_TITLE, "Select source")
+            val extras = mutableListOf<Intent>()
+            if (captureFirst && cameraIntent != null) {
+                extras.add(pickIntent)
+            } else if (cameraIntent != null) {
+                extras.add(cameraIntent)
+            }
+            if (extras.isNotEmpty()) {
+                putExtra(Intent.EXTRA_INITIAL_INTENTS, extras.toTypedArray())
+            }
+        }
+
+        try {
+            fileChooserLauncher.launch(chooser)
+        } catch (e: Exception) {
+            Log.e("FileChooser", "Failed to launch chooser: ${e.message}", e)
+            pendingFileChooserCallback?.onReceiveValue(null)
+            pendingFileChooserCallback = null
+            pendingFileChooserParams = null
+        }
+    }
+
+    /**
+     * Resolve the chooser result into an array of URIs and hand them
+     * to the WebView's ``ValueCallback``. Always clears the callback
+     * even on cancel so the next tap on the input works.
+     */
+    private fun handleFileChooserResult(resultCode: Int, data: Intent?) {
+        val cb = pendingFileChooserCallback
+        pendingFileChooserCallback = null
+        val cameraOutput = pendingCameraOutputUri
+        pendingCameraOutputUri = null
+        pendingFileChooserParams = null
+
+        if (cb == null) return
+
+        if (resultCode != Activity.RESULT_OK) {
+            cb.onReceiveValue(null)
+            return
+        }
+
+        val uris = mutableListOf<Uri>()
+
+        // ACTION_GET_CONTENT returns the URI via data.data, or
+        // data.clipData when MODE_OPEN_MULTIPLE was honoured.
+        data?.data?.let { uris.add(it) }
+        val clip = data?.clipData
+        if (clip != null) {
+            for (i in 0 until clip.itemCount) {
+                clip.getItemAt(i)?.uri?.let { if (!uris.contains(it)) uris.add(it) }
+            }
+        }
+
+        // ACTION_IMAGE_CAPTURE writes into the URI we passed in and
+        // returns an empty result. Detect "camera was the intent"
+        // heuristically: no data returned AND we had a pending
+        // cameraOutputUri AND the temp file exists with non-zero size.
+        if (uris.isEmpty() && cameraOutput != null) {
+            try {
+                val fd = contentResolver.openFileDescriptor(cameraOutput, "r")
+                val size = fd?.statSize ?: 0
+                fd?.close()
+                if (size > 0) uris.add(cameraOutput)
+            } catch (_: Exception) {
+                // Fall through with empty list - camera was cancelled
+                // or wrote nothing.
+            }
+        }
+
+        cb.onReceiveValue(if (uris.isEmpty()) null else uris.toTypedArray())
+    }
+
+    /**
+     * Create an empty JPEG file in the app's external "Pictures"
+     * directory. We use external-scoped storage so the file survives
+     * the camera app (which on some OEMs drops its handle before we
+     * return) and so the URI can be round-tripped through
+     * ``FileProvider`` without needing ``READ_EXTERNAL_STORAGE``.
+     */
+    private fun createImageCaptureFile(): File {
+        val stamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+        val dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+            ?: filesDir
+        if (!dir.exists()) dir.mkdirs()
+        return File.createTempFile("guardpro_${stamp}_", ".jpg", dir)
     }
 
     private companion object {

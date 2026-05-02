@@ -102,7 +102,7 @@ const FilterPanel = () => {
         <div className="filter-panel">
             <div className="filter-header">
                 <div className="filter-title">
-                    <span>🔍</span> Filters
+                    Filters
                     {hasFilters && <span className="filter-count">{selectedRoles.length + selectedSites.length + selectedShifts.length}</span>}
                 </div>
                 {hasFilters && (

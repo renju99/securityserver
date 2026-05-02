@@ -194,7 +194,7 @@ const GeoFenceAlertsView = () => {
                     <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>Loading alerts…</div>
                 ) : geoFenceAlerts.length === 0 ? (
                     <div style={{ padding: '3rem', textAlign: 'center' }}>
-                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>✅</div>
+                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>--</div>
                         <div style={{ fontWeight: 600, color: '#334155' }}>No geo-fence alerts</div>
                         <div style={{ color: '#94a3b8', fontSize: '0.875rem', marginTop: '0.25rem' }}>All staff are within their assigned sites.</div>
                     </div>

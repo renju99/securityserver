@@ -159,7 +159,7 @@ export default function MapDashboard() {
                                 lat: parseFloat(sites.find(s => s.id === (selectedSites[0] as number))!.latitude),
                                 lng: parseFloat(sites.find(s => s.id === (selectedSites[0] as number))!.longitude)
                             }}
-                            label={{ text: "📍 Site Location", className: 'site-label' }}
+                            label={{ text: "Site Location", className: 'site-label' }}
                         />
                     )}
 
@@ -178,8 +178,8 @@ export default function MapDashboard() {
                         .map((loc) => {
                             const isVehicle = (loc as any).departmentName === 'Vehicle' || (loc as any).department_name === 'Vehicle';
                             const iconUrl = isVehicle
-                                ? `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="14" fill="#6366f1" stroke="white" stroke-width="2"/><text x="16" y="21" font-size="14" text-anchor="middle">🚙</text></svg>')}`
-                                : `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="14" fill="#10b981" stroke="white" stroke-width="2"/><text x="16" y="21" font-size="14" text-anchor="middle">🧑‍💼</text></svg>')}`;
+                                ? `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="14" fill="#6366f1" stroke="white" stroke-width="2"/><text x="16" y="21" font-size="10" text-anchor="middle" fill="white" font-weight="700">VH</text></svg>')}`
+                                : `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="14" fill="#10b981" stroke="white" stroke-width="2"/><text x="16" y="21" font-size="10" text-anchor="middle" fill="white" font-weight="700">ST</text></svg>')}`;
 
                             return (
                                 <React.Fragment key={loc.employeeId}>

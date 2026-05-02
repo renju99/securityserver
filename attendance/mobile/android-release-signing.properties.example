@@ -1,0 +1,13 @@
+# Copy to: mobile/platforms/android/release-signing.properties
+# (That path is gitignored — never commit real values.)
+#
+# Gradle/Cordova accepts these keys (see app/build.gradle addSigningProps):
+#   storeFile       = absolute path to your .jks / .keystore
+#   storePassword   = keystore password
+#   keyAlias        = key alias inside the keystore
+#   keyPassword     = key password (often same as store password)
+
+storeFile=/absolute/path/to/release.keystore
+storePassword=CHANGE_ME
+keyAlias=berkeley-attendance
+keyPassword=CHANGE_ME

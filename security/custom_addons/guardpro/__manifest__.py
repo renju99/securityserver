@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Sentry - Security Guard Management',
-    'version': '18.0.1.1.67',
+    'version': '18.0.1.1.70',
     'category': 'Services/Security',
     'summary': 'Win premium guard contracts with an Odoo-native suite for mobile patrols, SLA automation, client portals, and analytics.',
     'description': """

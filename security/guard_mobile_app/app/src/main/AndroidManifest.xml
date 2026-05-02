@@ -16,8 +16,28 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!--
+        CAMERA is requested at runtime by:
+          * ``WebChromeClient.onPermissionRequest`` when the Emirates ID
+            scanner calls ``navigator.mediaDevices.getUserMedia({video:true})``
+            on the visitor registration / incident / audit screens.
+          * ``WebChromeClient.onShowFileChooser`` when the user taps
+            ``<input type="file" accept="image/*">`` and the OS picker
+            offers "Take photo" (Android routes that through the camera
+            app which inherits the caller's permission on Android 10+).
+        Without this declaration the runtime request is denied without
+        even showing the system dialog, so no camera UI ever appears
+        and the Android app-info screen hides "Camera" from the
+        permissions list.
+    -->
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <uses-feature android:name="android.hardware.nfc" android:required="false" />
+    <!-- Mark camera as optional so the APK still installs on devices
+         without a rear camera (tablets), falling back to file picker
+         from gallery. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
     <!--
         allowBackup=false: the app stores a live Odoo ``session_id`` cookie
@@ -80,6 +100,23 @@
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
+
+        <!--
+            FileProvider used by TwaLauncherActivity to hand the
+            system camera app a content:// URI for photo capture
+            triggered from <input type="file" accept="image/*"
+            capture>. The authority MUST match the one built in
+            Kotlin code: ``$packageName.fileprovider``.
+        -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider_paths" />
+        </provider>
 
     </application>
 </manifest>

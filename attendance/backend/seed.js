@@ -6,7 +6,13 @@ const pool = new Pool({
 });
 
 async function seed() {
-    const passwordHash = await bcrypt.hash('berkeley123', 10);
+    const isProd = process.env.NODE_ENV === 'production';
+    const demoPassword = process.env.SEED_DEMO_PASSWORD || (isProd ? null : 'berkeley123');
+    if (!demoPassword) {
+        console.error('Refusing to seed: set SEED_DEMO_PASSWORD when NODE_ENV=production (never use a dev default in prod).');
+        process.exit(1);
+    }
+    const passwordHash = await bcrypt.hash(demoPassword, 10);
 
     const employees = [
         { staffId: 'ST374', email: 'st374@berkeleyuae.com', roleId: 4, siteId: 1, name: 'Operations' },

@@ -2,6 +2,9 @@ import { useEffect, useState, useRef } from 'react'
 import { io } from 'socket.io-client'
 import { BrowserRouter, HashRouter, Routes, Route, Link } from 'react-router-dom'
 import HRDashboard from './HRDashboard'
+import FaceLoginCard from './components/FaceLoginCard'
+import HREnrollmentMobile from './components/HREnrollmentMobile'
+import KioskFaceAttendance from './components/KioskFaceAttendance'
 import './App.css'
 
 declare global {
@@ -49,8 +52,10 @@ function EmployeeView() {
   const [token, setToken] = useState(localStorage.getItem('authToken') || '');
   const [tempId, setTempId] = useState('');
   const [password, setPassword] = useState('');
+  const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [attendanceStatus, setAttendanceStatus] = useState('loading'); // 'checked_in', 'checked_out', 'loading'
+  const OFFLINE_ATTENDANCE_QUEUE_KEY = 'offlineAttendanceActionsV1';
 
   const [lastUpdate, setLastUpdate] = useState(null);
 
@@ -60,7 +65,7 @@ function EmployeeView() {
       if (window.AndroidBridge && typeof window.AndroidBridge.remoteLog === 'function') {
         window.AndroidBridge.remoteLog(tag, msg);
       } else {
-        fetch('https://attendance.berkeleyuae.com/api/debug/log', {
+        fetch('/api/debug/log', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ tag, msg })
@@ -306,6 +311,7 @@ function EmployeeView() {
 
     const handleConnect = () => {
       setStatus('connected');
+      flushOfflineAttendanceQueue();
       if (staffId && !window.isNativeApp) {
         startTracking();
       }
@@ -362,6 +368,38 @@ function EmployeeView() {
     };
   }, [staffId, token]);
 
+  const enqueueOfflineAttendanceAction = (entry: any) => {
+    try {
+      const existing = JSON.parse(localStorage.getItem(OFFLINE_ATTENDANCE_QUEUE_KEY) || '[]');
+      const queue = Array.isArray(existing) ? existing : [];
+      queue.push(entry);
+      localStorage.setItem(OFFLINE_ATTENDANCE_QUEUE_KEY, JSON.stringify(queue.slice(-250)));
+    } catch (err) {
+      console.error('Failed to queue offline attendance action', err);
+    }
+  };
+
+  const flushOfflineAttendanceQueue = async () => {
+    if (!token) return;
+    try {
+      const existing = JSON.parse(localStorage.getItem(OFFLINE_ATTENDANCE_QUEUE_KEY) || '[]');
+      if (!Array.isArray(existing) || existing.length === 0) return;
+      const response = await fetch('/api/attendance/offline-sync', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ entries: existing })
+      });
+      if (!response.ok) return;
+      localStorage.removeItem(OFFLINE_ATTENDANCE_QUEUE_KEY);
+      remoteLog('OFFLINE_SYNC', `Replayed ${existing.length} queued attendance actions`);
+    } catch (err) {
+      console.error('Offline queue replay failed', err);
+    }
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
@@ -377,28 +415,53 @@ function EmployeeView() {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('staffId', data.user.staffId);
-        localStorage.setItem('firstName', data.user.firstName || '');
-        localStorage.setItem('lastName', data.user.lastName || '');
-        localStorage.setItem('authToken', data.token);
-        setStaffId(data.user.staffId);
-        setFirstName(data.user.firstName || '');
-        setLastName(data.user.lastName || '');
-        setToken(data.token);
-
-        // Push token to Native TWA Bridge
-        if (window.AndroidBridge) {
-          window.AndroidBridge.postToken(data.token);
-        }
-
-        // Page will reload or state will update deviceready in native
-        if (window.isNativeApp) window.location.reload();
+        applyAuthData(data);
       } else {
         setError(data.error || 'Login failed');
       }
     } catch (err) {
       setError('Network error. Please try again.');
     }
+  };
+
+  const handlePinLogin = async () => {
+    setError('');
+    if (!tempId.trim() || !pin.trim()) {
+      setError('Enter Staff ID and PIN to continue.');
+      return;
+    }
+    try {
+      const baseUrl = isCordova ? 'https://attendance.berkeleyuae.com' : '';
+      const response = await fetch(`${baseUrl}/api/auth/pin-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ staffId: tempId.trim(), pin: pin.trim() })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error || 'PIN login failed');
+        return;
+      }
+      applyAuthData(data);
+    } catch (_err) {
+      setError('Network error. Please try again.');
+    }
+  };
+
+  const applyAuthData = (data: any) => {
+    localStorage.setItem('staffId', data.user.staffId);
+    localStorage.setItem('firstName', data.user.firstName || '');
+    localStorage.setItem('lastName', data.user.lastName || '');
+    localStorage.setItem('authToken', data.token);
+    setStaffId(data.user.staffId);
+    setFirstName(data.user.firstName || '');
+    setLastName(data.user.lastName || '');
+    setToken(data.token);
+
+    if (window.AndroidBridge) {
+      window.AndroidBridge.postToken(data.token);
+    }
+    if (window.isNativeApp) window.location.reload();
   };
 
   /* const handleAction = (type) => { // Removed native logic for now to force standard socket
@@ -415,6 +478,16 @@ function EmployeeView() {
     if (!isConn) {
       remoteLog('SOCKET_RETRY', 'Socket disconnected. Attempting reconnect...');
       targetSocket.connect();
+      enqueueOfflineAttendanceAction({
+        action: type,
+        timestamp: new Date().toISOString(),
+        latitude: location?.latitude,
+        longitude: location?.longitude,
+        nfcPayload: nfcPayload || undefined,
+        workContext: {}
+      });
+      setError('No connection: action saved and will sync automatically.');
+      return;
     }
 
     // In Native App, we might not have frontend location access, but backend has background location
@@ -520,9 +593,26 @@ function EmployeeView() {
                 className="setup-input"
               />
             </div>
+            <div className="form-group">
+              <input
+                type="password"
+                placeholder="Face PIN (fallback)"
+                value={pin}
+                onChange={(e) => setPin(e.target.value)}
+                className="setup-input"
+              />
+            </div>
             {error && <div className="error-message" style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
             <button type="submit" className="btn-primary">Login</button>
+            <button type="button" className="btn-secondary" style={{ width: '100%', marginTop: '0.5rem' }} onClick={handlePinLogin}>
+              Login with PIN
+            </button>
           </form>
+          <FaceLoginCard
+            staffId={tempId}
+            setError={setError}
+            onLoginSuccess={applyAuthData}
+          />
         </div>
       </div>
     );
@@ -533,7 +623,7 @@ function EmployeeView() {
       {(permission === 'prompt' || permission === 'denied') && showBanner && (
         <div className="permission-banner">
           <div className="banner-content">
-            <h3>📍 Enable Location</h3>
+            <h3>Enable Location</h3>
             <p><strong>Berkeley Workforce 360</strong> requires your location to verify attendance check-ins.</p>
           </div>
           <div className="banner-actions">
@@ -549,7 +639,7 @@ function EmployeeView() {
           <small style={{ fontSize: '0.6rem', opacity: 0.5 }}>v19.0</small>
         </div>
         <div className={`status-badge ${status}`}>
-          <span className="dot">●</span> {status === 'connected' ? 'Online' : 'Reconnecting...'}
+          {status === 'connected' ? 'Online' : 'Reconnecting...'}
         </div>
       </header>
 
@@ -563,13 +653,13 @@ function EmployeeView() {
           borderRadius: '12px',
           marginBottom: '10px'
         }}>
-          <strong>📱 Background Tracking Guide:</strong>
+          <strong>Background Tracking Guide:</strong>
           <p style={{ margin: '4px 0 8px 0', opacity: 0.8 }}>To stay "Online" while your screen is off or app is minimized:</p>
           <ul style={{ margin: '0', paddingLeft: '20px' }}>
             <li>Battery Settings &gt; <strong>Unrestricted / No Optimization</strong></li>
-            <li><strong>Lock the App:</strong> Long-press app in "Recent Apps" and click 🔒 Lock</li>
+            <li><strong>Lock the App:</strong> Long-press app in "Recent Apps" and use app lock</li>
             <li>Don't Swipe Close the app</li>
-            <li>{status === 'connected' ? '✅ Connection Active' : '⏳ Reconnecting...'}</li>
+            <li>{status === 'connected' ? 'Connection active' : 'Reconnecting...'}</li>
           </ul>
           <button
             onClick={() => { if (window.retryNativeTracking) window.retryNativeTracking(); else startTracking(); }}
@@ -598,7 +688,7 @@ function EmployeeView() {
             </div>
           ) : (
             <div className="tracking-inactive">
-              <p>⚠️ Location Access Needed</p>
+              <p>Location access needed</p>
               <button className="btn-primary" style={{ marginTop: '10px', fontSize: '0.8rem' }} onClick={() => window.retryNativeTracking ? window.retryNativeTracking() : startTracking()}>Retry Location Access</button>
             </div>
           )}
@@ -668,14 +758,13 @@ function EmployeeView() {
 
 function App() {
   const Router = isCordova ? HashRouter : BrowserRouter;
-  console.log('[ROUTER] Protocol:', window.location.protocol);
-  console.log('[ROUTER] Using:', isCordova ? 'HashRouter' : 'BrowserRouter');
-  console.log('[ROUTER] Path:', window.location.pathname);
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path="/" element={<EmployeeView />} />
         <Route path="/hr" element={<HRDashboard />} />
+        <Route path="/hr/enrollment" element={<HREnrollmentMobile />} />
+        <Route path="/kiosk/:siteId" element={<KioskFaceAttendance />} />
       </Routes>
     </Router>
   );

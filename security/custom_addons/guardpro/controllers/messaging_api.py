@@ -114,24 +114,82 @@ class GuardProMessagingAPI(http.Controller):
             return {'success': False, 'error': str(e)}
 
     @http.route('/guardpro/api/messages/send', type='json', auth='user')
-    def send_message(self, receiver_id, content, message_type='text', media_url=None,
+    def send_message(self, receiver_id=None, content='', message_type='text', media_url=None,
                      media_duration=None, is_urgent=False, conversation_id=None, **kwargs):
-        """Send a message to supervisor."""
+        """Send a message to supervisor.
+
+        ``receiver_id`` is optional when ``conversation_id`` is
+        supplied: the mobile chat page only knows the conversation
+        id (not the counterparty user id) so we resolve the receiver
+        from the conversation record. For brand-new threads (no
+        ``conversation_id``) ``receiver_id`` is still required.
+        """
         try:
             # Get current user
             sender = request.env.user
 
-            # Get receiver
-            receiver = request.env['res.users'].browse(receiver_id)
-            if not receiver.exists():
-                return {'success': False, 'error': 'Receiver not found'}
-
-            # Get or create conversation
+            # Get or create conversation first so we can resolve the
+            # receiver from it when the caller didn't supply one.
             if conversation_id:
                 conversation = request.env['guard.conversation'].browse(conversation_id)
                 if not conversation.exists():
                     return {'success': False, 'error': 'Conversation not found'}
+                # Resolve the counterparty user id from the thread:
+                # for guard-supervisor threads the "other side" flips
+                # depending on who the sender is; for guard-guard
+                # threads we map guard1/guard2 -> the non-sender's
+                # ``user_id``.
+                if not receiver_id:
+                    resolved = False
+                    if conversation.conversation_type == 'guard_supervisor':
+                        sup_id = conversation.supervisor_id.id if conversation.supervisor_id else False
+                        guard_user_id = (
+                            conversation.guard_id.user_id.id
+                            if conversation.guard_id and conversation.guard_id.user_id
+                            else False
+                        )
+                        if sender.id == sup_id and guard_user_id:
+                            receiver_id = guard_user_id
+                            resolved = True
+                        elif guard_user_id and sender.id == guard_user_id and sup_id:
+                            receiver_id = sup_id
+                            resolved = True
+                        elif sup_id and sender.id != sup_id:
+                            receiver_id = sup_id
+                            resolved = True
+                    elif conversation.conversation_type == 'guard_guard':
+                        g1u = (
+                            conversation.guard1_id.user_id.id
+                            if conversation.guard1_id and conversation.guard1_id.user_id
+                            else False
+                        )
+                        g2u = (
+                            conversation.guard2_id.user_id.id
+                            if conversation.guard2_id and conversation.guard2_id.user_id
+                            else False
+                        )
+                        if sender.id == g1u and g2u:
+                            receiver_id = g2u
+                            resolved = True
+                        elif sender.id == g2u and g1u:
+                            receiver_id = g1u
+                            resolved = True
+                    if not resolved:
+                        return {
+                            'success': False,
+                            'error': 'Could not resolve recipient for this conversation.',
+                        }
             else:
+                if not receiver_id:
+                    return {'success': False, 'error': 'Receiver is required for a new conversation.'}
+
+            # Get receiver (after the resolution step so we can error
+            # clearly if the conversation was orphaned).
+            receiver = request.env['res.users'].browse(receiver_id)
+            if not receiver.exists():
+                return {'success': False, 'error': 'Receiver not found'}
+
+            if not conversation_id:
                 # Get guard profile
                 guard = request.env['guard.profile'].search([
                     ('user_id', '=', sender.id)
@@ -330,31 +388,87 @@ class GuardProMessagingAPI(http.Controller):
 
     @http.route('/guardpro/api/messages/supervisors', type='json', auth='user')
     def get_available_supervisors(self, **kwargs):
-        """Get list of available supervisors for messaging."""
-        try:
-            # Get users in supervisor groups
-            supervisor_group = request.env.ref('guardpro.group_guardpro_supervisor')
-            manager_group = request.env.ref('guardpro.group_guardpro_manager')
+        """Get list of available supervisors for messaging.
 
-            supervisors = request.env['res.users'].search([
-                '|',
-                ('groups_id', 'in', [supervisor_group.id]),
-                ('groups_id', 'in', [manager_group.id])
-            ])
+        Why this uses ``sudo()``:
+        Portal / guard users have an ``ir.rule`` on ``res.users`` that
+        hides every record except their own. Running the search as the
+        guard returns zero supervisors and the mobile "New message"
+        picker shows an empty Supervisor tab even when supervisors
+        exist. We escalate to sudo() *only* for the directory lookup
+        (id + display name + email/phone), scope the list to supervisors
+        who share at least one site with the guard, and never expose
+        anything beyond the contact card fields below.
+        """
+        try:
+            supervisor_group = request.env.ref(
+                'guardpro.group_guardpro_supervisor', raise_if_not_found=False,
+            )
+            manager_group = request.env.ref(
+                'guardpro.group_guardpro_manager', raise_if_not_found=False,
+            )
+            if not supervisor_group and not manager_group:
+                return {'success': True, 'supervisors': [], 'total': 0}
+
+            group_domain = []
+            if supervisor_group and manager_group:
+                group_domain = [
+                    '|',
+                    ('groups_id', 'in', [supervisor_group.id]),
+                    ('groups_id', 'in', [manager_group.id]),
+                ]
+            elif supervisor_group:
+                group_domain = [('groups_id', 'in', [supervisor_group.id])]
+            else:
+                group_domain = [('groups_id', 'in', [manager_group.id])]
+
+            # Only active internal users; never leak archived / shared
+            # / template accounts.
+            base_domain = [('active', '=', True), ('share', '=', False)] + group_domain
+
+            caller = request.env.user
+            # Multi-site: if the caller is scoped to specific sites,
+            # only surface supervisors who are assigned to at least
+            # one of those sites. Managers with no site assignment
+            # (superadmins, HQ roles) stay visible to everyone.
+            caller_site_ids = caller.site_ids.ids if 'site_ids' in caller._fields else []
+
+            # Use sudo() to bypass the res.users record rule - see
+            # docstring above for why.
+            Users = request.env['res.users'].sudo()
+            candidates = Users.search(base_domain)
 
             supervisors_list = []
-            for supervisor in supervisors:
+            for supervisor in candidates:
+                # Don't list the caller themselves.
+                if supervisor.id == caller.id:
+                    continue
+                # Site scoping: a supervisor with no site_ids is
+                # treated as "all sites" (matches the manager-level
+                # convention used elsewhere in the module).
+                if caller_site_ids and 'site_ids' in supervisor._fields:
+                    sup_sites = supervisor.site_ids.ids
+                    if sup_sites and not set(sup_sites) & set(caller_site_ids):
+                        continue
                 supervisors_list.append({
                     'id': supervisor.id,
                     'name': supervisor.name,
                     'email': supervisor.email,
-                    'phone': supervisor.phone if hasattr(supervisor, 'phone') else None
+                    'phone': (
+                        supervisor.phone
+                        if 'phone' in supervisor._fields
+                        else None
+                    ),
                 })
+
+            # Stable alphabetical order so the picker doesn't
+            # shuffle between polls.
+            supervisors_list.sort(key=lambda s: (s.get('name') or '').lower())
 
             return {
                 'success': True,
                 'supervisors': supervisors_list,
-                'total': len(supervisors_list)
+                'total': len(supervisors_list),
             }
 
         except Exception as e:

@@ -42,8 +42,95 @@ CREATE TABLE IF NOT EXISTS employees (
     last_name VARCHAR(100),
     photo_url VARCHAR(255),
     is_active BOOLEAN DEFAULT TRUE,
+    face_descriptor JSONB,
+    face_enrollment_photo_url TEXT,
+    face_enrolled_at TIMESTAMP,
+    face_enrolled_by INTEGER REFERENCES employees(id),
+    face_auth_enabled BOOLEAN DEFAULT TRUE,
+    face_pin_hash TEXT,
+    face_failed_attempts INTEGER DEFAULT 0,
+    face_locked_until TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS face_auth_events (
+    id SERIAL PRIMARY KEY,
+    employee_id INTEGER REFERENCES employees(id),
+    actor_id INTEGER REFERENCES employees(id),
+    event_type VARCHAR(64) NOT NULL,
+    result VARCHAR(32) NOT NULL DEFAULT 'success',
+    similarity NUMERIC,
+    threshold NUMERIC,
+    metadata JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS odoo_instances (
+    id SERIAL PRIMARY KEY,
+    instance_code VARCHAR(32) UNIQUE NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    base_url TEXT NOT NULL,
+    db_name VARCHAR(128) NOT NULL,
+    username VARCHAR(128) NOT NULL,
+    password TEXT NOT NULL,
+    employee_lookup_field VARCHAR(32) NOT NULL DEFAULT 'barcode',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS staff_odoo_routing (
+    staff_id VARCHAR(50) PRIMARY KEY,
+    instance_code VARCHAR(32) NOT NULL REFERENCES odoo_instances(instance_code),
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    notes TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS attendance_sync_mapping (
+    attendance_id INTEGER PRIMARY KEY REFERENCES attendance(id) ON DELETE CASCADE,
+    instance_code VARCHAR(32) NOT NULL REFERENCES odoo_instances(instance_code),
+    odoo_attendance_id BIGINT,
+    synced_check_in_at TIMESTAMPTZ,
+    synced_check_out_at TIMESTAMPTZ,
+    last_status VARCHAR(24) NOT NULL DEFAULT 'pending',
+    last_error TEXT,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS attendance_sync_outbox (
+    id BIGSERIAL PRIMARY KEY,
+    attendance_id INTEGER NOT NULL REFERENCES attendance(id) ON DELETE CASCADE,
+    staff_id VARCHAR(50) NOT NULL,
+    event_type VARCHAR(16) NOT NULL CHECK (event_type IN ('check_in', 'check_out')),
+    payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+    status VARCHAR(24) NOT NULL DEFAULT 'pending',
+    attempts INTEGER NOT NULL DEFAULT 0,
+    next_retry_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    route_instance_code VARCHAR(32),
+    last_error TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS kiosk_devices (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(120) NOT NULL,
+    site_id INTEGER NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
+    device_key VARCHAR(128) NOT NULL UNIQUE,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    notes TEXT,
+    last_seen_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_employees_site_face_enrolled
+ON employees (site_id)
+WHERE face_descriptor IS NOT NULL
+  AND COALESCE(face_auth_enabled, TRUE) = TRUE
+  AND (is_active = TRUE OR is_active IS NULL);
 
 -- Attendance Table
 CREATE TABLE IF NOT EXISTS attendance (
@@ -53,7 +140,61 @@ CREATE TABLE IF NOT EXISTS attendance (
     check_out_time TIMESTAMP,
     check_in_coords GEOGRAPHY(POINT, 4326),
     check_out_coords GEOGRAPHY(POINT, 4326),
-    site_id INTEGER REFERENCES sites(id)
+    site_id INTEGER REFERENCES sites(id),
+    source VARCHAR(32) NOT NULL DEFAULT 'app',
+    status VARCHAR(16) NOT NULL DEFAULT 'approved',
+    submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    approved_at TIMESTAMPTZ,
+    approved_by INTEGER REFERENCES employees(id),
+    rejected_at TIMESTAMPTZ,
+    rejected_by INTEGER REFERENCES employees(id),
+    rejection_reason TEXT,
+    break_minutes INTEGER NOT NULL DEFAULT 0,
+    overtime_minutes INTEGER NOT NULL DEFAULT 0,
+    work_context JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE TABLE IF NOT EXISTS attendance_policy_rules (
+    id SERIAL PRIMARY KEY,
+    site_id INTEGER REFERENCES sites(id) ON DELETE CASCADE,
+    shift_id INTEGER REFERENCES shifts(id) ON DELETE CASCADE,
+    overtime_after_minutes INTEGER NOT NULL DEFAULT 480,
+    paid_break_minutes INTEGER NOT NULL DEFAULT 0,
+    unpaid_break_minutes INTEGER NOT NULL DEFAULT 0,
+    max_shift_minutes INTEGER,
+    require_approval_manual BOOLEAN NOT NULL DEFAULT FALSE,
+    require_approval_offline BOOLEAN NOT NULL DEFAULT TRUE,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_by INTEGER REFERENCES employees(id),
+    updated_by INTEGER REFERENCES employees(id),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_attendance_policy_rules_scope
+    ON attendance_policy_rules (COALESCE(site_id, -1), COALESCE(shift_id, -1))
+    WHERE is_active = TRUE;
+
+CREATE TABLE IF NOT EXISTS attendance_approval_logs (
+    id BIGSERIAL PRIMARY KEY,
+    attendance_id INTEGER NOT NULL REFERENCES attendance(id) ON DELETE CASCADE,
+    action VARCHAR(16) NOT NULL CHECK (action IN ('submitted', 'approved', 'rejected')),
+    actor_id INTEGER REFERENCES employees(id),
+    reason TEXT,
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS job_codes (
+    id SERIAL PRIMARY KEY,
+    code VARCHAR(64) NOT NULL UNIQUE,
+    name VARCHAR(120) NOT NULL,
+    site_id INTEGER REFERENCES sites(id) ON DELETE SET NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_by INTEGER REFERENCES employees(id),
+    updated_by INTEGER REFERENCES employees(id),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- LiveLogs Table with Partitioning

@@ -4,6 +4,21 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   base: './',
+  build: {
+    sourcemap: false,
+    chunkSizeWarningLimit: 700,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          reactVendor: ['react', 'react-dom', 'react-router-dom'],
+          mapVendor: ['@vis.gl/react-google-maps'],
+          faceVendor: ['@vladmandic/face-api'],
+          pdfVendor: ['jspdf', 'jspdf-autotable'],
+          socketVendor: ['socket.io-client']
+        }
+      }
+    }
+  },
   plugins: [
     react(),
     VitePWA({
@@ -42,6 +57,10 @@ export default defineConfig({
         target: 'http://api:3000',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
+      },
+      '/iclock': {
+        target: 'http://api:3000',
+        changeOrigin: true
       },
       '/socket.io': {
         target: 'http://api:3000',

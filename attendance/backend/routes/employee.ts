@@ -1,6 +1,13 @@
 export { };
 
 const express = require('express');
+const { enqueueAttendanceSync } = require('../services/attendanceSyncQueue');
+const {
+    getEffectiveAttendancePolicy,
+    shouldRequireApproval,
+    addApprovalLog,
+    applyCheckoutPolicy,
+} = require('../services/attendanceGovernance');
 
 // Helper: Calculate Distance (Haversine Formula) in meters
 const calculateDistance = (lat1: any, lon1: any, lat2: any, lon2: any) => {
@@ -62,6 +69,194 @@ module.exports = (pool: any, authenticateToken: any, locationLimiter: any, isDur
         } catch (err) {
             console.error(err);
             res.status(500).json({ error: 'Database error' });
+        }
+    });
+
+    router.post('/attendance/offline-sync', authenticateToken, async (req, res) => {
+        const entries = Array.isArray(req.body?.entries) ? req.body.entries : [];
+        if (!entries.length) {
+            return res.status(400).json({ error: 'entries[] is required' });
+        }
+        try {
+            const empRes = await pool.query(
+                `SELECT e.id, e.staff_id, e.site_id, e.shift_id, s.nfc_payload
+                 FROM employees e
+                 LEFT JOIN sites s ON s.id = e.site_id
+                 WHERE e.id = $1`,
+                [req.user.id]
+            );
+            if (empRes.rows.length === 0) {
+                return res.status(404).json({ error: 'Employee not found' });
+            }
+            const employee = empRes.rows[0];
+            const results = [];
+
+            for (const entry of entries.slice(0, 200)) {
+                const action = entry?.action === 'check_out' ? 'check_out' : 'check_in';
+                const ts = entry?.timestamp ? new Date(entry.timestamp) : new Date();
+                const latitude = Number(entry?.latitude);
+                const longitude = Number(entry?.longitude);
+                if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || !Number.isFinite(ts.getTime())) {
+                    results.push({ ok: false, action, error: 'Invalid timestamp or coordinates' });
+                    // eslint-disable-next-line no-continue
+                    continue;
+                }
+                if (employee.nfc_payload && String(employee.nfc_payload).trim() && entry?.nfcPayload !== employee.nfc_payload) {
+                    results.push({ ok: false, action, error: 'NFC payload mismatch' });
+                    // eslint-disable-next-line no-continue
+                    continue;
+                }
+                if (action === 'check_in') {
+                    // eslint-disable-next-line no-await-in-loop
+                    const openRes = await pool.query(
+                        'SELECT id FROM attendance WHERE employee_id = $1 AND check_out_time IS NULL',
+                        [employee.id]
+                    );
+                    if (openRes.rowCount > 0) {
+                        results.push({ ok: false, action, error: 'Already checked in' });
+                        // eslint-disable-next-line no-continue
+                        continue;
+                    }
+                    // eslint-disable-next-line no-await-in-loop
+                    const policy = await getEffectiveAttendancePolicy(pool, { siteId: employee.site_id, shiftId: employee.shift_id || null });
+                    const requireApproval = shouldRequireApproval(policy, 'offline_batch');
+                    // eslint-disable-next-line no-await-in-loop
+                    const inserted = await pool.query(
+                        `INSERT INTO attendance (employee_id, check_in_time, check_in_coords, site_id, source, status, work_context)
+                         VALUES ($1, $2, ST_SetSRID(ST_MakePoint($3, $4), 4326), $5, 'offline_batch', $6, $7::jsonb)
+                         RETURNING id, check_in_time, status`,
+                        [
+                            employee.id,
+                            ts.toISOString(),
+                            longitude,
+                            latitude,
+                            employee.site_id,
+                            requireApproval ? 'pending' : 'approved',
+                            JSON.stringify(entry?.workContext || {}),
+                        ]
+                    );
+                    if (inserted.rows[0].status === 'pending') {
+                        // eslint-disable-next-line no-await-in-loop
+                        await addApprovalLog(pool, {
+                            attendanceId: inserted.rows[0].id,
+                            action: 'submitted',
+                            actorId: employee.id,
+                            metadata: { source: 'offline_batch' },
+                        });
+                    }
+                    // eslint-disable-next-line no-await-in-loop
+                    await enqueueAttendanceSync(pool, {
+                        attendanceId: inserted.rows[0].id,
+                        staffId: employee.staff_id,
+                        eventType: 'check_in',
+                        siteId: employee.site_id,
+                        checkInTime: inserted.rows[0].check_in_time,
+                        source: 'offline_batch',
+                    });
+                    results.push({ ok: true, action, attendanceId: inserted.rows[0].id, status: inserted.rows[0].status });
+                } else {
+                    // eslint-disable-next-line no-await-in-loop
+                    const updated = await pool.query(
+                        `UPDATE attendance
+                         SET check_out_time = $1,
+                             check_out_coords = ST_SetSRID(ST_MakePoint($2, $3), 4326),
+                             source = COALESCE(source, 'offline_batch'),
+                             work_context = COALESCE(work_context, '{}'::jsonb) || $4::jsonb
+                         WHERE employee_id = $5 AND check_out_time IS NULL
+                         RETURNING id, check_in_time, check_out_time, status`,
+                        [ts.toISOString(), longitude, latitude, JSON.stringify(entry?.workContext || {}), employee.id]
+                    );
+                    if (updated.rowCount === 0) {
+                        results.push({ ok: false, action, error: 'No open check-in found' });
+                        // eslint-disable-next-line no-continue
+                        continue;
+                    }
+                    // eslint-disable-next-line no-await-in-loop
+                    await applyCheckoutPolicy(pool, {
+                        attendanceId: updated.rows[0].id,
+                        checkInTime: updated.rows[0].check_in_time,
+                        checkOutTime: updated.rows[0].check_out_time,
+                        siteId: employee.site_id,
+                        shiftId: employee.shift_id || null,
+                    });
+                    // eslint-disable-next-line no-await-in-loop
+                    await enqueueAttendanceSync(pool, {
+                        attendanceId: updated.rows[0].id,
+                        staffId: employee.staff_id,
+                        eventType: 'check_out',
+                        siteId: employee.site_id,
+                        checkOutTime: updated.rows[0].check_out_time,
+                        source: 'offline_batch',
+                    });
+                    results.push({ ok: true, action, attendanceId: updated.rows[0].id, status: updated.rows[0].status });
+                }
+            }
+            return res.json({ success: true, processed: results.length, results });
+        } catch (err) {
+            console.error('Offline attendance sync error:', err);
+            return res.status(500).json({ error: 'Offline attendance sync failed' });
+        }
+    });
+
+    router.get('/shifts/assignments', authenticateToken, async (req, res) => {
+        const startDate = req.query.startDate;
+        const endDate = req.query.endDate;
+        const params = [req.user.id];
+        const where = ['a.employee_id = $1'];
+        if (startDate) {
+            params.push(startDate);
+            where.push(`a.work_date >= $${params.length}::date`);
+        }
+        if (endDate) {
+            params.push(endDate);
+            where.push(`a.work_date <= $${params.length}::date`);
+        }
+        try {
+            const result = await pool.query(
+                `SELECT a.id, a.work_date, a.shift_id, a.site_id, a.acceptance_status, a.accepted_at, a.rejected_at, a.rejection_reason,
+                        sh.name AS shift_name, sh.start_time, sh.end_time, s.name AS site_name
+                 FROM roster_assignments a
+                 LEFT JOIN shifts sh ON sh.id = a.shift_id
+                 LEFT JOIN sites s ON s.id = a.site_id
+                 WHERE ${where.join(' AND ')}
+                 ORDER BY a.work_date ASC
+                 LIMIT 200`,
+                params
+            );
+            return res.json(result.rows);
+        } catch (err) {
+            if (err?.code === '42P01') return res.json([]);
+            console.error('Employee shift assignments error:', err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+    });
+
+    router.post('/shifts/assignments/:id/respond', authenticateToken, async (req, res) => {
+        const assignmentId = Number(req.params.id);
+        const decision = req.body?.decision === 'reject' ? 'reject' : 'accept';
+        const reason = req.body?.reason ? String(req.body.reason).trim().slice(0, 500) : null;
+        if (!Number.isFinite(assignmentId)) {
+            return res.status(400).json({ error: 'Invalid assignment id' });
+        }
+        try {
+            const result = await pool.query(
+                `UPDATE roster_assignments
+                 SET acceptance_status = $3,
+                     accepted_at = CASE WHEN $3 = 'accepted' THEN NOW() ELSE accepted_at END,
+                     accepted_by = CASE WHEN $3 = 'accepted' THEN $1 ELSE accepted_by END,
+                     rejected_at = CASE WHEN $3 = 'rejected' THEN NOW() ELSE rejected_at END,
+                     rejection_reason = CASE WHEN $3 = 'rejected' THEN $4 ELSE rejection_reason END
+                 WHERE id = $2 AND employee_id = $1
+                 RETURNING *`,
+                [req.user.id, assignmentId, decision === 'accept' ? 'accepted' : 'rejected', reason]
+            );
+            if (result.rowCount === 0) {
+                return res.status(404).json({ error: 'Shift assignment not found' });
+            }
+            return res.json({ success: true, record: result.rows[0] });
+        } catch (err) {
+            console.error('Shift assignment response error:', err);
+            return res.status(500).json({ error: 'Database error' });
         }
     });
 

@@ -18,7 +18,6 @@ const AnalyticsDashboard = () => {
 
             <div className="analytics-modern-grid">
                 <div className="analytics-modern-card blue">
-                    <div className="card-icon">👥</div>
                     <div className="card-content">
                         <span className="card-label">Total Staff</span>
                         <span className="card-value">{mgmtStats.total}</span>
@@ -28,7 +27,6 @@ const AnalyticsDashboard = () => {
                 </div>
 
                 <div className="analytics-modern-card green">
-                    <div className="card-icon">⚡</div>
                     <div className="card-content">
                         <span className="card-label">Active Today</span>
                         <span className="card-value">{Object.keys(onlineEmployees).length}</span>
@@ -38,7 +36,6 @@ const AnalyticsDashboard = () => {
                 </div>
 
                 <div className="analytics-modern-card orange">
-                    <div className="card-icon">📍</div>
                     <div className="card-content">
                         <span className="card-label">Total Sites</span>
                         <span className="card-value">{sites.length}</span>
@@ -48,7 +45,6 @@ const AnalyticsDashboard = () => {
                 </div>
 
                 <div className="analytics-modern-card purple">
-                    <div className="card-icon">🏢</div>
                     <div className="card-content">
                         <span className="card-label">Departments</span>
                         <span className="card-value">{new Set(mgmtUsers.map(u => u.department_name)).size}</span>
@@ -133,7 +129,7 @@ const AnalyticsDashboard = () => {
                             showToast('Staff data exported successfully', 'success');
                         }}
                     >
-                        📥 Employees CSV
+                        Employees CSV
                     </button>
                     <button
                         className="modern-action-btn secondary"
@@ -143,7 +139,7 @@ const AnalyticsDashboard = () => {
                             showToast('Sites data exported successfully', 'success');
                         }}
                     >
-                        📥 Sites CSV
+                        Sites CSV
                     </button>
                 </div>
             </div>

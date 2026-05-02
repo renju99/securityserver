@@ -9,16 +9,8 @@ const Toast = ({ message, type = 'info', onClose }) => {
         return () => clearTimeout(timer);
     }, [onClose]);
 
-    const icons = {
-        success: '✓',
-        error: '✕',
-        warning: '⚠',
-        info: 'ℹ'
-    };
-
     return (
         <div className={`toast toast-${type}`} onClick={onClose}>
-            <div className="toast-icon">{icons[type]}</div>
             <div className="toast-message">{message}</div>
             <button className="toast-close" onClick={onClose}>×</button>
         </div>

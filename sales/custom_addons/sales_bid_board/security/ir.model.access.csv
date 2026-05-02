@@ -39,3 +39,4 @@ access_bid_change_request_wizard_administrator,bid.change.request.wizard adminis
 access_bid_change_request_administrator,bid.change.request administrator,model_bid_change_request,sales_bid_board.group_bid_board_manager,1,1,1,1
 access_bid_proposal_administrator,bid.proposal administrator,model_bid_proposal,sales_bid_board.group_bid_board_manager,1,1,1,1
 access_bid_board_settings_administrator,bid.board.settings administrator,model_bid_board_settings,sales_bid_board.group_bid_board_manager,1,1,1,1
+access_res_partner_sales_manager,res.partner sales manager,base.model_res_partner,sales_bid_board.group_bid_board_sales_manager,1,1,1,0

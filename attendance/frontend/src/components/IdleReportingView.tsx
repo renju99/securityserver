@@ -98,7 +98,7 @@ const IdleReportingView = () => {
         <>
             <div className="route-tracking-view sidebar animate-fade-in" style={{ width: '320px', minWidth: '320px', display: 'flex', flexDirection: 'column', padding: '1.2rem', gap: '1.2rem' }}>
                 <div className="filter-section">
-                    <h3>⏳ Idle Reporting</h3>
+                    <h3>Idle Reporting</h3>
                     <p className="filter-description">Identify where staff stayed stationary for long periods</p>
 
                     <div className="filter-group">
@@ -135,8 +135,8 @@ const IdleReportingView = () => {
                     </div>
 
                     <div className="filter-actions">
-                        <button onClick={handleFetchReport} className="btn-primary" disabled={isLoading}>{isLoading ? 'Searching...' : '🔍 Generate Report'}</button>
-                        <button onClick={() => setLocalIdleSpots([])} className="btn-secondary" disabled={isLoading}>🗑️ Clear</button>
+                        <button onClick={handleFetchReport} className="btn-primary" disabled={isLoading}>{isLoading ? 'Searching...' : 'Generate Report'}</button>
+                        <button onClick={() => setLocalIdleSpots([])} className="btn-secondary" disabled={isLoading}>Clear</button>
                         {localIdleSpots.length > 0 && (
                             <button
                                 onClick={async () => {
@@ -160,7 +160,7 @@ const IdleReportingView = () => {
                                 }}
                                 className="btn-download" disabled={isGeneratingPDF}
                             >
-                                {isGeneratingPDF ? '⏳ Processing...' : '📄 Detailed PDF Report'}
+                                {isGeneratingPDF ? 'Processing...' : 'Detailed PDF Report'}
                             </button>
                         )}
                     </div>
@@ -170,7 +170,7 @@ const IdleReportingView = () => {
                     localIdleSpots.length > 0 && (
                         <div className="route-stats">
                             <div className="stat-card-route">
-                                <span className="rt-stat-icon">👤</span>
+                                <span className="rt-stat-icon">ID</span>
                                 <div className="stat-content">
                                     <span className="rt-stat-label">Staff Member</span>
                                     <span className="rt-stat-value">{employees.find(e => e.staff_id === selectedStaff)?.first_name || selectedStaff}</span>
@@ -178,7 +178,7 @@ const IdleReportingView = () => {
                                 </div>
                             </div>
                             <div className="stat-card-route">
-                                <div className="rt-stat-icon">🛑</div>
+                                <div className="rt-stat-icon">ST</div>
                                 <div className="stat-content"><span className="rt-stat-label">Idle Occurrences</span><span className="rt-stat-value">{localIdleSpots.length} Total</span></div>
                             </div>
                         </div>
@@ -195,11 +195,11 @@ const IdleReportingView = () => {
                                         setMapCenter({ lat: spot.lat, lng: spot.lng });
                                         setZoom(18);
                                     }}>
-                                        <div className="timeline-icon">🛑</div>
+                                        <div className="timeline-icon">ST</div>
                                         <div className="timeline-content">
                                             <div className="timeline-title">{spot.duration}m Stationary</div>
                                             <div className="timeline-desc">{new Date(spot.startTime).toLocaleTimeString()} — {new Date(spot.endTime).toLocaleTimeString()}</div>
-                                            {addresses[addrKey] && <div className="timeline-address" style={{ fontSize: '0.75rem', marginTop: '4px', color: '#667eea' }}>📍 {addresses[addrKey]}</div>}
+                                            {addresses[addrKey] && <div className="timeline-address" style={{ fontSize: '0.75rem', marginTop: '4px', color: '#667eea' }}>{addresses[addrKey]}</div>}
                                         </div>
                                     </div>
                                 );

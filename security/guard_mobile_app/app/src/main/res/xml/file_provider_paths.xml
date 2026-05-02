@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Paths shared via androidx.core.content.FileProvider.
+
+    * ``external-files-path`` exposes the app-scoped external
+      directory (``getExternalFilesDir(...)``) so the camera app
+      can write captured photos into it. This directory is wiped
+      when the app is uninstalled, so nothing leaks.
+    * ``files-path`` exposes the app's internal ``filesDir`` as a
+      fallback (e.g. on devices with no external storage).
+
+    Do NOT expose root / external-path; those would grant the
+    camera app read/write across arbitrary storage.
+-->
+<paths>
+    <external-files-path name="captured_images" path="Pictures/" />
+    <external-files-path name="captured_root" path="." />
+    <files-path name="internal_captures" path="." />
+</paths>

@@ -13,18 +13,9 @@ const ConfirmDialog = ({
 }) => {
     if (!isOpen) return null;
 
-    const icons = {
-        danger: '⚠️',
-        warning: '⚠',
-        info: 'ℹ️'
-    };
-
     return (
         <div className="confirm-overlay" onClick={onCancel}>
             <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
-                <div className={`confirm-icon confirm-icon-${type}`}>
-                    {icons[type]}
-                </div>
                 <h3 className="confirm-title">{title}</h3>
                 <p className="confirm-message">{message}</p>
                 <div className="confirm-actions">

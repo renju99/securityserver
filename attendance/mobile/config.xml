@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.berkeleyuae.attendance" version="1.5.1" android-versionCode="16" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<widget id="com.berkeleyuae.attendance" version="1.6.0" android-versionCode="17" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
     <name>Berkeley Workforce 360</name>
     <description>Berkeley Workforce 360 Employee Attendance and Live Tracking System</description>
     <author email="support@berkeleyuae.com" href="https://berkeleyuae.com">

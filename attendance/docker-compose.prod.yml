@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: attendance_api
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - CORS_ALLOW_NO_ORIGIN=${CORS_ALLOW_NO_ORIGIN:-false}
+      - JWT_REFRESH_COOKIE_SECURE=${JWT_REFRESH_COOKIE_SECURE:-true}
+      - TRUST_PROXY_HOPS=${TRUST_PROXY_HOPS:-1}
+      - PUBLIC_APP_URL=${PUBLIC_APP_URL}
+      - APP_PUBLIC_URL=${APP_PUBLIC_URL}
+      - BIOMETRIC_INGEST_TOKEN=${BIOMETRIC_INGEST_TOKEN}
+      - BIOMETRIC_STALE_MINS=${BIOMETRIC_STALE_MINS:-10}
+      - BIOMETRIC_OFFLINE_MINS=${BIOMETRIC_OFFLINE_MINS:-30}
+      - ZK_ICLOCK_ENABLED=${ZK_ICLOCK_ENABLED:-true}
+      - ZK_ICLOCK_ALLOWED_SN=${ZK_ICLOCK_ALLOWED_SN}
+      - ZK_ATTLOG_STAFF_PREFIX=${ZK_ATTLOG_STAFF_PREFIX}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - default
+      - web-proxy-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1:3000/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY}
+    container_name: attendance_web
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - default
+      - web-proxy-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  db:
+    image: postgis/postgis:15-3.3
+    container_name: attendance_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-attendance}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - default
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-attendance}"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: attendance_redis
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - default
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+  web-proxy-net:
+    external: true
