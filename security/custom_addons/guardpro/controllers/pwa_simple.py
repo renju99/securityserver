@@ -11,6 +11,7 @@ import base64
 from odoo import http, fields
 from odoo.http import request
 from odoo.exceptions import UserError, AccessError
+from odoo.tools import html2plaintext
 from datetime import datetime, timedelta
 from ..common.video_optimizer import VideoOptimizer
 from ..common.image_optimizer import ImageOptimizer
@@ -50,6 +51,21 @@ class GuardProPWASimple(http.Controller):
                 ], limit=1)
         
         return guard
+
+    def _mobile_safe_next_url(self, raw_next, default='/guardpro/mobile/tasks'):
+        """POST redirect target: only paths under /guardpro/mobile (avoid open redirects)."""
+        if not raw_next:
+            return default
+        url = str(raw_next).strip()
+        if not url.startswith('/guardpro/mobile') or '\n' in url or '\r' in url:
+            return default
+        return url
+
+    def _redirect_mobile_flash(self, raw_next, default, flash_key, flash_value):
+        """302 to next with one query param (e.g. success=task_started)."""
+        base = self._mobile_safe_next_url(raw_next, default=default)
+        sep = '&' if '?' in base else '?'
+        return request.redirect(f'{base}{sep}{flash_key}={flash_value}')
 
     def _resolve_guard_operation_site_id(self, guard):
         """Site for mobile guard actions: active attendance, then latest shift, then user's sites."""
@@ -457,54 +473,102 @@ class GuardProPWASimple(http.Controller):
     @http.route('/guardpro/mobile/task/start/<int:task_id>', type='http', auth='user', methods=['POST'], csrf=True)
     def mobile_task_start(self, task_id, **kwargs):
         """Start a task - Standard action."""
+        post = request.httprequest.form
+        next_raw = post.get('next')
+        default_next = '/guardpro/mobile/tasks'
+
         guard = self._get_guard_from_user()
-        
+
         if not guard:
-            return request.redirect('/guardpro/mobile?error=no_guard')
-        
+            return self._redirect_mobile_flash(next_raw, default_next, 'error', 'no_guard')
+
         task = request.env['guard.task'].sudo().search([
             ('id', '=', task_id),
             ('assigned_to', '=', guard.id),
         ], limit=1)
-        
+
         if not task:
-            return request.redirect('/guardpro/mobile?error=task_not_found')
-        
+            return self._redirect_mobile_flash(next_raw, default_next, 'error', 'task_not_found')
+
         if task.state not in ['draft', 'assigned']:
-            return request.redirect('/guardpro/mobile?error=task_cannot_start')
-        
+            return self._redirect_mobile_flash(next_raw, default_next, 'error', 'task_cannot_start')
+
         try:
             task.action_start()
-            return request.redirect('/guardpro/mobile?success=task_started')
+            return self._redirect_mobile_flash(next_raw, default_next, 'success', 'task_started')
         except Exception as e:
             _logger.error("Task start error: %s", str(e))
-            return request.redirect('/guardpro/mobile?error=task_start_failed')
+            return self._redirect_mobile_flash(next_raw, default_next, 'error', 'task_start_failed')
 
     @http.route('/guardpro/mobile/task/complete/<int:task_id>', type='http', auth='user', methods=['POST'], csrf=True)
     def mobile_task_complete(self, task_id, notes=None, **kwargs):
         """Complete a task - Standard action."""
+        post = request.httprequest.form
+        next_raw = post.get('next')
+        default_next = '/guardpro/mobile/tasks'
+
         guard = self._get_guard_from_user()
-        
+
         if not guard:
-            return request.redirect('/guardpro/mobile?error=no_guard')
-        
+            return self._redirect_mobile_flash(next_raw, default_next, 'error', 'no_guard')
+
         task = request.env['guard.task'].sudo().search([
             ('id', '=', task_id),
             ('assigned_to', '=', guard.id),
         ], limit=1)
-        
+
         if not task:
-            return request.redirect('/guardpro/mobile?error=task_not_found')
-        
+            return self._redirect_mobile_flash(next_raw, default_next, 'error', 'task_not_found')
+
         if notes:
             task.write({'completion_notes': notes})
-        
+
         try:
             task.action_complete()
-            return request.redirect('/guardpro/mobile?success=task_completed')
+            return self._redirect_mobile_flash(next_raw, default_next, 'success', 'task_completed')
+        except UserError as e:
+            _logger.info("Task complete validation: %s", str(e))
+            return self._redirect_mobile_flash(next_raw, default_next, 'error', 'task_checklist_incomplete')
         except Exception as e:
             _logger.error("Task complete error: %s", str(e))
-            return request.redirect('/guardpro/mobile?error=task_complete_failed')
+            return self._redirect_mobile_flash(next_raw, default_next, 'error', 'task_complete_failed')
+
+    @http.route(
+        '/guardpro/mobile/task/checklist/<int:checklist_id>/toggle',
+        type='http',
+        auth='user',
+        methods=['POST'],
+        csrf=True,
+        website=True,
+    )
+    def mobile_task_checklist_toggle(self, checklist_id, **kwargs):
+        """Toggle a checklist line from mobile tour/task cards (mandatory before complete)."""
+        post = request.httprequest.form
+        next_raw = post.get('next')
+        default_next = '/guardpro/mobile/tasks'
+
+        guard = self._get_guard_from_user()
+        if not guard:
+            return self._redirect_mobile_flash(next_raw, default_next, 'error', 'no_guard')
+
+        item = request.env['guard.task.checklist'].sudo().browse(checklist_id)
+        if not item.exists():
+            return self._redirect_mobile_flash(next_raw, default_next, 'error', 'checklist_item_not_found')
+
+        task = item.task_id
+        if not task or task.assigned_to.id != guard.id:
+            return self._redirect_mobile_flash(next_raw, default_next, 'error', 'not_authorized')
+
+        if task.state not in ('draft', 'assigned', 'in_progress'):
+            return self._redirect_mobile_flash(next_raw, default_next, 'error', 'task_not_editable')
+
+        try:
+            item.toggle_completed()
+        except Exception as e:
+            _logger.exception('Mobile checklist toggle failed: %s', e)
+            return self._redirect_mobile_flash(next_raw, default_next, 'error', 'checklist_toggle_failed')
+
+        return self._redirect_mobile_flash(next_raw, default_next, 'success', 'checklist_toggled')
 
     @http.route('/guardpro/mobile/panic', type='http', auth='user', methods=['POST'], csrf=True)
     def mobile_panic(self, latitude=None, longitude=None, **kwargs):
@@ -811,13 +875,15 @@ class GuardProPWASimple(http.Controller):
             ('assigned_to', '=', guard.id),
             ('state', '=', 'completed'),
         ], limit=10, order='completed_date desc')
-        
+
         return request.render('guardpro.mobile_tasks', {
             'guard': guard,
             'user': request.env.user,
             'tasks_assigned': tasks_assigned,
             'tasks_in_progress': tasks_in_progress,
             'tasks_completed': tasks_completed,
+            'format_datetime_tz': self._format_datetime_tz,
+            'html2plaintext': html2plaintext,
         })
 
     @http.route('/guardpro/mobile/incidents', type='http', auth='user', website=True)

@@ -42,7 +42,6 @@ const QUEUEABLE_API_ROUTES = [
     '/guardpro/api/attendance/checkin',
     '/guardpro/api/attendance/checkout',
     '/guardpro/api/tours/checkpoint',
-    '/guardpro/api/tasks/complete',
 ];
 
 /**

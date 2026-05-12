@@ -62,6 +62,12 @@ vendor-registration/uploads.*
 # RA08 listener: face/device captures (local only)
 attendance/ra08-listener/captures/
 
+# Backend face enrollment uploads (local/dev only)
+attendance/backend/uploads/
+
+# Docker Desktop local buildx state (never commit)
+.docker/
+
 # Android SDK
 Android/
 .git/

@@ -1559,7 +1559,7 @@
                                                                 <span class="ms-2">
                                                                     <t t-esc="task.state.replace('_', ' ').title()"/>
                                                                 </span>
-                                                                <t t-set="task_pending_mandatory" t-value="sum(1 for _i in task.checklist_ids if _i.mandatory and not _i.completed)"/>
+                                                                <t t-set="task_pending_mandatory" t-value="len([c for c in task.checklist_ids if c.mandatory and not c.completed])"/>
                                                                 <t t-if="task_pending_mandatory">
                                                                     <span class="badge bg-warning text-dark ms-2" title="Mandatory checklist items left">
                                                                         <i class="fa fa-list-ul me-1"/>
@@ -2739,7 +2739,7 @@
                                         </span>
                                     </div>
                                     <t t-if="task.description">
-                                        <p class="mb-2 small text-muted"><t t-esc="task.description[:100]"/>...</p>
+                                        <p class="mb-2 small text-muted"><t t-esc="(html2plaintext(task.description) or '')[:160]"/></p>
                                     </t>
                                     <div class="d-flex gap-2">
                                         <form t-attf-action="/guardpro/mobile/task/start/{{task.id}}" method="post" class="flex-grow-1">
@@ -2789,7 +2789,7 @@
                                          checklist items" otherwise and the
                                          page silently bounces to the dashboard
                                          with no clue why. -->
-                                    <t t-set="task_pending_mandatory" t-value="sum(1 for _i in task.checklist_ids if _i.mandatory and not _i.completed)"/>
+                                    <t t-set="task_pending_mandatory" t-value="len([c for c in task.checklist_ids if c.mandatory and not c.completed])"/>
                                     <t t-if="task.checklist_ids">
                                         <div class="mb-2">
                                             <t t-foreach="task.checklist_ids" t-as="item">
