@@ -1,4 +1,5 @@
 const { z } = require('zod');
+const { organizationIdFromUser } = require('../../utils/organization');
 const { ingestBiometricLog } = require('../../services/biometricIngest');
 const { runBiometricConnectionTests } = require('../../services/biometricConnectionTest');
 
@@ -74,6 +75,13 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
         try {
             const staleMinutes = parseInt(process.env.BIOMETRIC_STALE_MINS || '10', 10);
             const offlineMinutes = parseInt(process.env.BIOMETRIC_OFFLINE_MINS || '30', 10);
+            const orgId = organizationIdFromUser(req.user);
+            const params = [staleMinutes, offlineMinutes, orgId];
+            let siteFilter = 'WHERE b.organization_id = $3';
+            if (req.user.role === 'Site Supervisor') {
+                params.push(req.user.siteId);
+                siteFilter += ` AND b.site_id = $${params.length}`;
+            }
             const result = await pool.query(`
             SELECT b.*, s.name as site_name,
                    CASE
@@ -84,8 +92,9 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
                    END AS health_status
             FROM biometric_devices b 
             LEFT JOIN sites s ON b.site_id = s.id 
+            ${siteFilter}
             ORDER BY b.name ASC
-        `, [staleMinutes, offlineMinutes]);
+        `, params);
             res.json(result.rows);
         } catch (err) {
             console.error('Error fetching biometric devices:', err);
@@ -121,10 +130,22 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
         const portStr = port === undefined || port === null || port === '' ? null : String(port);
         const cfg = config !== undefined ? config : sanitizeBiometricConfig({});
         try {
+            const orgId = organizationIdFromUser(req.user);
+            let resolvedOrgId = orgId;
+            if (siteId) {
+                const s = await pool.query(
+                    'SELECT organization_id FROM sites WHERE id = $1 LIMIT 1',
+                    [Number.parseInt(String(siteId), 10)]
+                );
+                if (!s.rows[0] || Number(s.rows[0].organization_id) !== orgId) {
+                    return res.status(400).json({ error: 'Invalid site for this organization' });
+                }
+                resolvedOrgId = Number(s.rows[0].organization_id);
+            }
             const result = await pool.query(
-                `INSERT INTO biometric_devices (name, device_key, site_id, type, ip_address, port, config)
-                 VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb) RETURNING *`,
-                [name, deviceKey, siteId || null, type || 'RA08', ipAddress || null, portStr, JSON.stringify(cfg)]
+                `INSERT INTO biometric_devices (organization_id, name, device_key, site_id, type, ip_address, port, config)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb) RETURNING *`,
+                [resolvedOrgId, name, deviceKey, siteId || null, type || 'RA08', ipAddress || null, portStr, JSON.stringify(cfg)]
             );
             res.json(result.rows[0]);
         } catch (err) {
@@ -148,6 +169,7 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
         const portStr = port === undefined || port === null || port === '' ? null : String(port);
         const configJson = config !== undefined ? JSON.stringify(config) : null;
         try {
+            const orgId = organizationIdFromUser(req.user);
             const result = await pool.query(
                 `UPDATE biometric_devices SET
                     name = COALESCE($1, name),
@@ -157,8 +179,8 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
                     ip_address = COALESCE($5, ip_address),
                     port = COALESCE($6, port),
                     config = COALESCE($7::jsonb, config)
-                 WHERE id = $8 RETURNING *`,
-                [name, siteId === '' ? null : siteId, type, isActive, ipAddress || null, portStr, configJson, id]
+                 WHERE id = $8 AND organization_id = $9 RETURNING *`,
+                [name, siteId === '' ? null : siteId, type, isActive, ipAddress || null, portStr, configJson, id, orgId]
             );
             res.json(result.rows[0]);
         } catch (err) {
@@ -169,7 +191,8 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
 
     router.delete('/hr/biometrics/devices/:id', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
         try {
-            await pool.query('DELETE FROM biometric_devices WHERE id = $1', [req.params.id]);
+            const orgId = organizationIdFromUser(req.user);
+            await pool.query('DELETE FROM biometric_devices WHERE id = $1 AND organization_id = $2', [req.params.id, orgId]);
             res.json({ success: true });
         } catch (err) {
             console.error('Error deleting biometric device:', err);
@@ -180,15 +203,22 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
     router.get('/hr/biometrics/logs', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
         const { staffId, deviceId } = req.query;
         try {
+            const orgId = organizationIdFromUser(req.user);
             let query = `
             SELECT l.*, d.name as device_name, e.first_name, e.last_name 
             FROM biometric_logs l
             JOIN biometric_devices d ON l.device_id = d.id
             LEFT JOIN employees e ON l.employee_id = e.id
-            WHERE 1=1
+            WHERE d.organization_id = $1
         `;
-            const params = [];
-            let pIdx = 1;
+            const params = [orgId];
+            let pIdx = 2;
+
+            if (req.user.role === 'Site Supervisor') {
+                query += ` AND COALESCE(d.site_id, e.site_id) = $${pIdx}`;
+                params.push(req.user.siteId);
+                pIdx++;
+            }
 
             if (staffId) {
                 query += ` AND (l.staff_id = $${pIdx} OR e.staff_id = $${pIdx})`;

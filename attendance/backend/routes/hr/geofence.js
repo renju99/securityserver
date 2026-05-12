@@ -1,10 +1,13 @@
+const { organizationIdFromUser } = require('../../utils/organization');
+
 module.exports = ({ router, pool, authenticateToken, authorizeRole, normalizeFilterDateToUtcIso }) => {
     router.get('/hr/location-logs', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
         const { staffId, startDate, endDate, page = 1, limit = 100 } = req.query;
         const offset = (parseInt(page) - 1) * parseInt(limit);
-        const params = [];
-        const conditions = [];
-        let idx = 1;
+        const orgId = organizationIdFromUser(req.user);
+        const params = [orgId];
+        const conditions = ['e.organization_id = $1'];
+        let idx = 2;
 
         if (req.user.role === 'Site Supervisor') {
             conditions.push(`e.site_id = $${idx++}`);
@@ -33,7 +36,7 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, normalizeFil
             params.push(normalizedEndDate);
         }
 
-        const where = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
+        const where = 'WHERE ' + conditions.join(' AND ');
 
         try {
             const countRes = await pool.query(
@@ -71,8 +74,15 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, normalizeFil
     // HR API: Delete a single location log entry
     router.delete('/hr/location-logs/:id', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
         const { id } = req.params;
+        const orgId = organizationIdFromUser(req.user);
         try {
-            const result = await pool.query('DELETE FROM live_logs WHERE id = $1 RETURNING id', [id]);
+            const result = await pool.query(
+                `DELETE FROM live_logs ll
+                 USING employees e
+                 WHERE ll.id = $1 AND ll.employee_id = e.id AND e.organization_id = $2
+                 RETURNING ll.id`,
+                [id, orgId]
+            );
             if (result.rows.length === 0) return res.status(404).json({ error: 'Log not found' });
             res.json({ message: 'Log deleted' });
         } catch (err) {
@@ -87,8 +97,14 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, normalizeFil
 
         try {
             // Delete by explicit ID list
+            const orgId = organizationIdFromUser(req.user);
             if (ids && Array.isArray(ids) && ids.length > 0) {
-                await pool.query('DELETE FROM live_logs WHERE id = ANY($1)', [ids]);
+                await pool.query(
+                    `DELETE FROM live_logs ll
+                     USING employees e
+                     WHERE ll.id = ANY($1) AND ll.employee_id = e.id AND e.organization_id = $2`,
+                    [ids, orgId]
+                );
                 return res.json({ message: `${ids.length} log(s) deleted` });
             }
 
@@ -100,11 +116,13 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, normalizeFil
                 const empRes = await pool.query(
                     `SELECT id
                      FROM employees
-                     WHERE staff_id ILIKE $1
+                     WHERE organization_id = $2 AND (
+                        staff_id ILIKE $1
                         OR COALESCE(first_name, '') ILIKE $1
                         OR COALESCE(last_name, '') ILIKE $1
-                        OR CONCAT_WS(' ', COALESCE(first_name, ''), COALESCE(last_name, '')) ILIKE $1`,
-                    [`%${String(staffId).trim()}%`]
+                        OR CONCAT_WS(' ', COALESCE(first_name, ''), COALESCE(last_name, '')) ILIKE $1
+                     )`,
+                    [`%${String(staffId).trim()}%`, orgId]
                 );
                 const empIds = empRes.rows.map(r => r.id);
                 if (empIds.length === 0) return res.json({ message: '0 logs deleted' });
@@ -142,13 +160,14 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, normalizeFil
             const normalizedStartDate = normalizeFilterDateToUtcIso(startDate, false);
             const normalizedEndDate = normalizeFilterDateToUtcIso(endDate, true);
 
+            const orgId = organizationIdFromUser(req.user);
             const empQuery = `
             SELECT e.id, e.staff_id, e.first_name, e.last_name, e.site_id, s.name as site_name
             FROM employees e
             LEFT JOIN sites s ON e.site_id = s.id
-            WHERE e.staff_id = $1
+            WHERE e.staff_id = $1 AND e.organization_id = $2
         `;
-            const empResult = await pool.query(empQuery, [staffId]);
+            const empResult = await pool.query(empQuery, [staffId, orgId]);
 
             if (empResult.rows.length === 0) {
                 return res.status(404).json({ error: 'Employee not found' });
@@ -217,8 +236,9 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, normalizeFil
             const normalizedStartDate = normalizeFilterDateToUtcIso(startDate, false);
             const normalizedEndDate = normalizeFilterDateToUtcIso(endDate, true);
 
-            const empQuery = `SELECT id, staff_id, first_name, last_name FROM employees WHERE staff_id = $1`;
-            const empResult = await pool.query(empQuery, [staffId]);
+            const orgId = organizationIdFromUser(req.user);
+            const empQuery = 'SELECT id, staff_id, first_name, last_name FROM employees WHERE staff_id = $1 AND organization_id = $2';
+            const empResult = await pool.query(empQuery, [staffId, orgId]);
             if (empResult.rows.length === 0) return res.status(404).json({ error: 'Employee not found' });
             const employee = empResult.rows[0];
 

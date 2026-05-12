@@ -78,7 +78,7 @@ const FaceEnrollmentManager = ({ token, userId, staffId, initialEnrolled = false
                 context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
             }
             const enrollmentImage = canvas.toDataURL('image/jpeg', 0.72);
-            const res = await fetch(`/api/hr/users/${userId}/face-enrollment`, {
+            const res = await fetch(`/hr/users/${userId}/face-enrollment`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -103,7 +103,7 @@ const FaceEnrollmentManager = ({ token, userId, staffId, initialEnrolled = false
         setError('');
         setWorking(true);
         try {
-            const res = await fetch(`/api/hr/users/${userId}/face-enrollment`, {
+            const res = await fetch(`/hr/users/${userId}/face-enrollment`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`

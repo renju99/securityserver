@@ -72,3 +72,28 @@ test('ZKTeco ADMS virtual SN: connection-test probes live /iclock/ping on same s
         });
     }
 });
+
+test('ZKTeco ATTLOG returns retryable error when ingest storage fails', async () => {
+    const pool = {
+        async query(sql: string, _params: any[]) {
+            const text = sql.replace(/\s+/g, ' ').trim();
+            if (text.startsWith('SELECT id, site_id FROM biometric_devices')) return { rows: [{ id: 1, site_id: 1 }] };
+            if (text.startsWith('SELECT id FROM employees')) return { rows: [{ id: 10 }] };
+            if (text.startsWith('INSERT INTO biometric_logs')) throw new Error('database unavailable');
+            return { rows: [] };
+        },
+    };
+
+    const app = express();
+    app.use(
+        '/iclock',
+        express.text({ type: '*/*', limit: '15mb', defaultCharset: 'utf-8' }),
+        createZktecoIclockRouter(pool)
+    );
+
+    await request(app)
+        .post('/iclock/cdata?SN=ZK-RETRY-1&table=ATTLOG')
+        .send('100\t2026-05-02 08:00:00\t0\t1\t0\t0\n')
+        .expect(503)
+        .expect('ERROR');
+});

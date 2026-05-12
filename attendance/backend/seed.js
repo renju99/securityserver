@@ -23,9 +23,9 @@ async function seed() {
     for (const emp of employees) {
         try {
             await pool.query(
-                `INSERT INTO employees (staff_id, email, password_hash, role_id, site_id, department_name) 
-         VALUES ($1, $2, $3, $4, $5, $6)
-         ON CONFLICT (staff_id) DO UPDATE SET 
+                `INSERT INTO employees (organization_id, staff_id, email, password_hash, role_id, site_id, department_name) 
+         VALUES ((SELECT id FROM organizations WHERE slug = 'default' LIMIT 1), $1, $2, $3, $4, $5, $6)
+         ON CONFLICT (organization_id, staff_id) DO UPDATE SET 
          password_hash = EXCLUDED.password_hash,
          role_id = EXCLUDED.role_id,
          site_id = EXCLUDED.site_id,

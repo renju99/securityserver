@@ -108,7 +108,7 @@ const LocationLogsView = () => {
             onConfirm: async () => {
                 if (!token) return;
                 try {
-                    const res = await fetch(`/api/hr/location-logs/${id}`, {
+                    const res = await fetch(`/hr/location-logs/${id}`, {
                         method: 'DELETE',
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
@@ -136,7 +136,7 @@ const LocationLogsView = () => {
             onConfirm: async () => {
                 if (!token) return;
                 try {
-                    const res = await fetch('/api/hr/location-logs', {
+                    const res = await fetch('/hr/location-logs', {
                         method: 'DELETE',
                         headers: {
                             'Authorization': `Bearer ${token}`,
@@ -173,7 +173,7 @@ const LocationLogsView = () => {
             onConfirm: async () => {
                 if (!token) return;
                 try {
-                    const res = await fetch('/api/hr/location-logs', {
+                    const res = await fetch('/hr/location-logs', {
                         method: 'DELETE',
                         headers: {
                             'Authorization': `Bearer ${token}`,

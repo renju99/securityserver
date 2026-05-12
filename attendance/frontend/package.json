@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run typecheck && vite build",
     "build:cordova-sync": "npm run build && bash ../scripts/sync-frontend-to-cordova-www.sh",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
@@ -22,6 +23,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.30.3",
+    "exceljs": "^4.4.0",
     "socket.io-client": "^4.8.3",
     "zustand": "^5.0.11"
   },
@@ -30,16 +32,20 @@
     "@types/node": "^25.3.2",
     "@types/react": "^18.3.28",
     "@types/react-dom": "^18.3.7",
-    "@vitejs/plugin-react": "^4.2.0",
+    "@vitejs/plugin-react": "^5.2.0",
     "eslint": "^8.53.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.4",
     "typescript": "^5.9.3",
-    "vite": "^5.4.21",
+    "vite": "^7.3.2",
     "vite-plugin-pwa": "^1.2.0"
   },
   "overrides": {
-    "node-fetch": "2.7.0"
+    "node-fetch": "2.7.0",
+    "serialize-javascript": "7.0.5",
+    "exceljs": {
+      "uuid": "^14.0.0"
+    }
   }
 }

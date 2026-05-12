@@ -147,7 +147,7 @@ export default function VehiclesManager({
         }
 
         try {
-            const res = await fetch('/api/hr/users/bulk-update', {
+            const res = await fetch('/hr/users/bulk-update', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user?.token}` },
                 body: JSON.stringify(payload)

@@ -78,6 +78,8 @@ const LeaveCalendarView = () => {
 
     const token = user?.token;
     const isAdmin = user?.role === 'HR Admin';
+    const financeReadOnly = user?.role === 'Payroll' || user?.role === 'Finance';
+    const canSubmitLeave = (user?.role === 'HR Admin' || user?.role === 'Site Supervisor') && !financeReadOnly;
 
     const employeeOptions = useMemo(() => {
         const list = Array.isArray(employees) ? employees : [];
@@ -98,10 +100,10 @@ const LeaveCalendarView = () => {
 
         try {
             const [holidaysRes, leavesRes] = await Promise.all([
-                fetch(`/api/hr/calendar/holidays?${query}`, {
+                fetch(`/hr/calendar/holidays?${query}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 }),
-                fetch(`/api/hr/calendar/leaves?${query}`, {
+                fetch(`/hr/calendar/leaves?${query}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
             ]);
@@ -143,7 +145,7 @@ const LeaveCalendarView = () => {
         if (!token) return;
 
         try {
-            const res = await fetch('/api/hr/calendar/holidays', {
+            const res = await fetch('/hr/calendar/holidays', {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -176,7 +178,7 @@ const LeaveCalendarView = () => {
         if (!token) return;
 
         try {
-            const res = await fetch('/api/hr/calendar/leaves', {
+            const res = await fetch('/hr/calendar/leaves', {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -209,7 +211,7 @@ const LeaveCalendarView = () => {
     const updateLeaveStatus = async (leaveId: number, status: EmployeeLeave['status']) => {
         if (!token) return;
         try {
-            const res = await fetch(`/api/hr/calendar/leaves/${leaveId}`, {
+            const res = await fetch(`/hr/calendar/leaves/${leaveId}`, {
                 method: 'PATCH',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -230,7 +232,7 @@ const LeaveCalendarView = () => {
     const deleteHoliday = async (holidayId: number) => {
         if (!token) return;
         try {
-            const res = await fetch(`/api/hr/calendar/holidays/${holidayId}`, {
+            const res = await fetch(`/hr/calendar/holidays/${holidayId}`, {
                 method: 'DELETE',
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -247,7 +249,7 @@ const LeaveCalendarView = () => {
     const deleteLeave = async (leaveId: number) => {
         if (!token) return;
         try {
-            const res = await fetch(`/api/hr/calendar/leaves/${leaveId}`, {
+            const res = await fetch(`/hr/calendar/leaves/${leaveId}`, {
                 method: 'DELETE',
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -333,11 +335,12 @@ const LeaveCalendarView = () => {
                                     <option key={site.id} value={site.id}>{site.name}</option>
                                 ))}
                             </select>
-                            <button className="btn-primary" type="submit">Save Holiday</button>
+                            <button className="hr-btn primary" type="submit">Save Holiday</button>
                         </div>
                     </form>
                 )}
 
+                {canSubmitLeave ? (
                 <form onSubmit={handleLeaveSubmit} style={cardStyle}>
                     <h3 style={{ marginTop: 0, color: '#0f172a' }}>Add Leave Record</h3>
                     <div style={{ display: 'grid', gap: '0.85rem' }}>
@@ -394,9 +397,15 @@ const LeaveCalendarView = () => {
                             value={leaveForm.notes}
                             onChange={(e) => setLeaveForm((prev) => ({ ...prev, notes: e.target.value }))}
                         />
-                        <button className="btn-primary" type="submit">Save Leave</button>
+                        <button className="hr-btn primary" type="submit">Save Leave</button>
                     </div>
                 </form>
+                ) : financeReadOnly ? (
+                    <div style={{ ...cardStyle, color: '#64748b', fontSize: '0.9rem' }}>
+                        <h3 style={{ marginTop: 0, color: '#0f172a' }}>Leave records</h3>
+                        <p style={{ margin: 0 }}>You have read-only access. HR or site supervisors manage leave entries.</p>
+                    </div>
+                ) : null}
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1rem' }}>
@@ -422,7 +431,7 @@ const LeaveCalendarView = () => {
                                         </div>
                                     </div>
                                     {isAdmin && (
-                                        <button className="btn-secondary" type="button" onClick={() => deleteHoliday(holiday.id)}>
+                                        <button className="hr-btn secondary" type="button" onClick={() => deleteHoliday(holiday.id)}>
                                             Delete
                                         </button>
                                     )}
@@ -459,18 +468,32 @@ const LeaveCalendarView = () => {
                                             </div>
                                         </div>
                                         <div style={{ display: 'grid', gap: '0.5rem', justifyItems: 'end' }}>
-                                            <select
-                                                style={{ ...inputStyle, minWidth: '120px', background: colors.bg, color: colors.color, fontWeight: 700 }}
-                                                value={st}
-                                                onChange={(e) => updateLeaveStatus(leave.id, e.target.value as EmployeeLeave['status'])}
-                                            >
-                                                <option value="approved">Approved</option>
-                                                <option value="pending">Pending</option>
-                                                <option value="rejected">Rejected</option>
-                                            </select>
-                                            <button className="btn-secondary" type="button" onClick={() => deleteLeave(leave.id)}>
-                                                Delete
-                                            </button>
+                                            {financeReadOnly ? (
+                                                <span style={{
+                                                    ...inputStyle,
+                                                    minWidth: '120px',
+                                                    display: 'inline-block',
+                                                    textAlign: 'center',
+                                                    background: colors.bg,
+                                                    color: colors.color,
+                                                    fontWeight: 700
+                                                }}>{st}</span>
+                                            ) : (
+                                                <select
+                                                    style={{ ...inputStyle, minWidth: '120px', background: colors.bg, color: colors.color, fontWeight: 700 }}
+                                                    value={st}
+                                                    onChange={(e) => updateLeaveStatus(leave.id, e.target.value as EmployeeLeave['status'])}
+                                                >
+                                                    <option value="approved">Approved</option>
+                                                    <option value="pending">Pending</option>
+                                                    <option value="rejected">Rejected</option>
+                                                </select>
+                                            )}
+                                            {!financeReadOnly && (
+                                                <button className="hr-btn secondary" type="button" onClick={() => deleteLeave(leave.id)}>
+                                                    Delete
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

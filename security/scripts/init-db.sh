@@ -31,9 +31,9 @@ else
     # Drop and recreate if empty
     if [ "$TABLE_COUNT" = "0" ]; then
         echo "Stopping Odoo to drop empty database..."
-        ODOO_CONTAINER=$(docker ps --filter "name=odoo" --format "{{.Names}}" | head -n 1)
+        ODOO_CONTAINER=$(docker ps --filter "name=odoo-security" --format "{{.Names}}" | head -n 1)
         if [ -z "$ODOO_CONTAINER" ]; then
-            ODOO_CONTAINER=$(sudo docker ps --filter "name=odoo" --format "{{.Names}}" | head -n 1)
+            ODOO_CONTAINER=$(sudo docker ps --filter "name=odoo-security" --format "{{.Names}}" | head -n 1)
         fi
         if [ -n "$ODOO_CONTAINER" ]; then
             $DOCKER_CMD stop $ODOO_CONTAINER
@@ -59,7 +59,7 @@ else
         -e HOST=db \
         -e USER=odoo \
         -e PASSWORD=odoo \
-        odoo odoo -d $DB_NAME --stop-after-init \
+        odoo_security odoo -d $DB_NAME --stop-after-init \
         --config=/etc/odoo/odoo.conf \
         --without-demo=all \
         --init=base || {
@@ -96,8 +96,8 @@ sleep 5
 
 # Create user
 echo "Creating user '$ODOO_USER'..."
-$DOCKER_CMD cp scripts/create-user.py $(docker ps --filter "name=odoo" --format "{{.Names}}" | head -n 1):/tmp/create-user.py
-$DOCKER_CMD exec $(docker ps --filter "name=odoo" --format "{{.Names}}" | head -n 1) python3 /tmp/create-user.py
+$DOCKER_CMD cp scripts/create-user.py $(docker ps --filter "name=odoo-security" --format "{{.Names}}" | head -n 1):/tmp/create-user.py
+$DOCKER_CMD exec $(docker ps --filter "name=odoo-security" --format "{{.Names}}" | head -n 1) python3 /tmp/create-user.py
 
 echo ""
 echo "========================================="

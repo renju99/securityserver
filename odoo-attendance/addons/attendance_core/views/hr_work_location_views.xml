@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_work_location_form_attendance_core" model="ir.ui.view">
+        <field name="name">hr.work.location.form.attendance.core</field>
+        <field name="model">hr.work.location</field>
+        <field name="inherit_id" ref="hr.hr_work_location_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group" position="after">
+                <group string="Berkeley Workforce / Geofence">
+                    <field name="attendance_nfc_payload"/>
+                    <label for="attendance_geofence_latitude" string="Geofence center"/>
+                    <div class="o_row">
+                        <field name="attendance_geofence_latitude" placeholder="Latitude"/>
+                        <field name="attendance_geofence_longitude" placeholder="Longitude"/>
+                    </div>
+                    <field name="attendance_geofence_radius_meters"/>
+                    <field name="attendance_geofence_polygon_json" placeholder='[{"lat":25.0,"lng":55.0}, ...]'/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+    <record id="hr_work_location_tree_attendance_core" model="ir.ui.view">
+        <field name="name">hr.work.location.list.attendance.core</field>
+        <field name="model">hr.work.location</field>
+        <field name="inherit_id" ref="hr.hr_work_location_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list/field[@name='name']" position="after">
+                <field name="attendance_geofence_radius_meters" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

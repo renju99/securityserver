@@ -34,8 +34,8 @@ const RosterPlanningView = () => {
         if (!token) return;
         try {
             const [tplRes, asnRes] = await Promise.all([
-                fetch('/api/hr/rosters/templates', { headers: { Authorization: `Bearer ${token}` } }),
-                fetch(`/api/hr/rosters/assignments?startDate=${startDate}&endDate=${endDate}`, { headers: { Authorization: `Bearer ${token}` } })
+                fetch('/hr/rosters/templates', { headers: { Authorization: `Bearer ${token}` } }),
+                fetch(`/hr/rosters/assignments?startDate=${startDate}&endDate=${endDate}`, { headers: { Authorization: `Bearer ${token}` } })
             ]);
             const tplData = await tplRes.json();
             const asnData = await asnRes.json();
@@ -70,7 +70,7 @@ const RosterPlanningView = () => {
                 payload.cycleDays = cycleDays;
             }
 
-            const res = await fetch('/api/hr/rosters/apply', {
+            const res = await fetch('/hr/rosters/apply', {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -158,7 +158,7 @@ const RosterPlanningView = () => {
                 </div>
 
                 <div style={{ marginTop: '0.75rem' }}>
-                    <button className="btn-primary" onClick={applyRoster} disabled={loading}>
+                    <button className="hr-btn primary" onClick={applyRoster} disabled={loading}>
                         {loading ? 'Applying...' : 'Apply Roster'}
                     </button>
                 </div>

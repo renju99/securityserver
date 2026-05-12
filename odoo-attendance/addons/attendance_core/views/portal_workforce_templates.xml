@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_berkeley_workforce_page" name="Berkeley Workforce — My attendance">
+        <t t-call="portal.portal_layout">
+            <t t-set="no_footer" t-value="1"/>
+            <div id="wrap" class="o_portal_wrap container py-4">
+                <h2>Berkeley Workforce</h2>
+                <p class="text-muted">Signed in as <t t-esc="employee.name"/></p>
+                <div t-if="open_attendance" class="alert alert-info">
+                    You are checked in since <span t-field="open_attendance.check_in"/>.
+                </div>
+                <div t-else="" class="alert alert-secondary">You are not checked in.</div>
+                <form method="post" action="/my/berkeley_workforce/punch" class="d-inline">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="direction" value="in"/>
+                    <button type="submit" class="btn btn-primary me-2">Check in</button>
+                </form>
+                <form method="post" action="/my/berkeley_workforce/punch" class="d-inline">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="direction" value="out"/>
+                    <button type="submit" class="btn btn-outline-primary">Check out</button>
+                </form>
+                <hr/>
+                <h4>Offline queue</h4>
+                <p class="small text-muted">Actions taken without network are stored in this browser and replayed when you press Sync.</p>
+                <button type="button" class="btn btn-secondary" id="bw_offline_sync_btn">Sync now</button>
+                <pre id="bw_offline_status" class="mt-2 small"></pre>
+                <script type="text/javascript"><![CDATA[
+                    (function () {
+                        const KEY = 'bw_offline_punches_v1';
+                        const CSRF = document.querySelector('input[name="csrf_token"]')?.value || '';
+                        function readQ() {
+                            try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { return []; }
+                        }
+                        function writeQ(q) { localStorage.setItem(KEY, JSON.stringify(q)); }
+                        function pushAction(direction) {
+                            const q = readQ();
+                            q.push({ direction: direction, time: new Date().toISOString() });
+                            writeQ(q);
+                            const el = document.getElementById('bw_offline_status');
+                            if (el) el.textContent = 'Queued ' + q.length + ' action(s).';
+                        }
+                        document.querySelectorAll('form[action="/my/berkeley_workforce/punch"]').forEach(function (form) {
+                            form.addEventListener('submit', function (ev) {
+                                if (!navigator.onLine) {
+                                    ev.preventDefault();
+                                    const dir = form.querySelector('input[name="direction"]').value;
+                                    pushAction(dir);
+                                }
+                            });
+                        });
+                        const btn = document.getElementById('bw_offline_sync_btn');
+                        if (btn) {
+                            btn.addEventListener('click', function () {
+                                const q = readQ();
+                                if (!q.length) {
+                                    document.getElementById('bw_offline_status').textContent = 'Nothing to sync.';
+                                    return;
+                                }
+                                const body = new URLSearchParams();
+                                body.append('csrf_token', CSRF);
+                                body.append('punches_json', JSON.stringify(q));
+                                fetch('/my/berkeley_workforce/sync', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                    body: body.toString(),
+                                    credentials: 'same-origin',
+                                }).then(function (r) { return r.json(); }).then(function (data) {
+                                    if (data && data.ok) {
+                                        writeQ([]);
+                                        document.getElementById('bw_offline_status').textContent = 'Synced ' + data.processed + ' action(s). Reloading…';
+                                        window.location.reload();
+                                    } else {
+                                        document.getElementById('bw_offline_status').textContent = 'Sync failed.';
+                                    }
+                                }).catch(function () {
+                                    document.getElementById('bw_offline_status').textContent = 'Sync failed (network).';
+                                });
+                            });
+                        }
+                    })();
+                ]]></script>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_my_home_menu_workforce" inherit_id="portal.portal_my_home" name="Berkeley Workforce portal link">
+        <xpath expr="//div[@id='portal_common_category']" position="inside">
+            <t t-if="request.env.user.employee_id">
+                <t t-call="portal.portal_docs_entry">
+                    <t t-set="icon" t-value="'/web/static/img/favicon.ico'"/>
+                    <t t-set="title">Berkeley Workforce</t>
+                    <t t-set="text">Check in / out and offline sync</t>
+                    <t t-set="url" t-value="'/my/berkeley_workforce'"/>
+                </t>
+            </t>
+        </xpath>
+    </template>
+</odoo>

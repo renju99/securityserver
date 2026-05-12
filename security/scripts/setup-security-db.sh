@@ -17,7 +17,7 @@ else
 fi
 
 DB_CONTAINER=$($DOCKER_CMD ps --filter "name=db" --format "{{.Names}}" | head -n 1)
-ODOO_CONTAINER=$($DOCKER_CMD ps --filter "name=odoo" --format "{{.Names}}" | head -n 1)
+ODOO_CONTAINER=$($DOCKER_CMD ps --filter "name=odoo-security" --format "{{.Names}}" | head -n 1)
 
 echo "========================================="
 echo "Setting up 'security' database"

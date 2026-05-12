@@ -53,6 +53,7 @@ export interface AttendanceLogEntry {
     site_name?: string;
     site_id?: number | string;
     is_live?: boolean;
+    is_late?: boolean;
     notes?: string;
     auto_closed?: boolean;
     status?: 'approved' | 'pending' | 'rejected';

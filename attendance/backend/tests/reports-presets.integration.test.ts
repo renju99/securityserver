@@ -6,7 +6,7 @@ import request from 'supertest';
 const registerReportsRoutes = require('../routes/hr/reports');
 
 const authStub = (req: any, _res: any, next: any) => {
-    req.user = { id: 99, staffId: 'ADMIN1', role: 'HR Admin', siteId: 1 };
+    req.user = { id: 99, staffId: 'ADMIN1', role: 'HR Admin', siteId: 1, organizationId: 1 };
     next();
 };
 const allowAll = () => (_req: any, _res: any, next: any) => next();
@@ -18,7 +18,12 @@ test('report presets create list and delete', async () => {
         async query(sql: string, params: any[]) {
             const text = sql.replace(/\s+/g, ' ').trim();
             if (text.startsWith('INSERT INTO report_presets')) {
-                const row = { id: nextId++, created_by: params[0], name: params[1] };
+                const row = {
+                    id: nextId++,
+                    organization_id: params[0],
+                    created_by: params[1],
+                    name: params[2],
+                };
                 presets.set(row.id, row);
                 return { rows: [row] };
             }

@@ -86,7 +86,7 @@ const KioskFaceAttendance = () => {
         try {
             const descriptor = await readFaceDescriptorWithLiveness(videoRef.current, 6500, { fastMode: true });
             const coords = await readCoordinates();
-            const res = await fetch('/api/auth/kiosk/face-attendance', {
+            const res = await fetch('/auth/kiosk/face-attendance', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

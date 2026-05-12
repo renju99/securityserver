@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+      Do not inherit hr_attendance.view_attendance_tree here.
+      The core list uses js_class="attendance_list_view"; extending that tree with
+      extra fields can produce a merged arch where the web client parses columns
+      before the hr.attendance fields map includes them (Owl "field is undefined").
+      Job / break are on the attendance form (hr_attendance_views.xml). Use pivot/graph
+      for analysis. Do not extend the global search view with custom hr.attendance fields:
+      the web SearchArchParser can throw "Unknown field" when those keys are missing from
+      its field map (same class of issue as the attendance list js_class).
+    -->
+    <record id="action_hr_attendance_report_attendance_core" model="ir.actions.act_window">
+        <field name="name">Berkeley Workforce — Attendance analysis</field>
+        <field name="res_model">hr.attendance</field>
+        <field name="view_mode">graph,pivot,list,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Use pivot/graph to analyse attendances including punch work location.</p>
+        </field>
+    </record>
+
+    <!-- Phase 5: reporting with Berkeley Workforce dimensions (not on list tree — see comment above). -->
+    <record id="hr_attendance_view_graph_attendance_core" model="ir.ui.view">
+        <field name="name">hr.attendance.graph.attendance.core</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.hr_attendance_view_graph"/>
+        <field name="arch" type="xml">
+            <xpath expr="//graph" position="inside">
+                <field name="check_work_location_id" type="row"/>
+                <field name="attendance_job_code_id" type="row"/>
+                <field name="break_minutes" type="measure"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="hr_attendance_view_pivot_attendance_core" model="ir.ui.view">
+        <field name="name">hr.attendance.pivot.attendance.core</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.hr_attendance_view_pivot"/>
+        <field name="arch" type="xml">
+            <xpath expr="//pivot" position="inside">
+                <field name="check_work_location_id" type="row"/>
+                <field name="attendance_job_code_id" type="row"/>
+                <field name="break_minutes" type="measure"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

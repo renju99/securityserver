@@ -28,14 +28,28 @@ async function ingestBiometricLog(pool, input) {
             return { ok: false, status: 400, error: 'Invalid timestamp' };
         }
 
-        await pool.query(
-            'INSERT INTO biometric_logs (device_id, staff_id, employee_id, timestamp, photo_url, raw_data) VALUES ($1, $2, $3, $4, $5, $6)',
+        const insertRes = await pool.query(
+            `INSERT INTO biometric_logs (device_id, staff_id, employee_id, timestamp, photo_url, raw_data, process_status, next_retry_at)
+             VALUES ($1, $2, $3, $4, $5, $6, 'pending', NOW())
+             ON CONFLICT (device_id, staff_id, timestamp) DO UPDATE SET
+                employee_id = COALESCE(EXCLUDED.employee_id, biometric_logs.employee_id),
+                photo_url = COALESCE(EXCLUDED.photo_url, biometric_logs.photo_url),
+                raw_data = EXCLUDED.raw_data,
+                process_status = CASE
+                    WHEN biometric_logs.process_status IN ('succeeded', 'processing') THEN biometric_logs.process_status
+                    ELSE 'pending'
+                END,
+                next_retry_at = CASE
+                    WHEN biometric_logs.process_status IN ('succeeded', 'processing') THEN biometric_logs.next_retry_at
+                    ELSE NOW()
+                END
+             RETURNING id`,
             [deviceId, staffId, employeeId, ts, photoUrl || null, JSON.stringify(rawData ?? {})]
         );
 
         await pool.query('UPDATE biometric_devices SET last_seen = NOW() WHERE id = $1', [deviceId]);
 
-        return { ok: true };
+        return { ok: true, logId: insertRes.rows[0]?.id || null };
     } catch (err) {
         console.error('[BIOMETRIC_INGEST]', err.message);
         return { ok: false, status: 500, error: 'Database error' };

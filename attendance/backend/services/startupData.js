@@ -84,11 +84,29 @@ const initializeStartupData = async (pool) => {
                 );
             `);
             await pool.query(`ALTER TABLE geo_fence_alerts ADD COLUMN IF NOT EXISTS false_positive BOOLEAN DEFAULT false`);
-            await pool.query(`
-                INSERT INTO shifts (name, start_time, end_time) 
-                VALUES ('Morning Shift', '08:00', '17:00'), ('Night Shift', '20:00', '05:00')
-                ON CONFLICT (name) DO NOTHING;
+            const shiftOrgCol = await pool.query(`
+                SELECT 1 FROM information_schema.columns
+                WHERE table_schema = 'public' AND table_name = 'shifts' AND column_name = 'organization_id'
             `);
+            if (shiftOrgCol.rows.length > 0) {
+                await pool.query(`
+                    INSERT INTO shifts (organization_id, name, start_time, end_time)
+                    SELECT o.id, v.name, v.start_time::time, v.end_time::time
+                    FROM organizations o
+                    CROSS JOIN (VALUES
+                        ('Morning Shift', '08:00', '17:00'),
+                        ('Night Shift', '20:00', '05:00')
+                    ) AS v(name, start_time, end_time)
+                    WHERE o.slug = 'default'
+                    ON CONFLICT (organization_id, name) DO NOTHING
+                `);
+            } else {
+                await pool.query(`
+                    INSERT INTO shifts (name, start_time, end_time)
+                    VALUES ('Morning Shift', '08:00', '17:00'), ('Night Shift', '20:00', '05:00')
+                    ON CONFLICT (name) DO NOTHING
+                `);
+            }
             await pool.query(`ALTER TABLE attendance ADD COLUMN IF NOT EXISTS notes TEXT`);
             await pool.query(`ALTER TABLE attendance ADD COLUMN IF NOT EXISTS auto_closed BOOLEAN DEFAULT false`);
             await pool.query(`
@@ -118,6 +136,16 @@ const initializeStartupData = async (pool) => {
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             `);
+            await pool.query(`ALTER TABLE biometric_logs ADD COLUMN IF NOT EXISTS process_status VARCHAR(24) NOT NULL DEFAULT 'pending'`);
+            await pool.query(`ALTER TABLE biometric_logs ADD COLUMN IF NOT EXISTS process_attempts INTEGER NOT NULL DEFAULT 0`);
+            await pool.query(`ALTER TABLE biometric_logs ADD COLUMN IF NOT EXISTS next_retry_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`);
+            await pool.query(`ALTER TABLE biometric_logs ADD COLUMN IF NOT EXISTS processed_at TIMESTAMPTZ`);
+            await pool.query(`ALTER TABLE biometric_logs ADD COLUMN IF NOT EXISTS process_last_error TEXT`);
+            await pool.query(`ALTER TABLE biometric_logs ADD COLUMN IF NOT EXISTS attendance_id INTEGER REFERENCES attendance(id) ON DELETE SET NULL`);
+            await pool.query(`ALTER TABLE biometric_logs ADD COLUMN IF NOT EXISTS attendance_event_type VARCHAR(16)`);
+            await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS idx_biometric_logs_device_staff_timestamp_unique ON biometric_logs (device_id, staff_id, timestamp)`);
+            await pool.query(`CREATE INDEX IF NOT EXISTS idx_biometric_logs_process_retry ON biometric_logs (process_status, next_retry_at, timestamp, id)`);
+            await pool.query(`CREATE INDEX IF NOT EXISTS idx_biometric_logs_attendance ON biometric_logs (attendance_id)`);
             await pool.query(`
                 CREATE TABLE IF NOT EXISTS public_holidays (
                     id SERIAL PRIMARY KEY,

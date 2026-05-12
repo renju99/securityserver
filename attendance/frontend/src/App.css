@@ -278,6 +278,168 @@ body {
   font-size: 0.8rem;
 }
 
+/* Employee app — in-flow banner (avoid covering the whole screen) */
+.app-container .permission-banner {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  animation: none;
+  box-shadow: var(--shadow-sm);
+  border-bottom: 1px solid var(--gray-200);
+  padding: var(--space-4) var(--space-4);
+}
+
+.app-container .permission-banner.permission-banner--warning {
+  background: var(--warning-bg);
+  border-bottom-color: rgba(183, 121, 31, 0.25);
+}
+
+.app-container .permission-banner.permission-banner--info {
+  background: var(--primary-light);
+  border-bottom-color: rgba(31, 75, 153, 0.12);
+}
+
+.app-container .permission-banner .banner-content h3 {
+  font-size: var(--text-md);
+}
+
+.app-container .permission-banner .banner-content p {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+  line-height: 1.45;
+}
+
+/* Employee — alerts & status card */
+.employee-alert {
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  border: 1px solid transparent;
+}
+
+.employee-alert--success {
+  background: var(--success-bg);
+  border-color: rgba(15, 143, 99, 0.22);
+  color: #0d5c44;
+}
+
+.employee-alert--warning {
+  background: var(--warning-bg);
+  border-color: rgba(183, 121, 31, 0.3);
+  color: #92400e;
+}
+
+.employee-alert--info {
+  background: var(--primary-light);
+  border-color: rgba(31, 75, 153, 0.14);
+  color: var(--primary-dark);
+}
+
+.employee-status-card {
+  font-size: 0.88rem;
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  color: var(--gray-900);
+}
+
+.employee-status-card__label {
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  color: var(--gray-500);
+  text-transform: uppercase;
+}
+
+.employee-status-card__lead {
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+
+.employee-status-card__meta {
+  font-size: 0.8rem;
+  color: var(--gray-600);
+  margin-bottom: var(--space-3);
+}
+
+.employee-muted {
+  font-weight: 500;
+  color: var(--gray-500);
+}
+
+.employee-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--gray-500);
+}
+
+.btn-employee-tool {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gray-300);
+  background: var(--white);
+  color: var(--gray-700);
+  min-height: auto;
+  font-weight: 600;
+}
+
+.btn-employee-tool:hover:not(:disabled) {
+  background: var(--gray-50);
+  border-color: var(--gray-400);
+}
+
+.setup-screen label.field-label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: var(--space-1);
+}
+
+.setup-screen .field-hint {
+  font-size: var(--text-xs);
+  color: var(--gray-500);
+  margin: 0 0 var(--space-2);
+  line-height: 1.4;
+}
+
+.setup-screen .error-banner {
+  background: var(--danger-bg);
+  color: #9f1239;
+  border: 1px solid #fecdd3;
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.status-badge.connecting {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.check-in-controls .check-in-btn,
+.check-in-controls .check-out-btn {
+  min-height: 48px;
+  font-size: 0.95rem;
+}
+
+.tracking-active.tracking-active--idle {
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px dashed var(--gray-300);
+}
+
 /* Buttons — global */
 .check-in-controls {
   display: grid;
@@ -357,6 +519,16 @@ textarea:focus-visible {
 .btn-secondary:hover:not(:disabled) {
   background: var(--gray-50);
   border-color: var(--gray-300);
+}
+
+
+/* Dashboard/management actions should not stretch full width on wide screens. */
+.dashboard-main .btn-primary,
+.dashboard-main .btn-secondary,
+.management-view .btn-primary,
+.management-view .btn-secondary {
+  width: auto;
+  min-width: 0;
 }
 
 
@@ -704,6 +876,28 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+@media (max-width: 900px) {
+  .dashboard-topbar {
+    height: auto;
+    min-height: 58px;
+    padding: 0.5rem 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .topbar-right {
+    max-width: 100%;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .btn-logout {
+    margin-left: auto;
+  }
 }
 
 .env-pill {
@@ -738,6 +932,12 @@ textarea:focus-visible {
   color: #ffd6dc;
   background: rgba(151, 41, 61, 0.34);
   border-color: rgba(255, 167, 182, 0.32);
+}
+
+.live-pill.connecting {
+  color: #ffe8a3;
+  background: rgba(120, 90, 20, 0.35);
+  border-color: rgba(255, 214, 128, 0.35);
 }
 
 .dashboard-shell {
@@ -2568,7 +2768,9 @@ textarea:focus-visible {
   border-bottom: 1px solid var(--gray-200);
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: var(--space-4);
+  flex-wrap: wrap;
 }
 
 .logs-header h2 {

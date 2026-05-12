@@ -183,7 +183,7 @@ const BiometricDeviceModal: React.FC<BiometricDeviceModalProps> = ({
                 if (typeof v === 'number' && !Number.isFinite(v)) continue;
                 cfg[k] = v as string | number | boolean;
             }
-            const res = await fetch('/api/hr/biometrics/devices/connection-test', {
+            const res = await fetch('/hr/biometrics/devices/connection-test', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -325,7 +325,7 @@ const BiometricDeviceModal: React.FC<BiometricDeviceModalProps> = ({
         setSaving(true);
         try {
             const method = form.id ? 'PATCH' : 'POST';
-            const url = form.id ? `/api/hr/biometrics/devices/${form.id}` : '/api/hr/biometrics/devices';
+            const url = form.id ? `/hr/biometrics/devices/${form.id}` : '/hr/biometrics/devices';
             const portVal = form.port === '' || form.port === undefined ? null : String(form.port);
             const cfg: Record<string, string | number | boolean> = {};
             for (const [k, v] of Object.entries(form.config)) {

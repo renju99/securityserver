@@ -6,6 +6,10 @@ function sendZkOk(res) {
     res.status(200).type('text/plain').send('OK');
 }
 
+function sendZkRetry(res, message = 'ERROR') {
+    res.status(503).type('text/plain').send(message);
+}
+
 function readSn(req) {
     const q = req.query || {};
     const sn = q.SN || q.sn || q.Sn || '';
@@ -23,7 +27,7 @@ function mapStaffId(userId) {
 /**
  * @param {import('pg').Pool} pool
  */
-function createCdataHandler(pool) {
+function createCdataHandler(pool, metrics) {
     return async (req, res) => {
         const sn = readSn(req);
         const tableRaw = req.query.table || req.query.Table || '';
@@ -58,6 +62,8 @@ function createCdataHandler(pool) {
 
             if (table === 'ATTLOG' || table === '') {
                 const records = parseZkAttlogLines(body);
+                let transientFailure = false;
+                let okLines = 0;
                 for (const rec of records) {
                     const iso = zkTimestampToIso(rec.timestampStr);
                     if (!iso) {
@@ -80,14 +86,36 @@ function createCdataHandler(pool) {
                         photoUrl: null,
                         rawData,
                     });
+                    if (result.ok) {
+                        okLines += 1;
+                        metrics?.increment?.('zk_iclock_attlog_records_ok_total', 1);
+                    }
                     if (!result.ok && result.status === 404) {
                         console.warn(
                             '[ZK_ICLOCK] device not registered for SN (add terminal with this device key):',
                             sn
                         );
+                        transientFailure = true;
                     } else if (!result.ok) {
                         console.error('[ZK_ICLOCK] ingest failed', result.error);
+                        if (result.status >= 500) transientFailure = true;
                     }
+                }
+                if (transientFailure) {
+                    metrics?.increment?.('zk_iclock_attlog_batch_retry_total', 1);
+                    console.log(JSON.stringify({
+                        level: 'warn',
+                        component: 'zk_iclock',
+                        event: 'attlog_batch_retry',
+                        sn,
+                        table: table || 'ATTLOG',
+                        records: records.length,
+                        okLines,
+                    }));
+                    return sendZkRetry(res, 'ERROR');
+                }
+                if (okLines > 0) {
+                    metrics?.increment?.('zk_iclock_attlog_batches_ok_total', 1);
                 }
             } else if (table) {
                 console.info('[ZK_ICLOCK] acknowledged table (no row stored):', table, 'SN=', sn);
@@ -95,16 +123,24 @@ function createCdataHandler(pool) {
 
             return sendZkOk(res);
         } catch (err) {
+            metrics?.increment?.('zk_iclock_cdata_errors_total', 1);
+            console.log(JSON.stringify({
+                level: 'error',
+                component: 'zk_iclock',
+                event: 'cdata_error',
+                message: err?.message || String(err),
+            }));
             console.error('[ZK_ICLOCK] cdata error:', err.message);
-            return sendZkOk(res);
+            return sendZkRetry(res, 'ERROR');
         }
     };
 }
 
 /**
  * @param {import('pg').Pool} pool
+ * @param {{ increment?: (name: string, value?: number) => void }} [metrics]
  */
-module.exports = function createZktecoIclockRouter(pool) {
+module.exports = function createZktecoIclockRouter(pool, metrics) {
     const router = express.Router();
     const enabled = (process.env.ZK_ICLOCK_ENABLED || 'true').toLowerCase() !== 'false';
 
@@ -126,7 +162,7 @@ module.exports = function createZktecoIclockRouter(pool) {
     router.get('/fdata', (_req, res) => sendZkOk(res));
     router.post('/fdata', (_req, res) => sendZkOk(res));
 
-    const cdata = createCdataHandler(pool);
+    const cdata = createCdataHandler(pool, metrics);
     router.post('/cdata', cdata);
     router.post('/Cdata', cdata);
 

@@ -8,6 +8,7 @@ const {
     addApprovalLog,
     applyCheckoutPolicy,
 } = require('../services/attendanceGovernance');
+const { organizationIdFromUser, hrDashboardRoom, hrSiteRoom } = require('../utils/organization');
 
 // Helper: Calculate Distance (Haversine Formula) in meters
 const calculateDistance = (lat1: any, lon1: any, lat2: any, lon2: any) => {
@@ -45,21 +46,34 @@ module.exports = (pool: any, authenticateToken: any, locationLimiter: any, isDur
     router.get('/attendance/status', authenticateToken, async (req, res) => {
         try {
             const { id } = req.user;
-            const attResult = await pool.query(
-                'SELECT * FROM attendance WHERE employee_id = $1 ORDER BY check_in_time DESC LIMIT 1',
+            const openRes = await pool.query(
+                `SELECT a.id, a.check_in_time, a.source, a.status, s.name AS site_name
+                 FROM attendance a
+                 LEFT JOIN sites s ON s.id = a.site_id
+                 WHERE a.employee_id = $1 AND a.check_out_time IS NULL
+                   AND a.status NOT IN ('voided', 'rejected')
+                 ORDER BY a.check_in_time DESC LIMIT 1`,
                 [id]
             );
 
-            const empResult = await pool.query('SELECT first_name, last_name, staff_id FROM employees WHERE id = $1', [id]);
+            const empResult = await pool.query(
+                `SELECT e.first_name, e.last_name, e.staff_id, s.name AS assigned_site_name
+                 FROM employees e
+                 LEFT JOIN sites s ON s.id = e.site_id
+                 WHERE e.id = $1`,
+                [id]
+            );
             const employee = empResult.rows[0];
 
-            let status = 'checked_out';
-            if (attResult.rows.length > 0 && !attResult.rows[0].check_out_time) {
-                status = 'checked_in';
-            }
+            const status = openRes.rows.length > 0 ? 'checked_in' : 'checked_out';
+            const open = openRes.rows[0] || null;
 
             res.json({
                 status,
+                openAttendanceId: open?.id ?? null,
+                openCheckInTime: open?.check_in_time ?? null,
+                openSource: open?.source ?? null,
+                siteName: open?.site_name || employee?.assigned_site_name || null,
                 user: {
                     firstName: employee ? employee.first_name : null,
                     lastName: employee ? employee.last_name : null,
@@ -89,31 +103,57 @@ module.exports = (pool: any, authenticateToken: any, locationLimiter: any, isDur
                 return res.status(404).json({ error: 'Employee not found' });
             }
             const employee = empRes.rows[0];
-            const results = [];
+            const capped = entries.slice(0, 200);
+            const results = new Array(capped.length);
+            const sorted = capped
+                .map((entry, originalIndex) => ({ entry, originalIndex }))
+                .sort((a, b) => {
+                    const ta = new Date(a.entry?.timestamp || 0).getTime();
+                    const tb = new Date(b.entry?.timestamp || 0).getTime();
+                    return ta - tb || a.originalIndex - b.originalIndex;
+                });
 
-            for (const entry of entries.slice(0, 200)) {
+            for (const { entry, originalIndex } of sorted) {
                 const action = entry?.action === 'check_out' ? 'check_out' : 'check_in';
                 const ts = entry?.timestamp ? new Date(entry.timestamp) : new Date();
-                const latitude = Number(entry?.latitude);
-                const longitude = Number(entry?.longitude);
+                let latitude = Number(entry?.latitude);
+                let longitude = Number(entry?.longitude);
+                if ((!Number.isFinite(latitude) || !Number.isFinite(longitude)) && Number.isFinite(employee.id)) {
+                    const locRes = await pool.query(
+                        `SELECT ST_X(current_coords::geometry) AS lon, ST_Y(current_coords::geometry) AS lat
+                         FROM live_logs WHERE employee_id = $1 ORDER BY timestamp DESC LIMIT 1`,
+                        [employee.id]
+                    );
+                    if (locRes.rows.length > 0) {
+                        latitude = Number(locRes.rows[0].lat);
+                        longitude = Number(locRes.rows[0].lon);
+                    }
+                }
                 if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || !Number.isFinite(ts.getTime())) {
-                    results.push({ ok: false, action, error: 'Invalid timestamp or coordinates' });
+                    results[originalIndex] = { ok: false, action, error: 'Invalid timestamp or coordinates' };
                     // eslint-disable-next-line no-continue
                     continue;
                 }
                 if (employee.nfc_payload && String(employee.nfc_payload).trim() && entry?.nfcPayload !== employee.nfc_payload) {
-                    results.push({ ok: false, action, error: 'NFC payload mismatch' });
+                    results[originalIndex] = { ok: false, action, error: 'NFC payload mismatch' };
                     // eslint-disable-next-line no-continue
                     continue;
                 }
                 if (action === 'check_in') {
                     // eslint-disable-next-line no-await-in-loop
                     const openRes = await pool.query(
-                        'SELECT id FROM attendance WHERE employee_id = $1 AND check_out_time IS NULL',
+                        `SELECT id FROM attendance
+                         WHERE employee_id = $1 AND check_out_time IS NULL
+                           AND status NOT IN ('voided', 'rejected')`,
                         [employee.id]
                     );
                     if (openRes.rowCount > 0) {
-                        results.push({ ok: false, action, error: 'Already checked in' });
+                        results[originalIndex] = {
+                            ok: false,
+                            action,
+                            error: 'Already checked in',
+                            conflict: 'duplicate_open_check_in',
+                        };
                         // eslint-disable-next-line no-continue
                         continue;
                     }
@@ -153,7 +193,7 @@ module.exports = (pool: any, authenticateToken: any, locationLimiter: any, isDur
                         checkInTime: inserted.rows[0].check_in_time,
                         source: 'offline_batch',
                     });
-                    results.push({ ok: true, action, attendanceId: inserted.rows[0].id, status: inserted.rows[0].status });
+                    results[originalIndex] = { ok: true, action, attendanceId: inserted.rows[0].id, status: inserted.rows[0].status };
                 } else {
                     // eslint-disable-next-line no-await-in-loop
                     const updated = await pool.query(
@@ -163,11 +203,17 @@ module.exports = (pool: any, authenticateToken: any, locationLimiter: any, isDur
                              source = COALESCE(source, 'offline_batch'),
                              work_context = COALESCE(work_context, '{}'::jsonb) || $4::jsonb
                          WHERE employee_id = $5 AND check_out_time IS NULL
+                           AND status NOT IN ('voided', 'rejected')
                          RETURNING id, check_in_time, check_out_time, status`,
                         [ts.toISOString(), longitude, latitude, JSON.stringify(entry?.workContext || {}), employee.id]
                     );
                     if (updated.rowCount === 0) {
-                        results.push({ ok: false, action, error: 'No open check-in found' });
+                        results[originalIndex] = {
+                            ok: false,
+                            action,
+                            error: 'No open check-in found',
+                            conflict: 'checkout_without_open',
+                        };
                         // eslint-disable-next-line no-continue
                         continue;
                     }
@@ -188,10 +234,10 @@ module.exports = (pool: any, authenticateToken: any, locationLimiter: any, isDur
                         checkOutTime: updated.rows[0].check_out_time,
                         source: 'offline_batch',
                     });
-                    results.push({ ok: true, action, attendanceId: updated.rows[0].id, status: updated.rows[0].status });
+                    results[originalIndex] = { ok: true, action, attendanceId: updated.rows[0].id, status: updated.rows[0].status };
                 }
             }
-            return res.json({ success: true, processed: results.length, results });
+            return res.json({ success: true, processed: capped.length, results });
         } catch (err) {
             console.error('Offline attendance sync error:', err);
             return res.status(500).json({ error: 'Offline attendance sync failed' });
@@ -277,6 +323,7 @@ module.exports = (pool: any, authenticateToken: any, locationLimiter: any, isDur
             console.log(`[TWA Update] ${employeeId} (${hw_id}): ${lat}, ${lng} at ${ts}`);
 
             // Get Employee Details including Shift and Site
+            const orgId = organizationIdFromUser(req.user);
             const empRes = await pool.query(
                 `SELECT e.id, e.site_id, e.department_name, e.photo_url, e.is_tracking_enabled,
                    s.latitude as site_lat, s.longitude as site_lon, s.radius_meters, s.name as site_name, s.geofence_type, s.geofence_data, s.geofence_enabled,
@@ -284,8 +331,8 @@ module.exports = (pool: any, authenticateToken: any, locationLimiter: any, isDur
              FROM employees e
              LEFT JOIN sites s ON e.site_id = s.id
              LEFT JOIN shifts sh ON e.shift_id = sh.id
-             WHERE e.staff_id = $1`,
-                [employeeId]
+             WHERE e.staff_id = $1 AND e.organization_id = $2`,
+                [employeeId, orgId]
             );
 
 
@@ -294,7 +341,10 @@ module.exports = (pool: any, authenticateToken: any, locationLimiter: any, isDur
                 const internalId = emp.id;
 
                 // 1. Check Global Tracking
-                const globalRes = await pool.query('SELECT value FROM settings WHERE key = $1', ['global_tracking_enabled']);
+                const globalRes = await pool.query(
+                    'SELECT value FROM settings WHERE key = $1 AND organization_id = $2',
+                    ['global_tracking_enabled', orgId]
+                );
                 const globalEnabled = globalRes.rows.length > 0 ? (globalRes.rows[0].value === true) : true;
 
                 if (!globalEnabled) {
@@ -325,9 +375,10 @@ module.exports = (pool: any, authenticateToken: any, locationLimiter: any, isDur
                     hw_id,
                     ts
                 };
-                io.to('hr-dashboard').emit('employee_location', payload);
+                io.to(hrDashboardRoom(orgId)).emit('employee_location', payload);
                 if (emp.site_id) {
-                    io.to(`hr-site:${emp.site_id}`).emit('employee_location', payload);
+                    const siteRoom = hrSiteRoom(orgId, emp.site_id);
+                    if (siteRoom) io.to(siteRoom).emit('employee_location', payload);
                 }
 
                 // 2. Save to LiveLogs
@@ -390,8 +441,9 @@ module.exports = (pool: any, authenticateToken: any, locationLimiter: any, isDur
                                     [internalId, siteId, lat, lng, message]
                                 );
                                 const alertData = { ...alertRes.rows[0], staff_id: employeeId, site_name: siteName };
-                                io.to('hr-dashboard').emit('geo_fence_alert', alertData);
-                                io.to(`hr-site:${siteId}`).emit('geo_fence_alert', alertData);
+                                io.to(hrDashboardRoom(orgId)).emit('geo_fence_alert', alertData);
+                                const siteRoom = hrSiteRoom(orgId, siteId);
+                                if (siteRoom) io.to(siteRoom).emit('geo_fence_alert', alertData);
                             }
                         }
                     }

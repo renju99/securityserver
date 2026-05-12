@@ -1,5 +1,6 @@
 const cron = require('node-cron');
 const { enqueueAttendanceSync } = require('../services/attendanceSyncQueue');
+const { hrDashboardRoom } = require('../utils/organization');
 
 const createAutoCheckoutRunner = ({ pool, io, metrics, APP_TIMEZONE }) => {
     const AUTO_CHECKOUT_GRACE_HOURS = parseInt(process.env.AUTO_CHECKOUT_GRACE_HOURS || '2');
@@ -17,12 +18,14 @@ const createAutoCheckoutRunner = ({ pool, io, metrics, APP_TIMEZONE }) => {
                     e.staff_id,
                     e.first_name,
                     e.last_name,
+                    e.organization_id,
                     sh.name AS shift_name,
                     sh.end_time AS shift_end_time
                 FROM attendance a
                 JOIN employees e ON a.employee_id = e.id
                 LEFT JOIN shifts sh ON e.shift_id = sh.id
                 WHERE a.check_out_time IS NULL
+                  AND a.status NOT IN ('voided', 'rejected')
             `);
 
             if (openRecords.rows.length === 0) return;
@@ -61,7 +64,8 @@ const createAutoCheckoutRunner = ({ pool, io, metrics, APP_TIMEZONE }) => {
                 const updateRes = await pool.query(
                     `UPDATE attendance
                      SET check_out_time = NOW(), auto_closed = true, notes = $1
-                     WHERE id = $2 AND check_out_time IS NULL`,
+                     WHERE id = $2 AND check_out_time IS NULL
+                       AND status NOT IN ('voided', 'rejected')`,
                     [record.reason, record.attendance_id]
                 );
                 if (updateRes.rowCount > 0) {
@@ -73,7 +77,7 @@ const createAutoCheckoutRunner = ({ pool, io, metrics, APP_TIMEZONE }) => {
                         source: 'auto_checkout',
                     });
                 }
-                io.to('hr-dashboard').emit('auto_checkout', {
+                io.to(hrDashboardRoom(record.organization_id)).emit('auto_checkout', {
                     attendanceId: record.attendance_id,
                     staffId: record.staff_id,
                     name: [record.first_name, record.last_name].filter(Boolean).join(' '),
@@ -101,6 +105,39 @@ const createAutoCheckoutRunner = ({ pool, io, metrics, APP_TIMEZONE }) => {
 };
 
 const setupMaintenanceSchedulers = ({ pool, APP_TIMEZONE, DATA_RETENTION_DAYS }) => {
+    const ensureLiveLogPartitions = async () => {
+        try {
+            await pool.query(`
+                DO $$
+                DECLARE
+                    i integer;
+                    month_start timestamptz;
+                    month_end timestamptz;
+                    part_name text;
+                BEGIN
+                    FOR i IN -1..6 LOOP
+                        month_start := date_trunc('month', now()) + (i || ' month')::interval;
+                        month_end := month_start + interval '1 month';
+                        part_name := format('live_logs_p_%s', to_char(month_start, 'YYYY_MM'));
+                        EXECUTE format(
+                            'CREATE TABLE IF NOT EXISTS %I PARTITION OF live_logs FOR VALUES FROM (%L) TO (%L)',
+                            part_name,
+                            month_start,
+                            month_end
+                        );
+                    END LOOP;
+                END $$;
+            `);
+            console.log('[PARTITIONS] live_logs partitions ensured for current rolling window.');
+        } catch (err) {
+            console.error('[PARTITIONS] live_logs partition maintenance error:', err.message);
+        }
+    };
+
+    ensureLiveLogPartitions();
+
+    cron.schedule('15 1 1 * *', ensureLiveLogPartitions, { timezone: APP_TIMEZONE });
+
     cron.schedule('0 2 * * *', async () => {
         const started = Date.now();
         console.log(`[CLEANUP] Starting daily data cleanup (retention: ${DATA_RETENTION_DAYS} days)...`);

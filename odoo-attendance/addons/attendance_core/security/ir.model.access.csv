@@ -1,0 +1,44 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_biometric_device_manager,attendance.biometric.device manager,model_attendance_biometric_device,hr.group_hr_manager,1,1,1,1
+access_biometric_event_manager,attendance.biometric.event manager,model_attendance_biometric_event,hr.group_hr_manager,1,1,1,1
+access_geofence_alert_user,attendance.geofence.alert user,model_attendance_geofence_alert,hr.group_hr_user,1,0,0,0
+access_geofence_alert_officer,attendance.geofence.alert officer,model_attendance_geofence_alert,hr_attendance.group_hr_attendance_manager,1,1,1,1
+access_job_code_user,attendance.job.code user,model_attendance_job_code,hr.group_hr_user,1,0,0,0
+access_job_code_officer,attendance.job.code officer read,model_attendance_job_code,hr_attendance.group_hr_attendance_officer,1,0,0,0
+access_job_code_manager,attendance.job.code manager,model_attendance_job_code,hr.group_hr_manager,1,1,1,1
+access_policy_manager,attendance.policy.rule manager,model_attendance_policy_rule,hr.group_hr_manager,1,1,1,1
+access_public_holiday_user,attendance.public.holiday user,model_attendance_public_holiday,hr.group_hr_user,1,0,0,0
+access_public_holiday_manager,attendance.public.holiday manager,model_attendance_public_holiday,hr.group_hr_manager,1,1,1,1
+access_report_preset_user,attendance.report.preset user,model_attendance_report_preset,hr.group_hr_user,1,1,1,1
+access_scheduled_export_manager,attendance.scheduled.export manager,model_attendance_scheduled_export,hr.group_hr_manager,1,1,1,1
+access_roster_template_manager,attendance.roster.template manager,model_attendance_roster_template,hr.group_hr_manager,1,1,1,1
+access_roster_line_manager,attendance.roster.template.line manager,model_attendance_roster_template_line,hr.group_hr_manager,1,1,1,1
+access_roster_assignment_user,attendance.roster.assignment user,model_attendance_roster_assignment,hr.group_hr_user,1,1,1,1
+access_location_log_user,attendance.location.log user,model_attendance_location_log,hr.group_hr_user,1,1,1,1
+access_bulk_checkout_wizard,attendance.bulk.checkout.wizard,model_attendance_bulk_checkout_wizard,hr.group_hr_manager,1,1,1,1
+access_metrics_snapshot,attendance.metrics.snapshot,model_attendance_metrics_snapshot,hr.group_hr_user,1,0,0,0
+access_metrics_snapshot_manager,attendance.metrics.snapshot manager,model_attendance_metrics_snapshot,hr.group_hr_manager,1,1,1,1
+access_daily_mobility,attendance.daily.mobility,model_attendance_daily_mobility,hr.group_hr_user,1,0,0,0
+access_daily_mobility_manager,attendance.daily.mobility manager,model_attendance_daily_mobility,hr.group_hr_manager,1,1,1,1
+access_metrics_snapshot_officer,attendance.metrics.snapshot officer read,model_attendance_metrics_snapshot,hr_attendance.group_hr_attendance_officer,1,0,0,0
+access_daily_mobility_officer,attendance.daily.mobility officer read,model_attendance_daily_mobility,hr_attendance.group_hr_attendance_officer,1,0,0,0
+access_location_log_officer,attendance.location.log officer,model_attendance_location_log,hr_attendance.group_hr_attendance_officer,1,1,1,1
+access_geofence_alert_officer_rw,attendance.geofence.alert officer,model_attendance_geofence_alert,hr_attendance.group_hr_attendance_officer,1,1,1,1
+access_biometric_device_settings,attendance.biometric.device settings admin,model_attendance_biometric_device,base.group_system,1,1,1,1
+access_biometric_event_settings,attendance.biometric.event settings admin,model_attendance_biometric_event,base.group_system,1,1,1,1
+access_job_code_settings,attendance.job.code settings admin,model_attendance_job_code,base.group_system,1,1,1,1
+access_policy_settings,attendance.policy.rule settings admin,model_attendance_policy_rule,base.group_system,1,1,1,1
+access_public_holiday_settings,attendance.public.holiday settings admin,model_attendance_public_holiday,base.group_system,1,1,1,1
+access_report_preset_settings,attendance.report.preset settings admin,model_attendance_report_preset,base.group_system,1,1,1,1
+access_scheduled_export_settings,attendance.scheduled.export settings admin,model_attendance_scheduled_export,base.group_system,1,1,1,1
+access_roster_template_settings,attendance.roster.template settings admin,model_attendance_roster_template,base.group_system,1,1,1,1
+access_roster_line_settings,attendance.roster.template.line settings admin,model_attendance_roster_template_line,base.group_system,1,1,1,1
+access_bulk_checkout_wizard_settings,attendance.bulk.checkout.wizard settings admin,model_attendance_bulk_checkout_wizard,base.group_system,1,1,1,1
+access_metrics_snapshot_settings,attendance.metrics.snapshot settings admin,model_attendance_metrics_snapshot,base.group_system,1,1,1,1
+access_daily_mobility_settings,attendance.daily.mobility settings admin,model_attendance_daily_mobility,base.group_system,1,1,1,1
+access_odoo_remote_instance_manager,attendance.odoo.remote.instance manager,model_attendance_odoo_remote_instance,hr.group_hr_manager,1,1,1,1
+access_odoo_remote_instance_system,attendance.odoo.remote.instance system,model_attendance_odoo_remote_instance,base.group_system,1,1,1,1
+access_odoo_sync_outbox_manager,attendance.odoo.sync.outbox manager,model_attendance_odoo_sync_outbox,hr.group_hr_manager,1,1,1,1
+access_odoo_sync_outbox_system,attendance.odoo.sync.outbox system,model_attendance_odoo_sync_outbox,base.group_system,1,1,1,1
+access_odoo_routing_manager,attendance.odoo.employee.routing manager,model_attendance_odoo_employee_routing,hr.group_hr_manager,1,1,1,1
+access_odoo_routing_system,attendance.odoo.employee.routing system,model_attendance_odoo_employee_routing,base.group_system,1,1,1,1

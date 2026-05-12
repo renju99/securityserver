@@ -15,7 +15,7 @@ const {
     applyCheckoutPolicy,
 } = require('../services/attendanceGovernance');
 
-module.exports = (pool, JWT_SECRET, authLimiter) => {
+module.exports = (pool, JWT_SECRET, authLimiter, authenticateToken = null) => {
     const router = express.Router();
     const ACCESS_TOKEN_TTL = process.env.JWT_ACCESS_TTL || '15m';
     const REFRESH_TOKEN_TTL = process.env.JWT_REFRESH_TTL || '30d';
@@ -25,17 +25,28 @@ module.exports = (pool, JWT_SECRET, authLimiter) => {
     const REFRESH_COOKIE_SAMESITE = process.env.JWT_REFRESH_COOKIE_SAMESITE || 'lax';
     const REFRESH_COOKIE_MAX_AGE_MS = parseInt(process.env.JWT_REFRESH_COOKIE_MAX_AGE_MS || String(30 * 24 * 60 * 60 * 1000), 10);
 
+    const organizationSlugSchema = z
+        .string()
+        .trim()
+        .max(64)
+        .regex(/^[a-z0-9][a-z0-9-]*$/, 'organizationSlug must be lowercase letters, digits, or hyphen')
+        .optional()
+        .nullable();
+
     const loginSchema = z.object({
         staffId: z.string().min(1, 'Staff ID is required'),
         password: z.string().min(1, 'Password is required'),
+        organizationSlug: organizationSlugSchema,
     });
     const faceLoginSchema = z.object({
         staffId: z.string().min(1, 'Staff ID is required'),
         descriptor: z.array(z.number()).min(64, 'Face descriptor is required'),
+        organizationSlug: organizationSlugSchema,
     });
     const pinLoginSchema = z.object({
         staffId: z.string().min(1, 'Staff ID is required'),
         pin: z.string().regex(/^\d{4,10}$/, 'PIN must be 4-10 digits'),
+        organizationSlug: organizationSlugSchema,
     });
     const faceAttendanceSchema = z.object({
         staffId: z.string().min(1, 'Staff ID is required'),
@@ -44,6 +55,7 @@ module.exports = (pool, JWT_SECRET, authLimiter) => {
         latitude: z.number().optional(),
         longitude: z.number().optional(),
         nfcPayload: z.string().optional().nullable(),
+        organizationSlug: organizationSlugSchema,
     });
     const kioskFaceAttendanceSchema = z.object({
         siteId: z.union([z.number(), z.string()]),
@@ -172,10 +184,10 @@ module.exports = (pool, JWT_SECRET, authLimiter) => {
 
     const issueAccessToken = (payload) => jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_TTL });
 
-    const issueRefreshToken = ({ id, staffId, role, siteId, familyId }) => {
+    const issueRefreshToken = ({ id, staffId, role, siteId, organizationId, familyId }) => {
         const tokenId = randomId();
         const token = jwt.sign(
-            { id, staffId, role, siteId, type: 'refresh', familyId, tokenId },
+            { id, staffId, role, siteId, organizationId, type: 'refresh', familyId, tokenId },
             REFRESH_SECRET,
             { expiresIn: REFRESH_TOKEN_TTL }
         );
@@ -200,14 +212,25 @@ module.exports = (pool, JWT_SECRET, authLimiter) => {
         });
     };
 
-    const fetchUserByStaffId = async (staffId) => {
+    const resolveOrganizationId = async (organizationSlug) => {
+        const raw = organizationSlug && String(organizationSlug).trim();
+        const slug = (raw || 'default').toLowerCase();
         const result = await pool.query(
-            `SELECT e.*, r.name as role_name, s.name as site_name
+            'SELECT id, slug, name FROM organizations WHERE slug = $1 LIMIT 1',
+            [slug]
+        );
+        return result.rows[0] || null;
+    };
+
+    const fetchUserByStaffId = async (staffId, organizationId) => {
+        const result = await pool.query(
+            `SELECT e.*, r.name as role_name, s.name as site_name, o.slug AS organization_slug, o.name AS organization_name
              FROM employees e
              JOIN roles r ON e.role_id = r.id
+             JOIN organizations o ON e.organization_id = o.id
              LEFT JOIN sites s ON e.site_id = s.id
-             WHERE e.staff_id = $1`,
-            [staffId]
+             WHERE e.staff_id = $1 AND e.organization_id = $2`,
+            [staffId, organizationId]
         );
         return result.rows[0] || null;
     };
@@ -254,8 +277,15 @@ module.exports = (pool, JWT_SECRET, authLimiter) => {
     };
 
     const issueSession = async (res, user) => {
+        const organizationId = Number(user.organization_id);
         const token = issueAccessToken(
-            { id: user.id, staffId: user.staff_id, role: user.role_name, siteId: user.site_id },
+            {
+                id: user.id,
+                staffId: user.staff_id,
+                role: user.role_name,
+                siteId: user.site_id,
+                organizationId,
+            },
         );
         const familyId = randomId();
         const refresh = issueRefreshToken({
@@ -263,6 +293,7 @@ module.exports = (pool, JWT_SECRET, authLimiter) => {
             staffId: user.staff_id,
             role: user.role_name,
             siteId: user.site_id,
+            organizationId,
             familyId
         });
         await persistRefreshToken({
@@ -276,6 +307,8 @@ module.exports = (pool, JWT_SECRET, authLimiter) => {
             token,
             accessTokenExpiresIn: ACCESS_TOKEN_TTL,
             user: {
+                id: user.id,
+                email: user.email || null,
                 staffId: user.staff_id,
                 role: user.role_name,
                 siteId: user.site_id,
@@ -284,7 +317,10 @@ module.exports = (pool, JWT_SECRET, authLimiter) => {
                 lastName: user.last_name,
                 photoUrl: user.photo_url,
                 faceAuthEnabled: user.face_auth_enabled !== false,
-                faceEnrolled: !!user.face_descriptor
+                faceEnrolled: !!user.face_descriptor,
+                organizationId,
+                organizationSlug: user.organization_slug,
+                organizationName: user.organization_name,
             }
         };
     };
@@ -591,7 +627,9 @@ module.exports = (pool, JWT_SECRET, authLimiter) => {
 
         if (action === 'check_in') {
             const openRes = await pool.query(
-                'SELECT id FROM attendance WHERE employee_id = $1 AND check_out_time IS NULL',
+                `SELECT id FROM attendance
+                 WHERE employee_id = $1 AND check_out_time IS NULL
+                   AND status NOT IN ('voided', 'rejected')`,
                 [user.id]
             );
             if (openRes.rows.length > 0) {
@@ -643,6 +681,7 @@ module.exports = (pool, JWT_SECRET, authLimiter) => {
                  check_out_coords = ST_SetSRID(ST_MakePoint($1, $2), 4326),
                  source = COALESCE(source, $4)
              WHERE employee_id = $3 AND check_out_time IS NULL
+               AND status NOT IN ('voided', 'rejected')
              RETURNING id, check_out_time, check_in_time, status`,
             [resolvedLongitude, resolvedLatitude, user.id, source]
         );
@@ -685,9 +724,11 @@ module.exports = (pool, JWT_SECRET, authLimiter) => {
         if (!parsed.success) {
             return res.status(400).json({ error: parsed.error.issues[0]?.message || 'Invalid login payload' });
         }
-        const { staffId, password } = parsed.data;
+        const { staffId, password, organizationSlug } = parsed.data;
         try {
-            const user = await fetchUserByStaffId(staffId);
+            const org = await resolveOrganizationId(organizationSlug);
+            if (!org) return res.status(400).json({ error: 'Unknown organization' });
+            const user = await fetchUserByStaffId(staffId, org.id);
             if (!user) return res.status(401).json({ error: 'Invalid ID' });
             const validPass = await bcrypt.compare(password, user.password_hash);
             if (!validPass) return res.status(401).json({ error: 'Invalid password' });
@@ -705,9 +746,11 @@ module.exports = (pool, JWT_SECRET, authLimiter) => {
         if (!parsed.success) {
             return res.status(400).json({ error: parsed.error.issues[0]?.message || 'Invalid face login payload' });
         }
-        const { staffId, descriptor } = parsed.data;
+        const { staffId, descriptor, organizationSlug } = parsed.data;
         try {
-            const user = await fetchUserByStaffId(staffId);
+            const org = await resolveOrganizationId(organizationSlug);
+            if (!org) return res.status(400).json({ error: 'Unknown organization' });
+            const user = await fetchUserByStaffId(staffId, org.id);
             if (!user) return res.status(401).json({ error: 'Invalid ID' });
             if (user.face_auth_enabled === false) {
                 return res.status(403).json({ error: 'Face authentication is disabled for this user' });
@@ -780,9 +823,11 @@ module.exports = (pool, JWT_SECRET, authLimiter) => {
         if (!parsed.success) {
             return res.status(400).json({ error: parsed.error.issues[0]?.message || 'Invalid pin login payload' });
         }
-        const { staffId, pin } = parsed.data;
+        const { staffId, pin, organizationSlug } = parsed.data;
         try {
-            const user = await fetchUserByStaffId(staffId);
+            const org = await resolveOrganizationId(organizationSlug);
+            if (!org) return res.status(400).json({ error: 'Unknown organization' });
+            const user = await fetchUserByStaffId(staffId, org.id);
             if (!user) return res.status(401).json({ error: 'Invalid ID' });
             if (!user.face_pin_hash) {
                 return res.status(403).json({ error: 'PIN login is not configured. Contact HR.' });
@@ -818,9 +863,11 @@ module.exports = (pool, JWT_SECRET, authLimiter) => {
         if (!parsed.success) {
             return res.status(400).json({ error: parsed.error.issues[0]?.message || 'Invalid face attendance payload' });
         }
-        const { staffId, descriptor, action, latitude, longitude, nfcPayload } = parsed.data;
+        const { staffId, descriptor, action, latitude, longitude, nfcPayload, organizationSlug } = parsed.data;
         try {
-            const user = await fetchUserByStaffId(staffId);
+            const org = await resolveOrganizationId(organizationSlug);
+            if (!org) return res.status(400).json({ error: 'Unknown organization' });
+            const user = await fetchUserByStaffId(staffId, org.id);
             if (!user) return res.status(401).json({ error: 'Invalid ID' });
             if (user.face_auth_enabled === false) {
                 return res.status(403).json({ error: 'Face authentication is disabled for this user' });
@@ -1086,14 +1133,32 @@ module.exports = (pool, JWT_SECRET, authLimiter) => {
                 return res.status(401).json({ error: 'Refresh token expired or invalid' });
             }
 
+            const orgIdFromToken = Number(payload.organizationId);
+            const orgIdResolved = Number.isFinite(orgIdFromToken) && orgIdFromToken > 0 ? orgIdFromToken : 1;
+            const empOrgRes = await pool.query(
+                'SELECT organization_id FROM employees WHERE id = $1 LIMIT 1',
+                [payload.id]
+            );
+            const dbOrgId = empOrgRes.rows[0] ? Number(empOrgRes.rows[0].organization_id) : null;
+            if (!dbOrgId || dbOrgId !== orgIdResolved) {
+                return res.status(401).json({ error: 'Refresh token expired or invalid' });
+            }
+
             const token = issueAccessToken(
-                { id: payload.id, staffId: payload.staffId, role: payload.role, siteId: payload.siteId },
+                {
+                    id: payload.id,
+                    staffId: payload.staffId,
+                    role: payload.role,
+                    siteId: payload.siteId,
+                    organizationId: orgIdResolved,
+                },
             );
             const nextRefresh = issueRefreshToken({
                 id: payload.id,
                 staffId: payload.staffId,
                 role: payload.role,
                 siteId: payload.siteId,
+                organizationId: orgIdResolved,
                 familyId: payload.familyId
             });
 
@@ -1146,6 +1211,93 @@ module.exports = (pool, JWT_SECRET, authLimiter) => {
         res.clearCookie(refreshCookieName, { path: '/' });
         return res.json({ ok: true });
     });
+
+    const switchOrganizationSchema = z
+        .object({
+            organizationId: z.number().int().positive().optional(),
+            organizationSlug: organizationSlugSchema,
+        })
+        .superRefine((data, ctx) => {
+            const hasId = data.organizationId != null && Number.isFinite(Number(data.organizationId));
+            const slug = data.organizationSlug && String(data.organizationSlug).trim();
+            if (!hasId && !slug) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: 'Provide organizationId or organizationSlug',
+                });
+            }
+        });
+
+    if (typeof authenticateToken === 'function') {
+        const {
+            listAccessibleOrganizations,
+            resolveTargetEmployeeForOrgSwitch,
+        } = require('../services/organizationSwitch');
+
+        router.get('/accessible-organizations', authenticateToken, async (req, res) => {
+            try {
+                const empId = req.user?.id;
+                if (!empId) return res.status(401).json({ error: 'Invalid session' });
+                const organizations = await listAccessibleOrganizations(pool, Number(empId));
+                return res.json({ organizations });
+            } catch (err) {
+                console.error('[auth] accessible-organizations', err);
+                return res.status(500).json({ error: 'Database error' });
+            }
+        });
+
+        router.post('/switch-organization', authenticateToken, authLimiter, async (req, res) => {
+            const parsed = switchOrganizationSchema.safeParse(req.body || {});
+            if (!parsed.success) {
+                return res.status(400).json({ error: parsed.error.issues[0]?.message || 'Invalid body' });
+            }
+            try {
+                const empId = req.user?.id;
+                if (!empId) return res.status(401).json({ error: 'Invalid session' });
+
+                let targetOrgId = parsed.data.organizationId != null ? Number(parsed.data.organizationId) : null;
+                if (targetOrgId == null || !Number.isFinite(targetOrgId)) {
+                    const org = await resolveOrganizationId(parsed.data.organizationSlug);
+                    if (!org) return res.status(400).json({ error: 'Unknown organization' });
+                    targetOrgId = Number(org.id);
+                }
+
+                const accessible = await listAccessibleOrganizations(pool, Number(empId));
+                const allowed = accessible.some((o) => Number(o.id) === targetOrgId);
+                if (!allowed) {
+                    return res.status(403).json({ error: 'You do not have access to that organization' });
+                }
+
+                const targetUser = await resolveTargetEmployeeForOrgSwitch(pool, Number(empId), targetOrgId);
+                if (!targetUser) {
+                    return res.status(404).json({ error: 'No dashboard account found in that organization for your profile' });
+                }
+
+                const tokenFromCookie = req.cookies?.[refreshCookieName];
+                if (tokenFromCookie) {
+                    try {
+                        const p = jwt.verify(tokenFromCookie, REFRESH_SECRET);
+                        if (p?.tokenId) {
+                            await pool.query(
+                                `UPDATE refresh_tokens
+                                 SET revoked_at = COALESCE(revoked_at, NOW()), revoke_reason = COALESCE(revoke_reason, 'org_switch')
+                                 WHERE token_id = $1`,
+                                [p.tokenId]
+                            );
+                        }
+                    } catch (_e) {
+                        /* ignore */
+                    }
+                }
+
+                const payload = await issueSession(res, targetUser);
+                return res.json(payload);
+            } catch (err) {
+                console.error('[auth] switch-organization', err);
+                return res.status(500).json({ error: 'Switch failed' });
+            }
+        });
+    }
 
     return router;
 };

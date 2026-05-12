@@ -5,8 +5,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 FRONT="$ROOT/frontend"
 MOB="$ROOT/mobile"
 
-echo "==> Building web app ($FRONT)"
-(cd "$FRONT" && npm run build)
+echo "==> Building web app for Cordova (VITE_BASE=./ file URLs)"
+(cd "$FRONT" && VITE_BASE=./ npm run build)
 
 echo "==> Removing old hashed bundles (keeps www/js, www/img, etc.)"
 rm -rf "$MOB/www/assets" "$MOB/www/dist"

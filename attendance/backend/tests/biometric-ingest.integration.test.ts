@@ -60,7 +60,7 @@ test('biometric ingest stores log and updates device heartbeat', async () => {
                 assert.equal(params[0], 5);
                 assert.equal(params[1], 'ST100');
                 assert.equal(params[2], 7);
-                return { rows: [] };
+                return { rows: [{ id: 99 }] };
             }
             if (text.startsWith('UPDATE biometric_devices SET last_seen = NOW()')) {
                 assert.equal(params[0], 5);

@@ -1,15 +1,10 @@
 const express = require('express');
-const { APP_TIMEZONE, normalizeFilterDateToUtcIso } = require('../utils/time');
+const { APP_TIMEZONE } = require('../utils/time');
+const { organizationIdFromUser } = require('../utils/organization');
 const { z } = require('zod');
 const registerUsersRoutes = require('./hr/users');
-const registerReportsRoutes = require('./hr/reports');
-const registerGeofenceRoutes = require('./hr/geofence');
-const registerBiometricsRoutes = require('./hr/biometrics');
-const registerAlertsRoutes = require('./hr/alerts');
-const registerCalendarRoutes = require('./hr/calendar');
-const registerRostersRoutes = require('./hr/rosters');
-const registerIntegrationsRoutes = require('./hr/integrations');
 const registerAttendanceGovernanceRoutes = require('./hr/attendanceGovernance');
+const { toPublic: emailMessagingToPublic } = require('../services/orgEmailMessagingSettings');
 
 const siteSchema = z.object({
     name: z.string().trim().min(1, 'Site name is required'),
@@ -52,13 +47,6 @@ module.exports = (
     const router = express.Router();
 
     registerUsersRoutes({ router, pool, authenticateToken, authorizeRole, bcrypt, io });
-    registerReportsRoutes({ router, pool, authenticateToken, authorizeRole, normalizeFilterDateToUtcIso });
-    registerGeofenceRoutes({ router, pool, authenticateToken, authorizeRole, normalizeFilterDateToUtcIso });
-    registerBiometricsRoutes({ router, pool, authenticateToken, authorizeRole });
-    registerAlertsRoutes({ router, pool, authenticateToken, authorizeRole, normalizeFilterDateToUtcIso, metrics });
-    registerCalendarRoutes({ router, pool, authenticateToken, authorizeRole, normalizeFilterDateToUtcIso });
-    registerRostersRoutes({ router, pool, authenticateToken, authorizeRole });
-    registerIntegrationsRoutes({ router, pool, authenticateToken, authorizeRole, runOdooSync });
     registerAttendanceGovernanceRoutes({ router, pool, authenticateToken, authorizeRole });
 
     // Helper to extract JWT if some functions need it
@@ -66,13 +54,39 @@ module.exports = (
     // HR API: Get global settings
     router.get('/hr/settings', authenticateToken, async (req, res) => {
         try {
-            const result = await pool.query('SELECT key, value FROM settings');
+            const orgId = organizationIdFromUser(req.user);
+            const result = await pool.query(
+                'SELECT key, value FROM settings WHERE organization_id = $1',
+                [orgId]
+            );
             const settings = {};
-            result.rows.forEach(r => { settings[r.key] = r.value; });
+            result.rows.forEach((r) => {
+                if (r.key === 'email_messaging') {
+                    const raw = typeof r.value === 'object' && r.value && !Array.isArray(r.value) ? r.value : {};
+                    settings[r.key] = emailMessagingToPublic(raw);
+                } else {
+                    settings[r.key] = r.value;
+                }
+            });
             res.json(settings);
         } catch (err) {
             console.error('Error fetching settings:', err);
             res.status(500).json({ error: 'Database error' });
+        }
+    });
+
+    router.get('/hr/organization', authenticateToken, async (req, res) => {
+        try {
+            const orgId = organizationIdFromUser(req.user);
+            const result = await pool.query(
+                'SELECT id, slug, name, created_at FROM organizations WHERE id = $1 LIMIT 1',
+                [orgId]
+            );
+            if (result.rowCount === 0) return res.status(404).json({ error: 'Organization not found' });
+            return res.json(result.rows[0]);
+        } catch (err) {
+            console.error('Error fetching organization:', err);
+            return res.status(500).json({ error: 'Database error' });
         }
     });
 
@@ -81,9 +95,12 @@ module.exports = (
         const { key, value } = req.body;
         if (!key) return res.status(400).json({ error: 'Missing key' });
         try {
+            const orgId = organizationIdFromUser(req.user);
             await pool.query(
-                'INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value',
-                [key, JSON.stringify(value)]
+                `INSERT INTO settings (organization_id, key, value)
+                 VALUES ($1, $2, $3::jsonb)
+                 ON CONFLICT (organization_id, key) DO UPDATE SET value = EXCLUDED.value`,
+                [orgId, key, JSON.stringify(value)]
             );
             res.json({ message: 'Setting updated' });
         } catch (err) {
@@ -123,9 +140,13 @@ module.exports = (
     };
 
     // HR API: Get all sites
-    router.get('/hr/sites', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
+    router.get('/hr/sites', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor', 'Payroll', 'Finance']), async (req, res) => {
         try {
-            const result = await pool.query('SELECT * FROM sites ORDER BY name ASC');
+            const orgId = organizationIdFromUser(req.user);
+            const result = await pool.query(
+                'SELECT * FROM sites WHERE organization_id = $1 ORDER BY name ASC',
+                [orgId]
+            );
             res.json(result.rows);
         } catch (err) {
             res.status(500).json({ error: 'Database error' });
@@ -140,9 +161,11 @@ module.exports = (
         }
         const { name, location, latitude, longitude, radiusMeters, geofenceType, geofenceData, geofenceEnabled, nfcPayload } = parsed.data;
         try {
+            const orgId = organizationIdFromUser(req.user);
             const result = await pool.query(
-                'INSERT INTO sites (name, location, latitude, longitude, radius_meters, geofence_type, geofence_data, geofence_enabled, nfc_payload) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
-                [name, location, latitude, longitude, radiusMeters || 100, geofenceType || 'CIRCLE', JSON.stringify(geofenceData), geofenceEnabled !== false, nfcPayload || null]
+                `INSERT INTO sites (organization_id, name, location, latitude, longitude, radius_meters, geofence_type, geofence_data, geofence_enabled, nfc_payload)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+                [orgId, name, location, latitude, longitude, radiusMeters || 100, geofenceType || 'CIRCLE', JSON.stringify(geofenceData), geofenceEnabled !== false, nfcPayload || null]
             );
             res.json(result.rows[0]);
         } catch (err) {
@@ -160,10 +183,13 @@ module.exports = (
         }
         const { name, location, latitude, longitude, radiusMeters, geofenceType, geofenceData, geofenceEnabled, nfcPayload } = parsed.data;
         try {
+            const orgId = organizationIdFromUser(req.user);
             const result = await pool.query(
-                'UPDATE sites SET name = $1, location = $2, latitude = $3, longitude = $4, radius_meters = $5, geofence_type = $6, geofence_data = $7, geofence_enabled = $8, nfc_payload = $9 WHERE id = $10 RETURNING *',
-                [name, location, latitude, longitude, radiusMeters, geofenceType, JSON.stringify(geofenceData), geofenceEnabled !== false, nfcPayload || null, id]
+                `UPDATE sites SET name = $1, location = $2, latitude = $3, longitude = $4, radius_meters = $5, geofence_type = $6, geofence_data = $7, geofence_enabled = $8, nfc_payload = $9
+                 WHERE id = $10 AND organization_id = $11 RETURNING *`,
+                [name, location, latitude, longitude, radiusMeters, geofenceType, JSON.stringify(geofenceData), geofenceEnabled !== false, nfcPayload || null, id, orgId]
             );
+            if (result.rows.length === 0) return res.status(404).json({ error: 'Site not found' });
             res.json(result.rows[0]);
         } catch (err) {
             console.error('Error updating site:', err);
@@ -172,7 +198,7 @@ module.exports = (
     });
 
     // HR API: Get all roles (with permissions)
-    router.get('/hr/roles', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
+    router.get('/hr/roles', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor', 'Payroll', 'Finance']), async (req, res) => {
         try {
             const query = `
             SELECT r.id, r.name, 
@@ -348,9 +374,13 @@ module.exports = (
     // HR API: Get all shifts
 
 
-    router.get('/hr/shifts', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
+    router.get('/hr/shifts', authenticateToken, authorizeRole(['HR Admin', 'Payroll', 'Finance']), async (req, res) => {
         try {
-            const result = await pool.query('SELECT * FROM shifts ORDER BY name ASC');
+            const orgId = organizationIdFromUser(req.user);
+            const result = await pool.query(
+                'SELECT * FROM shifts WHERE organization_id = $1 ORDER BY name ASC',
+                [orgId]
+            );
             res.json(result.rows);
         } catch (err) {
             res.status(500).json({ error: 'Database error' });
@@ -365,9 +395,10 @@ module.exports = (
         }
         const { name, startTime, endTime } = parsed.data;
         try {
+            const orgId = organizationIdFromUser(req.user);
             const result = await pool.query(
-                'INSERT INTO shifts (name, start_time, end_time) VALUES ($1, $2, $3) RETURNING *',
-                [name, startTime, endTime]
+                'INSERT INTO shifts (organization_id, name, start_time, end_time) VALUES ($1, $2, $3, $4) RETURNING *',
+                [orgId, name, startTime, endTime]
             );
             res.json(result.rows[0]);
         } catch (err) {
@@ -384,9 +415,10 @@ module.exports = (
         }
         const { name, startTime, endTime } = parsed.data;
         try {
+            const orgId = organizationIdFromUser(req.user);
             const result = await pool.query(
-                'UPDATE shifts SET name = $1, start_time = $2, end_time = $3 WHERE id = $4 RETURNING *',
-                [name, startTime, endTime, id]
+                'UPDATE shifts SET name = $1, start_time = $2, end_time = $3 WHERE id = $4 AND organization_id = $5 RETURNING *',
+                [name, startTime, endTime, id, orgId]
             );
             if (result.rows.length === 0) {
                 return res.status(404).json({ error: 'Shift not found' });

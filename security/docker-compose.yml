@@ -12,7 +12,9 @@ services:
       - odoo-network
     restart: unless-stopped
 
-  odoo:
+  # Service name must not be "odoo": odoo-attendance also exposes service "odoo" on
+  # web-proxy-net, so nginx resolving hostname "odoo" could hit the wrong instance.
+  odoo_security:
     build:
       context: .
       dockerfile: Dockerfile
@@ -28,7 +30,7 @@ services:
       - ./custom_addons:/mnt/extra-addons
       - ./config:/etc/odoo
       - ./scripts:/scripts
-    container_name: odoo
+    container_name: odoo-security
     restart: unless-stopped
     command: [ "odoo", "--config=/etc/odoo/odoo.conf" ]
     networks:

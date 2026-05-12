@@ -1,6 +1,8 @@
 const { z } = require('zod');
+const { organizationIdFromUser } = require('../../utils/organization');
 const { addApprovalLog } = require('../../services/attendanceGovernance');
 const { enqueueAttendanceSync } = require('../../services/attendanceSyncQueue');
+const { notifyAttendanceDecision } = require('../../services/workforceNotifications');
 
 const policySchema = z.object({
     siteId: z.union([z.number(), z.string()]).optional().nullable(),
@@ -32,14 +34,18 @@ const jobCodeSchema = z.object({
 });
 
 module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
-    router.get('/hr/attendance/policies', authenticateToken, authorizeRole(['HR Admin']), async (_req, res) => {
+    router.get('/hr/attendance/policies', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
         try {
+            const orgId = organizationIdFromUser(req.user);
             const result = await pool.query(
                 `SELECT p.*, s.name AS site_name, sh.name AS shift_name
                  FROM attendance_policy_rules p
                  LEFT JOIN sites s ON s.id = p.site_id
                  LEFT JOIN shifts sh ON sh.id = p.shift_id
-                 ORDER BY p.updated_at DESC`
+                 WHERE (p.site_id IS NULL OR s.organization_id = $1)
+                   AND (p.shift_id IS NULL OR sh.organization_id = $1)
+                 ORDER BY p.updated_at DESC`,
+                [orgId]
             );
             res.json(result.rows);
         } catch (err) {
@@ -63,6 +69,21 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
             ? null
             : Math.max(Number(body.maxShiftMinutes), 0);
         try {
+            const orgId = organizationIdFromUser(req.user);
+            if (Number.isFinite(siteId)) {
+                const siteOk = await pool.query(
+                    'SELECT 1 FROM sites WHERE id = $1 AND organization_id = $2 LIMIT 1',
+                    [siteId, orgId]
+                );
+                if (siteOk.rowCount === 0) return res.status(400).json({ error: 'Invalid site for this organization' });
+            }
+            if (Number.isFinite(shiftId)) {
+                const shiftOk = await pool.query(
+                    'SELECT 1 FROM shifts WHERE id = $1 AND organization_id = $2 LIMIT 1',
+                    [shiftId, orgId]
+                );
+                if (shiftOk.rowCount === 0) return res.status(400).json({ error: 'Invalid shift for this organization' });
+            }
             const result = await pool.query(
                 `INSERT INTO attendance_policy_rules
                  (site_id, shift_id, overtime_after_minutes, paid_break_minutes, unpaid_break_minutes,
@@ -102,8 +123,9 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
     });
 
     router.get('/hr/attendance/pending-approvals', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
-        const params = [];
-        const where = [`a.status = 'pending'`];
+        const orgId = organizationIdFromUser(req.user);
+        const params = [orgId];
+        const where = [`a.status = 'pending'`, 'e.organization_id = $1'];
         if (req.user.role === 'Site Supervisor') {
             params.push(req.user.siteId);
             where.push(`a.site_id = $${params.length}`);
@@ -131,12 +153,13 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
         const id = Number(req.params.id);
         if (!Number.isFinite(id)) return res.status(400).json({ error: 'Invalid attendance id' });
         try {
+            const orgId = organizationIdFromUser(req.user);
             const existing = await pool.query(
                 `SELECT a.id, a.site_id, a.status, a.employee_id, e.staff_id
                  FROM attendance a
                  JOIN employees e ON e.id = a.employee_id
-                 WHERE a.id = $1`,
-                [id]
+                 WHERE a.id = $1 AND e.organization_id = $2`,
+                [id, orgId]
             );
             if (existing.rowCount === 0) return res.status(404).json({ error: 'Attendance entry not found' });
             const row = existing.rows[0];
@@ -177,6 +200,15 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
                 });
             }
             res.json({ success: true, record: updated.rows[0] });
+            setImmediate(() => {
+                notifyAttendanceDecision(pool, {
+                    attendanceId: id,
+                    employeeId: row.employee_id,
+                    decision: 'approved',
+                    reason: null,
+                    actorEmployeeId: req.user.id,
+                }).catch((e) => console.error('[NOTIFY] approve:', e.message));
+            });
         } catch (err) {
             console.error('Approve attendance error:', err);
             res.status(500).json({ error: 'Database error' });
@@ -191,7 +223,13 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
             return res.status(400).json({ error: parsed.error.issues[0]?.message || 'Invalid reject payload' });
         }
         try {
-            const existing = await pool.query('SELECT id, site_id, status FROM attendance WHERE id = $1', [id]);
+            const orgId = organizationIdFromUser(req.user);
+            const existing = await pool.query(
+                `SELECT a.id, a.site_id, a.status, a.employee_id FROM attendance a
+                 JOIN employees e ON e.id = a.employee_id
+                 WHERE a.id = $1 AND e.organization_id = $2`,
+                [id, orgId]
+            );
             if (existing.rowCount === 0) return res.status(404).json({ error: 'Attendance entry not found' });
             const row = existing.rows[0];
             if (req.user.role === 'Site Supervisor' && Number(row.site_id) !== Number(req.user.siteId)) {
@@ -215,6 +253,15 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
                 metadata: { previousStatus: row.status },
             });
             res.json({ success: true, record: updated.rows[0] });
+            setImmediate(() => {
+                notifyAttendanceDecision(pool, {
+                    attendanceId: id,
+                    employeeId: row.employee_id,
+                    decision: 'rejected',
+                    reason: parsed.data.reason || null,
+                    actorEmployeeId: req.user.id,
+                }).catch((e) => console.error('[NOTIFY] reject:', e.message));
+            });
         } catch (err) {
             console.error('Reject attendance error:', err);
             res.status(500).json({ error: 'Database error' });
@@ -229,7 +276,13 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
             return res.status(400).json({ error: parsed.error.issues[0]?.message || 'Invalid context payload' });
         }
         try {
-            const existing = await pool.query('SELECT id, site_id, work_context FROM attendance WHERE id = $1', [id]);
+            const orgId = organizationIdFromUser(req.user);
+            const existing = await pool.query(
+                `SELECT a.id, a.site_id, a.work_context FROM attendance a
+                 JOIN employees e ON e.id = a.employee_id
+                 WHERE a.id = $1 AND e.organization_id = $2`,
+                [id, orgId]
+            );
             if (existing.rowCount === 0) return res.status(404).json({ error: 'Attendance entry not found' });
             const row = existing.rows[0];
             if (req.user.role === 'Site Supervisor' && Number(row.site_id) !== Number(req.user.siteId)) {
@@ -242,11 +295,12 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
                 ...(parsed.data.notes ? { contextNote: parsed.data.notes } : {}),
             };
             const updated = await pool.query(
-                `UPDATE attendance
+                `UPDATE attendance a
                  SET work_context = $2::jsonb
-                 WHERE id = $1
-                 RETURNING id, work_context`,
-                [id, JSON.stringify(merged)]
+                 FROM employees e
+                 WHERE a.id = $1 AND a.employee_id = e.id AND e.organization_id = $3
+                 RETURNING a.id, a.work_context`,
+                [id, JSON.stringify(merged), orgId]
             );
             res.json({ success: true, record: updated.rows[0] });
         } catch (err) {
@@ -255,16 +309,62 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
         }
     });
 
+    router.get('/hr/attendance/:id/activity-log', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor', 'Payroll', 'Finance']), async (req, res) => {
+        const id = Number(req.params.id);
+        if (!Number.isFinite(id)) return res.status(400).json({ error: 'Invalid attendance id' });
+        try {
+            const orgId = organizationIdFromUser(req.user);
+            const att = await pool.query(
+                `SELECT a.id, a.employee_id, a.check_in_time, a.check_out_time, a.site_id, a.source, a.status,
+                        a.auto_closed, a.notes, a.work_context, a.submitted_at, a.approved_at, a.rejected_at,
+                        e.staff_id, e.first_name, e.last_name, s.name AS site_name
+                 FROM attendance a
+                 JOIN employees e ON e.id = a.employee_id
+                 LEFT JOIN sites s ON s.id = a.site_id
+                 WHERE a.id = $1 AND e.organization_id = $2`,
+                [id, orgId]
+            );
+            if (att.rowCount === 0) return res.status(404).json({ error: 'Attendance entry not found' });
+            const row = att.rows[0];
+            if (req.user.role === 'Site Supervisor' && Number(row.site_id) !== Number(req.user.siteId)) {
+                return res.status(403).json({ error: 'Not allowed for this site' });
+            }
+
+            let events = { rows: [] };
+            try {
+                events = await pool.query(
+                    `SELECT l.id, l.action, l.reason, l.metadata, l.created_at,
+                            ea.staff_id AS actor_staff_id,
+                            ea.first_name AS actor_first_name,
+                            ea.last_name AS actor_last_name
+                     FROM attendance_approval_logs l
+                     LEFT JOIN employees ea ON ea.id = l.actor_id
+                     WHERE l.attendance_id = $1
+                     ORDER BY l.created_at ASC`,
+                    [id]
+                );
+            } catch (e) {
+                if (e?.code !== '42P01') throw e;
+            }
+
+            return res.json({ attendance: row, events: events.rows || [] });
+        } catch (err) {
+            console.error('Attendance activity-log error:', err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+    });
+
     router.get('/hr/job-codes', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
         const siteId = req.query.siteId ? Number(req.query.siteId) : null;
-        const params = [];
-        let where = 'WHERE is_active = TRUE';
+        const orgId = organizationIdFromUser(req.user);
+        const params = [orgId];
+        let where = 'WHERE jc.is_active = TRUE AND jc.organization_id = $1';
         if (req.user.role === 'Site Supervisor') {
             params.push(Number(req.user.siteId));
-            where += ` AND (site_id = $${params.length} OR site_id IS NULL)`;
+            where += ` AND (jc.site_id = $${params.length} OR jc.site_id IS NULL)`;
         } else if (Number.isFinite(siteId)) {
             params.push(siteId);
-            where += ` AND (site_id = $${params.length} OR site_id IS NULL)`;
+            where += ` AND (jc.site_id = $${params.length} OR jc.site_id IS NULL)`;
         }
         try {
             const result = await pool.query(
@@ -289,17 +389,25 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
         }
         const body = parsed.data;
         try {
+            const orgId = organizationIdFromUser(req.user);
+            if (body.siteId) {
+                const siteOk = await pool.query(
+                    'SELECT 1 FROM sites WHERE id = $1 AND organization_id = $2 LIMIT 1',
+                    [Number(body.siteId), orgId]
+                );
+                if (siteOk.rowCount === 0) return res.status(400).json({ error: 'Invalid site for this organization' });
+            }
             const result = await pool.query(
-                `INSERT INTO job_codes (code, name, site_id, is_active, created_by, updated_by, updated_at)
-                 VALUES ($1, $2, $3, COALESCE($4, TRUE), $5, $5, NOW())
-                 ON CONFLICT (code) DO UPDATE SET
+                `INSERT INTO job_codes (organization_id, code, name, site_id, is_active, created_by, updated_by, updated_at)
+                 VALUES ($1, $2, $3, $4, COALESCE($5, TRUE), $6, $6, NOW())
+                 ON CONFLICT (organization_id, code) DO UPDATE SET
                     name = EXCLUDED.name,
                     site_id = EXCLUDED.site_id,
                     is_active = EXCLUDED.is_active,
                     updated_by = EXCLUDED.updated_by,
                     updated_at = NOW()
                  RETURNING *`,
-                [body.code, body.name, body.siteId ? Number(body.siteId) : null, body.isActive ?? true, req.user.id]
+                [orgId, body.code, body.name, body.siteId ? Number(body.siteId) : null, body.isActive ?? true, req.user.id]
             );
             res.json(result.rows[0]);
         } catch (err) {

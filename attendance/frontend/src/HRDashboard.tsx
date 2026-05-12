@@ -1,220 +1,148 @@
-import ManualAttendanceView from './components/ManualAttendanceView';
-import BiometricsView from './components/BiometricsView';
-import GeoFenceAlertsView from './components/GeoFenceAlertsView';
-import LocationLogsView from './components/LocationLogsView';
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import AttendanceLog from './components/AttendanceLog';
-import AnalyticsDashboard from './components/AnalyticsDashboard';
 import StaffManager from './components/StaffManager';
-import VehiclesManager from './components/VehiclesManager';
-import MapDashboard from './components/MapDashboard';
+import GeoFenceAlertsView from './components/GeoFenceAlertsView';
+import ReportsView from './components/ReportsView';
+import ScheduledReportsConfigView from './components/ScheduledReportsConfigView';
+import OdooIntegrationView from './components/OdooIntegrationView';
+import LeaveCalendarView from './components/LeaveCalendarView';
+import MetricsDashboardView from './components/MetricsDashboardView';
+import RouteTrackingView from './components/RouteTrackingView';
+import IdleReportingView from './components/IdleReportingView';
+import RosterPlanningView from './components/RosterPlanningView';
+import LocationLogsView from './components/LocationLogsView';
+import OrganizationsSettingsView from './components/OrganizationsSettingsView';
+import EmailMessagingSettingsView from './components/EmailMessagingSettingsView';
 import { useAuthStore } from './store/useAuthStore';
 import { useDataStore } from './store/useDataStore';
-import { useMapStore } from './store/useMapStore';
 import { useUIStore } from './store/useUIStore';
 import { io } from 'socket.io-client';
-import { APIProvider, Map, Marker, InfoWindow, useMapsLibrary, useMap } from '@vis.gl/react-google-maps';
 import Toast from './components/Toast';
 import ConfirmDialog from './components/ConfirmDialog';
-import { LoadingSpinner, TableSkeleton } from './components/LoadingSpinner';
-import AnalyticsCard from './components/AnalyticsCard';
-import FilterPanel from './components/FilterPanel';
-import ReportsView from './components/ReportsView';
 import ErrorBoundary from './components/ErrorBoundary';
-import GeofenceManager from './components/GeofenceManager';
-import RouteTrackingView, { RoutePolyline } from './components/RouteTrackingView';
-import IdleReportingView from './components/IdleReportingView';
-import LeaveCalendarView from './components/LeaveCalendarView';
-import BiometricDeviceModal from './components/BiometricDeviceModal';
-import MetricsDashboardView from './components/MetricsDashboardView';
-import RosterPlanningView from './components/RosterPlanningView';
-import FaceEnrollmentManager from './components/FaceEnrollmentManager';
-import OdooIntegrationView from './components/OdooIntegrationView';
-import { exportToCSV, formatDataForExport, formatSitesForExport } from './utils/exportUtils';
-import { Employee, Site, Role, Shift, AttendanceLogEntry, GeoFenceAlert, BiometricDevice, BiometricLog } from './types';
+import { Employee, Site, Role } from './types';
+import { exportToCSV, formatDataForExport } from './utils/exportUtils';
 import './App.css';
 
-declare global {
-    interface Window {
-        google: any;
+const resolveSocketBaseUrl = (): string => {
+    const fromEnv = import.meta.env.VITE_SOCKET_BASE_URL?.trim();
+    if (fromEnv) return fromEnv.replace(/\/$/, '');
+    if (typeof window !== 'undefined' && window.location?.origin) {
+        return window.location.origin;
     }
-}
+    return '/';
+};
 
-
-// Socket connection
-const socket = io('/', {
+const socket = io(resolveSocketBaseUrl(), {
     path: '/socket.io/',
-    autoConnect: false
+    autoConnect: false,
+    transports: ['polling', 'websocket'],
 });
 
-
-
-const formatPermissionName = (name) => {
-    if (name == null || String(name).trim() === '') return 'Permission';
-    return String(name)
-        .split('_')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-};
-
-const getPermissionIcon = (name) => {
-    if (name == null || String(name).trim() === '') return 'AC';
-    if (name.includes('dashboard')) return 'DB';
-    if (name.includes('map')) return 'MP';
-    if (name.includes('staff') || name.includes('user')) return 'US';
-    if (name.includes('site')) return 'ST';
-    if (name.includes('report') || name.includes('export')) return 'RP';
-    if (name.includes('attendance')) return 'AT';
-    return 'AC';
-};
-
-const buildDashboardTabs = (role, geoAlertsCount) => {
-    const tabs = [];
-    const canManage = role === 'HR Admin' || role === 'Site Supervisor';
-    if (canManage) {
-        tabs.push(
-            { key: 'attendance', label: 'Attendance Log', group: 'Main' },
-            { key: 'reports', label: 'Reports', group: 'Main' },
-            { key: 'leave_calendar', label: 'Leaves', group: 'Main' },
-            { key: 'rosters', label: 'Shifts & Jobs', group: 'Main' },
-            { key: 'geo_fence_alerts', label: `Alerts & Approvals${geoAlertsCount > 0 ? ` (${geoAlertsCount})` : ''}`, group: 'Main' },
-            { key: 'staff', label: 'Employee Directory', hrOnly: true, group: 'Main' },
-            { key: 'integrations', label: 'Settings', hrOnly: true, group: 'Main' },
-            { key: 'map', label: 'Live Map', group: 'Operations' },
-            { key: 'location_logs', label: 'Location Logs', group: 'Operations' },
-            { key: 'route_tracking', label: 'Route Tracking', group: 'Operations' },
-            { key: 'idle_reporting', label: 'Idle Reporting', group: 'Operations' },
-            { key: 'biometrics', label: 'Biometrics', group: 'Operations' },
-            { key: 'analytics', label: 'Analytics', hrOnly: true, group: 'Advanced' },
-            { key: 'metrics', label: 'Metrics', hrOnly: true, group: 'Advanced' },
-            { key: 'vehicles', label: 'Vehicles', hrOnly: true, group: 'Advanced' },
-            { key: 'access_roles', label: 'Access Roles', hrOnly: true, group: 'Advanced' }
-        );
-    }
-    return tabs.filter((tab) => !tab.hrOnly || role === 'HR Admin');
-};
-
 const BRANDING = {
-    appTitle: 'Workforce Attendance Platform',
-    portalTitle: 'Corporate Attendance',
-    portalSubtitle: 'Workforce Operations',
+    appTitle: 'Workforce Attendance',
+    portalTitle: 'Attendance',
+    portalSubtitle: 'HR',
 };
 
+const WEB_APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
+
+type AccessibleOrg = { id: number; slug: string; name: string };
+
+function buildNavTabs(role: string | undefined) {
+    const tabs: { key: string; label: string; group: string }[] = [
+        { key: 'attendance', label: 'Attendance log', group: 'Main' },
+    ];
+    if (role === 'HR Admin') {
+        tabs.push({ key: 'staff', label: 'Staff & locations', group: 'Main' });
+        tabs.push({ key: 'alerts', label: 'Geo alerts', group: 'Operations' });
+        tabs.push({ key: 'reports', label: 'Reports', group: 'Operations' });
+        tabs.push({ key: 'schedules', label: 'Report schedules', group: 'Operations' });
+        tabs.push({ key: 'rosters', label: 'Roster planning', group: 'Operations' });
+        tabs.push({ key: 'calendar', label: 'Leave calendar', group: 'Operations' });
+        tabs.push({ key: 'locationLogs', label: 'Location logs', group: 'Monitoring' });
+        tabs.push({ key: 'routeTracking', label: 'Route tracking', group: 'Monitoring' });
+        tabs.push({ key: 'idle', label: 'Idle reporting', group: 'Monitoring' });
+        tabs.push({ key: 'metrics', label: 'Metrics', group: 'Monitoring' });
+        tabs.push({ key: 'odoo', label: 'Odoo integration', group: 'Integrations' });
+        tabs.push({ key: 'emailSettings', label: 'Email settings', group: 'Settings' });
+        tabs.push({ key: 'organizations', label: 'Organizations', group: 'Settings' });
+    } else if (role === 'Site Supervisor') {
+        tabs.push({ key: 'alerts', label: 'Geo alerts', group: 'Operations' });
+        tabs.push({ key: 'reports', label: 'Reports', group: 'Operations' });
+        tabs.push({ key: 'rosters', label: 'Roster planning', group: 'Operations' });
+        tabs.push({ key: 'calendar', label: 'Leave calendar', group: 'Operations' });
+        tabs.push({ key: 'locationLogs', label: 'Location logs', group: 'Monitoring' });
+        tabs.push({ key: 'routeTracking', label: 'Route tracking', group: 'Monitoring' });
+        tabs.push({ key: 'idle', label: 'Idle reporting', group: 'Monitoring' });
+    } else if (role === 'Payroll' || role === 'Finance') {
+        tabs.push({ key: 'reports', label: 'Reports', group: 'Main' });
+        tabs.push({ key: 'schedules', label: 'Report schedules', group: 'Main' });
+        tabs.push({ key: 'calendar', label: 'Leave calendar', group: 'Main' });
+    }
+    return tabs;
+}
+
+const defaultDashboardTab = () => 'attendance';
 
 const HRDashboard = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
     const environmentLabel = import.meta.env.PROD ? 'Production' : 'Staging';
-    const user = useAuthStore(state => state.user);
-    const login = useAuthStore(state => state.login);
-    const logout = useAuthStore(state => state.logout);
-    const refreshAccessToken = useAuthStore(state => state.refreshAccessToken);
+    const tabInitRef = useRef(false);
+    const user = useAuthStore((state) => state.user);
+    const [accessibleOrgs, setAccessibleOrgs] = useState<AccessibleOrg[]>([]);
+    const [orgSwitchLoading, setOrgSwitchLoading] = useState(false);
 
-    const employees = useDataStore(state => state.employees);
-    const onlineEmployees = useDataStore(state => state.onlineEmployees);
-    const stats = useDataStore(state => state.stats);
-    const mgmtUsers = useDataStore(state => state.mgmtUsers);
-    const mgmtStats = useDataStore(state => state.mgmtStats);
-    const sites = useDataStore(state => state.sites);
-    const roles = useDataStore(state => state.roles);
-    const shifts = useDataStore(state => state.shifts);
-    const attendanceLogs = useDataStore(state => state.attendanceLogs);
-    const geoFenceAlerts = useDataStore(state => state.geoFenceAlerts);
-    const biometricDevices = useDataStore(state => state.biometricDevices);
-    const biometricLogs = useDataStore(state => state.biometricLogs);
-    const allPermissions = useDataStore(state => state.allPermissions);
-    const isMgmtLoading = useDataStore(state => state.isMgmtLoading);
-    const fetchEmployees = useDataStore(state => state.fetchEmployees);
-    const fetchRoles = useDataStore(state => state.fetchRoles);
-    const fetchSites = useDataStore(state => state.fetchSites);
-    const fetchShifts = useDataStore(state => state.fetchShifts);
-    const fetchAlerts = useDataStore(state => state.fetchAlerts);
-    const fetchAttendance = useDataStore(state => state.fetchAttendance);
-    const fetchPermissions = useDataStore(state => state.fetchPermissions);
-    const fetchBiometricDevices = useDataStore(state => state.fetchBiometricDevices);
-    const fetchBiometricLogs = useDataStore(state => state.fetchBiometricLogs);
-    const fetchManagementUsers = useDataStore(state => state.fetchManagementUsers);
-    const setOnlineEmployees = useDataStore(state => state.setOnlineEmployees);
-    const setAttendanceLogs = useDataStore(state => state.setAttendanceLogs);
-    const setGeoFenceAlerts = useDataStore(state => state.setGeoFenceAlerts);
-    const setShifts = useDataStore(state => state.setShifts);
-    const selectedRoles = useDataStore(state => state.selectedRoles);
-    const setSelectedRoles = useDataStore(state => state.setSelectedRoles);
-    const selectedSites = useDataStore(state => state.selectedSites);
-    const setSelectedSites = useDataStore(state => state.setSelectedSites);
-    const selectedUsers = useDataStore(state => state.selectedUsers);
-    const setSelectedUsers = useDataStore(state => state.setSelectedUsers);
-    const selectAll = useDataStore(state => state.selectAll);
-    const setSelectAll = useDataStore(state => state.setSelectAll);
-    const sortField = useDataStore(state => state.sortField);
-    const setSortField = useDataStore(state => state.setSortField);
-    const sortDirection = useDataStore(state => state.sortDirection);
-    const setSortDirection = useDataStore(state => state.setSortDirection);
-    const mgmtPage = useDataStore(state => state.mgmtPage);
-    const setMgmtPage = useDataStore(state => state.setMgmtPage);
-    const mgmtSearch = useDataStore(state => state.mgmtSearch);
-    const setMgmtSearch = useDataStore(state => state.setMgmtSearch);
-    const mgmtSubTab = useDataStore(state => state.mgmtSubTab);
-    const setMgmtSubTab = useDataStore(state => state.setMgmtSubTab);
-    const showFilters = useDataStore(state => state.showFilters);
-    const setShowFilters = useDataStore(state => state.setShowFilters);
-    const routeData = useDataStore(state => state.routeData);
-    const idleThreshold = useDataStore(state => state.idleThreshold);
+    const login = useAuthStore((state) => state.login);
+    const logout = useAuthStore((state) => state.logout);
+    const refreshAccessToken = useAuthStore((state) => state.refreshAccessToken);
 
-    const gfPage = useDataStore(state => state.gfPage);
-    const setGfPage = useDataStore(state => state.setGfPage);
-    const gfTotal = useDataStore(state => state.gfTotal);
-    const gfTotalPages = useDataStore(state => state.gfTotalPages);
-    const gfLoading = useDataStore(state => state.gfLoading);
-    const gfSearch = useDataStore(state => state.gfSearch);
-    const setGfSearch = useDataStore(state => state.setGfSearch);
-    const gfSiteFilter = useDataStore(state => state.gfSiteFilter);
-    const setGfSiteFilter = useDataStore(state => state.setGfSiteFilter);
-    const gfStatusFilter = useDataStore(state => state.gfStatusFilter);
-    const setGfStatusFilter = useDataStore(state => state.setGfStatusFilter);
-    const gfStartDate = useDataStore(state => state.gfStartDate);
-    const setGfStartDate = useDataStore(state => state.setGfStartDate);
-    const gfEndDate = useDataStore(state => state.gfEndDate);
-    const setGfEndDate = useDataStore(state => state.setGfEndDate);
-    const GF_LIMIT = useDataStore(state => state.GF_LIMIT);
+    const employees = useDataStore((state) => state.employees);
+    const stats = useDataStore((state) => state.stats);
+    const mgmtUsers = useDataStore((state) => state.mgmtUsers);
+    const sites = useDataStore((state) => state.sites);
+    const roles = useDataStore((state) => state.roles);
+    const shifts = useDataStore((state) => state.shifts);
+    const fetchEmployees = useDataStore((state) => state.fetchEmployees);
+    const fetchRoles = useDataStore((state) => state.fetchRoles);
+    const fetchSites = useDataStore((state) => state.fetchSites);
+    const fetchShifts = useDataStore((state) => state.fetchShifts);
+    const fetchAttendance = useDataStore((state) => state.fetchAttendance);
+    const fetchManagementUsers = useDataStore((state) => state.fetchManagementUsers);
+    const setOnlineEmployees = useDataStore((state) => state.setOnlineEmployees);
+    const setAttendanceLogs = useDataStore((state) => state.setAttendanceLogs);
+    const setShifts = useDataStore((state) => state.setShifts);
 
-    const locationLogs = useDataStore(state => state.locationLogs);
-    const locLogTotal = useDataStore(state => state.locLogTotal);
-    const locLogTotalPages = useDataStore(state => state.locLogTotalPages);
-    const locLogPage = useDataStore(state => state.locLogPage);
-    const setLocLogPage = useDataStore(state => state.setLocLogPage);
-    const locLogSearch = useDataStore(state => state.locLogSearch);
-    const setLocLogSearch = useDataStore(state => state.setLocLogSearch);
-    const locLogStartDate = useDataStore(state => state.locLogStartDate);
-    const setLocLogStartDate = useDataStore(state => state.setLocLogStartDate);
-    const locLogEndDate = useDataStore(state => state.locLogEndDate);
-    const setLocLogEndDate = useDataStore(state => state.setLocLogEndDate);
-    const locLogLoading = useDataStore(state => state.locLogLoading);
-    const fetchLocationLogs = useDataStore(state => state.fetchLocationLogs);
-    const setLocLogSelected = useDataStore(state => state.setLocLogSelected);
-    const locLogSelected = useDataStore(state => state.locLogSelected);
-    const locLogSelectAll = useDataStore(state => state.locLogSelectAll);
-    const setLocLogSelectAll = useDataStore(state => state.setLocLogSelectAll);
+    const mgmtPage = useDataStore((state) => state.mgmtPage);
+    const mgmtSearch = useDataStore((state) => state.mgmtSearch);
 
-    const toasts = useUIStore(state => state.toasts);
-    const confirmDialog = useUIStore(state => state.confirmDialog);
-    const showToast = useUIStore(state => state.showToast);
-    const removeToast = useUIStore(state => state.removeToast);
-    const openConfirm = useUIStore(state => state.openConfirm);
-    const closeConfirm = useUIStore(state => state.closeConfirm);
+    const toasts = useUIStore((state) => state.toasts);
+    const confirmDialog = useUIStore((state) => state.confirmDialog);
+    const showToast = useUIStore((state) => state.showToast);
+    const removeToast = useUIStore((state) => state.removeToast);
+    const openConfirm = useUIStore((state) => state.openConfirm);
+    const closeConfirm = useUIStore((state) => state.closeConfirm);
 
-    const searchQuery = useMapStore(state => state.searchQuery);
-    const selectedId = useMapStore(state => state.selectedId);
-    const mapCenter = useMapStore(state => state.mapCenter);
-    const zoom = useMapStore(state => state.zoom);
-    const setSearchQuery = useMapStore(state => state.setSearchQuery);
-    const setSelectedId = useMapStore(state => state.setSelectedId);
-    const setMapCenter = useMapStore(state => state.setMapCenter);
-    const setZoom = useMapStore(state => state.setZoom);
-    const [loginData, setLoginData] = useState<any>({ staffId: '', password: '' });
+    const [loginData, setLoginData] = useState(() => ({
+        staffId: '',
+        password: '',
+        organizationSlug: (typeof localStorage !== 'undefined' && localStorage.getItem('hrOrganizationSlug')) || 'default',
+    }));
     const [error, setError] = useState('');
 
-    const [activeTab, setActiveTab] = useState('attendance'); // default landing
+    const [activeTab, setActiveTab] = useState('attendance');
     const [showUserModal, setShowUserModal] = useState(false);
-    const [currentUser, setCurrentUser] = useState<any>({ staffId: '', email: '', password: '', roleId: 4, siteId: '', departmentName: '', firstName: '', lastName: '', faceAuthEnabled: true, facePin: '' });
+    const [currentUser, setCurrentUser] = useState<any>({
+        staffId: '',
+        email: '',
+        password: '',
+        roleId: 4,
+        siteId: '',
+        departmentName: '',
+        firstName: '',
+        lastName: '',
+    });
     const [showSiteModal, setShowSiteModal] = useState(false);
     const [currentSite, setCurrentSite] = useState<any>({
         name: '',
@@ -224,196 +152,163 @@ const HRDashboard = () => {
         radiusMeters: 100,
         geofenceType: 'CIRCLE',
         geofenceData: null,
-        geofenceEnabled: true
+        geofenceEnabled: true,
     });
     const [showShiftModal, setShowShiftModal] = useState(false);
     const [currentShift, setCurrentShift] = useState<any>({ name: '', startTime: '', endTime: '' });
-    const [selectedRole, setSelectedRole] = useState<Role | null>(null);
-    const [isEditingPermissions, setIsEditingPermissions] = useState(false);
-    const [tempPermissions, setTempPermissions] = useState<number[]>([]);
 
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
     const [socketStatus, setSocketStatus] = useState('connecting');
-    const [lastHeartbeat, setLastHeartbeat] = useState<string | null>(null);
+    const [socketErrorDetail, setSocketErrorDetail] = useState<string | null>(null);
     const [checkedInSummary, setCheckedInSummary] = useState<any>({ totalCheckedIn: 0, lateCount: 0, perSiteCounts: {}, records: [] });
 
-    // Biometrics state
-    const [showBiometricModal, setShowBiometricModal] = useState(false);
-    const [currentBiometricDevice, setCurrentBiometricDevice] = useState<any>({
-        name: '',
-        deviceKey: '',
-        siteId: '',
-        type: 'RA08',
-        ipAddress: '',
-        port: '',
-        config: {},
-    });
+    const selectedUsers = useDataStore((state) => state.selectedUsers);
+    const setSelectedUsers = useDataStore((state) => state.setSelectedUsers);
+    const selectAll = useDataStore((state) => state.selectAll);
+    const setSelectAll = useDataStore((state) => state.setSelectAll);
 
-    const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-
-    // Filter helper functions
-    const applyFilters = useCallback((users) => {
-        let filtered = [...users];
-
-        // Apply role filter
-        if (selectedRoles.length > 0) {
-            filtered = filtered.filter(u => selectedRoles.includes(u.role_id));
+    useEffect(() => {
+        if (!user?.token) {
+            setAccessibleOrgs([]);
+            return;
         }
-
-        // Apply site filter
-        if (selectedSites.length > 0) {
-            filtered = filtered.filter(u => {
-                if (selectedSites.includes(-1 as any)) {
-                    return !u.site_id || selectedSites.includes(u.site_id);
-                }
-                return selectedSites.includes(u.site_id);
+        let cancelled = false;
+        void fetch('/auth/accessible-organizations', {
+            headers: { Authorization: `Bearer ${user.token}` },
+            credentials: 'same-origin',
+        })
+            .then((r) => r.json())
+            .then((d: { organizations?: AccessibleOrg[] }) => {
+                if (!cancelled) setAccessibleOrgs(Array.isArray(d.organizations) ? d.organizations : []);
+            })
+            .catch(() => {
+                if (!cancelled) setAccessibleOrgs([]);
             });
-        }
+        return () => {
+            cancelled = true;
+        };
+    }, [user?.token, user?.organizationId]);
 
-        return filtered;
-    }, [selectedRoles, selectedSites]);
-
-    // Sort helper function
-    const applySorting = useCallback((users) => {
-        return [...users].sort((a, b) => {
-            let aVal = a[sortField];
-            let bVal = b[sortField];
-
-            // Handle null/undefined
-            if (aVal === null || aVal === undefined) aVal = '';
-            if (bVal === null || bVal === undefined) bVal = '';
-
-            // Convert to string for comparison
-            aVal = String(aVal).toLowerCase();
-            bVal = String(bVal).toLowerCase();
-
-            if (sortDirection === 'asc') {
-                return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
-            } else {
-                return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+    const handleOrganizationSwitch = async (nextOrgId: number) => {
+        const curId = Number((user as { organizationId?: number })?.organizationId);
+        if (!user?.token || !Number.isFinite(nextOrgId) || nextOrgId === curId) return;
+        setOrgSwitchLoading(true);
+        try {
+            const res = await fetch('/auth/switch-organization', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { Authorization: `Bearer ${user.token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ organizationId: nextOrgId }),
+            });
+            const data = (await res.json()) as { error?: string; user?: Record<string, unknown>; token?: string };
+            if (!res.ok) throw new Error(data.error || 'Could not switch organization');
+            const u = data.user || {};
+            const slug = String(u.organizationSlug || 'default').trim().toLowerCase() || 'default';
+            try {
+                localStorage.setItem('hrOrganizationSlug', slug);
+            } catch {
+                /* ignore */
             }
-        });
-    }, [sortField, sortDirection]);
-
-    // Bulk operations
-    const handleSelectAll = useCallback(() => {
-        if (selectAll) {
-            setSelectedUsers([]);
-            setSelectAll(false);
-        } else {
-            setSelectedUsers(mgmtUsers.map(u => u.id));
-            setSelectAll(true);
+            setOnlineEmployees({});
+            setAttendanceLogs([]);
+            setShifts([]);
+            tabInitRef.current = false;
+            login({ ...u, token: data.token } as Parameters<typeof login>[0]);
+            showToast(`Organization: ${String(u.organizationName || slug)}`, 'success');
+        } catch (e: unknown) {
+            showToast(e instanceof Error ? e.message : 'Switch failed', 'error');
+        } finally {
+            setOrgSwitchLoading(false);
         }
-    }, [selectAll, mgmtUsers]);
-
-    const handleSelectUser = useCallback((userId) => {
-        if (selectedUsers.includes(userId)) {
-            setSelectedUsers(prev => prev.filter(id => id !== userId));
-            setSelectAll(false);
-        } else {
-            setSelectedUsers(prev => [...prev, userId]);
-        }
-    }, [selectedUsers]);
+    };
 
     const handleBulkDelete = useCallback(() => {
         if (selectedUsers.length === 0) {
             showToast('No users selected', 'warning');
             return;
         }
-
         openConfirm({
             title: 'Delete Selected Staff?',
-            message: `Are you sure you want to delete ${selectedUsers.length} staff member(s)? This will also remove their attendance and location records.`,
+            message: `Delete ${selectedUsers.length} staff member(s)? This removes their attendance records.`,
             confirmText: 'Delete All',
             cancelText: 'Cancel',
             type: 'danger',
             onConfirm: async () => {
                 setIsLoading(true);
                 try {
-                    const promises = selectedUsers.map(userId =>
-                        fetch(`/api/hr/users/${userId}`, {
-                            method: 'DELETE',
-                            headers: { 'Authorization': `Bearer ${user.token}` }
-                        })
+                    await Promise.all(
+                        selectedUsers.map((userId) =>
+                            fetch(`/hr/users/${userId}`, {
+                                method: 'DELETE',
+                                headers: { Authorization: `Bearer ${user.token}` },
+                            })
+                        )
                     );
-                    await Promise.all(promises);
-                    showToast(`Successfully deleted ${selectedUsers.length} user(s)`, 'success');
+                    showToast(`Deleted ${selectedUsers.length} user(s)`, 'success');
                     setSelectedUsers([]);
                     setSelectAll(false);
                     fetchManagementUsers(user?.token || '', mgmtPage, mgmtSearch);
-                } catch (err) {
+                } catch {
                     showToast('Failed to delete some users', 'error');
                 } finally {
                     setIsLoading(false);
                 }
-            }
+            },
         });
-    }, [selectedUsers, user, showToast, openConfirm, fetchManagementUsers, mgmtPage, mgmtSearch]);
+    }, [selectedUsers, user, showToast, openConfirm, fetchManagementUsers, mgmtPage, mgmtSearch, setSelectedUsers, setSelectAll]);
 
     const handleBulkArchive = useCallback(() => {
         if (selectedUsers.length === 0) {
             showToast('No users selected', 'warning');
             return;
         }
-
         openConfirm({
             title: 'Archive Selected Staff?',
-            message: `Are you sure you want to archive ${selectedUsers.length} staff member(s)? They will be hidden but their history will be preserved.`,
+            message: `Archive ${selectedUsers.length} staff member(s)?`,
             confirmText: 'Archive All',
             cancelText: 'Cancel',
             type: 'warning',
             onConfirm: async () => {
                 setIsLoading(true);
                 try {
-                    const res = await fetch(`/api/hr/users/bulk-update`, {
+                    const res = await fetch(`/hr/users/bulk-update`, {
                         method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.token}` },
-                        body: JSON.stringify({ userIds: selectedUsers, isActive: false })
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` },
+                        body: JSON.stringify({ userIds: selectedUsers, isActive: false }),
                     });
-
                     if (res.ok) {
-                        showToast(`Successfully archived ${selectedUsers.length} user(s)`, 'success');
+                        showToast(`Archived ${selectedUsers.length} user(s)`, 'success');
                         setSelectedUsers([]);
                         setSelectAll(false);
                         fetchManagementUsers(user?.token || '', mgmtPage, mgmtSearch);
-                    } else {
-                        throw new Error('Failed');
-                    }
-                } catch (err) {
-                    showToast('Failed to archive some users', 'error');
+                    } else throw new Error('Failed');
+                } catch {
+                    showToast('Failed to archive', 'error');
                 } finally {
                     setIsLoading(false);
                 }
-            }
+            },
         });
-    }, [selectedUsers, user, showToast, openConfirm, fetchManagementUsers, mgmtPage, mgmtSearch]);
+    }, [selectedUsers, user, showToast, openConfirm, fetchManagementUsers, mgmtPage, mgmtSearch, setSelectedUsers, setSelectAll]);
 
     const handleBulkExport = useCallback(() => {
         if (selectedUsers.length === 0) {
             showToast('No users selected', 'warning');
             return;
         }
-
-        const selectedData = mgmtUsers.filter(u => selectedUsers.includes(u.id));
-        const formattedData = formatDataForExport(selectedData);
-        exportToCSV(formattedData, `selected_staff_${new Date().toISOString().split('T')[0]}.csv`);
+        const selectedData = mgmtUsers.filter((u) => selectedUsers.includes(u.id));
+        exportToCSV(formatDataForExport(selectedData), `staff_${new Date().toISOString().split('T')[0]}.csv`);
         showToast(`Exported ${selectedUsers.length} user(s)`, 'success');
     }, [selectedUsers, mgmtUsers, showToast]);
 
-    const clearFilters = useCallback(() => {
-        setSelectedRoles([]);
-        setSelectedSites([]);
-        showToast('Filters cleared', 'info');
-    }, [showToast, setSelectedRoles, setSelectedSites]);
-
     useEffect(() => {
         if (!user) return;
-
         let cancelled = false;
 
         const applySocketAuth = (token: string) => {
             socket.auth = { token };
+            setSocketStatus('connecting');
             if (socket.connected) socket.disconnect();
             socket.connect();
         };
@@ -422,47 +317,32 @@ const HRDashboard = () => {
             socket.off('connect');
             socket.off('disconnect');
             socket.off('connect_error');
-            socket.off('employee_location');
             socket.off('attendance_event');
-            socket.off('geo_fence_alert');
-            socket.off('auto_checkout');
 
             socket.on('connect', () => {
                 setSocketStatus('connected');
-                console.log('Socket connected to server');
+                setSocketErrorDetail(null);
+                const sessionUser = useAuthStore.getState().user;
+                if (sessionUser?.role === 'HR Admin') {
+                    socket.emit('join_hr');
+                } else if (sessionUser?.role === 'Site Supervisor' && sessionUser.siteId) {
+                    socket.emit('join_site', sessionUser.siteId);
+                }
             });
 
-            socket.on('disconnect', (reason) => {
+            socket.on('disconnect', (reason: string) => {
                 setSocketStatus('disconnected');
                 console.log('Socket disconnected:', reason);
             });
 
-            socket.on('connect_error', (error) => {
+            socket.on('connect_error', (err: Error & { data?: unknown }) => {
                 setSocketStatus('error');
-                console.error('Socket connection error:', error);
+                const msg = err?.message || String(err);
+                setSocketErrorDetail(msg);
             });
 
-            const updateHeartbeat = () => setLastHeartbeat(new Date().toLocaleTimeString());
-            socket.on('employee_location', (data) => {
-                console.log('Online update received:', data);
-                if (!data || !data.employeeId || data.latitude === undefined || data.longitude === undefined) {
-                    console.warn('Malformed location data received:', data);
-                    return;
-                }
-                setOnlineEmployees(prev => ({
-                    ...prev,
-                    [data.employeeId]: {
-                        ...data,
-                        lastSeen: new Date().toLocaleTimeString()
-                    }
-                }));
-                updateHeartbeat();
-            });
-
-            socket.on('attendance_event', (data) => {
-                console.log('Attendance event:', data);
-
-                setAttendanceLogs(prev => {
+            socket.on('attendance_event', (data: any) => {
+                setAttendanceLogs((prev) => {
                     const logs = [...prev];
                     if (data.type === 'check_in') {
                         logs.unshift({
@@ -474,30 +354,16 @@ const HRDashboard = () => {
                             check_out_time: null,
                             site_name: data.siteName,
                             site_id: data.siteId,
-                            is_live: true
+                            is_live: true,
                         });
                     } else if (data.type === 'check_out') {
-                        const idx = logs.findIndex(l => l.staff_id === data.employeeId && !l.check_out_time);
+                        const idx = logs.findIndex((l) => l.staff_id === data.employeeId && !l.check_out_time);
                         if (idx >= 0) {
                             logs[idx] = { ...logs[idx], check_out_time: data.timestamp };
                         }
                     }
                     return logs.slice(0, 100);
                 });
-            });
-
-            socket.on('geo_fence_alert', (data) => {
-                console.warn('Geo Fence Alert:', data);
-                showToast(`Geo-Fence Alert: ${data.first_name || data.staff_id} is outside ${data.site_name || 'site'}.`, 'error');
-                setGeoFenceAlerts(prev => [data, ...prev]);
-            });
-
-            socket.on('auto_checkout', (data) => {
-                console.warn('[AUTO-CHECKOUT] Event received:', data);
-                showToast(
-                    `Auto Check-Out: ${data.name || data.staffId} was automatically checked out. ${data.reason}`,
-                    'warning'
-                );
             });
         };
 
@@ -513,13 +379,12 @@ const HRDashboard = () => {
 
             if (!refreshed) {
                 try {
-                    const probe = await fetch('/api/hr/employees', {
+                    const probe = await fetch('/hr/employees', {
                         headers: { Authorization: `Bearer ${sessionUser.token}` },
                         credentials: 'same-origin',
                     });
                     if (cancelled) return;
                     if (probe.status === 401 || probe.status === 403) {
-                        console.warn('Authentication expired, logging out...');
                         logout();
                         return;
                     }
@@ -532,30 +397,25 @@ const HRDashboard = () => {
             if (cancelled || !sessionUser?.token) return;
 
             attachSocketHandlers();
-
             if (sessionUser.token) {
                 socket.auth = { token: sessionUser.token };
+                setSocketStatus(socket.connected ? 'connected' : 'connecting');
                 if (!socket.connected) socket.connect();
             }
 
-            if (sessionUser.role === 'HR Admin') {
-                socket.emit('join_hr');
-            } else if (sessionUser.role === 'Site Supervisor' && sessionUser.siteId) {
-                socket.emit('join_site', sessionUser.siteId);
-            }
-
             fetchEmployees(sessionUser.token);
+            fetchAttendance(sessionUser.token);
 
-            if (sessionUser.role === 'HR Admin' || sessionUser.role === 'Site Supervisor') {
-                fetchRoles(sessionUser.token);
-                fetchAlerts(sessionUser.token);
-            }
             if (sessionUser.role === 'HR Admin') {
+                fetchRoles(sessionUser.token);
+                fetchSites(sessionUser.token);
+                fetchShifts(sessionUser.token);
+            } else if (sessionUser.role === 'Site Supervisor') {
+                fetchSites(sessionUser.token);
+            } else if (sessionUser.role === 'Payroll' || sessionUser.role === 'Finance') {
                 fetchSites(sessionUser.token);
                 fetchShifts(sessionUser.token);
             }
-
-            fetchAttendance(sessionUser.token);
         };
 
         void loadDashboardData();
@@ -574,86 +434,41 @@ const HRDashboard = () => {
             socket.off('connect');
             socket.off('disconnect');
             socket.off('connect_error');
-            socket.off('employee_location');
             socket.off('attendance_event');
-            socket.off('geo_fence_alert');
-            socket.off('auto_checkout');
         };
-    }, [user?.token, user?.role, user?.siteId, refreshAccessToken, logout, fetchEmployees, fetchRoles, fetchSites, fetchShifts, fetchAlerts, fetchAttendance, showToast, setOnlineEmployees, setAttendanceLogs, setGeoFenceAlerts]);
-
-    useEffect(() => {
-        if (activeTab === 'staff' && user?.role === 'HR Admin') {
-            fetchManagementUsers(user.token, mgmtPage, mgmtSearch);
-        }
-        if (activeTab === 'access_roles' && user?.role === 'HR Admin') {
-            fetchPermissions(user.token);
-        }
-    }, [activeTab, mgmtPage, mgmtSearch, user, fetchManagementUsers, fetchPermissions]);
-
-    useEffect(() => {
-        if (activeTab !== 'map') return;
-
-        if (selectedSites.length === 1) {
-            const site = sites.find(s => s.id === selectedSites[0]);
-            if (site && site.latitude && site.longitude) {
-                setMapCenter({
-                    lat: parseFloat(site.latitude),
-                    lng: parseFloat(site.longitude)
-                });
-                setZoom(16);
-            }
-        }
-    }, [selectedSites, sites, activeTab, setMapCenter, setZoom]);
-
-
-    const handleDeleteBiometricDevice = async (id: number) => {
-        openConfirm({
-            title: 'Delete Device?',
-            message: 'Are you sure you want to remove this biometric terminal? This will not delete associated logs.',
-            confirmText: 'Delete',
-            type: 'danger',
-            onConfirm: async () => {
-                try {
-                    const res = await fetch(`/api/hr/biometrics/devices/${id}`, {
-                        method: 'DELETE',
-                        headers: { 'Authorization': `Bearer ${user.token}` }
-                    });
-                    if (res.ok) {
-                        fetchBiometricDevices(user.token);
-                        showToast('Device removed', 'success');
-                    } else {
-                        showToast('Failed to delete device', 'error');
-                    }
-                } catch {
-                    showToast('Network error', 'error');
-                }
-            }
-        });
-    };
-
-    useEffect(() => {
-        if (activeTab === 'biometrics' && (user?.role === 'HR Admin' || user?.role === 'Site Supervisor')) {
-            fetchBiometricDevices(user.token);
-            fetchBiometricLogs(user.token);
-        }
-    }, [activeTab, fetchBiometricDevices, fetchBiometricLogs, user]);
+    }, [
+        user?.token,
+        user?.role,
+        user?.siteId,
+        user?.organizationId,
+        refreshAccessToken,
+        logout,
+        fetchEmployees,
+        fetchRoles,
+        fetchSites,
+        fetchShifts,
+        fetchAttendance,
+        setAttendanceLogs,
+        setOnlineEmployees,
+        setShifts,
+    ]);
 
     useEffect(() => {
         if (!user?.token || !(user.role === 'HR Admin' || user.role === 'Site Supervisor')) return;
         let mounted = true;
-        let timer: any = null;
+        let timer: ReturnType<typeof setInterval> | null = null;
         const fetchSummary = async () => {
             try {
-                const res = await fetch('/api/hr/attendance/current-summary', {
-                    headers: { 'Authorization': `Bearer ${user.token}` }
+                const res = await fetch('/hr/attendance/current-summary', {
+                    headers: { Authorization: `Bearer ${user.token}` },
                 });
                 const data = await res.json();
                 if (res.ok && mounted) setCheckedInSummary(data);
             } catch (err) {
-                console.error('Failed to fetch current attendance summary:', err);
+                console.error('current-summary:', err);
             }
         };
-        fetchSummary();
+        void fetchSummary();
         timer = setInterval(fetchSummary, 30000);
         return () => {
             mounted = false;
@@ -661,40 +476,112 @@ const HRDashboard = () => {
         };
     }, [user?.token, user?.role]);
 
-    // Debounced search
+    useEffect(() => {
+        if (activeTab === 'staff' && user?.role === 'HR Admin') {
+            fetchManagementUsers(user.token, mgmtPage, mgmtSearch);
+        }
+    }, [activeTab, mgmtPage, mgmtSearch, user, fetchManagementUsers]);
+
     useEffect(() => {
         if (activeTab !== 'staff') return;
-
         const debounceTimer = setTimeout(() => {
-            fetchManagementUsers(user.token, mgmtPage, mgmtSearch);
-        }, 300); // 300ms debounce
-
+            if (user?.token) fetchManagementUsers(user.token, mgmtPage, mgmtSearch);
+        }, 300);
         return () => clearTimeout(debounceTimer);
     }, [mgmtSearch, activeTab, fetchManagementUsers, mgmtPage, user]);
 
-    const validateUser = (user) => {
-        const errors: any = {};
-        if (!user.staffId && !user.staff_id) errors.staffId = 'Staff ID is required';
-        if (user.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) {
+    const navTabs = useMemo(() => buildNavTabs(user?.role), [user?.role]);
+    const navTabGroups = useMemo(() => {
+        return navTabs.reduce<Record<string, { key: string; label: string; group: string }[]>>((acc, tab) => {
+            if (!acc[tab.group]) acc[tab.group] = [];
+            acc[tab.group].push(tab);
+            return acc;
+        }, {});
+    }, [navTabs]);
+
+    useEffect(() => {
+        if (!user?.staffId || !user?.token || !user?.role) return;
+        if (tabInitRef.current) return;
+        tabInitRef.current = true;
+        const allowed = new Set(navTabs.map((t) => t.key));
+        const fromUrl = searchParams.get('tab');
+        const orgSlug = String((user as { organizationSlug?: string }).organizationSlug || 'default');
+        const storageKey = `hrDashboardLastTab:${orgSlug}:${user.staffId}`;
+        const saved = typeof localStorage !== 'undefined' ? localStorage.getItem(storageKey) : null;
+        if (fromUrl && allowed.has(fromUrl)) setActiveTab(fromUrl);
+        else if (saved && allowed.has(saved)) setActiveTab(saved);
+        else setActiveTab(defaultDashboardTab());
+    }, [user?.staffId, user?.role, user?.token, navTabs, searchParams, (user as { organizationSlug?: string })?.organizationSlug]);
+
+    useEffect(() => {
+        if (!user?.staffId || !user?.token || !user?.role) return;
+        if (!tabInitRef.current) return;
+        const allowed = new Set(navTabs.map((t) => t.key));
+        const fromUrl = searchParams.get('tab');
+        if (!fromUrl || !allowed.has(fromUrl)) return;
+        setActiveTab(fromUrl);
+    }, [searchParams, navTabs, user?.staffId, user?.token, user?.role]);
+
+    useEffect(() => {
+        if (!user?.staffId || !user?.role) return;
+        const allowed = new Set(navTabs.map((t) => t.key));
+        if (!allowed.has(activeTab)) return;
+        setSearchParams(
+            (prev) => {
+                if (prev.get('tab') === activeTab) return prev;
+                const next = new URLSearchParams(prev);
+                next.set('tab', activeTab);
+                return next;
+            },
+            { replace: true }
+        );
+    }, [activeTab, user?.staffId, user?.role, navTabs, setSearchParams]);
+
+    useEffect(() => {
+        if (!user?.token) tabInitRef.current = false;
+    }, [user?.token]);
+
+    useEffect(() => {
+        if (!user?.staffId || !user?.role) return;
+        const orgSlug = String((user as { organizationSlug?: string }).organizationSlug || 'default');
+        const storageKey = `hrDashboardLastTab:${orgSlug}:${user.staffId}`;
+        if (typeof localStorage !== 'undefined') localStorage.setItem(storageKey, activeTab);
+    }, [activeTab, user?.staffId, user?.role, (user as { organizationSlug?: string })?.organizationSlug]);
+
+    useEffect(() => {
+        if (!navTabs.some((tab) => tab.key === activeTab)) {
+            setActiveTab(defaultDashboardTab());
+        }
+    }, [activeTab, navTabs]);
+
+    const handleFocusSite = (site: Site) => {
+        if (site.latitude && site.longitude) {
+            showToast(`${site.name}: ${site.latitude}, ${site.longitude}`, 'info');
+        } else {
+            showToast('No coordinates set for this site', 'warning');
+        }
+    };
+
+    const validateUser = (u: any) => {
+        const errors: Record<string, string> = {};
+        if (!u.staffId && !u.staff_id) errors.staffId = 'Staff ID is required';
+        if (u.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(u.email)) {
             errors.email = 'Invalid email format';
         }
-        if (!user.id && !user.password) errors.password = 'Password is required for new users';
-        if (user.password && user.password.length < 6) errors.password = 'Password must be at least 6 characters';
-        if (user.facePin && !/^\d{4,10}$/.test(user.facePin)) errors.facePin = 'Face PIN must be 4-10 digits';
+        if (!u.id && !u.password) errors.password = 'Password is required for new users';
+        if (u.password && u.password.length < 6) errors.password = 'Password must be at least 6 characters';
         return errors;
     };
 
-    const handleSaveUser = async (e) => {
+    const handleSaveUser = async (e: React.FormEvent) => {
         e.preventDefault();
         setValidationErrors({});
-
         const errors = validateUser(currentUser);
         if (Object.keys(errors).length > 0) {
             setValidationErrors(errors);
             showToast('Please fix validation errors', 'error');
             return;
         }
-
         const payload = {
             staffId: currentUser.staffId !== undefined ? currentUser.staffId : currentUser.staff_id,
             email: currentUser.email,
@@ -705,76 +592,68 @@ const HRDashboard = () => {
             firstName: currentUser.firstName !== undefined ? currentUser.firstName : currentUser.first_name,
             lastName: currentUser.lastName !== undefined ? currentUser.lastName : currentUser.last_name,
             shiftId: currentUser.shiftId !== undefined ? currentUser.shiftId : currentUser.shift_id,
-            photoHelper: currentUser.photoHelper,
-            faceAuthEnabled: currentUser.faceAuthEnabled !== undefined ? currentUser.faceAuthEnabled : currentUser.face_auth_enabled,
-            facePin: currentUser.facePin
         };
-
         setIsLoading(true);
         try {
-            const res = await fetch('/api/hr/users', {
+            const res = await fetch('/hr/users', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${user.token}`
-                },
-                body: JSON.stringify(payload)
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` },
+                body: JSON.stringify(payload),
             });
-
             if (res.ok) {
                 setShowUserModal(false);
                 fetchManagementUsers(user?.token || '', mgmtPage, mgmtSearch);
-                setCurrentUser({ staffId: '', email: '', password: '', roleId: 4, siteId: '', departmentName: '', firstName: '', lastName: '', faceAuthEnabled: true, facePin: '' });
-                showToast(currentUser.id ? 'User updated successfully' : 'User created successfully', 'success');
+                setCurrentUser({
+                    staffId: '',
+                    email: '',
+                    password: '',
+                    roleId: 4,
+                    siteId: '',
+                    departmentName: '',
+                    firstName: '',
+                    lastName: '',
+                });
+                showToast('Staff saved', 'success');
             } else {
-                const error = await res.json();
-                showToast(error.error || 'Failed to save user', 'error');
+                const errBody = await res.json();
+                showToast(errBody.error || 'Failed to save user', 'error');
             }
-        } catch (err) {
-            console.error('Error saving user:', err);
-            showToast('Network error. Please try again.', 'error');
+        } catch {
+            showToast('Network error', 'error');
         } finally {
             setIsLoading(false);
         }
     };
 
-    const validateSite = (site) => {
-        const errors: any = {};
+    const validateSite = (site: any) => {
+        const errors: Record<string, string> = {};
         if (!site.name || site.name.trim().length === 0) errors.name = 'Site name is required';
         if (site.name && site.name.length < 3) errors.name = 'Site name must be at least 3 characters';
         return errors;
     };
 
-    const handleSaveSite = async (e) => {
+    const handleSaveSite = async (e: React.FormEvent) => {
         e.preventDefault();
         setValidationErrors({});
-
         const errors = validateSite(currentSite);
         if (Object.keys(errors).length > 0) {
             setValidationErrors(errors);
             showToast('Please fix validation errors', 'error');
             return;
         }
-
         const method = currentSite.id ? 'PATCH' : 'POST';
-        const url = currentSite.id ? `/api/hr/sites/${currentSite.id}` : '/api/hr/sites';
-
+        const url = currentSite.id ? `/hr/sites/${currentSite.id}` : '/hr/sites';
         setIsLoading(true);
         try {
             const res = await fetch(url, {
                 method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${user.token}`
-                },
-                body: JSON.stringify(currentSite)
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` },
+                body: JSON.stringify(currentSite),
             });
-
             if (res.ok) {
                 setShowSiteModal(false);
-                // Refresh sites list
-                fetch('/api/hr/sites', { headers: { 'Authorization': `Bearer ${user.token}` } })
-                    .then(res => res.json())
+                fetch('/hr/sites', { headers: { Authorization: `Bearer ${user.token}` } })
+                    .then((r) => r.json())
                     .then(() => fetchSites(user.token));
                 setCurrentSite({
                     name: '',
@@ -784,130 +663,54 @@ const HRDashboard = () => {
                     radiusMeters: 100,
                     geofenceType: 'CIRCLE',
                     geofenceData: null,
-                    geofenceEnabled: true
+                    geofenceEnabled: true,
                 });
-                showToast(currentSite.id ? 'Site updated successfully' : 'Site created successfully', 'success');
+                showToast(currentSite.id ? 'Site updated' : 'Site created', 'success');
             } else {
-                const error = await res.json();
-                showToast(error.error || 'Failed to save site', 'error');
+                const errBody = await res.json();
+                showToast(errBody.error || 'Failed to save site', 'error');
             }
-        } catch (err) {
-            console.error('Error saving site:', err);
-            showToast('Network error. Please try again.', 'error');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleFocusSite = (site) => {
-        if (site.latitude && site.longitude) {
-            setMapCenter({ lat: parseFloat(site.latitude), lng: parseFloat(site.longitude) });
-            setZoom(16);
-            setActiveTab('map');
-            setSelectedSites([site.id]);
-            showToast(`Focusing on ${site.name}`, 'info');
-        } else {
-            showToast('Geo location not set for this site', 'warning');
-        }
-    };
-
-    const handleStartEditPermissions = () => {
-        if (!selectedRole) return;
-        // Default to empty array if no permissions
-        const currentIds = (selectedRole.permissions || []).map(p => p.id).filter(id => id);
-        setTempPermissions(currentIds);
-        setIsEditingPermissions(true);
-    };
-
-    const handleTogglePermission = (permId) => {
-        setTempPermissions(prev => {
-            if (prev.includes(permId)) {
-                return prev.filter(id => id !== permId);
-            } else {
-                return [...prev, permId];
-            }
-        });
-    };
-
-    const handleSavePermissions = async () => {
-        if (!selectedRole) return;
-        setIsLoading(true);
-        try {
-            const res = await fetch(`/api/hr/roles/${selectedRole.id}/permissions`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${user.token}`
-                },
-                body: JSON.stringify({ permissionIds: tempPermissions })
-            });
-
-            if (res.ok) {
-                showToast('Permissions updated successfully', 'success');
-                setIsEditingPermissions(false);
-                // Refresh Roles
-                fetch('/api/hr/roles', { headers: { 'Authorization': `Bearer ${user.token}` } })
-                    .then(r => r.json())
-                    .then(data => {
-                        fetchRoles(user.token);
-                        // Update selected role ref
-                        const updatedRole = data.find(r => r.id === selectedRole.id);
-                        if (updatedRole) setSelectedRole(updatedRole);
-                    });
-            } else {
-                showToast('Failed to update permissions', 'error');
-            }
-        } catch (err) {
-            console.error(err);
+        } catch {
             showToast('Network error', 'error');
         } finally {
             setIsLoading(false);
         }
     };
 
-    const sidebarEmployees = [
-        ...employees,
-        ...Object.keys(onlineEmployees)
-            .filter(id => !employees.some(e => e.staff_id === id))
-            .map(id => ({
-                id: `guest-${id}`,
-                staff_id: id,
-                isGuest: true,
-                site_id: onlineEmployees[id].siteId,
-                photo_url: onlineEmployees[id].photoUrl || onlineEmployees[id].photo_url,
-                department_name: onlineEmployees[id].departmentName || onlineEmployees[id].department_name
-            }))
-    ].filter(emp => {
-        const matchesSearch = emp.staff_id.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesSite = selectedSites.length === 0 || selectedSites.includes((emp as any).site_id || (emp as any).siteId);
-        return matchesSearch && matchesSite;
-    });
-
-    const handleLogin = async (e) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setIsLoading(true);
-
         try {
-            const res = await fetch('/api/auth/login', {
+            const organizationSlug = String(loginData.organizationSlug || 'default').trim().toLowerCase() || 'default';
+            const res = await fetch('/auth/login', {
                 method: 'POST',
-                credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(loginData)
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    staffId: loginData.staffId.trim(),
+                    password: loginData.password,
+                    organizationSlug,
+                }),
             });
             const data = await res.json();
-
             if (res.ok) {
-                const userData = { ...data.user, token: data.token };
-                login(userData);
-                showToast(`Welcome back, ${data.user.role}!`, 'success');
+                const slug = organizationSlug;
+                try {
+                    localStorage.setItem('hrOrganizationSlug', slug);
+                } catch {
+                    /* ignore */
+                }
+                login({ ...data.user, token: data.token } as Parameters<typeof login>[0]);
+                showToast(`Welcome back, ${String(data.user?.role || 'user')}!`, 'success');
             } else {
                 setError(data.error || 'Login failed');
                 showToast(data.error || 'Invalid credentials', 'error');
             }
         } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Request failed';
             setError('Connection error');
-            showToast('Unable to connect to server', 'error');
+            showToast(`Unable to reach the server (${msg}).`, 'error');
         } finally {
             setIsLoading(false);
         }
@@ -917,54 +720,73 @@ const HRDashboard = () => {
         logout();
     };
 
-    const handleSelectEmployee = (empId) => {
-        if (onlineEmployees[empId]) {
-            setMapCenter({
-                lat: onlineEmployees[empId].latitude,
-                lng: onlineEmployees[empId].longitude
-            });
-            setZoom(15);
-            setSelectedId(empId);
-        }
-    };
-    const navTabs = useMemo(
-        () => buildDashboardTabs(user?.role, gfTotal || geoFenceAlerts.length),
-        [user?.role, gfTotal, geoFenceAlerts.length]
-    );
-    useEffect(() => {
-        if (!navTabs.some((tab) => tab.key === activeTab)) {
-            setActiveTab('map');
-        }
-    }, [activeTab, navTabs]);
-
     if (!user) {
         return (
             <div className="setup-screen hr-login">
                 <div className="setup-card">
                     <div className="berkeley-logo-small" style={{ marginBottom: '1rem' }}>
-                        <img src="/berkeley-logo.png" alt="Berkeley" style={{ height: '30px', width: 'auto', objectFit: 'contain' }} />
+                        <img src="/berkeley-logo.png" alt="" style={{ height: '30px', width: 'auto', objectFit: 'contain' }} />
                     </div>
-                    <h2>Dashboard Login</h2>
-                    <p>Enter your management credentials.</p>
-                    <form onSubmit={handleLogin}>
-                        {error && <div className="error-box">{error}</div>}
-                        <input
-                            type="text"
-                            placeholder="Staff ID"
-                            value={loginData.staffId}
-                            onChange={(e) => setLoginData({ ...loginData, staffId: e.target.value })}
-                            required
-                            className="setup-input"
-                        />
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            value={loginData.password}
-                            onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                            required
-                            className="setup-input"
-                        />
-                        <button type="submit" className="btn-primary">Sign In</button>
+                    <h2>HR dashboard</h2>
+                    <p className="field-hint" style={{ marginTop: 0, color: 'var(--gray-600)' }}>
+                        Sign in with your staff account. Use the same organization code your team uses for the mobile app (often <strong>default</strong>).
+                    </p>
+                    <form onSubmit={handleLogin} noValidate>
+                        {error && (
+                            <div className="error-banner" role="alert" style={{ marginBottom: '1rem' }}>
+                                {error}
+                            </div>
+                        )}
+                        <div className="form-group">
+                            <label htmlFor="hr-staff-id" className="field-label">Staff ID</label>
+                            <input
+                                id="hr-staff-id"
+                                type="text"
+                                placeholder="Your staff ID"
+                                value={loginData.staffId}
+                                onChange={(e) => setLoginData({ ...loginData, staffId: e.target.value })}
+                                required
+                                className="setup-input"
+                                autoComplete="username"
+                                disabled={isLoading}
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="hr-org-slug" className="field-label">Organization</label>
+                            <p className="field-hint" style={{ marginTop: 0 }}>Short code for your company (e.g. <code style={{ fontSize: '0.85em' }}>default</code>).</p>
+                            <input
+                                id="hr-org-slug"
+                                type="text"
+                                placeholder="default"
+                                value={loginData.organizationSlug}
+                                onChange={(e) =>
+                                    setLoginData({
+                                        ...loginData,
+                                        organizationSlug: (e.target.value || 'default').trim().toLowerCase(),
+                                    })
+                                }
+                                className="setup-input"
+                                autoComplete="organization"
+                                disabled={isLoading}
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="hr-password" className="field-label">Password</label>
+                            <input
+                                id="hr-password"
+                                type="password"
+                                placeholder="Password"
+                                value={loginData.password}
+                                onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                                required
+                                className="setup-input"
+                                autoComplete="current-password"
+                                disabled={isLoading}
+                            />
+                        </div>
+                        <button type="submit" className="btn-primary" disabled={isLoading} aria-busy={isLoading}>
+                            {isLoading ? 'Signing in…' : 'Sign in'}
+                        </button>
                     </form>
                 </div>
             </div>
@@ -973,884 +795,400 @@ const HRDashboard = () => {
 
     return (
         <div className="hr-dashboard">
-            <APIProvider apiKey={GOOGLE_MAPS_API_KEY} libraries={['places', 'drawing', 'geometry']}>
-                <header className="dashboard-topbar">
-                    <div className="topbar-left">
-                        <div className="topbar-title-row">
-                            <img src="/berkeley-logo.png" alt="Berkeley" className="topbar-logo" />
-                            <div className="topbar-title">{BRANDING.appTitle}</div>
-                        </div>
-                        <div className="topbar-subtitle">
-                            {user.role}{user.siteName ? ` · ${user.siteName}` : (user.siteId ? ` · Site #${user.siteId}` : ' · Global')}
-                        </div>
+            <header className="dashboard-topbar">
+                <div className="topbar-left">
+                    <div className="topbar-title-row">
+                        <img src="/berkeley-logo.png" alt="Berkeley" className="topbar-logo" />
+                        <div className="topbar-title">{BRANDING.appTitle}</div>
                     </div>
-                    <div className="topbar-right">
-                        <span className="env-pill">{environmentLabel}</span>
-                        <span className={`live-pill ${socketStatus === 'connected' ? 'online' : 'offline'}`}>
-                            {socketStatus === 'connected' ? 'Live Connected' : 'Offline'}
-                        </span>
-                        <button onClick={handleLogout} className="btn-logout">Logout</button>
+                    <div className="topbar-subtitle">
+                        {user.role}
+                        {user.siteName ? ` · ${user.siteName}` : user.siteId ? ` · Site #${user.siteId}` : ''}
                     </div>
-                </header>
-
-                <div className="dashboard-shell">
-                    <aside className="dashboard-nav">
-                        <div className="dashboard-nav-brand">
-                            <img src="/berkeley-logo.png" alt="Berkeley" className="dashboard-nav-logo-image" />
-                            <div>
-                                <div className="dashboard-nav-logo-title">{BRANDING.portalTitle}</div>
-                                <div className="dashboard-nav-logo-sub">{BRANDING.portalSubtitle}</div>
-                            </div>
-                        </div>
-                        {['Main', 'Operations', 'Advanced'].map((group) => {
-                            const groupTabs = navTabs.filter((tab) => tab.group === group);
-                            if (!groupTabs.length) return null;
-                            return (
-                                <div key={group} className="dashboard-nav-group">
-                                    <div className="dashboard-nav-header">{group}</div>
-                                    <div className="dashboard-nav-list">
-                                        {groupTabs.map((tab) => (
-                                            <button
-                                                key={tab.key}
-                                                className={`dashboard-nav-item ${activeTab === tab.key ? 'active' : ''}`}
-                                                onClick={() => setActiveTab(tab.key)}
-                                            >
-                                                <span>{tab.label}</span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </aside>
-
-                    <main className="dashboard-main">
-                        <div className="kpi-strip">
-                            <div className="kpi-strip-card blue">
-                                <div className="kpi-strip-value">{stats.total}</div>
-                                <div className="kpi-strip-label">Total Employees</div>
-                            </div>
-                            <div className="kpi-strip-card green">
-                                <div className="kpi-strip-value">{checkedInSummary.totalCheckedIn || 0}</div>
-                                <div className="kpi-strip-label">Checked In</div>
-                            </div>
-                            <div className="kpi-strip-card amber">
-                                <div className="kpi-strip-value">{Math.max((checkedInSummary.totalCheckedIn || 0) - (checkedInSummary.lateCount || 0), 0)}</div>
-                                <div className="kpi-strip-label">In-Time</div>
-                            </div>
-                            <div className="kpi-strip-card red">
-                                <div className="kpi-strip-value">{checkedInSummary.lateCount || 0}</div>
-                                <div className="kpi-strip-label">Late</div>
-                            </div>
-                            <div className="kpi-strip-card purple">
-                                <div className="kpi-strip-value">{Object.keys(onlineEmployees).length}</div>
-                                <div className="kpi-strip-label">Online Now</div>
-                            </div>
-                        </div>
-
-                        <div className="dashboard-layout">
-                    <ErrorBoundary label={activeTab}>
-                        {activeTab === 'map' ? (
-                        <MapDashboard />
-                    ) : activeTab === 'staff' ? (
-                        <StaffManager
-                            onEditUser={(user) => {
-                                setCurrentUser(user);
-                                setShowUserModal(true);
-                                setValidationErrors({});
-                            }}
-                            setCurrentUser={setCurrentUser}
-                            setShowUserModal={setShowUserModal}
-                            handleBulkExport={handleBulkExport}
-                            handleBulkArchive={handleBulkArchive}
-                            handleBulkDelete={handleBulkDelete}
-                            handleFocusSite={handleFocusSite}
-                            setCurrentSite={setCurrentSite}
-                            setShowSiteModal={setShowSiteModal}
-                            setCurrentShift={setCurrentShift}
-                            setShowShiftModal={setShowShiftModal}
-                            currentShift={currentShift}
-                            setValidationErrors={setValidationErrors}
-                            showShiftModal={showShiftModal}
-                        />
-                    ) : activeTab === 'vehicles' ? (
-                        <VehiclesManager
-                            onEditUser={(u) => {
-                                setCurrentUser({
-                                    id: u.id,
-                                    staffId: u.staff_id,
-                                    email: u.email,
-                                    roleId: u.role_id,
-                                    siteId: u.site_id,
-                                    departmentName: u.department_name,
-                                    firstName: u.first_name,
-                                    lastName: u.last_name
-                                });
-                                setShowUserModal(true);
-                            }}
-                            setCurrentUser={setCurrentUser}
-                            setShowUserModal={setShowUserModal}
-                            handleBulkExport={handleBulkExport}
-                            handleBulkArchive={handleBulkArchive}
-                            handleBulkDelete={handleBulkDelete}
-                            handleFocusSite={handleFocusSite}
-                            setCurrentSite={setCurrentSite}
-                            setShowSiteModal={setShowSiteModal}
-                            setCurrentShift={setCurrentShift}
-                            setShowShiftModal={setShowShiftModal}
-                            currentShift={currentShift}
-                            setValidationErrors={setValidationErrors}
-                            showShiftModal={showShiftModal}
-                        />
-                    ) : activeTab === 'reports' ? (
-                        <ReportsView />
-                    ) : activeTab === 'leave_calendar' ? (
-                        <LeaveCalendarView />
-                    ) : activeTab === 'attendance' ? (
-                        <AttendanceLog />
-                    ) : activeTab === 'rosters' ? (
-                        <RosterPlanningView />
-                    ) : activeTab === 'geo_fence_alerts' ? (
-                        <GeoFenceAlertsView />
-                    ) : activeTab === 'location_logs' ? (
-                        <LocationLogsView />
-                    ) : activeTab === 'analytics' ? (
-                        <AnalyticsDashboard />
-                    ) : activeTab === 'route_tracking' ? (
-                        <RouteTrackingView />
-                    ) : activeTab === 'idle_reporting' ? (
-                        <IdleReportingView />
-                    ) : activeTab === 'biometrics' ? (
-                        <BiometricsView
-                            onAddTerminal={() => {
-                                setCurrentBiometricDevice({
-                                    name: '',
-                                    deviceKey: '',
-                                    siteId: '',
-                                    type: 'RA08',
-                                    ipAddress: '',
-                                    port: '',
-                                    config: {},
-                                });
-                                setShowBiometricModal(true);
-                            }}
-                            onEditTerminal={(device) => {
-                                setCurrentBiometricDevice(device);
-                                setShowBiometricModal(true);
-                            }}
-                            onDelete={handleDeleteBiometricDevice}
-                        />
-                    ) : activeTab === 'metrics' ? (
-                        <MetricsDashboardView />
-                    ) : activeTab === 'integrations' ? (
-                        <OdooIntegrationView />
-                    ) : activeTab === 'access_roles' ? (
-                        <div className="management-view">
-                            <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '2rem', height: '100%', alignItems: 'start' }}>
-                                {/* Roles List */}
-                                <div className="card" style={{ padding: '0', overflow: 'hidden', height: 'calc(100vh - 140px)', display: 'flex', flexDirection: 'column' }}>
-                                    <div style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0' }}>
-                                        <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#1e293b' }}>Access Roles</h3>
-                                        <p style={{ margin: '0.5rem 0 0', color: '#64748b', fontSize: '0.875rem' }}>Select a role to view permissions</p>
-                                    </div>
-                                    <div className="role-list" style={{ overflowY: 'auto', flex: 1 }}>
-                                        {roles.map(role => (
-                                            <div
-                                                key={role.id}
-                                                className={`list-item ${selectedRole?.id === role.id ? 'selected' : ''}`}
-                                                onClick={() => setSelectedRole(role)}
-                                                style={{
-                                                    padding: '1rem 1.5rem',
-                                                    cursor: 'pointer',
-                                                    borderBottom: '1px solid #f1f5f9',
-                                                    background: selectedRole?.id === role.id ? '#eff6ff' : 'transparent',
-                                                    borderLeft: selectedRole?.id === role.id ? '4px solid #2563eb' : '4px solid transparent'
-                                                }}
-                                            >
-                                                <div style={{ fontWeight: '600', color: selectedRole?.id === role.id ? '#1e40af' : '#334155' }}>{role.name}</div>
-                                                <div style={{ fontSize: '0.75rem', color: selectedRole?.id === role.id ? '#3b82f6' : '#94a3b8', marginTop: '4px' }}>
-                                                    {role.permissions ? role.permissions.length : 0} permissions assigned
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Role Details */}
-                                <div className="card" style={{ height: 'calc(100vh - 140px)', overflowY: 'auto' }}>
-                                    {selectedRole ? (
-                                        <>
-                                            <div style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '1.5rem', marginBottom: '2rem' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                        <h2 style={{ margin: 0, fontSize: '1.875rem', color: '#0f172a' }}>{selectedRole.name}</h2>
-                                                        <span className="role-tag" style={{ fontSize: '0.875rem', padding: '0.25rem 0.75rem' }}>Active Role</span>
-                                                    </div>
-                                                    {!isEditingPermissions ? (
-                                                        <button
-                                                            className="btn-primary"
-                                                            onClick={handleStartEditPermissions}
-                                                            style={{ fontSize: '0.875rem', padding: '0.5rem 1rem' }}
-                                                        >
-                                                            Edit Permissions
-                                                        </button>
-                                                    ) : (
-                                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                            <button
-                                                                className="btn-secondary"
-                                                                onClick={() => setIsEditingPermissions(false)}
-                                                                disabled={isLoading}
-                                                            >
-                                                                Cancel
-                                                            </button>
-                                                            <button
-                                                                className="btn-primary"
-                                                                onClick={handleSavePermissions}
-                                                                disabled={isLoading}
-                                                            >
-                                                                {isLoading ? 'Saving...' : 'Save Changes'}
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <p style={{ color: '#64748b', margin: 0, fontSize: '1rem' }}>
-                                                    This role grants access to the following screens and functionalities within the system.
-                                                </p>
-                                            </div>
-
-                                            <div style={{ display: 'grid', gap: '2rem' }}>
-                                                <div>
-                                                    <h4 style={{
-                                                        color: '#334155',
-                                                        marginBottom: '1rem',
-                                                        fontSize: '1.1rem',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '0.5rem'
-                                                    }}>
-                                                        Available Screens & Permissions
-                                                    </h4>
-
-                                                    {isEditingPermissions ? (
-                                                        <div className="permissions-edit-grid" style={{
-                                                            display: 'grid',
-                                                            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                                                            gap: '1rem'
-                                                        }}>
-                                                            {allPermissions.map(perm => {
-                                                                const isChecked = tempPermissions.includes(perm.id);
-                                                                return (
-                                                                    <div
-                                                                        key={perm.id}
-                                                                        onClick={() => handleTogglePermission(perm.id)}
-                                                                        style={{
-                                                                            border: isChecked ? '1px solid #2563eb' : '1px solid #e2e8f0',
-                                                                            background: isChecked ? '#eff6ff' : '#fff',
-                                                                            borderRadius: '8px',
-                                                                            padding: '1rem',
-                                                                            cursor: 'pointer',
-                                                                            display: 'flex',
-                                                                            alignItems: 'flex-start',
-                                                                            gap: '1rem',
-                                                                            transition: 'all 0.2s'
-                                                                        }}
-                                                                    >
-                                                                        <div style={{
-                                                                            width: '20px',
-                                                                            height: '20px',
-                                                                            borderRadius: '4px',
-                                                                            border: isChecked ? 'none' : '2px solid #cbd5e1',
-                                                                            background: isChecked ? '#2563eb' : 'transparent',
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            justifyContent: 'center',
-                                                                            color: 'white',
-                                                                            flexShrink: 0,
-                                                                            marginTop: '2px'
-                                                                        }}>
-                                                                            {isChecked && 'OK'}
-                                                                        </div>
-                                                                        <div>
-                                                                            <div style={{ fontWeight: '600', color: '#1e293b', marginBottom: '0.25rem' }}>
-                                                                                {formatPermissionName(perm.name)}
-                                                                            </div>
-                                                                            <div style={{ fontSize: '0.875rem', color: '#64748b' }}>
-                                                                                {perm.description}
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    ) : (
-                                                        selectedRole.permissions && selectedRole.permissions.length > 0 ? (
-                                                            <div className="permissions-grid" style={{
-                                                                display: 'grid',
-                                                                gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
-                                                                gap: '1rem'
-                                                            }}>
-                                                                {selectedRole.permissions.map((perm, idx) => (
-                                                                    <div key={idx} style={{
-                                                                        background: '#fff',
-                                                                        padding: '1.25rem',
-                                                                        borderRadius: '12px',
-                                                                        border: '1px solid #e2e8f0',
-                                                                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                                                                        transition: 'transform 0.2s',
-                                                                        cursor: 'default'
-                                                                    }}>
-                                                                        <div style={{
-                                                                            width: '32px',
-                                                                            height: '32px',
-                                                                            borderRadius: '8px',
-                                                                            background: '#eff6ff',
-                                                                            color: '#2563eb',
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            justifyContent: 'center',
-                                                                            marginBottom: '1rem',
-                                                                            fontSize: '1.25rem'
-                                                                        }}>
-                                                                            {getPermissionIcon(perm.name)}
-                                                                        </div>
-                                                                        <div style={{ fontWeight: '600', color: '#1e293b', marginBottom: '0.5rem' }}>
-                                                                            {formatPermissionName(perm.name)}
-                                                                        </div>
-                                                                        <div style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: '1.5' }}>
-                                                                            {perm.description || 'Access granted to this feature.'}
-                                                                        </div>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        ) : (
-                                                            <div style={{
-                                                                padding: '3rem',
-                                                                textAlign: 'center',
-                                                                color: '#64748b',
-                                                                background: '#f8fafc',
-                                                                borderRadius: '12px',
-                                                                border: '2px dashed #e2e8f0'
-                                                            }}>
-                                                                <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🚫</div>
-                                                                <h3 style={{ margin: '0 0 0.5rem 0', color: '#475569' }}>No Permissions Assigned</h3>
-                                                                <p style={{ margin: 0 }}>This role currently has no specific access permissions configured.</p>
-                                                            </div>
-                                                        )
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <div style={{
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            height: '100%',
-                                            color: '#94a3b8',
-                                            background: '#f8fafc',
-                                            borderRadius: '0 12px 12px 0'
-                                        }}>
-                                            <div style={{ fontSize: '4rem', marginBottom: '1.5rem', opacity: 0.5 }}>👈</div>
-                                            <h3 style={{ margin: '0 0 0.5rem 0', color: '#475569' }}>Select a Role</h3>
-                                            <p style={{ margin: 0 }}>Choose a role from the list to view its access details.</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    ) : null}
-                    </ErrorBoundary>
-                        </div>
-                    </main>
                 </div>
+                <div className="topbar-right">
+                    {accessibleOrgs.length > 1 ? (
+                        <label className="env-pill" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', margin: 0 }}>
+                            <span style={{ whiteSpace: 'nowrap' }}>Organization</span>
+                            <select
+                                className="control-input"
+                                style={{ minWidth: '10rem', maxWidth: '14rem', padding: '0.2rem 0.35rem', fontSize: '0.8rem' }}
+                                value={Number((user as { organizationId?: number }).organizationId) || ''}
+                                disabled={orgSwitchLoading}
+                                onChange={(e) => {
+                                    const v = Number(e.target.value);
+                                    if (Number.isFinite(v)) void handleOrganizationSwitch(v);
+                                }}
+                            >
+                                {accessibleOrgs.map((o) => (
+                                    <option key={o.id} value={o.id}>
+                                        {o.name || o.slug}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                    ) : (
+                        <span className="env-pill">Org: {user.organizationSlug || 'default'}</span>
+                    )}
+                    <span className="env-pill">v{WEB_APP_VERSION}</span>
+                    <span className="env-pill">{environmentLabel}</span>
+                    <span
+                        className={`live-pill ${socketStatus === 'connected' ? 'online' : socketStatus === 'connecting' ? 'connecting' : 'offline'}`}
+                        title={socketErrorDetail || (socketStatus === 'connected' ? 'Live updates for new check-ins' : undefined)}
+                    >
+                        {socketStatus === 'connected' ? 'Live' : socketStatus === 'connecting' ? 'Connecting' : 'Offline'}
+                    </span>
+                    <button type="button" onClick={handleLogout} className="btn-logout">
+                        Logout
+                    </button>
+                </div>
+            </header>
 
-                {
-                    showUserModal && (
-                        <div className="modal-overlay">
-                            <div className="modal-content">
-                                <h3>{currentUser.id ? 'Edit' : 'Add'} {activeTab === 'vehicles' ? 'Vehicle' : 'Staff Member'}</h3>
-                                <form onSubmit={handleSaveUser}>
-                                    <div className="form-grid">
-                                        <div className="form-group">
-                                            <label>{activeTab === 'vehicles' ? 'Vehicle Make (e.g. Toyota)' : 'First Name'}</label>
-                                            <input
-                                                type="text"
-                                                value={currentUser.firstName !== undefined ? currentUser.firstName : (currentUser.first_name || '')}
-                                                onChange={(e) => setCurrentUser({ ...currentUser, firstName: e.target.value })}
-                                                placeholder={activeTab === 'vehicles' ? "Make" : "e.g. John"}
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label>{activeTab === 'vehicles' ? 'Vehicle Model (e.g. Hilux)' : 'Last Name'}</label>
-                                            <input
-                                                type="text"
-                                                value={currentUser.lastName !== undefined ? currentUser.lastName : (currentUser.last_name || '')}
-                                                onChange={(e) => setCurrentUser({ ...currentUser, lastName: e.target.value })}
-                                                placeholder={activeTab === 'vehicles' ? "Model" : "e.g. Doe"}
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label>{activeTab === 'vehicles' ? 'Plate Number (Tracking ID)' : 'Staff ID'}</label>
-                                            <input
-                                                type="text"
-                                                value={currentUser.staff_id || currentUser.staffId}
-                                                onChange={(e) => setCurrentUser({ ...currentUser, staffId: e.target.value })}
-                                                required
-                                                disabled={!!currentUser.id}
-                                                className={(validationErrors as any).staffId ? 'input-error' : ''}
-                                            />
-                                            {(validationErrors as any).staffId && (
-                                                <span className="error-message">{(validationErrors as any).staffId}</span>
-                                            )}
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Email</label>
-                                            <input
-                                                type="email"
-                                                value={currentUser.email}
-                                                onChange={(e) => setCurrentUser({ ...currentUser, email: e.target.value })}
-                                                className={(validationErrors as any).email ? 'input-error' : ''}
-                                            />
-                                            {(validationErrors as any).email && (
-                                                <span className="error-message">{(validationErrors as any).email}</span>
-                                            )}
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Password {currentUser.id && '(Leave blank to keep current)'}</label>
-                                            <input
-                                                type="password"
-                                                value={currentUser.password}
-                                                onChange={(e) => setCurrentUser({ ...currentUser, password: e.target.value })}
-                                                required={!currentUser.id}
-                                                className={(validationErrors as any).password ? 'input-error' : ''}
-                                            />
-                                            {(validationErrors as any).password && (
-                                                <span className="error-message">{(validationErrors as any).password}</span>
-                                            )}
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Face PIN (fallback, 4-10 digits)</label>
-                                            <input
-                                                type="password"
-                                                value={currentUser.facePin || ''}
-                                                onChange={(e) => setCurrentUser({ ...currentUser, facePin: e.target.value })}
-                                                placeholder={currentUser.id ? 'Leave blank to keep current PIN' : 'e.g. 1234'}
-                                                className={(validationErrors as any).facePin ? 'input-error' : ''}
-                                            />
-                                            {(validationErrors as any).facePin && (
-                                                <span className="error-message">{(validationErrors as any).facePin}</span>
-                                            )}
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Role</label>
-                                            <select
-                                                value={currentUser.role_id || currentUser.roleId}
-                                                onChange={(e) => setCurrentUser({ ...currentUser, roleId: e.target.value })}
-                                            >
-                                                {roles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-                                            </select>
-                                        </div>
-                                        <div className="form-group" style={{ display: activeTab === 'vehicles' ? 'none' : 'block' }}>
-                                            <label>Department</label>
-                                            <input
-                                                type="text"
-                                                value={currentUser.department_name || currentUser.departmentName || ''}
-                                                onChange={(e) => setCurrentUser({ ...currentUser, departmentName: e.target.value })}
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Site Assignment</label>
-                                            <select
-                                                value={currentUser.site_id || currentUser.siteId}
-                                                onChange={(e) => setCurrentUser({ ...currentUser, siteId: e.target.value })}
-                                            >
-                                                <option value="">Global / All Sites</option>
-                                                {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                                            </select>
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Shift Schedule</label>
-                                            <select
-                                                value={currentUser.shift_id || currentUser.shiftId || ''}
-                                                onChange={(e) => setCurrentUser({ ...currentUser, shiftId: e.target.value })}
-                                            >
-                                                <option value="">No Shift Assigned</option>
-                                                {shifts.map(s => <option key={s.id} value={s.id}>{s.name} ({s.start_time} - {s.end_time})</option>)}
-                                            </select>
-                                        </div>
-                                        <div className="form-group">
-                                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={currentUser.faceAuthEnabled !== false}
-                                                    onChange={(e) => setCurrentUser({ ...currentUser, faceAuthEnabled: e.target.checked })}
-                                                />
-                                                Enable face login for this employee
-                                            </label>
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Photo</label>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                                                    <div
-                                                        style={{
-                                                            width: '64px',
-                                                            height: '64px',
-                                                            borderRadius: '50%',
-                                                            border: '1px solid #cbd5e1',
-                                                            background: '#f8fafc',
-                                                            overflow: 'hidden',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center'
-                                                        }}
-                                                    >
-                                                        {(currentUser.photo_url || currentUser.photoUrl) ? (
-                                                            <img
-                                                                src={currentUser.photo_url || currentUser.photoUrl}
-                                                                alt="Current"
-                                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                                onError={(e) => {
-                                                                    e.currentTarget.style.display = 'none';
-                                                                    const fallback = e.currentTarget.parentElement?.querySelector('[data-photo-fallback]') as HTMLElement | null;
-                                                                    if (fallback) fallback.style.display = 'flex';
-                                                                }}
-                                                            />
-                                                        ) : null}
-                                                        <div
-                                                            data-photo-fallback
-                                                            style={{
-                                                                display: (currentUser.photo_url || currentUser.photoUrl) ? 'none' : 'flex',
-                                                                width: '100%',
-                                                                height: '100%',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center',
-                                                                fontWeight: 700,
-                                                                color: '#475569',
-                                                                fontSize: '0.95rem',
-                                                                background: '#eef2ff'
-                                                            }}
-                                                        >
-                                                            {`${(currentUser.first_name || currentUser.firstName || '?').toString().charAt(0)}${(currentUser.last_name || currentUser.lastName || '').toString().charAt(0)}`.toUpperCase()}
-                                                        </div>
-                                                    </div>
-                                                    <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                                                        Current saved photo
-                                                    </div>
-                                                </div>
-                                                {currentUser.photoHelper && (
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                                                        <img src={currentUser.photoHelper} alt="Preview" style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #cbd5e1' }} />
-                                                        <div style={{ fontSize: '0.78rem', color: '#64748b' }}>New upload preview</div>
-                                                    </div>
-                                                )}
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={(e) => {
-                                                        const file = e.target.files[0];
-                                                        if (file) {
-                                                            const reader = new FileReader();
-                                                            reader.onloadend = () => {
-                                                                setCurrentUser({ ...currentUser, photoHelper: reader.result });
-                                                            };
-                                                            reader.readAsDataURL(file);
-                                                        }
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
-                                        <FaceEnrollmentManager
-                                            token={user.token}
-                                            userId={currentUser.id}
-                                            staffId={currentUser.staff_id || currentUser.staffId}
-                                            initialEnrolled={!!currentUser.face_descriptor || !!currentUser.faceEnrolled || !!currentUser.face_enrolled}
-                                            initialEnrollmentImageUrl={currentUser.face_enrollment_photo_url || currentUser.faceEnrollmentPhotoUrl || ''}
-                                            fallbackProfilePhotoUrl={currentUser.photo_url || currentUser.photoUrl || ''}
-                                            onStatusChange={(enrolled, enrollmentImageUrl) => setCurrentUser({
-                                                ...currentUser,
-                                                faceEnrolled: enrolled,
-                                                face_enrollment_photo_url: enrollmentImageUrl || null
-                                            })}
-                                        />
-                                    </div>
-                                    <div className="modal-footer">
-                                        <button type="button" className="btn-secondary" onClick={() => setShowUserModal(false)}>Cancel</button>
-                                        <button type="submit" className="btn-primary" disabled={isLoading}>
-                                            {isLoading ? 'Saving...' : 'Save Changes'}
-                                        </button>
-                                    </div>
-                                </form>
+            <div className="dashboard-shell">
+                <aside className="dashboard-nav">
+                    <div className="dashboard-nav-brand">
+                        <img src="/berkeley-logo.png" alt="" className="dashboard-nav-logo-image" />
+                        <div>
+                            <div className="dashboard-nav-logo-title">{BRANDING.portalTitle}</div>
+                            <div className="dashboard-nav-logo-sub">{BRANDING.portalSubtitle}</div>
+                        </div>
+                    </div>
+                    {Object.entries(navTabGroups).map(([groupName, tabs]) => (
+                        <div className="dashboard-nav-group" key={groupName}>
+                            <div className="dashboard-nav-header">{groupName}</div>
+                            <div className="dashboard-nav-list">
+                                {tabs.map((tab) => (
+                                    <button
+                                        key={tab.key}
+                                        type="button"
+                                        className={`dashboard-nav-item ${activeTab === tab.key ? 'active' : ''}`}
+                                        onClick={() => setActiveTab(tab.key)}
+                                        aria-current={activeTab === tab.key ? 'page' : undefined}
+                                    >
+                                        <span>{tab.label}</span>
+                                    </button>
+                                ))}
                             </div>
                         </div>
-                    )
-                }
-
-                {
-                    showSiteModal && (
-                        <div className="modal-overlay">
-                            <div className="modal-content modal-content-lg">
-                                <h3>{currentSite.id ? 'Edit' : 'Add'} Site Location</h3>
-                                <form onSubmit={handleSaveSite}>
-                                    <div className="geofence-form-layout">
-                                        <div className="left-panel">
-                                            <div className="form-group">
-                                                <label>Site Name</label>
-                                                <input
-                                                    type="text"
-                                                    value={currentSite.name}
-                                                    onChange={(e) => setCurrentSite({ ...currentSite, name: e.target.value })}
-                                                    required
-                                                    placeholder="e.g. Dubai South Hub"
-                                                />
-                                            </div>
-                                            <div className="form-group">
-                                                <label>Location/Description</label>
-                                                <input
-                                                    type="text"
-                                                    value={currentSite.location}
-                                                    onChange={(e) => setCurrentSite({ ...currentSite, location: e.target.value })}
-                                                    placeholder="Address or area description"
-                                                />
-                                            </div>
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                                <div className="form-group">
-                                                    <label>Latitude</label>
-                                                    <input
-                                                        type="number"
-                                                        step="any"
-                                                        value={currentSite.latitude}
-                                                        onChange={(e) => setCurrentSite({ ...currentSite, latitude: e.target.value })}
-                                                        placeholder="e.g. 25.2048"
-                                                    />
-                                                </div>
-                                                <div className="form-group">
-                                                    <label>Longitude</label>
-                                                    <input
-                                                        type="number"
-                                                        step="any"
-                                                        value={currentSite.longitude}
-                                                        onChange={(e) => setCurrentSite({ ...currentSite, longitude: e.target.value })}
-                                                        placeholder="e.g. 55.2708"
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div className="form-group" style={{ marginTop: '1rem' }}>
-                                                <label>Radius (Meters)</label>
-                                                <input
-                                                    type="number"
-                                                    value={currentSite.radiusMeters || 100}
-                                                    onChange={(e) => setCurrentSite({ ...currentSite, radiusMeters: parseInt(e.target.value) })}
-                                                    placeholder="100"
-                                                />
-                                            </div>
-
-                                            <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', marginTop: '1.5rem' }}>
-                                                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: 600 }}>
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={currentSite.geofenceEnabled !== false}
-                                                        onChange={(e) => setCurrentSite({ ...currentSite, geofenceEnabled: e.target.checked })}
-                                                        style={{ width: '20px', height: '20px' }}
-                                                    />
-                                                    Enforce Geofencing for this site
-                                                </label>
-                                                <p style={{ fontSize: '0.75rem', color: '#64748b', marginLeft: '30px', marginTop: '4px' }}>
-                                                    If disabled, staff assigned to this site will not trigger alerts even if they are outside the perimeter.
-                                                </p>
-                                            </div>
-
-                                        </div>
-
-                                        <div className="location-picker-section">
-                                            <PlaceAutocomplete onPlaceSelect={(place) => {
-                                                if (place.geometry && place.geometry.location) {
-                                                    const lat = place.geometry.location.lat();
-                                                    const lng = place.geometry.location.lng();
-                                                    setCurrentSite(prev => ({
-                                                        ...prev,
-                                                        latitude: lat,
-                                                        longitude: lng,
-                                                        location: place.formatted_address || prev.location
-                                                    }));
-                                                    // Also move map view to the selected place
-                                                    setMapCenter({ lat: parseFloat(lat), lng: parseFloat(lng) });
-                                                    setZoom(16);
-                                                }
-                                            }} />
-
-                                            <div style={{ height: '400px', width: '100%', borderRadius: '8px', overflow: 'hidden', marginTop: '10px', position: 'relative' }}>
-                                                <Map
-                                                    style={{ width: '100%', height: '100%' }}
-                                                    zoomControl={true}
-                                                    mapTypeControl={false}
-                                                    gestureHandling="greedy"
-                                                    center={{
-                                                        lat: parseFloat(currentSite.latitude) || 25.2048,
-                                                        lng: parseFloat(currentSite.longitude) || 55.2708
-                                                    }}
-                                                    zoom={currentSite.latitude ? 16 : 11}
-                                                    onClick={(e) => {
-                                                        if (currentSite.geofenceType !== 'POLYGON') {
-                                                            setCurrentSite({
-                                                                ...currentSite,
-                                                                latitude: e.detail.latLng.lat.toString(),
-                                                                longitude: e.detail.latLng.lng.toString()
-                                                            });
-                                                        }
-                                                    }}
-                                                    disableDefaultUI={false}
-                                                    mapId="site-map"
-                                                >
-                                                    <GeofenceManager
-                                                        type={currentSite.geofenceType || 'CIRCLE'}
-                                                        data={currentSite.geofenceData}
-                                                        radius={currentSite.radiusMeters || 100}
-                                                        center={{ lat: parseFloat(currentSite.latitude), lng: parseFloat(currentSite.longitude) }}
-                                                        onChange={(newGeofence) => {
-                                                            setCurrentSite(prev => ({
-                                                                ...prev,
-                                                                ...newGeofence
-                                                            }));
-                                                        }}
-                                                    />
-                                                    {currentSite.latitude && currentSite.longitude && currentSite.geofenceType !== 'POLYGON' && (
-                                                        <Marker position={{
-                                                            lat: parseFloat(currentSite.latitude),
-                                                            lng: parseFloat(currentSite.longitude)
-                                                        }} />
-                                                    )}
-                                                </Map>
-                                            </div>
-                                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                                                <label style={{ fontWeight: 600 }}>Geofence Check:</label>
-                                                <button type="button"
-                                                    onClick={() => setCurrentSite({ ...currentSite, geofenceType: 'CIRCLE' })}
-                                                    className={(!currentSite.geofenceType || currentSite.geofenceType === 'CIRCLE') ? 'btn-primary' : 'btn-secondary'}
-                                                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
-                                                >
-                                                    Standard Radius (Circle)
-                                                </button>
-                                                <button type="button"
-                                                    onClick={() => setCurrentSite({ ...currentSite, geofenceType: 'POLYGON' })}
-                                                    className={currentSite.geofenceType === 'POLYGON' ? 'btn-primary' : 'btn-secondary'}
-                                                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
-                                                >
-                                                    Custom Area (Polygon)
-                                                </button>
-                                            </div>
-                                            <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '5px' }}>
-                                                {currentSite.geofenceType === 'POLYGON'
-                                                    ? "Use the drawing tools on the map (top center) to draw the site boundary. Requires at least 3 points."
-                                                    : "Click on the map to set center. Enter radius above or drag the circle edge (if visible) to adjust."}
-                                            </p>
-                                        </div>
-
-                                    </div>
-                                    <div className="modal-footer">
-                                        <button type="button" className="btn-secondary" onClick={() => setShowSiteModal(false)}>Cancel</button>
-                                        <button type="submit" className="btn-primary">Save Site</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    )
-                }
-
-                <BiometricDeviceModal
-                    open={showBiometricModal}
-                    onClose={() => setShowBiometricModal(false)}
-                    initial={currentBiometricDevice}
-                    sites={sites}
-                    authToken={user?.token || ''}
-                    onSaved={() => {
-                        if (user?.token) fetchBiometricDevices(user.token);
-                    }}
-                    showToast={showToast}
-                />
-
-                {/* Toast Notifications */}
-                <div className="toast-container">
-                    {toasts.map(toast => (
-                        <Toast
-                            key={toast.id}
-                            message={toast.message}
-                            type={toast.type}
-                            onClose={() => removeToast(toast.id)}
-                        />
                     ))}
+                </aside>
+
+                <main className="dashboard-main">
+                    {(user.role === 'Payroll' || user.role === 'Finance') && (
+                        <div
+                            className="employee-alert employee-alert--info"
+                            style={{ margin: '0 0 1rem', fontSize: '0.875rem' }}
+                            role="status"
+                        >
+                            You are in a <strong>read-focused</strong> role: view attendance and export as needed. To change records, ask an HR Admin or site supervisor.
+                        </div>
+                    )}
+                    <div className="kpi-strip">
+                        <div className="kpi-strip-card blue" title="People in the directory for this organization">
+                            <div className="kpi-strip-value">{stats.total || employees.length}</div>
+                            <div className="kpi-strip-label">Employees</div>
+                        </div>
+                        <div className="kpi-strip-card green" title="Currently checked in (open attendance)">
+                            <div className="kpi-strip-value">{checkedInSummary.totalCheckedIn || 0}</div>
+                            <div className="kpi-strip-label">Checked in</div>
+                        </div>
+                        <div className="kpi-strip-card amber" title="Checked in at or before shift threshold">
+                            <div className="kpi-strip-value">
+                                {Math.max((checkedInSummary.totalCheckedIn || 0) - (checkedInSummary.lateCount || 0), 0)}
+                            </div>
+                            <div className="kpi-strip-label">On time</div>
+                        </div>
+                        <div className="kpi-strip-card red" title="Checked in after late threshold">
+                            <div className="kpi-strip-value">{checkedInSummary.lateCount || 0}</div>
+                            <div className="kpi-strip-label">Late</div>
+                        </div>
+                    </div>
+
+                    <div className="dashboard-layout">
+                        <ErrorBoundary label={activeTab}>
+                            {activeTab === 'staff' ? (
+                                <StaffManager
+                                    onEditUser={(u: Employee) => {
+                                        setCurrentUser(u);
+                                        setShowUserModal(true);
+                                        setValidationErrors({});
+                                    }}
+                                    setCurrentUser={setCurrentUser}
+                                    setShowUserModal={setShowUserModal}
+                                    handleBulkExport={handleBulkExport}
+                                    handleBulkArchive={handleBulkArchive}
+                                    handleBulkDelete={handleBulkDelete}
+                                    handleFocusSite={handleFocusSite}
+                                    setCurrentSite={setCurrentSite}
+                                    setShowSiteModal={setShowSiteModal}
+                                    setCurrentShift={setCurrentShift}
+                                    setShowShiftModal={setShowShiftModal}
+                                    currentShift={currentShift}
+                                    setValidationErrors={setValidationErrors}
+                                    showShiftModal={showShiftModal}
+                                />
+                            ) : activeTab === 'alerts' ? (
+                                <GeoFenceAlertsView />
+                            ) : activeTab === 'reports' ? (
+                                <ReportsView onOpenReportSchedules={() => setActiveTab('schedules')} />
+                            ) : activeTab === 'schedules' ? (
+                                <ScheduledReportsConfigView />
+                            ) : activeTab === 'odoo' ? (
+                                <OdooIntegrationView />
+                            ) : activeTab === 'calendar' ? (
+                                <LeaveCalendarView />
+                            ) : activeTab === 'metrics' ? (
+                                <MetricsDashboardView />
+                            ) : activeTab === 'routeTracking' ? (
+                                <RouteTrackingView />
+                            ) : activeTab === 'idle' ? (
+                                <IdleReportingView />
+                            ) : activeTab === 'rosters' ? (
+                                <RosterPlanningView />
+                            ) : activeTab === 'locationLogs' ? (
+                                <LocationLogsView />
+                            ) : activeTab === 'organizations' ? (
+                                <OrganizationsSettingsView />
+                            ) : activeTab === 'emailSettings' ? (
+                                <EmailMessagingSettingsView />
+                            ) : (
+                                <AttendanceLog />
+                            )}
+                        </ErrorBoundary>
+                    </div>
+                </main>
+            </div>
+
+            {showUserModal && (
+                <div className="modal-overlay" role="presentation">
+                    <div
+                        className="modal-content"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="hr-staff-modal-title"
+                    >
+                        <h3 id="hr-staff-modal-title">{currentUser.id ? 'Edit team member' : 'Add team member'}</h3>
+                        <form onSubmit={handleSaveUser}>
+                            <div className="form-grid">
+                                <div className="form-group">
+                                    <label>First Name</label>
+                                    <input
+                                        type="text"
+                                        value={currentUser.firstName !== undefined ? currentUser.firstName : currentUser.first_name || ''}
+                                        onChange={(e) => setCurrentUser({ ...currentUser, firstName: e.target.value })}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Last Name</label>
+                                    <input
+                                        type="text"
+                                        value={currentUser.lastName !== undefined ? currentUser.lastName : currentUser.last_name || ''}
+                                        onChange={(e) => setCurrentUser({ ...currentUser, lastName: e.target.value })}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Staff ID</label>
+                                    <input
+                                        type="text"
+                                        value={currentUser.staff_id || currentUser.staffId}
+                                        onChange={(e) => setCurrentUser({ ...currentUser, staffId: e.target.value })}
+                                        required
+                                        disabled={!!currentUser.id}
+                                        className={validationErrors.staffId ? 'input-error' : ''}
+                                    />
+                                    {validationErrors.staffId && <span className="error-message">{validationErrors.staffId}</span>}
+                                </div>
+                                <div className="form-group">
+                                    <label>Email</label>
+                                    <input
+                                        type="email"
+                                        value={currentUser.email || ''}
+                                        onChange={(e) => setCurrentUser({ ...currentUser, email: e.target.value })}
+                                        className={validationErrors.email ? 'input-error' : ''}
+                                    />
+                                    {validationErrors.email && <span className="error-message">{validationErrors.email}</span>}
+                                </div>
+                                <div className="form-group">
+                                    <label>Password {currentUser.id && '(blank = unchanged)'}</label>
+                                    <input
+                                        type="password"
+                                        value={currentUser.password || ''}
+                                        onChange={(e) => setCurrentUser({ ...currentUser, password: e.target.value })}
+                                        required={!currentUser.id}
+                                        className={validationErrors.password ? 'input-error' : ''}
+                                    />
+                                    {validationErrors.password && <span className="error-message">{validationErrors.password}</span>}
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="hr-modal-role">Role</label>
+                                    <select
+                                        id="hr-modal-role"
+                                        value={String(currentUser.role_id ?? currentUser.roleId ?? '')}
+                                        onChange={(e) => setCurrentUser({ ...currentUser, roleId: e.target.value })}
+                                    >
+                                        {roles.map((r: Role) => (
+                                            <option key={r.id} value={r.id}>
+                                                {r.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Department</label>
+                                    <input
+                                        type="text"
+                                        value={currentUser.department_name || currentUser.departmentName || ''}
+                                        onChange={(e) => setCurrentUser({ ...currentUser, departmentName: e.target.value })}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Site</label>
+                                    <select
+                                        value={currentUser.site_id || currentUser.siteId || ''}
+                                        onChange={(e) => setCurrentUser({ ...currentUser, siteId: e.target.value })}
+                                    >
+                                        <option value="">All sites</option>
+                                        {sites.map((s: Site) => (
+                                            <option key={s.id} value={s.id}>
+                                                {s.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Shift</label>
+                                    <select
+                                        value={currentUser.shift_id || currentUser.shiftId || ''}
+                                        onChange={(e) => setCurrentUser({ ...currentUser, shiftId: e.target.value })}
+                                    >
+                                        <option value="">None</option>
+                                        {shifts.map((s) => (
+                                            <option key={s.id} value={s.id}>
+                                                {s.name} ({s.start_time} - {s.end_time})
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn-secondary" onClick={() => setShowUserModal(false)}>
+                                    Cancel
+                                </button>
+                                <button type="submit" className="btn-primary" disabled={isLoading}>
+                                    {isLoading ? 'Saving…' : 'Save'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
+            )}
 
-                {/* Confirmation Dialog */}
-                <ConfirmDialog
-                    isOpen={confirmDialog.isOpen}
-                    title={confirmDialog.title}
-                    message={confirmDialog.message}
-                    confirmText={confirmDialog.confirmText}
-                    cancelText={confirmDialog.cancelText}
-                    type={confirmDialog.type}
-                    onConfirm={() => {
-                        confirmDialog.onConfirm?.();
-                        closeConfirm();
-                    }}
-                    onCancel={closeConfirm}
-                />
-            </APIProvider >
-        </div >
-    );
-};
+            {showSiteModal && (
+                <div className="modal-overlay" role="presentation">
+                    <div
+                        className="modal-content modal-content-lg"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="hr-site-modal-title"
+                    >
+                        <h3 id="hr-site-modal-title">{currentSite.id ? 'Edit work site' : 'Add work site'}</h3>
+                        <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: 'var(--gray-600)' }}>
+                            Sites are used for assignments and location rules. Coordinates and radius support map and geofence checks where enabled.
+                        </p>
+                        <form onSubmit={handleSaveSite}>
+                            <div className="form-group">
+                                <label htmlFor="hr-site-name">Site name</label>
+                                <input
+                                    id="hr-site-name"
+                                    type="text"
+                                    value={currentSite.name}
+                                    onChange={(e) => setCurrentSite({ ...currentSite, name: e.target.value })}
+                                    required
+                                />
+                                {validationErrors.name && <span className="error-message">{validationErrors.name}</span>}
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="hr-site-desc">Description or address</label>
+                                <input
+                                    id="hr-site-desc"
+                                    type="text"
+                                    value={currentSite.location}
+                                    onChange={(e) => setCurrentSite({ ...currentSite, location: e.target.value })}
+                                />
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div className="form-group">
+                                    <label>Latitude</label>
+                                    <input
+                                        type="number"
+                                        step="any"
+                                        value={currentSite.latitude}
+                                        onChange={(e) => setCurrentSite({ ...currentSite, latitude: e.target.value })}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Longitude</label>
+                                    <input
+                                        type="number"
+                                        step="any"
+                                        value={currentSite.longitude}
+                                        onChange={(e) => setCurrentSite({ ...currentSite, longitude: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="hr-site-radius">Radius (meters)</label>
+                                <p className="field-hint" style={{ marginTop: 0 }}>Distance from the center point used when geofencing is on.</p>
+                                <input
+                                    id="hr-site-radius"
+                                    type="number"
+                                    min={1}
+                                    value={currentSite.radiusMeters || 100}
+                                    onChange={(e) => setCurrentSite({ ...currentSite, radiusMeters: parseInt(e.target.value, 10) })}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={currentSite.geofenceEnabled !== false}
+                                        onChange={(e) => setCurrentSite({ ...currentSite, geofenceEnabled: e.target.checked })}
+                                    />
+                                    Enforce geofence for this site
+                                </label>
+                                <p className="field-hint" style={{ marginBottom: 0 }}>When off, location rules may not apply for this site.</p>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn-secondary" onClick={() => setShowSiteModal(false)}>
+                                    Cancel
+                                </button>
+                                <button type="submit" className="btn-primary">
+                                    Save
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
-// Helper component for Place Search
-const PlaceAutocomplete = ({ onPlaceSelect }) => {
-    const inputRef = useRef(null);
-    const places = useMapsLibrary('places');
-    const onPlaceSelectRef = useRef(onPlaceSelect);
+            <div className="toast-container">
+                {toasts.map((toast) => (
+                    <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => removeToast(toast.id)} />
+                ))}
+            </div>
 
-    // Keep the ref updated with the latest callback
-    useEffect(() => {
-        onPlaceSelectRef.current = onPlaceSelect;
-    }, [onPlaceSelect]);
-
-    useEffect(() => {
-        if (!places || !inputRef.current) return;
-
-        const options = {
-            fields: ['geometry', 'name', 'formatted_address'],
-            componentRestrictions: { country: 'ae' } // Biased to UAE
-        };
-
-        const autocomplete = new places.Autocomplete(inputRef.current, options);
-
-        const handlePlaceChanged = () => {
-            const place = autocomplete.getPlace();
-            if (place.geometry) {
-                onPlaceSelectRef.current(place);
-                // Clear the search box after selection to make it ready for next search
-                if (inputRef.current) inputRef.current.value = '';
-            }
-        };
-
-        const listener = autocomplete.addListener('place_changed', handlePlaceChanged);
-
-        return () => {
-            if (listener) window.google.maps.event.removeListener(listener);
-        };
-    }, [places]);
-
-    return (
-        <div className="form-group">
-            <label>Search and Link Map Location</label>
-            <input
-                ref={inputRef}
-                placeholder="Search for a building, street, or area..."
-                className="setup-input"
-                style={{
-                    width: '100%',
-                    border: '2px solid #3b82f6',
-                    padding: '0.75rem',
-                    borderRadius: '0.5rem'
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                title={confirmDialog.title}
+                message={confirmDialog.message}
+                confirmText={confirmDialog.confirmText}
+                cancelText={confirmDialog.cancelText}
+                type={confirmDialog.type}
+                onConfirm={() => {
+                    confirmDialog.onConfirm?.();
+                    closeConfirm();
                 }}
+                onCancel={closeConfirm}
             />
         </div>
     );

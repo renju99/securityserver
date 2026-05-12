@@ -1,9 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useDataStore } from '../store/useDataStore';
 import { useUIStore } from '../store/useUIStore';
 
-const GeoFenceAlertsView = () => {
+const isSameLocalDay = (iso: string | undefined | null, dayStr: string) => {
+    if (!iso || !dayStr) return false;
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return false;
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}` === dayStr;
+};
+
+const localTodayStr = () => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+};
+
+export type GeoFenceAlertsViewProps = {
+    onOpenMap?: (lat: number, lng: number, staffId: string) => void;
+};
+
+const GeoFenceAlertsView: React.FC<GeoFenceAlertsViewProps> = ({ onOpenMap }) => {
     const { user } = useAuthStore();
     const {
         sites, geoFenceAlerts, fetchAlerts,
@@ -36,7 +58,7 @@ const GeoFenceAlertsView = () => {
     const handleResolve = async (alertId: number) => {
         if (!user?.token) return;
         try {
-            const res = await fetch(`/api/hr/alerts/${alertId}/resolve`, {
+            const res = await fetch(`/hr/alerts/${alertId}/resolve`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });
@@ -51,7 +73,7 @@ const GeoFenceAlertsView = () => {
     const handleBulkResolve = async () => {
         if (selectedAlerts.length === 0 || !user?.token) return;
         try {
-            const res = await fetch('/api/hr/alerts/bulk-resolve', {
+            const res = await fetch('/hr/alerts/bulk-resolve', {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${user.token}`,
@@ -117,6 +139,21 @@ const GeoFenceAlertsView = () => {
         return d.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     };
 
+    const todayStr = localTodayStr();
+    const todayActiveSorted = useMemo(() => {
+        return geoFenceAlerts
+            .filter((a) => a.status === 'active' && isSameLocalDay(a.created_at, todayStr))
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }, [geoFenceAlerts, todayStr]);
+
+    const applyTodayFilter = () => {
+        setGfStartDate(todayStr);
+        setGfEndDate(todayStr);
+        setGfStatusFilter('active');
+        setGfPage(1);
+        if (user?.token) fetchAlerts(user.token, 1);
+    };
+
     return (
         <div className="management-view" style={{ padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
@@ -143,6 +180,54 @@ const GeoFenceAlertsView = () => {
                     <button className="hr-btn secondary" onClick={exportCSV}>↓ Export CSV</button>
                 </div>
             </div>
+
+            {todayActiveSorted.length > 0 && (
+                <div style={{
+                    marginBottom: '1rem',
+                    padding: '1rem 1.1rem',
+                    borderRadius: '12px',
+                    border: '1px solid #fecaca',
+                    background: 'linear-gradient(135deg, #fff1f2 0%, #fff 100%)',
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+                        <div>
+                            <strong style={{ color: '#9f1239' }}>Today’s active exceptions ({todayActiveSorted.length})</strong>
+                            <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '4px' }}>
+                                Same-day open alerts — handle these first, then review the full list below.
+                            </div>
+                        </div>
+                        <button type="button" className="hr-btn secondary sm" onClick={applyTodayFilter}>
+                            Filter list to today (active)
+                        </button>
+                    </div>
+                    <div style={{ marginTop: '0.75rem', display: 'grid', gap: '0.5rem' }}>
+                        {todayActiveSorted.slice(0, 6).map((alert) => (
+                            <div key={`td-${alert.id}`} style={{
+                                display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between',
+                                gap: '0.5rem', padding: '0.5rem 0.65rem', background: '#fff', borderRadius: '8px', border: '1px solid #fecdd3',
+                                fontSize: '0.82rem'
+                            }}>
+                                <span><strong>{alert.staff_id}</strong>{(alert.first_name || alert.last_name) ? ` · ${[alert.first_name, alert.last_name].filter(Boolean).join(' ')}` : ''} · {alert.site_name || 'Site'}</span>
+                                <span style={{ color: '#64748b' }}>{formatDateTime(alert.created_at)}</span>
+                                <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                                    {onOpenMap && alert.latitude != null && alert.longitude != null && (
+                                        <button
+                                            type="button"
+                                            className="hr-btn secondary sm"
+                                            onClick={() => onOpenMap(Number(alert.latitude), Number(alert.longitude), String(alert.staff_id))}
+                                        >
+                                            Live Map
+                                        </button>
+                                    )}
+                                    {alert.status !== 'resolved' && (
+                                        <button type="button" className="hr-btn success sm" onClick={() => handleResolve(alert.id)}>Resolve</button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <div style={{
                 display: 'flex', flexWrap: 'wrap', gap: '0.75rem',
@@ -194,9 +279,13 @@ const GeoFenceAlertsView = () => {
                     <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>Loading alerts…</div>
                 ) : geoFenceAlerts.length === 0 ? (
                     <div style={{ padding: '3rem', textAlign: 'center' }}>
-                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>--</div>
-                        <div style={{ fontWeight: 600, color: '#334155' }}>No geo-fence alerts</div>
-                        <div style={{ color: '#94a3b8', fontSize: '0.875rem', marginTop: '0.25rem' }}>All staff are within their assigned sites.</div>
+                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>—</div>
+                        <div style={{ fontWeight: 600, color: '#334155' }}>No geo-fence alerts match your filters</div>
+                        <div style={{ color: '#94a3b8', fontSize: '0.875rem', marginTop: '0.35rem', maxWidth: '420px', margin: '0.35rem auto 0' }}>
+                            {user?.role === 'Site Supervisor'
+                                ? 'Try clearing dates to see the full history for your site, or check back after shift start when geofence monitoring is active.'
+                                : 'Try widening the date range or clearing filters. When everyone stays inside their sites, this list stays empty.'}
+                        </div>
                     </div>
                 ) : (
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -220,7 +309,7 @@ const GeoFenceAlertsView = () => {
                                     </td>
                                     <td style={{ padding: '0.85rem 1rem', color: '#334155', fontSize: '0.875rem' }}>{alert.site_name || '—'}</td>
                                     <td style={{ padding: '0.85rem 1rem', color: '#64748b', fontSize: '0.78rem', fontFamily: 'monospace' }}>
-                                        {alert.latitude && alert.longitude ? `${parseFloat(alert.latitude).toFixed(5)}, ${parseFloat(alert.longitude).toFixed(5)}` : '—'}
+                                        {alert.latitude && alert.longitude ? `${parseFloat(String(alert.latitude)).toFixed(5)}, ${parseFloat(String(alert.longitude)).toFixed(5)}` : '—'}
                                     </td>
                                     <td style={{ padding: '0.85rem 1rem', color: '#475569', fontSize: '0.82rem', maxWidth: '280px' }}>{alert.message}</td>
                                     <td style={{ padding: '0.85rem 1rem', color: '#64748b', fontSize: '0.82rem', whiteSpace: 'nowrap' }}>{formatDateTime(alert.created_at)}</td>
@@ -231,7 +320,18 @@ const GeoFenceAlertsView = () => {
                                         }}>{alert.status === 'resolved' ? 'Resolved' : 'Active'}</span>
                                     </td>
                                     <td style={{ padding: '0.85rem 1rem' }}>
-                                        {alert.status !== 'resolved' && <button className="hr-btn success sm" onClick={() => handleResolve(alert.id)}>Resolve</button>}
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                                            {onOpenMap && alert.latitude != null && alert.longitude != null && (
+                                                <button
+                                                    type="button"
+                                                    className="hr-btn secondary sm"
+                                                    onClick={() => onOpenMap(Number(alert.latitude), Number(alert.longitude), String(alert.staff_id))}
+                                                >
+                                                    Live Map
+                                                </button>
+                                            )}
+                                            {alert.status !== 'resolved' && <button className="hr-btn success sm" onClick={() => handleResolve(alert.id)}>Resolve</button>}
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

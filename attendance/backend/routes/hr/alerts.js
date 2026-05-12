@@ -1,4 +1,5 @@
 const { z } = require('zod');
+const { organizationIdFromUser } = require('../../utils/organization');
 
 const resolveAlertSchema = z.object({
     falsePositive: z.boolean().optional(),
@@ -10,9 +11,10 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, normalizeFil
         const { staffId, siteId: filterSiteId, status, startDate, endDate, page = 1, limit = 50 } = req.query;
         const offset = (parseInt(page) - 1) * parseInt(limit);
         try {
-            const conditions = [];
-            const params = [];
-            let idx = 1;
+            const orgId = organizationIdFromUser(req.user);
+            const conditions = [`e.organization_id = $1`];
+            const params = [orgId];
+            let idx = 2;
 
             // Site Supervisor: locked to their own site via employee's site
             if (req.user.role === 'Site Supervisor') {
@@ -46,7 +48,7 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, normalizeFil
                 params.push(normalizedEndDate);
             }
 
-            const where = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
+            const where = 'WHERE ' + conditions.join(' AND ');
 
             const query = `
             SELECT a.*, e.staff_id, e.first_name, e.last_name, s.name as site_name
@@ -92,13 +94,22 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, normalizeFil
             return res.status(400).json({ error: parsed.error.issues[0]?.message || 'Invalid resolve payload' });
         }
         try {
+            const orgId = organizationIdFromUser(req.user);
+            const params = [id, parsed.data.falsePositive, orgId];
+            const siteScope = req.user.role === 'Site Supervisor'
+                ? `AND e.site_id = $${params.push(req.user.siteId)}`
+                : '';
             const result = await pool.query(
                 `UPDATE geo_fence_alerts
                  SET status = 'resolved',
                      false_positive = COALESCE($2, false_positive)
-                 WHERE id = $1
+                 FROM employees e
+                 WHERE geo_fence_alerts.id = $1
+                   AND geo_fence_alerts.employee_id = e.id
+                   AND e.organization_id = $3
+                   ${siteScope}
                  RETURNING *`,
-                [id, parsed.data.falsePositive]
+                params
             );
             if (result.rows.length === 0) return res.status(404).json({ error: 'Alert not found' });
             if (parsed.data.falsePositive) {
@@ -118,13 +129,22 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, normalizeFil
             return res.status(400).json({ error: 'Provide an array of alert IDs' });
         }
         try {
+            const orgId = organizationIdFromUser(req.user);
+            const params = [ids, !!falsePositive, orgId];
+            const siteScope = req.user.role === 'Site Supervisor'
+                ? `AND e.site_id = $${params.push(req.user.siteId)}`
+                : '';
             const result = await pool.query(
                 `UPDATE geo_fence_alerts
                  SET status = 'resolved',
                      false_positive = CASE WHEN $2::boolean THEN true ELSE false_positive END
-                 WHERE id = ANY($1)
+                 FROM employees e
+                 WHERE geo_fence_alerts.id = ANY($1)
+                   AND geo_fence_alerts.employee_id = e.id
+                   AND e.organization_id = $3
+                   ${siteScope}
                  RETURNING *`,
-                [ids, !!falsePositive]
+                params
             );
             if (falsePositive) {
                 metrics?.increment?.('geofence_false_positives_total', result.rowCount || 0);

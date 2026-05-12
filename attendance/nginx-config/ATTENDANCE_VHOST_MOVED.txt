@@ -1,0 +1,7 @@
+The nginx vhost for attendance.berkeleyuae.com now lives under the odoo-attendance project:
+
+  ../odoo-attendance/nginx-config/attendance.berkeleyuae.com.conf
+
+nginx-proxy/docker-compose.yml mounts that file into /etc/nginx/extra.d/
+
+The old attendance.berkeleyuae.com.conf in this folder is no longer used by nginx-proxy.

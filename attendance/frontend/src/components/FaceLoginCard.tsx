@@ -7,6 +7,9 @@ type Props = {
     setError: (message: string) => void;
 };
 
+const readOrganizationSlug = () =>
+    (typeof localStorage !== 'undefined' && (localStorage.getItem('hrOrganizationSlug') || '').trim()) || 'default';
+
 const FaceLoginCard = ({ staffId, onLoginSuccess, setError }: Props) => {
     const [cameraReady, setCameraReady] = useState(false);
     const [busy, setBusy] = useState(false);
@@ -74,10 +77,10 @@ const FaceLoginCard = ({ staffId, onLoginSuccess, setError }: Props) => {
             const isCordovaRuntime =
                 typeof window !== 'undefined' && ((window as any).cordova !== undefined || window.location.protocol === 'file:');
             const baseUrl = isCordovaRuntime ? 'https://attendance.berkeleyuae.com' : '';
-            const response = await fetch(`${baseUrl}/api/auth/face-login`, {
+            const response = await fetch(`${baseUrl}/auth/face-login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ staffId: staffId.trim(), descriptor })
+                body: JSON.stringify({ staffId: staffId.trim(), descriptor, organizationSlug: readOrganizationSlug() })
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'Face login failed');
@@ -107,7 +110,7 @@ const FaceLoginCard = ({ staffId, onLoginSuccess, setError }: Props) => {
             const isCordovaRuntime =
                 typeof window !== 'undefined' && ((window as any).cordova !== undefined || window.location.protocol === 'file:');
             const baseUrl = isCordovaRuntime ? 'https://attendance.berkeleyuae.com' : '';
-            const response = await fetch(`${baseUrl}/api/auth/face-attendance`, {
+            const response = await fetch(`${baseUrl}/auth/face-attendance`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -115,7 +118,8 @@ const FaceLoginCard = ({ staffId, onLoginSuccess, setError }: Props) => {
                     descriptor,
                     action,
                     latitude: coords?.latitude,
-                    longitude: coords?.longitude
+                    longitude: coords?.longitude,
+                    organizationSlug: readOrganizationSlug(),
                 })
             });
             const data = await response.json();

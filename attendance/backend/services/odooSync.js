@@ -1,7 +1,7 @@
 const MAX_BATCH = parseInt(process.env.ODOO_SYNC_BATCH_SIZE || '25', 10);
 const RETRY_BASE_SECONDS = parseInt(process.env.ODOO_SYNC_RETRY_BASE_SECONDS || '30', 10);
 const RETRY_MAX_SECONDS = parseInt(process.env.ODOO_SYNC_RETRY_MAX_SECONDS || '900', 10);
-const MAX_ATTEMPTS = parseInt(process.env.ODOO_SYNC_MAX_ATTEMPTS || '10', 10);
+const MAX_ATTEMPTS = parseInt(process.env.ODOO_SYNC_MAX_ATTEMPTS || '288', 10);
 
 const odooJsonRpc = async ({ baseUrl, path, payload, sessionId }) => {
     const headers = { 'Content-Type': 'application/json' };
@@ -84,22 +84,11 @@ const getRetryDelaySeconds = (attempts) => {
     return Math.min(raw, RETRY_MAX_SECONDS);
 };
 
-const isPermanentSyncError = (message) => {
-    const text = String(message || '').toLowerCase();
-    return (
-        text.includes('no odoo route configured') ||
-        text.includes('mapped odoo instance') && text.includes('inactive') ||
-        text.includes('no odoo employee found') ||
-        text.includes('multiple odoo employees found') ||
-        text.includes('no mapped/open odoo attendance found')
-    );
-};
-
 const resolveRoute = async (pool, staffId) => {
     const routingRes = await pool.query(
-        `SELECT r.instance_code, i.base_url, i.db_name, i.username, i.password, i.employee_lookup_field, i.is_active
+        `SELECT r.instance_code, r.organization_id, i.base_url, i.db_name, i.username, i.password, i.employee_lookup_field, i.is_active
          FROM staff_odoo_routing r
-         JOIN odoo_instances i ON i.instance_code = r.instance_code
+         JOIN odoo_instances i ON i.organization_id = r.organization_id AND i.instance_code = r.instance_code
          WHERE r.staff_id = $1 AND r.is_active = true`,
         [staffId]
     );
@@ -130,15 +119,16 @@ const resolveOdooEmployeeId = async (client, staffId) => {
     return records[0].id;
 };
 
-const upsertMapping = async ({ pool, attendanceId, instanceCode, odooAttendanceId, status, error, eventType }) => {
+const upsertMapping = async ({ pool, attendanceId, organizationId, instanceCode, odooAttendanceId, status, error, eventType }) => {
     const setCheckIn = eventType === 'check_in' ? 'NOW()' : 'attendance_sync_mapping.synced_check_in_at';
     const setCheckOut = eventType === 'check_out' ? 'NOW()' : 'attendance_sync_mapping.synced_check_out_at';
     const numericAttendanceId = Number.isFinite(Number(odooAttendanceId)) ? Number(odooAttendanceId) : null;
     await pool.query(
         `INSERT INTO attendance_sync_mapping
-         (attendance_id, instance_code, odoo_attendance_id, synced_check_in_at, synced_check_out_at, last_status, last_error, updated_at)
-         VALUES ($1::integer, $2::varchar, $3::bigint, ${eventType === 'check_in' ? 'NOW()' : 'NULL'}, ${eventType === 'check_out' ? 'NOW()' : 'NULL'}, $4::varchar, $5::text, NOW())
+         (attendance_id, organization_id, instance_code, odoo_attendance_id, synced_check_in_at, synced_check_out_at, last_status, last_error, updated_at)
+         VALUES ($1::integer, $2::integer, $3::varchar, $4::bigint, ${eventType === 'check_in' ? 'NOW()' : 'NULL'}, ${eventType === 'check_out' ? 'NOW()' : 'NULL'}, $5::varchar, $6::text, NOW())
          ON CONFLICT (attendance_id) DO UPDATE SET
+            organization_id = EXCLUDED.organization_id,
             instance_code = EXCLUDED.instance_code,
             odoo_attendance_id = COALESCE(EXCLUDED.odoo_attendance_id, attendance_sync_mapping.odoo_attendance_id),
             synced_check_in_at = ${setCheckIn},
@@ -146,7 +136,7 @@ const upsertMapping = async ({ pool, attendanceId, instanceCode, odooAttendanceI
             last_status = EXCLUDED.last_status,
             last_error = EXCLUDED.last_error,
             updated_at = NOW()`,
-        [attendanceId, instanceCode || null, numericAttendanceId, status, error || null]
+        [attendanceId, organizationId, instanceCode || null, numericAttendanceId, status, error || null]
     );
 };
 
@@ -164,8 +154,7 @@ const markOutboxSuccess = async (pool, outboxId, instanceCode) => {
 
 const markOutboxFailure = async (pool, row, errMessage) => {
     const attempts = (row.attempts || 0) + 1;
-    const permanent = isPermanentSyncError(errMessage);
-    const dead = permanent || attempts >= MAX_ATTEMPTS;
+    const dead = attempts >= MAX_ATTEMPTS;
     const delay = getRetryDelaySeconds(attempts);
     await pool.query(
         `UPDATE attendance_sync_outbox
@@ -177,10 +166,31 @@ const markOutboxFailure = async (pool, row, errMessage) => {
          WHERE id = $1::integer`,
         [row.id, attempts, dead ? 'dead_letter' : 'failed', errMessage, delay]
     );
+    let organizationId = null;
+    const code = row.route_instance_code || null;
+    if (code) {
+        const oi = await pool.query(
+            'SELECT organization_id FROM odoo_instances WHERE instance_code = $1 ORDER BY id ASC LIMIT 1',
+            [code]
+        );
+        organizationId = oi.rows[0]?.organization_id ?? null;
+    }
+    if (organizationId == null) {
+        const r = await pool.query(
+            'SELECT organization_id FROM staff_odoo_routing WHERE staff_id = $1 AND is_active = true LIMIT 1',
+            [row.staff_id]
+        );
+        organizationId = r.rows[0]?.organization_id ?? null;
+    }
+    if (organizationId == null) {
+        const d = await pool.query(`SELECT id FROM organizations WHERE slug = 'default' LIMIT 1`);
+        organizationId = d.rows[0]?.id ?? null;
+    }
     await upsertMapping({
         pool,
         attendanceId: row.attendance_id,
-        instanceCode: row.route_instance_code || null,
+        organizationId,
+        instanceCode: code,
         odooAttendanceId: null,
         status: dead ? 'dead_letter' : 'failed',
         error: errMessage,
@@ -234,6 +244,7 @@ const processOutboxRow = async ({ pool, row, metrics }) => {
         await upsertMapping({
             pool,
             attendanceId: row.attendance_id,
+            organizationId: instance.organization_id,
             instanceCode: instance.instance_code,
             odooAttendanceId,
             status: 'succeeded',
@@ -265,6 +276,7 @@ const processOutboxRow = async ({ pool, row, metrics }) => {
         await upsertMapping({
             pool,
             attendanceId: row.attendance_id,
+            organizationId: instance.organization_id,
             instanceCode: instance.instance_code,
             odooAttendanceId,
             status: 'succeeded',

@@ -1,0 +1,45 @@
+# Dedicated Odoo 18 instance for attendance (does not mount other projects' addons).
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: odoo
+      POSTGRES_USER: odoo
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - odoo-attendance-db-data:/var/lib/postgresql/data/pgdata
+    networks:
+      - odoo-attendance-net
+    restart: unless-stopped
+
+  odoo:
+    image: odoo:18
+    depends_on:
+      - db
+    environment:
+      HOST: db
+      USER: odoo
+      PASSWORD: odoo
+    ports:
+      - "8070:8069"
+    volumes:
+      - odoo-attendance-web-data:/var/lib/odoo
+      - ./addons:/mnt/extra-addons
+      - ./config:/etc/odoo
+    command: ["odoo", "--config=/etc/odoo/odoo.conf"]
+    container_name: odoo-attendance
+    networks:
+      - odoo-attendance-net
+      - web-proxy-net
+    restart: unless-stopped
+
+volumes:
+  odoo-attendance-db-data:
+  odoo-attendance-web-data:
+
+networks:
+  odoo-attendance-net:
+    driver: bridge
+  web-proxy-net:
+    external: true

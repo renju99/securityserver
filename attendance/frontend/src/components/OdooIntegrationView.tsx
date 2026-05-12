@@ -51,6 +51,13 @@ type KioskDevice = {
     last_seen_at?: string;
 };
 
+type OperationsHealth = {
+    generatedAt: string;
+    processCounters: { counters: Record<string, number>; apiLatency: unknown[]; generatedAt: string } | null;
+    biometricQueue: { counts: Record<string, number>; oldestPending: string | null };
+    odooOutbox: { oldestRetryAt: string | null; actionableCount: number };
+};
+
 const OdooIntegrationView = () => {
     const user = useAuthStore((state) => state.user);
     const token = user?.token;
@@ -84,6 +91,7 @@ const OdooIntegrationView = () => {
     const [importRejectedRows, setImportRejectedRows] = useState<CsvRejectedRow[]>([]);
     const [sites, setSites] = useState<SiteLite[]>([]);
     const [kioskDevices, setKioskDevices] = useState<KioskDevice[]>([]);
+    const [operationsHealth, setOperationsHealth] = useState<OperationsHealth | null>(null);
     const [kioskForm, setKioskForm] = useState({
         name: '',
         siteId: '',
@@ -111,18 +119,20 @@ const OdooIntegrationView = () => {
         setLoading(true);
         setError('');
         try {
-            const [instancesData, routingData, statusData, sitesData, kioskData] = await Promise.all([
-                request('/api/hr/integrations/odoo-instances'),
-                request(`/api/hr/integrations/staff-routing?search=${encodeURIComponent(search)}`),
-                request('/api/hr/integrations/odoo-sync/status'),
-                request('/api/hr/sites'),
-                request('/api/hr/integrations/kiosk-devices'),
+            const [instancesData, routingData, statusData, sitesData, kioskData, healthData] = await Promise.all([
+                request('/hr/integrations/odoo-instances'),
+                request(`/hr/integrations/staff-routing?search=${encodeURIComponent(search)}`),
+                request('/hr/integrations/odoo-sync/status'),
+                request('/hr/sites'),
+                request('/hr/integrations/kiosk-devices'),
+                request('/hr/integrations/operations-health'),
             ]);
             setInstances(instancesData || []);
             setRoutingRows(routingData || []);
             setSyncStatus(statusData || null);
             setSites(Array.isArray(sitesData) ? sitesData : []);
             setKioskDevices(Array.isArray(kioskData) ? kioskData : []);
+            setOperationsHealth(healthData || null);
         } catch (err: any) {
             setError(err.message || 'Failed to load integration data');
         } finally {
@@ -138,7 +148,7 @@ const OdooIntegrationView = () => {
         e.preventDefault();
         setError('');
         try {
-            await request('/api/hr/integrations/odoo-instances', {
+            await request('/hr/integrations/odoo-instances', {
                 method: 'POST',
                 body: JSON.stringify(instanceForm),
             });
@@ -153,7 +163,7 @@ const OdooIntegrationView = () => {
         e.preventDefault();
         setError('');
         try {
-            await request(`/api/hr/integrations/staff-routing/${encodeURIComponent(routingForm.staffId.trim())}`, {
+            await request(`/hr/integrations/staff-routing/${encodeURIComponent(routingForm.staffId.trim())}`, {
                 method: 'PUT',
                 body: JSON.stringify({
                     instanceCode: routingForm.instanceCode,
@@ -171,17 +181,45 @@ const OdooIntegrationView = () => {
     const runSyncNow = async () => {
         setError('');
         try {
-            await request('/api/hr/integrations/odoo-sync/run', { method: 'POST', body: JSON.stringify({}) });
+            await request('/hr/integrations/odoo-sync/run', { method: 'POST', body: JSON.stringify({}) });
             await loadData();
         } catch (err: any) {
             setError(err.message || 'Failed to trigger sync');
         }
     };
 
+    const requeueOdooDeadLetter = async () => {
+        if (!window.confirm('Re-queue up to 100 dead-letter Odoo sync rows? This resets attempts and runs the sync worker.')) return;
+        setError('');
+        try {
+            await request('/hr/integrations/odoo-sync/requeue', {
+                method: 'POST',
+                body: JSON.stringify({ scope: 'dead_letter', limit: 100, confirm: true }),
+            });
+            await loadData();
+        } catch (err: any) {
+            setError(err.message || 'Re-queue failed');
+        }
+    };
+
+    const reprocessBiometricFailed = async () => {
+        if (!window.confirm('Re-process up to 100 failed biometric punch rows?')) return;
+        setError('');
+        try {
+            await request('/hr/integrations/biometric-logs/reprocess', {
+                method: 'POST',
+                body: JSON.stringify({ scope: 'failed', limit: 100, confirm: true }),
+            });
+            await loadData();
+        } catch (err: any) {
+            setError(err.message || 'Reprocess failed');
+        }
+    };
+
     const deleteRouting = async (staffId: string) => {
         setError('');
         try {
-            await request(`/api/hr/integrations/staff-routing/${encodeURIComponent(staffId)}`, { method: 'DELETE' });
+            await request(`/hr/integrations/staff-routing/${encodeURIComponent(staffId)}`, { method: 'DELETE' });
             await loadData();
         } catch (err: any) {
             setError(err.message || 'Failed to delete routing');
@@ -200,7 +238,7 @@ const OdooIntegrationView = () => {
         }
         setError('');
         try {
-            await request('/api/hr/integrations/kiosk-devices', {
+            await request('/hr/integrations/kiosk-devices', {
                 method: 'POST',
                 body: JSON.stringify({
                     name: kioskForm.name.trim(),
@@ -220,7 +258,7 @@ const OdooIntegrationView = () => {
     const updateKioskDevice = async (id: number, patch: Partial<KioskDevice>) => {
         setError('');
         try {
-            await request(`/api/hr/integrations/kiosk-devices/${id}`, {
+            await request(`/hr/integrations/kiosk-devices/${id}`, {
                 method: 'PATCH',
                 body: JSON.stringify({
                     name: patch.name,
@@ -239,7 +277,7 @@ const OdooIntegrationView = () => {
     const deleteKioskDevice = async (id: number) => {
         setError('');
         try {
-            await request(`/api/hr/integrations/kiosk-devices/${id}`, { method: 'DELETE' });
+            await request(`/hr/integrations/kiosk-devices/${id}`, { method: 'DELETE' });
             await loadData();
         } catch (err: any) {
             setError(err.message || 'Failed to delete kiosk device');
@@ -301,7 +339,7 @@ const OdooIntegrationView = () => {
         }
         setError('');
         try {
-            const data = await request('/api/hr/integrations/staff-routing/bulk', {
+            const data = await request('/hr/integrations/staff-routing/bulk', {
                 method: 'POST',
                 body: JSON.stringify({
                     mappings: cleanedValidRows.map((r) => ({
@@ -394,8 +432,8 @@ const OdooIntegrationView = () => {
                     <p className="form-help">Staff-ID routing to Dubai and Abu Dhabi Odoo instances.</p>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="btn-secondary" onClick={loadData} disabled={loading}>{loading ? 'Loading...' : 'Refresh'}</button>
-                    <button className="btn-primary" onClick={runSyncNow}>Run Sync Now</button>
+                    <button className="hr-btn secondary sm" onClick={loadData} disabled={loading}>{loading ? 'Loading...' : 'Refresh'}</button>
+                    <button className="hr-btn primary sm" onClick={runSyncNow}>Run Sync Now</button>
                 </div>
             </div>
 
@@ -408,6 +446,41 @@ const OdooIntegrationView = () => {
                         <div className="kpi-value">{syncStatus?.counts?.[k] || 0}</div>
                     </div>
                 ))}
+            </div>
+
+            <div className="form-surface" style={{ marginBottom: '1rem' }}>
+                <h3>Operations health and replay</h3>
+                <p className="form-help" style={{ marginTop: 0 }}>
+                    Live counters (this API instance), biometric punch queue, and Odoo outbox backlog. Use replay when fixes are deployed or routing was corrected.
+                </p>
+                <div className="kpi-grid" style={{ marginBottom: '0.75rem' }}>
+                    <div className="kpi-card">
+                        <div className="kpi-label">Odoo actionable outbox</div>
+                        <div className="kpi-value">{operationsHealth?.odooOutbox?.actionableCount ?? '—'}</div>
+                    </div>
+                    <div className="kpi-card">
+                        <div className="kpi-label">Biometric pending</div>
+                        <div className="kpi-value">{operationsHealth?.biometricQueue?.counts?.pending ?? 0}</div>
+                    </div>
+                    <div className="kpi-card">
+                        <div className="kpi-label">Biometric failed</div>
+                        <div className="kpi-value">{operationsHealth?.biometricQueue?.counts?.failed ?? 0}</div>
+                    </div>
+                    <div className="kpi-card">
+                        <div className="kpi-label">ZK ATTLOG lines (ok, this instance)</div>
+                        <div className="kpi-value">
+                            {operationsHealth?.processCounters?.counters?.zk_iclock_attlog_records_ok_total ?? 0}
+                        </div>
+                    </div>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <button className="hr-btn secondary sm" type="button" onClick={requeueOdooDeadLetter}>
+                        Re-queue dead-letter (Odoo)
+                    </button>
+                    <button className="hr-btn secondary sm" type="button" onClick={reprocessBiometricFailed}>
+                        Re-process failed punches
+                    </button>
+                </div>
             </div>
 
             <div className="form-surface" style={{ marginBottom: '1rem' }}>
@@ -451,7 +524,7 @@ const OdooIntegrationView = () => {
                         <input type="checkbox" checked={instanceForm.isActive} onChange={(e) => setInstanceForm({ ...instanceForm, isActive: e.target.checked })} />
                         Active instance
                     </label>
-                    <button className="btn-primary" type="submit">Save Instance</button>
+                    <button className="hr-btn primary sm" type="submit" style={{ justifySelf: "start" }}>Save Instance</button>
                 </form>
                 <div className="form-help">
                     Suggested lookup for `{instanceForm.instanceCode}`: <strong>{inferredLookup}</strong>
@@ -513,7 +586,7 @@ const OdooIntegrationView = () => {
                         <input type="checkbox" checked={routingForm.isActive} onChange={(e) => setRoutingForm({ ...routingForm, isActive: e.target.checked })} />
                         Active
                     </label>
-                    <button className="btn-primary" type="submit">Save Routing</button>
+                    <button className="hr-btn primary sm" type="submit" style={{ justifySelf: "start" }}>Save Routing</button>
                 </form>
             </div>
 
@@ -528,7 +601,7 @@ const OdooIntegrationView = () => {
                     <span className="inline-chip">3. Import and review rejects</span>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <button className="btn-secondary" type="button" onClick={downloadTemplate}>
+                    <button className="hr-btn secondary sm" type="button" onClick={downloadTemplate}>
                         Download Template
                     </button>
                     <input
@@ -548,11 +621,11 @@ const OdooIntegrationView = () => {
                         <input type="checkbox" checked={bulkReplace} onChange={(e) => setBulkReplace(e.target.checked)} />
                         Replace all existing mappings
                     </label>
-                    <button className="btn-primary" type="button" onClick={uploadBulkRouting} disabled={!cleanedValidRows.length}>
+                    <button className="hr-btn primary sm" type="button" onClick={uploadBulkRouting} disabled={!cleanedValidRows.length}>
                         {cleanedValidRows.length ? `Import ${cleanedValidRows.length} Cleaned Rows` : 'Import CSV'}
                     </button>
                     <button
-                        className="btn-secondary"
+                        className="hr-btn secondary sm"
                         type="button"
                         onClick={() => {
                             setBulkRows([]);
@@ -573,9 +646,9 @@ const OdooIntegrationView = () => {
                             {cleanedValidRows.slice(0, 5).map((r) => `${r.staffId},${r.instanceCode},${r.notes || ''},${r.isActive}`).join('\n')}
                         </div>
                         <button
-                            className="btn-secondary"
+                            className="hr-btn secondary sm"
                             type="button"
-                            style={{ marginTop: '0.45rem', padding: '0.28rem 0.6rem' }}
+                            style={{ marginTop: '0.45rem' }}
                             onClick={downloadCleanedValidRows}
                         >
                             Export cleaned valid CSV
@@ -586,9 +659,9 @@ const OdooIntegrationView = () => {
                     <div className="form-help" style={{ marginTop: '0.6rem', color: '#b45309' }}>
                         Skipped during parsing: {parseRejectedRows.length} row(s).
                         <button
-                            className="btn-secondary"
+                            className="hr-btn secondary sm"
                             type="button"
-                            style={{ marginLeft: '0.5rem', padding: '0.25rem 0.55rem' }}
+                            style={{ marginLeft: '0.5rem' }}
                             onClick={() => downloadRejectedRows(parseRejectedRows, 'staff_routing_parse_rejected.csv')}
                         >
                             Export parse errors CSV
@@ -604,9 +677,9 @@ const OdooIntegrationView = () => {
                     <div className="form-help" style={{ marginTop: '0.6rem', color: '#b91c1c' }}>
                         Rejected by server: {importRejectedRows.length} row(s).
                         <button
-                            className="btn-secondary"
+                            className="hr-btn secondary sm"
                             type="button"
-                            style={{ marginLeft: '0.5rem', padding: '0.25rem 0.55rem' }}
+                            style={{ marginLeft: '0.5rem' }}
                             onClick={() => downloadRejectedRows(importRejectedRows, 'staff_routing_server_rejected.csv')}
                         >
                             Export server rejected CSV
@@ -644,7 +717,7 @@ const OdooIntegrationView = () => {
                         <input type="checkbox" checked={kioskForm.isActive} onChange={(e) => setKioskForm({ ...kioskForm, isActive: e.target.checked })} />
                         Active
                     </label>
-                    <button className="btn-primary" type="submit">Add Kiosk Device</button>
+                    <button className="hr-btn primary sm" type="submit" style={{ justifySelf: "start" }}>Add Kiosk Device</button>
                 </form>
                 <div className="mgmt-table-container" style={{ marginTop: '0.75rem' }}>
                     <table className="mgmt-table">
@@ -668,17 +741,15 @@ const OdooIntegrationView = () => {
                                     <td>{d.last_seen_at ? new Date(d.last_seen_at).toLocaleString() : '-'}</td>
                                     <td style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
                                         <button
-                                            className="btn-secondary"
+                                            className="hr-btn secondary sm"
                                             type="button"
-                                            style={{ padding: '0.28rem 0.6rem' }}
                                             onClick={() => updateKioskDevice(d.id, { is_active: !d.is_active })}
                                         >
                                             {d.is_active ? 'Disable' : 'Enable'}
                                         </button>
                                         <button
-                                            className="btn-secondary"
+                                            className="hr-btn secondary sm"
                                             type="button"
-                                            style={{ padding: '0.28rem 0.6rem' }}
                                             onClick={() => deleteKioskDevice(d.id)}
                                         >
                                             Remove
@@ -696,7 +767,7 @@ const OdooIntegrationView = () => {
 
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', background: '#fff', padding: '0.6rem', borderRadius: 10, border: '1px solid #e2e8f0', flexWrap: 'wrap' }}>
                 <input className="control-input" placeholder="Search routing by staff/name..." value={search} onChange={(e) => setSearch(e.target.value)} />
-                <button className="btn-secondary" onClick={loadData}>Search Routing</button>
+                <button className="hr-btn secondary sm" onClick={loadData}>Search Routing</button>
             </div>
             <div className="mgmt-table-container">
                 <table className="mgmt-table">
@@ -719,7 +790,7 @@ const OdooIntegrationView = () => {
                                 <td>{row.notes || '-'}</td>
                                 <td>{row.is_active ? 'Active' : 'Disabled'}</td>
                                 <td>
-                                    <button className="btn-secondary" onClick={() => deleteRouting(row.staff_id)} style={{ padding: '0.3rem 0.6rem' }}>
+                                    <button className="hr-btn secondary sm" onClick={() => deleteRouting(row.staff_id)}>
                                         Remove
                                     </button>
                                 </td>

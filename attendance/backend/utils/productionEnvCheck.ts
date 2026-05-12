@@ -2,25 +2,37 @@
  * Fail fast in production when critical secrets are left at dev defaults.
  * Called immediately after dotenv loads.
  */
-export function assertProductionBiometricsConfig(): void {
+export function assertProductionCoreConfig(): void {
     if (process.env.NODE_ENV !== 'production') return;
 
-    const token = process.env.BIOMETRIC_INGEST_TOKEN || '';
-    const insecure = !token.trim() || token === 'attendance_secret_token';
-    if (insecure) {
-        console.error(
-            '[FATAL] Production requires BIOMETRIC_INGEST_TOKEN to a strong random value. ' +
-                'RA08 listeners and generic HTTP bridges send Authorization: Bearer <this token>. ' +
-                'Never use the dev default in production.'
-        );
+    const fatal = (message: string): void => {
+        console.error(`[FATAL] ${message}`);
         process.exit(1);
+    };
+
+    const weakSecrets = new Set([
+        '',
+        'dev_jwt_secret_change_me',
+        'dev_refresh_secret_change_me',
+        'dev_fallback_secret_change_me',
+        'change_me_in_production',
+        'change_me_refresh_in_production',
+        'change_me_super_secret',
+        'change_me_refresh_secret',
+    ]);
+    const jwtSecret = process.env.JWT_SECRET || '';
+    const refreshSecret = process.env.JWT_REFRESH_SECRET || '';
+    if (weakSecrets.has(jwtSecret) || jwtSecret.length < 32) {
+        fatal('Production requires JWT_SECRET to be set to a non-default secret of at least 32 characters.');
+    }
+    if (weakSecrets.has(refreshSecret) || refreshSecret.length < 32 || refreshSecret === jwtSecret) {
+        fatal('Production requires JWT_REFRESH_SECRET to be a separate non-default secret of at least 32 characters.');
     }
 
-    if (!process.env.PUBLIC_APP_URL?.trim() && !process.env.APP_PUBLIC_URL?.trim()) {
-        console.warn(
-            '[WARN] PUBLIC_APP_URL (or APP_PUBLIC_URL) is not set. The HR wizard connection test may not reach ' +
-                '/iclock or /api/biometrics/log from inside the API unless X-Forwarded-Host is correct. ' +
-                'Set it to your public origin, e.g. https://attendance.example.com'
-        );
+    if ((process.env.CORS_ALLOW_NO_ORIGIN || '').toLowerCase() === 'true') {
+        fatal('Production requires CORS_ALLOW_NO_ORIGIN=false so browser/API access is constrained to configured origins.');
     }
 }
+
+/** @deprecated Use assertProductionCoreConfig */
+export const assertProductionBiometricsConfig = assertProductionCoreConfig;

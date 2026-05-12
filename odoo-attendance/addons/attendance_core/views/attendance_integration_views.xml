@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_bw_live_hr_dashboard" model="ir.actions.client">
+        <field name="name">Live HR attendance</field>
+        <field name="tag">bw_live_hr_dashboard</field>
+    </record>
+
+    <record id="view_attendance_odoo_remote_tree" model="ir.ui.view">
+        <field name="name">attendance.odoo.remote.instance.list</field>
+        <field name="model">attendance.odoo.remote.instance</field>
+        <field name="arch" type="xml">
+            <list string="Target Odoo instances">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="base_url"/>
+                <field name="database"/>
+                <field name="verify_ssl"/>
+                <field name="active"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_attendance_odoo_remote_form" model="ir.ui.view">
+        <field name="name">attendance.odoo.remote.instance.form</field>
+        <field name="model">attendance.odoo.remote.instance</field>
+        <field name="arch" type="xml">
+            <form string="Target Odoo (replication)">
+                <header>
+                    <button name="action_attendance_test_connection" type="object" string="Test connection to target" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-info" role="alert">
+                        This record describes <strong>another</strong> Odoo server. Punches recorded <em>on this database</em>
+                        are copied to that server over XML-RPC when employees have a routing rule and replication is enabled on the company.
+                    </div>
+                    <group>
+                        <field name="name"/>
+                        <field name="code"/>
+                        <field name="active"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                    </group>
+                    <group string="Target Odoo (XML-RPC)">
+                        <field name="base_url" placeholder="https://other-odoo.example.com"/>
+                        <field name="database"/>
+                        <field name="username"/>
+                        <field name="password" password="True"/>
+                        <field name="verify_ssl"/>
+                        <field name="employee_lookup_field"/>
+                    </group>
+                    <group>
+                        <field name="note" placeholder="Internal notes (not sent to the target)"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_attendance_odoo_remote_instance" model="ir.actions.act_window">
+        <field name="name">Target Odoo instances</field>
+        <field name="res_model">attendance.odoo.remote.instance</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_attendance_odoo_sync_outbox_tree" model="ir.ui.view">
+        <field name="name">attendance.odoo.sync.outbox.list</field>
+        <field name="model">attendance.odoo.sync.outbox</field>
+        <field name="arch" type="xml">
+            <list string="Replication queue">
+                <field name="create_date"/>
+                <field name="attendance_id"/>
+                <field name="remote_id"/>
+                <field name="event_type"/>
+                <field name="state"/>
+                <field name="attempts"/>
+                <field name="remote_attendance_id"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_attendance_odoo_sync_outbox_form" model="ir.ui.view">
+        <field name="name">attendance.odoo.sync.outbox.form</field>
+        <field name="model">attendance.odoo.sync.outbox</field>
+        <field name="arch" type="xml">
+            <form string="Replication queue line">
+                <sheet>
+                    <group>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="remote_id"/>
+                        <field name="attendance_id"/>
+                        <field name="event_type"/>
+                        <field name="state"/>
+                        <field name="attempts"/>
+                        <field name="remote_attendance_id"/>
+                    </group>
+                    <group>
+                        <field name="last_error"/>
+                        <field name="payload_json"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_attendance_odoo_sync_outbox" model="ir.actions.act_window">
+        <field name="name">Replication queue</field>
+        <field name="res_model">attendance.odoo.sync.outbox</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_attendance_odoo_employee_routing_tree" model="ir.ui.view">
+        <field name="name">attendance.odoo.employee.routing.list</field>
+        <field name="model">attendance.odoo.employee.routing</field>
+        <field name="arch" type="xml">
+            <list string="Employee replication routing">
+                <field name="employee_id"/>
+                <field name="remote_id"/>
+                <field name="active"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_attendance_odoo_employee_routing_form" model="ir.ui.view">
+        <field name="name">attendance.odoo.employee.routing.form</field>
+        <field name="model">attendance.odoo.employee.routing</field>
+        <field name="arch" type="xml">
+            <form string="Employee replication routing">
+                <sheet>
+                    <group>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="employee_id"/>
+                        <field name="remote_id"/>
+                        <field name="active"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_attendance_odoo_employee_routing" model="ir.actions.act_window">
+        <field name="name">Employee replication routing</field>
+        <field name="res_model">attendance.odoo.employee.routing</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

@@ -29,10 +29,36 @@ const {
     addApprovalLog,
     applyCheckoutPolicy,
 } = require('../services/attendanceGovernance');
+const { organizationIdFromUser, hrDashboardRoom, hrSiteRoom } = require('../utils/organization');
 
-const registerSocketHandlers = ({ io, pool, isDuringShift, metrics }) => {
+const isHrRole = (role) => role === 'HR Admin' || role === 'Site Supervisor';
+
+const extractSocketToken = (socket) => {
+    const authToken = socket.handshake?.auth?.token;
+    if (typeof authToken === 'string' && authToken.trim()) return authToken.trim();
+
+    const header = socket.handshake?.headers?.authorization || '';
+    if (typeof header === 'string' && header.startsWith('Bearer ')) return header.slice(7).trim();
+
+    const queryToken = socket.handshake?.query?.token;
+    return typeof queryToken === 'string' && queryToken.trim() ? queryToken.trim() : null;
+};
+
+const registerSocketHandlers = ({ io, pool, isDuringShift, metrics, jwt, JWT_SECRET }) => {
+    io.use((socket, next) => {
+        const token = extractSocketToken(socket);
+        if (!token) return next(new Error('Authentication error'));
+        try {
+            socket.user = jwt.verify(token, JWT_SECRET);
+            return next();
+        } catch (err) {
+            return next(new Error(err?.message || 'Authentication error'));
+        }
+    });
+
     io.on('connection', (socket) => {
         console.log('a user connected', socket.id);
+        const socketUser = socket.user || {};
         const locationMinIntervalMs = parseInt(process.env.LOCATION_UPDATE_MIN_INTERVAL_MS || '10000', 10);
         const locationBatchFlushMs = parseInt(process.env.LOCATION_BATCH_FLUSH_MS || '5000', 10);
         const lastProcessedByEmployee = new Map();
@@ -66,8 +92,21 @@ const registerSocketHandlers = ({ io, pool, isDuringShift, metrics }) => {
             }
         };
 
-        socket.on('join_hr', () => socket.join('hr-dashboard'));
-        socket.on('join_site', (siteId) => socket.join(`hr-site:${siteId}`));
+        socket.on('join_hr', () => {
+            if (!isHrRole(socketUser.role)) return;
+            const orgId = organizationIdFromUser(socketUser);
+            socket.join(hrDashboardRoom(orgId));
+        });
+        socket.on('join_site', (siteId) => {
+            if (!isHrRole(socketUser.role)) return;
+            const orgId = organizationIdFromUser(socketUser);
+            const requestedSiteId = Number(siteId);
+            const userSiteId = Number(socketUser.siteId);
+            if (socketUser.role === 'HR Admin' || (Number.isFinite(requestedSiteId) && requestedSiteId === userSiteId)) {
+                const room = hrSiteRoom(orgId, requestedSiteId);
+                if (room) socket.join(room);
+            }
+        });
         socket.on('disconnect', () => {
             if (flushTimer) {
                 clearTimeout(flushTimer);
@@ -78,13 +117,15 @@ const registerSocketHandlers = ({ io, pool, isDuringShift, metrics }) => {
 
         socket.on('location_update', async (data) => {
             try {
-                const { employeeId, latitude, longitude } = data || {};
+                const { latitude, longitude } = data || {};
+                const employeeId = socketUser.staffId;
                 if (!employeeId) return;
                 const nowMs = Date.now();
                 const lastProcessed = lastProcessedByEmployee.get(employeeId) || 0;
                 if (nowMs - lastProcessed < locationMinIntervalMs) return;
                 lastProcessedByEmployee.set(employeeId, nowMs);
 
+                const orgId = organizationIdFromUser(socketUser);
                 const empRes = await pool.query(
                     `SELECT e.id, e.site_id, e.department_name, e.photo_url,
                            s.latitude as site_lat, s.longitude as site_lon, s.radius_meters, s.name as site_name, s.geofence_type, s.geofence_data, s.geofence_enabled,
@@ -92,8 +133,8 @@ const registerSocketHandlers = ({ io, pool, isDuringShift, metrics }) => {
                      FROM employees e
                      LEFT JOIN sites s ON e.site_id = s.id
                      LEFT JOIN shifts sh ON e.shift_id = sh.id
-                     WHERE e.staff_id = $1`,
-                    [employeeId]
+                     WHERE e.staff_id = $1 AND e.organization_id = $2`,
+                    [employeeId, orgId]
                 );
 
                 if (empRes.rows.length > 0) {
@@ -104,9 +145,12 @@ const registerSocketHandlers = ({ io, pool, isDuringShift, metrics }) => {
                         start_time: startTime, end_time: endTime
                     } = empRes.rows[0];
 
-                    const payload = { ...data, siteId, departmentName, photoUrl };
-                    io.to('hr-dashboard').emit('employee_location', payload);
-                    if (siteId) io.to(`hr-site:${siteId}`).emit('employee_location', payload);
+                    const payload = { ...data, employeeId, siteId, departmentName, photoUrl };
+                    io.to(hrDashboardRoom(orgId)).emit('employee_location', payload);
+                    if (siteId) {
+                        const sr = hrSiteRoom(orgId, siteId);
+                        if (sr) io.to(sr).emit('employee_location', payload);
+                    }
                     queueLiveLog({ employeeId: internalId, longitude, latitude });
 
                     if (siteId && geofenceEnabled !== false) {
@@ -143,35 +187,38 @@ const registerSocketHandlers = ({ io, pool, isDuringShift, metrics }) => {
                                         [internalId, siteId, latitude, longitude, message]
                                     );
                                     const alertData = { ...alertRes.rows[0], staff_id: employeeId, site_name: siteName };
-                                    io.to('hr-dashboard').emit('geo_fence_alert', alertData);
-                                    if (siteId) io.to(`hr-site:${siteId}`).emit('geo_fence_alert', alertData);
+                                    io.to(hrDashboardRoom(orgId)).emit('geo_fence_alert', alertData);
+                                    if (siteId) {
+                                        const sr = hrSiteRoom(orgId, siteId);
+                                        if (sr) io.to(sr).emit('geo_fence_alert', alertData);
+                                    }
                                 }
                             }
                         }
                     }
-                } else {
-                    io.to('hr-dashboard').emit('employee_location', data);
                 }
             } catch (err) {
-                console.error('Error handling location update for', data?.employeeId, ':', err.message);
+                console.error('Error handling location update for', socketUser.staffId, ':', err.message);
             }
         });
 
         socket.on('check_in', async (data) => {
-            let { employeeId, latitude, longitude } = data || {};
+            let { latitude, longitude } = data || {};
+            const employeeId = socketUser.staffId;
             const emitCheckInError = (message) => {
-                metrics.increment('failed_checkins_total', 1);
+                metrics?.increment?.('failed_checkins_total', 1);
                 socket.emit('error', { message });
             };
             if (!employeeId) {
-                metrics.increment('failed_checkins_total', 1);
+                metrics?.increment?.('failed_checkins_total', 1);
                 return;
             }
             try {
+                const orgId = organizationIdFromUser(socketUser);
                 const empRes = await pool.query(`
                     SELECT e.id, e.first_name, e.last_name, e.site_id, s.name as site_name, s.nfc_payload as site_nfc_payload 
-                    FROM employees e LEFT JOIN sites s ON e.site_id = s.id WHERE e.staff_id = $1
-                `, [employeeId]);
+                    FROM employees e LEFT JOIN sites s ON e.site_id = s.id WHERE e.staff_id = $1 AND e.organization_id = $2
+                `, [employeeId, orgId]);
                 if (empRes.rows.length > 0) {
                     const { id: internalId, first_name: firstName, last_name: lastName, site_id: siteId, site_name: siteName, site_nfc_payload: siteNfcPayload } = empRes.rows[0];
                     if (siteNfcPayload && siteNfcPayload.trim().length > 0 && (!data.nfcPayload || data.nfcPayload !== siteNfcPayload)) {
@@ -191,7 +238,12 @@ const registerSocketHandlers = ({ io, pool, isDuringShift, metrics }) => {
                             return;
                         }
                     }
-                    const checkRes = await pool.query('SELECT id FROM attendance WHERE employee_id = $1 AND check_out_time IS NULL', [internalId]);
+                    const checkRes = await pool.query(
+                        `SELECT id FROM attendance
+                         WHERE employee_id = $1 AND check_out_time IS NULL
+                           AND status NOT IN ('voided', 'rejected')`,
+                        [internalId]
+                    );
                     if (checkRes.rows.length > 0) {
                         emitCheckInError('Already checked in');
                         return;
@@ -214,8 +266,11 @@ const registerSocketHandlers = ({ io, pool, isDuringShift, metrics }) => {
                     }
                     socket.emit('check_in_success');
                     const eventData = { type: 'check_in', employeeId, firstName, lastName, siteId, siteName, timestamp: new Date() };
-                    io.to('hr-dashboard').emit('attendance_event', eventData);
-                    if (siteId) io.to(`hr-site:${siteId}`).emit('attendance_event', eventData);
+                    io.to(hrDashboardRoom(orgId)).emit('attendance_event', eventData);
+                    if (siteId) {
+                        const sr = hrSiteRoom(orgId, siteId);
+                        if (sr) io.to(sr).emit('attendance_event', eventData);
+                    }
                     if (inserted?.rows?.[0]?.id) {
                         await enqueueAttendanceSync(pool, {
                             attendanceId: inserted.rows[0].id,
@@ -229,18 +284,20 @@ const registerSocketHandlers = ({ io, pool, isDuringShift, metrics }) => {
                 }
             } catch (err) {
                 console.error('Error on check-in:', err);
-                metrics.increment('failed_checkins_total', 1);
+                metrics?.increment?.('failed_checkins_total', 1);
             }
         });
 
         socket.on('check_out', async (data) => {
-            let { employeeId, latitude, longitude } = data || {};
+            let { latitude, longitude } = data || {};
+            const employeeId = socketUser.staffId;
             if (!employeeId) return;
             try {
+                const orgId = organizationIdFromUser(socketUser);
                 const empRes = await pool.query(`
                     SELECT e.id, e.first_name, e.last_name, e.site_id, s.name as site_name, s.nfc_payload as site_nfc_payload
-                    FROM employees e LEFT JOIN sites s ON e.site_id = s.id WHERE e.staff_id = $1
-                `, [employeeId]);
+                    FROM employees e LEFT JOIN sites s ON e.site_id = s.id WHERE e.staff_id = $1 AND e.organization_id = $2
+                `, [employeeId, orgId]);
                 if (empRes.rows.length > 0) {
                     const { id: internalId, first_name: firstName, last_name: lastName, site_id: siteId, site_name: siteName, site_nfc_payload: siteNfcPayload } = empRes.rows[0];
                     if (siteNfcPayload && siteNfcPayload.trim().length > 0 && (!data.nfcPayload || data.nfcPayload !== siteNfcPayload)) {
@@ -261,7 +318,9 @@ const registerSocketHandlers = ({ io, pool, isDuringShift, metrics }) => {
                         }
                     }
                     const checkRes = await pool.query(
-                        'UPDATE attendance SET check_out_time = CURRENT_TIMESTAMP, check_out_coords = ST_SetSRID(ST_MakePoint($1, $2), 4326) WHERE employee_id = $3 AND check_out_time IS NULL RETURNING id',
+                        `UPDATE attendance SET check_out_time = CURRENT_TIMESTAMP, check_out_coords = ST_SetSRID(ST_MakePoint($1, $2), 4326)
+                         WHERE employee_id = $3 AND check_out_time IS NULL
+                           AND status NOT IN ('voided', 'rejected') RETURNING id`,
                         [longitude, latitude, internalId]
                     );
                     if (checkRes.rows.length > 0) {
@@ -281,8 +340,11 @@ const registerSocketHandlers = ({ io, pool, isDuringShift, metrics }) => {
                         });
                         socket.emit('check_out_success');
                         const eventData = { type: 'check_out', employeeId, firstName, lastName, siteId, siteName, timestamp: new Date() };
-                        io.to('hr-dashboard').emit('attendance_event', eventData);
-                        if (siteId) io.to(`hr-site:${siteId}`).emit('attendance_event', eventData);
+                        io.to(hrDashboardRoom(orgId)).emit('attendance_event', eventData);
+                        if (siteId) {
+                            const sr = hrSiteRoom(orgId, siteId);
+                            if (sr) io.to(sr).emit('attendance_event', eventData);
+                        }
                         await enqueueAttendanceSync(pool, {
                             attendanceId: checkRes.rows[0].id,
                             staffId: employeeId,

@@ -1,6 +1,7 @@
 const { z } = require('zod');
 const { DateTime } = require('luxon');
 const { APP_TIMEZONE } = require('../../utils/time');
+const { organizationIdFromUser } = require('../../utils/organization');
 
 const normalizeDateOnly = (value, normalizeFilterDateToUtcIso, isEnd = false) => {
     if (value instanceof Date) {
@@ -61,10 +62,11 @@ const leaveUpdateSchema = z.object({
 });
 
 module.exports = ({ router, pool, authenticateToken, authorizeRole, normalizeFilterDateToUtcIso }) => {
-    router.get('/hr/calendar/holidays', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
+    router.get('/hr/calendar/holidays', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor', 'Payroll', 'Finance']), async (req, res) => {
         const { startDate, endDate } = req.query;
-        const params = [];
-        const conditions = ['h.is_active = true'];
+        const orgId = organizationIdFromUser(req.user);
+        const params = [orgId];
+        const conditions = ['h.organization_id = $1', 'h.is_active = true'];
 
         if (req.user.role === 'Site Supervisor') {
             params.push(req.user.siteId);
@@ -126,11 +128,19 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, normalizeFil
         }
 
         try {
+            const orgId = organizationIdFromUser(req.user);
+            if (siteId !== null) {
+                const siteOk = await pool.query(
+                    'SELECT 1 FROM sites WHERE id = $1 AND organization_id = $2 LIMIT 1',
+                    [siteId, orgId]
+                );
+                if (siteOk.rowCount === 0) return res.status(400).json({ error: 'Invalid site for this organization' });
+            }
             const result = await pool.query(
-                `INSERT INTO public_holidays (name, start_date, end_date, site_id, is_active, created_by)
-                 VALUES ($1, $2, $3, $4, $5, $6)
+                `INSERT INTO public_holidays (organization_id, name, start_date, end_date, site_id, is_active, created_by)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7)
                  RETURNING *`,
-                [parsed.data.name, normalizedStart, normalizedEnd, siteId, parsed.data.isActive !== false, req.user.id]
+                [orgId, parsed.data.name, normalizedStart, normalizedEnd, siteId, parsed.data.isActive !== false, req.user.id]
             );
             res.status(201).json(result.rows[0]);
         } catch (err) {
@@ -141,7 +151,11 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, normalizeFil
 
     router.delete('/hr/calendar/holidays/:id', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
         try {
-            const result = await pool.query('DELETE FROM public_holidays WHERE id = $1 RETURNING id', [req.params.id]);
+            const orgId = organizationIdFromUser(req.user);
+            const result = await pool.query(
+                'DELETE FROM public_holidays WHERE id = $1 AND organization_id = $2 RETURNING id',
+                [req.params.id, orgId]
+            );
             if (result.rows.length === 0) {
                 return res.status(404).json({ error: 'Holiday not found' });
             }
@@ -152,10 +166,11 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, normalizeFil
         }
     });
 
-    router.get('/hr/calendar/leaves', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
+    router.get('/hr/calendar/leaves', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor', 'Payroll', 'Finance']), async (req, res) => {
         const { startDate, endDate, status = '' } = req.query;
-        const params = [];
-        const conditions = [];
+        const orgId = organizationIdFromUser(req.user);
+        const params = [orgId];
+        const conditions = ['e.organization_id = $1'];
 
         if (req.user.role === 'Site Supervisor') {
             params.push(req.user.siteId);
@@ -178,7 +193,7 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, normalizeFil
             conditions.push(`l.status = $${params.length}`);
         }
 
-        const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+        const whereClause = `WHERE ${conditions.join(' AND ')}`;
 
         try {
             const result = await pool.query(
@@ -230,9 +245,10 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, normalizeFil
         }
 
         try {
+            const orgId = organizationIdFromUser(req.user);
             const employeeResult = await pool.query(
-                `SELECT id, staff_id, site_id FROM employees WHERE ${employeeLookupField} = $1`,
-                [employeeLookupValue]
+                `SELECT id, staff_id, site_id FROM employees WHERE ${employeeLookupField} = $1 AND organization_id = $2`,
+                [employeeLookupValue, orgId]
             );
 
             if (employeeResult.rows.length === 0) {
@@ -274,12 +290,13 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, normalizeFil
         }
 
         try {
+            const orgId = organizationIdFromUser(req.user);
             const existing = await pool.query(
                 `SELECT l.id, l.start_date, l.end_date, l.leave_type, l.status, l.notes, e.site_id
                  FROM employee_leaves l
                  JOIN employees e ON l.employee_id = e.id
-                 WHERE l.id = $1`,
-                [req.params.id]
+                 WHERE l.id = $1 AND e.organization_id = $2`,
+                [req.params.id, orgId]
             );
 
             if (existing.rows.length === 0) {
@@ -328,12 +345,13 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, normalizeFil
 
     router.delete('/hr/calendar/leaves/:id', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
         try {
+            const orgId = organizationIdFromUser(req.user);
             const existing = await pool.query(
                 `SELECT l.id, e.site_id
                  FROM employee_leaves l
                  JOIN employees e ON l.employee_id = e.id
-                 WHERE l.id = $1`,
-                [req.params.id]
+                 WHERE l.id = $1 AND e.organization_id = $2`,
+                [req.params.id, orgId]
             );
 
             if (existing.rows.length === 0) {

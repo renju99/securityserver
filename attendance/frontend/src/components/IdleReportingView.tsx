@@ -65,7 +65,7 @@ const IdleReportingView = () => {
 
         try {
             const res = await fetch(
-                `/api/hr/idle-report?staffId=${selectedStaff}&startDate=${startUTC}&endDate=${endUTC}&thresholdMins=${idleThreshold}`,
+                `/hr/idle-report?staffId=${selectedStaff}&startDate=${startUTC}&endDate=${endUTC}&thresholdMins=${idleThreshold}`,
                 { headers: { 'Authorization': `Bearer ${user.token}` } }
             );
 
@@ -135,8 +135,8 @@ const IdleReportingView = () => {
                     </div>
 
                     <div className="filter-actions">
-                        <button onClick={handleFetchReport} className="btn-primary" disabled={isLoading}>{isLoading ? 'Searching...' : 'Generate Report'}</button>
-                        <button onClick={() => setLocalIdleSpots([])} className="btn-secondary" disabled={isLoading}>Clear</button>
+                        <button onClick={handleFetchReport} className="hr-btn primary" disabled={isLoading}>{isLoading ? 'Searching...' : 'Generate Report'}</button>
+                        <button onClick={() => setLocalIdleSpots([])} className="hr-btn secondary" disabled={isLoading}>Clear</button>
                         {localIdleSpots.length > 0 && (
                             <button
                                 onClick={async () => {

@@ -10,6 +10,7 @@ const {
     addApprovalLog,
     applyCheckoutPolicy,
 } = require('../../services/attendanceGovernance');
+const { organizationIdFromUser, hrDashboardRoom } = require('../../utils/organization');
 
 const uploadsDir = path.join(__dirname, '..', '..', 'uploads');
 if (!fs.existsSync(uploadsDir)) {
@@ -49,6 +50,7 @@ const userUpsertSchema = z.object({
     isTrackingEnabled: z.boolean().optional(),
     faceAuthEnabled: z.boolean().optional(),
     facePin: z.string().trim().regex(/^\d{4,10}$/, 'facePin must be 4-10 digits').optional().nullable().or(z.literal('')),
+    phoneE164: z.string().trim().max(24).optional().nullable().or(z.literal('')),
 });
 
 const faceEnrollmentSchema = z.object({
@@ -111,12 +113,12 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
     }
 
     const safeEmployeeSelect = `
-        e.id, e.staff_id, e.email, e.role_id, e.site_id, e.department_name, e.first_name, e.last_name,
+        e.id, e.staff_id, e.email, e.phone_e164, e.role_id, e.site_id, e.department_name, e.first_name, e.last_name,
         e.photo_url, e.is_active, e.created_at, e.shift_id, e.is_tracking_enabled, e.face_auth_enabled,
         e.face_enrolled_at, e.face_enrollment_photo_url, (e.face_descriptor IS NOT NULL) as face_enrolled
     `;
     const safeEmployeeReturning = `
-        id, staff_id, email, role_id, site_id, department_name, first_name, last_name,
+        id, staff_id, email, phone_e164, role_id, site_id, department_name, first_name, last_name,
         photo_url, is_active, created_at, shift_id, is_tracking_enabled, face_auth_enabled, face_enrollment_photo_url,
         face_enrolled_at, (face_descriptor IS NOT NULL) as face_enrolled
     `;
@@ -145,19 +147,21 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
     };
 
     // HR API: Get all employees
-    router.get('/hr/employees', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
+    router.get('/hr/employees', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor', 'Payroll', 'Finance']), async (req, res) => {
         try {
+            const orgId = organizationIdFromUser(req.user);
             let query = `
             SELECT ${safeEmployeeSelect}, r.name as role_name, s.name as site_name, sh.name as shift_name, sh.start_time, sh.end_time
             FROM employees e
             LEFT JOIN roles r ON e.role_id = r.id 
             LEFT JOIN sites s ON e.site_id = s.id
             LEFT JOIN shifts sh ON e.shift_id = sh.id
+            WHERE e.organization_id = $1
         `;
-            const params = [];
+            const params = [orgId];
 
             if (req.user.role === 'Site Supervisor') {
-                query += ' WHERE e.site_id = $1';
+                query += ` AND e.site_id = $${params.length + 1}`;
                 params.push(req.user.siteId);
             }
 
@@ -179,7 +183,7 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
         if (!parsed.success) {
             return res.status(400).json({ error: parsed.error.issues[0]?.message || 'Invalid user payload' });
         }
-        const { staffId, email, password, roleId, siteId, departmentName, firstName, lastName, photoHelper, shiftId, isTrackingEnabled, faceAuthEnabled, facePin } = parsed.data;
+        const { staffId, email, password, roleId, siteId, departmentName, firstName, lastName, photoHelper, shiftId, isTrackingEnabled, faceAuthEnabled, facePin, phoneE164 } = parsed.data;
         // photoHelper is the base64 string from frontend if updated
 
         try {
@@ -197,18 +201,20 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
                 photoUrl = saveBase64Image(photoHelper, staffId);
             }
 
+            const orgId = organizationIdFromUser(req.user);
             const query = `
-            INSERT INTO employees (staff_id, email, password_hash, role_id, site_id, department_name, first_name, last_name, photo_url, shift_id, is_tracking_enabled, face_auth_enabled, face_pin_hash)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-            ON CONFLICT (staff_id) DO UPDATE SET
+            INSERT INTO employees (organization_id, staff_id, email, phone_e164, password_hash, role_id, site_id, department_name, first_name, last_name, photo_url, shift_id, is_tracking_enabled, face_auth_enabled, face_pin_hash)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+            ON CONFLICT (organization_id, staff_id) DO UPDATE SET
             email = EXCLUDED.email,
+            phone_e164 = EXCLUDED.phone_e164,
             password_hash = COALESCE(EXCLUDED.password_hash, employees.password_hash),
             role_id = EXCLUDED.role_id,
             site_id = EXCLUDED.site_id,
             department_name = EXCLUDED.department_name,
             first_name = EXCLUDED.first_name,
             last_name = EXCLUDED.last_name,
-            photo_url = COALESCE($9, employees.photo_url),
+            photo_url = COALESCE(EXCLUDED.photo_url, employees.photo_url),
             shift_id = EXCLUDED.shift_id,
             is_tracking_enabled = COALESCE(EXCLUDED.is_tracking_enabled, employees.is_tracking_enabled),
             face_auth_enabled = COALESCE(EXCLUDED.face_auth_enabled, employees.face_auth_enabled),
@@ -224,8 +230,10 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
             const sanitizedFaceAuthEnabled = faceAuthEnabled !== undefined ? faceAuthEnabled : null;
 
             const result = await pool.query(query, [
+                orgId,
                 staffId,
                 email,
+                phoneE164 && String(phoneE164).trim() ? String(phoneE164).trim() : null,
                 passwordHash,
                 sanitizedRoleId,
                 sanitizedSiteId,
@@ -243,10 +251,10 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
         } catch (err) {
             console.error('Error adding user:', err);
             if (err.code === '23505') {
-                if (err.constraint === 'employees_email_key') {
+                if (String(err.constraint || '').includes('email')) {
                     return res.status(400).json({ error: 'Email already in use' });
                 }
-                if (err.constraint === 'employees_staff_id_key') {
+                if (String(err.constraint || '').includes('staff')) {
                     return res.status(400).json({ error: 'Staff ID already exists' });
                 }
             }
@@ -255,8 +263,9 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
     });
 
     // HR API: Get recent attendance (Filtered by site for Supervisors)
-    router.get('/hr/attendance', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
+    router.get('/hr/attendance', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor', 'Payroll', 'Finance']), async (req, res) => {
         try {
+            const orgId = organizationIdFromUser(req.user);
             const lateMins = parseInt(process.env.LATE_THRESHOLD_MINS || '15', 10);
             let query = `
             SELECT a.*, e.staff_id, e.email, e.first_name, e.last_name, s.name as site_name,
@@ -269,11 +278,12 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
             JOIN employees e ON a.employee_id = e.id 
             LEFT JOIN sites s ON a.site_id = s.id
             LEFT JOIN shifts sh ON e.shift_id = sh.id
+            WHERE e.organization_id = $2
         `;
-            const params = [lateMins];
+            const params = [lateMins, orgId];
 
             if (req.user.role === 'Site Supervisor') {
-                query += ' WHERE e.site_id = $2';
+                query += ` AND e.site_id = $${params.length + 1}`;
                 params.push(req.user.siteId);
             }
 
@@ -288,9 +298,10 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
 
     router.get('/hr/attendance/current-summary', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
         try {
+            const orgId = organizationIdFromUser(req.user);
             const lateMins = parseInt(process.env.LATE_THRESHOLD_MINS || '15', 10);
-            const params = [];
-            const conditions = ['a.check_out_time IS NULL'];
+            const params = [orgId];
+            const conditions = [`a.check_out_time IS NULL`, `a.status NOT IN ('voided', 'rejected')`, 'e.organization_id = $1'];
             if (req.user.role === 'Site Supervisor') {
                 params.push(req.user.siteId);
                 conditions.push(`e.site_id = $${params.length}`);
@@ -352,10 +363,11 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
         }
         const { staffId, checkInTime, siteId, notes, jobCode, activityName } = parsed.data;
         try {
+            const orgId = organizationIdFromUser(req.user);
             // Resolve employee
             const empResult = await pool.query(
                 `SELECT e.id, e.first_name, e.last_name, e.site_id, e.shift_id
-             FROM employees e WHERE e.staff_id = $1`, [staffId]
+             FROM employees e WHERE e.staff_id = $1 AND e.organization_id = $2`, [staffId, orgId]
             );
             if (empResult.rows.length === 0) return res.status(404).json({ error: 'Employee not found.' });
             const emp = empResult.rows[0];
@@ -369,6 +381,7 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
             const existingOpen = await pool.query(
                 `SELECT id FROM attendance
              WHERE employee_id = $1 AND check_out_time IS NULL
+               AND status NOT IN ('voided', 'rejected')
                AND DATE(check_in_time) = DATE($2)`,
                 [emp.id, checkInTime]
             );
@@ -401,7 +414,7 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
             }
 
             // Emit real-time event to dashboard
-            io.to('hr-dashboard').emit('attendance_event', {
+            io.to(hrDashboardRoom(orgId)).emit('attendance_event', {
                 type: 'manual_check_in',
                 staffId,
                 name: [emp.first_name, emp.last_name].filter(Boolean).join(' '),
@@ -434,9 +447,10 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
         }
         const { staffId, checkOutTime, attendanceId, notes, jobCode, activityName } = parsed.data;
         try {
+            const orgId = organizationIdFromUser(req.user);
             // Resolve employee
             const empResult = await pool.query(
-                `SELECT e.id, e.site_id FROM employees e WHERE e.staff_id = $1`, [staffId]
+                `SELECT e.id, e.site_id FROM employees e WHERE e.staff_id = $1 AND e.organization_id = $2`, [staffId, orgId]
             );
             if (empResult.rows.length === 0) return res.status(404).json({ error: 'Employee not found.' });
             const emp = empResult.rows[0];
@@ -449,7 +463,8 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
             let openRecord;
             if (attendanceId) {
                 const r = await pool.query(
-                    `SELECT id FROM attendance WHERE id = $1 AND employee_id = $2 AND check_out_time IS NULL`,
+                    `SELECT id FROM attendance WHERE id = $1 AND employee_id = $2 AND check_out_time IS NULL
+                     AND status NOT IN ('voided', 'rejected')`,
                     [attendanceId, emp.id]
                 );
                 openRecord = r.rows[0];
@@ -458,6 +473,7 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
                 const r = await pool.query(
                     `SELECT id FROM attendance
                  WHERE employee_id = $1 AND check_out_time IS NULL
+                   AND status NOT IN ('voided', 'rejected')
                  ORDER BY check_in_time DESC LIMIT 1`,
                     [emp.id]
                 );
@@ -497,7 +513,7 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
                 shiftId: null,
             });
 
-            io.to('hr-dashboard').emit('attendance_event', {
+            io.to(hrDashboardRoom(orgId)).emit('attendance_event', {
                 type: 'manual_check_out',
                 staffId,
                 checkOutTime,
@@ -529,9 +545,10 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
         const { staffIds = [], siteId, departmentName, checkOutTime, notes } = parsed.data;
 
         try {
-            const params = [];
-            const conditions = ['a.check_out_time IS NULL'];
-            let idx = 1;
+            const orgId = organizationIdFromUser(req.user);
+            const params = [orgId];
+            const conditions = [`a.check_out_time IS NULL`, `a.status NOT IN ('voided', 'rejected')`, 'e.organization_id = $1'];
+            let idx = 2;
 
             if (staffIds.length > 0) {
                 conditions.push(`e.staff_id = ANY($${idx++})`);
@@ -577,7 +594,7 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
                 [closeTime, noteText, attendanceIds]
             );
 
-            io.to('hr-dashboard').emit('attendance_event', {
+            io.to(hrDashboardRoom(orgId)).emit('attendance_event', {
                 type: 'manual_bulk_check_out',
                 count: updateRes.rowCount,
                 checkOutTime: closeTime,
@@ -623,19 +640,23 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
         const search = req.query.search || '';
 
         try {
+            const orgId = organizationIdFromUser(req.user);
             const query = `
             SELECT ${safeEmployeeSelect}, r.name as role_name, s.name as site_name, sh.name as shift_name
             FROM employees e
             LEFT JOIN roles r ON e.role_id = r.id
             LEFT JOIN sites s ON e.site_id = s.id
             LEFT JOIN shifts sh ON e.shift_id = sh.id
-            WHERE (e.is_active = TRUE OR e.is_active IS NULL) AND (e.staff_id ILIKE $1 OR e.email ILIKE $1)
+            WHERE e.organization_id = $4 AND (e.is_active = TRUE OR e.is_active IS NULL) AND (e.staff_id ILIKE $1 OR e.email ILIKE $1)
             ORDER BY e.created_at DESC
             LIMIT $2 OFFSET $3
         `;
-            const result = await pool.query(query, [`%${search}%`, limit, offset]);
+            const result = await pool.query(query, [`%${search}%`, limit, offset, orgId]);
 
-            const countRes = await pool.query('SELECT COUNT(*) FROM employees WHERE (is_active = TRUE OR is_active IS NULL) AND (staff_id ILIKE $1 OR email ILIKE $1)', [`%${search}%`]);
+            const countRes = await pool.query(
+                'SELECT COUNT(*) FROM employees WHERE organization_id = $2 AND (is_active = TRUE OR is_active IS NULL) AND (staff_id ILIKE $1 OR email ILIKE $1)',
+                [`%${search}%`, orgId]
+            );
 
             res.json({
                 users: result.rows,
@@ -651,13 +672,14 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
     // HR API: Delete or Archive user
     router.delete('/hr/users/:id', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
         const { id } = req.params;
+        const orgId = organizationIdFromUser(req.user);
         try {
-            await pool.query('DELETE FROM employees WHERE id = $1', [id]);
+            await pool.query('DELETE FROM employees WHERE id = $1 AND organization_id = $2', [id, orgId]);
             res.json({ message: 'User permanently deleted' });
         } catch (err) {
             if (err.code === '23503') { // Foreign key constraint violation
                 try {
-                    await pool.query('UPDATE employees SET is_active = FALSE WHERE id = $1', [id]);
+                    await pool.query('UPDATE employees SET is_active = FALSE WHERE id = $1 AND organization_id = $2', [id, orgId]);
                     res.json({ message: 'User archived properly due to existing records' });
                 } catch (archiveErr) {
                     console.error('Error archiving user:', archiveErr);
@@ -716,7 +738,9 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
                 return res.status(400).json({ error: 'No update data provided' });
             }
 
-            const query = `UPDATE employees SET ${updates.join(', ')} WHERE id = ANY($1) RETURNING *`;
+            const orgId = organizationIdFromUser(req.user);
+            const query = `UPDATE employees SET ${updates.join(', ')} WHERE id = ANY($1) AND organization_id = $${paramIdx++} RETURNING *`;
+            params.push(orgId);
             const result = await pool.query(query, params);
 
             res.json({ message: `${result.rowCount} user(s) updated successfully`, count: result.rowCount });
@@ -739,6 +763,7 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
             ? saveBase64Image(parsed.data.enrollmentImage, `face_${req.params.id}`)
             : null;
         try {
+            const orgId = organizationIdFromUser(req.user);
             const result = await pool.query(
                 `UPDATE employees
                  SET face_descriptor = $1::jsonb,
@@ -748,9 +773,9 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
                      face_enrollment_photo_url = COALESCE($4, face_enrollment_photo_url),
                      face_failed_attempts = 0,
                      face_locked_until = NULL
-                 WHERE id = $3
+                 WHERE id = $3 AND organization_id = $5
                  RETURNING id, staff_id, site_id, face_enrolled_at, face_auth_enabled, face_enrollment_photo_url`,
-                [JSON.stringify(descriptor), req.user.id, req.params.id, enrollmentImageUrl]
+                [JSON.stringify(descriptor), req.user.id, req.params.id, enrollmentImageUrl, orgId]
             );
             if (result.rows.length === 0) {
                 return res.status(404).json({ error: 'Employee not found' });
@@ -776,6 +801,7 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
 
     router.delete('/hr/users/:id/face-enrollment', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
         try {
+            const orgId = organizationIdFromUser(req.user);
             const result = await pool.query(
                 `UPDATE employees
                  SET face_descriptor = NULL,
@@ -784,9 +810,9 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, bcrypt, io }
                      face_enrollment_photo_url = NULL,
                      face_failed_attempts = 0,
                      face_locked_until = NULL
-                 WHERE id = $1
+                 WHERE id = $1 AND organization_id = $2
                  RETURNING id, staff_id, site_id`,
-                [req.params.id]
+                [req.params.id, orgId]
             );
             if (result.rows.length === 0) {
                 return res.status(404).json({ error: 'Employee not found' });

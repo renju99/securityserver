@@ -213,7 +213,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     // Fetches
     fetchEmployees: async (token) => {
         try {
-            const res = await fetch('/api/hr/employees', { headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await fetch('/hr/employees', { headers: { 'Authorization': `Bearer ${token}` } });
             if (!res.ok) return;
             const data = await res.json();
             if (Array.isArray(data)) {
@@ -226,7 +226,7 @@ export const useDataStore = create<DataState>((set, get) => ({
 
     fetchRoles: async (token) => {
         try {
-            const res = await fetch('/api/hr/roles', { headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await fetch('/hr/roles', { headers: { 'Authorization': `Bearer ${token}` } });
             if (!res.ok) return;
             const data = await res.json();
             if (Array.isArray(data)) set({ roles: data });
@@ -235,7 +235,7 @@ export const useDataStore = create<DataState>((set, get) => ({
 
     fetchSites: async (token) => {
         try {
-            const res = await fetch('/api/hr/sites', { headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await fetch('/hr/sites', { headers: { 'Authorization': `Bearer ${token}` } });
             if (!res.ok) return;
             const data = await res.json();
             if (Array.isArray(data)) set({ sites: data });
@@ -244,7 +244,7 @@ export const useDataStore = create<DataState>((set, get) => ({
 
     fetchShifts: async (token) => {
         try {
-            const res = await fetch('/api/hr/shifts', { headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await fetch('/hr/shifts', { headers: { 'Authorization': `Bearer ${token}` } });
             if (!res.ok) return;
             const data = await res.json();
             if (Array.isArray(data)) set({ shifts: data });
@@ -267,7 +267,7 @@ export const useDataStore = create<DataState>((set, get) => ({
         });
 
         try {
-            const res = await fetch(`/api/hr/alerts?${params}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await fetch(`/hr/alerts?${params}`, { headers: { 'Authorization': `Bearer ${token}` } });
             const data = await res.json();
             if (Array.isArray(data)) {
                 set({ geoFenceAlerts: data, gfLoading: false });
@@ -287,7 +287,7 @@ export const useDataStore = create<DataState>((set, get) => ({
 
     fetchAttendance: async (token) => {
         try {
-            const res = await fetch('/api/hr/attendance', { headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await fetch('/hr/attendance', { headers: { 'Authorization': `Bearer ${token}` } });
             const data = await res.json();
             if (Array.isArray(data)) set({ attendanceLogs: data });
         } catch (err) { console.error('Error fetching attendance:', err); }
@@ -295,7 +295,7 @@ export const useDataStore = create<DataState>((set, get) => ({
 
     fetchPermissions: async (token) => {
         try {
-            const res = await fetch('/api/hr/permissions', { headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await fetch('/hr/permissions', { headers: { 'Authorization': `Bearer ${token}` } });
             if (!res.ok) return;
             const data = await res.json();
             if (Array.isArray(data)) set({ allPermissions: data });
@@ -305,7 +305,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     fetchBiometricDevices: async (token) => {
         set({ isBiometricLoading: true });
         try {
-            const res = await fetch('/api/hr/biometrics/devices', { headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await fetch('/hr/biometrics/devices', { headers: { 'Authorization': `Bearer ${token}` } });
             const data = await res.json();
             if (Array.isArray(data)) set({ biometricDevices: data });
         } catch (err) {
@@ -322,7 +322,7 @@ export const useDataStore = create<DataState>((set, get) => ({
         if (deviceId) params.set('deviceId', deviceId);
 
         try {
-            const res = await fetch(`/api/hr/biometrics/logs?${params}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await fetch(`/hr/biometrics/logs?${params}`, { headers: { 'Authorization': `Bearer ${token}` } });
             const data = await res.json();
             if (Array.isArray(data)) set({ biometricLogs: data });
         } catch (err) {
@@ -335,7 +335,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     fetchManagementUsers: async (token, page = 1, search = '') => {
         set({ isMgmtLoading: true });
         try {
-            const res = await fetch(`/api/hr/users?page=${page}&search=${search}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await fetch(`/hr/users?page=${page}&search=${search}`, { headers: { 'Authorization': `Bearer ${token}` } });
             if (!res.ok) return;
             const data = await res.json();
             if (data.users && Array.isArray(data.users)) {
@@ -366,7 +366,7 @@ export const useDataStore = create<DataState>((set, get) => ({
         }
 
         try {
-            const res = await fetch(`/api/hr/location-logs?${query}`, {
+            const res = await fetch(`/hr/location-logs?${query}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();

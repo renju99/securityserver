@@ -4,10 +4,10 @@ Populate Quiz Question Data - Simple Script
 Run this script to add test question-level data to existing quiz attempts.
 
 Usage:
-1. Stop Odoo: sudo docker-compose stop odoo
-2. Run this script: sudo docker-compose run --rm odoo odoo shell -c /etc/odoo/odoo.conf -d security
+1. Stop Odoo: sudo docker-compose stop odoo_security
+2. Run this script: sudo docker-compose run --rm odoo_security odoo shell -c /etc/odoo/odoo.conf -d security
 3. Then paste this entire script
-4. Start Odoo: sudo docker-compose start odoo
+4. Start Odoo: sudo docker-compose start odoo_security
 """
 
 import random

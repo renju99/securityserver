@@ -1,11 +1,21 @@
 import { create } from 'zustand';
 
 interface User {
-    id: number;
-    staff_id: string;
-    email: string;
+    id?: number;
+    staff_id?: string;
+    staffId?: string;
+    email?: string | null;
     role: string;
     token: string;
+    siteId?: number | null;
+    siteName?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    organizationId?: number;
+    /** Same as organizationId; kept for API payloads that use snake_case. */
+    organization_id?: number;
+    organizationSlug?: string | null;
+    organizationName?: string | null;
 }
 
 interface AuthState {
@@ -33,12 +43,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     },
 
     logout: () => {
-        void fetch('/api/auth/logout', {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({}),
-        });
+        void (async () => {
+            try {
+                let r = await fetch('/auth/logout', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({}),
+                });
+                if (r.status === 404) {
+                    await fetch('/api/auth/logout', {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({}),
+                    });
+                }
+            } catch {
+                await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({}),
+                }).catch(() => {});
+            }
+        })();
         localStorage.removeItem('hrUser');
         set({ user: null });
         window.location.href = '/';
@@ -54,13 +83,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     },
 
     refreshAccessToken: async () => {
-        try {
-            const res = await fetch('/api/auth/refresh', {
+        const tryRefresh = async (url: string) => {
+            const res = await fetch(url, {
                 method: 'POST',
                 credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({}),
             });
+            return res;
+        };
+        try {
+            let res = await tryRefresh('/auth/refresh');
+            if (res.status === 404) {
+                res = await tryRefresh('/api/auth/refresh');
+            }
             if (!res.ok) return false;
             const data = (await res.json()) as { token?: string };
             if (!data?.token) return false;

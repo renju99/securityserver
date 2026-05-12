@@ -28,12 +28,12 @@ If you want to see the feature work with your existing quiz attempts, you can po
 1. **Stop Odoo**:
    ```bash
    cd /home/azureuser/security
-   sudo docker-compose stop odoo
+   sudo docker-compose stop odoo_security
    ```
 
 2. **Run the population script**:
    ```bash
-   sudo docker-compose run --rm odoo odoo shell -c /etc/odoo/odoo.conf -d security
+   sudo docker-compose run --rm odoo_security odoo shell -c /etc/odoo/odoo.conf -d security
    ```
 
 3. **In the Odoo shell, paste this code**:
@@ -109,7 +109,7 @@ If you want to see the feature work with your existing quiz attempts, you can po
 
 5. **Start Odoo**:
    ```bash
-   sudo docker-compose start odoo
+   sudo docker-compose start odoo_security
    ```
 
 6. **Refresh your browser** and check the quiz responses!

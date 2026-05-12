@@ -63,7 +63,7 @@ const RouteTrackingView = () => {
 
         try {
             const res = await fetch(
-                `/api/hr/route-tracking?staffId=${encodeURIComponent(selectedStaff)}&startDate=${encodeURIComponent(startUTC)}&endDate=${encodeURIComponent(endUTC)}`,
+                `/hr/route-tracking?staffId=${encodeURIComponent(selectedStaff)}&startDate=${encodeURIComponent(startUTC)}&endDate=${encodeURIComponent(endUTC)}`,
                 { headers: { 'Authorization': `Bearer ${user.token}` } }
             );
 
@@ -157,8 +157,8 @@ const RouteTrackingView = () => {
                         <input type="datetime-local" value={endDateTime} onChange={(e) => setEndDateTime(e.target.value)} className="filter-input" />
                     </div>
                     <div className="filter-actions">
-                        <button onClick={handleFetchRoute} className="btn-primary" disabled={isLoading}>Track</button>
-                        {routeData && <button onClick={handleClearRoute} className="btn-secondary">Clear</button>}
+                        <button onClick={handleFetchRoute} className="hr-btn primary" disabled={isLoading}>Track</button>
+                        {routeData && <button onClick={handleClearRoute} className="hr-btn secondary">Clear</button>}
                         {routeData && (
                             <button
                                 onClick={async () => {

@@ -1,4 +1,5 @@
 const { z } = require('zod');
+const { organizationIdFromUser } = require('../../utils/organization');
 
 const applyRosterSchema = z.object({
     mode: z.enum(['fixed', 'rotating']),
@@ -14,13 +15,16 @@ const applyRosterSchema = z.object({
 });
 
 module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
-    router.get('/hr/rosters/templates', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (_req, res) => {
+    router.get('/hr/rosters/templates', authenticateToken, authorizeRole(['HR Admin', 'Site Supervisor']), async (req, res) => {
         try {
+            const orgId = organizationIdFromUser(req.user);
             const result = await pool.query(
                 `SELECT id, name, rotation_type, start_date, end_date, shift_sequence, cycle_days, created_at
                  FROM roster_templates
+                 WHERE organization_id = $1
                  ORDER BY created_at DESC
-                 LIMIT 200`
+                 LIMIT 200`,
+                [orgId]
             );
             return res.json(result.rows);
         } catch (err) {
@@ -34,8 +38,13 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
         const startDate = req.query.startDate;
         const endDate = req.query.endDate;
         try {
-            const params = [];
-            const conditions = [];
+            const orgId = organizationIdFromUser(req.user);
+            const params = [orgId];
+            const conditions = ['e.organization_id = $1'];
+            if (req.user.role === 'Site Supervisor') {
+                params.push(req.user.siteId);
+                conditions.push(`e.site_id = $${params.length}`);
+            }
             if (startDate) {
                 params.push(startDate);
                 conditions.push(`a.work_date >= $${params.length}::date`);
@@ -44,7 +53,7 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
                 params.push(endDate);
                 conditions.push(`a.work_date <= $${params.length}::date`);
             }
-            const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+            const where = `WHERE ${conditions.join(' AND ')}`;
             const result = await pool.query(
                 `SELECT a.id, a.work_date, a.employee_id, a.shift_id, a.site_id,
                         e.staff_id, sft.name as shift_name, st.name as site_name
@@ -76,9 +85,23 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
         try {
             await client.query('BEGIN');
             const selectedEmployeeIds = (payload.employeeIds || []).map((id) => Number.parseInt(String(id), 10)).filter((id) => Number.isInteger(id));
+            const supervisorSiteId = Number(req.user.siteId);
+            if (req.user.role === 'Site Supervisor' && (!Number.isFinite(supervisorSiteId) || supervisorSiteId <= 0)) {
+                await client.query('ROLLBACK');
+                return res.status(403).json({ error: 'Supervisor account is not assigned to a site.' });
+            }
+            if (req.user.role === 'Site Supervisor' && payload.siteId && Number.parseInt(String(payload.siteId), 10) !== supervisorSiteId) {
+                await client.query('ROLLBACK');
+                return res.status(403).json({ error: 'You can only apply rosters for your assigned site.' });
+            }
 
-            const params = [];
-            const where = [];
+            const orgId = organizationIdFromUser(req.user);
+            const params = [orgId];
+            const where = ['e.organization_id = $1'];
+            if (req.user.role === 'Site Supervisor') {
+                params.push(supervisorSiteId);
+                where.push(`e.site_id = $${params.length}`);
+            }
             if (selectedEmployeeIds.length > 0) {
                 params.push(selectedEmployeeIds);
                 where.push(`e.id = ANY($${params.length})`);
@@ -105,10 +128,10 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
                 sequence = (payload.shiftSequence || []).map((id) => Number.parseInt(String(id), 10)).filter((id) => Number.isInteger(id));
                 cycleDays = Number.parseInt(String(payload.cycleDays || '1'), 10) || 1;
                 const tplRes = await client.query(
-                    `INSERT INTO roster_templates (name, rotation_type, shift_sequence, cycle_days, start_date, end_date, created_by)
-                     VALUES ($1, 'rotating', $2::jsonb, $3, $4::date, $5::date, $6)
+                    `INSERT INTO roster_templates (organization_id, name, rotation_type, shift_sequence, cycle_days, start_date, end_date, created_by)
+                     VALUES ($1, $2, 'rotating', $3::jsonb, $4, $5::date, $6::date, $7)
                      RETURNING id`,
-                    [payload.name || `Rotation ${payload.startDate}`, JSON.stringify(sequence), cycleDays, payload.startDate, payload.endDate, req.user.id]
+                    [orgId, payload.name || `Rotation ${payload.startDate}`, JSON.stringify(sequence), cycleDays, payload.startDate, payload.endDate, req.user.id]
                 );
                 templateId = tplRes.rows[0].id;
             }
@@ -140,7 +163,7 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole }) => {
                             template_id = EXCLUDED.template_id,
                             acceptance_status = 'assigned',
                             notified_at = NOW()`,
-                        [emp.id, workDate, shiftId || null, payload.siteId ? Number.parseInt(String(payload.siteId), 10) : emp.site_id || null, templateId, req.user.id]
+                        [emp.id, workDate, shiftId || null, req.user.role === 'Site Supervisor' ? supervisorSiteId : (payload.siteId ? Number.parseInt(String(payload.siteId), 10) : emp.site_id || null), templateId, req.user.id]
                     );
                     assignmentsUpserted += 1;
                 }

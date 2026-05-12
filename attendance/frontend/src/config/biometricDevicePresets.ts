@@ -68,7 +68,7 @@ export const BIOMETRIC_DEVICE_PRESETS: BiometricDevicePreset[] = [
         label: 'ZKTeco — ADMS / iClock push (Horus, SpeedFace, etc.)',
         manufacturer: 'ZKTeco',
         description:
-            'ZKTeco terminals in “push” or cloud mode call server URLs such as /iclock/getrequest and /iclock/cdata with serial SN. Horus E1-FP and similar models use the same family of settings when ADMS/push is enabled. This app stores only tab-text attendance (ATTLOG): photo / image push (e.g. ATTPHOTO) is acknowledged but not saved. These fields document what you enter on the device.',
+            'ZKTeco terminals in “push” or cloud mode call server URLs such as /iclock/getrequest and /iclock/cdata with serial SN. Horus E1-FP and similar models use the same family of settings when ADMS/push is enabled. This app stores only tab-text attendance (ATTLOG): photo / image push (e.g. ATTPHOTO) is acknowledged but not saved. The API also supports direct TCP pull for ZKTeco_TCP rows—both modes can run together. These fields document what you enter on the device.',
         uaeNotes:
             'Push mode is outbound from the terminal to your portal — the device does not need a static public IP for ADMS. If you need inbound access (web UI on the device), use DynDNS on the router or site plus port-forward. On cellular SIMs (du / e&), inbound HTTP is often blocked — prefer push, HQ VPN, or a public HTTPS reverse proxy to /iclock/. Set device timezone to Asia/Dubai (UTC+4). This app serves iClock at https://YOUR-HOST/iclock/ (nginx proxies to the API).',
         deviceKeyHint: 'Must equal the device serial number (SN) — same value as query ?SN= on push requests.',
@@ -140,7 +140,7 @@ export const BIOMETRIC_DEVICE_PRESETS: BiometricDevicePreset[] = [
         label: 'ZKTeco — direct TCP (pull / SDK)',
         manufacturer: 'ZKTeco',
         description:
-            'Classic ZK terminal reachable by TCP (default port 4370) with proprietary protocol. The panel is often on a dynamic public IP — register a DynDNS hostname on the router or PC at the site and store that name here so pollers always resolve the current address. Requires a polling service or vendor SDK on your network — not handled by this web app.',
+            'Classic ZK terminal on TCP port 4370 (ZK binary protocol). Community PHP/Laravel libraries such as github.com/jmrashed/zkteco use the same protocol over sockets; this app polls in-process with node-zklib on a schedule (env ZK_TCP_PULL_CRON; pull is on by default, disable with ZK_TCP_PULL_ENABLED=false). You can use this together with ADMS/iClock push for different terminals. The panel is often on a dynamic public IP — store a DynDNS hostname in step 3 so DNS stays current.',
         uaeNotes:
             'Without a static IP, point your bridge at the device’s DynDNS hostname (and forwarded port), not a stale numeric IP. SIM sites may still need VPN or allow-lists.',
         deviceKeyHint: 'Serial / device ID used by your bridge software',

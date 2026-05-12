@@ -1,4 +1,85 @@
 // Export utilities for data export functionality
+import ExcelJS from 'exceljs';
+
+function padField(value: unknown, width: number) {
+    const s = String(value ?? '').replace(/\r|\n/g, ' ');
+    if (s.length >= width) return s.slice(0, width);
+    return s.padEnd(width, ' ');
+}
+
+/** Fixed-width payroll-style lines (matches server payroll_v1 profile). */
+export const exportToFixedWidthPayroll = (data: Record<string, string>[], filename = 'payroll_export.txt') => {
+    if (!data?.length) {
+        console.warn('No data to export');
+        return;
+    }
+    const spec: [string, number][] = [
+        ['Staff ID', 12],
+        ['Name', 28],
+        ['Department', 18],
+        ['Site', 16],
+        ['Date', 10],
+        ['Check In', 19],
+        ['Check Out', 19],
+        ['Day note', 24],
+    ];
+    const header = spec.map(([label, w]) => padField(label, w)).join('') + '\r\n';
+    const body = data
+        .map((r) =>
+            [
+                padField(r['Staff ID'], 12),
+                padField(r.Name, 28),
+                padField(r.Department, 18),
+                padField(r.Site, 16),
+                padField(r.Date, 10),
+                padField(r['Check In'], 19),
+                padField(r['Check Out'], 19),
+                padField(r['Day note'], 24),
+            ].join('')
+        )
+        .join('\r\n');
+    const blob = new Blob([header + body + '\r\n'], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.download = filename;
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+};
+
+export async function exportToXlsx(
+    data: Record<string, unknown>[],
+    filename = 'export.xlsx',
+    sheetName = 'Attendance'
+): Promise<void> {
+    if (!data?.length) {
+        console.warn('No data to export');
+        return;
+    }
+    const workbook = new ExcelJS.Workbook();
+    const ws = workbook.addWorksheet(sheetName.slice(0, 31));
+    const headers = Object.keys(data[0] as object);
+    ws.addRow(headers);
+    for (const row of data) {
+        ws.addRow(headers.map((h) => row[h]));
+    }
+    const buf = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buf], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.download = filename;
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
 
 export const exportToCSV = (data: any[], filename = 'export.csv') => {
     if (!data || data.length === 0) {

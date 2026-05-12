@@ -24,7 +24,7 @@ else
 fi
 
 DB_CONTAINER=$($DOCKER_CMD ps --filter "name=db" --format "{{.Names}}" | head -n 1)
-ODOO_CONTAINER=$($DOCKER_CMD ps --filter "name=odoo" --format "{{.Names}}" | head -n 1)
+ODOO_CONTAINER=$($DOCKER_CMD ps --filter "name=odoo-security" --format "{{.Names}}" | head -n 1)
 
 if [ -z "$DB_CONTAINER" ] || [ -z "$ODOO_CONTAINER" ]; then
     echo "ERROR: Could not find database or Odoo containers"

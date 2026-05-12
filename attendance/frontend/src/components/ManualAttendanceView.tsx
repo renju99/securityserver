@@ -1,11 +1,27 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, Fragment } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useDataStore } from '../store/useDataStore';
 import { useUIStore } from '../store/useUIStore';
 import { Employee } from '../types';
 
+const HR_MESSAGE_TEMPLATES: { label: string; body: string }[] = [
+    {
+        label: 'Reminder: check out',
+        body: 'Hi — please remember to check out in the Workforce app when you finish so your hours stay accurate. Thanks.',
+    },
+    {
+        label: 'Reminder: check in',
+        body: 'Hi — please check in when you arrive on site today. If GPS is weak, move to an open area and tap Check in again.',
+    },
+    {
+        label: 'NFC site tag',
+        body: 'Your site uses NFC verification. Please tap the site tag before check-in or check-out as instructed on the poster.',
+    },
+];
+
 const ManualAttendanceView = () => {
     const { user } = useAuthStore();
+    const canManageAttendance = user?.role === 'HR Admin' || user?.role === 'Site Supervisor';
     const {
         employees, sites, attendanceLogs, setAttendanceLogs,
         logSearch, setLogSearch
@@ -31,6 +47,9 @@ const ManualAttendanceView = () => {
     const [bulkSubmitting, setBulkSubmitting] = useState(false);
     const [pendingApprovals, setPendingApprovals] = useState<any[]>([]);
     const [loadingApprovals, setLoadingApprovals] = useState(false);
+    const [auditPanelFor, setAuditPanelFor] = useState<number | string | null>(null);
+    const [auditLoading, setAuditLoading] = useState(false);
+    const [auditCache, setAuditCache] = useState<Record<string, { attendance: any; events: any[] }>>({});
     const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'completed'>('all');
     const [siteFilter, setSiteFilter] = useState<string>('all');
     const [page, setPage] = useState(1);
@@ -63,15 +82,49 @@ const ManualAttendanceView = () => {
         setShowSuggest(false);
     };
 
+    const copyTemplate = async (body: string) => {
+        try {
+            await navigator.clipboard.writeText(body);
+            showToast('Message copied to clipboard', 'success');
+        } catch {
+            showToast('Could not copy — select and copy manually', 'error');
+        }
+    };
+
+    const toggleAttendanceAudit = async (logId: number | string) => {
+        const key = String(logId);
+        if (auditPanelFor === logId) {
+            setAuditPanelFor(null);
+            return;
+        }
+        setAuditPanelFor(logId);
+        if (auditCache[key]) return;
+        if (!token) return;
+        setAuditLoading(true);
+        try {
+            const res = await fetch(`/hr/attendance/${encodeURIComponent(key)}/activity-log`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed to load audit');
+            setAuditCache((prev) => ({ ...prev, [key]: { attendance: data.attendance, events: data.events || [] } }));
+        } catch (e: any) {
+            showToast(e?.message || 'Audit load failed', 'error');
+            setAuditPanelFor(null);
+        } finally {
+            setAuditLoading(false);
+        }
+    };
+
     const refreshLogs = async () => {
         if (!token) return;
         try {
-            const res = await fetch('/api/hr/attendance', { headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await fetch('/hr/attendance', { headers: { 'Authorization': `Bearer ${token}` } });
             const data = await res.json();
             if (Array.isArray(data)) setAttendanceLogs(data);
-            if (user?.role === 'HR Admin' || user?.role === 'Site Supervisor') {
+            if (canManageAttendance) {
                 setLoadingApprovals(true);
-                const approvalsRes = await fetch('/api/hr/attendance/pending-approvals', {
+                const approvalsRes = await fetch('/hr/attendance/pending-approvals', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const approvalsData = await approvalsRes.json();
@@ -91,8 +144,8 @@ const ManualAttendanceView = () => {
 
         setSubmitting(true);
         const endpoint = entryType === 'checkin'
-            ? '/api/hr/attendance/manual-checkin'
-            : '/api/hr/attendance/manual-checkout';
+            ? '/hr/attendance/manual-checkin'
+            : '/hr/attendance/manual-checkout';
 
         const body = entryType === 'checkin'
             ? { staffId: selectedEmployee.staff_id, checkInTime: dateTime, siteId: siteId || undefined, notes, jobCode: jobCode || undefined, activityName: activityName || undefined }
@@ -138,7 +191,7 @@ const ManualAttendanceView = () => {
                 siteId: bulkSiteId || undefined,
                 departmentName: bulkDepartment || undefined
             };
-            const res = await fetch('/api/hr/attendance/manual-bulk-checkout', {
+            const res = await fetch('/hr/attendance/manual-bulk-checkout', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -195,19 +248,26 @@ const ManualAttendanceView = () => {
 
     const handleApprovalAction = async (attendanceId: number, action: 'approve' | 'reject') => {
         if (!token) return;
-        const reason = action === 'reject' ? prompt('Reason for rejection (optional):') : '';
+        let reason: string | undefined;
+        if (action === 'reject') {
+            const entered = window.prompt(
+                'Optional: add a short reason for rejection (or leave blank).\n\nPress Cancel to go back without rejecting.'
+            );
+            if (entered === null) return;
+            reason = entered.trim() || undefined;
+        }
         try {
-            const res = await fetch(`/api/hr/attendance/${attendanceId}/${action}`, {
+            const res = await fetch(`/hr/attendance/${attendanceId}/${action}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ reason: reason || undefined })
+                body: JSON.stringify({ reason })
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || `Failed to ${action} attendance`);
-            showToast(`Attendance ${action}d successfully`, 'success');
+            showToast(action === 'approve' ? 'Attendance approved.' : 'Attendance rejected.', 'success');
             refreshLogs();
         } catch (err: any) {
             showToast(err.message || 'Approval action failed', 'error');
@@ -220,12 +280,23 @@ const ManualAttendanceView = () => {
         outline: 'none', background: '#fff'
     };
 
+    const formatPendingSource = (source?: string) => {
+        const value = String(source || '').toLowerCase();
+        if (!value) return 'Unknown source';
+        if (value === 'offline_batch') return 'Offline sync';
+        if (value === 'manual') return 'Manual entry';
+        if (value === 'mobile') return 'Mobile app';
+        if (value === 'biometric') return 'Biometric device';
+        return source;
+    };
+
     return (
         <div className="logs-container">
             <div className="logs-card">
                 <div className="logs-header">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <h2>Live Attendance Logs</h2>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                        <h2 style={{ margin: 0 }}>Attendance</h2>
                         <div className="logs-search-wrapper">
                             <svg className="search-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <circle cx="11" cy="11" r="8"></circle>
@@ -233,21 +304,35 @@ const ManualAttendanceView = () => {
                             </svg>
                             <input
                                 type="text"
-                                placeholder="Filter logs by Name or ID..."
+                                placeholder="Search by name or staff ID…"
                                 className="logs-search-input"
                                 value={logSearch}
                                 onChange={e => setLogSearch(e.target.value)}
+                                aria-label="Filter attendance list"
                             />
                         </div>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.82rem', color: '#64748b', maxWidth: '42rem' }}>
+                            {canManageAttendance
+                                ? 'Review check-ins, approve pending entries, and log manual check-in or check-out when needed.'
+                                : 'View-only: browse and filter attendance for your access level.'}
+                        </p>
                     </div>
-                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', gap: '0.75rem', flexShrink: 0 }}>
+                        {canManageAttendance && (
+                            <button
+                                type="button"
+                                className={showPanel ? 'hr-btn secondary' : 'hr-btn primary'}
+                                onClick={() => setShowPanel(p => !p)}
+                            >
+                                {showPanel ? 'Close manual form' : 'Add manual record'}
+                            </button>
+                        )}
                         <button
-                            className={showPanel ? 'hr-btn secondary' : 'hr-btn primary'}
-                            onClick={() => setShowPanel(p => !p)}
+                            type="button"
+                            className="hr-btn secondary"
+                            onClick={() => { refreshLogs(); showToast('List updated', 'info'); }}
                         >
-                            {showPanel ? 'Cancel' : 'Log Entry'}
-                        </button>
-                        <button className="hr-btn secondary" onClick={() => { refreshLogs(); showToast('Logs refreshed', 'info'); }}>
                             Refresh
                         </button>
                     </div>
@@ -276,7 +361,7 @@ const ManualAttendanceView = () => {
                     </div>
                 </div>
 
-                {showPanel && (
+                {canManageAttendance && showPanel && (
                     <div style={{
                         margin: '0 0 1.25rem 0', padding: '1.25rem 1.5rem',
                         background: 'linear-gradient(135deg, #f8f6ff 0%, #fff 100%)',
@@ -285,10 +370,10 @@ const ManualAttendanceView = () => {
                     }}>
                         <div style={{ marginBottom: '1rem' }}>
                             <div style={{ fontWeight: 700, fontSize: '1rem', color: '#1e293b', marginBottom: '0.35rem' }}>
-                                Manual Attendance Log
+                                Manual attendance
                             </div>
                             <p style={{ margin: 0, fontSize: '0.82rem', color: '#64748b' }}>
-                                Log a check-in or check-out on behalf of an employee. All manual entries are audited.
+                                Only use this when someone could not check in or out in the app. Every manual change is recorded in audit history.
                             </p>
                         </div>
 
@@ -296,30 +381,13 @@ const ManualAttendanceView = () => {
                             {(['checkin', 'checkout'] as const).map(type => (
                                 <button
                                     key={type}
+                                    type="button"
                                     className={`hr-btn sm ${entryType === type ? 'primary' : 'secondary'}`}
                                     onClick={() => setEntryType(type)}
                                 >
                                     {type === 'checkin' ? 'Check-In' : 'Check-Out'}
                                 </button>
                             ))}
-                        </div>
-
-                        <div style={{ marginBottom: '1rem', padding: '0.85rem', border: '1px dashed #f59e0b', borderRadius: '10px', background: '#fffbea' }}>
-                            <div style={{ fontWeight: 700, color: '#92400e', marginBottom: '0.45rem' }}>Emergency Bulk Check-Out</div>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: '0.65rem' }}>
-                                {user?.role === 'HR Admin' && (
-                                    <select style={inputStyle} value={bulkSiteId} onChange={(e) => setBulkSiteId(e.target.value)}>
-                                        <option value="">All Sites</option>
-                                        {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                                    </select>
-                                )}
-                                <input style={inputStyle} placeholder="Department (optional)" value={bulkDepartment} onChange={(e) => setBulkDepartment(e.target.value)} />
-                                <input type="datetime-local" style={inputStyle} value={bulkDateTime} onChange={(e) => setBulkDateTime(e.target.value)} />
-                                <input style={inputStyle} placeholder="Reason/Note" value={bulkNotes} onChange={(e) => setBulkNotes(e.target.value)} />
-                            </div>
-                            <button className="hr-btn secondary" style={{ marginTop: '0.65rem' }} onClick={handleBulkCheckout} disabled={bulkSubmitting}>
-                                {bulkSubmitting ? 'Running bulk check-out...' : 'Run Bulk Check-Out'}
-                            </button>
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.9rem' }}>
@@ -441,6 +509,7 @@ const ManualAttendanceView = () => {
 
                         <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
                             <button
+                                type="button"
                                 className="hr-btn primary"
                                 onClick={handleSubmit}
                                 disabled={submitting}
@@ -448,34 +517,137 @@ const ManualAttendanceView = () => {
                                 {submitting ? 'Saving…' : `Save ${entryType === 'checkin' ? 'Check-In' : 'Check-Out'}`}
                             </button>
                             <button
+                                type="button"
                                 className="hr-btn secondary"
                                 onClick={() => { setShowPanel(false); setFormError(''); }}
                             >
                                 Cancel
                             </button>
                         </div>
+
+                        <details style={{ marginTop: '1rem', borderTop: '1px solid #e2e8f0', paddingTop: '0.8rem' }}>
+                            <summary style={{ cursor: 'pointer', fontSize: '0.82rem', fontWeight: 700, color: '#475569' }}>
+                                Advanced tools (use only when needed)
+                            </summary>
+                            <div style={{ marginTop: '0.75rem', display: 'grid', gap: '0.85rem' }}>
+                                <div style={{
+                                    padding: '0.85rem',
+                                    border: '1px solid #e2e8f0',
+                                    borderRadius: '10px',
+                                    background: '#fafafa',
+                                }}>
+                                    <div style={{ fontWeight: 700, fontSize: '0.82rem', color: '#334155', marginBottom: '0.45rem' }}>
+                                        Message snippets
+                                    </div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                                        {HR_MESSAGE_TEMPLATES.map((t) => (
+                                            <button
+                                                key={t.label}
+                                                type="button"
+                                                className="hr-btn secondary sm"
+                                                onClick={() => copyTemplate(t.body)}
+                                                title="Copy text to send to staff"
+                                            >
+                                                {t.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div style={{ padding: '0.85rem', border: '1px dashed #f59e0b', borderRadius: '10px', background: '#fffbea' }}>
+                                    <div style={{ fontWeight: 700, color: '#92400e', marginBottom: '0.45rem' }}>Emergency bulk check-out</div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: '0.65rem' }}>
+                                        {user?.role === 'HR Admin' && (
+                                            <select style={inputStyle} value={bulkSiteId} onChange={(e) => setBulkSiteId(e.target.value)}>
+                                                <option value="">All Sites</option>
+                                                {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                                            </select>
+                                        )}
+                                        <input style={inputStyle} placeholder="Department (optional)" value={bulkDepartment} onChange={(e) => setBulkDepartment(e.target.value)} />
+                                        <input type="datetime-local" style={inputStyle} value={bulkDateTime} onChange={(e) => setBulkDateTime(e.target.value)} />
+                                        <input style={inputStyle} placeholder="Reason/Note" value={bulkNotes} onChange={(e) => setBulkNotes(e.target.value)} />
+                                    </div>
+                                    <button type="button" className="hr-btn secondary" style={{ marginTop: '0.65rem' }} onClick={handleBulkCheckout} disabled={bulkSubmitting}>
+                                        {bulkSubmitting ? 'Running bulk check-out...' : 'Run bulk check-out'}
+                                    </button>
+                                </div>
+                            </div>
+                        </details>
                     </div>
                 )}
 
-                {(user?.role === 'HR Admin' || user?.role === 'Site Supervisor') && (
+                {canManageAttendance && (
                     <div style={{ marginBottom: '1rem', padding: '0.85rem 1rem', border: '1px solid #e2e8f0', borderRadius: '10px', background: '#fff' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.55rem' }}>
-                            <strong>Pending Attendance Approvals</strong>
-                            <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{loadingApprovals ? 'Loading...' : `${pendingApprovals.length} pending`}</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem', gap: '0.75rem', flexWrap: 'wrap' }}>
+                            <strong style={{ fontSize: '0.95rem' }}>Needs your action</strong>
+                            <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{loadingApprovals ? 'Loading...' : `${pendingApprovals.length} items`}</span>
                         </div>
+                        <p style={{ margin: '0 0 0.8rem', fontSize: '0.82rem', color: '#64748b', lineHeight: 1.45 }}>
+                            1) Check employee and time. 2) If valid, choose <strong>Approve</strong>. 3) If not valid, choose <strong>Reject</strong>.
+                        </p>
                         {pendingApprovals.length === 0 ? (
-                            <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>No pending entries.</div>
+                            <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Nothing to review right now.</div>
                         ) : (
                             <div style={{ display: 'grid', gap: '0.55rem' }}>
                                 {pendingApprovals.slice(0, 10).map((item) => (
-                                    <div key={item.id} style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.55rem 0.7rem', display: 'flex', justifyContent: 'space-between', gap: '0.8rem', alignItems: 'center' }}>
-                                        <div style={{ fontSize: '0.8rem' }}>
-                                            <div style={{ fontWeight: 700 }}>{item.staff_id} · {item.first_name || ''} {item.last_name || ''}</div>
-                                            <div style={{ color: '#64748b' }}>{item.site_name || 'Unassigned'} · {item.source} · {new Date(item.check_in_time).toLocaleString()}</div>
+                                    <div key={item.id} style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.75rem', display: 'grid', gap: '0.6rem' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.8rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                                            <div style={{ fontSize: '0.85rem' }}>
+                                                <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                                                    {item.first_name || item.last_name
+                                                        ? `${item.first_name || ''} ${item.last_name || ''}`.trim()
+                                                        : item.staff_id}
+                                                    {item.staff_id ? ` (${item.staff_id})` : ''}
+                                                </div>
+                                                <div style={{ color: '#64748b', marginTop: '0.2rem' }}>
+                                                    {new Date(item.check_in_time).toLocaleString()}
+                                                </div>
+                                            </div>
+                                            <span style={{
+                                                fontSize: '0.72rem',
+                                                fontWeight: 700,
+                                                color: '#1d4ed8',
+                                                background: '#eff6ff',
+                                                border: '1px solid #bfdbfe',
+                                                borderRadius: '999px',
+                                                padding: '0.2rem 0.55rem'
+                                            }}>
+                                                Review required
+                                            </span>
                                         </div>
-                                        <div style={{ display: 'flex', gap: '0.45rem' }}>
-                                            <button className="hr-btn sm primary" onClick={() => handleApprovalAction(item.id, 'approve')}>Approve</button>
-                                            <button className="hr-btn sm secondary" onClick={() => handleApprovalAction(item.id, 'reject')}>Reject</button>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.45rem', fontSize: '0.78rem' }}>
+                                            <div style={{ background: '#f8fafc', borderRadius: '6px', padding: '0.4rem 0.5rem' }}>
+                                                <div style={{ color: '#64748b' }}>Site</div>
+                                                <div style={{ fontWeight: 600, color: '#334155' }}>{item.site_name || 'Unassigned'}</div>
+                                            </div>
+                                            <div style={{ background: '#f8fafc', borderRadius: '6px', padding: '0.4rem 0.5rem' }}>
+                                                <div style={{ color: '#64748b' }}>Type</div>
+                                                <div style={{ fontWeight: 600, color: '#334155' }}>{formatPendingSource(item.source)}</div>
+                                            </div>
+                                            <div style={{ background: '#f8fafc', borderRadius: '6px', padding: '0.4rem 0.5rem' }}>
+                                                <div style={{ color: '#64748b' }}>Action needed</div>
+                                                <div style={{ fontWeight: 600, color: '#334155' }}>Approve or reject this entry</div>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                            <button
+                                                type="button"
+                                                className="hr-btn sm primary"
+                                                onClick={() => handleApprovalAction(item.id, 'approve')}
+                                                style={{ minWidth: '120px' }}
+                                            >
+                                                Approve
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="hr-btn sm secondary"
+                                                onClick={() => handleApprovalAction(item.id, 'reject')}
+                                                style={{ minWidth: '120px' }}
+                                            >
+                                                Reject
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
@@ -508,6 +680,7 @@ const ManualAttendanceView = () => {
                                 <th>Check Out</th>
                                 <th>Site Location</th>
                                 <th style={{ textAlign: 'center' }}>Status</th>
+                                <th style={{ textAlign: 'center' }}>Audit</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -518,9 +691,16 @@ const ManualAttendanceView = () => {
                                 const isManual = log.notes && log.notes.includes('Manually logged');
                                 const isAutoClosed = !!log.auto_closed;
                                 const isLate = !!log.is_late;
+                                const rowKey = log.id ?? i;
+                                const numericId =
+                                    typeof log.id === 'number'
+                                        ? log.id
+                                        : (typeof log.id === 'string' && /^\d+$/.test(log.id) ? Number(log.id) : null);
+                                const auditKey = numericId != null ? String(numericId) : '';
 
                                 return (
-                                    <tr key={log.id || i} className={log.is_live ? 'live-row' : ''}>
+                                    <Fragment key={rowKey}>
+                                    <tr className={log.is_live ? 'live-row' : ''}>
                                         <td className="attendance-table-staff">
                                             <div className="staff-info-cell">
                                                 <div className="staff-avatar-mini">
@@ -553,10 +733,7 @@ const ManualAttendanceView = () => {
                                             )}
                                         </td>
                                         <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Site</span>
-                                                <span>{log.site_name || 'Unassigned'}</span>
-                                            </div>
+                                            <span style={{ fontSize: '0.9rem', color: '#334155' }}>{log.site_name || 'Unassigned'}</span>
                                         </td>
                                         <td style={{ textAlign: 'center' }}>
                                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
@@ -589,14 +766,66 @@ const ManualAttendanceView = () => {
                                                 )}
                                             </div>
                                         </td>
+                                        <td style={{ textAlign: 'center' }}>
+                                            {numericId != null ? (
+                                                <button
+                                                    type="button"
+                                                    className="hr-btn secondary sm"
+                                                    onClick={() => toggleAttendanceAudit(numericId)}
+                                                >
+                                                    {auditPanelFor === numericId ? 'Hide' : 'History'}
+                                                </button>
+                                            ) : (
+                                                <span style={{ color: '#cbd5e1', fontSize: '0.75rem' }}>—</span>
+                                            )}
+                                        </td>
                                     </tr>
+                                    {auditPanelFor === numericId && numericId != null && (
+                                        <tr>
+                                            <td colSpan={6} style={{ background: '#f8fafc', padding: '0.75rem 1rem', fontSize: '0.8rem', borderBottom: '1px solid #e2e8f0' }}>
+                                                {auditLoading && !auditCache[auditKey] ? (
+                                                    <span style={{ color: '#64748b' }}>Loading audit…</span>
+                                                ) : auditCache[auditKey] ? (
+                                                    <div>
+                                                        <div style={{ fontWeight: 700, marginBottom: '0.35rem' }}>Record</div>
+                                                        <div style={{ color: '#475569', marginBottom: '0.5rem' }}>
+                                                            Source: <code>{auditCache[auditKey].attendance?.source || '—'}</code>
+                                                            {' · '}Status: <code>{auditCache[auditKey].attendance?.status || '—'}</code>
+                                                            {auditCache[auditKey].attendance?.auto_closed ? ' · Auto-closed' : ''}
+                                                        </div>
+                                                        {auditCache[auditKey].attendance?.notes && (
+                                                            <div style={{ color: '#64748b', marginBottom: '0.5rem' }}>Notes: {String(auditCache[auditKey].attendance.notes)}</div>
+                                                        )}
+                                                        <div style={{ fontWeight: 700, marginBottom: '0.25rem' }}>Approval history</div>
+                                                        {(auditCache[auditKey].events || []).length === 0 ? (
+                                                            <span style={{ color: '#94a3b8' }}>No approval events recorded for this row yet.</span>
+                                                        ) : (
+                                                            <ul style={{ margin: 0, paddingLeft: '1.1rem', color: '#334155' }}>
+                                                                {auditCache[auditKey].events.map((ev: any) => (
+                                                                    <li key={ev.id} style={{ marginBottom: '0.25rem' }}>
+                                                                        <strong>{ev.action}</strong>
+                                                                        {ev.actor_staff_id ? ` · by ${ev.actor_staff_id}` : ''}
+                                                                        {' · '}{ev.created_at ? new Date(ev.created_at).toLocaleString() : ''}
+                                                                        {ev.reason ? ` — ${ev.reason}` : ''}
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <span style={{ color: '#94a3b8' }}>No audit data.</span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    )}
+                                    </Fragment>
                                 );
                             })}
                             {pagedLogs.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} style={{ textAlign: 'center', padding: '4rem', color: '#94a3b8' }}>
-                                        <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>--</div>
-                                        No recent attendance records found.
+                                    <td colSpan={6} style={{ textAlign: 'center', padding: '3rem 1.5rem', color: '#64748b' }}>
+                                        <div style={{ fontWeight: 700, color: '#334155', marginBottom: '0.5rem' }}>No rows match your filters</div>
+                                        <div style={{ fontSize: '0.875rem' }}>Try clearing the search box or setting status to &quot;All&quot;. Tap Refresh if you expect new data.</div>
                                     </td>
                                 </tr>
                             )}
@@ -608,10 +837,10 @@ const ManualAttendanceView = () => {
                         Page {page} of {totalPages}
                     </div>
                     <div style={{ display: 'flex', gap: '0.45rem' }}>
-                        <button className="hr-btn secondary sm" onClick={() => setPage(1)} disabled={page === 1}>First</button>
-                        <button className="hr-btn secondary sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>Prev</button>
-                        <button className="hr-btn secondary sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}>Next</button>
-                        <button className="hr-btn secondary sm" onClick={() => setPage(totalPages)} disabled={page === totalPages}>Last</button>
+                        <button type="button" className="hr-btn secondary sm" onClick={() => setPage(1)} disabled={page === 1}>First</button>
+                        <button type="button" className="hr-btn secondary sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>Prev</button>
+                        <button type="button" className="hr-btn secondary sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}>Next</button>
+                        <button type="button" className="hr-btn secondary sm" onClick={() => setPage(totalPages)} disabled={page === totalPages}>Last</button>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,6 @@
 const { z } = require('zod');
 const crypto = require('crypto');
+const { organizationIdFromUser } = require('../../utils/organization');
 
 const instanceSchema = z.object({
     instanceCode: z.string().trim().min(2),
@@ -35,15 +36,38 @@ const kioskDeviceSchema = z.object({
     notes: z.string().trim().max(500).optional().nullable(),
 });
 
-module.exports = ({ router, pool, authenticateToken, authorizeRole, runOdooSync }) => {
+const odooRequeueSchema = z.object({
+    ids: z.array(z.number().int().positive()).optional(),
+    scope: z.enum(['dead_letter', 'failed', 'retryable']).optional(),
+    limit: z.number().int().min(1).max(500).optional().default(100),
+    confirm: z.boolean().optional(),
+}).refine(
+    (d) => (Array.isArray(d.ids) && d.ids.length > 0) || d.confirm === true,
+    { message: 'Bulk requeue requires confirm:true, or pass explicit ids[]' }
+);
+
+const biometricReprocessSchema = z.object({
+    ids: z.array(z.number().int().positive()).min(1).max(500).optional(),
+    scope: z.enum(['failed', 'dead_letter', 'retryable']).optional(),
+    limit: z.number().int().min(1).max(500).optional().default(100),
+    confirm: z.boolean().optional(),
+}).refine(
+    (d) => (Array.isArray(d.ids) && d.ids.length > 0) || d.confirm === true,
+    { message: 'Bulk reprocess requires confirm:true, or pass explicit ids[]' }
+);
+
+module.exports = ({ router, pool, authenticateToken, authorizeRole, runOdooSync, metrics }) => {
     const generateDeviceKey = () => `kiosk_${crypto.randomBytes(12).toString('hex')}`;
 
-    router.get('/hr/integrations/odoo-instances', authenticateToken, authorizeRole(['HR Admin']), async (_req, res) => {
+    router.get('/hr/integrations/odoo-instances', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
         try {
+            const orgId = organizationIdFromUser(req.user);
             const result = await pool.query(
                 `SELECT instance_code, name, base_url, db_name, username, employee_lookup_field, is_active, updated_at
                  FROM odoo_instances
-                 ORDER BY instance_code ASC`
+                 WHERE organization_id = $1
+                 ORDER BY instance_code ASC`,
+                [orgId]
             );
             return res.json(result.rows);
         } catch (err) {
@@ -59,11 +83,12 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, runOdooSync 
         }
         const data = parsed.data;
         try {
+            const orgId = organizationIdFromUser(req.user);
             const result = await pool.query(
                 `INSERT INTO odoo_instances
-                 (instance_code, name, base_url, db_name, username, password, employee_lookup_field, is_active, updated_at)
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, COALESCE($8, true), NOW())
-                 ON CONFLICT (instance_code) DO UPDATE SET
+                 (organization_id, instance_code, name, base_url, db_name, username, password, employee_lookup_field, is_active, updated_at)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, COALESCE($9, true), NOW())
+                 ON CONFLICT (organization_id, instance_code) DO UPDATE SET
                     name = EXCLUDED.name,
                     base_url = EXCLUDED.base_url,
                     db_name = EXCLUDED.db_name,
@@ -74,6 +99,7 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, runOdooSync 
                     updated_at = NOW()
                  RETURNING instance_code, name, base_url, db_name, username, employee_lookup_field, is_active, updated_at`,
                 [
+                    orgId,
                     data.instanceCode.toLowerCase(),
                     data.name,
                     data.baseUrl.replace(/\/$/, ''),
@@ -94,17 +120,18 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, runOdooSync 
     router.get('/hr/integrations/staff-routing', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
         const search = String(req.query.search || '').trim();
         try {
-            const params = [];
-            let where = '';
+            const orgId = organizationIdFromUser(req.user);
+            const params = [orgId];
+            let where = 'WHERE r.organization_id = $1';
             if (search) {
                 params.push(`%${search}%`);
-                where = `WHERE r.staff_id ILIKE $1 OR e.first_name ILIKE $1 OR e.last_name ILIKE $1`;
+                where += ` AND (r.staff_id ILIKE $2 OR e.first_name ILIKE $2 OR e.last_name ILIKE $2)`;
             }
             const result = await pool.query(
                 `SELECT r.staff_id, r.instance_code, r.is_active, r.notes, r.updated_at,
                         e.first_name, e.last_name
                  FROM staff_odoo_routing r
-                 LEFT JOIN employees e ON e.staff_id = r.staff_id
+                 LEFT JOIN employees e ON e.staff_id = r.staff_id AND e.organization_id = r.organization_id
                  ${where}
                  ORDER BY r.staff_id ASC
                  LIMIT 500`,
@@ -125,16 +152,17 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, runOdooSync 
         const staffId = String(req.params.staffId || '').trim();
         if (!staffId) return res.status(400).json({ error: 'staffId is required' });
         try {
+            const orgId = organizationIdFromUser(req.user);
             const result = await pool.query(
-                `INSERT INTO staff_odoo_routing (staff_id, instance_code, notes, is_active, updated_at)
-                 VALUES ($1, $2, $3, COALESCE($4, true), NOW())
-                 ON CONFLICT (staff_id) DO UPDATE SET
+                `INSERT INTO staff_odoo_routing (organization_id, staff_id, instance_code, notes, is_active, updated_at)
+                 VALUES ($1, $2, $3, $4, COALESCE($5, true), NOW())
+                 ON CONFLICT (organization_id, staff_id) DO UPDATE SET
                     instance_code = EXCLUDED.instance_code,
                     notes = EXCLUDED.notes,
                     is_active = EXCLUDED.is_active,
                     updated_at = NOW()
                  RETURNING *`,
-                [staffId, parsed.data.instanceCode.toLowerCase(), parsed.data.notes || null, parsed.data.isActive]
+                [orgId, staffId, parsed.data.instanceCode.toLowerCase(), parsed.data.notes || null, parsed.data.isActive]
             );
             return res.json(result.rows[0]);
         } catch (err) {
@@ -164,11 +192,12 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, runOdooSync 
         const client = await pool.connect();
         try {
             await client.query('BEGIN');
+            const orgId = organizationIdFromUser(req.user);
 
             const instanceSet = [...new Set(deduped.map((row) => row.instanceCode))];
             const instanceRes = await client.query(
-                `SELECT instance_code FROM odoo_instances WHERE instance_code = ANY($1)`,
-                [instanceSet]
+                `SELECT instance_code FROM odoo_instances WHERE organization_id = $1 AND instance_code = ANY($2)`,
+                [orgId, instanceSet]
             );
             const validSet = new Set(instanceRes.rows.map((r) => r.instance_code));
             const rejectedRows = [];
@@ -188,8 +217,8 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, runOdooSync 
 
             const staffSet = [...new Set(validInstanceRows.map((row) => row.staffId))];
             const employeeRes = await client.query(
-                `SELECT staff_id FROM employees WHERE staff_id = ANY($1)`,
-                [staffSet]
+                `SELECT staff_id FROM employees WHERE organization_id = $1 AND staff_id = ANY($2)`,
+                [orgId, staffSet]
             );
             const employeeSet = new Set(employeeRes.rows.map((r) => r.staff_id));
             const validRows = [];
@@ -207,21 +236,21 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, runOdooSync 
             });
 
             if (replaceExisting) {
-                await client.query('DELETE FROM staff_odoo_routing');
+                await client.query('DELETE FROM staff_odoo_routing WHERE organization_id = $1', [orgId]);
             }
 
             let insertedOrUpdated = 0;
             for (const row of validRows) {
                 // eslint-disable-next-line no-await-in-loop
                 await client.query(
-                    `INSERT INTO staff_odoo_routing (staff_id, instance_code, notes, is_active, updated_at)
-                     VALUES ($1, $2, $3, $4, NOW())
-                     ON CONFLICT (staff_id) DO UPDATE SET
+                    `INSERT INTO staff_odoo_routing (organization_id, staff_id, instance_code, notes, is_active, updated_at)
+                     VALUES ($1, $2, $3, $4, $5, NOW())
+                     ON CONFLICT (organization_id, staff_id) DO UPDATE SET
                         instance_code = EXCLUDED.instance_code,
                         notes = EXCLUDED.notes,
                         is_active = EXCLUDED.is_active,
                         updated_at = NOW()`,
-                    [row.staffId, row.instanceCode, row.notes, row.isActive]
+                    [orgId, row.staffId, row.instanceCode, row.notes, row.isActive]
                 );
                 insertedOrUpdated += 1;
             }
@@ -248,7 +277,11 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, runOdooSync 
 
     router.delete('/hr/integrations/staff-routing/:staffId', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
         try {
-            await pool.query('DELETE FROM staff_odoo_routing WHERE staff_id = $1', [req.params.staffId]);
+            const orgId = organizationIdFromUser(req.user);
+            await pool.query(
+                'DELETE FROM staff_odoo_routing WHERE staff_id = $1 AND organization_id = $2',
+                [req.params.staffId, orgId]
+            );
             return res.json({ success: true });
         } catch (err) {
             console.error('Delete staff routing error:', err);
@@ -259,10 +292,11 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, runOdooSync 
     router.get('/hr/integrations/kiosk-devices', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
         const siteId = Number(req.query.siteId);
         try {
-            const params = [];
-            let where = '';
+            const orgId = organizationIdFromUser(req.user);
+            const params = [orgId];
+            let where = 'WHERE d.organization_id = $1';
             if (Number.isFinite(siteId) && siteId > 0) {
-                where = 'WHERE d.site_id = $1';
+                where += ' AND d.site_id = $2';
                 params.push(siteId);
             }
             const result = await pool.query(
@@ -291,11 +325,17 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, runOdooSync 
         }
         const deviceKey = (parsed.data.deviceKey || generateDeviceKey()).trim();
         try {
+            const orgId = organizationIdFromUser(req.user);
+            const siteOk = await pool.query(
+                'SELECT 1 FROM sites WHERE id = $1 AND organization_id = $2 LIMIT 1',
+                [siteId, orgId]
+            );
+            if (siteOk.rowCount === 0) return res.status(400).json({ error: 'Invalid site for this organization' });
             const result = await pool.query(
-                `INSERT INTO kiosk_devices (name, site_id, device_key, is_active, notes, updated_at)
-                 VALUES ($1, $2, $3, COALESCE($4, true), $5, NOW())
+                `INSERT INTO kiosk_devices (organization_id, name, site_id, device_key, is_active, notes, updated_at)
+                 VALUES ($1, $2, $3, $4, COALESCE($5, true), $6, NOW())
                  RETURNING id, name, site_id, device_key, is_active, notes, last_seen_at, created_at, updated_at`,
-                [parsed.data.name, siteId, deviceKey, parsed.data.isActive, parsed.data.notes || null]
+                [orgId, parsed.data.name, siteId, deviceKey, parsed.data.isActive, parsed.data.notes || null]
             );
             return res.json(result.rows[0]);
         } catch (err) {
@@ -329,12 +369,13 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, runOdooSync 
             return res.status(400).json({ error: 'No update fields provided' });
         }
         updates.push('updated_at = NOW()');
-        params.push(req.params.id);
+        const orgId = organizationIdFromUser(req.user);
+        params.push(req.params.id, orgId);
         try {
             const result = await pool.query(
                 `UPDATE kiosk_devices
                  SET ${updates.join(', ')}
-                 WHERE id = $${idx}
+                 WHERE id = $${idx++} AND organization_id = $${idx}
                  RETURNING id, name, site_id, device_key, is_active, notes, last_seen_at, created_at, updated_at`,
                 params
             );
@@ -353,7 +394,11 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, runOdooSync 
 
     router.delete('/hr/integrations/kiosk-devices/:id', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
         try {
-            const result = await pool.query('DELETE FROM kiosk_devices WHERE id = $1 RETURNING id', [req.params.id]);
+            const orgId = organizationIdFromUser(req.user);
+            const result = await pool.query(
+                'DELETE FROM kiosk_devices WHERE id = $1 AND organization_id = $2 RETURNING id',
+                [req.params.id, orgId]
+            );
             if (result.rows.length === 0) return res.status(404).json({ error: 'Kiosk device not found' });
             return res.json({ success: true });
         } catch (err) {
@@ -388,6 +433,172 @@ module.exports = ({ router, pool, authenticateToken, authorizeRole, runOdooSync 
             return res.json({ counts, deadSamples: deadSamples.rows });
         } catch (err) {
             console.error('Odoo sync status error:', err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+    });
+
+    router.get('/hr/integrations/operations-health', authenticateToken, authorizeRole(['HR Admin']), async (_req, res) => {
+        try {
+            const [bioCounts, bioOldest, outboxOldest, outboxPending] = await Promise.all([
+                pool.query(
+                    `SELECT process_status AS status, COUNT(*)::int AS count
+                     FROM biometric_logs
+                     GROUP BY process_status`
+                ),
+                pool.query(
+                    `SELECT MIN(timestamp) AS oldest_pending
+                     FROM biometric_logs
+                     WHERE process_status = 'pending'`
+                ),
+                pool.query(
+                    `SELECT MIN(next_retry_at) AS oldest_retry_at
+                     FROM attendance_sync_outbox
+                     WHERE status IN ('pending', 'failed')`
+                ),
+                pool.query(
+                    `SELECT COUNT(*)::int AS count
+                     FROM attendance_sync_outbox
+                     WHERE status IN ('pending', 'failed', 'processing')`
+                ),
+            ]);
+
+            const biometricQueue = { counts: {}, oldestPending: bioOldest.rows[0]?.oldest_pending || null };
+            bioCounts.rows.forEach((row) => {
+                biometricQueue.counts[row.status] = row.count;
+            });
+
+            return res.json({
+                generatedAt: new Date().toISOString(),
+                processCounters: metrics?.snapshot?.() || null,
+                biometricQueue,
+                odooOutbox: {
+                    oldestRetryAt: outboxOldest.rows[0]?.oldest_retry_at || null,
+                    actionableCount: outboxPending.rows[0]?.count ?? 0,
+                },
+            });
+        } catch (err) {
+            console.error('operations-health error:', err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+    });
+
+    router.post('/hr/integrations/odoo-sync/requeue', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
+        const parsed = odooRequeueSchema.safeParse(req.body || {});
+        if (!parsed.success) {
+            return res.status(400).json({ error: parsed.error.issues[0]?.message || 'Invalid requeue payload' });
+        }
+        const { ids, scope, limit } = parsed.data;
+        try {
+            let result;
+            if (ids && ids.length > 0) {
+                result = await pool.query(
+                    `UPDATE attendance_sync_outbox o
+                     SET status = 'pending',
+                         next_retry_at = NOW(),
+                         attempts = 0,
+                         last_error = NULL,
+                         updated_at = NOW()
+                     WHERE o.id = ANY($1::bigint[])
+                       AND o.status IN ('dead_letter', 'failed')
+                     RETURNING o.id`,
+                    [ids]
+                );
+            } else {
+                const scopeKey = scope || 'retryable';
+                const statuses = scopeKey === 'failed'
+                    ? ['failed']
+                    : scopeKey === 'dead_letter'
+                        ? ['dead_letter']
+                        : ['dead_letter', 'failed'];
+                result = await pool.query(
+                    `WITH cte AS (
+                        SELECT id FROM attendance_sync_outbox
+                        WHERE status = ANY($1::varchar[])
+                        ORDER BY updated_at ASC
+                        LIMIT $2
+                        FOR UPDATE SKIP LOCKED
+                     )
+                     UPDATE attendance_sync_outbox o
+                     SET status = 'pending',
+                         next_retry_at = NOW(),
+                         attempts = 0,
+                         last_error = NULL,
+                         updated_at = NOW()
+                     FROM cte
+                     WHERE o.id = cte.id
+                     RETURNING o.id`,
+                    [statuses, limit]
+                );
+            }
+            const requeuedIds = result.rows.map((r) => r.id);
+            console.log(JSON.stringify({
+                level: 'info',
+                component: 'operations',
+                event: 'odoo_outbox_requeue',
+                actorStaffId: req.user?.staffId || null,
+                count: requeuedIds.length,
+            }));
+            runOdooSync().catch((err) => console.error('[ODOO_SYNC] post-requeue run error:', err.message));
+            return res.json({ success: true, requeued: requeuedIds.length, ids: requeuedIds });
+        } catch (err) {
+            console.error('odoo-sync requeue error:', err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+    });
+
+    router.post('/hr/integrations/biometric-logs/reprocess', authenticateToken, authorizeRole(['HR Admin']), async (req, res) => {
+        const parsed = biometricReprocessSchema.safeParse(req.body || {});
+        if (!parsed.success) {
+            return res.status(400).json({ error: parsed.error.issues[0]?.message || 'Invalid reprocess payload' });
+        }
+        const { ids, scope, limit } = parsed.data;
+        try {
+            let result;
+            if (ids && ids.length > 0) {
+                result = await pool.query(
+                    `UPDATE biometric_logs b
+                     SET process_status = 'pending',
+                         next_retry_at = NOW()
+                     WHERE b.id = ANY($1::int[])
+                       AND b.process_status IN ('failed', 'dead_letter')
+                     RETURNING b.id`,
+                    [ids]
+                );
+            } else {
+                const scopeKey = scope || 'retryable';
+                const statuses = scopeKey === 'failed'
+                    ? ['failed']
+                    : scopeKey === 'dead_letter'
+                        ? ['dead_letter']
+                        : ['dead_letter', 'failed'];
+                result = await pool.query(
+                    `WITH cte AS (
+                        SELECT id FROM biometric_logs
+                        WHERE process_status = ANY($1::varchar[])
+                        ORDER BY next_retry_at ASC, id ASC
+                        LIMIT $2
+                        FOR UPDATE SKIP LOCKED
+                     )
+                     UPDATE biometric_logs b
+                     SET process_status = 'pending',
+                         next_retry_at = NOW()
+                     FROM cte
+                     WHERE b.id = cte.id
+                     RETURNING b.id`,
+                    [statuses, limit]
+                );
+            }
+            const idsOut = result.rows.map((r) => r.id);
+            console.log(JSON.stringify({
+                level: 'info',
+                component: 'operations',
+                event: 'biometric_logs_reprocess',
+                actorStaffId: req.user?.staffId || null,
+                count: idsOut.length,
+            }));
+            return res.json({ success: true, reset: idsOut.length, ids: idsOut });
+        } catch (err) {
+            console.error('biometric-logs reprocess error:', err);
             return res.status(500).json({ error: 'Database error' });
         }
     });

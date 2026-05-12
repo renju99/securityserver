@@ -16,14 +16,23 @@ const makePool = () => {
         state,
         async query(sql: string, params: any[]) {
             const text = sql.replace(/\s+/g, ' ').trim();
+            if (text.startsWith('SELECT id, slug, name FROM organizations WHERE slug')) {
+                return { rows: [{ id: 1, slug: String(params[0] || 'default'), name: 'Default' }] };
+            }
+            if (text.startsWith('SELECT organization_id FROM employees WHERE id')) {
+                return { rows: [{ organization_id: 1 }] };
+            }
             if (text.startsWith('SELECT e.*, r.name as role_name')) {
                 return {
                     rows: [{
                         id: 1,
                         staff_id: 'ST100',
+                        organization_id: 1,
                         role_name: 'HR Admin',
                         site_id: 1,
                         site_name: 'Main',
+                        organization_slug: 'default',
+                        organization_name: 'Default',
                         first_name: 'Test',
                         last_name: 'User',
                         photo_url: null,

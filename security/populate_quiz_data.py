@@ -7,7 +7,7 @@ that show "Passed (No details)" so you can see the question-level tracking featu
 
 Usage:
     Run this from Odoo shell:
-    sudo docker-compose exec -T odoo odoo shell -c /etc/odoo/odoo.conf -d security < populate_quiz_data.py
+    sudo docker-compose exec -T odoo_security odoo shell -c /etc/odoo/odoo.conf -d security < populate_quiz_data.py
 """
 
 import random

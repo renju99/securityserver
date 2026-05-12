@@ -47,7 +47,7 @@ const HREnrollmentMobile = () => {
         setLoading(true);
         setError('');
         try {
-            const res = await fetch(`/api/hr/users?page=1&limit=30&search=${encodeURIComponent(query)}`, {
+            const res = await fetch(`/hr/users?page=1&limit=30&search=${encodeURIComponent(query)}`, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             const data = await res.json();
@@ -77,7 +77,7 @@ const HREnrollmentMobile = () => {
         setError('');
         setLoading(true);
         try {
-            const res = await fetch('/api/auth/login', {
+            const res = await fetch('/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ staffId: loginData.staffId.trim(), password: loginData.password })

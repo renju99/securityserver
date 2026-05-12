@@ -1,0 +1,32 @@
+legacy_table,legacy_column,odoo_standard_target,custom_addon_target,action
+organizations,id,name,,"Use res.company (multi-company). No custom org model."
+organizations,slug,,,"Optional res.company.code if needed."
+sites,id,name,hr.work_location.name,Extend hr.work.location
+sites,location,,hr.work_location (address_id / notes),"Use address_id (res.partner) or location notes."
+sites,latitude/longitude/radiusMeters/geofence*,,hr.work_location (attendance_core),"Custom geofence fields on hr.work.location only."
+employees,id,,hr.employee,"Native employee."
+employees,staff_id,,hr.employee.barcode,"Map legacy staff_id to barcode."
+employees,email,,hr.employee.work_email,"Standard."
+employees,role_id,,hr.employee + res.groups,"Map roles to Odoo security groups."
+employees,site_id,,hr.employee.work_location_id,"Standard link to hr.work.location."
+employees,department_name,,hr.department + hr.employee.department_id,"Use department master data."
+employees,face_descriptor/face_pin_hash/...,,,,"Out of scope v1; use hr_attendance kiosk/PIN via employee.pin if needed."
+attendance,id,employee_id,hr.attendance.employee_id,Native
+attendance,check_in_time,,hr.attendance.check_in,Native
+attendance,check_out_time,,hr.attendance.check_out,Native
+attendance,check_in_coords,,hr.attendance.in_latitude/in_longitude,Native
+attendance,check_out_coords,,hr.attendance.out_latitude/out_longitude,Native
+attendance,site_id,,hr.attendance (attendance_core).check_work_location_id,Custom Many2one hr.work.location when punch site differs from employee default
+attendance,source,,hr.attendance.in_mode/out_mode,Map app/kiosk/biometric to kiosk/manual/technical as appropriate
+attendance,status/approval,,hr.attendance.mail.thread + attendance_core.review_status,"Chatter for audit; minimal review_status if payroll needs gate."
+attendance,break_minutes,,,,"Defer: configure breaks in contracts/attendance settings; add field only if payroll mandates stored minutes on line."
+attendance,overtime_minutes,,hr.attendance.overtime_hours / validated_overtime_hours,Convert units; use standard overtime pipeline
+attendance,work_context JSON,,mail.message / analytic,"Prefer analytic account or chatter; avoid JSON unless required."
+attendance_policy_rules,*,,resource.calendar + company settings,"Configure working hours; add custom policy model only if rules exceed calendar."
+job_codes,code/name,,account.analytic.account OR attendance_core.attendance.job.code,"Prefer analytic account if Finance uses Odoo Accounting."
+biometric_devices,*,,attendance.biometric.device,New model (integration boundary)
+biometric_logs,*,,attendance.biometric.event,New model; creates hr.attendance when processed
+geo_fence_alerts,*,,attendance.geofence.alert,New model (operational alerts)
+kiosk_devices,*,,hr.attendance kiosk + device registry,"Register devices as attendance.biometric.device or Odoo kiosk config."
+odoo_instances / staff_odoo_routing / attendance_sync_*,,,,"Not used on dedicated Odoo instance (native hr.attendance)."
+live_logs,*,,,,"Optional later: attendance.location.log if continuous GPS required."

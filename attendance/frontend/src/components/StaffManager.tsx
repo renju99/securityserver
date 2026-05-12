@@ -4,7 +4,6 @@ import { LoadingSpinner } from './LoadingSpinner';
 import { useAuthStore } from '../store/useAuthStore';
 import { useDataStore } from '../store/useDataStore';
 import { useUIStore } from '../store/useUIStore';
-import { useMapStore } from '../store/useMapStore';
 import { Employee, Site } from '../types';
 import { exportToCSV, formatDataForExport } from '../utils/exportUtils';
 
@@ -47,8 +46,6 @@ export default function StaffManager({
         bulkDeptName, setBulkDeptName,
     } = useDataStore();
     const { showToast } = useUIStore();
-
-    const { setMapCenter, setZoom } = useMapStore();
 
     const applyFilters = useCallback((users: Employee[]) => {
         let filtered = [...users];
@@ -148,7 +145,7 @@ export default function StaffManager({
         }
 
         try {
-            const res = await fetch('/api/hr/users/bulk-update', {
+            const res = await fetch('/hr/users/bulk-update', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user?.token}` },
                 body: JSON.stringify(payload)
@@ -170,24 +167,33 @@ export default function StaffManager({
 
     return (
         <div className="management-view">
-            <div className="mgmt-subtabs">
+            <div className="mgmt-subtabs" role="tablist" aria-label="Staff management sections">
                 <button
+                    type="button"
+                    role="tab"
+                    aria-selected={mgmtSubTab === 'staff'}
                     className={`subtab-btn ${mgmtSubTab === 'staff' ? 'active' : ''}`}
                     onClick={() => setMgmtSubTab('staff')}
                 >
-                    Staff Directory
+                    Staff directory
                 </button>
                 <button
+                    type="button"
+                    role="tab"
+                    aria-selected={mgmtSubTab === 'sites'}
                     className={`subtab-btn ${mgmtSubTab === 'sites' ? 'active' : ''}`}
                     onClick={() => setMgmtSubTab('sites')}
                 >
-                    Site Locations
+                    Sites
                 </button>
                 <button
+                    type="button"
+                    role="tab"
+                    aria-selected={mgmtSubTab === 'shifts'}
                     className={`subtab-btn ${mgmtSubTab === 'shifts' ? 'active' : ''}`}
                     onClick={() => setMgmtSubTab('shifts')}
                 >
-                    Shift Schedules
+                    Shifts
                 </button>
             </div>
 
@@ -197,30 +203,34 @@ export default function StaffManager({
                         <div className="mgmt-actions">
                             <input
                                 type="text"
-                                placeholder="Search by ID or Email..."
+                                placeholder="Search name, ID, or email…"
                                 className="mgmt-search"
                                 value={mgmtSearch}
                                 onChange={(e) => { setMgmtSearch(e.target.value); setMgmtPage(1); }}
+                                aria-label="Search staff"
                             />
                             <button
+                                type="button"
                                 className="btn-primary"
                                 onClick={() => {
                                     setCurrentUser({ staffId: '', email: '', password: '', roleId: 4, siteId: '', departmentName: 'Operations', faceAuthEnabled: true, facePin: '' });
                                     setShowUserModal(true);
                                 }}>
-                                + Add New Staff
+                                Add staff
                             </button>
                             <button
+                                type="button"
                                 className="btn-secondary"
                                 onClick={() => {
                                     const formattedData = formatDataForExport(mgmtUsers);
                                     exportToCSV(formattedData, `staff_export_${new Date().toISOString().split('T')[0]}.csv`);
-                                    showToast('Staff data exported successfully', 'success');
+                                    showToast('Exported current page to CSV', 'success');
                                 }}
                             >
                                 Export CSV
                             </button>
                             <button
+                                type="button"
                                 className={`btn-secondary ${showFilters ? 'active' : ''}`}
                                 onClick={() => setShowFilters(!showFilters)}
                             >
@@ -236,13 +246,13 @@ export default function StaffManager({
                                     <span className="bulk-selected-pill">
                                         {selectedUsers.length}
                                     </span>
-                                    <span className="bulk-selected-label">User(s) Selected</span>
+                                    <span className="bulk-selected-label">selected</span>
                                 </div>
                                 <div className="bulk-actions-buttons">
-                                    <button className="btn-secondary bulk-btn-sm" onClick={handleBulkExport}>Export</button>
-                                    <button className="btn-secondary bulk-btn-sm bulk-btn-archive" onClick={handleBulkArchive}>Archive</button>
-                                    <button className="btn-secondary bulk-btn-sm bulk-btn-delete" onClick={handleBulkDelete}>Delete</button>
-                                    <button className="btn-secondary bulk-btn-sm" onClick={() => { setSelectedUsers([]); setSelectAll(false); }}>Clear</button>
+                                    <button type="button" className="btn-secondary bulk-btn-sm" onClick={handleBulkExport}>Export</button>
+                                    <button type="button" className="btn-secondary bulk-btn-sm bulk-btn-archive" onClick={handleBulkArchive}>Archive</button>
+                                    <button type="button" className="btn-secondary bulk-btn-sm bulk-btn-delete" onClick={handleBulkDelete}>Delete</button>
+                                    <button type="button" className="btn-secondary bulk-btn-sm" onClick={() => { setSelectedUsers([]); setSelectAll(false); }}>Clear</button>
                                 </div>
                             </div>
 
@@ -256,7 +266,7 @@ export default function StaffManager({
                                         <option value="">Select Shift...</option>
                                         {shifts.map(s => <option key={s.id} value={s.id}>{s.name} ({s.start_time} - {s.end_time})</option>)}
                                     </select>
-                                    <button className="btn-secondary bulk-btn-sm" onClick={() => handleBulkUpdate('shift')}>Apply Shift</button>
+                                    <button type="button" className="btn-secondary bulk-btn-sm" onClick={() => handleBulkUpdate('shift')}>Apply shift</button>
                                 </div>
 
                                 {/* Bulk Site */}
@@ -269,7 +279,7 @@ export default function StaffManager({
                                         <option value="-1">Global / Remotely (No Site)</option>
                                         {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                                     </select>
-                                    <button className="btn-secondary bulk-btn-sm" onClick={() => handleBulkUpdate('site')}>Apply Site</button>
+                                    <button type="button" className="btn-secondary bulk-btn-sm" onClick={() => handleBulkUpdate('site')}>Apply site</button>
                                 </div>
 
                                 {/* Bulk Department */}
@@ -280,13 +290,13 @@ export default function StaffManager({
                                         value={bulkDeptName}
                                         onChange={(e) => setBulkDeptName(e.target.value)}
                                     />
-                                    <button className="btn-secondary bulk-btn-sm" onClick={() => handleBulkUpdate('dept')}>Apply Dept</button>
+                                    <button type="button" className="btn-secondary bulk-btn-sm" onClick={() => handleBulkUpdate('dept')}>Apply department</button>
                                 </div>
 
                                 {/* Tracking Flags */}
                                 <div className="bulk-action-group">
-                                    <button className="btn-secondary bulk-btn-sm bulk-btn-enable" onClick={() => handleBulkUpdate('tracking-on')}>Enable Tracking</button>
-                                    <button className="btn-secondary bulk-btn-sm bulk-btn-disable" onClick={() => handleBulkUpdate('tracking-off')}>Disable Tracking</button>
+                                    <button type="button" className="btn-secondary bulk-btn-sm bulk-btn-enable" onClick={() => handleBulkUpdate('tracking-on')}>Enable tracking</button>
+                                    <button type="button" className="btn-secondary bulk-btn-sm bulk-btn-disable" onClick={() => handleBulkUpdate('tracking-off')}>Disable tracking</button>
                                 </div>
                             </div>
                         </div>
@@ -414,7 +424,7 @@ export default function StaffManager({
                                             <td>{u.site_name || 'Global'}</td>
                                             <td>{u.department_name}</td>
                                             <td>
-                                                <button className="btn-edit" onClick={() => {
+                                                <button type="button" className="btn-edit" onClick={() => {
                                                     onEditUser?.(u);
                                                     setValidationErrors({});
                                                 }}>Edit</button>
@@ -427,16 +437,16 @@ export default function StaffManager({
                     </div>
 
                     <div className="mgmt-pagination">
-                        <button disabled={mgmtPage === 1} onClick={() => setMgmtPage(p => p - 1)}>Previous</button>
+                        <button type="button" disabled={mgmtPage === 1} onClick={() => setMgmtPage(p => p - 1)}>Previous</button>
                         <span>Page {mgmtPage} of {mgmtStats.totalPages}</span>
-                        <button disabled={mgmtPage === mgmtStats.totalPages} onClick={() => setMgmtPage(p => p + 1)}>Next</button>
+                        <button type="button" disabled={mgmtPage === mgmtStats.totalPages} onClick={() => setMgmtPage(p => p + 1)}>Next</button>
                     </div>
                 </>
             ) : mgmtSubTab === 'sites' ? (
                 <div className="site-management">
                     <div className="mgmt-header">
                         <div className="mgmt-actions">
-                            <button className="btn-primary" onClick={() => {
+                            <button type="button" className="btn-primary" onClick={() => {
                                 setCurrentSite({
                                     name: '',
                                     location: '',
@@ -444,11 +454,12 @@ export default function StaffManager({
                                     longitude: '',
                                     radiusMeters: 100,
                                     geofenceType: 'CIRCLE',
-                                    geofenceData: null
+                                    geofenceData: null,
+                                    geofenceEnabled: true,
                                 });
                                 setShowSiteModal(true);
                             }}>
-                                + Add New Site
+                                Add site
                             </button>
                         </div>
                     </div>
@@ -473,7 +484,7 @@ export default function StaffManager({
                                         <td>{s.location || '-'}</td>
                                         <td>
                                             <div className="inline-actions">
-                                                <button className="btn-edit" onClick={() => {
+                                                <button type="button" className="btn-edit" onClick={() => {
                                                     setCurrentSite({
                                                         ...s,
                                                         radiusMeters: (s as any).radius_meters || 100,
@@ -484,10 +495,11 @@ export default function StaffManager({
                                                     setShowSiteModal(true);
                                                 }}>Edit</button>
                                                 <button
+                                                    type="button"
                                                     className="btn-secondary map-focus-btn"
                                                     onClick={() => handleFocusSite(s)}
                                                 >
-                                                    View on Map
+                                                    Coordinates
                                                 </button>
                                             </div>
                                         </td>
@@ -501,11 +513,11 @@ export default function StaffManager({
                 <div className="site-management">
                     <div className="mgmt-header">
                         <div className="mgmt-actions">
-                            <button className="btn-primary" onClick={() => {
+                            <button type="button" className="btn-primary" onClick={() => {
                                 setCurrentShift({ name: '', startTime: '', endTime: '' });
                                 setShowShiftModal(true);
                             }}>
-                                + Create New Shift
+                                Add shift
                             </button>
                         </div>
                     </div>
@@ -526,7 +538,7 @@ export default function StaffManager({
                                         <td>{s.start_time}</td>
                                         <td>{s.end_time}</td>
                                         <td>
-                                            <button className="btn-edit" onClick={() => {
+                                            <button type="button" className="btn-edit" onClick={() => {
                                                 setCurrentShift({
                                                     id: s.id,
                                                     name: s.name,
@@ -546,13 +558,13 @@ export default function StaffManager({
                     </div>
 
                     {showShiftModal && (
-                        <div className="modal-overlay">
-                            <div className="modal-content">
-                                <h3>{currentShift.id ? 'Edit' : 'Create'} Shift Schedule</h3>
+                        <div className="modal-overlay" role="presentation">
+                            <div className="modal-content" role="dialog" aria-modal="true" aria-labelledby="shift-modal-title">
+                                <h3 id="shift-modal-title">{currentShift.id ? 'Edit shift' : 'New shift'}</h3>
                                 <form onSubmit={async (e) => {
                                     e.preventDefault();
                                     try {
-                                        const url = currentShift.id ? `/api/hr/shifts/${currentShift.id}` : '/api/hr/shifts';
+                                        const url = currentShift.id ? `/hr/shifts/${currentShift.id}` : '/hr/shifts';
                                         const method = currentShift.id ? 'PUT' : 'POST';
 
                                         const res = await fetch(url, {
@@ -563,7 +575,7 @@ export default function StaffManager({
 
                                         if (res.ok) {
                                             setShowShiftModal(false);
-                                            fetch('/api/hr/shifts', { headers: { 'Authorization': `Bearer ${user?.token}` } })
+                                            fetch('/hr/shifts', { headers: { 'Authorization': `Bearer ${user?.token}` } })
                                                 .then(r => r.json()).then(setShifts);
                                             showToast(currentShift.id ? 'Shift updated' : 'Shift created', 'success');
                                         } else {

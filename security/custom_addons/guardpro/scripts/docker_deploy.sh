@@ -16,7 +16,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration - UPDATE THESE FOR YOUR ENVIRONMENT
-ODOO_CONTAINER="odoo"  # Update with your Odoo container name
+ODOO_CONTAINER="odoo-security"  # Must match security/docker-compose.yml container_name (unique on web-proxy-net)
 POSTGRES_CONTAINER="postgres"  # Update with your PostgreSQL container name
 DB_NAME="security"  # Update with your database name
 DB_USER="odoo"  # Update with your database user

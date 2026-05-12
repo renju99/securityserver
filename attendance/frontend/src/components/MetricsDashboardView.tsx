@@ -36,7 +36,7 @@ const MetricsDashboardView = () => {
         setLoading(true);
         setError('');
         try {
-            const res = await fetch('/api/hr/admin/metrics', {
+            const res = await fetch('/hr/admin/metrics', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             const data = await res.json();
@@ -60,7 +60,7 @@ const MetricsDashboardView = () => {
                     <h2 style={{ margin: 0 }}>System Metrics</h2>
                     <p style={{ margin: '4px 0 0', color: '#64748b' }}>API latency and operational counters</p>
                 </div>
-                <button className="btn-secondary" onClick={loadMetrics} disabled={loading}>
+                <button className="hr-btn secondary" onClick={loadMetrics} disabled={loading}>
                     {loading ? 'Refreshing...' : 'Refresh'}
                 </button>
             </div>

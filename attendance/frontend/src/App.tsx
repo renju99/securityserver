@@ -1,11 +1,9 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { io } from 'socket.io-client'
 import { BrowserRouter, HashRouter, Routes, Route, Link } from 'react-router-dom'
-import HRDashboard from './HRDashboard'
-import FaceLoginCard from './components/FaceLoginCard'
-import HREnrollmentMobile from './components/HREnrollmentMobile'
-import KioskFaceAttendance from './components/KioskFaceAttendance'
 import './App.css'
+
+import HRDashboard from './HRDashboard'
 
 declare global {
   interface Window {
@@ -13,39 +11,41 @@ declare global {
     io: any;
     AndroidBridge: any;
     isNativeApp: any;
-    updateLocationUI: any;
-    setPermissionUI: any;
-    setSocketStatusUI: any;
     appSocket: any;
     hasShownAuthAlert: any;
-    retryNativeTracking: any;
-    NDEFReader: any;
   }
 }
-
 
 const isCordova = typeof window !== 'undefined' && (window.cordova !== undefined || window.location.protocol === 'file:');
 const SOCKET_URL = isCordova ? 'https://attendance.berkeleyuae.com' : '/';
 
+const mapAttendanceSocketMessage = (raw: string) => {
+  const m = String(raw || '').toLowerCase();
+  if (m.includes('already checked in')) return 'You are already checked in. Use Check out when you leave.';
+  if (m.includes('nfc scan required') || m.includes('nfc')) return 'This site requires NFC verification before check-in or check-out.';
+  if (m.includes('location data unavailable') || m.includes('enable gps')) return 'GPS was not available. Turn on location, wait for a fix, then try again.';
+  if (m.includes('no open check-in')) return 'There is no open check-in to close. Contact HR if this is wrong.';
+  return raw || 'Something went wrong. Please try again or contact HR.';
+};
+
 const socket = io(SOCKET_URL, {
   path: '/socket.io/',
-  autoConnect: false // Don't connect until authenticated
+  autoConnect: false
 });
 
-// Expose io for app-native.js
 if (typeof window !== 'undefined') {
   window.io = io;
-  // Detect if running in TWA/Native App
   if (window.AndroidBridge || navigator.userAgent.includes('Berkeley-Attendance-App')) {
     window.isNativeApp = true;
   }
 }
 
+type NetState = 'connecting' | 'connected' | 'disconnected';
+
 function EmployeeView() {
-  const [status, setStatus] = useState('disconnected');
-  const [location, setLocation] = useState<any>(null);
-  const [permission, setPermission] = useState('prompt');
-  const [showBanner, setShowBanner] = useState(true);
+  const [netState, setNetState] = useState<NetState>('disconnected');
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [permission, setPermission] = useState<'prompt' | 'granted' | 'denied'>('prompt');
   const [staffId, setStaffId] = useState(localStorage.getItem('staffId') || '');
   const [firstName, setFirstName] = useState(localStorage.getItem('firstName') || '');
   const [lastName, setLastName] = useState(localStorage.getItem('lastName') || '');
@@ -54,288 +54,112 @@ function EmployeeView() {
   const [password, setPassword] = useState('');
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
-  const [attendanceStatus, setAttendanceStatus] = useState('loading'); // 'checked_in', 'checked_out', 'loading'
+  const [infoMessage, setInfoMessage] = useState('');
+  const [queuedPunches, setQueuedPunches] = useState(0);
+  const [attendanceStatus, setAttendanceStatus] = useState<'checked_in' | 'checked_out' | 'loading'>('loading');
+  const [statusDetail, setStatusDetail] = useState<{
+    siteName?: string | null;
+    openSource?: string | null;
+    openCheckInTime?: string | null;
+  }>({});
+  const [lastStatusSyncAt, setLastStatusSyncAt] = useState<Date | null>(null);
+  const [loginSubmitting, setLoginSubmitting] = useState(false);
   const OFFLINE_ATTENDANCE_QUEUE_KEY = 'offlineAttendanceActionsV1';
 
-  const [lastUpdate, setLastUpdate] = useState(null);
+  const apiBase = isCordova ? 'https://attendance.berkeleyuae.com' : '';
 
-  // Remote logging helper
-  const remoteLog = (tag, msg) => {
+  const getTargetSocket = () => ((window.isNativeApp && window.appSocket) ? window.appSocket : socket);
+
+  const readOfflineQueueLength = () => {
     try {
-      if (window.AndroidBridge && typeof window.AndroidBridge.remoteLog === 'function') {
-        window.AndroidBridge.remoteLog(tag, msg);
-      } else {
-        fetch('/api/debug/log', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tag, msg })
-        }).catch(err => console.error('Remote log failed:', err));
-      }
+      const raw = localStorage.getItem(OFFLINE_ATTENDANCE_QUEUE_KEY);
+      const q = raw ? JSON.parse(raw) : [];
+      return Array.isArray(q) ? q.length : 0;
+    } catch {
+      return 0;
+    }
+  };
+
+  const refreshAttendanceStatus = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${apiBase}/attendance/status`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.status === 'checked_in') setAttendanceStatus('checked_in');
+      else setAttendanceStatus('checked_out');
+      setStatusDetail({
+        siteName: data.siteName || null,
+        openSource: data.openSource || null,
+        openCheckInTime: data.openCheckInTime || null,
+      });
+      setLastStatusSyncAt(new Date());
     } catch (e) {
-      console.error(e);
+      console.warn('[APP] attendance/status failed', e);
     }
-  };
+  }, [token, apiBase]);
 
-  // Wake Lock and Audio Refs
-  const wakeLockRef = useRef(null);
-  const audioRef = useRef(null);
-
-  const requestWakeLock = async () => {
-    try {
-      if ('wakeLock' in navigator) {
-        const wakeLock = await navigator.wakeLock.request('screen');
-        wakeLockRef.current = wakeLock;
-        console.log('Wake Lock is active');
-
-        wakeLock.addEventListener('release', () => {
-          console.log('Wake Lock was released');
-        });
-      }
-    } catch (err) {
-      console.error(`${err.name}, ${err.message}`);
+  const refreshLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setPermission('denied');
+      return;
     }
-  };
-
-  const startSilentAudio = () => {
-    if (!audioRef.current) {
-      // Tiny silent mp3 as base64
-      const silentMp3 = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA== ";
-      const audio = new Audio(silentMp3);
-      audio.loop = true;
-      audioRef.current = audio;
-    }
-    if (audioRef.current) {
-      audioRef.current.play().catch(e => console.log("Audio play blocked", e));
-
-      // Update Media Session to help keep app alive
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: 'Live Tracking Active',
-          artist: 'Berkeley Workforce 360',
-          album: 'Attendance System'
-        });
-        navigator.mediaSession.playbackState = 'playing';
-      }
-    }
-  };
-
-  const startTracking = () => {
-    if (!navigator.geolocation) return;
-
-    // Request Wake Lock and Audio to keep process alive on mobile
-    requestWakeLock();
-    startSilentAudio();
-
-    // Helper function to actually start geolocation tracking
-    const beginTracking = () => {
-      // Use a more aggressive interval-based sender for background
-      const forceSend = () => {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const { latitude, longitude } = pos.coords;
-            setLocation({ latitude, longitude });
-            if (staffId && socket.connected) {
-              socket.emit('location_update', {
-                employeeId: staffId,
-                latitude,
-                longitude,
-                timestamp: new Date().toISOString()
-              });
-              setLastUpdate(new Date().toLocaleTimeString());
-            }
-          },
-          (err) => {
-            console.warn('Force send error:', err.message);
-          },
-          { enableHighAccuracy: true, timeout: 5000 }
-        );
-      };
-
-      // Initial check to trigger permission prompt immediately
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setPermission('granted');
-          const { latitude, longitude } = pos.coords;
-          setLocation({ latitude, longitude });
-          if (staffId && socket.connected) {
-            // Provide immediate update
-            const timestamp = new Date();
-            socket.emit('location_update', {
-              employeeId: staffId,
-              latitude,
-              longitude,
-              timestamp: timestamp.toISOString()
-            });
-            setLastUpdate(timestamp.toLocaleTimeString());
-          }
-        },
-        (err) => {
-          console.warn('Initial geolocation check failed:', err.message);
-          if (err.code === 1) setPermission('denied');
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      );
-
-      // Continuous watch
-      const watchId = navigator.geolocation.watchPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          setLocation({ latitude, longitude });
-
-          // Only emit if authenticated and connected
-          if (staffId && socket.connected) {
-            const timestamp = new Date();
-            socket.emit('location_update', {
-              employeeId: staffId,
-              latitude,
-              longitude,
-              timestamp: timestamp.toISOString()
-            });
-            setLastUpdate(timestamp.toLocaleTimeString());
-          }
-          setPermission('granted');
-          setShowBanner(false);
-        },
-        (err) => {
-          if (err.code === 1) setPermission('denied');
-          console.warn('Watch Position Error:', err.message);
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      );
-
-      // Active Interval Sender (Heartbeat) - ensures updates even if watchPosition is lazy
-      const intervalId = setInterval(forceSend, 30000);
-
-      // Cleanup function if component unmounts (though EmployeeView usually stays)
-      return () => {
-        navigator.geolocation.clearWatch(watchId);
-        clearInterval(intervalId);
-      };
-    };
-
-    // Check if running in Cordova and use diagnostic plugin if available
-    if (isCordova && window.cordova && window.cordova.plugins && window.cordova.plugins.diagnostic) {
-      const diagnostic = window.cordova.plugins.diagnostic;
-
-      diagnostic.getLocationAuthorizationStatus(
-        (status) => {
-          console.log('[APP] Location authorization status:', status);
-
-          if (status === diagnostic.permissionStatus.GRANTED ||
-            status === diagnostic.permissionStatus.GRANTED_WHEN_IN_USE) {
-            console.log('[APP] Permission already granted, starting tracking');
-            setPermission('granted');
-            setShowBanner(false);
-            beginTracking();
-          } else if (status === diagnostic.permissionStatus.NOT_REQUESTED ||
-            status === diagnostic.permissionStatus.DENIED_ONCE) {
-            console.log('[APP] Requesting location permission');
-            diagnostic.requestLocationAuthorization(
-              (newStatus) => {
-                console.log('[APP] Permission request result:', newStatus);
-                if (newStatus === diagnostic.permissionStatus.GRANTED ||
-                  newStatus === diagnostic.permissionStatus.GRANTED_WHEN_IN_USE) {
-                  setPermission('granted');
-                  setShowBanner(false);
-                  beginTracking();
-                } else {
-                  setPermission('denied');
-                  alert('Location permission is required for attendance tracking.');
-                }
-              },
-              (error) => {
-                console.error('[APP] Permission request error:', error);
-                setPermission('denied');
-              },
-              diagnostic.locationAuthorizationMode.ALWAYS
-            );
-          } else {
-            console.error('[APP] Location permission denied');
-            setPermission('denied');
-            alert('Location permission is required. Please enable it in Settings.');
-          }
-        },
-        (error) => {
-          console.error('[APP] Error checking location status:', error);
-          // Fallback to standard approach
-          beginTracking();
-        }
-      );
-    } else {
-      // Not in Cordova or plugin not available, use standard approach
-      beginTracking();
-    }
-  };
-
-  // Bridge for native location updates
-  useEffect(() => {
-    window.updateLocationUI = ({ latitude, longitude, lastUpdate }) => {
-      setLocation({ latitude, longitude });
-      if (lastUpdate) setLastUpdate(lastUpdate);
-    };
-
-    window.setPermissionUI = (state) => {
-      setPermission(state);
-      if (state === 'granted') setShowBanner(false);
-    };
-
-    window.setSocketStatusUI = (s) => {
-      setStatus(s);
-    };
-
-    // If native bridge exists, we can assume permissions are handled natively
-    if (window.isNativeApp) {
-      setPermission('granted');
-      setShowBanner(false);
-    }
-
-    return () => {
-      delete window.updateLocationUI;
-      delete window.setPermissionUI;
-      delete window.setSocketStatusUI;
-    };
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setPermission('granted');
+        setLocation({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+      },
+      (err) => {
+        console.warn('Geolocation:', err.message);
+        if (err.code === 1) setPermission('denied');
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+    );
   }, []);
 
-  // Use consolidated socket
   useEffect(() => {
     if (!token) return;
 
     if (window.isNativeApp && window.appSocket) {
-      // App-native.js already handles the socket
-      const nativeSocket = window.appSocket;
-      if (nativeSocket.connected) setStatus('connected');
+      setNetState(window.appSocket.connected ? 'connected' : 'connecting');
     } else {
+      setNetState('connecting');
       socket.auth = { token };
       if (!socket.connected) socket.connect();
     }
 
     const handleConnect = () => {
-      setStatus('connected');
+      setNetState('connected');
+      setError('');
       flushOfflineAttendanceQueue();
-      if (staffId && !window.isNativeApp) {
-        startTracking();
-      }
+      refreshLocation();
     };
 
-    const handleDisconnect = () => {
-      setStatus('disconnected');
-    };
+    const handleDisconnect = () => setNetState('disconnected');
 
     const handleCheckInSuccess = () => {
       setAttendanceStatus('checked_in');
-      alert('Check-in Successful!');
+      setError('');
+      setInfoMessage('Check-in recorded successfully.');
+      setTimeout(() => setInfoMessage(''), 5000);
+      void refreshAttendanceStatus();
     };
 
     const handleCheckOutSuccess = () => {
       setAttendanceStatus('checked_out');
-      alert('Check-out Successful!');
+      setError('');
+      setInfoMessage('Check-out recorded successfully.');
+      setTimeout(() => setInfoMessage(''), 5000);
+      void refreshAttendanceStatus();
     };
 
-    const handleError = (err) => {
-      alert(`Error: ${err.message}`);
+    const handleError = (err: { message?: string }) => {
+      const raw = err?.message ? String(err.message) : '';
+      setError(mapAttendanceSocketMessage(raw));
     };
 
-    const targetSocket = (window.isNativeApp && window.appSocket) ? window.appSocket : socket;
+    const targetSocket = getTargetSocket();
 
     targetSocket.on('connect', handleConnect);
     targetSocket.on('disconnect', handleDisconnect);
@@ -343,16 +167,14 @@ function EmployeeView() {
     targetSocket.on('check_out_success', handleCheckOutSuccess);
     targetSocket.on('error', handleError);
 
-    targetSocket.on('connect_error', (err) => {
+    targetSocket.on('connect_error', (err: Error) => {
       console.error('Connection Error:', err.message);
+      setNetState('disconnected');
       if (err.message === 'Authentication error' || err.message === 'jwt expired') {
-        // Prevent infinite alert loop if already disconnected
         if (targetSocket.connected) targetSocket.disconnect();
-
-        // Only alert once
         if (!window.hasShownAuthAlert) {
           window.hasShownAuthAlert = true;
-          alert('Session expired. Please log in again.');
+          alert('Your session has expired. Please sign in again.');
           handleLogout();
         }
       }
@@ -366,14 +188,22 @@ function EmployeeView() {
       targetSocket.off('error', handleError);
       targetSocket.off('connect_error');
     };
-  }, [staffId, token]);
+  }, [token, refreshAttendanceStatus, refreshLocation]);
 
-  const enqueueOfflineAttendanceAction = (entry: any) => {
+  useEffect(() => {
+    if (!token || !staffId) return;
+    void refreshAttendanceStatus();
+    setQueuedPunches(readOfflineQueueLength());
+  }, [token, staffId, refreshAttendanceStatus]);
+
+  const enqueueOfflineAttendanceAction = (entry: Record<string, unknown>) => {
     try {
       const existing = JSON.parse(localStorage.getItem(OFFLINE_ATTENDANCE_QUEUE_KEY) || '[]');
       const queue = Array.isArray(existing) ? existing : [];
-      queue.push(entry);
+      const clientId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `q_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      queue.push({ ...entry, clientId, queuedAt: new Date().toISOString() });
       localStorage.setItem(OFFLINE_ATTENDANCE_QUEUE_KEY, JSON.stringify(queue.slice(-250)));
+      setQueuedPunches(queue.length);
     } catch (err) {
       console.error('Failed to queue offline attendance action', err);
     }
@@ -384,7 +214,7 @@ function EmployeeView() {
     try {
       const existing = JSON.parse(localStorage.getItem(OFFLINE_ATTENDANCE_QUEUE_KEY) || '[]');
       if (!Array.isArray(existing) || existing.length === 0) return;
-      const response = await fetch('/api/attendance/offline-sync', {
+      const response = await fetch(`${apiBase}/attendance/offline-sync`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -392,163 +222,163 @@ function EmployeeView() {
         },
         body: JSON.stringify({ entries: existing })
       });
-      if (!response.ok) return;
-      localStorage.removeItem(OFFLINE_ATTENDANCE_QUEUE_KEY);
-      remoteLog('OFFLINE_SYNC', `Replayed ${existing.length} queued attendance actions`);
+      let data: { results?: { ok?: boolean; error?: string }[] } | null = null;
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
+      if (!response.ok || !data) return;
+      const results = Array.isArray(data.results) ? data.results : [];
+      const nextQueue: typeof existing = [];
+      for (let i = 0; i < existing.length; i++) {
+        const r = results[i];
+        const permFail = r && !r.ok && (
+          r.error === 'NFC payload mismatch' ||
+          (r.error === 'Invalid timestamp or coordinates')
+        );
+        if (r && r.ok) continue;
+        if (permFail) continue;
+        nextQueue.push(existing[i]);
+      }
+      if (nextQueue.length > 0) {
+        localStorage.setItem(OFFLINE_ATTENDANCE_QUEUE_KEY, JSON.stringify(nextQueue.slice(-250)));
+        setError(`Some check-ins could not be synced (${nextQueue.length} still waiting). Contact HR if this continues.`);
+      } else {
+        localStorage.removeItem(OFFLINE_ATTENDANCE_QUEUE_KEY);
+        setError('');
+      }
+      setQueuedPunches(nextQueue.length);
+      const synced = existing.length - nextQueue.length;
+      if (synced > 0) {
+        setInfoMessage(`Synced ${synced} offline check-in${synced === 1 ? '' : 's'}.`);
+        setTimeout(() => setInfoMessage(''), 6000);
+        await refreshAttendanceStatus();
+      }
     } catch (err) {
       console.error('Offline queue replay failed', err);
     }
   };
 
-  const handleLogin = async (e) => {
+  useEffect(() => {
+    const onOnline = () => { void flushOfflineAttendanceQueue(); };
+    window.addEventListener('online', onOnline);
+    return () => window.removeEventListener('online', onOnline);
+  }, [token]);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
+    setLoginSubmitting(true);
     try {
       const baseUrl = isCordova ? 'https://attendance.berkeleyuae.com' : '';
-      const response = await fetch(`${baseUrl}/api/auth/login`, {
+      const organizationSlug =
+        (typeof localStorage !== 'undefined' && (localStorage.getItem('hrOrganizationSlug') || '').trim()) || 'default';
+      const response = await fetch(`${baseUrl}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ staffId: tempId.trim(), password })
+        body: JSON.stringify({ staffId: tempId.trim(), password, organizationSlug })
       });
-
       const data = await response.json();
-
       if (response.ok) {
         applyAuthData(data);
       } else {
-        setError(data.error || 'Login failed');
+        setError(data.error || 'Sign-in failed. Check your staff ID and password.');
       }
-    } catch (err) {
-      setError('Network error. Please try again.');
+    } catch {
+      setError('Could not reach the server. Check your connection and try again.');
+    } finally {
+      setLoginSubmitting(false);
     }
   };
 
   const handlePinLogin = async () => {
     setError('');
     if (!tempId.trim() || !pin.trim()) {
-      setError('Enter Staff ID and PIN to continue.');
+      setError('Enter your staff ID and PIN.');
       return;
     }
+    setLoginSubmitting(true);
     try {
       const baseUrl = isCordova ? 'https://attendance.berkeleyuae.com' : '';
-      const response = await fetch(`${baseUrl}/api/auth/pin-login`, {
+      const organizationSlug =
+        (typeof localStorage !== 'undefined' && (localStorage.getItem('hrOrganizationSlug') || '').trim()) || 'default';
+      const response = await fetch(`${baseUrl}/auth/pin-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ staffId: tempId.trim(), pin: pin.trim() })
+        body: JSON.stringify({ staffId: tempId.trim(), pin: pin.trim(), organizationSlug })
       });
       const data = await response.json();
       if (!response.ok) {
-        setError(data.error || 'PIN login failed');
+        setError(data.error || 'PIN sign-in failed.');
         return;
       }
       applyAuthData(data);
-    } catch (_err) {
-      setError('Network error. Please try again.');
+    } catch {
+      setError('Could not reach the server. Check your connection and try again.');
+    } finally {
+      setLoginSubmitting(false);
     }
   };
 
-  const applyAuthData = (data: any) => {
+  const applyAuthData = (data: { token: string; user: { staffId: string; firstName?: string; lastName?: string; organizationSlug?: string } }) => {
     localStorage.setItem('staffId', data.user.staffId);
     localStorage.setItem('firstName', data.user.firstName || '');
     localStorage.setItem('lastName', data.user.lastName || '');
     localStorage.setItem('authToken', data.token);
+    if (data.user?.organizationSlug) {
+      localStorage.setItem('hrOrganizationSlug', String(data.user.organizationSlug).toLowerCase());
+    }
     setStaffId(data.user.staffId);
     setFirstName(data.user.firstName || '');
     setLastName(data.user.lastName || '');
     setToken(data.token);
-
     if (window.AndroidBridge) {
       window.AndroidBridge.postToken(data.token);
     }
     if (window.isNativeApp) window.location.reload();
   };
 
-  /* const handleAction = (type) => { // Removed native logic for now to force standard socket
-    const targetSocket = (window.isNativeApp && window.appSocket) ? window.appSocket : socket; */
-
-  const handleAction = (type, nfcPayload = null) => {
-    // Force use of standard socket
-    const targetSocket = socket;
+  const handleAction = (type: 'check_in' | 'check_out') => {
+    setError('');
+    const targetSocket = getTargetSocket();
+    const browserOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
     const isConn = targetSocket.connected;
 
-    // Remote Log the attempt
-    remoteLog('BTN_CLICK', `Action: ${type}, Staff: ${staffId}, Socket: ${isConn}, NFC: ${!!nfcPayload}`);
+    refreshLocation();
 
-    if (!isConn) {
-      remoteLog('SOCKET_RETRY', 'Socket disconnected. Attempting reconnect...');
+    if (browserOffline || !isConn) {
       targetSocket.connect();
+      if (!staffId) {
+        setError('Sign in before you can check in.');
+        return;
+      }
       enqueueOfflineAttendanceAction({
         action: type,
         timestamp: new Date().toISOString(),
         latitude: location?.latitude,
         longitude: location?.longitude,
-        nfcPayload: nfcPayload || undefined,
         workContext: {}
       });
-      setError('No connection: action saved and will sync automatically.');
+      setInfoMessage(browserOffline
+        ? 'You are offline. Your check-in is saved on this device and will send when you are back online.'
+        : 'Reconnecting to the server. Your check-in is saved and will send automatically.');
+      setTimeout(() => setInfoMessage(''), 8000);
       return;
     }
 
-    // In Native App, we might not have frontend location access, but backend has background location
-    if (staffId) {
-      const payload: any = { employeeId: staffId };
-      if (location) {
-        payload.latitude = location.latitude;
-        payload.longitude = location.longitude;
-      }
-      if (nfcPayload) {
-        payload.nfcPayload = nfcPayload;
-      }
-
-      console.log(`[FRONTEND] Emitting ${type} with payload:`, payload);
-      targetSocket.emit(type, payload);
-
-      // Optimistic UI update
-      if (type === 'check_in') {
-        setAttendanceStatus('loading');
-      }
-    } else {
-      setError('Waiting for GPS location...');
-      remoteLog('BTN_FAIL', 'Missing staffId');
-    }
-  };
-
-  const handleNfcAction = async (type) => {
-    if (!('NDEFReader' in window)) {
-      alert('NFC is not supported on this browser. Try Chrome on Android.');
+    if (!staffId) {
+      setError('Sign in first.');
       return;
     }
 
-    try {
-      const ndef = new window.NDEFReader();
-      await ndef.scan();
-      // Show scanning modal (using simple alert for now)
-      setError(`Ready to scan NFC. Tap your device to the Site Tag to ${type === 'check_in' ? 'Check In' : 'Check Out'}.`);
-
-      ndef.onreading = event => {
-        let textPayload = event.serialNumber || 'UNKNOWN_TAG';
-        if (event.message && event.message.records) {
-          for (const record of event.message.records) {
-            if (record.recordType === "text") {
-              const textDecoder = new TextDecoder(record.encoding || 'utf-8');
-              textPayload = textDecoder.decode(record.data);
-              break;
-            }
-          }
-        }
-        setError('');
-        alert(`NFC Tag Read Successfully. Processing ${type}...`);
-        handleAction(type, textPayload);
-      };
-
-      ndef.onreadingerror = () => {
-        setError('Error reading NFC tag. Please hold it steady and try again.');
-      };
-    } catch (error) {
-      console.error(error);
-      setError('NFC Error: ' + error.message);
+    const payload: { employeeId: string; latitude?: number; longitude?: number } = { employeeId: staffId };
+    if (location) {
+      payload.latitude = location.latitude;
+      payload.longitude = location.longitude;
     }
+    targetSocket.emit(type, payload);
+    if (type === 'check_in') setAttendanceStatus('loading');
   };
 
   const handleLogout = () => {
@@ -565,190 +395,247 @@ function EmployeeView() {
     window.location.reload();
   };
 
+  const nextStepMain =
+    (() => {
+      const site = statusDetail.siteName ? ` at ${statusDetail.siteName}` : '';
+      if (attendanceStatus === 'checked_in') return `You are checked in${site}. Tap Check out when you finish work or leave the site.`;
+      if (attendanceStatus === 'loading') return 'Checking your status with the server…';
+      return `You are checked out${site}. Tap Check in when you start work.`;
+    })();
+
+  const openSessionHint =
+    attendanceStatus === 'checked_in' && statusDetail.openSource
+      ? `This session was started via ${statusDetail.openSource}${
+          statusDetail.openCheckInTime
+            ? ` on ${new Date(statusDetail.openCheckInTime).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}`
+            : ''
+        }.`
+      : null;
+
+  const statusSyncHint = !lastStatusSyncAt
+    ? 'Status will update after you sign in.'
+    : `Last updated ${lastStatusSyncAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}.`;
+
+  const statusBadgeClass =
+    netState === 'connected' ? 'connected' : netState === 'connecting' ? 'connecting' : 'disconnected';
+  const statusBadgeLabel =
+    netState === 'connected' ? 'Online' : netState === 'connecting' ? 'Connecting…' : 'Offline';
+
   if (!staffId || !token) {
     return (
       <div className="setup-screen">
         <div className="setup-card">
           <div className="berkeley-logo-small">Berkeley Workforce 360</div>
-          <h2>Staff Login</h2>
-          <p>Please enter your credentials.</p>
-          <form onSubmit={handleLogin}>
+          <h2>Sign in</h2>
+          <p className="field-hint" style={{ marginTop: 0 }}>Use the staff ID and password from HR. PIN is optional if your account has one.</p>
+          <form onSubmit={handleLogin} noValidate>
             <div className="form-group">
+              <label htmlFor="emp-staff-id" className="field-label">Staff ID</label>
               <input
+                id="emp-staff-id"
                 type="text"
-                placeholder="Staff ID (e.g. ST374)"
+                placeholder="e.g. ST374"
                 value={tempId}
                 onChange={(e) => setTempId(e.target.value)}
                 required
+                autoComplete="username"
                 className="setup-input"
+                aria-invalid={!!error}
+                disabled={loginSubmitting}
               />
             </div>
             <div className="form-group">
+              <label htmlFor="emp-password" className="field-label">Password</label>
               <input
+                id="emp-password"
                 type="password"
-                placeholder="Password"
+                placeholder="Your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="current-password"
                 className="setup-input"
+                disabled={loginSubmitting}
               />
             </div>
             <div className="form-group">
+              <label htmlFor="emp-pin" className="field-label">PIN <span className="employee-muted">(optional)</span></label>
+              <p className="field-hint">If you use PIN sign-in, fill this and tap &quot;Sign in with PIN&quot; below.</p>
               <input
+                id="emp-pin"
                 type="password"
-                placeholder="Face PIN (fallback)"
+                inputMode="numeric"
+                placeholder="Only if you have a PIN"
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
                 className="setup-input"
+                autoComplete="off"
+                disabled={loginSubmitting}
               />
             </div>
-            {error && <div className="error-message" style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
-            <button type="submit" className="btn-primary">Login</button>
-            <button type="button" className="btn-secondary" style={{ width: '100%', marginTop: '0.5rem' }} onClick={handlePinLogin}>
-              Login with PIN
+            {error && (
+              <div className="error-banner" role="alert">
+                {error}
+              </div>
+            )}
+            <button type="submit" className="btn-primary" disabled={loginSubmitting}>
+              {loginSubmitting ? 'Signing in…' : 'Sign in'}
+            </button>
+            <button
+              type="button"
+              className="btn-secondary"
+              style={{ width: '100%', marginTop: '0.5rem' }}
+              onClick={handlePinLogin}
+              disabled={loginSubmitting}
+            >
+              Sign in with PIN
             </button>
           </form>
-          <FaceLoginCard
-            staffId={tempId}
-            setError={setError}
-            onLoginSuccess={applyAuthData}
-          />
+          {!isCordova && (
+            <p className="field-hint" style={{ marginTop: '1.25rem', textAlign: 'center' }}>
+              <Link to="/hr" style={{ color: 'var(--primary)', fontWeight: 600 }}>HR &amp; managers</Link>
+              {' — open the dashboard'}
+            </p>
+          )}
         </div>
       </div>
     );
   }
 
+  const showLocationBanner = permission !== 'granted';
+  const locationBannerModifier = permission === 'denied' ? 'permission-banner--warning' : 'permission-banner--info';
+
   return (
     <div className="app-container">
-      {(permission === 'prompt' || permission === 'denied') && showBanner && (
-        <div className="permission-banner">
+      {showLocationBanner && (
+        <div className={`permission-banner ${locationBannerModifier}`} role="region" aria-label="Location">
           <div className="banner-content">
-            <h3>Enable Location</h3>
-            <p><strong>Berkeley Workforce 360</strong> requires your location to verify attendance check-ins.</p>
+            <h3>{permission === 'denied' ? 'Location is turned off' : 'Location helps verify check-in'}</h3>
+            <p>
+              {permission === 'denied'
+                ? 'Allow location in your browser or device settings so check-in can be validated when your site requires it.'
+                : 'Tap the button to share your current location. You can refresh again before checking in if GPS was slow.'}
+            </p>
           </div>
           <div className="banner-actions">
-            <button className="btn-primary" onClick={() => window.retryNativeTracking ? window.retryNativeTracking() : startTracking()}>Allow Access</button>
-            <button className="btn-secondary" onClick={() => setShowBanner(false)}>Close</button>
+            <button type="button" className="btn-primary" onClick={() => refreshLocation()}>
+              {permission === 'denied' ? 'Try again' : 'Share location'}
+            </button>
           </div>
         </div>
       )}
 
       <header className="app-header">
         <div>
-          <h1 style={{ fontSize: '1.1rem' }}>Berkeley Workforce 360</h1>
-          <small style={{ fontSize: '0.6rem', opacity: 0.5 }}>v19.0</small>
+          <h1 style={{ fontSize: '1.05rem' }}>Workforce attendance</h1>
+          <small style={{ fontSize: '0.72rem', opacity: 0.65, display: 'block', marginTop: '2px' }}>Check in &amp; out</small>
         </div>
-        <div className={`status-badge ${status}`}>
-          {status === 'connected' ? 'Online' : 'Reconnecting...'}
+        <div className={`status-badge ${statusBadgeClass}`} title={netState === 'disconnected' ? 'You can still queue check-ins offline' : undefined}>
+          <span className="dot" aria-hidden>{netState === 'connected' ? '●' : netState === 'connecting' ? '◌' : '○'}</span>
+          {statusBadgeLabel}
         </div>
       </header>
 
       <main className="main-content">
-        <div className="bg-warning-banner" style={{
-          fontSize: '0.8rem',
-          padding: '12px',
-          background: status === 'connected' ? 'rgba(39, 210, 173, 0.1)' : '#fffbeb',
-          border: '1px solid',
-          borderColor: status === 'connected' ? 'var(--success-color)' : '#fef3c7',
-          borderRadius: '12px',
-          marginBottom: '10px'
-        }}>
-          <strong>Background Tracking Guide:</strong>
-          <p style={{ margin: '4px 0 8px 0', opacity: 0.8 }}>To stay "Online" while your screen is off or app is minimized:</p>
-          <ul style={{ margin: '0', paddingLeft: '20px' }}>
-            <li>Battery Settings &gt; <strong>Unrestricted / No Optimization</strong></li>
-            <li><strong>Lock the App:</strong> Long-press app in "Recent Apps" and use app lock</li>
-            <li>Don't Swipe Close the app</li>
-            <li>{status === 'connected' ? 'Connection active' : 'Reconnecting...'}</li>
-          </ul>
-          <button
-            onClick={() => { if (window.retryNativeTracking) window.retryNativeTracking(); else startTracking(); }}
-            style={{ marginTop: '10px', width: '100%', padding: '6px', fontSize: '0.75rem', borderRadius: '6px', border: '1px solid #ddd', background: '#fff', cursor: 'pointer', fontFamily: 'inherit' }}
-          >
-            Manual Connection Reset
-          </button>
+        {queuedPunches > 0 && (
+          <div className="employee-alert employee-alert--warning" role="status">
+            <strong>{queuedPunches} check-in{queuedPunches === 1 ? '' : 's'} waiting to sync.</strong>
+            {' '}They will send automatically when you are online and connected.
+          </div>
+        )}
+        {infoMessage && (
+          <div className="employee-alert employee-alert--success" role="status">
+            {infoMessage}
+          </div>
+        )}
+        <div className="employee-status-card">
+          <div className="employee-status-card__label">What to do next</div>
+          <div className="employee-status-card__lead">{nextStepMain}</div>
+          {openSessionHint && <div className="employee-status-card__meta">{openSessionHint}</div>}
+          <div className="employee-toolbar">
+            <span>{statusSyncHint}</span>
+            <button
+              type="button"
+              className="btn-employee-tool"
+              onClick={() => { void refreshAttendanceStatus(); }}
+            >
+              Refresh status
+            </button>
+            <button
+              type="button"
+              className="btn-employee-tool"
+              onClick={() => { refreshLocation(); setInfoMessage('Updating location…'); setTimeout(() => setInfoMessage(''), 3000); }}
+            >
+              Refresh location
+            </button>
+          </div>
         </div>
+
         <div className="employee-card">
           <div className="avatar-placeholder">{firstName ? firstName[0] : staffId[0]}</div>
           <h2>{firstName && lastName ? `${firstName} ${lastName}` : `Employee ${staffId}`}</h2>
-          <p className="dept-text">Operations Department | {staffId}</p>
+          <p className="dept-text">Staff ID: {staffId}</p>
         </div>
 
         <div className="action-section">
-          {permission === 'granted' ? (
-            <div className="tracking-active">
-              <div className="pulse-ring"></div>
-              <p>Live Tracking Active</p>
-              {lastUpdate && <p style={{ fontSize: '0.8rem', marginTop: '-0.5rem', opacity: 0.8 }}>Last sent: {lastUpdate}</p>}
-              {location && (
+          <div
+            className={`tracking-active ${permission !== 'granted' || !location ? 'tracking-active--idle' : ''}`}
+          >
+            {permission === 'granted' && location ? (
+              <>
+                <p style={{ margin: 0 }}>Location ready for check-in</p>
                 <code className="coords">
                   {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
                 </code>
-              )}
-            </div>
-          ) : (
-            <div className="tracking-inactive">
-              <p>Location access needed</p>
-              <button className="btn-primary" style={{ marginTop: '10px', fontSize: '0.8rem' }} onClick={() => window.retryNativeTracking ? window.retryNativeTracking() : startTracking()}>Retry Location Access</button>
-            </div>
-          )}
+              </>
+            ) : (
+              <p style={{ margin: 0 }}>Get a location fix before checking in if your site uses GPS. Use &quot;Refresh location&quot; above.</p>
+            )}
+          </div>
 
           <div className="check-in-controls">
             <button
+              type="button"
               className="check-in-btn"
               disabled={attendanceStatus === 'checked_in'}
               onClick={() => handleAction('check_in')}
               style={{ opacity: attendanceStatus === 'checked_in' ? 0.5 : 1 }}
+              aria-label={attendanceStatus === 'checked_in' ? 'Already checked in' : 'Check in to work'}
             >
-              {attendanceStatus === 'checked_in' ? 'Checked In' : 'Check In'}
+              {attendanceStatus === 'checked_in' ? 'Checked in' : 'Check in'}
             </button>
             <button
+              type="button"
               className="check-out-btn"
               disabled={attendanceStatus === 'checked_out'}
               onClick={() => handleAction('check_out')}
               style={{ opacity: attendanceStatus === 'checked_out' ? 0.5 : 1 }}
+              aria-label={attendanceStatus === 'checked_out' ? 'Already checked out' : 'Check out from work'}
             >
-              {attendanceStatus === 'checked_out' ? 'Checked Out' : 'Check Out'}
+              {attendanceStatus === 'checked_out' ? 'Checked out' : 'Check out'}
             </button>
-            {'NDEFReader' in window && (
-              <>
-                <button
-                  className="check-in-btn nfc-btn"
-                  disabled={attendanceStatus === 'checked_in'}
-                  onClick={() => handleNfcAction('check_in')}
-                  style={{ opacity: attendanceStatus === 'checked_in' ? 0.5 : 1, background: '#4f46e5', marginTop: '10px' }}
-                >
-                  📶 NFC Check In
-                </button>
-                <button
-                  className="check-out-btn nfc-btn"
-                  disabled={attendanceStatus === 'checked_out'}
-                  onClick={() => handleNfcAction('check_out')}
-                  style={{ opacity: attendanceStatus === 'checked_out' ? 0.5 : 1, background: '#4f46e5', color: '#fff', border: 'none', marginTop: '10px' }}
-                >
-                  📶 NFC Check Out
-                </button>
-              </>
+            {error && (
+              <p
+                className="employee-alert employee-alert--warning"
+                style={{ gridColumn: '1 / -1', margin: 0, marginTop: '0.25rem' }}
+                role="alert"
+              >
+                {error}
+              </p>
             )}
-            {error && <p style={{ color: '#d97706', fontSize: '0.85rem', marginTop: '10px', width: '100%', textAlign: 'center' }}>{error}</p>}
           </div>
 
           <button
+            type="button"
             onClick={handleLogout}
+            className="btn-secondary"
             style={{
-              marginTop: '1rem',
-              width: '100%',
-              background: 'transparent',
-              color: '#6b7280',
-              border: '1px solid #e2e8f0',
-              padding: '0.75rem',
-              borderRadius: '0.75rem',
-              fontSize: '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'inherit'
+              marginTop: '0.5rem',
+              color: 'var(--gray-600)',
+              borderColor: 'var(--gray-200)',
             }}
           >
-            Logout / Switch Staff
+            Sign out
           </button>
         </div>
       </main>
@@ -763,8 +650,6 @@ function App() {
       <Routes>
         <Route path="/" element={<EmployeeView />} />
         <Route path="/hr" element={<HRDashboard />} />
-        <Route path="/hr/enrollment" element={<HREnrollmentMobile />} />
-        <Route path="/kiosk/:siteId" element={<KioskFaceAttendance />} />
       </Routes>
     </Router>
   );
