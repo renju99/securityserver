@@ -1,0 +1,86 @@
+# Standalone stack for a machine that serves ONLY security.berkeleyuae.com.
+# Includes Postgres, Odoo, Nginx, and Certbot on one Docker network (no web-proxy-net).
+#
+# Usage (from security/):
+#   docker compose -f docker-compose.standalone.yml up -d
+#
+# First-time TLS: nginx needs cert files to start with the current vhost. Either copy
+# live/security.berkeleyuae.com from your old host's LetsEncrypt volume, or obtain certs
+# once with certbot --standalone while nginx is stopped (port 80 free), then up -d all.
+#
+# Do not run this compose on the same host as nginx-proxy with BOTH publishing 80:80
+# and 443:443 — only one process can bind those ports.
+
+name: berkeley-security
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_USER=odoo
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data/pgdata
+    networks:
+      - security-internal
+    restart: unless-stopped
+
+  odoo_security:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=odoo
+    volumes:
+      - odoo-web-data:/var/lib/odoo
+      - ./custom_addons:/mnt/extra-addons
+      - ./config:/etc/odoo
+      - ./scripts:/scripts
+    container_name: odoo-security
+    restart: unless-stopped
+    command: [ "odoo", "--config=/etc/odoo/odoo.conf" ]
+    networks:
+      - security-internal
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-security
+    depends_on:
+      - odoo_security
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx-config/security.berkeleyuae.com.conf:/etc/nginx/conf.d/security.berkeleyuae.com.conf:ro
+      - security_letsencrypt_www:/var/www/certbot:ro
+      - security_letsencrypt_conf:/etc/letsencrypt:ro
+    networks:
+      - security-internal
+    restart: unless-stopped
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot-security
+    volumes:
+      - security_letsencrypt_www:/var/www/certbot
+      - security_letsencrypt_conf:/etc/letsencrypt
+    networks:
+      - security-internal
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    restart: unless-stopped
+
+volumes:
+  odoo-db-data:
+  odoo-web-data:
+  security_letsencrypt_www:
+  security_letsencrypt_conf:
+
+networks:
+  security-internal:
+    driver: bridge

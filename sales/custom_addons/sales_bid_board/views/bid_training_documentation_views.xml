@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <record id="action_bid_board_training_client" model="ir.actions.client">
-        <field name="name">Documentation</field>
-        <field name="tag">sales_bid_board.training_doc</field>
-    </record>
-</odoo>

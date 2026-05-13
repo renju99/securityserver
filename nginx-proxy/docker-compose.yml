@@ -1,3 +1,5 @@
+# Edge proxy for security.berkeleyuae.com only (other apps run on a separate host).
+
 version: '3.8'
 
 services:
@@ -9,13 +11,8 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro # Contains security, esign, .htpasswd
-      # Mount separate configs for other apps
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ../security/nginx-config/security.berkeleyuae.com.conf:/etc/nginx/extra.d/security.berkeleyuae.com.conf:ro
-      - ../sales/nginx-config/sales.berkeleyuae.com.conf:/etc/nginx/extra.d/sales.berkeleyuae.com.conf:ro
-      - ../odoo-attendance/nginx-config/attendance.berkeleyuae.com.conf:/etc/nginx/extra.d/attendance.berkeleyuae.com.conf:ro
-      - ../vendor-registration/nginx-config/vendor.berkeleyuae.com.conf:/etc/nginx/extra.d/vendor.berkeleyuae.com.conf:ro
-      # Certbot volumes (reusing existing volumes to keep certs)
       - security_certbot-www:/var/www/certbot:ro
       - security_certbot-conf:/etc/letsencrypt:ro
     networks:

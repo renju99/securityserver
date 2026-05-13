@@ -1,3 +1,7 @@
+# Odoo + Postgres only; joins external web-proxy-net so host nginx-proxy can reach odoo-security:8069.
+# For a dedicated security machine (own Nginx + Certbot on 80/443), use:
+#   docker compose -f docker-compose.standalone.yml up -d
+
 services:
   db:
     image: postgres:15

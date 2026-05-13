@@ -1,9 +1,0 @@
-# Optional Python dependencies for Berkeley Workforce (attendance_core)
-# Install on the Odoo server only when you need the feature.
-
-# Face encoding / matching (dlib + face_recognition; may require system build tools)
-face_recognition>=1.3.0
-numpy>=1.22.0
-
-# Scheduled export upload to Amazon S3
-boto3>=1.26.0
