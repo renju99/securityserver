@@ -1,5 +1,5 @@
 /**
- * GuardPro Offline Attendance Manager
+ * GuardLink Offline Attendance Manager
  * Handles offline shift check-in/out with GPS caching
  */
 

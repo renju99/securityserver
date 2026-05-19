@@ -1,6 +1,6 @@
-# GuardPro - Internationalization (i18n)
+# GuardLink - Internationalization (i18n)
 
-This directory contains translation files for the GuardPro module.
+This directory contains translation files for the GuardLink module.
 
 ## Available Languages
 

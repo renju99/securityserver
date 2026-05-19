@@ -6,7 +6,7 @@
             <t t-set="breadcrumbs_searchbar" t-value="True"/>
             
             <t t-call="portal.portal_searchbar">
-                <t t-set="title">GuardPro Dashboard</t>
+                <t t-set="title">GuardLink Dashboard</t>
             </t>
             
             <!-- Enhanced Navigation Header -->
@@ -17,7 +17,7 @@
                             <div class="card-header bg-primary text-white">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <h5 class="mb-0">
-                                        <i class="fa fa-shield me-2"/>GuardPro Dashboard
+                                        <i class="fa fa-shield me-2"/>GuardLink Dashboard
                                     </h5>
                                     <div class="btn-group" role="group">
                                         <a href="/guardpro/pwa/" class="btn btn-light btn-sm">
@@ -1400,10 +1400,10 @@
                                 <h2 class="mb-3">Access Denied</h2>
                                 <p class="lead text-muted mb-4" t-esc="error_message or 'You do not have permission to access this page.'"/>
                                 <p class="text-muted">
-                                    The Sentry Portal is exclusively for users with the <strong>Guard</strong> role.
+                                    The GuardLink Portal is exclusively for users with the <strong>Guard</strong> role.
                                 </p>
                                 <p class="text-muted">
-                                    If you are a Supervisor, Manager, or Administrator, please use the backend interface to access GuardPro features.
+                                    If you are a Supervisor, Manager, or Administrator, please use the backend interface to access GuardLink features.
                                 </p>
                                 <div class="mt-4">
                                     <a href="/web" class="btn btn-primary me-2">
@@ -1426,7 +1426,7 @@
             <t t-set="breadcrumbs_searchbar" t-value="True"/>
             
             <t t-call="portal.portal_searchbar">
-                <t t-set="title">GuardPro Access</t>
+                <t t-set="title">GuardLink Access</t>
             </t>
             
             <div class="container mt-5">
@@ -1437,10 +1437,10 @@
                                 <i class="fa fa-shield fa-5x text-warning mb-4"/>
                                 <h2 class="mb-3">Access Restricted</h2>
                                 <p class="lead text-muted mb-4">
-                                    You do not have guard privileges to access the GuardPro portal.
+                                    You do not have guard privileges to access the GuardLink portal.
                                 </p>
                                 <p class="text-muted">
-                                    The GuardPro portal is only accessible to users with an active guard profile.
+                                    The GuardLink portal is only accessible to users with an active guard profile.
                                     If you believe you should have access, please contact your system administrator.
                                 </p>
                                 <div class="mt-4">
@@ -1582,19 +1582,19 @@
         </t>
     </template>
     
-    <!-- Extend Portal Home to Add GuardPro Navigation -->
-    <template id="portal_my_home_guardpro" name="Sentry Portal Home" inherit_id="portal.portal_my_home" priority="50">
+    <!-- Extend Portal Home to Add GuardLink Navigation -->
+    <template id="portal_my_home_guardpro" name="GuardLink Portal Home" inherit_id="portal.portal_my_home" priority="50">
         <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
             <!-- GUARD PORTAL: Only show to security guards, NOT residents -->
             <t t-if="request.env.user.has_group('guardpro.group_guardpro_guard_portal') and not request.env.user.has_group('guardpro.group_guardpro_resident_user')">
-            <!-- Prominent GuardPro Dashboard Card -->
+            <!-- Prominent GuardLink Dashboard Card -->
             <div class="card mb-3 bg-primary text-white">
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-auto">
                             <div class="text-center">
                                 <i class="fa fa-shield fa-4x mb-2"/>
-                                <h4 class="mb-0">GuardPro</h4>
+                                <h4 class="mb-0">GuardLink</h4>
                             </div>
                         </div>
                         <div class="col">

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Example: Adding Constraints and Validations to GuardPro
+Example: Adding Constraints and Validations to GuardLink
 
 This example demonstrates different types of constraints:
 - Python constraints (@api.constrains)

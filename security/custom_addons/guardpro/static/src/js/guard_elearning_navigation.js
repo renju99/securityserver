@@ -23,11 +23,11 @@
         const isElearningPage = currentPath.includes('/slides') || currentPath.includes('/my/training');
         
         if (!isElearningPage) {
-            console.log('GuardPro: Not on eLearning page, skipping mobile button');
+            console.log('GuardLink: Not on eLearning page, skipping mobile button');
             return;
         }
         
-        console.log('GuardPro: On eLearning page, adding mobile dashboard button');
+        console.log('GuardLink: On eLearning page, adding mobile dashboard button');
         
         // Add CSS styles first
         addStyles();
@@ -121,7 +121,7 @@
         `;
         
         document.head.appendChild(style);
-        console.log('GuardPro: Styles added');
+        console.log('GuardLink: Styles added');
     }
     
     function createMobileButton() {
@@ -129,13 +129,13 @@
         const mobileButton = document.createElement('a');
         mobileButton.href = '/guardpro/mobile';
         mobileButton.className = 'guardpro-mobile-floating-btn';
-        mobileButton.title = 'Return to Sentry Mobile Dashboard';
+        mobileButton.title = 'Return to GuardLink Mobile Dashboard';
         mobileButton.innerHTML = '<i class="fa fa-mobile"></i> <span>Mobile</span>';
         
         // Append button to body
         document.body.appendChild(mobileButton);
         
-        console.log('GuardPro: Floating mobile button added');
+        console.log('GuardLink: Floating mobile button added');
     }
     
     function addTopNavigationLink() {
@@ -151,7 +151,7 @@
                 mobileLink.innerHTML = '<i class="fa fa-arrow-left"></i> Mobile Dashboard';
                 
                 searchArea.parentElement.insertBefore(mobileLink, searchArea);
-                console.log('GuardPro: Top navigation link added (search area)');
+                console.log('GuardLink: Top navigation link added (search area)');
             } else if (breadcrumb) {
                 const mobileLink = document.createElement('a');
                 mobileLink.href = '/guardpro/mobile';
@@ -160,7 +160,7 @@
                 mobileLink.innerHTML = '<i class="fa fa-arrow-left"></i> Mobile Dashboard';
                 
                 breadcrumb.appendChild(mobileLink);
-                console.log('GuardPro: Top navigation link added (breadcrumb)');
+                console.log('GuardLink: Top navigation link added (breadcrumb)');
             }
         }, 500);  // Small delay to ensure DOM is fully loaded
     }

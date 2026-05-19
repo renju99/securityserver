@@ -19,7 +19,7 @@ from ..common.image_optimizer import ImageOptimizer
 _logger = logging.getLogger(__name__)
 
 
-class GuardProPWASimple(http.Controller):
+class GuardLinkPWASimple(http.Controller):
     """Simplified PWA Controller using Odoo's standard patterns."""
 
     def _format_datetime_tz(self, record, datetime_value, format_str='%H:%M'):
@@ -104,7 +104,7 @@ class GuardProPWASimple(http.Controller):
         return user.id in audit.auditor_team_ids.ids
 
     def _user_can_access_mobile_compliance(self, user):
-        """Compliance mobile UI/API: GuardPro Supervisor / Manager / Admin (not guard-only portal)."""
+        """Compliance mobile UI/API: GuardLink Supervisor / Manager / Admin (not guard-only portal)."""
         if not user or user._is_public():
             return False
         return (
@@ -212,7 +212,7 @@ class GuardProPWASimple(http.Controller):
     @http.route('/guardpro/mobile', type='http', auth='user', website=True)
     def mobile_dashboard(self, **kwargs):
         """Main mobile dashboard using Odoo website framework."""
-        _logger.info('[GuardPro Mobile] Accessed by user: %s (ID: %s)', request.env.user.name, request.env.user.id)
+        _logger.info('[GuardLink Mobile] Accessed by user: %s (ID: %s)', request.env.user.name, request.env.user.id)
         
         guard = self._get_guard_from_user()
         
@@ -669,7 +669,7 @@ class GuardProPWASimple(http.Controller):
         today_start_utc = today_start_local.astimezone(pytz.UTC).replace(tzinfo=None)
         today_end_utc = today_start_utc + timedelta(days=1)
         
-        _logger.info('[GuardPro Mobile Shifts] Guard: %s, User TZ: %s, Today Start UTC: %s', 
+        _logger.info('[GuardLink Mobile Shifts] Guard: %s, User TZ: %s, Today Start UTC: %s', 
                      guard.name, user_tz, today_start_utc)
         
         shifts_today = request.env['guard.shift'].sudo().search([
@@ -688,7 +688,7 @@ class GuardProPWASimple(http.Controller):
             ('start_datetime', '<', today_start_utc),
         ], limit=10, order='start_datetime desc')
         
-        _logger.info('[GuardPro Mobile Shifts] Found %d today, %d upcoming, %d past shifts', 
+        _logger.info('[GuardLink Mobile Shifts] Found %d today, %d upcoming, %d past shifts', 
                      len(shifts_today), len(upcoming_shifts), len(past_shifts))
         
         return request.render('guardpro.mobile_shifts', {
@@ -1469,8 +1469,8 @@ class GuardProPWASimple(http.Controller):
     def mobile_manifest(self, **kwargs):
         """PWA manifest file."""
         manifest = {
-            'name': 'GuardPro Mobile',
-            'short_name': 'GuardPro',
+            'name': 'GuardLink Mobile',
+            'short_name': 'GuardLink',
             'version': '2.0.0',
             'description': 'Security guard management mobile app',
             'start_url': '/guardpro/mobile',
@@ -1504,10 +1504,10 @@ class GuardProPWASimple(http.Controller):
     @http.route('/guardpro/mobile/profile', type='http', auth='user', website=True)
     def mobile_profile(self, **kwargs):
         """Mobile profile page."""
-        _logger.info('[GuardPro Mobile] Accessing profile for user: %s', request.env.user.name)
+        _logger.info('[GuardLink Mobile] Accessing profile for user: %s', request.env.user.name)
         try:
             guard = self._get_guard_from_user()
-            _logger.info('[GuardPro Mobile] Guard profile found: %s', guard.name if guard else 'None')
+            _logger.info('[GuardLink Mobile] Guard profile found: %s', guard.name if guard else 'None')
             
             if not guard:
                 return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
@@ -1517,7 +1517,7 @@ class GuardProPWASimple(http.Controller):
                 'user': request.env.user,
             })
         except Exception as e:
-            _logger.error('[GuardPro Mobile] Error in mobile_profile: %s', str(e), exc_info=True)
+            _logger.error('[GuardLink Mobile] Error in mobile_profile: %s', str(e), exc_info=True)
             raise e
     
     @http.route('/guardpro/mobile/site_info', type='http', auth='user', website=True)
@@ -1539,7 +1539,7 @@ class GuardProPWASimple(http.Controller):
                 ], limit=1, order='checkin_time desc')
                 if active_attendance:
                     site = active_attendance.site_id
-                    _logger.info('[GuardPro Mobile] Found site from active attendance: %s', site.name)
+                    _logger.info('[GuardLink Mobile] Found site from active attendance: %s', site.name)
             
             # Second Fallback: Check most recent shift
             if not site and guard:
@@ -1548,12 +1548,12 @@ class GuardProPWASimple(http.Controller):
                 ], limit=1, order='start_datetime desc')
                 if recent_shift:
                     site = recent_shift.site_id
-                    _logger.info('[GuardPro Mobile] Found site from recent shift: %s', site.name)
+                    _logger.info('[GuardLink Mobile] Found site from recent shift: %s', site.name)
 
-            _logger.info('[GuardPro Mobile] Site Info for Guard %s: Site=%s (ID: %s)', guard.name, site.name if site else 'None', site.id if site else 'None')
+            _logger.info('[GuardLink Mobile] Site Info for Guard %s: Site=%s (ID: %s)', guard.name, site.name if site else 'None', site.id if site else 'None')
             
             if site and site.manager_id:
-                _logger.info('[GuardPro Mobile] Site Manager for Site %s: %s (ID: %s)', site.name, site.manager_id.name, site.manager_id.id)
+                _logger.info('[GuardLink Mobile] Site Manager for Site %s: %s (ID: %s)', site.name, site.manager_id.name, site.manager_id.id)
             
             return request.render('guardpro.mobile_site_info_template', {
                 'guard': guard,
@@ -1563,7 +1563,7 @@ class GuardProPWASimple(http.Controller):
         except Exception as e:
             import traceback
             error_trace = traceback.format_exc()
-            _logger.error('[GuardPro Mobile] Error in mobile_site_info: %s\n%s', str(e), error_trace)
+            _logger.error('[GuardLink Mobile] Error in mobile_site_info: %s\n%s', str(e), error_trace)
             return request.make_response(f"Internal Server Error\n\n{str(e)}\n\n{error_trace}", status=500)
 
     @http.route('/guardpro/mobile/emergency', type='http', auth='user', website=True)
@@ -1881,7 +1881,7 @@ class GuardProPWASimple(http.Controller):
     def mobile_service_worker(self, **kwargs):
         """Minimal service worker for offline support."""
         sw_content = """
-// GuardPro Mobile - Minimal Service Worker (Odoo 18)
+// GuardLink Mobile - Minimal Service Worker (Odoo 18)
 const CACHE_VERSION = 'v2.0.7';
 const CACHE_NAME = 'guardpro-mobile-' + CACHE_VERSION;
 

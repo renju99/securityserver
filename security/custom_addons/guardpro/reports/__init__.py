@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Report models for GuardPro."""
+"""Report models for GuardLink."""
 
 from . import incident_report_pdf
 from . import shift_report_pdf

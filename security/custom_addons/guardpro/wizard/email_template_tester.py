@@ -8,7 +8,7 @@ _logger = logging.getLogger(__name__)
 
 
 class EmailTemplateTester(models.TransientModel):
-    """Email Template Testing Wizard for GuardPro Module"""
+    """Email Template Testing Wizard for GuardLink Module"""
     _name = 'email.template.tester'
     _description = 'Email Template Tester'
 
@@ -153,7 +153,7 @@ class EmailTemplateTester(models.TransientModel):
         templates = templates.sorted(key=lambda t: t.name)
         
         result_lines = []
-        result_lines.append("<h2>GuardPro Email Template Test Report</h2>")
+        result_lines.append("<h2>GuardLink Email Template Test Report</h2>")
         result_lines.append("<p><strong>Total Templates Found:</strong> %s</p>" % len(templates))
         result_lines.append("<p><strong>Test Date:</strong> %s</p><hr/>" % fields.Datetime.now())
         

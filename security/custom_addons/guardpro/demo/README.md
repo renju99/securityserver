@@ -1,8 +1,8 @@
-# GuardPro Demo Data Documentation
+# GuardLink Demo Data Documentation
 
 ## Overview
 
-This comprehensive demo data package showcases all features of the GuardPro Security Guard Management System. The demo data is designed to persist through module uninstall/reinstall cycles, making it perfect for client presentations and demonstrations.
+This comprehensive demo data package showcases all features of the GuardLink Security Guard Management System. The demo data is designed to persist through module uninstall/reinstall cycles, making it perfect for client presentations and demonstrations.
 
 ## Demo Data Components
 

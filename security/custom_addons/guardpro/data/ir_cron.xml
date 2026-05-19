@@ -8,7 +8,7 @@
         
         <!-- Shift Reminder Notifications -->
         <record id="cron_shift_reminders" model="ir.cron">
-            <field name="name">GuardPro: Send Shift Reminders</field>
+            <field name="name">GuardLink: Send Shift Reminders</field>
             <field name="model_id" ref="model_guard_shift"/>
             <field name="state">code</field>
             <field name="code">model.send_shift_reminders()</field>
@@ -20,7 +20,7 @@
 
         <!-- Location History Archiving (30 days) -->
         <record id="cron_cleanup_location_history" model="ir.cron">
-            <field name="name">GuardPro: Archive Old Location History (30 days)</field>
+            <field name="name">GuardLink: Archive Old Location History (30 days)</field>
             <field name="model_id" ref="model_guard_location_history"/>
             <field name="state">code</field>
             <field name="code">model.cleanup_old_records()</field>
@@ -33,7 +33,7 @@
 
         <!-- Certification Expiry Alerts -->
         <record id="cron_certification_expiry" model="ir.cron">
-            <field name="name">GuardPro: Check Certification Expiry</field>
+            <field name="name">GuardLink: Check Certification Expiry</field>
             <field name="model_id" ref="model_guard_profile"/>
             <field name="state">code</field>
             <field name="code">model.check_certification_expiry()</field>
@@ -46,7 +46,7 @@
 
         <!-- Escalate Critical Incidents -->
         <record id="cron_escalate_incidents" model="ir.cron">
-            <field name="name">GuardPro: Escalate Unresponded Critical Incidents</field>
+            <field name="name">GuardLink: Escalate Unresponded Critical Incidents</field>
             <field name="model_id" ref="model_incident_report"/>
             <field name="state">code</field>
             <field name="code">model.escalate_critical_incidents()</field>
@@ -58,7 +58,7 @@
 
         <!-- Check Overdue Tours -->
         <record id="cron_check_overdue_tours" model="ir.cron">
-            <field name="name">GuardPro: Check Overdue Tours</field>
+            <field name="name">GuardLink: Check Overdue Tours</field>
             <field name="model_id" ref="model_tour_log"/>
             <field name="state">code</field>
             <field name="code">model.check_overdue_tours()</field>
@@ -70,7 +70,7 @@
 
         <!-- Check Equipment Maintenance -->
         <record id="cron_equipment_maintenance" model="ir.cron">
-            <field name="name">GuardPro: Equipment Maintenance Reminders</field>
+            <field name="name">GuardLink: Equipment Maintenance Reminders</field>
             <field name="model_id" ref="model_guardpro_equipment"/>
             <field name="state">code</field>
             <field name="code">model.send_maintenance_reminders()</field>
@@ -83,7 +83,7 @@
 
         <!-- Check Missed Check-ins -->
         <record id="cron_missed_checkins" model="ir.cron">
-            <field name="name">GuardPro: Alert on Missed Check-ins</field>
+            <field name="name">GuardLink: Alert on Missed Check-ins</field>
             <field name="model_id" ref="model_guard_shift"/>
             <field name="state">code</field>
             <field name="code">model.check_missed_checkins()</field>
@@ -95,7 +95,7 @@
 
         <!-- Update Guard Status -->
         <record id="cron_update_guard_status" model="ir.cron">
-            <field name="name">GuardPro: Update Guard Status</field>
+            <field name="name">GuardLink: Update Guard Status</field>
             <field name="model_id" ref="model_guard_profile"/>
             <field name="state">code</field>
             <field name="code">model.update_guard_status()</field>
@@ -107,7 +107,7 @@
 
         <!-- Generate Shifts from Templates - DISABLED: Manual generation only -->
         <record id="cron_generate_template_shifts" model="ir.cron">
-            <field name="name">GuardPro: Generate Shifts from Templates (Disabled)</field>
+            <field name="name">GuardLink: Generate Shifts from Templates (Disabled)</field>
             <field name="model_id" ref="model_shift_template"/>
             <field name="state">code</field>
             <field name="code"># Disabled - Manual generation only</field>
@@ -120,7 +120,7 @@
 
         <!-- mail.mail retention: remove email queue rows older than N days (default 365). Does not delete chatter. -->
         <record id="cron_mail_mail_retention" model="ir.cron">
-            <field name="name">GuardPro: Purge old mail.mail (retention, default 365 days)</field>
+            <field name="name">GuardLink: Purge old mail.mail (retention, default 365 days)</field>
             <field name="model_id" ref="mail.model_mail_mail"/>
             <field name="state">code</field>
             <field name="code">model.guardpro_cron_purge_old_records()</field>
@@ -133,7 +133,7 @@
 
         <!-- Push-to-talk temp stream retention: remove stale temp files from interrupted sessions -->
         <record id="cron_ptt_temp_cleanup" model="ir.cron">
-            <field name="name">GuardPro: Cleanup stale push-to-talk temp files</field>
+            <field name="name">GuardLink: Cleanup stale push-to-talk temp files</field>
             <field name="model_id" ref="model_push_to_talk_message"/>
             <field name="state">code</field>
             <field name="code">model.cron_cleanup_stale_stream_temp_files()</field>
@@ -149,7 +149,7 @@
         <!-- Uncomment when activating equipment management integration -->
         <!--
         <record id="cron_equipment_calibration_check" model="ir.cron">
-            <field name="name">GuardPro: Check Equipment Calibration Due</field>
+            <field name="name">GuardLink: Check Equipment Calibration Due</field>
             <field name="model_id" ref="maintenance.model_maintenance_equipment"/>
             <field name="state">code</field>
             <field name="code">model._cron_check_calibration_due()</field>
@@ -163,7 +163,7 @@
 
         <!-- Patrol reminders: 30 / 10 minutes before shift start, per assigned tour -->
         <record id="cron_patrol_reminders" model="ir.cron">
-            <field name="name">GuardPro: Patrol Start Reminders (30 / 10 min)</field>
+            <field name="name">GuardLink: Patrol Start Reminders (30 / 10 min)</field>
             <field name="model_id" ref="model_tour_patrol_reminder"/>
             <field name="state">code</field>
             <field name="code">model.cron_create_from_shifts()</field>

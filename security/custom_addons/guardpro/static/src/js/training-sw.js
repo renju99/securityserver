@@ -1,5 +1,5 @@
 /**
- * Service Worker for GuardPro Training Offline Support
+ * Service Worker for GuardLink Training Offline Support
  * Handles caching of training content and assets for offline access
  */
 

@@ -1,5 +1,5 @@
 /**
- * QR Code Scanner Module for GuardPro
+ * QR Code Scanner Module for GuardLink
  * Uses device camera for QR code scanning
  */
 

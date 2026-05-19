@@ -1,8 +1,8 @@
 #!/bin/bash
-# Verification Script for GuardPro Scalability Configuration
+# Verification Script for GuardLink Scalability Configuration
 
 echo "=========================================="
-echo "GuardPro Scalability Configuration Check"
+echo "GuardLink Scalability Configuration Check"
 echo "=========================================="
 echo ""
 

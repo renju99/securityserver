@@ -1121,7 +1121,7 @@ class MobileAPIController(http.Controller):
         return bool(self_auditor or in_team)
 
     def _compliance_api_staff_only(self, user):
-        """GuardPro supervisor, manager, or admin."""
+        """GuardLink supervisor, manager, or admin."""
         if not user or user._is_public():
             return False
         return (

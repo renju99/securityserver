@@ -4,7 +4,7 @@
         
         <!-- Cron: Auto-calculate monthly performance metrics -->
         <record id="ir_cron_calculate_monthly_performance" model="ir.cron">
-            <field name="name">GuardPro: Calculate Monthly Performance Metrics</field>
+            <field name="name">GuardLink: Calculate Monthly Performance Metrics</field>
             <field name="model_id" ref="model_guard_performance_review"/>
             <field name="state">code</field>
             <field name="code">model._cron_calculate_monthly_performance()</field>
@@ -16,7 +16,7 @@
 
         <!-- Cron: Send performance review reminders -->
         <record id="ir_cron_performance_review_reminders" model="ir.cron">
-            <field name="name">GuardPro: Performance Review Reminders</field>
+            <field name="name">GuardLink: Performance Review Reminders</field>
             <field name="model_id" ref="model_guard_performance_review"/>
             <field name="state">code</field>
             <field name="code">model._cron_send_review_reminders()</field>
@@ -28,7 +28,7 @@
 
         <!-- Cron: Auto-award performance badges -->
         <record id="ir_cron_award_performance_badges" model="ir.cron">
-            <field name="name">GuardPro: Auto-Award Performance Badges</field>
+            <field name="name">GuardLink: Auto-Award Performance Badges</field>
             <field name="model_id" ref="model_guard_performance_badge"/>
             <field name="state">code</field>
             <field name="code">model._cron_auto_award_badges()</field>

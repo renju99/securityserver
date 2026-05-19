@@ -1,6 +1,6 @@
 # Troubleshooting Guide
 
-Common issues and solutions for Sentry.
+Common issues and solutions for GuardLink.
 
 ---
 
@@ -54,8 +54,8 @@ Common issues and solutions for Sentry.
 ## Getting Help
 
 ### Support Channels
-- 📧 Email: support@sentry.app
-- 📞 Phone: 1-800-SENTRY
+- 📧 Email: support@guardlink.app
+- 📞 Phone: GuardLink Support
 - 💬 Live Chat: 24/7 in-app
 - 🎫 Support Ticket: Help menu
 

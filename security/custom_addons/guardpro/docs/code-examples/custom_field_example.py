@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Example: Adding Custom Fields to GuardPro Models
+Example: Adding Custom Fields to GuardLink Models
 
-This example shows how to add custom fields to existing GuardPro models
+This example shows how to add custom fields to existing GuardLink models
 using Odoo's inheritance mechanism.
 """
 

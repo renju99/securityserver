@@ -1,5 +1,5 @@
 /**
- * GuardPro Offline Sync Manager
+ * GuardLink Offline Sync Manager
  * Handles synchronization of offline data with conflict resolution
  */
 

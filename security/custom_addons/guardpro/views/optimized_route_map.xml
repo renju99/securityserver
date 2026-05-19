@@ -379,7 +379,7 @@
                                 <t t-translate="yes">Google Maps API key required</t>
                             </h4>
                             <p t-translate="yes">
-                                Configure your Google Maps JavaScript API key under Settings -> General Settings -> GuardPro -> Google Maps Integration to visualize optimized patrol routes.
+                                Configure your Google Maps JavaScript API key under Settings -> General Settings -> GuardLink -> Google Maps Integration to visualize optimized patrol routes.
                             </p>
                             <p class="mb-0" t-translate="yes">
                                 Supplying a customer-specific key ensures you stay in control of Google Cloud billing.

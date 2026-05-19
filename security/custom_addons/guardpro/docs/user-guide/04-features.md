@@ -1,6 +1,6 @@
 # Features overview
 
-High-level map of Sentry areas. For **what is enabled in your build** (mobile web, optional Odoo apps, CCTV UI, biometric capture), see the [Documentation hub](../INDEX.md) section *Product scope*.
+High-level map of GuardLink areas. For **what is enabled in your build** (mobile web, optional Odoo apps, CCTV UI, biometric capture), see the [Documentation hub](../INDEX.md) section *Product scope*.
 
 ---
 

@@ -1,5 +1,5 @@
 /**
- * GuardPro PWA Service Worker Registration
+ * GuardLink PWA Service Worker Registration
  * Registers the service worker and handles updates
  */
 
@@ -150,8 +150,8 @@
             showSyncNotification('success', 'All offline data has been synced');
             
             // Refresh data
-            if (window.GuardProApp && window.GuardProApp.refreshData) {
-                window.GuardProApp.refreshData();
+            if (window.GuardLinkApp && window.GuardLinkApp.refreshData) {
+                window.GuardLinkApp.refreshData();
             }
         }
         

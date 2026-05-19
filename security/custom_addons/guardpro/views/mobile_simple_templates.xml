@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Mobile Base Template - Clean Odoo-native design -->
-    <template id="mobile_base" name="Sentry Mobile Base">
+    <template id="mobile_base" name="GuardLink Mobile Base">
         <t t-call="website.layout">
             <t t-set="no_header" t-value="True"/>
             <t t-set="no_footer" t-value="True"/>
@@ -14,7 +14,7 @@
                     <div class="container-fluid">
                         <div class="d-flex justify-content-between align-items-center">
                             <h1 class="h4 mb-0 fw-bold">
-                                <i class="fa fa-shield-alt me-2" style="color: #F7941D;"/>Berkeley Guard
+                                <i class="fa fa-shield-alt me-2" style="color: #F7941D;"/>GuardLink
                             </h1>
                             <t t-if="guard and guard != False">
                                 <span class="small">
@@ -212,7 +212,7 @@
                     }
                     // Only log errors that are not from extensions
                     if (!e.message || (!e.message.includes('spoofer') && !e.message.includes('extension'))) {
-                        console.warn('[GuardPro Mobile] JavaScript error caught (non-blocking):', e.message, e.filename, e.lineno);
+                        console.warn('[GuardLink Mobile] JavaScript error caught (non-blocking):', e.message, e.filename, e.lineno);
                     }
                 }, true);
                 
@@ -226,7 +226,7 @@
                     }
                     // Only log rejections that are not from extensions
                     if (!e.reason || (typeof e.reason === 'string' && !e.reason.includes('spoofer') && !e.reason.includes('extension'))) {
-                        console.warn('[GuardPro Mobile] Unhandled promise rejection (non-blocking):', e.reason);
+                        console.warn('[GuardLink Mobile] Unhandled promise rejection (non-blocking):', e.reason);
                     }
                 });
                 
@@ -245,13 +245,13 @@
                                 // Ensure element is not disabled (unless it should be)
                                 if (el.disabled && el.type !== 'submit' && !el.hasAttribute('data-disabled')) {
                                     // Don't enable disabled elements, but log for debugging
-                                    console.log('[GuardPro Mobile] Element is disabled:', el);
+                                    console.log('[GuardLink Mobile] Element is disabled:', el);
                                 }
                             } catch (e) {
                                 // Ignore errors when setting styles
                             }
                         });
-                        console.log('[GuardPro Mobile] Interactive elements checked and enabled');
+                        console.log('[GuardLink Mobile] Interactive elements checked and enabled');
                     }, 100);
                 });
 
@@ -287,7 +287,7 @@
                                 // Links should work normally without JavaScript interference
                                 // Only ensure CSS is set for proper touch handling
                             } catch (err) {
-                                console.warn('[GuardPro Mobile] Error setting up nav link:', err);
+                                console.warn('[GuardLink Mobile] Error setting up nav link:', err);
                             }
                         });
 
@@ -311,7 +311,7 @@
                                 // Only add visual feedback, not event handlers that could block default behavior
                                 
                             } catch (err) {
-                                console.warn('[GuardPro Mobile] Error setting up button:', err);
+                                console.warn('[GuardLink Mobile] Error setting up button:', err);
                             }
                         });
                         
@@ -322,7 +322,7 @@
                                 form.style.pointerEvents = 'auto';
                                 // Don't interfere with form submission - let onsubmit handlers work
                             } catch (err) {
-                                console.warn('[GuardPro Mobile] Error setting up form:', err);
+                                console.warn('[GuardLink Mobile] Error setting up form:', err);
                             }
                         });
                         
@@ -334,13 +334,13 @@
                                 link.style.touchAction = 'manipulation';
                                 // Don't interfere with link navigation
                             } catch (err) {
-                                console.warn('[GuardPro Mobile] Error setting up link:', err);
+                                console.warn('[GuardLink Mobile] Error setting up link:', err);
                             }
                         });
 
-                        console.log('[GuardPro Mobile] Navigation and buttons initialized');
+                        console.log('[GuardLink Mobile] Navigation and buttons initialized');
                     } catch (err) {
-                        console.error('[GuardPro Mobile] Error initializing navigation:', err);
+                        console.error('[GuardLink Mobile] Error initializing navigation:', err);
                     }
                 });
                 ]]>
@@ -606,7 +606,7 @@
     </template>
 
     <!-- Mobile Dashboard -->
-    <template id="mobile_dashboard" name="Berkeley Guard Mobile Dashboard">
+    <template id="mobile_dashboard" name="GuardLink Mobile Dashboard">
         <t t-call="guardpro.mobile_base">
             <div class="container-fluid p-3">
                 <!-- Location Permission Banner -->
@@ -855,26 +855,26 @@
             <script type="text/javascript"><![CDATA[
                 function getLocationAndSubmit(form, event) {
                     try {
-                        console.log('[GuardPro Mobile] getLocationAndSubmit called');
-                        console.log('[GuardPro Mobile] Form:', form);
-                        console.log('[GuardPro Mobile] Event:', event);
+                        console.log('[GuardLink Mobile] getLocationAndSubmit called');
+                        console.log('[GuardLink Mobile] Form:', form);
+                        console.log('[GuardLink Mobile] Event:', event);
                         
                         // Safety check: if form or event is missing, allow normal submission
                         if (!form || !event) {
-                            console.warn('[GuardPro Mobile] Form or event missing, allowing normal submission');
+                            console.warn('[GuardLink Mobile] Form or event missing, allowing normal submission');
                             return true;
                         }
                         
                         if (navigator.geolocation) {
-                            console.log('[GuardPro Mobile] Geolocation available, preventing default');
+                            console.log('[GuardLink Mobile] Geolocation available, preventing default');
                             event.preventDefault();
                             event.stopPropagation();
                             
                             const latField = form.querySelector('[name="latitude"]');
                             const lngField = form.querySelector('[name="longitude"]');
                             
-                            console.log('[GuardPro Mobile] Latitude field:', latField);
-                            console.log('[GuardPro Mobile] Longitude field:', lngField);
+                            console.log('[GuardLink Mobile] Latitude field:', latField);
+                            console.log('[GuardLink Mobile] Longitude field:', lngField);
                             
                             // Show loading state
                             const submitBtn = form.querySelector('button[type="submit"]');
@@ -888,7 +888,7 @@
                             
                             // Set a timeout to ensure form submits even if geolocation hangs
                             const submitTimeout = setTimeout(function() {
-                                console.warn('[GuardPro Mobile] Location timeout, submitting form without location');
+                                console.warn('[GuardLink Mobile] Location timeout, submitting form without location');
                                 if (submitBtn) {
                                     submitBtn.disabled = originalDisabled;
                                     submitBtn.innerHTML = originalText;
@@ -896,7 +896,7 @@
                                 try {
                                     form.submit();
                                 } catch (e) {
-                                    console.error('[GuardPro Mobile] Error submitting form:', e);
+                                    console.error('[GuardLink Mobile] Error submitting form:', e);
                                     // Last resort: trigger click on submit button
                                     if (submitBtn) {
                                         submitBtn.disabled = false;
@@ -908,7 +908,7 @@
                             navigator.geolocation.getCurrentPosition(
                                 function(position) {
                                     clearTimeout(submitTimeout);
-                                    console.log('[GuardPro Mobile] Location captured:', position.coords.latitude, position.coords.longitude);
+                                    console.log('[GuardLink Mobile] Location captured:', position.coords.latitude, position.coords.longitude);
                                     if (latField) latField.value = position.coords.latitude;
                                     if (lngField) lngField.value = position.coords.longitude;
                                     
@@ -920,7 +920,7 @@
                                     try {
                                         form.submit();
                                     } catch (e) {
-                                        console.error('[GuardPro Mobile] Error submitting form after location:', e);
+                                        console.error('[GuardLink Mobile] Error submitting form after location:', e);
                                         // Last resort: trigger click on submit button
                                         if (submitBtn) {
                                             submitBtn.disabled = false;
@@ -931,7 +931,7 @@
                                 function(error) {
                                     clearTimeout(submitTimeout);
                                     // Submit without location on error
-                                    console.warn('[GuardPro Mobile] Location error:', error);
+                                    console.warn('[GuardLink Mobile] Location error:', error);
                                     if (submitBtn) {
                                         submitBtn.disabled = originalDisabled;
                                         submitBtn.innerHTML = originalText;
@@ -941,7 +941,7 @@
                                     try {
                                         form.submit();
                                     } catch (e) {
-                                        console.error('[GuardPro Mobile] Error submitting form after location error:', e);
+                                        console.error('[GuardLink Mobile] Error submitting form after location error:', e);
                                         // Last resort: trigger click on submit button
                                         if (submitBtn) {
                                             submitBtn.disabled = false;
@@ -953,11 +953,11 @@
                             );
                             return false;
                         } else {
-                            console.log('[GuardPro Mobile] Geolocation not available, submitting form directly');
+                            console.log('[GuardLink Mobile] Geolocation not available, submitting form directly');
                             return true; // Allow normal form submission
                         }
                     } catch (error) {
-                        console.error('[GuardPro Mobile] Error in getLocationAndSubmit:', error);
+                        console.error('[GuardLink Mobile] Error in getLocationAndSubmit:', error);
                         // On any error, allow normal form submission
                         return true;
                     }
@@ -965,11 +965,11 @@
                 
                 // Ensure function is available globally
                 window.getLocationAndSubmit = getLocationAndSubmit;
-                console.log('[GuardPro Mobile] getLocationAndSubmit function defined and available globally');
+                console.log('[GuardLink Mobile] getLocationAndSubmit function defined and available globally');
                 
                 // Check if GPS tracker is available
                 if (typeof window.gpsTracker !== 'undefined') {
-                    console.log('[GuardPro Mobile] GPS tracker available');
+                    console.log('[GuardLink Mobile] GPS tracker available');
                     
                     // Function to request location permission (must be called from user interaction)
                     window.requestLocationPermission = function() {
@@ -978,20 +978,20 @@
                             return;
                         }
                         
-                        console.log('[GuardPro Mobile] Requesting location permission (user clicked button)...');
+                        console.log('[GuardLink Mobile] Requesting location permission (user clicked button)...');
                         
                         // Request permission - this MUST be triggered by user interaction
                         navigator.geolocation.getCurrentPosition(
                             function(position) {
-                                console.log('[GuardPro Mobile] ✓ Location permission GRANTED');
-                                console.log('[GuardPro Mobile] Current location:', position.coords.latitude, position.coords.longitude);
+                                console.log('[GuardLink Mobile] ✓ Location permission GRANTED');
+                                console.log('[GuardLink Mobile] Current location:', position.coords.latitude, position.coords.longitude);
                                 
                                 // Hide permission banner
                                 const banner = document.getElementById('location-permission-banner');
                                 if (banner) banner.style.display = 'none';
                                 
                                 // Start GPS tracking now that we have permission
-                                console.log('[GuardPro Mobile] Starting GPS tracker...');
+                                console.log('[GuardLink Mobile] Starting GPS tracker...');
                                 window.gpsTracker.startTracking();
                                 
                                 // Show success message
@@ -1010,7 +1010,7 @@
                                 localStorage.setItem('gps_permission_granted', 'true');
                             },
                             function(error) {
-                                console.error('[GuardPro Mobile] ✗ Location permission DENIED:', error);
+                                console.error('[GuardLink Mobile] ✗ Location permission DENIED:', error);
                                 let errorMsg = '⚠️ Location Access Denied\n\n';
                                 if (error.code === 1) {
                                     errorMsg += 'You blocked location access. To enable:\n\n';
@@ -1034,16 +1034,16 @@
                     
                     // Check permission status using Permissions API (if supported)
                     async function checkLocationPermission() {
-                        console.log('[GuardPro Mobile] Checking location permission status...');
+                        console.log('[GuardLink Mobile] Checking location permission status...');
                         
                         // Check localStorage first
                         if (localStorage.getItem('gps_permission_granted') === 'true') {
-                            console.log('[GuardPro Mobile] Permission previously granted, attempting to start tracking...');
+                            console.log('[GuardLink Mobile] Permission previously granted, attempting to start tracking...');
                             try {
                                 window.gpsTracker.startTracking();
                                 return true;
                             } catch (e) {
-                                console.warn('[GuardPro Mobile] Could not start tracking:', e);
+                                console.warn('[GuardLink Mobile] Could not start tracking:', e);
                             }
                         }
                         
@@ -1051,25 +1051,25 @@
                         if (navigator.permissions && navigator.permissions.query) {
                             try {
                                 const result = await navigator.permissions.query({ name: 'geolocation' });
-                                console.log('[GuardPro Mobile] Permission state:', result.state);
+                                console.log('[GuardLink Mobile] Permission state:', result.state);
                                 
                                 if (result.state === 'granted') {
-                                    console.log('[GuardPro Mobile] Permission granted, starting tracker...');
+                                    console.log('[GuardLink Mobile] Permission granted, starting tracker...');
                                     window.gpsTracker.startTracking();
                                     return true;
                                 } else if (result.state === 'prompt' || result.state === 'denied') {
-                                    console.log('[GuardPro Mobile] Permission not granted, showing banner...');
+                                    console.log('[GuardLink Mobile] Permission not granted, showing banner...');
                                     const banner = document.getElementById('location-permission-banner');
                                     if (banner) banner.style.display = 'block';
                                     return false;
                                 }
                             } catch (e) {
-                                console.warn('[GuardPro Mobile] Permissions API not fully supported:', e);
+                                console.warn('[GuardLink Mobile] Permissions API not fully supported:', e);
                             }
                         }
                         
                         // Fallback: just show the banner
-                        console.log('[GuardPro Mobile] Cannot determine permission status, showing banner...');
+                        console.log('[GuardLink Mobile] Cannot determine permission status, showing banner...');
                         const banner = document.getElementById('location-permission-banner');
                         if (banner) banner.style.display = 'block';
                         return false;
@@ -1079,7 +1079,7 @@
                     checkLocationPermission();
                     
                 } else {
-                    console.warn('[GuardPro Mobile] GPS tracker not available - gps_tracker.js may not be loaded');
+                    console.warn('[GuardLink Mobile] GPS tracker not available - gps_tracker.js may not be loaded');
                 }
                 
                 // Panic Button Hold-to-Activate
@@ -1130,7 +1130,7 @@
                     
                     // Set timer for full hold
                     panicHoldTimer = setTimeout(function() {
-                        console.log('[GuardPro] Panic button held for 3 seconds - triggering alert');
+                        console.log('[GuardLink] Panic button held for 3 seconds - triggering alert');
                         
                         // Strong vibration pattern for confirmation
                         if ('vibrate' in navigator) {
@@ -1214,7 +1214,7 @@
                         <div class="card-body">
                             <h6 class="card-title"><i class="fa fa-clipboard-check me-2"/>Compliance audits</h6>
                             <p class="card-text small text-muted mb-3">
-                                Open this if you use a <strong>supervisor, manager, or admin</strong> login in Sentry / GuardPro.
+                                Open this if you use a <strong>supervisor, manager, or admin</strong> login in GuardLink.
                             </p>
                             <a href="/guardpro/mobile/compliance" class="btn btn-primary w-100">
                                 <i class="fa fa-arrow-right me-2"/>Open compliance audits
@@ -2443,9 +2443,9 @@
                         try {
                             // Double vibration pattern: 200ms, pause 100ms, 200ms
                             navigator.vibrate([200, 100, 200]);
-                            console.log('[GuardPro] Haptic feedback triggered');
+                            console.log('[GuardLink] Haptic feedback triggered');
                         } catch (e) {
-                            console.warn('[GuardPro] Haptic feedback failed:', e);
+                            console.warn('[GuardLink] Haptic feedback failed:', e);
                         }
                     }
                     
@@ -2512,9 +2512,9 @@
                             oscillator.start(audioContext.currentTime);
                             oscillator.stop(audioContext.currentTime + 0.2);
                             
-                            console.log('[GuardPro] Audio beep played');
+                            console.log('[GuardLink] Audio beep played');
                         } catch (e) {
-                            console.warn('[GuardPro] Audio beep failed:', e);
+                            console.warn('[GuardLink] Audio beep failed:', e);
                         }
                     }
                 }
@@ -4185,7 +4185,7 @@
                                 form.onsubmit = originalOnSubmit;
                             }, 1000);
                         } catch (error) {
-                            console.error('[GuardPro Mobile] Error submitting form:', error);
+                            console.error('[GuardLink Mobile] Error submitting form:', error);
                             // Last resort: direct submit
                             form.submit();
                         }
@@ -4195,7 +4195,7 @@
                     if (navigator.geolocation) {
                         // Set a timeout to ensure form submits even if geolocation fails
                         const locationTimeout = setTimeout(function() {
-                            console.warn('[GuardPro Mobile] Location timeout, submitting without location');
+                            console.warn('[GuardLink Mobile] Location timeout, submitting without location');
                             submitForm();
                         }, 6000); // 6 second timeout
                         
@@ -4204,13 +4204,13 @@
                                 clearTimeout(locationTimeout);
                                 if (latField) latField.value = position.coords.latitude;
                                 if (lngField) lngField.value = position.coords.longitude;
-                                console.log('[GuardPro Mobile] Location captured:', position.coords.latitude, position.coords.longitude);
+                                console.log('[GuardLink Mobile] Location captured:', position.coords.latitude, position.coords.longitude);
                                 submitForm();
                             },
                             function(error) {
                                 clearTimeout(locationTimeout);
-                                console.warn('[GuardPro Mobile] Location error:', error.message || error);
-                                console.warn('[GuardPro Mobile] Submitting form without location');
+                                console.warn('[GuardLink Mobile] Location error:', error.message || error);
+                                console.warn('[GuardLink Mobile] Submitting form without location');
                                 submitForm();
                             },
                             { 
@@ -4221,7 +4221,7 @@
                         );
                     } else {
                         // Geolocation not available, submit immediately
-                        console.warn('[GuardPro Mobile] Geolocation not available, submitting without location');
+                        console.warn('[GuardLink Mobile] Geolocation not available, submitting without location');
                         submitForm();
                     }
                     
@@ -4355,7 +4355,7 @@
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">Platform</span>
-                            <strong>Sentry Mobile</strong>
+                            <strong>GuardLink Mobile</strong>
                         </div>
                         <div class="d-flex justify-content-between">
                             <span class="text-muted">Built on</span>
@@ -4380,7 +4380,7 @@
             <script type="text/javascript">
                 // Fallback function if main JS doesn't load
                 if (typeof getLocationAndSubmit === 'undefined') {
-                    console.warn('[GuardPro Mobile] Main JS not loaded, using inline fallback');
+                    console.warn('[GuardLink Mobile] Main JS not loaded, using inline fallback');
                     window.getLocationAndSubmit = function(form, event) {
                         console.log('[Guard Pro Mobile Inline] getLocationAndSubmit called');
                         
@@ -4427,7 +4427,7 @@
                         return false;
                     };
                 } else {
-                    console.log('[GuardPro Mobile] Main JS loaded successfully');
+                    console.log('[GuardLink Mobile] Main JS loaded successfully');
                 }
             </script>
         </t>
@@ -4604,7 +4604,7 @@
                     <div class="card-body">
                         <div class="text-center mb-3">
                             <i class="fa fa-shield-alt fa-3x text-primary mb-2"/>
-                            <h5 class="mb-1">Sentry Mobile</h5>
+                            <h5 class="mb-1">GuardLink Mobile</h5>
                             <p class="text-muted small mb-0">Version 2.0.0</p>
                         </div>
                         <div class="d-flex justify-content-between py-2 border-top">
@@ -7127,8 +7127,8 @@
                 </div>
                 
                  <div class="text-center text-muted mt-4">
-                    <small>GuardPro Mobile v1.0.0</small><br/>
-                    <small>&#169; 2026 Security Systems</small>
+                    <small>GuardLink Mobile v1.0.0</small><br/>
+                    <small>&#169; 2026 GuardLink</small>
                 </div>
             </div>
         </t>

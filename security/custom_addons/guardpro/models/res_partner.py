@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Extension of res.partner for GuardPro multi-tenancy."""
+"""Extension of res.partner for GuardLink multi-tenancy."""
 
 from odoo import models, fields
 

@@ -153,6 +153,7 @@
             <field name="checkpoint_ids" eval="[(6, 0, [ref('checkpoint_sp_main_entrance'), ref('checkpoint_sp_clubhouse'), ref('checkpoint_sp_residential_a')])]"/>
             <field name="estimated_duration">0.5</field>
             <field name="frequency">custom</field>
+            <field name="frequency_custom">On-demand during emergencies</field>
             <field name="requires_supervisor" eval="True"/>
             <field name="requires_photos" eval="True"/>
             <field name="requires_notes" eval="True"/>

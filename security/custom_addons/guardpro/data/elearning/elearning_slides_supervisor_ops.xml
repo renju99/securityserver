@@ -87,7 +87,7 @@
 
                 &lt;h4&gt;Ongoing Supervision (During Shifts)&lt;/h4&gt;
                 &lt;ul&gt;
-                    &lt;li&gt;Monitor active shifts through GuardPro dashboard&lt;/li&gt;
+                    &lt;li&gt;Monitor active shifts through GuardLink dashboard&lt;/li&gt;
                     &lt;li&gt;Respond to alerts and notifications in real-time&lt;/li&gt;
                     &lt;li&gt;Conduct random site inspections and guard check-ins&lt;/li&gt;
                     &lt;li&gt;Handle emergency situations and incident responses&lt;/li&gt;
@@ -122,7 +122,7 @@
 
                 &lt;h4&gt;Technical Proficiency&lt;/h4&gt;
                 &lt;ul&gt;
-                    &lt;li&gt;&lt;strong&gt;Security Systems Knowledge:&lt;/strong&gt; Understanding of security technology and procedures&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;GuardLink Knowledge:&lt;/strong&gt; Understanding of security technology and procedures&lt;/li&gt;
                     &lt;li&gt;&lt;strong&gt;Regulatory Compliance:&lt;/strong&gt; Familiarity with applicable laws and industry standards&lt;/li&gt;
                     &lt;li&gt;&lt;strong&gt;Emergency Response:&lt;/strong&gt; Ability to manage crisis situations effectively&lt;/li&gt;
                     &lt;li&gt;&lt;strong&gt;Report Writing:&lt;/strong&gt; Clear, comprehensive documentation skills&lt;/li&gt;
@@ -263,9 +263,9 @@
                     &lt;li&gt;&lt;strong&gt;Review Budget Constraints:&lt;/strong&gt; Balance coverage needs with cost limitations&lt;/li&gt;
                 &lt;/ol&gt;
 
-                &lt;h4&gt;Creation Steps in GuardPro&lt;/h4&gt;
+                &lt;h4&gt;Creation Steps in GuardLink&lt;/h4&gt;
                 &lt;ol&gt;
-                    &lt;li&gt;&lt;strong&gt;Access Operations Module:&lt;/strong&gt; Navigate to Operations → Shifts in GuardPro&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Access Operations Module:&lt;/strong&gt; Navigate to Operations → Shifts in GuardLink&lt;/li&gt;
                     &lt;li&gt;&lt;strong&gt;Initiate Creation:&lt;/strong&gt; Click the "Create" button to start a new shift&lt;/li&gt;
                     &lt;li&gt;&lt;strong&gt;Select Site and Type:&lt;/strong&gt; Choose the appropriate site location and shift category&lt;/li&gt;
                     &lt;li&gt;&lt;strong&gt;Set Schedule Parameters:&lt;/strong&gt; Define start date, time, duration, and end time&lt;/li&gt;
@@ -316,7 +316,7 @@
                     &lt;li&gt;&lt;strong&gt;Verify Qualifications:&lt;/strong&gt; Ensure both guards meet assignment requirements&lt;/li&gt;
                     &lt;li&gt;&lt;strong&gt;Check Impact:&lt;/strong&gt; Assess effects on overall coverage and other assignments&lt;/li&gt;
                     &lt;li&gt;&lt;strong&gt;Obtain Approval:&lt;/strong&gt; Get supervisor approval for significant changes&lt;/li&gt;
-                    &lt;li&gt;&lt;strong&gt;Update System:&lt;/strong&gt; Modify assignments in GuardPro immediately&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Update System:&lt;/strong&gt; Modify assignments in GuardLink immediately&lt;/li&gt;
                     &lt;li&gt;&lt;strong&gt;Notify Parties:&lt;/strong&gt; Inform all affected guards and supervisors&lt;/li&gt;
                     &lt;li&gt;&lt;strong&gt;Document Change:&lt;/strong&gt; Record reason and approval in system notes&lt;/li&gt;
                 &lt;/ol&gt;
@@ -360,7 +360,7 @@
                 &lt;h3&gt;Technology and Tools for Shift Management&lt;/h3&gt;
                 &lt;p&gt;Modern shift management relies on technology for efficiency and accuracy:&lt;/p&gt;
 
-                &lt;h4&gt;GuardPro Shift Management Features&lt;/h4&gt;
+                &lt;h4&gt;GuardLink Shift Management Features&lt;/h4&gt;
                 &lt;ul&gt;
                     &lt;li&gt;&lt;strong&gt;Automated Scheduling:&lt;/strong&gt; Intelligent assignment based on skills and availability&lt;/li&gt;
                     &lt;li&gt;&lt;strong&gt;Real-Time Updates:&lt;/strong&gt; Instant notifications of changes and updates&lt;/li&gt;

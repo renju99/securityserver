@@ -1,5 +1,5 @@
 /**
- * Biometric Capture for Sentry Mobile App
+ * Biometric Capture for GuardLink Mobile App
  * Supports: Fingerprint (Touch ID/Face ID), Facial Recognition (Camera)
  */
 

@@ -1,13 +1,13 @@
 # Common Workflows
 
-Step-by-step guides for common tasks in GuardPro.
+Step-by-step guides for common tasks in GuardLink.
 
 ---
 
 ## Daily Workflows
 
 ### Starting Your Day
-1. Log into GuardPro
+1. Log into GuardLink
 2. Check dashboard for alerts
 3. Review today's schedule
 4. Address any urgent items

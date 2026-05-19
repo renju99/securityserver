@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""GuardPro Portal Controller."""
+"""GuardLink Portal Controller."""
 
 from odoo import http, fields, _
 from odoo.http import request

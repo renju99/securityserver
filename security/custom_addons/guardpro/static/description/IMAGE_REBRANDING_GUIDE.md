@@ -1,26 +1,26 @@
-# Image Rebranding Guide: GuardPro → Sentry
+# Image Rebranding Guide: GuardLink
 
-This document lists all images that need to be updated to reflect the Sentry branding instead of GuardPro.
+This document lists all images that need to be updated to reflect the GuardLink branding instead of GuardLink.
 
 ## Priority Images (Most Visible Branding)
 
 ### 1. **banner_screenshot.png** (Line 6 in index.html)
    - **Location**: Hero section at top of page
-   - **Current**: Likely shows "GuardPro" branding
-   - **Needs**: "Sentry Enterprise Security Operations Suite" branding
+   - **Current**: Likely shows "GuardLink" branding
+   - **Needs**: "GuardLink Enterprise Security Operations Suite" branding
    - **Size**: Full-width banner (100% width)
    - **Usage**: Main promotional image
 
 ### 2. **icon.png** (Module Icon)
    - **Location**: Module icon in Odoo Apps
-   - **Current**: GuardPro logo/icon
-   - **Needs**: Sentry logo/icon
+   - **Current**: GuardLink logo/icon
+   - **Needs**: GuardLink logo/icon
    - **Size**: Standard Odoo module icon size
    - **Usage**: App icon in Odoo application menu
 
 ## Screenshot Images (May Contain UI Branding)
 
-These screenshots may contain "GuardPro" text in the UI headers, titles, or branding elements:
+These screenshots may contain "GuardLink" text in the UI headers, titles, or branding elements:
 
 1. **analyticsdashboard.png** - Analytics Dashboard
 2. **liveguardview.png** - Live Guard View
@@ -35,27 +35,27 @@ These screenshots may contain "GuardPro" text in the UI headers, titles, or bran
 
 ## Rebranding Checklist
 
-- [ ] Update banner_screenshot.png with Sentry branding
-- [ ] Update icon.png with Sentry logo
-- [ ] Review all screenshot images for GuardPro text/logo
-- [ ] Replace any "GuardPro" text with "Sentry" in UI screenshots
+- [ ] Update banner_screenshot.png with GuardLink branding
+- [ ] Update icon.png with GuardLink logo
+- [ ] Review all screenshot images for GuardLink text/logo
+- [ ] Replace any "GuardLink" text with "GuardLink" in UI screenshots
 - [ ] Update any module name references in screenshots
-- [ ] Ensure color scheme matches Sentry branding (#875A7B purple)
+- [ ] Ensure color scheme matches GuardLink branding (#875A7B purple)
 - [ ] Verify all images display correctly after updates
 
 ## Branding Guidelines
 
-- **Product Name**: "Sentry" or "Sentry Enterprise Security Operations Suite"
+- **Product Name**: "GuardLink" or "GuardLink Enterprise Security Operations Suite"
 - **Color Scheme**: Primary purple #875A7B
 - **Tagline**: "Enterprise Security Operations Suite for Odoo 18"
-- **Website**: sentry.proptechme.com
+- **Website**: guardlink.app
 
 ## Notes
 
 - All image file names are correct (no "guardpro" in filenames)
 - HTML references are correct (all point to proper image files)
 - Only the image content itself needs updating
-- Consider using a screenshot tool to capture updated UI with Sentry branding
+- Consider using a screenshot tool to capture updated UI with GuardLink branding
 
 
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The GuardPro system now includes **two professional printable PDF formats** for Standard Operating Procedures (SOPs) that guards can easily print, download, and share.
+The GuardLink system now includes **two professional printable PDF formats** for Standard Operating Procedures (SOPs) that guards can easily print, download, and share.
 
 ---
 
@@ -33,7 +33,7 @@ The GuardPro system now includes **two professional printable PDF formats** for 
 ### **Method 1: From SOP Form View**
 
 1. **Navigate to SOP**
-   - Go to: **GuardPro → Training & Knowledge → Knowledge & SOPs → Standard Operating Procedures**
+   - Go to: **GuardLink → Training & Knowledge → Knowledge & SOPs → Standard Operating Procedures**
    - Click on any SOP (e.g., "Main Gate Access Control Procedure")
 
 2. **Print Options**
@@ -266,7 +266,7 @@ Set up automated printing:
 
 ### **From Mobile Device:**
 
-1. Open GuardPro on mobile browser
+1. Open GuardLink on mobile browser
 2. Navigate to SOP
 3. Click "Print Compact (Field)"
 4. Use mobile print function or save to files
@@ -370,7 +370,7 @@ You now have **professional, printable SOPs** available in two formats:
 ---
 
 *Last Updated: November 2025*
-*GuardPro - Security Guard Management System*
+*GuardLink - Security Guard Management System*
 
 
 

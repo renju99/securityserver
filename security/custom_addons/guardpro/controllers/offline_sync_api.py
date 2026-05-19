@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""GuardPro Offline Sync API Controller."""
+"""GuardLink Offline Sync API Controller."""
 
 from odoo import http, fields, _
 from odoo.http import request, Response
@@ -11,7 +11,7 @@ from datetime import datetime
 _logger = logging.getLogger(__name__)
 
 
-class GuardProOfflineSyncAPI(http.Controller):
+class GuardLinkOfflineSyncAPI(http.Controller):
     """API endpoints for offline data synchronization."""
     
     def _get_current_guard(self):

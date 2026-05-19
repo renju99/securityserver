@@ -1,5 +1,5 @@
 /**
- * GuardPro Tour Scanner
+ * GuardLink Tour Scanner
  * Production-level QR and NFC scanning for security tours
  * Uses html5-qrcode library for QR scanning and Web NFC API for NFC tags
  * 
@@ -239,5 +239,5 @@ window.TourScanner = TourScanner;
 window.getCurrentLocation = getCurrentLocation;
 window.showNotification = showNotification;
 
-console.log('GuardPro Tour Scanner module loaded');
+console.log('GuardLink Tour Scanner module loaded');
 

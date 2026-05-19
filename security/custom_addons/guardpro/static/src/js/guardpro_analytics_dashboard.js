@@ -179,9 +179,9 @@ export class TableWidget extends Component {
 }
 
 /**
- * Main GuardPro Analytics Dashboard Controller
+ * Main GuardLink Analytics Dashboard Controller
  */
-export class GuardProAnalyticsDashboard extends Component {
+export class GuardLinkAnalyticsDashboard extends Component {
     static template = "guardpro.DashboardView";
     static components = { KPICardWidget, ChartWidget, TableWidget };
 
@@ -509,9 +509,9 @@ export class GuardProAnalyticsDashboard extends Component {
  * Register Dashboard as a Form Controller Extension
  */
 export const guardProAnalyticsDashboard = {
-    component: GuardProAnalyticsDashboard,
+    component: GuardLinkAnalyticsDashboard,
 };
 
 // Auto-initialize dashboard when form view loads
-registry.category("public_components").add("GuardProAnalyticsDashboard", GuardProAnalyticsDashboard);
+registry.category("public_components").add("GuardLinkAnalyticsDashboard", GuardLinkAnalyticsDashboard);
 

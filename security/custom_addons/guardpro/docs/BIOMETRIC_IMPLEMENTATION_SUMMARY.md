@@ -8,7 +8,7 @@
 
 ## Overview
 
-Biometric verification has been successfully integrated into GuardPro, starting with **mobile device sensors** (recommended rollout approach). This provides secure identity verification for guard check-in/check-out without requiring additional hardware.
+Biometric verification has been successfully integrated into GuardLink, starting with **mobile device sensors** (recommended rollout approach). This provides secure identity verification for guard check-in/check-out without requiring additional hardware.
 
 ---
 

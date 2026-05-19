@@ -3,7 +3,7 @@
     <data>
     <!-- ROOT MENU -->
     <menuitem id="menu_guardpro_root"
-        name="Sentry"
+        name="GuardLink"
         sequence="10"
         web_icon="guardpro,static/description/icon.png"/>
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Mobile Enhanced API Controllers for GuardPro."""
+"""Mobile Enhanced API Controllers for GuardLink."""
 
 from odoo import http
 from odoo.http import request
@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 _logger = logging.getLogger(__name__)
 
 
-class GuardProMobileEnhancedAPI(http.Controller):
+class GuardLinkMobileEnhancedAPI(http.Controller):
     """Enhanced Mobile API endpoints for additional features."""
 
     @http.route('/guardpro/api/attendance/my-records', type='json', auth='user')

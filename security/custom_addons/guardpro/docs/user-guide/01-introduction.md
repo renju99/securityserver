@@ -1,12 +1,12 @@
-# Introduction to Sentry
+# Introduction to GuardLink
 
-Welcome to Sentry - Enterprise Security Guard Management System
+Welcome to GuardLink - Enterprise Security Guard Management System
 
 ---
 
-## What is Sentry?
+## What is GuardLink?
 
-Sentry is a comprehensive platform for managing security guard operations, from scheduling and attendance to incident reporting and compliance management.
+GuardLink is a comprehensive platform for managing security guard operations, from scheduling and attendance to incident reporting and compliance management.
 
 ---
 
@@ -50,7 +50,7 @@ Physical locations that guards scan during patrols
 
 ## Navigation
 
-**Main Menu:** Click "Sentry" in top navigation
+**Main Menu:** Click "GuardLink" in top navigation
 
 **Quick Search:** Press `Ctrl + K` to search anything
 

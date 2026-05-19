@@ -1,5 +1,5 @@
 /**
- * GuardPro Offline App Initialization
+ * GuardLink Offline App Initialization
  * Initializes all offline managers and sets up the app
  */
 
@@ -8,7 +8,7 @@
     
     // Wait for DOM and all managers to be ready
     document.addEventListener('DOMContentLoaded', async function() {
-        console.log('Initializing GuardPro Offline App...');
+        console.log('Initializing GuardLink Offline App...');
         
         try {
             // Get guard data from page
@@ -57,7 +57,7 @@
             // Setup sync status display
             setupSyncStatusDisplay();
             
-            console.log('GuardPro Offline App initialized successfully');
+            console.log('GuardLink Offline App initialized successfully');
             
             // Trigger initial sync if online
             if (navigator.onLine && window.OfflineSyncManager) {
@@ -217,7 +217,7 @@
     /**
      * Global app utilities
      */
-    window.GuardProApp = {
+    window.GuardLinkApp = {
         /**
          * Refresh data after sync
          */

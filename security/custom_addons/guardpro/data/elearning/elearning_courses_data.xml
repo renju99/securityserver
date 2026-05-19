@@ -4,7 +4,7 @@
         
         <!-- eLearning Tag Groups -->
         <record id="elearning_tag_group_guardpro" model="slide.channel.tag.group">
-            <field name="name">GuardPro</field>
+            <field name="name">GuardLink</field>
             <field name="sequence">10</field>
         </record>
 
@@ -15,7 +15,7 @@
 
         <!-- eLearning Categories/Tags -->
         <record id="elearning_category_guardpro" model="slide.channel.tag">
-            <field name="name">GuardPro Training</field>
+            <field name="name">GuardLink Training</field>
             <field name="group_id" ref="elearning_tag_group_guardpro"/>
             <field name="sequence">10</field>
         </record>
@@ -26,10 +26,10 @@
             <field name="sequence">10</field>
         </record>
 
-        <!-- Course 1: GuardPro Fundamentals -->
+        <!-- Course 1: GuardLink Fundamentals -->
         <record id="elearning_course_fundamentals" model="slide.channel">
-            <field name="name">GuardPro Fundamentals</field>
-            <field name="description">Comprehensive introduction to GuardPro Security Management System for all users.</field>
+            <field name="name">GuardLink Fundamentals</field>
+            <field name="description">Comprehensive introduction to GuardLink Security Management System for all users.</field>
             <field name="channel_type">training</field>
             <field name="enroll">public</field>
             <field name="visibility">public</field>

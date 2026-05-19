@@ -11,7 +11,7 @@ from datetime import datetime
 _logger = logging.getLogger(__name__)
 
 
-class GuardProSmartFeaturesAPI(http.Controller):
+class GuardLinkSmartFeaturesAPI(http.Controller):
     """API endpoints for smart task suggestions and enhanced incident reporting."""
 
     # =========================================================================

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Main GuardPro Controllers."""
+"""Main GuardLink Controllers."""
 
 from odoo import http, fields
 from odoo.http import request
@@ -9,8 +9,8 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class GuardProController(http.Controller):
-    """Main GuardPro web controller."""
+class GuardLinkController(http.Controller):
+    """Main GuardLink web controller."""
 
     # ====================================================
     # Helpers
@@ -56,7 +56,7 @@ class GuardProController(http.Controller):
 
     @http.route(['/guardpro', '/guardpro/home'], type='http', auth='public', website=True)
     def homepage(self, **kwargs):
-        """GuardPro landing page."""
+        """GuardLink landing page."""
         user = request.env.user
         is_logged_in = user and user._is_public() == False
         
@@ -194,7 +194,7 @@ async function syncData() {
 
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('GuardProDB', 1);
+    const request = indexedDB.open('GuardLinkDB', 1);
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
   });

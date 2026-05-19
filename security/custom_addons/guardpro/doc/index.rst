@@ -1,12 +1,12 @@
-GuardPro - Enterprise Security Operations Suite
+GuardLink - Enterprise Security Operations Suite
 ==================================================
 
 Overview
 --------
 
-GuardPro centralizes guard field operations, compliance, and client reporting inside Odoo 18 Community Edition. The suite connects supervisors, control rooms, guards, and clients with real-time visibility, mobile-first workflows, and automated analytics.
+GuardLink centralizes guard field operations, compliance, and client reporting inside Odoo 18 Community Edition. The suite connects supervisors, control rooms, guards, and clients with real-time visibility, mobile-first workflows, and automated analytics.
 
-Designed with security service providers and in-house facility teams in mind, GuardPro helps you win competitive tenders, protect service margins, and deliver branded transparency to every client account.
+Designed with security service providers and in-house facility teams in mind, GuardLink helps you win competitive tenders, protect service margins, and deliver branded transparency to every client account.
 
 Highlights
 ----------
@@ -95,7 +95,7 @@ Installation
 
 5. In Odoo, go to **Apps > Update Apps List**
 
-6. Search for "GuardPro" and click **Install**
+6. Search for "GuardLink" and click **Install**
 
 Configuration
 -------------
@@ -109,11 +109,11 @@ Google Maps API Key (Required for Mapping)
 1. Create a billing-enabled project in the `Google Cloud Console <https://console.cloud.google.com/apis/credentials>`_
 2. Enable the **Maps JavaScript API** (and optional Places/Geocoding APIs if needed)
 3. Generate a browser-restricted API key
-4. In Odoo, go to **Settings > General Settings > GuardPro > Google Maps Integration**
+4. In Odoo, go to **Settings > General Settings > GuardLink > Google Maps Integration**
 5. Paste the key into the **Google Maps API Key** field and click **Save**
 
 .. note::
-   GuardPro never ships with a shared Google API key. Each customer must provide their own key so billing and usage stay under their Google Cloud account.
+   GuardLink never ships with a shared Google API key. Each customer must provide their own key so billing and usage stay under their Google Cloud account.
 
 Create Guard Profiles
 ^^^^^^^^^^^^^^^^^^^^^
@@ -161,7 +161,7 @@ For Guards (Mobile)
 ~~~~~~~~~~~~~~~~~~~
 
 1. **Check-in to Shift**:
-   * Open GuardPro mobile app
+   * Open GuardLink mobile app
    * Tap "Check In" button
    * Confirm GPS location is within geofence
 

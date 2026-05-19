@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 /**
- * GuardPro - Interactive Checkpoint Map Creator
+ * GuardLink - Interactive Checkpoint Map Creator
  * 
  * This module provides an interactive map for creating checkpoints by clicking
  * on the map. Users can place checkpoints visually and save them to the database.

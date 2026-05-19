@@ -92,7 +92,7 @@
                     
                     <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
                         <p style="margin: 0; color: #999; font-size: 12px;">
-                            This is an automated message from GuardPro Task Management System
+                            This is an automated message from GuardLink Task Management System
                         </p>
                     </div>
                 </div>
@@ -165,7 +165,7 @@
                     
                     <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
                         <p style="margin: 0; color: #999; font-size: 12px;">
-                            This is an automated message from GuardPro Shift Management System
+                            This is an automated message from GuardLink Shift Management System
                         </p>
                     </div>
                 </div>
@@ -227,7 +227,7 @@
                             URGENT - IMMEDIATE ATTENTION REQUIRED
                         </p>
                         <p style="margin: 5px 0 0 0; color: #999; font-size: 12px;">
-                            GuardPro Emergency Notification System
+                            GuardLink Emergency Notification System
                         </p>
                     </div>
                 </div>
@@ -313,7 +313,7 @@
                     
                     <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
                         <p style="margin: 0; color: #999; font-size: 12px;">
-                            This is an automated message from GuardPro Package Management System
+                            This is an automated message from GuardLink Package Management System
                         </p>
                     </div>
                 </div>
@@ -395,7 +395,7 @@
                     
                     <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
                         <p style="margin: 0; color: #999; font-size: 12px;">
-                            This is an automated message from GuardPro SLA Management System<br/>
+                            This is an automated message from GuardLink SLA Management System<br/>
                             Report Reference: ${object.name}
                         </p>
                     </div>
@@ -464,7 +464,7 @@
                     
                     <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
                         <p style="margin: 0; color: #999; font-size: 12px;">
-                            This is an automated message from GuardPro Key Management System
+                            This is an automated message from GuardLink Key Management System
                         </p>
                     </div>
                 </div>
@@ -562,7 +562,7 @@
                     
                     <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
                         <p style="margin: 0; color: #999; font-size: 12px;">
-                            This is an automated message from GuardPro Compliance Management System
+                            This is an automated message from GuardLink Compliance Management System
                         </p>
                     </div>
                 </div>
@@ -629,7 +629,7 @@
                     
                     <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
                         <p style="margin: 0; color: #999; font-size: 12px;">
-                            This is an automated message from GuardPro Compliance Management System
+                            This is an automated message from GuardLink Compliance Management System
                         </p>
                     </div>
                 </div>
@@ -734,7 +734,7 @@
                     
                     <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
                         <p style="margin: 0; color: #999; font-size: 12px;">
-                            This is an automated message from GuardPro Performance Management System
+                            This is an automated message from GuardLink Performance Management System
                         </p>
                     </div>
                 </div>
@@ -824,7 +824,7 @@
                     
                     <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
                         <p style="margin: 0; color: #999; font-size: 12px;">
-                            This is an automated message from GuardPro Credential Management System
+                            This is an automated message from GuardLink Credential Management System
                         </p>
                     </div>
                 </div>
@@ -929,7 +929,7 @@
                     
                     <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
                         <p style="margin: 0; color: #999; font-size: 12px;">
-                            This is an automated notification from GuardPro Package Management System<br/>
+                            This is an automated notification from GuardLink Package Management System<br/>
                             % if object.site_id.site_phone:
                             Contact: ${object.site_id.site_phone}
                             % endif
@@ -1019,12 +1019,12 @@
                     </div>
                     
                     <div style="margin-top: 20px;">
-                        <p>Thank you for using GuardPro Package Management System.</p>
+                        <p>Thank you for using GuardLink Package Management System.</p>
                     </div>
                     
                     <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
                         <p style="margin: 0; color: #999; font-size: 12px;">
-                            This is an automated message from GuardPro Package Management System<br/>
+                            This is an automated message from GuardLink Package Management System<br/>
                             % if object.site_id.site_phone:
                             Contact: ${object.site_id.site_phone}
                             % endif

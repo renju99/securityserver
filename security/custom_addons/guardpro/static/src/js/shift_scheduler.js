@@ -1,5 +1,5 @@
 /**
- * Shift Scheduler Widget for GuardPro
+ * Shift Scheduler Widget for GuardLink
  * Drag-and-drop shift scheduling interface
  */
 

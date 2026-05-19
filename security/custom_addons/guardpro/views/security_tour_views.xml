@@ -11,6 +11,7 @@
                     <field name="site_id"/>
                     <field name="total_checkpoints"/>
                     <field name="estimated_duration" widget="float_time"/>
+                    <field name="frequency_display" string="Frequency" optional="show"/>
                     <field name="status" widget="badge"/>
                     <field name="completion_rate" widget="percentage" optional="hide"/>
                     <button name="action_manual_generate_tour" string="Manual Generate" type="object" 
@@ -57,6 +58,10 @@
                             <group>
                                 <field name="estimated_duration" widget="float_time"/>
                                 <field name="frequency"/>
+                                <field name="frequency_custom"
+                                       invisible="frequency != 'custom'"
+                                       required="frequency == 'custom'"
+                                       placeholder="e.g. Twice per night shift, Mon/Wed/Fri at 22:00"/>
                                 <field name="completion_rate" widget="percentage"/>
                                 <field name="average_duration" widget="float_time"/>
                             </group>

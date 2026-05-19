@@ -3,7 +3,7 @@
 
 - Website app root in Odoo 18 is website.menu_website_configuration (not only
   menu_website_root).
-- GuardPro Configuration root must not keep GuardPro role groups on ir.ui.menu
+- GuardLink Configuration root must not keep GuardLink role groups on ir.ui.menu
   (menuitem + partial updates can leave extra ir_ui_menu_group_rel rows).
 """
 

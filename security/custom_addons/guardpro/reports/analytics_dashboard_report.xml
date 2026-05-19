@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="report_analytics_dashboard_pdf" name="GuardPro Analytics Dashboard Report">
+    <template id="report_analytics_dashboard_pdf" name="GuardLink Analytics Dashboard Report">
         <t t-call="web.html_container">
             <t t-call="web.external_layout">
                 <div class="page">
@@ -394,7 +394,7 @@
                     <!-- Simple Report Title -->
                     <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #1a73e8;">
                         <h1 style="color: #1a73e8; margin: 0 0 8px 0; font-size: 22px; font-weight: 600;">
-                            <i class="fa fa-tachometer"/> GuardPro Analytics Dashboard
+                            <i class="fa fa-tachometer"/> GuardLink Analytics Dashboard
                         </h1>
                         <div style="color: #5f6368; font-size: 10px; margin-bottom: 8px;">
                             Comprehensive Security Operations Overview &amp; Performance Metrics
@@ -754,7 +754,7 @@
                             <div style="display: table; width: 100%; font-size: 10px; color: #5f6368;">
                                 <div style="display: table-cell; width: 50%; vertical-align: middle;">
                                     <div style="font-weight: 600; color: #202124; margin-bottom: 4px;">
-                                        <i class="fa fa-shield"/> GuardPro Analytics Dashboard
+                                        <i class="fa fa-shield"/> GuardLink Analytics Dashboard
                                     </div>
                                     <div>
                                         Generated on <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d at %H:%M:%S')"/>
@@ -785,11 +785,11 @@
     </template>
 
     <record id="action_report_analytics_dashboard" model="ir.actions.report">
-        <field name="name">GuardPro Analytics Dashboard</field>
+        <field name="name">GuardLink Analytics Dashboard</field>
         <field name="model">guardpro.analytics.dashboard</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">guardpro.report_analytics_dashboard_pdf</field>
-        <field name="print_report_name">'GuardPro Analytics - %s' % (context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H%M'))</field>
+        <field name="print_report_name">'GuardLink Analytics - %s' % (context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H%M'))</field>
         <field name="binding_model_id" ref="model_guardpro_analytics_dashboard"/>
         <field name="binding_type">report</field>
         <field name="paperformat_id" ref="base.paperformat_euro"/>

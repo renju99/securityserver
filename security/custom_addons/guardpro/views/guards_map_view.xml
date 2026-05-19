@@ -607,6 +607,7 @@
                         autoRefreshInterval: null,
                         pathPolyline: null,
                         pathMarkers: [],
+                        pathTooltip: null,
                         geofences: [],
                         geofencesVisible: true,
                         markerClusterer: null,
@@ -1074,9 +1075,42 @@
                                 geodesic: true,
                                 strokeColor: '#3b82f6',
                                 strokeOpacity: 0.8,
-                                strokeWeight: 3,
+                                strokeWeight: 5,
                                 map: this.map
                             });
+
+                            // Create a single InfoWindow for tooltip
+                            if (!this.pathTooltip) {
+                                this.pathTooltip = new google.maps.InfoWindow();
+                            }
+
+                            google.maps.event.addListener(this.pathPolyline, 'mousemove', (e) => {
+                                let closestPoint = null;
+                                let minDistance = Infinity;
+
+                                pathData.forEach(point => {
+                                    const ptLatLng = new google.maps.LatLng(parseFloat(point.latitude), parseFloat(point.longitude));
+                                    const dist = google.maps.geometry.spherical.computeDistanceBetween(e.latLng, ptLatLng);
+                                    if (dist < minDistance) {
+                                        minDistance = dist;
+                                        closestPoint = point;
+                                    }
+                                });
+
+                                if (closestPoint) {
+                                    const timeStr = new Date(closestPoint.timestamp).toLocaleString();
+                                    this.pathTooltip.setContent(`<div style="padding: 5px; font-size: 12px; color: #1e293b;"><strong>Time:</strong> ${timeStr}</div>`);
+                                    this.pathTooltip.setPosition(e.latLng);
+                                    this.pathTooltip.open(this.map);
+                                }
+                            });
+
+                            google.maps.event.addListener(this.pathPolyline, 'mouseout', () => {
+                                if (this.pathTooltip) {
+                                    this.pathTooltip.close();
+                                }
+                            });
+
                             
                             // Add start marker (green)
                             const startMarker = new google.maps.Marker({
@@ -1148,6 +1182,10 @@
                             if (this.pathPolyline) {
                                 this.pathPolyline.setMap(null);
                                 this.pathPolyline = null;
+                            }
+                            
+                            if (this.pathTooltip) {
+                                this.pathTooltip.close();
                             }
                             
                             // Remove path markers
@@ -1479,7 +1517,7 @@
                                 <t t-translate="yes">Google Maps API key required</t>
                             </h4>
                             <p t-translate="yes">
-                                GuardPro requires your own Google Maps JavaScript API key. Generate it from the Google Cloud Console and configure it under Settings -> General Settings -> GuardPro -> Google Maps Integration.
+                                GuardLink requires your own Google Maps JavaScript API key. Generate it from the Google Cloud Console and configure it under Settings -> General Settings -> GuardLink -> Google Maps Integration.
                             </p>
                             <p t-translate="yes">
                                 Providing a customer-specific key prevents unauthorized consumption of your Google API quota.

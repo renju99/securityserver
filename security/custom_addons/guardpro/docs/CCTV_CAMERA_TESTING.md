@@ -1,7 +1,7 @@
 # CCTV Camera Testing Guide
 
 ## Overview
-This guide explains how to test the CCTV camera functionality in GuardPro using free online camera streams.
+This guide explains how to test the CCTV camera functionality in GuardLink using free online camera streams.
 
 ## Test Stream URLs
 
@@ -125,7 +125,7 @@ The CCTV viewer supports the following stream types:
 ## Security
 
 - Camera viewer requires user authentication
-- Access controlled by GuardPro security groups:
+- Access controlled by GuardLink security groups:
   - `group_guardpro_client_user`
   - `group_guardpro_supervisor`
   - `group_guardpro_manager`

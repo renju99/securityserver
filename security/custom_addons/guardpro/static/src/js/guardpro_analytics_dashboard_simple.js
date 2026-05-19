@@ -5,7 +5,7 @@ import { Component, useState, onWillStart, onMounted } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { loadBundle } from "@web/core/assets";
 
-class GuardProAnalyticsDashboard extends Component {
+class GuardLinkAnalyticsDashboard extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
@@ -114,7 +114,7 @@ class GuardProAnalyticsDashboard extends Component {
                 const newDashboardId = await this.orm.create(
                     'guardpro.analytics.dashboard',
                     {
-                        name: 'Sentry Analytics',
+                        name: 'GuardLink Analytics',
                     }
                 );
                 // Odoo ORM create returns the ID directly
@@ -696,7 +696,7 @@ class GuardProAnalyticsDashboard extends Component {
     }
 }
 
-GuardProAnalyticsDashboard.template = "guardpro.AnalyticsDashboardClient";
+GuardLinkAnalyticsDashboard.template = "guardpro.AnalyticsDashboardClient";
 
-registry.category("actions").add("guardpro_analytics_dashboard", GuardProAnalyticsDashboard);
+registry.category("actions").add("guardpro_analytics_dashboard", GuardLinkAnalyticsDashboard);
 

@@ -1,10 +1,10 @@
 /* =============================================================================
-   Sentry in-app documentation
+   GuardLink in-app documentation
    - Unique class names (odoo-docs-*) avoid collisions with Odoo UI.
-   - Prose is scoped under .sentry-docs-guide so global Odoo CSS cannot break it.
+   - Prose is scoped under .guardlink-docs-guide so global Odoo CSS cannot break it.
    ============================================================================= */
 
-/* --- Top banner (sibling of .sentry-docs-guide in template) --- */
+/* --- Top banner (sibling of .guardlink-docs-guide in template) --- */
 .odoo-docs-header {
     background: #ffffff;
     color: #172b4d;
@@ -61,29 +61,29 @@
     .odoo-docs-layout {
         flex-direction: column;
     }
-    .sentry-docs-guide .odoo-docs-sidebar {
+    .guardlink-docs-guide .odoo-docs-sidebar {
         width: 100%;
         position: relative;
         top: 0;
     }
 }
 
-.sentry-docs-guide {
+.guardlink-docs-guide {
     color-scheme: only light;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
 }
 
 /* --- Shell --- */
-.sentry-docs-guide.odoo-docs-guide-wrap {
+.guardlink-docs-guide.odoo-docs-guide-wrap {
     background: #f4f5f7;
     min-height: calc(100vh - 48px);
     padding-bottom: 2rem;
 }
 
 /* --- Markdown column (single source of truth for article typography) --- */
-.sentry-docs-guide .documentation-body,
-.sentry-docs-guide .odoo-docs-body.documentation-body {
+.guardlink-docs-guide .documentation-body,
+.guardlink-docs-guide .odoo-docs-body.documentation-body {
     max-width: 48rem;
     background: #ffffff !important;
     color: #172b4d !important;
@@ -98,11 +98,11 @@
     line-height: 1.65;
 }
 
-.sentry-docs-guide .documentation-body::before {
+.guardlink-docs-guide .documentation-body::before {
     display: none !important;
 }
 
-.sentry-docs-guide .documentation-body h1 {
+.guardlink-docs-guide .documentation-body h1 {
     font-size: 1.75rem;
     font-weight: 600;
     line-height: 1.3;
@@ -113,7 +113,7 @@
     border-bottom: 1px solid #dfe1e6 !important;
 }
 
-.sentry-docs-guide .documentation-body h2 {
+.guardlink-docs-guide .documentation-body h2 {
     font-size: 1.35rem;
     font-weight: 600;
     color: #172b4d !important;
@@ -122,7 +122,7 @@
     border-bottom: 1px solid #ebecf0 !important;
 }
 
-.sentry-docs-guide .documentation-body h3 {
+.guardlink-docs-guide .documentation-body h3 {
     font-size: 1.125rem;
     font-weight: 600;
     color: #253858 !important;
@@ -131,57 +131,57 @@
     padding: 0 !important;
 }
 
-.sentry-docs-guide .documentation-body h4 {
+.guardlink-docs-guide .documentation-body h4 {
     font-size: 1rem;
     font-weight: 600;
     color: #42526e !important;
     margin: 1.25rem 0 0.5rem !important;
 }
 
-.sentry-docs-guide .documentation-body p {
+.guardlink-docs-guide .documentation-body p {
     margin: 0 0 1rem !important;
     color: #42526e !important;
     font-size: 1rem !important;
     line-height: 1.65 !important;
 }
 
-.sentry-docs-guide .documentation-body ul,
-.sentry-docs-guide .documentation-body ol {
+.guardlink-docs-guide .documentation-body ul,
+.guardlink-docs-guide .documentation-body ol {
     margin: 0 0 1rem !important;
     padding-left: 1.5rem !important;
     color: #42526e !important;
 }
 
-.sentry-docs-guide .documentation-body li {
+.guardlink-docs-guide .documentation-body li {
     margin-bottom: 0.35rem;
     line-height: 1.55;
 }
 
-.sentry-docs-guide .documentation-body hr {
+.guardlink-docs-guide .documentation-body hr {
     border: none;
     border-top: 1px solid #dfe1e6;
     margin: 1.5rem 0;
 }
 
-.sentry-docs-guide .documentation-body a {
+.guardlink-docs-guide .documentation-body a {
     color: #0c66e4 !important;
     font-weight: 500;
     text-decoration: none;
     border-bottom: 1px solid transparent;
 }
 
-.sentry-docs-guide .documentation-body a:hover {
+.guardlink-docs-guide .documentation-body a:hover {
     color: #0055cc !important;
     border-bottom-color: #0055cc;
 }
 
-.sentry-docs-guide .documentation-body strong {
+.guardlink-docs-guide .documentation-body strong {
     color: #172b4d;
     font-weight: 600;
 }
 
 /* Inline & block code — always light */
-.sentry-docs-guide .documentation-body code {
+.guardlink-docs-guide .documentation-body code {
     background: #f4f5f7 !important;
     color: #0747a6 !important;
     padding: 0.15rem 0.4rem !important;
@@ -191,7 +191,7 @@
     border: 1px solid #ebecf0 !important;
 }
 
-.sentry-docs-guide .documentation-body pre {
+.guardlink-docs-guide .documentation-body pre {
     background: #f4f5f7 !important;
     color: #172b4d !important;
     border: 1px solid #dfe1e6 !important;
@@ -203,11 +203,11 @@
     font-size: 0.875rem !important;
 }
 
-.sentry-docs-guide .documentation-body pre::before {
+.guardlink-docs-guide .documentation-body pre::before {
     display: none !important;
 }
 
-.sentry-docs-guide .documentation-body pre code {
+.guardlink-docs-guide .documentation-body pre code {
     background: transparent !important;
     color: inherit !important;
     border: none !important;
@@ -215,7 +215,7 @@
     font-size: inherit !important;
 }
 
-.sentry-docs-guide .documentation-body .codehilite {
+.guardlink-docs-guide .documentation-body .codehilite {
     background: #f4f5f7 !important;
     border: 1px solid #dfe1e6 !important;
     border-radius: 8px !important;
@@ -224,7 +224,7 @@
 }
 
 /* Tables — neutral, readable */
-.sentry-docs-guide .documentation-body table {
+.guardlink-docs-guide .documentation-body table {
     width: 100% !important;
     border-collapse: collapse !important;
     margin: 1rem 0 !important;
@@ -235,15 +235,15 @@
     box-shadow: none !important;
 }
 
-.sentry-docs-guide .documentation-body table th,
-.sentry-docs-guide .documentation-body table td {
+.guardlink-docs-guide .documentation-body table th,
+.guardlink-docs-guide .documentation-body table td {
     padding: 0.65rem 0.85rem !important;
     border: 1px solid #ebecf0 !important;
     text-align: left !important;
     vertical-align: top;
 }
 
-.sentry-docs-guide .documentation-body table th {
+.guardlink-docs-guide .documentation-body table th {
     background: #f4f5f7 !important;
     color: #172b4d !important;
     font-weight: 600 !important;
@@ -251,12 +251,12 @@
     letter-spacing: normal !important;
 }
 
-.sentry-docs-guide .documentation-body table tr:nth-child(even) td {
+.guardlink-docs-guide .documentation-body table tr:nth-child(even) td {
     background: #fafbfc !important;
 }
 
 /* Blockquotes */
-.sentry-docs-guide .documentation-body blockquote {
+.guardlink-docs-guide .documentation-body blockquote {
     margin: 1rem 0 !important;
     padding: 0.75rem 1rem !important;
     border-left: 4px solid #017e84 !important;
@@ -266,11 +266,11 @@
     font-style: normal !important;
 }
 
-.sentry-docs-guide .documentation-body blockquote::before {
+.guardlink-docs-guide .documentation-body blockquote::before {
     display: none !important;
 }
 
-.sentry-docs-guide .documentation-body img {
+.guardlink-docs-guide .documentation-body img {
     max-width: 100%;
     height: auto;
     border-radius: 8px;
@@ -279,12 +279,12 @@
     box-shadow: none;
 }
 
-.sentry-docs-guide .documentation-body img:hover {
+.guardlink-docs-guide .documentation-body img:hover {
     transform: none;
 }
 
 /* Optional JS TOC panel */
-.sentry-docs-guide .documentation-toc.docs-toc-panel {
+.guardlink-docs-guide .documentation-toc.docs-toc-panel {
     background: #f4f5f7;
     border: 1px solid #dfe1e6;
     border-radius: 8px;
@@ -292,13 +292,13 @@
     overflow: hidden;
 }
 
-.sentry-docs-guide .docs-toc-header {
+.guardlink-docs-guide .docs-toc-header {
     background: #fff;
     border-bottom: 1px solid #dfe1e6;
     padding: 0.5rem 0.85rem;
 }
 
-.sentry-docs-guide .docs-toc-title {
+.guardlink-docs-guide .docs-toc-title {
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -306,20 +306,20 @@
     color: #5e6c84;
 }
 
-.sentry-docs-guide .docs-toc-body {
+.guardlink-docs-guide .docs-toc-body {
     padding: 0.5rem 0.85rem 0.75rem;
     background: #fff;
     max-height: 260px;
     overflow-y: auto;
 }
 
-.sentry-docs-guide .documentation-toc .toc-list a {
+.guardlink-docs-guide .documentation-toc .toc-list a {
     color: #0c66e4 !important;
     font-size: 0.9rem;
 }
 
 /* --- Main column chrome (title area + actions) --- */
-.sentry-docs-guide .odoo-docs-content {
+.guardlink-docs-guide .odoo-docs-content {
     flex: 1;
     min-width: 0;
     background: #ffffff;
@@ -330,7 +330,7 @@
     max-width: 920px;
 }
 
-.sentry-docs-guide .odoo-docs-breadcrumb {
+.guardlink-docs-guide .odoo-docs-breadcrumb {
     background: #f4f5f7;
     padding: 0.5rem 0.85rem;
     border-radius: 6px;
@@ -340,18 +340,18 @@
     border: 1px solid #ebecf0;
 }
 
-.sentry-docs-guide .odoo-docs-breadcrumb a {
+.guardlink-docs-guide .odoo-docs-breadcrumb a {
     color: #0c66e4 !important;
 }
 
-.sentry-docs-guide .odoo-docs-title {
+.guardlink-docs-guide .odoo-docs-title {
     color: #172b4d !important;
     font-size: 1.5rem !important;
     font-weight: 600 !important;
     margin: 0 0 0.5rem !important;
 }
 
-.sentry-docs-guide .odoo-docs-page-kicker {
+.guardlink-docs-guide .odoo-docs-page-kicker {
     font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -360,7 +360,7 @@
     margin-bottom: 0.25rem;
 }
 
-.sentry-docs-guide .odoo-docs-description {
+.guardlink-docs-guide .odoo-docs-description {
     color: #5e6c84 !important;
     font-size: 0.95rem !important;
     margin-bottom: 1rem !important;
@@ -368,7 +368,7 @@
 }
 
 /* Toolbar buttons: explicit so Odoo link/button reset does not break */
-.sentry-docs-guide .odoo-docs-content .btn {
+.guardlink-docs-guide .odoo-docs-content .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -381,39 +381,39 @@
     cursor: pointer;
 }
 
-.sentry-docs-guide .odoo-docs-content .btn-outline-primary {
+.guardlink-docs-guide .odoo-docs-content .btn-outline-primary {
     color: #0c66e4 !important;
     border-color: #0c66e4 !important;
     background: #fff !important;
 }
 
-.sentry-docs-guide .odoo-docs-content .btn-outline-primary:hover {
+.guardlink-docs-guide .odoo-docs-content .btn-outline-primary:hover {
     background: #f4f5f7 !important;
     color: #0055cc !important;
 }
 
-.sentry-docs-guide .odoo-docs-content .btn-outline-secondary {
+.guardlink-docs-guide .odoo-docs-content .btn-outline-secondary {
     color: #42526e !important;
     border-color: #c1c7d0 !important;
     background: #fff !important;
 }
 
-.sentry-docs-guide .odoo-docs-content .btn-outline-secondary:hover {
+.guardlink-docs-guide .odoo-docs-content .btn-outline-secondary:hover {
     background: #f4f5f7 !important;
 }
 
-.sentry-docs-guide .odoo-docs-content .btn-outline-info {
+.guardlink-docs-guide .odoo-docs-content .btn-outline-info {
     color: #0c66e4 !important;
     border-color: #7a869a !important;
     background: #fff !important;
 }
 
-.sentry-docs-guide .odoo-docs-content .btn-outline-info:hover {
+.guardlink-docs-guide .odoo-docs-content .btn-outline-info:hover {
     background: #f4f5f7 !important;
 }
 
 /* --- Sidebar --- */
-.sentry-docs-guide .odoo-docs-sidebar {
+.guardlink-docs-guide .odoo-docs-sidebar {
     width: 280px;
     flex-shrink: 0;
     background: #ffffff;
@@ -426,15 +426,15 @@
     box-shadow: 0 1px 2px rgba(9, 30, 66, 0.06);
 }
 
-.sentry-docs-guide .odoo-docs-sidebar .section {
+.guardlink-docs-guide .odoo-docs-sidebar .section {
     margin-bottom: 1.15rem;
 }
 
-.sentry-docs-guide .odoo-docs-sidebar .section:last-child {
+.guardlink-docs-guide .odoo-docs-sidebar .section:last-child {
     margin-bottom: 0;
 }
 
-.sentry-docs-guide .odoo-docs-sidebar h3 {
+.guardlink-docs-guide .odoo-docs-sidebar h3 {
     color: #017e84;
     font-size: 0.8rem;
     font-weight: 700;
@@ -443,7 +443,7 @@
     letter-spacing: 0.06em;
 }
 
-.sentry-docs-guide .odoo-docs-sidebar .section-title {
+.guardlink-docs-guide .odoo-docs-sidebar .section-title {
     color: #5e6c84;
     font-weight: 700;
     font-size: 0.7rem;
@@ -452,20 +452,20 @@
     letter-spacing: 0.05em;
 }
 
-.sentry-docs-guide .odoo-docs-sidebar .section-description {
+.guardlink-docs-guide .odoo-docs-sidebar .section-description {
     color: #7a869a;
     font-size: 0.75rem;
     margin-bottom: 0.5rem;
     line-height: 1.35;
 }
 
-.sentry-docs-guide .odoo-docs-sidebar ul {
+.guardlink-docs-guide .odoo-docs-sidebar ul {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-.sentry-docs-guide .odoo-docs-sidebar a {
+.guardlink-docs-guide .odoo-docs-sidebar a {
     color: #253858 !important;
     text-decoration: none !important;
     font-size: 0.875rem;
@@ -475,22 +475,22 @@
     line-height: 1.35;
 }
 
-.sentry-docs-guide .odoo-docs-sidebar a:hover {
+.guardlink-docs-guide .odoo-docs-sidebar a:hover {
     background: #f4f5f7;
     color: #0c66e4 !important;
 }
 
-.sentry-docs-guide .odoo-docs-sidebar a.active {
+.guardlink-docs-guide .odoo-docs-sidebar a.active {
     background: #017e84 !important;
     color: #ffffff !important;
 }
 
 /* Search row */
-.sentry-docs-guide .odoo-docs-search {
+.guardlink-docs-guide .odoo-docs-search {
     margin-bottom: 1rem;
 }
 
-.sentry-docs-guide .odoo-docs-search .input-group {
+.guardlink-docs-guide .odoo-docs-search .input-group {
     flex-wrap: nowrap;
     border-radius: 8px;
     overflow: hidden;
@@ -498,14 +498,14 @@
     background: #fff;
 }
 
-.sentry-docs-guide .odoo-docs-search .input-group-text {
+.guardlink-docs-guide .odoo-docs-search .input-group-text {
     background: #f4f5f7 !important;
     border: none !important;
     color: #5e6c84 !important;
     padding: 0.5rem 0.65rem;
 }
 
-.sentry-docs-guide .odoo-docs-search .form-control {
+.guardlink-docs-guide .odoo-docs-search .form-control {
     border: none !important;
     box-shadow: none !important;
     font-size: 0.875rem !important;
@@ -514,11 +514,11 @@
     background: #fff !important;
 }
 
-.sentry-docs-guide .odoo-docs-search .form-control::placeholder {
+.guardlink-docs-guide .odoo-docs-search .form-control::placeholder {
     color: #7a869a;
 }
 
-.sentry-docs-guide .odoo-docs-search .input-group-append .btn {
+.guardlink-docs-guide .odoo-docs-search .input-group-append .btn {
     border-radius: 0 !important;
     border: none !important;
     padding: 0.5rem 0.85rem !important;
@@ -528,12 +528,12 @@
     color: #fff !important;
 }
 
-.sentry-docs-guide .odoo-docs-search .input-group-append .btn:hover {
+.guardlink-docs-guide .odoo-docs-search .input-group-append .btn:hover {
     background: #015c61 !important;
     color: #fff !important;
 }
 
-.sentry-docs-guide #searchResults.search-results {
+.guardlink-docs-guide #searchResults.search-results {
     margin-top: 0.5rem;
     max-height: 280px;
     overflow-y: auto;
@@ -543,33 +543,33 @@
     box-shadow: 0 4px 12px rgba(9, 30, 66, 0.12);
 }
 
-.sentry-docs-guide .search-result-item {
+.guardlink-docs-guide .search-result-item {
     padding: 0.65rem 0.85rem !important;
     border-bottom: 1px solid #ebecf0;
     cursor: pointer;
 }
 
-.sentry-docs-guide .search-result-item:last-child {
+.guardlink-docs-guide .search-result-item:last-child {
     border-bottom: none;
 }
 
-.sentry-docs-guide .search-result-item:hover {
+.guardlink-docs-guide .search-result-item:hover {
     background: #f4f5f7 !important;
 }
 
-.sentry-docs-guide .search-result-title {
+.guardlink-docs-guide .search-result-title {
     color: #0c66e4 !important;
     font-weight: 600;
     font-size: 0.9rem;
 }
 
-.sentry-docs-guide .search-result-context {
+.guardlink-docs-guide .search-result-context {
     color: #5e6c84 !important;
     font-size: 0.8rem;
 }
 
 /* Footer */
-.sentry-docs-guide .odoo-docs-footer {
+.guardlink-docs-guide .odoo-docs-footer {
     margin-top: 2rem;
     padding-top: 1.25rem;
     border-top: 1px solid #dfe1e6;
@@ -577,12 +577,12 @@
     color: #5e6c84 !important;
 }
 
-.sentry-docs-guide .odoo-docs-footer a {
+.guardlink-docs-guide .odoo-docs-footer a {
     color: #0c66e4 !important;
 }
 
 /* Floating buttons */
-.sentry-docs-guide ~ .back-to-guardpro,
+.guardlink-docs-guide ~ .back-to-guardpro,
 body .back-to-guardpro {
     z-index: 1001;
 }
@@ -608,22 +608,22 @@ body .back-to-guardpro {
 
 /* JS helpers */
 .fade-in {
-    animation: sentryDocFade 0.25s ease-out;
+    animation: guardlinkDocFade 0.25s ease-out;
 }
 
-@keyframes sentryDocFade {
+@keyframes guardlinkDocFade {
     from { opacity: 0; }
     to { opacity: 1; }
 }
 
 /* Print */
 @media print {
-    .sentry-docs-guide .odoo-docs-sidebar,
+    .guardlink-docs-guide .odoo-docs-sidebar,
     .back-to-guardpro,
     #scrollToTop {
         display: none !important;
     }
-    .sentry-docs-guide .odoo-docs-content {
+    .guardlink-docs-guide .odoo-docs-content {
         box-shadow: none;
         border: none;
         max-width: 100%;

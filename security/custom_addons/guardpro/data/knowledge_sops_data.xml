@@ -85,7 +85,7 @@
             <field name="expected_duration">1.0</field>
             <field name="description"><![CDATA[
                 <ul>
-                    <li>Search visitor name in GuardPro watchlist system</li>
+                    <li>Search visitor name in GuardLink watchlist system</li>
                     <li>Check for any active bans or restrictions</li>
                     <li>Verify against previous incident reports</li>
                     <li>If match found: Follow escalation procedure (do NOT grant access)</li>
@@ -146,7 +146,7 @@
             <field name="expected_duration">2.0</field>
             <field name="description"><![CDATA[
                 <ul>
-                    <li>Open GuardPro Visitor Management module</li>
+                    <li>Open GuardLink Visitor Management module</li>
                     <li>Click "New Visitor Registration"</li>
                     <li>Scan or manually enter Emirates ID number</li>
                     <li>Fill in all required fields: Name, ID Number, Contact, Purpose, Host</li>
@@ -246,7 +246,7 @@
         <record id="sop_checklist_ac_001_7" model="knowledge.sop.checklist">
             <field name="sop_id" ref="sop_access_control_visitor"/>
             <field name="sequence">7</field>
-            <field name="name">Visitor registered in GuardPro system</field>
+            <field name="name">Visitor registered in GuardLink system</field>
             <field name="category">documentation</field>
             <field name="is_mandatory" eval="True"/>
         </record>
@@ -477,7 +477,7 @@
             <field name="description"><![CDATA[
                 <p>After emergency is controlled:</p>
                 <ul>
-                    <li>Create incident report in GuardPro system</li>
+                    <li>Create incident report in GuardLink system</li>
                     <li>Document timeline of events</li>
                     <li>List all emergency service units that responded</li>
                     <li>Note any injuries or property damage</li>
@@ -507,7 +507,7 @@
             <field name="scope">All guards assigned to patrol duties at client sites.</field>
             <field name="description"><![CDATA[
                 <h3>Purpose</h3>
-                <p>Systematic patrols deter criminal activity, identify hazards, and ensure site security. GuardPro's checkpoint scanning system ensures accountability and proof of patrol completion.</p>
+                <p>Systematic patrols deter criminal activity, identify hazards, and ensure site security. GuardLink's checkpoint scanning system ensures accountability and proof of patrol completion.</p>
                 
                 <h3>Patrol Types</h3>
                 <ul>
@@ -533,7 +533,7 @@
             <field name="training_duration">2.5</field>
             <field name="sequence">40</field>
             <field name="objective">To ensure all security incidents are accurately documented, reported promptly, and properly escalated.</field>
-            <field name="scope">All security personnel must report incidents using GuardPro Incident Management module.</field>
+            <field name="scope">All security personnel must report incidents using GuardLink Incident Management module.</field>
             <field name="description"><![CDATA[
                 <h3>What is an Incident?</h3>
                 <p>Any event that:</p>

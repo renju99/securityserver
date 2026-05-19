@@ -507,7 +507,7 @@ class GuardMessage(models.Model):
             self.env['guardpro.mobile.outbox'].sudo().push(
                 user=recipient_users,
                 kind='message_received',
-                title=_('Message from %s') % (self.sender_id.name or 'GuardPro'),
+                title=_('Message from %s') % (self.sender_id.name or 'GuardLink'),
                 body=preview,
                 priority='high' if self.is_urgent else 'normal',
                 res_model='guard.message',

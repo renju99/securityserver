@@ -10,7 +10,7 @@ _logger = logging.getLogger(__name__)
 
 
 class NotificationAPIController(http.Controller):
-    """Notification API endpoints for GuardPro mobile app."""
+    """Notification API endpoints for GuardLink mobile app."""
 
     @http.route('/guardpro/api/notifications/list', type='json', auth='user', methods=['POST'], csrf=False)
     def list_notifications(self, limit=20, **kwargs):

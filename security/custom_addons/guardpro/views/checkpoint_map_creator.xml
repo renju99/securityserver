@@ -495,7 +495,7 @@
                                 <t t-translate="yes">Google Maps API key required</t>
                             </h4>
                             <p t-translate="yes">
-                                Configure your Google Maps JavaScript API key under Settings -> General Settings -> GuardPro -> Google Maps Integration to use the interactive checkpoint creator.
+                                Configure your Google Maps JavaScript API key under Settings -> General Settings -> GuardLink -> Google Maps Integration to use the interactive checkpoint creator.
                             </p>
                             <p class="mb-0" t-translate="yes">
                                 Each customer must supply their own Google Cloud key to control billing and usage.

@@ -1,8 +1,8 @@
-# GuardPro Business Logic
+# GuardLink Business Logic
 
 ## Overview
 
-GuardPro's business logic layer implements the core security management workflows, automated processes, and business rules that drive the system's operations. This layer ensures data integrity, enforces business policies, and automates routine tasks.
+GuardLink's business logic layer implements the core security management workflows, automated processes, and business rules that drive the system's operations. This layer ensures data integrity, enforces business policies, and automates routine tasks.
 
 ## Business Logic Architecture
 
@@ -1185,4 +1185,4 @@ class EventHandlerManager:
 
 ---
 
-*GuardPro Business Logic: Robust Workflow Management for Security Operations*
+*GuardLink Business Logic: Robust Workflow Management for Security Operations*

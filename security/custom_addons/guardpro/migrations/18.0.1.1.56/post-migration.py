@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Fix GuardPro menu parents: views file had top-level menus without menu_guardpro_root."""
+"""Fix GuardLink menu parents: views file had top-level menus without menu_guardpro_root."""
 
 from odoo import api, SUPERUSER_ID
 

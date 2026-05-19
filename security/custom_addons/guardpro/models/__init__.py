@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""GuardPro Models."""
+"""GuardLink Models."""
 
 from . import website_fix  # Fix for REQUEST_URI KeyError in website module
 from . import ir_http  # Permissions-Policy for mobile PWA (camera)
@@ -87,8 +87,8 @@ from . import favorites
 from . import client_dashboard
 from . import dashboard_diagnostics
 from . import analytics
-from . import guardpro_analytics_dashboard  # GuardPro Analytics Dashboard
-from . import guardpro_tours_dashboard  # GuardPro Tours Dashboard
+from . import guardpro_analytics_dashboard  # GuardLink Analytics Dashboard
+from . import guardpro_tours_dashboard  # GuardLink Tours Dashboard
 from . import guard_performance  # Performance scoring and reviews
 from . import auto_followers_mixin  # Load before audit_log
 from . import audit_log  # Must be after models it inherits from

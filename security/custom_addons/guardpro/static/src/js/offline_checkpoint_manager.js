@@ -1,5 +1,5 @@
 /**
- * GuardPro Offline Checkpoint Manager
+ * GuardLink Offline Checkpoint Manager
  * Handles offline checkpoint scanning with automatic sync
  */
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""REST API v1 for GuardPro."""
+"""REST API v1 for GuardLink."""
 
 from odoo import http, fields, _
 from odoo.http import request, Response
@@ -9,8 +9,8 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class GuardProAPIv1(http.Controller):
-    """REST API endpoints for GuardPro."""
+class GuardLinkAPIv1(http.Controller):
+    """REST API endpoints for GuardLink."""
     
     def _authenticate_api_key(self):
         """Authenticate using API key from header."""

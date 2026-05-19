@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""GuardPro Unit Tests."""
+"""GuardLink Unit Tests."""
 
 from . import test_guard_profile
 from . import test_geo_utils

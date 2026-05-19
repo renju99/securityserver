@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""GuardPro Documentation Controller."""
+"""GuardLink Documentation Controller."""
 
 import os
 import logging
@@ -16,8 +16,8 @@ except ImportError:
     markdown = None
 
 
-class GuardProDocumentation(http.Controller):
-    """Controller for displaying GuardPro documentation."""
+class GuardLinkDocumentation(http.Controller):
+    """Controller for displaying GuardLink documentation."""
 
     def _get_docs_path(self):
         """Get the path to the docs directory."""
@@ -34,7 +34,7 @@ class GuardProDocumentation(http.Controller):
                 'sections': [
                     {'file': 'INDEX.md', 'title': 'Documentation hub', 'description': 'Chapters, scope, and links'},
                     {'file': 'GETTING_STARTED.md', 'title': 'Chapter 1 — Get started', 'description': 'First site, shift, tour, and mobile patrol loop'},
-                    {'file': 'README.md', 'title': 'What is Sentry?', 'description': 'Product summary and quick setup'},
+                    {'file': 'README.md', 'title': 'What is GuardLink?', 'description': 'Product summary and quick setup'},
                     {'file': 'QUICK_REFERENCE.md', 'title': 'Quick reference', 'description': 'Shortcuts and tips'},
                 ]
             },
@@ -43,7 +43,7 @@ class GuardProDocumentation(http.Controller):
                 'description': 'Installation and how the app fits together',
                 'sections': [
                     {'file': 'user-guide/01-introduction.md', 'title': 'Introduction', 'description': 'Concepts and navigation'},
-                    {'file': 'user-guide/02-installation.md', 'title': 'Installation', 'description': 'Installing Sentry on Odoo 18'},
+                    {'file': 'user-guide/02-installation.md', 'title': 'Installation', 'description': 'Installing GuardLink on Odoo 18'},
                     {'file': 'user-guide/03-configuration.md', 'title': 'Configuration', 'description': 'Settings and security groups'},
                     {'file': 'user-guide/04-features.md', 'title': 'Features overview', 'description': 'Areas of the module'},
                 ]

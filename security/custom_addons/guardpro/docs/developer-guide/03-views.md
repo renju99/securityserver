@@ -1,8 +1,8 @@
-# GuardPro Views
+# GuardLink Views
 
 ## Overview
 
-GuardPro's user interface is built using Odoo's view system, providing comprehensive and intuitive interfaces for all security management operations. The views are designed with modern UX principles, responsive design, and accessibility in mind.
+GuardLink's user interface is built using Odoo's view system, providing comprehensive and intuitive interfaces for all security management operations. The views are designed with modern UX principles, responsive design, and accessibility in mind.
 
 ## View Architecture
 
@@ -601,7 +601,7 @@ Views/
     <field name="name">guard.dashboard</field>
     <field name="model">guard.dashboard</field>
     <field name="arch" type="xml">
-        <dashboard string="GuardPro Dashboard">
+        <dashboard string="GuardLink Dashboard">
             
             <!-- Key Metrics Row -->
             <view type="graph" string="Performance Metrics">
@@ -930,4 +930,4 @@ odoo.define('guardpro.ProgressBarWidget', function (require) {
 
 ---
 
-*GuardPro Views: Modern, Intuitive, and Responsive User Interfaces*
+*GuardLink Views: Modern, Intuitive, and Responsive User Interfaces*

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Example: Customizing and Overriding GuardPro Workflows
+Example: Customizing and Overriding GuardLink Workflows
 
-This example shows how to extend GuardPro workflows, add custom
+This example shows how to extend GuardLink workflows, add custom
 state transitions, and override existing business logic.
 """
 

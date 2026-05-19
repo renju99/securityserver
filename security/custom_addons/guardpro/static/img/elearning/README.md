@@ -1,15 +1,15 @@
-# GuardPro eLearning Images
+# GuardLink eLearning Images
 
-This directory contains screenshots and images used in the GuardPro eLearning courses.
+This directory contains screenshots and images used in the GuardLink eLearning courses.
 
 ## Available Images
 
 | File | Description | Used In |
 |------|-------------|---------|
-| `01_login_page.png` | GuardPro login screen | Fundamentals - Module 2: System Navigation |
+| `01_login_page.png` | GuardLink login screen | Fundamentals - Module 2: System Navigation |
 | `02_main_dashboard.png` | Main application dashboard | Fundamentals - Module 2: System Navigation |
 | `03_app_menu.png` | Application menu showing all modules | Fundamentals - Module 2: System Navigation |
-| `04_guardpro_operations_dashboard.png` | GuardPro Operations Dashboard with live metrics | Fundamentals - Module 4: Dashboard Overview |
+| `04_guardpro_operations_dashboard.png` | GuardLink Operations Dashboard with live metrics | Fundamentals - Module 4: Dashboard Overview |
 | `05_operations_menu.png` | Operations dropdown menu | Fundamentals - Module 5: Basic Operations |
 | `06_incidents_emergency_menu.png` | Incidents & Emergency submenu | N/A (Available for future use) |
 | `07_guard_management_tab.png` | Guard Management dashboard tab | Supervisor Ops - Module 2: Shift Management |
@@ -29,7 +29,7 @@ Images are referenced in the elearning slide XML files using the following forma
 <field name="description">
     &lt;h3&gt;Dashboard Overview&lt;/h3&gt;
     &lt;img src="/guardpro/static/img/elearning/04_guardpro_operations_dashboard.png" 
-         alt="GuardPro Operations Dashboard" 
+         alt="GuardLink Operations Dashboard" 
          style="max-width: 100%; height: auto; margin: 15px 0; border: 1px solid #ddd; border-radius: 4px;"/&gt;
 </field>
 ```
@@ -44,7 +44,7 @@ Images are referenced in the elearning slide XML files using the following forma
 
 ## Courses Using Images
 
-### 1. GuardPro Fundamentals (GP-101)
+### 1. GuardLink Fundamentals (GP-101)
 - Module 2: System Navigation (3 images)
 - Module 4: Dashboard Overview (1 image)
 - Module 5: Basic Operations (1 image)

@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 {
-    'name': 'Sentry - Security Guard Management',
-    'version': '18.0.1.1.70',
+    'name': 'GuardLink - Security Guard Management',
+    'version': '18.0.1.1.72',
     'category': 'Services/Security',
     'summary': 'Win premium guard contracts with an Odoo-native suite for mobile patrols, SLA automation, client portals, and analytics.',
     'description': """
-Sentry - Enterprise Security Operations Suite
+GuardLink - Enterprise Security Operations Suite
 ===============================================
 
-Sentry centralizes security guard field operations, compliance, and client reporting inside Odoo 18 Community Edition. The suite connects supervisors, control rooms, guards, and clients with real-time visibility, mobile-first workflows, and automated analytics.
+GuardLink centralizes security guard field operations, compliance, and client reporting inside Odoo 18 Community Edition. The suite connects supervisors, control rooms, guards, and clients with real-time visibility, mobile-first workflows, and automated analytics.
 
 Core Highlights
 ---------------
@@ -61,12 +61,12 @@ Implementation Guidance
 Support & Roadmap
 -----------------
 * Version 18.0.1.0.8 consolidates the 2025 enhancement wave: analytics dashboards, emergency broadcast suite, eLearning content, and security audit tooling
-* Roadmap items include AI-assisted scheduling, expanded compliance automation, and customer success analytics. Feedback is welcomed via the Sentry support channel.
+* Roadmap items include AI-assisted scheduling, expanded compliance automation, and customer success analytics. Feedback is welcomed via the GuardLink support channel.
     """,
-    'author': 'Sentry',
-    'website': 'https://sentry.proptechme.com/',
+    'author': 'GuardLink',
+    'website': 'https://guardlink.app/',
     'support': 'mails4ranjith@gmail.com',
-    'maintainers': ['sentry'],
+    'maintainers': ['guardlink'],
     'license': 'LGPL-3',
     'price': 1000,
     'currency': 'USD',
@@ -381,7 +381,7 @@ Support & Roadmap
         
         # Homepage Template
         'views/guardpro_homepage_template.xml',
-        'views/berkeley_homepage_template.xml',  # Berkeley Services branded homepage
+        'views/berkeley_homepage_template.xml',  # GuardLink branded homepage
         # PWA Templates (Legacy - DISABLED - files removed to avoid 404 errors)
         # 'views/pwa_templates.xml',  # References deleted static/pwa/ files
         # 'views/pwa_optimized_templates.xml',  # References deleted static/pwa/ files

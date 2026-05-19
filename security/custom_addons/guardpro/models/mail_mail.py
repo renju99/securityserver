@@ -46,7 +46,7 @@ class MailMail(models.Model):
 
         if total:
             _logger.info(
-                'GuardPro mail.mail retention: removed %s record(s) with create_date before %s '
+                'GuardLink mail.mail retention: removed %s record(s) with create_date before %s '
                 '(retention %s days)',
                 total,
                 cutoff,

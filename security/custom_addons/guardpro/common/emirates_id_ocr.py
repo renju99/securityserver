@@ -1037,7 +1037,7 @@ def _extract_uae_llc_suffix(tail):
 
 
 def _parse_employer_after_services_colon(lat):
-    """``Berkeley Services: …`` — only merge a real ``U.a.e (L L C)`` tail, not random OCR after the colon."""
+    """``GuardLink: …`` — only merge a real ``U.a.e (L L C)`` tail, not random OCR after the colon."""
     if not lat:
         return ""
     m = re.search(r"(?i)\b((?:berkeley|berte?ley)\s+services)\s*:\s*", lat)

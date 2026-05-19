@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 /**
- * GuardPro - Google Maps Integration for Real-time Guard Tracking
+ * GuardLink - Google Maps Integration for Real-time Guard Tracking
  * 
  * This module provides real-time visualization of security guard locations
  * on Google Maps with auto-refresh capabilities.

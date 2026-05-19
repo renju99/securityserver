@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-GuardPro NFC & QR Code Test Runner
+GuardLink NFC & QR Code Test Runner
 ===================================
 
 This script runs comprehensive tests for NFC and QR code functionality.
@@ -73,7 +73,7 @@ def print_instructions():
     
     print("\n1. BACKEND TESTS (Python ORM Tests)")
     print("   " + "-" * 70)
-    print("   Run all GuardPro tests:")
+    print("   Run all GuardLink tests:")
     print("   $ ./odoo-bin -c odoo.conf -d guardpro_test -u guardpro \\")
     print("                --test-enable --stop-after-init")
     print()
@@ -116,7 +116,7 @@ def print_instructions():
     print("   " + "-" * 70)
     print("   Create sample checkpoints for testing:")
     print("   - Go to Odoo web interface")
-    print("   - Navigate to GuardPro > Configuration > Checkpoints")
+    print("   - Navigate to GuardLink > Configuration > Checkpoints")
     print("   - Create test checkpoints with different scan types")
     print()
 
@@ -127,7 +127,7 @@ def print_requirements():
     
     print("\n📋 Backend Tests:")
     print("   ✓ Odoo 18 Community Edition")
-    print("   ✓ GuardPro module installed")
+    print("   ✓ GuardLink module installed")
     print("   ✓ Test database configured")
     print("   ✓ Python packages: qrcode, Pillow")
     print()
@@ -264,22 +264,22 @@ def print_quick_start():
     
     print("\n🚀 5-Minute Test Setup:")
     print()
-    print("1. Install GuardPro module:")
+    print("1. Install GuardLink module:")
     print("   $ ./odoo-bin -c odoo.conf -d DATABASE -i guardpro")
     print()
     print("2. Create a test site:")
-    print("   - Go to GuardPro > Sites > Create")
+    print("   - Go to GuardLink > Sites > Create")
     print("   - Name: 'Test Site'")
     print()
     print("3. Create a test checkpoint:")
-    print("   - Go to GuardPro > Configuration > Checkpoints > Create")
+    print("   - Go to GuardLink > Configuration > Checkpoints > Create")
     print("   - Name: 'Test NFC Checkpoint'")
     print("   - Scan Type: 'NFC Tag'")
     print("   - NFC Tag ID: 'TEST-NFC-001'")
     print("   - Site: Select 'Test Site'")
     print()
     print("4. Create a guard profile:")
-    print("   - Go to GuardPro > Guards > Create")
+    print("   - Go to GuardLink > Guards > Create")
     print("   - Link to your user account")
     print()
     print("5. Run Python tests:")

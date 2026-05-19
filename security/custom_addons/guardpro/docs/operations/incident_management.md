@@ -1,6 +1,6 @@
 # Incident Management
 
-Complete guide to reporting, tracking, and managing security incidents in GuardPro.
+Complete guide to reporting, tracking, and managing security incidents in GuardLink.
 
 ---
 
@@ -40,7 +40,7 @@ Incident Management allows you to:
 ### Navigation Steps:
 
 **Method 1: From Main Menu**
-1. Click **"GuardPro"** (top navigation)
+1. Click **"GuardLink"** (top navigation)
 2. Select **"Operations"**
 3. Click **"Incident Reports"**
 
@@ -50,7 +50,7 @@ Incident Management allows you to:
 - Select **"Incident Reports"**
 
 **Method 3: From Dashboard**
-- Go to GuardPro Dashboard
+- Go to GuardLink Dashboard
 - Click **"Incidents"** widget
 - Shows recent incidents with quick filters
 
@@ -646,7 +646,7 @@ Escalate incidents when:
 **Step 2:** Provide immediate assistance
 
 **Step 3:** While waiting for ambulance:
-- Open GuardPro mobile app
+- Open GuardLink mobile app
 - Tap **"Report Incident"**
 - Select **"Medical Emergency"**
 - Set severity: **Critical**

@@ -105,13 +105,13 @@
                                 <td style="width: 50%; text-align: center; padding: 20px;">
                                     <div style="border-top: 2px solid #000; padding-top: 10px; margin: 40px 60px 0 60px;">
                                         <p style="margin: 5px 0; font-weight: bold; font-size: 16px;">Training Coordinator</p>
-                                        <p style="margin: 5px 0; color: #666; font-size: 12px;">GuardPro Training Department</p>
+                                        <p style="margin: 5px 0; color: #666; font-size: 12px;">GuardLink Training Department</p>
                                     </div>
                                 </td>
                                 <td style="width: 50%; text-align: center; padding: 20px;">
                                     <div style="border-top: 2px solid #000; padding-top: 10px; margin: 40px 60px 0 60px;">
                                         <p style="margin: 5px 0; font-weight: bold; font-size: 16px;">Director of Operations</p>
-                                        <p style="margin: 5px 0; color: #666; font-size: 12px;">GuardPro Security Management</p>
+                                        <p style="margin: 5px 0; color: #666; font-size: 12px;">GuardLink Security Management</p>
                                     </div>
                                 </td>
                             </tr>
@@ -145,7 +145,7 @@
                     <!-- Footer -->
                     <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); text-align: center; width: 80%;">
                         <p style="margin: 0; font-size: 11px; color: #999; border-top: 1px solid #ddd; padding-top: 10px;">
-                            GuardPro Security Management | Professional Training &amp; Development Program<br/>
+                            GuardLink Security Management | Professional Training &amp; Development Program<br/>
                             <span style="font-size: 9px;">This certificate verifies completion of the specified training course and commitment to professional excellence</span>
                         </p>
                     </div>

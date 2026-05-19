@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Post-migration script for GuardPro 18.0.1.0.3
+"""Post-migration script for GuardLink 18.0.1.0.3
 
 This migration:
 - Adds missing conflict detection fields to guard_shift table
@@ -13,7 +13,7 @@ _logger = logging.getLogger(__name__)
 
 def migrate(cr, version):
     """Run post-migration tasks."""
-    _logger.info("Running GuardPro post-migration 18.0.1.0.3")
+    _logger.info("Running GuardLink post-migration 18.0.1.0.3")
     
     # Add missing columns to guard_shift table
     _logger.info("Adding conflict detection columns to guard_shift table...")
@@ -74,7 +74,7 @@ def migrate(cr, version):
     affected_rows = cr.rowcount
     _logger.info(f"Updated {affected_rows} shifts with default conflict values")
     
-    _logger.info("GuardPro post-migration 18.0.1.0.3 completed successfully")
+    _logger.info("GuardLink post-migration 18.0.1.0.3 completed successfully")
 
 
 

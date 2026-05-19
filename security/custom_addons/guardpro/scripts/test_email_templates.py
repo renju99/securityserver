@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-GuardPro Email Template Testing Script
+GuardLink Email Template Testing Script
 Run this script to test all email templates without UI
 """
 
@@ -102,7 +102,7 @@ def test_template(env, template, test_record=None):
 
 def main():
     """Main testing function"""
-    print_header("GuardPro Email Template Tester")
+    print_header("GuardLink Email Template Tester")
     print(f"Test Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
     
     try:
@@ -124,8 +124,8 @@ def main():
             print("Make sure you run this in Odoo shell context")
             sys.exit(1)
         
-        # Search for GuardPro templates
-        print("Searching for GuardPro email templates...")
+        # Search for GuardLink templates
+        print("Searching for GuardLink email templates...")
         templates = env['mail.template'].search([
             '|', '|', '|',
             ('model', 'ilike', 'guard'),
@@ -196,7 +196,7 @@ if __name__ == '__main__':
         import __main__
         if hasattr(__main__, 'env'):
             env = __main__.env
-            print_header("GuardPro Email Template Tester (Interactive Mode)")
+            print_header("GuardLink Email Template Tester (Interactive Mode)")
             
             templates = env['mail.template'].search([
                 '|', '|', '|',

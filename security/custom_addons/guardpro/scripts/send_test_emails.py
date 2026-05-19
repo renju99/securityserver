@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-GuardPro Email Template - Send Test Emails
+GuardLink Email Template - Send Test Emails
 This script sends test emails for all templates to verify they work correctly.
 
 Usage in Odoo shell:
@@ -165,7 +165,7 @@ def create_or_get_test_data(env):
 def send_test_emails(env, test_email=TEST_EMAIL):
     """Send test emails for all templates"""
     print("\n" + "="*80)
-    print("GuardPro Email Template - Test Email Sender".center(80))
+    print("GuardLink Email Template - Test Email Sender".center(80))
     print("="*80 + "\n")
     print(f"Test Email Address: {test_email}")
     print(f"Test Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
@@ -196,7 +196,7 @@ def send_test_emails(env, test_email=TEST_EMAIL):
         'Overdue Key Return Notification': ('key.register', None),  # Skip
     }
     
-    # Search for all GuardPro templates
+    # Search for all GuardLink templates
     templates = env['mail.template'].search([
         '|', '|', '|', '|',
         ('model', 'ilike', 'guard'),

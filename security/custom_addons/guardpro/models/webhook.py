@@ -155,9 +155,9 @@ class Webhook(models.Model):
         # Prepare headers
         headers = {
             'Content-Type': 'application/json',
-            'User-Agent': 'GuardPro-Odoo/1.0',
-            'X-GuardPro-Event': event_type,
-            'X-GuardPro-Delivery': str(self.env['guardpro.webhook.log'].search_count([]) + 1)
+            'User-Agent': 'GuardLink-Odoo/1.0',
+            'X-GuardLink-Event': event_type,
+            'X-GuardLink-Delivery': str(self.env['guardpro.webhook.log'].search_count([]) + 1)
         }
         
         # Add authentication
@@ -178,7 +178,7 @@ class Webhook(models.Model):
                 payload_json.encode(),
                 hashlib.sha256
             ).hexdigest()
-            headers['X-GuardPro-Signature'] = f'sha256={signature}'
+            headers['X-GuardLink-Signature'] = f'sha256={signature}'
         
         # Send webhook with retry logic
         attempt = 0
@@ -251,7 +251,7 @@ class Webhook(models.Model):
             'event': 'test.webhook',
             'timestamp': fields.Datetime.now().isoformat(),
             'data': {
-                'message': 'This is a test webhook from GuardPro',
+                'message': 'This is a test webhook from GuardLink',
                 'webhook_name': self.name
             }
         }

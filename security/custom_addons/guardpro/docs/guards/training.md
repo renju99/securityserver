@@ -1,6 +1,6 @@
 # Training & Certifications
 
-Complete guide to managing guard training and certifications in GuardPro.
+Complete guide to managing guard training and certifications in GuardLink.
 
 ---
 
@@ -77,7 +77,7 @@ Training & Certifications management helps you track guard training completion, 
 ### Scheduling Training Sessions
 
 **Navigation:**
-- GuardPro > Training > Training Sessions
+- GuardLink > Training > Training Sessions
 - Click **"Schedule Session"**
 
 ### Training Session Setup
@@ -121,7 +121,7 @@ Training & Certifications management helps you track guard training completion, 
 
 ### Assigning Courses
 
-**Step 1:** GuardPro > E-Learning > Courses
+**Step 1:** GuardLink > E-Learning > Courses
 
 **Step 2:** Select course
 

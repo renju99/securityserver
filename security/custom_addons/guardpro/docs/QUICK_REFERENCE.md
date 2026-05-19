@@ -1,4 +1,4 @@
-# 🚀 Quick Reference Guide - Sentry Security Operations
+# 🚀 Quick Reference Guide - GuardLink Security Operations
 
 <div align="center">
 
@@ -207,10 +207,10 @@ Esc: Cancel/Close modal
 
 ### Voice Commands (Mobile)
 ```
-"Hey Sentry, check me in" - Quick check-in
-"Hey Sentry, report incident" - Start incident report
-"Hey Sentry, call supervisor" - Emergency contact
-"Hey Sentry, status update" - Send location/status
+"Hey GuardLink, check me in" - Quick check-in
+"Hey GuardLink, report incident" - Start incident report
+"Hey GuardLink, call supervisor" - Emergency contact
+"Hey GuardLink, status update" - Send location/status
 ```
 
 ### Batch Operations
@@ -242,8 +242,8 @@ Client Emergency Contact: [Client's emergency number]
 
 ### System Support
 ```
-Technical Support: support@sentry.app
-Emergency System Support: 1-800-SENTRY (24/7)
+Technical Support: support@guardlink.app
+Emergency System Support: GuardLink Support (24/7)
 Documentation: https://security.berkeleyuae.com/guardpro/documentation
 ```
 
@@ -349,7 +349,7 @@ Login failed: Reset password → Check credentials
 
 **Remember: Your safety and the safety of others comes first. Always follow established protocols and report any concerns immediately.**
 
-*For technical support, contact the Sentry support team at support@sentry.app*
+*For technical support, contact the GuardLink support team at support@guardlink.app*
 
 </div>
 

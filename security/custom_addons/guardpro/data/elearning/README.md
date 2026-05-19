@@ -1,13 +1,13 @@
-# GuardPro E-Learning Data Files
+# GuardLink E-Learning Data Files
 
-This directory contains all e-learning course data for the GuardPro Security Management System - focused on security guard training and management.
+This directory contains all e-learning course data for the GuardLink Security Management System - focused on security guard training and management.
 
 ## Files Overview
 
 | File | Purpose | Status |
 |------|---------|--------|
 | `elearning_courses_data.xml` | Course definitions, tags, and metadata | ✅ Complete |
-| `elearning_slides_fundamentals.xml` | Course 1: GuardPro Fundamentals (2 hrs) | ✅ Complete |
+| `elearning_slides_fundamentals.xml` | Course 1: GuardLink Fundamentals (2 hrs) | ✅ Complete |
 | `elearning_slides_guard_operations.xml` | Course 2: Guard Field Operations (3 hrs) | ✅ Complete |
 | `elearning_slides_supervisor_ops.xml` | Course 3: Supervisor Operations (4 hrs) | ✅ Complete |
 | `elearning_slides_basic_security.xml` | Course 4: Basic Security Training (3 hrs) | ✅ Complete |
@@ -70,7 +70,7 @@ These files are loaded in the following order (as defined in `__manifest__.py`):
 
 ### Course Breakdown
 
-**Course 1: GuardPro Fundamentals (GP-101)**
+**Course 1: GuardLink Fundamentals (GP-101)**
 - Target: All users
 - Duration: 2 hours
 - Mandatory: ✅ Yes
@@ -204,7 +204,7 @@ Courses are organized by category:
 ## Mandatory Training
 
 **New guards must complete (9 courses):**
-1. GuardPro Fundamentals ✅
+1. GuardLink Fundamentals ✅
 2. Security Guard Field Operations ✅
 3. Basic Security Training ✅
 4. Emergency Response & Procedures ✅
@@ -287,7 +287,7 @@ When editing these files:
 These data files require:
 - Odoo 18 Community Edition
 - `website_slides` module (eLearning)
-- GuardPro module base installation
+- GuardLink module base installation
 
 ## Maintenance
 
@@ -295,7 +295,7 @@ These data files require:
 **Version**: 3.0 🆕 **Dubai Edition**  
 **Status**: Production Ready  
 **Focus**: Guard Training & Management + Dubai/SIRA Compliance  
-**Maintained By**: GuardPro Development Team
+**Maintained By**: GuardLink Development Team
 
 ### Recent Updates (v3.0 - November 3, 2025)
 - ✅ Added SIRA Compliance & Dubai Security Regulations course

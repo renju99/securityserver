@@ -1,11 +1,11 @@
 #!/bin/bash
-# GuardPro Docker Production Deployment Script
+# GuardLink Docker Production Deployment Script
 # This script automates the deployment process after code push
 
 set -e
 
 echo "=========================================="
-echo "GuardPro Docker Production Deployment"
+echo "GuardLink Docker Production Deployment"
 echo "=========================================="
 echo ""
 
@@ -137,9 +137,9 @@ else
 fi
 echo ""
 
-# Step 6: Update GuardPro module
-echo "7. Updating GuardPro module..."
-read -p "Update GuardPro module? (y/n) " -n 1 -r
+# Step 6: Update GuardLink module
+echo "7. Updating GuardLink module..."
+read -p "Update GuardLink module? (y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "  Running module update..."
@@ -151,7 +151,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "    docker start $ODOO_CONTAINER"
 else
     echo "  Skipping module update"
-    echo "  Update manually via Odoo web interface: Apps > GuardPro > Upgrade"
+    echo "  Update manually via Odoo web interface: Apps > GuardLink > Upgrade"
 fi
 echo ""
 

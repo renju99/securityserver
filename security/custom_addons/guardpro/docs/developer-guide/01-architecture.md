@@ -1,8 +1,8 @@
-# GuardPro Architecture
+# GuardLink Architecture
 
 ## Overview
 
-GuardPro is built on the Odoo 18 Community Edition platform, leveraging its robust ORM, security framework, and extensible architecture. The system follows modern software architecture principles with clear separation of concerns, modular design, and comprehensive API integration.
+GuardLink is built on the Odoo 18 Community Edition platform, leveraging its robust ORM, security framework, and extensible architecture. The system follows modern software architecture principles with clear separation of concerns, modular design, and comprehensive API integration.
 
 ## System Architecture
 
@@ -10,7 +10,7 @@ GuardPro is built on the Odoo 18 Community Edition platform, leveraging its robu
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    GuardPro System                          │
+│                    GuardLink System                          │
 ├─────────────────────────────────────────────────────────────┤
 │  Web Interface (Odoo Web)  │  Mobile App (PWA)            │
 ├─────────────────────────────────────────────────────────────┤
@@ -143,9 +143,9 @@ guardpro/
 
 ```python
 # Base model with common functionality
-class GuardProBase(models.AbstractModel):
+class GuardLinkBase(models.AbstractModel):
     _name = 'guardpro.base'
-    _description = 'GuardPro Base Model'
+    _description = 'GuardLink Base Model'
     
     # Common fields
     name = fields.Char(string='Name', required=True, index=True)
@@ -221,7 +221,7 @@ class GuardProBase(models.AbstractModel):
 
 ```python
 # API endpoint structure
-class GuardProAPI(http.Controller):
+class GuardLinkAPI(http.Controller):
     
     # Authentication endpoints
     @http.route('/api/v1/auth/login', type='json', auth='public', methods=['POST'])
@@ -357,7 +357,7 @@ type Incident {
 
 ```python
 # Security configuration
-class GuardProSecurity:
+class GuardLinkSecurity:
     
     # User groups
     GROUPS = {
@@ -413,7 +413,7 @@ class GuardProSecurity:
 
 ```python
 # Record rules for data access control
-class GuardProRecordRules:
+class GuardLinkRecordRules:
     
     @api.model
     def _get_guard_domain(self):
@@ -454,7 +454,7 @@ class GuardProRecordRules:
 
 ```python
 # Integration framework
-class GuardProIntegration:
+class GuardLinkIntegration:
     
     def __init__(self):
         self.integrations = {
@@ -493,7 +493,7 @@ class GuardProIntegration:
         
         headers = {
             'Content-Type': 'application/json',
-            'User-Agent': 'GuardPro-Webhook/1.0'
+            'User-Agent': 'GuardLink-Webhook/1.0'
         }
         
         response = requests.post(
@@ -513,7 +513,7 @@ class GuardProIntegration:
 
 ```python
 # Caching implementation
-class GuardProCache:
+class GuardLinkCache:
     
     def __init__(self):
         self.cache = {}
@@ -556,7 +556,7 @@ class GuardProCache:
 
 ```python
 # Database optimization strategies
-class GuardProDBOptimization:
+class GuardLinkDBOptimization:
     
     @classmethod
     def optimize_queries(cls, model, domain=None, fields=None):
@@ -669,7 +669,7 @@ volumes:
 
 ```python
 # Monitoring and logging configuration
-class GuardProMonitoring:
+class GuardLinkMonitoring:
     
     def __init__(self):
         self.logger = logging.getLogger('guardpro')
@@ -763,4 +763,4 @@ class GuardProMonitoring:
 
 ---
 
-*GuardPro Architecture: Building Scalable, Secure, and Maintainable Security Management Systems*
+*GuardLink Architecture: Building Scalable, Secure, and Maintainable Security Management Systems*

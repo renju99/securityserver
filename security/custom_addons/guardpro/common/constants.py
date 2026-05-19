@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""GuardPro Module Constants.
+"""GuardLink Module Constants.
 
-This module contains all constants used throughout the GuardPro module.
+This module contains all constants used throughout the GuardLink module.
 Centralizing constants improves maintainability and makes configuration easier.
 """
 

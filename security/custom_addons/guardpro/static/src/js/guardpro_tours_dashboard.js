@@ -5,7 +5,7 @@ import { Component, useState, onWillStart, onMounted } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { loadBundle } from "@web/core/assets";
 
-class GuardProToursDashboard extends Component {
+class GuardLinkToursDashboard extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
@@ -462,6 +462,6 @@ class GuardProToursDashboard extends Component {
     }
 }
 
-GuardProToursDashboard.template = "guardpro.ToursDashboardClient";
+GuardLinkToursDashboard.template = "guardpro.ToursDashboardClient";
 
-registry.category("actions").add("guardpro_tours_dashboard", GuardProToursDashboard);
+registry.category("actions").add("guardpro_tours_dashboard", GuardLinkToursDashboard);

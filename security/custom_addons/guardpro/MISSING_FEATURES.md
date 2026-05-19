@@ -1,4 +1,4 @@
-# Assessment of GuardPro Features
+# Assessment of GuardLink Features
 
 This document outlines the assessment of the `guardpro` module for missing features, based on code review, TODOs, and disabled configurations.
 

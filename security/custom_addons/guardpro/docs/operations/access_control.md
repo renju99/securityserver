@@ -1,6 +1,6 @@
 # Access Control
 
-Complete guide to managing site access control in GuardPro.
+Complete guide to managing site access control in GuardLink.
 
 ---
 
@@ -15,7 +15,7 @@ Access Control Management helps you manage access cards, badges, permissions, do
 ### Issuing Access Cards
 
 **Navigation:**
-- GuardPro > Access Control > Access Cards
+- GuardLink > Access Control > Access Cards
 - Click **"Issue Card"**
 
 ### Card Information
@@ -74,7 +74,7 @@ Access Control Management helps you manage access cards, badges, permissions, do
 ### Viewing Access History
 
 **Navigation:**
-- GuardPro > Access Control > Access Logs
+- GuardLink > Access Control > Access Logs
 
 **Log Shows:**
 - Date/time of access

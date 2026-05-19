@@ -8,7 +8,7 @@
         
         <!-- Send Overdue Task Alerts -->
         <record id="cron_overdue_task_alerts" model="ir.cron">
-            <field name="name">GuardPro: Send Overdue Task Alerts</field>
+            <field name="name">GuardLink: Send Overdue Task Alerts</field>
             <field name="model_id" ref="model_guard_task"/>
             <field name="state">code</field>
             <field name="code">model.send_overdue_task_alerts()</field>
@@ -23,7 +23,7 @@
         
         <!-- Check Overdue Visitors -->
         <record id="cron_overdue_visitors" model="ir.cron">
-            <field name="name">GuardPro: Check Overdue Visitors</field>
+            <field name="name">GuardLink: Check Overdue Visitors</field>
             <field name="model_id" ref="model_visitor_management"/>
             <field name="state">code</field>
             <field name="code">model.check_overdue_visitors()</field>
@@ -34,7 +34,7 @@
         
         <!-- Auto-Expire Old Visitor Registrations -->
         <record id="cron_expire_visitor_registrations" model="ir.cron">
-            <field name="name">GuardPro: Auto-Expire Old Visitor Registrations</field>
+            <field name="name">GuardLink: Auto-Expire Old Visitor Registrations</field>
             <field name="model_id" ref="model_visitor_management"/>
             <field name="state">code</field>
             <field name="code">model.auto_expire_old_registrations()</field>
@@ -45,7 +45,7 @@
 
         <!-- Daily Visitor Log Email (6 PM Dubai time, one send per day) -->
         <record id="cron_daily_visitor_log_email" model="ir.cron">
-            <field name="name">GuardPro: Daily Visitor Log Email</field>
+            <field name="name">GuardLink: Daily Visitor Log Email</field>
             <field name="model_id" ref="model_visitor_management"/>
             <field name="state">code</field>
             <field name="code">model.send_daily_visitor_log_email()</field>
@@ -56,7 +56,7 @@
         
         <!-- Check Expired Watchlist Entries -->
         <record id="cron_expired_watchlist" model="ir.cron">
-            <field name="name">GuardPro: Check Expired Watchlist Entries</field>
+            <field name="name">GuardLink: Check Expired Watchlist Entries</field>
             <field name="model_id" ref="model_visitor_watchlist"/>
             <field name="state">code</field>
             <field name="code">model.check_expired_entries()</field>
@@ -71,7 +71,7 @@
         
         <!-- Send Lost & Found Expiry Reminders -->
         <record id="cron_lost_found_expiry_reminders" model="ir.cron">
-            <field name="name">GuardPro: Send Lost &amp; Found Expiry Reminders</field>
+            <field name="name">GuardLink: Send Lost &amp; Found Expiry Reminders</field>
             <field name="model_id" ref="model_lost_found_item"/>
             <field name="state">code</field>
             <field name="code">model.send_expiry_reminders()</field>
@@ -82,7 +82,7 @@
         
         <!-- Auto-Update Expired Lost & Found Items -->
         <record id="cron_lost_found_auto_update_expired" model="ir.cron">
-            <field name="name">GuardPro: Auto-Update Expired Lost &amp; Found Items</field>
+            <field name="name">GuardLink: Auto-Update Expired Lost &amp; Found Items</field>
             <field name="model_id" ref="model_lost_found_item"/>
             <field name="state">code</field>
             <field name="code">model.auto_update_expired_items()</field>
@@ -97,7 +97,7 @@
         
         <!-- Send Overdue Package Notifications -->
         <record id="cron_overdue_packages" model="ir.cron">
-            <field name="name">GuardPro: Send Overdue Package Notifications</field>
+            <field name="name">GuardLink: Send Overdue Package Notifications</field>
             <field name="model_id" ref="model_package_management"/>
             <field name="state">code</field>
             <field name="code">model.send_overdue_notifications()</field>
@@ -108,7 +108,7 @@
         
         <!-- Auto-Mark Unclaimed Packages -->
         <record id="cron_mark_unclaimed_packages" model="ir.cron">
-            <field name="name">GuardPro: Auto-Mark Unclaimed Packages</field>
+            <field name="name">GuardLink: Auto-Mark Unclaimed Packages</field>
             <field name="model_id" ref="model_package_management"/>
             <field name="state">code</field>
             <field name="code">model.auto_mark_unclaimed()</field>
@@ -123,7 +123,7 @@
         
         <!-- Send Overdue Key Reminders -->
         <record id="cron_overdue_keys" model="ir.cron">
-            <field name="name">GuardPro: Send Overdue Key Reminders</field>
+            <field name="name">GuardLink: Send Overdue Key Reminders</field>
             <field name="model_id" ref="model_key_transaction"/>
             <field name="state">code</field>
             <field name="code">model.send_overdue_reminders()</field>
@@ -138,7 +138,7 @@
         
         <!-- Send Audit Reminders -->
         <record id="cron_audit_reminders" model="ir.cron">
-            <field name="name">GuardPro: Send Audit Reminders</field>
+            <field name="name">GuardLink: Send Audit Reminders</field>
             <field name="model_id" ref="model_compliance_audit"/>
             <field name="state">code</field>
             <field name="code">model.send_audit_reminders()</field>
@@ -149,7 +149,7 @@
         
         <!-- Send Overdue Corrective Action Alerts -->
         <record id="cron_overdue_corrective_actions" model="ir.cron">
-            <field name="name">GuardPro: Send Overdue Corrective Action Alerts</field>
+            <field name="name">GuardLink: Send Overdue Corrective Action Alerts</field>
             <field name="model_id" ref="model_compliance_corrective_action"/>
             <field name="state">code</field>
             <field name="code">model.send_overdue_action_alerts()</field>
@@ -164,7 +164,7 @@
         
         <!-- Auto-Generate Daily Activity Reports -->
         <record id="cron_auto_generate_dars" model="ir.cron">
-            <field name="name">GuardPro: Auto-Generate Daily Activity Reports</field>
+            <field name="name">GuardLink: Auto-Generate Daily Activity Reports</field>
             <field name="model_id" ref="model_daily_activity_report"/>
             <field name="state">code</field>
             <field name="code">model.auto_generate_reports()</field>
@@ -175,7 +175,7 @@
         
         <!-- Auto-Send Approved DARs to Clients -->
         <record id="cron_auto_send_dars" model="ir.cron">
-            <field name="name">GuardPro: Auto-Send Approved DARs to Clients</field>
+            <field name="name">GuardLink: Auto-Send Approved DARs to Clients</field>
             <field name="model_id" ref="model_daily_activity_report"/>
             <field name="state">code</field>
             <field name="code">model.auto_send_approved_reports()</field>
@@ -190,7 +190,7 @@
         
         <!-- Calculate Monthly SLA Performance -->
         <record id="cron_calculate_sla_performance" model="ir.cron">
-            <field name="name">GuardPro: Calculate Monthly SLA Performance</field>
+            <field name="name">GuardLink: Calculate Monthly SLA Performance</field>
             <field name="model_id" ref="model_sla_performance"/>
             <field name="state">code</field>
             <field name="code">model.calculate_monthly_performance()</field>
@@ -201,7 +201,7 @@
         
         <!-- Send SLA KPI Breach Alerts -->
         <record id="cron_sla_breach_alerts" model="ir.cron">
-            <field name="name">GuardPro: Send SLA KPI Breach Alerts</field>
+            <field name="name">GuardLink: Send SLA KPI Breach Alerts</field>
             <field name="model_id" ref="model_sla_performance"/>
             <field name="state">code</field>
             <field name="code">model.send_kpi_breach_alerts()</field>

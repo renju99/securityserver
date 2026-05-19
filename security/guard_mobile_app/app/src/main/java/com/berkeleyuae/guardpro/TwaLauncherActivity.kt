@@ -719,7 +719,7 @@ class TwaLauncherActivity : AppCompatActivity() {
         settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
         
         settings.cacheMode = WebSettings.LOAD_DEFAULT
-        settings.userAgentString = settings.userAgentString + " Berkeley-GuardPro-App-v1.0"
+        settings.userAgentString = settings.userAgentString + " GuardLink-App-v1.0"
         
         // Native-to-JS bridge.
         //
@@ -1147,7 +1147,7 @@ class TwaLauncherActivity : AppCompatActivity() {
             "Emergency broadcasts",
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "Urgent messages from your control room (GuardPro)."
+            description = "Urgent messages from your control room (GuardLink)."
             enableVibration(true)
             enableLights(true)
             setSound(soundUri, attrs)
@@ -1837,11 +1837,11 @@ class TwaLauncherActivity : AppCompatActivity() {
     }
 
     private companion object {
-        private const val TAG_GUARDPRO_EM = "GuardProEmergency"
-        private const val TAG_GUARDPRO_PATROL = "GuardProPatrol"
-        private const val TAG_GUARDPRO_PTT = "GuardProPTT"
-        private const val TAG_GUARDPRO_TASK = "GuardProTask"
-        private const val TAG_GUARDPRO_OUTBOX = "GuardProOutbox"
+        private const val TAG_GUARDPRO_EM = "GuardLinkEmergency"
+        private const val TAG_GUARDPRO_PATROL = "GuardLinkPatrol"
+        private const val TAG_GUARDPRO_PTT = "GuardLinkPTT"
+        private const val TAG_GUARDPRO_TASK = "GuardLinkTask"
+        private const val TAG_GUARDPRO_OUTBOX = "GuardLinkOutbox"
         private const val EMERGENCY_NOTIF_ID = 94002
         private const val PATROL_REMINDER_NOTIF_ID = 94003
         private const val PUSH_TO_TALK_NOTIF_ID = 94004

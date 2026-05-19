@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Smart Task Suggestion System for GuardPro."""
+"""Smart Task Suggestion System for GuardLink."""
 
 from odoo import models, fields, api, Command
 from odoo.exceptions import ValidationError

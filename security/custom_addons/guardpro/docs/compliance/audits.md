@@ -1,6 +1,6 @@
 # Compliance Audits & Inspections
 
-Complete guide to conducting compliance audits in GuardPro.
+Complete guide to conducting compliance audits in GuardLink.
 
 ---
 
@@ -13,7 +13,7 @@ Compliance Audits help ensure security operations meet industry standards, clien
 ## Creating an Audit
 
 ### Navigation
-- GuardPro > Compliance > Audits
+- GuardLink > Compliance > Audits
 - Click **"Schedule Audit"**
 
 ### Audit Information

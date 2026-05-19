@@ -1,11 +1,11 @@
 /**
- * GuardPro Offline Storage Manager
+ * GuardLink Offline Storage Manager
  * Manages IndexedDB for offline data storage and synchronization
  */
 
 class OfflineStorageManager {
     constructor() {
-        this.dbName = 'GuardProOfflineDB';
+        this.dbName = 'GuardLinkOfflineDB';
         this.dbVersion = 1;
         this.db = null;
         this.syncInProgress = false;

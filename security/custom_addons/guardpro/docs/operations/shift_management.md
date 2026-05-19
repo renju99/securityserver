@@ -1,6 +1,6 @@
 # Shift Management
 
-Complete guide to creating, assigning, and managing guard shifts in GuardPro.
+Complete guide to creating, assigning, and managing guard shifts in GuardLink.
 
 ---
 
@@ -31,14 +31,14 @@ Shift Management allows you to:
 
 ### Navigation Steps:
 
-**Step 1:** Log in to GuardPro
+**Step 1:** Log in to GuardLink
 - Open your web browser
-- Go to your GuardPro URL (e.g., `https://your-company.odoo.com`)
+- Go to your GuardLink URL (e.g., `https://your-company.odoo.com`)
 - Enter your username and password
 - Click **"Log in"**
 
 **Step 2:** Navigate to Shift Management
-- Click on **"GuardPro"** in the main menu (top navigation bar)
+- Click on **"GuardLink"** in the main menu (top navigation bar)
 - Click on **"Operations"** in the dropdown menu
 - Select **"Guard Shifts"**
 
@@ -226,7 +226,7 @@ Shift Templates are predefined shift configurations for recurring schedules (e.g
 
 ### Creating a Shift Template
 
-**Step 1:** Navigate to **GuardPro > Configuration > Shift Templates**
+**Step 1:** Navigate to **GuardLink > Configuration > Shift Templates**
 
 **Step 2:** Click **"Create"**
 
@@ -275,7 +275,7 @@ Shift Templates are predefined shift configurations for recurring schedules (e.g
 
 **Step 1:** You'll receive notification: **"Shift swap request pending"**
 
-**Step 2:** Navigate to **GuardPro > Operations > Shift Swaps**
+**Step 2:** Navigate to **GuardLink > Operations > Shift Swaps**
 
 **Step 3:** Open the swap request
 
@@ -368,7 +368,7 @@ Shift Templates are predefined shift configurations for recurring schedules (e.g
 1. Guard's email/phone number not configured
    - **Solution:** Update guard's contact information in profile
 2. Notification settings disabled
-   - **Solution:** Go to **GuardPro > Configuration > Settings**
+   - **Solution:** Go to **GuardLink > Configuration > Settings**
    - Enable **"Shift Reminders"**
 3. Guard's notification preferences set to "None"
    - **Solution:** Guard updates preferences in mobile app or portal
@@ -469,4 +469,4 @@ Shift Templates are predefined shift configurations for recurring schedules (e.g
 - 📘 **See also:** [Attendance Tracking](../guards/attendance.md)
 - 📘 **See also:** [Site Management](../sites/site_setup.md)
 - 📞 **Support:** Contact your system administrator
-- 🎥 **Video Tutorials:** Available in GuardPro Help Center
+- 🎥 **Video Tutorials:** Available in GuardLink Help Center

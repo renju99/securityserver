@@ -1,7 +1,7 @@
 # Performance System Enhancements Summary
 
 ## Overview
-This document summarizes all fixes and enhancements made to the GuardPro performance review, metrics, badges, and criteria system.
+This document summarizes all fixes and enhancements made to the GuardLink performance review, metrics, badges, and criteria system.
 
 ## Date: 2026-01-28
 

@@ -1,8 +1,8 @@
-# GuardPro REST API
+# GuardLink REST API
 
 ## Overview
 
-The GuardPro REST API provides programmatic access to all GuardPro functionality, enabling integration with third-party systems, mobile applications, and custom workflows. The API follows RESTful principles and provides comprehensive endpoints for managing guards, shifts, incidents, and other security operations.
+The GuardLink REST API provides programmatic access to all GuardLink functionality, enabling integration with third-party systems, mobile applications, and custom workflows. The API follows RESTful principles and provides comprehensive endpoints for managing guards, shifts, incidents, and other security operations.
 
 ## Authentication
 
@@ -1149,7 +1149,7 @@ GET /api/guardpro/guards?sort=status:asc,name:asc
 
 ### Webhook Events
 
-GuardPro can send webhook notifications for various events:
+GuardLink can send webhook notifications for various events:
 
 - `guard.created`: New guard created
 - `guard.updated`: Guard information updated
@@ -1198,7 +1198,7 @@ POST /api/guardpro/webhooks
 Webhooks include a signature header for verification:
 
 ```http
-X-GuardPro-Signature: sha256=abc123def456...
+X-GuardLink-Signature: sha256=abc123def456...
 ```
 
 ## SDK Examples
@@ -1206,10 +1206,10 @@ X-GuardPro-Signature: sha256=abc123def456...
 ### Python SDK
 
 ```python
-from guardpro_api import GuardProClient
+from guardpro_api import GuardLinkClient
 
 # Initialize client
-client = GuardProClient(
+client = GuardLinkClient(
     base_url='https://your-domain.com/api/guardpro',
     api_key='your-api-key'
 )
@@ -1246,10 +1246,10 @@ client.shifts.end(shift['id'], {'notes': 'Shift completed successfully'})
 ### JavaScript SDK
 
 ```javascript
-import { GuardProClient } from '@guardpro/api-client';
+import { GuardLinkClient } from '@guardpro/api-client';
 
 // Initialize client
-const client = new GuardProClient({
+const client = new GuardLinkClient({
     baseUrl: 'https://your-domain.com/api/guardpro',
     apiKey: 'your-api-key'
 });
@@ -1309,7 +1309,7 @@ curl -X POST https://your-domain.com/api/guardpro/guards \
 
 ### Postman Collection
 
-Import the GuardPro API Postman collection for comprehensive testing:
+Import the GuardLink API Postman collection for comprehensive testing:
 
 1. Download the collection file
 2. Import into Postman
@@ -1318,4 +1318,4 @@ Import the GuardPro API Postman collection for comprehensive testing:
 
 ---
 
-*GuardPro REST API: Comprehensive Security Management Integration*
+*GuardLink REST API: Comprehensive Security Management Integration*

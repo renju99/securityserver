@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-GuardPro Enhanced Logging Helper
+GuardLink Enhanced Logging Helper
 Provides categorized logging for better debugging and audit trail
 """
 
@@ -14,7 +14,7 @@ _integration_logger = logging.getLogger('guardpro.integration')
 _business_logger = logging.getLogger('guardpro.business')
 
 
-class GuardProLogger:
+class GuardLinkLogger:
     """Enhanced logger with category support."""
     
     @staticmethod
@@ -79,5 +79,5 @@ class GuardProLogger:
 
 
 # Convenience instance
-logger = GuardProLogger()
+logger = GuardLinkLogger()
 

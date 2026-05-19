@@ -1162,7 +1162,7 @@ class GuardProfile(models.Model):
                         '<p><strong>License Expiration Warning</strong></p>'
                         '<p>Your security license will expire in <strong>%d days</strong> on %s.</p>'
                         '<p>Please renew your license before the expiration date to avoid being removed from active assignments.</p>'
-                        '<p style="margin-top: 16px; font-size: 12px; color: #888;">This is an automated reminder from GuardPro Compliance Monitoring.</p>'
+                        '<p style="margin-top: 16px; font-size: 12px; color: #888;">This is an automated reminder from GuardLink Compliance Monitoring.</p>'
                     ) % (days_remaining, guard.license_expiry.strftime('%Y-%m-%d')),
                     partner_ids=guard.user_id.partner_id.ids if guard.user_id else []
                 )
@@ -1193,7 +1193,7 @@ class GuardProfile(models.Model):
                         '<p><strong>Training Certification Expiring</strong></p>'
                         '<p>Your %s certification will expire in <strong>%d days</strong> on %s.</p>'
                         '<p>Please schedule a renewal training session before the expiration date.</p>'
-                        '<p style="margin-top: 16px; font-size: 12px; color: #888;">This is an automated reminder from GuardPro Training Compliance.</p>'
+                        '<p style="margin-top: 16px; font-size: 12px; color: #888;">This is an automated reminder from GuardLink Training Compliance.</p>'
                     ) % (
                         training.course_id.name,
                         days_remaining,

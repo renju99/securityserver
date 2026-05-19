@@ -2,7 +2,7 @@
 """Geographic Utility Functions.
 
 This module provides reusable geographic calculation functions
-for the GuardPro module, including distance calculations and
+for the GuardLink module, including distance calculations and
 geofence validation.
 """
 

@@ -151,7 +151,7 @@
                     &lt;!-- Footer --&gt;
                     &lt;tr&gt;
                         &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
-                            &lt;p style="margin: 0 0 5px 0;"&gt;&lt;strong&gt;GuardPro Security Management System&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p style="margin: 0 0 5px 0;"&gt;&lt;strong&gt;GuardLink Security Management System&lt;/strong&gt;&lt;/p&gt;
                             &lt;p style="margin: 0 0 5px 0;"&gt;Automated Geofence Monitoring Alert&lt;/p&gt;
                             &lt;p style="margin: 10px 0 0 0; font-size: 10px; color: #999;"&gt;
                                 This is an automated security alert. Please do not reply to this email.&lt;br/&gt;
@@ -329,7 +329,7 @@
                     &lt;!-- Footer --&gt;
                     &lt;tr&gt;
                         &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
-                            &lt;p style="margin: 0 0 5px 0;"&gt;&lt;strong&gt;GuardPro Emergency Management System&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p style="margin: 0 0 5px 0;"&gt;&lt;strong&gt;GuardLink Emergency Management System&lt;/strong&gt;&lt;/p&gt;
                             &lt;p style="margin: 0 0 5px 0; color: #c62828; font-weight: bold;"&gt;AUTOMATED EMERGENCY ALERT - IMMEDIATE RESPONSE REQUIRED&lt;/p&gt;
                             &lt;p style="margin: 10px 0 0 0; font-size: 10px; color: #999;"&gt;
                                 This is an automated emergency notification. Do not reply to this email.&lt;br/&gt;
@@ -470,7 +470,7 @@
                     &lt;!-- Footer --&gt;
                     &lt;tr&gt;
                         &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
-                            &lt;p style="margin: 0;"&gt;GuardPro Shift Management System&lt;/p&gt;
+                            &lt;p style="margin: 0;"&gt;GuardLink Shift Management System&lt;/p&gt;
                             &lt;p style="margin: 5px 0 0 0; font-size: 10px;"&gt;This is an automated notification. Please log in to the system to respond.&lt;/p&gt;
                         &lt;/td&gt;
                     &lt;/tr&gt;
@@ -570,7 +570,7 @@
                     &lt;/tr&gt;
                     &lt;tr&gt;
                         &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
-                            &lt;p style="margin: 0;"&gt;GuardPro Shift Management System&lt;/p&gt;
+                            &lt;p style="margin: 0;"&gt;GuardLink Shift Management System&lt;/p&gt;
                         &lt;/td&gt;
                     &lt;/tr&gt;
                 &lt;/table&gt;
@@ -685,7 +685,7 @@
                     &lt;/tr&gt;
                     &lt;tr&gt;
                         &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
-                            &lt;p style="margin: 0;"&gt;GuardPro Resident Services&lt;/p&gt;
+                            &lt;p style="margin: 0;"&gt;GuardLink Resident Services&lt;/p&gt;
                             &lt;p style="margin: 5px 0 0 0;"&gt;Thank you for helping us improve our service&lt;/p&gt;
                         &lt;/td&gt;
                     &lt;/tr&gt;
@@ -781,7 +781,7 @@
                     &lt;/tr&gt;
                     &lt;tr&gt;
                         &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
-                            &lt;p style="margin: 0;"&gt;GuardPro Resident Services&lt;/p&gt;
+                            &lt;p style="margin: 0;"&gt;GuardLink Resident Services&lt;/p&gt;
                         &lt;/td&gt;
                     &lt;/tr&gt;
                 &lt;/table&gt;
@@ -873,7 +873,7 @@
                     &lt;/tr&gt;
                     &lt;tr&gt;
                         &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
-                            &lt;p style="margin: 0;"&gt;GuardPro Security Management&lt;/p&gt;
+                            &lt;p style="margin: 0;"&gt;GuardLink Security Management&lt;/p&gt;
                             &lt;p style="margin: 5px 0 0 0;"&gt;Excellence in Security Services&lt;/p&gt;
                         &lt;/td&gt;
                     &lt;/tr&gt;
@@ -1012,7 +1012,7 @@
                     &lt;/tr&gt;
                     &lt;tr&gt;
                         &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
-                            &lt;p style="margin: 0;"&gt;&lt;strong&gt;GuardPro Compliance Management&lt;/strong&gt;&lt;/p&gt;
+                            &lt;p style="margin: 0;"&gt;&lt;strong&gt;GuardLink Compliance Management&lt;/strong&gt;&lt;/p&gt;
                             &lt;p style="margin: 5px 0 0 0;"&gt;Automated Compliance Monitoring System&lt;/p&gt;
                         &lt;/td&gt;
                     &lt;/tr&gt;
@@ -1105,7 +1105,7 @@
                     &lt;/tr&gt;
                     &lt;tr&gt;
                         &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
-                            &lt;p style="margin: 0;"&gt;GuardPro Security Management&lt;/p&gt;
+                            &lt;p style="margin: 0;"&gt;GuardLink Security Management&lt;/p&gt;
                         &lt;/td&gt;
                     &lt;/tr&gt;
                 &lt;/table&gt;
@@ -1213,7 +1213,7 @@
                     &lt;/tr&gt;
                     &lt;tr&gt;
                         &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
-                            &lt;p style="margin: 0;"&gt;GuardPro Training &amp; Development&lt;/p&gt;
+                            &lt;p style="margin: 0;"&gt;GuardLink Training &amp; Development&lt;/p&gt;
                         &lt;/td&gt;
                     &lt;/tr&gt;
                 &lt;/table&gt;
@@ -1317,7 +1317,7 @@
                     &lt;/tr&gt;
                     &lt;tr&gt;
                         &lt;td style="background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #777;"&gt;
-                            &lt;p style="margin: 0;"&gt;GuardPro Training &amp; Development&lt;/p&gt;
+                            &lt;p style="margin: 0;"&gt;GuardLink Training &amp; Development&lt;/p&gt;
                             &lt;p style="margin: 5px 0 0 0;"&gt;Investing in Your Professional Growth&lt;/p&gt;
                         &lt;/td&gt;
                     &lt;/tr&gt;

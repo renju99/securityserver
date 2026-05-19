@@ -1,5 +1,5 @@
 /**
- * GPS Tracking Module for GuardPro
+ * GPS Tracking Module for GuardLink
  * Provides real-time GPS location tracking with battery optimization
  */
 

@@ -1,6 +1,6 @@
-# Sentry — Security operations on Odoo 18
+# GuardLink — Security operations on Odoo 18
 
-Sentry brings guard scheduling, patrol proof, incidents, visitors, and client reporting into **Odoo 18 Community**. Supervisors, control room staff, and guards share one system; clients can use the portal where you enable it.
+GuardLink brings guard scheduling, patrol proof, incidents, visitors, and client reporting into **Odoo 18 Community**. Supervisors, control room staff, and guards share one system; clients can use the portal where you enable it.
 
 **Version:** 18.0.1.1.17 · See also [Documentation index](INDEX.md) and [Get started](GETTING_STARTED.md).
 

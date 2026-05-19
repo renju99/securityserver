@@ -1,6 +1,6 @@
-# Sentry documentation
+# GuardLink documentation
 
-Welcome to the documentation for **Sentry**, the security guard operations suite for Odoo 18. This hub is organized like a **guide**: short chapters, clear outcomes, and links into deeper topics.
+Welcome to the documentation for **GuardLink**, the security guard operations suite for Odoo 18. This hub is organized like a **guide**: short chapters, clear outcomes, and links into deeper topics.
 
 **Module version:** 18.0.1.1.17 · **Last updated:** March 2026
 
@@ -16,7 +16,7 @@ Welcome to the documentation for **Sentry**, the security guard operations suite
 | One-page cheat sheet | [Quick reference](QUICK_REFERENCE.md) |
 | APIs and integrations | [Mobile API](api/mobile-api.md) · [REST API](api/rest-api.md) · [Webhooks](api/webhooks.md) |
 
-Open the **in-app documentation** (from Sentry, if your admin enabled it) for search and the same content in a reader-friendly layout.
+Open the **in-app documentation** (from GuardLink, if your admin enabled it) for search and the same content in a reader-friendly layout.
 
 ---
 
@@ -89,9 +89,9 @@ Use the sidebar search in the **in-app documentation** viewer to find niche topi
 
 ## Support
 
-- **Email:** support@sentry.app  
-- **Website:** [sentry.proptechme.com](https://sentry.proptechme.com/)  
+- **Email:** support@guardlink.app  
+- **Website:** [guardlink.app](https://guardlink.app/)  
 
 ---
 
-[↑ Back to top](#sentry-documentation)
+[↑ Back to top](#guardlink-documentation)

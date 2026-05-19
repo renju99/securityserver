@@ -1,7 +1,7 @@
 /* eslint-env serviceworker */
 /* eslint-disable no-restricted-globals */
 /**
- * GuardPro PWA Service Worker
+ * GuardLink PWA Service Worker
  * Handles offline caching, data synchronization, and conflict resolution
  */
 
@@ -253,7 +253,7 @@ async function queueRequest(request) {
  */
 function openDatabase() {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open('GuardProOfflineDB', 1);
+        const request = indexedDB.open('GuardLinkOfflineDB', 1);
         
         request.onerror = () => reject(request.error);
         request.onsuccess = () => resolve(request.result);

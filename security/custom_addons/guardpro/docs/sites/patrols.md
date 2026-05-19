@@ -1,6 +1,6 @@
 # Patrol Routes
 
-Complete guide to creating and managing patrol routes in GuardPro.
+Complete guide to creating and managing patrol routes in GuardLink.
 
 ---
 
@@ -13,7 +13,7 @@ Patrol Routes allow you to define scheduled routes that guards follow, including
 ## Creating Patrol Routes
 
 ### Navigation
-- GuardPro > Site Management > Patrol Routes
+- GuardLink > Site Management > Patrol Routes
 - Click **"Create"**
 
 ### Route Information

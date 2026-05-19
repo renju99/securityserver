@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Business Intelligence Analytics Models for GuardPro."""
+"""Business Intelligence Analytics Models for GuardLink."""
 
 from odoo import models, fields, api, tools, _
 from odoo.exceptions import ValidationError
@@ -8,7 +8,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class GuardProductivityReport(models.Model):
+class GuardLinkductivityReport(models.Model):
     """Guard Productivity Analytics Report."""
     
     _name = 'guardpro.productivity.report'
@@ -335,13 +335,13 @@ class EquipmentUtilizationReport(models.Model):
         """ % self._table)
 
 
-class GuardProDashboard(models.Model):
+class GuardLinkDashboard(models.Model):
     """Enhanced Main Dashboard KPI Model with Comprehensive Analytics."""
     
     _name = 'guardpro.dashboard'
-    _description = 'GuardPro Advanced Dashboard'
+    _description = 'GuardLink Advanced Dashboard'
     
-    name = fields.Char(string='Dashboard', default='GuardPro Operations Dashboard', readonly=True)
+    name = fields.Char(string='Dashboard', default='GuardLink Operations Dashboard', readonly=True)
     
     # ============================================
     # REAL-TIME OPERATIONS METRICS

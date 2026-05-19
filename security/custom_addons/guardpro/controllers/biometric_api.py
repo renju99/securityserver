@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Biometric API Controllers for GuardPro."""
+"""Biometric API Controllers for GuardLink."""
 
 from odoo import http, fields
 from odoo.http import request
@@ -9,7 +9,7 @@ import base64
 _logger = logging.getLogger(__name__)
 
 
-class GuardProBiometricAPI(http.Controller):
+class GuardLinkBiometricAPI(http.Controller):
     """API endpoints for biometric enrollment and verification."""
     
     @http.route('/guardpro/api/biometric/enroll', type='json', auth='user', methods=['POST'], csrf=False)

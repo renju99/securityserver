@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-This document outlines the technical approach for integrating biometric verification (fingerprint, facial recognition, voice) into GuardPro's attendance and access control systems. The implementation will support multiple biometric methods, hardware devices, and provide a secure, privacy-compliant solution.
+This document outlines the technical approach for integrating biometric verification (fingerprint, facial recognition, voice) into GuardLink's attendance and access control systems. The implementation will support multiple biometric methods, hardware devices, and provide a secure, privacy-compliant solution.
 
 ---
 
@@ -49,7 +49,7 @@ This document outlines the technical approach for integrating biometric verifica
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    GuardPro Odoo Backend                     │
+│                    GuardLink Odoo Backend                     │
 │  ┌────────────────────────────────────────────────────────┐  │
 │  │     Biometric Verification Service (Python)            │  │
 │  │  - Template Storage (Encrypted)                        │  │
@@ -813,7 +813,7 @@ class BiometricCapture {
             const credential = await navigator.credentials.create({
                 publicKey: {
                     challenge: new Uint8Array(32),
-                    rp: { name: "GuardPro" },
+                    rp: { name: "GuardLink" },
                     user: {
                         id: new Uint8Array(16),
                         name: guardEmail,

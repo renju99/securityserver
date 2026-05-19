@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GuardPro JavaScript Loading Test</title>
+    <title>GuardLink JavaScript Loading Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -101,7 +101,7 @@
     </style>
 </head>
 <body>
-    <h1>🔍 GuardPro JavaScript Loading Diagnostic</h1>
+    <h1>🔍 GuardLink JavaScript Loading Diagnostic</h1>
     
     <div class="test-section">
         <h2>Test Summary</h2>
@@ -181,9 +181,9 @@
 
         // Global objects to test
         const globalObjects = [
-            'GuardProErrorSuppression',
-            'GuardProPWA',
-            'GuardProNavigation',
+            'GuardLinkErrorSuppression',
+            'GuardLinkPWA',
+            'GuardLinkNavigation',
             'PWALazyLoader'
         ];
 
@@ -301,7 +301,7 @@
                         <strong>⚠️ Issues Detected</strong><br>
                         Some JavaScript files failed to load. This could indicate:<br>
                         • Odoo server not running<br>
-                        • GuardPro module not installed/enabled<br>
+                        • GuardLink module not installed/enabled<br>
                         • Assets not built (run: <code>./fix_guardpro_loading.sh</code>)<br>
                         • File paths incorrect in manifest<br>
                         • Browser blocking scripts (check console for CORS errors)
@@ -316,7 +316,7 @@
         }
 
         // Run tests
-        console.log('Starting GuardPro JavaScript diagnostic tests...');
+        console.log('Starting GuardLink JavaScript diagnostic tests...');
         jsFiles.forEach(testFileLoading);
         updateSummary();
     </script>

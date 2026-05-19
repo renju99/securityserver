@@ -1,6 +1,6 @@
-# GuardPro Screenshots Descriptions
+# GuardLink Screenshots Descriptions
 
-This document provides descriptions for all screenshots used in the GuardPro Odoo app store listing.
+This document provides descriptions for all screenshots used in the GuardLink Odoo app store listing.
 
 ## Operations & Analytics
 

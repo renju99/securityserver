@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""GuardPro Tours Dashboard Model."""
+"""GuardLink Tours Dashboard Model."""
 
 from odoo import models, fields, api, _
 from odoo.tools import date_utils
@@ -12,11 +12,11 @@ import pytz
 _logger = logging.getLogger(__name__)
 
 
-class GuardProToursDashboard(models.Model):
-    """Tours Analytics Dashboard for GuardPro System."""
+class GuardLinkToursDashboard(models.Model):
+    """Tours Analytics Dashboard for GuardLink System."""
 
     _name = 'guardpro.tours.dashboard'
-    _description = 'GuardPro Tours Dashboard'
+    _description = 'GuardLink Tours Dashboard'
 
     name = fields.Char(
         'Dashboard Name',

@@ -1,6 +1,6 @@
 # Checkpoint Management
 
-Complete guide to setting up and managing patrol checkpoints in GuardPro.
+Complete guide to setting up and managing patrol checkpoints in GuardLink.
 
 ---
 
@@ -41,7 +41,7 @@ Checkpoint Management allows you to:
 #### Step 1: Navigate to Checkpoints
 
 **Navigation:**
-- GuardPro > Site Management > Checkpoints
+- GuardLink > Site Management > Checkpoints
 - Or: Press `Ctrl + K`, type "checkpoints"
 
 #### Step 2: Create New Checkpoint
@@ -145,7 +145,7 @@ Order Required: No
 
 **Method 1: Mobile App (Recommended)**
 1. Guard goes to physical location
-2. Opens GuardPro mobile app
+2. Opens GuardLink mobile app
 3. App captures GPS automatically
 4. Saves to checkpoint
 
@@ -276,7 +276,7 @@ Safety Notes:
 
 **Step 1:** Order blank NFC tags
 
-**Step 2:** Download GuardPro NFC Writer app
+**Step 2:** Download GuardLink NFC Writer app
 
 **Step 3:** Open checkpoint in system
 
@@ -303,7 +303,7 @@ Safety Notes:
 
 ### Creating Checkpoint Patrol Routes
 
-**Step 1:** GuardPro > Patrol Routes
+**Step 1:** GuardLink > Patrol Routes
 
 **Step 2:** Click **"Create Route"**
 
@@ -345,7 +345,7 @@ Guard has: 30 minutes to complete
 
 **QR Code Scan:**
 
-**Step 1:** Open GuardPro mobile app
+**Step 1:** Open GuardLink mobile app
 
 **Step 2:** Tap **"Scan Checkpoint"**
 
@@ -460,7 +460,7 @@ Guard has: 30 minutes to complete
 
 ### Generating Reports
 
-**Step 1:** GuardPro > Reports > Checkpoint Reports
+**Step 1:** GuardLink > Reports > Checkpoint Reports
 
 **Step 2:** Select report type
 

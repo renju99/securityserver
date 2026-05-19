@@ -89,7 +89,7 @@
                 Create an API Key
             </p>
             <p>
-                API keys allow external systems to integrate with GuardPro via REST API.
+                API keys allow external systems to integrate with GuardLink via REST API.
             </p>
         </field>
     </record>

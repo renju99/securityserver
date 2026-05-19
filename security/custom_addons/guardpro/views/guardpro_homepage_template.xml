@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <template id="guardpro_homepage_template" name="Sentry - Enterprise Security Guard Management">
+    <template id="guardpro_homepage_template" name="GuardLink - Enterprise Security Guard Management">
         <t t-call="web.layout">
             <t t-set="body_class">guardpro-homepage</t>
             <t t-set="top_menu_visible" eval="False"/>
             <t t-set="main_content_class">guardpro-main-content</t>
-            <t t-set="title">Sentry - Enterprise Security Guard Management</t>
+            <t t-set="title">GuardLink - Enterprise Security Guard Management</t>
             
             <t t-set="head">
                 <meta charset="UTF-8"/>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-                <meta name="description" content="Sentry - Complete security guard management with GPS tracking, NFC/QR checkpoints, patrol monitoring, and mobile PWA. Transform your security operations with real-time guard tracking and incident management."/>
-                <meta property="og:title" content="Sentry - Enterprise Security Guard Management"/>
+                <meta name="description" content="GuardLink - Complete security guard management with GPS tracking, NFC/QR checkpoints, patrol monitoring, and mobile PWA. Transform your security operations with real-time guard tracking and incident management."/>
+                <meta property="og:title" content="GuardLink - Enterprise Security Guard Management"/>
                 <meta property="og:description" content="Complete security guard management solution with GPS tracking, patrol monitoring, and mobile access."/>
                 <meta property="og:type" content="website"/>
                 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
@@ -982,7 +982,7 @@
                             <div class="logo-icon">
                                 <i class="fas fa-shield-alt"></i>
                             </div>
-                            GuardPro
+                            GuardLink
                         </a>
                         
                         <ul class="nav-menu">
@@ -1153,7 +1153,7 @@
                                             <div style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b;"></div>
                                             <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></div>
                                         </div>
-                                        <div style="font-weight: 600; color: #1f2937; margin-left: auto;">GuardPro Dashboard</div>
+                                        <div style="font-weight: 600; color: #1f2937; margin-left: auto;">GuardLink Dashboard</div>
                                     </div>
                                     
                                     <div class="mockup-content" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
@@ -1375,7 +1375,7 @@
                     <div class="cta-container">
                         <h2 class="cta-title">Ready to Transform Your Security Operations?</h2>
                         <p class="cta-description">
-                                    Contact us today to learn how GuardPro can streamline your security management.
+                                    Contact us today to learn how GuardLink can streamline your security management.
                         </p>
                         <div class="cta-actions">
                             <a href="tel:+971589906245" class="btn btn-white btn-large">

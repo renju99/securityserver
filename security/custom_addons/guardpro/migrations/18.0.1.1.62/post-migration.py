@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Restore primary apps sidebar for users stuck on invisible.
 
-GuardPro previously redefined res.users.sidebar_type with default 'invisible',
+GuardLink previously redefined res.users.sidebar_type with default 'invisible',
 which overrides MuK AppsBar (default 'large') and hides the vertical app menu.
 This migration resets affected users so the apps bar is visible again.
 """

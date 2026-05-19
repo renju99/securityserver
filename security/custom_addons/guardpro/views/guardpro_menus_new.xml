@@ -2,7 +2,7 @@
 <odoo><data>
 
     <!-- ROOT MENU -->
-    <menuitem name="Sentry"
+    <menuitem name="GuardLink"
         id="menu_guardpro_root"
         sequence="10"
         web_icon="guardpro,static/description/icon.png"/>

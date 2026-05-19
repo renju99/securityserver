@@ -1,6 +1,6 @@
 # Guard Profile Management
 
-Complete guide to creating and managing security guard profiles in GuardPro.
+Complete guide to creating and managing security guard profiles in GuardLink.
 
 ---
 
@@ -32,8 +32,8 @@ Guard Profile Management allows you to:
 
 ### Navigation Steps:
 
-**Step 1:** From GuardPro Main Menu
-- Click **"GuardPro"** in the top navigation
+**Step 1:** From GuardLink Main Menu
+- Click **"GuardLink"** in the top navigation
 - Select **"Guards"**
 - Click **"Guard Profiles"**
 

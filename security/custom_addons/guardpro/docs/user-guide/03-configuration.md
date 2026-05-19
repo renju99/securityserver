@@ -1,12 +1,12 @@
 # Configuration Guide
 
-System configuration and preferences for GuardPro.
+System configuration and preferences for GuardLink.
 
 ---
 
 ## Company Settings
 
-Navigate to: GuardPro > Configuration > Settings
+Navigate to: GuardLink > Configuration > Settings
 
 ### Basic Information
 - Company name
@@ -24,7 +24,7 @@ Navigate to: GuardPro > Configuration > Settings
 ## User Management
 
 ### Creating Users
-1. GuardPro > Configuration > Users
+1. GuardLink > Configuration > Users
 2. Click "Create"
 3. Fill user information
 4. Assign security groups

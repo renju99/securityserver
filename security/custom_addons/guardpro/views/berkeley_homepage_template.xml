@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Berkeley Services Custom Homepage with Sign-In -->
-    <template id="berkeley_homepage" name="Berkeley Services Homepage">
+    <!-- GuardLink Custom Homepage with Sign-In -->
+    <template id="berkeley_homepage" name="GuardLink Homepage">
         <t t-call="website.layout">
             <div id="wrap" class="oe_structure oe_empty">
                 <!-- Custom CSS -->
@@ -309,7 +309,7 @@
                                 </div>
                                 
                                 <h1 class="berkeley-title">
-                                    Welcome to Berkeley Services
+                                    Welcome to GuardLink
                                 </h1>
                                 
                                 <p class="berkeley-subtitle">
@@ -473,7 +473,7 @@
 
     <!-- Page record -->
     <record id="page_berkeley_homepage" model="website.page">
-        <field name="name">Berkeley Services Home</field>
+        <field name="name">GuardLink Home</field>
         <field name="url">/</field>
         <field name="view_id" ref="berkeley_homepage"/>
         <field name="is_published" eval="True"/>

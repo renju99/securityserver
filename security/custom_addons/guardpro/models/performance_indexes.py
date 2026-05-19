@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Performance Indexes for GuardPro PWA.
+"""Performance Indexes for GuardLink PWA.
 
 This module adds database indexes to frequently queried fields
 for maximum query performance in the PWA interface.

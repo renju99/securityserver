@@ -1,5 +1,5 @@
 /**
- * GuardPro Documentation JavaScript
+ * GuardLink Documentation JavaScript
  * Plain JavaScript (no Odoo module format)
  */
 

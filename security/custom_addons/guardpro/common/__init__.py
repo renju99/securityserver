@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""GuardPro Common Utilities."""
+"""GuardLink Common Utilities."""
 
 from . import constants
 from . import geo_utils

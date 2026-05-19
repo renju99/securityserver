@@ -49,7 +49,7 @@
         }
     }
 
-    /** Berkeley Guard Pro TWA APK: real Android notification via JavascriptInterface. */
+    /** GuardLink TWA APK: real Android notification via JavascriptInterface. */
     function notifyAndroidTwa(data) {
         try {
             var bridge = window.AndroidBridge;

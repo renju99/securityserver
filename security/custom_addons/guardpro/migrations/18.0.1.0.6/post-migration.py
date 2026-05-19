@@ -2,7 +2,7 @@
 """
 Post-migration script to fix e-learning course visibility.
 
-This migration ensures all GuardPro training courses are:
+This migration ensures all GuardLink training courses are:
 - Published (is_published=True)
 - Public visibility
 - Public enrollment
@@ -14,10 +14,10 @@ _logger = logging.getLogger(__name__)
 
 
 def migrate(cr, version):
-    """Update all GuardPro training courses to be public and published."""
+    """Update all GuardLink training courses to be public and published."""
     _logger.info("Starting e-learning course visibility migration...")
     
-    # Get all GuardPro training courses
+    # Get all GuardLink training courses
     cr.execute("""
         SELECT sc.id, sc.name, sc.visibility, sc.is_published, sc.enroll
         FROM slide_channel sc
@@ -25,10 +25,10 @@ def migrate(cr, version):
     """)
     
     courses = cr.fetchall()
-    _logger.info(f"Found {len(courses)} GuardPro training courses")
+    _logger.info(f"Found {len(courses)} GuardLink training courses")
     
     if not courses:
-        _logger.warning("No GuardPro training courses found!")
+        _logger.warning("No GuardLink training courses found!")
         return
     
     # Update all courses to be public and published

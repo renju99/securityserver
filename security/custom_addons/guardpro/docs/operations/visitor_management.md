@@ -1,6 +1,6 @@
 # Visitor Management
 
-Complete guide to registering, tracking, and managing visitors in GuardPro.
+Complete guide to registering, tracking, and managing visitors in GuardLink.
 
 ---
 
@@ -59,7 +59,7 @@ Visitor Management allows you to:
 #### Step 1: Open Visitor Registration
 
 **Navigation:**
-- GuardPro > Operations > Visitor Management
+- GuardLink > Operations > Visitor Management
 - Or: Press `Ctrl + K`, type "visitor"
 - Click **"Register New Visitor"**
 
@@ -324,7 +324,7 @@ Visitor Management allows you to:
 
 #### Step 1: Access Pre-Registration
 
-- GuardPro > Visitor Management
+- GuardLink > Visitor Management
 - Click **"Pre-Register Visitor"**
 
 #### Step 2: Schedule Visit
@@ -508,7 +508,7 @@ Visitor Management allows you to:
 
 **Step 1:** Create Contractor Profile
 
-- GuardPro > Contractor Management
+- GuardLink > Contractor Management
 - Click **"New Contractor"**
 
 | Field | Description |
@@ -575,7 +575,7 @@ Visitor Management allows you to:
 
 ### Generating Reports
 
-**Step 1:** GuardPro > Reports > Visitor Reports
+**Step 1:** GuardLink > Reports > Visitor Reports
 
 **Step 2:** Select report type
 

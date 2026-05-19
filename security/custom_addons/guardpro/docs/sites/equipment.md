@@ -1,6 +1,6 @@
 # Equipment Management
 
-Complete guide to managing security equipment and assets in GuardPro.
+Complete guide to managing security equipment and assets in GuardLink.
 
 ---
 
@@ -29,7 +29,7 @@ Equipment Management helps track security equipment, assign to guards, schedule 
 ## Adding Equipment
 
 ### Navigation
-- GuardPro > Site Management > Equipment
+- GuardLink > Site Management > Equipment
 - Click **"Add Equipment"**
 
 ### Equipment Information

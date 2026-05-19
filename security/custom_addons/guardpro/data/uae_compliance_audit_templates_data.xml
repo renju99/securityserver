@@ -1048,9 +1048,9 @@
             <field name="max_score">20</field>
         </record>
 
-        <!-- 31. Security Systems Maintenance & Testing Audit -->
+        <!-- 31. GuardLink Maintenance & Testing Audit -->
         <record id="audit_template_uae_sys_maint" model="compliance.audit.template">
-            <field name="name">Security Systems Maintenance &amp; Testing Audit</field>
+            <field name="name">GuardLink Maintenance &amp; Testing Audit</field>
             <field name="description">Audit for ensuring all electronic security systems are tested regularly.</field>
             <field name="audit_type">security</field>
             <field name="frequency">monthly</field>

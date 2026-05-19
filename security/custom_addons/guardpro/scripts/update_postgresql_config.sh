@@ -1,5 +1,5 @@
 #!/bin/bash
-# PostgreSQL Configuration Update Script for GuardPro Scalability
+# PostgreSQL Configuration Update Script for GuardLink Scalability
 # This script updates PostgreSQL max_connections to support 1000-2000 users
 
 set -e
@@ -50,7 +50,7 @@ if [ "$CURRENT_MAX" -lt 500 ]; then
     else
         # Add new setting
         echo "" | sudo tee -a "$PG_CONF" > /dev/null
-        echo "# GuardPro Scalability - Updated $(date)" | sudo tee -a "$PG_CONF" > /dev/null
+        echo "# GuardLink Scalability - Updated $(date)" | sudo tee -a "$PG_CONF" > /dev/null
         echo "max_connections = 500" | sudo tee -a "$PG_CONF" > /dev/null
     fi
     

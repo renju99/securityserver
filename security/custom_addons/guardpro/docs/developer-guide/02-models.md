@@ -1,8 +1,8 @@
-# GuardPro Models
+# GuardLink Models
 
 ## Overview
 
-GuardPro's data models are built using Odoo's Object-Relational Mapping (ORM) system, providing a robust foundation for security management operations. The models follow Odoo best practices and implement comprehensive business logic, validation, and security controls.
+GuardLink's data models are built using Odoo's Object-Relational Mapping (ORM) system, providing a robust foundation for security management operations. The models follow Odoo best practices and implement comprehensive business logic, validation, and security controls.
 
 ## Core Models
 
@@ -936,4 +936,4 @@ GuardIncidentVideo
 
 ---
 
-*GuardPro Models: Robust Data Foundation for Security Management*
+*GuardLink Models: Robust Data Foundation for Security Management*

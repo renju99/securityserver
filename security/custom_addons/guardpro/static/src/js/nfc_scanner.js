@@ -1,5 +1,5 @@
 /**
- * NFC Scanner Module for GuardPro
+ * NFC Scanner Module for GuardLink
  * Uses Web NFC API for checkpoint scanning
  */
 

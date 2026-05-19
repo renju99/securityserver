@@ -1,8 +1,8 @@
-# GuardPro NFC & QR Code Testing Guide
+# GuardLink NFC & QR Code Testing Guide
 
 ## 📋 Overview
 
-This testing suite provides comprehensive coverage for NFC and QR code checkpoint scanning functionality in the GuardPro module.
+This testing suite provides comprehensive coverage for NFC and QR code checkpoint scanning functionality in the GuardLink module.
 
 ## 🎯 What's Being Tested
 
@@ -37,7 +37,7 @@ python3 run_nfc_qr_tests.py
 ```bash
 cd /home/ranjith/odoo
 
-# Run all GuardPro tests
+# Run all GuardLink tests
 ./odoo-bin -c odoo.conf -d guardpro_test -u guardpro --test-enable --stop-after-init
 
 # Run with verbose logging
@@ -148,7 +148,7 @@ pip3 install qrcode Pillow
 ```python
 # In odoo.conf or command line
 --test-enable          # Enable tests
---test-tags=/guardpro  # Run only GuardPro tests
+--test-tags=/guardpro  # Run only GuardLink tests
 --log-level=test       # Show test output
 --stop-after-init      # Stop after running tests
 ```
@@ -158,7 +158,7 @@ pip3 install qrcode Pillow
 # Create test database
 createdb guardpro_test
 
-# Initialize with GuardPro
+# Initialize with GuardLink
 ./odoo-bin -c odoo.conf -d guardpro_test -i guardpro --stop-after-init
 
 # Run tests
@@ -277,13 +277,13 @@ pip3 install qrcode Pillow
 ### Via Odoo Interface
 
 1. **Create Site**
-   - Go to GuardPro > Sites
+   - Go to GuardLink > Sites
    - Click Create
    - Name: "Test Security Site"
    - Save
 
 2. **Create NFC Checkpoint**
-   - Go to GuardPro > Configuration > Checkpoints
+   - Go to GuardLink > Configuration > Checkpoints
    - Click Create
    - Name: "Test NFC Checkpoint"
    - Code: "NFC-001"
@@ -299,7 +299,7 @@ pip3 install qrcode Pillow
    - QR Code: Leave blank (auto-generated) or enter "TEST-QR-001"
 
 4. **Create Guard Profile**
-   - Go to GuardPro > Guards
+   - Go to GuardLink > Guards
    - Click Create
    - Name: "Test Guard"
    - Badge Number: "TEST001"
@@ -377,5 +377,5 @@ LGPL-3
 ---
 
 **Last Updated**: 2025-10-09
-**GuardPro Version**: 18.0.1.0.0
+**GuardLink Version**: 18.0.1.0.0
 

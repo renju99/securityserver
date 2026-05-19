@@ -54,9 +54,9 @@
                                         <td><strong>Estimated Duration:</strong></td>
                                         <td><span t-field="o.estimated_duration"/> hours</td>
                                     </tr>
-                                    <tr t-if="o.frequency">
+                                    <tr t-if="o.frequency_display">
                                         <td><strong>Frequency:</strong></td>
-                                        <td><span t-field="o.frequency"/></td>
+                                        <td><span t-field="o.frequency_display"/></td>
                                     </tr>
                                 </table>
                             </div>

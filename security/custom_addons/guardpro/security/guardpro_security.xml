@@ -3,7 +3,7 @@
     <data>
         <!-- Categories -->
         <record id="module_category_guardpro" model="ir.module.category">
-            <field name="name">GuardPro</field>
+            <field name="name">GuardLink</field>
             <field name="description">Security Guard Management</field>
             <field name="sequence">20</field>
         </record>

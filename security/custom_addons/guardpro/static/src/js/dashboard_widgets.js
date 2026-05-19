@@ -1,5 +1,5 @@
 /**
- * Dashboard Widgets for GuardPro
+ * Dashboard Widgets for GuardLink
  */
 
 class DashboardWidgets {

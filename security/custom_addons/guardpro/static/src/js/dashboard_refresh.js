@@ -5,7 +5,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
 /**
- * GuardPro Dashboard Auto-Refresh Component
+ * GuardLink Dashboard Auto-Refresh Component
  * Provides real-time data updates for the dashboard
  */
 class DashboardRefresh extends Component {

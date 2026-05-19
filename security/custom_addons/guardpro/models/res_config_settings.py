@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""GuardPro Configuration Settings."""
+"""GuardLink Configuration Settings."""
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
 
 class ResConfigSettings(models.TransientModel):
-    """GuardPro system configuration settings."""
+    """GuardLink system configuration settings."""
     
     _inherit = 'res.config.settings'
 

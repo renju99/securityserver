@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""GuardPro Wizards."""
+"""GuardLink Wizards."""
 
 from . import shift_assignment_wizard
 from . import shift_conflict_wizard

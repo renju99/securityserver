@@ -1,6 +1,6 @@
 # SLA Management
 
-Complete guide to managing Service Level Agreements in GuardPro.
+Complete guide to managing Service Level Agreements in GuardLink.
 
 ---
 
@@ -13,7 +13,7 @@ SLA Management helps you define, monitor, and report on service level commitment
 ## Creating SLAs
 
 ### Navigation
-- GuardPro > Compliance > SLA Management
+- GuardLink > Compliance > SLA Management
 - Click **"Create SLA"**
 
 ### SLA Information

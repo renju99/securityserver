@@ -1,6 +1,6 @@
 # Daily Activity Reports (DAR)
 
-Complete guide to creating and managing Daily Activity Reports in GuardPro.
+Complete guide to creating and managing Daily Activity Reports in GuardLink.
 
 ---
 
@@ -13,7 +13,7 @@ Daily Activity Reports (DARs) document all guard activities, observations, and i
 ## Creating a DAR
 
 ### Navigation
-- GuardPro > Compliance > Daily Reports
+- GuardLink > Compliance > Daily Reports
 - Click **"Create Report"**
 
 ### Report Information
@@ -160,7 +160,7 @@ Notable: Increased vehicle traffic due to nearby event
 - Required sections included
 
 **Creating Templates:**
-- GuardPro > Configuration > DAR Templates
+- GuardLink > Configuration > DAR Templates
 - Define sections
 - Set required fields
 - Assign to sites

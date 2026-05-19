@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Documentation Page Template - Odoo Documentation Style -->
-    <template id="documentation_page" name="Sentry Documentation">
+    <template id="documentation_page" name="GuardLink Documentation">
         <t t-call="web.layout">
             <t t-set="head">
                 <!-- Cache-bust so browsers pick up CSS/JS after upgrades -->
@@ -13,7 +13,7 @@
                 <div class="odoo-docs-container">
                     <div class="d-flex align-items-start justify-content-between flex-wrap">
                         <div>
-                            <div class="odoo-docs-kicker">Sentry · Product guide</div>
+                            <div class="odoo-docs-kicker">GuardLink · Product guide</div>
                             <h1 class="mb-2">
                                 <i class="fa fa-book mr-2" style="color: #017e84;"></i>
                                 Documentation
@@ -35,7 +35,7 @@
                 </div>
             </div>
 
-            <div class="odoo-docs-guide-wrap sentry-docs-guide">
+            <div class="odoo-docs-guide-wrap guardlink-docs-guide">
             <div class="odoo-docs-container">
                 <div class="odoo-docs-layout">
                     <!-- Sidebar Navigation -->
@@ -117,7 +117,7 @@
                                 <div class="odoo-docs-page-kicker" t-if="not current_page_info">Start here</div>
                                 <h1 class="odoo-docs-title" t-if="current_page_info" t-esc="current_page_info.get('title', '')"/>
                                 <h1 class="odoo-docs-title" t-if="not current_page_info">
-                                    Welcome to the Sentry guide
+                                    Welcome to the GuardLink guide
                                 </h1>
 
                                 <!-- Page Description -->
@@ -130,12 +130,12 @@
                             <!-- Quick Actions -->
                             <div class="d-none d-md-flex flex-column gap-2">
                                 <a href="/web#action=guardpro.action_guardpro_analytics_dashboard_client" class="btn btn-outline-primary btn-sm">
-                                    <i class="fa fa-tachometer mr-1"></i> Open Sentry
+                                    <i class="fa fa-tachometer mr-1"></i> Open GuardLink
                                 </a>
                                 <button type="button" onclick="window.print()" class="btn btn-outline-secondary btn-sm">
                                     <i class="fa fa-print mr-1"></i> Print Page
                                 </button>
-                                <a href="mailto:support@sentry.app" class="btn btn-outline-info btn-sm">
+                                <a href="mailto:support@guardlink.app" class="btn btn-outline-info btn-sm">
                                     <i class="fa fa-envelope mr-1"></i> Get Support
                                 </a>
                             </div>
@@ -151,7 +151,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <h6 class="text-secondary mb-2 font-weight-bold">
-                                        <i class="fa fa-info-circle mr-2"></i>Sentry documentation
+                                        <i class="fa fa-info-circle mr-2"></i>GuardLink documentation
                                     </h6>
                                     <p class="mb-2 text-muted small">
                                         <strong>Version:</strong> 18.0.1.1.18
@@ -174,10 +174,10 @@
                                         </a>
                                     </div>
                                     <div>
-                                        <a href="mailto:support@sentry.app" class="text-muted mr-3 small">
-                                            <i class="fa fa-envelope mr-1"></i> support@sentry.app
+                                        <a href="mailto:support@guardlink.app" class="text-muted mr-3 small">
+                                            <i class="fa fa-envelope mr-1"></i> support@guardlink.app
                                         </a>
-                                        <a href="https://sentry.proptechme.com/" target="_blank" rel="noopener noreferrer" class="text-muted small">
+                                        <a href="https://guardlink.app/" target="_blank" rel="noopener noreferrer" class="text-muted small">
                                             <i class="fa fa-globe mr-1"></i> Website
                                         </a>
                                     </div>
@@ -186,7 +186,7 @@
                             <hr class="my-3" style="border-color: #dfe1e6;" />
                             <div class="text-center">
                                 <small class="text-muted">
-                                    © 2026 Sentry · Security operations for Odoo
+                                    © 2026 GuardLink · Security operations for Odoo
                                 </small>
                             </div>
                         </footer>
@@ -195,8 +195,8 @@
             </div>
             </div>
             
-            <!-- Back to GuardPro Button -->
-            <a href="/web#action=guardpro.action_guardpro_analytics_dashboard_client" class="back-to-guardpro" title="Back to Sentry Dashboard">
+            <!-- Back to GuardLink Button -->
+            <a href="/web#action=guardpro.action_guardpro_analytics_dashboard_client" class="back-to-guardpro" title="Back to GuardLink Dashboard">
                 <i class="fa fa-tachometer"></i>
                 <span class="d-none d-md-inline ml-2">Dashboard</span>
             </a>
@@ -210,7 +210,7 @@
     
     <!-- Client Action to open documentation in new tab -->
     <record id="action_guardpro_documentation" model="ir.actions.act_url">
-        <field name="name">Sentry Documentation</field>
+        <field name="name">GuardLink Documentation</field>
         <field name="url">/guardpro/documentation</field>
         <field name="target">new</field>
     </record>

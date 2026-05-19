@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""GuardPro Controllers."""
+"""GuardLink Controllers."""
 
 from . import main
 from . import mobile_api

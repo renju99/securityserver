@@ -1,6 +1,6 @@
 # Attendance Tracking
 
-Complete guide to tracking guard attendance and time management in GuardPro.
+Complete guide to tracking guard attendance and time management in GuardLink.
 
 ---
 
@@ -14,7 +14,7 @@ Attendance Tracking allows you to monitor guard check-in/check-out times, track 
 
 ### Mobile App Check-In
 
-**Step 1:** Guard opens GuardPro mobile app
+**Step 1:** Guard opens GuardLink mobile app
 
 **Step 2:** Taps **"Check In"** button
 
@@ -30,7 +30,7 @@ Attendance Tracking allows you to monitor guard check-in/check-out times, track 
 
 **For office/reception based check-in:**
 
-**Step 1:** GuardPro > Guards > Attendance
+**Step 1:** GuardLink > Guards > Attendance
 
 **Step 2:** Click **"Check In Guard"**
 
@@ -45,7 +45,7 @@ Attendance Tracking allows you to monitor guard check-in/check-out times, track 
 ### Viewing Attendance
 
 **Navigation:**
-- GuardPro > Guards > Attendance Records
+- GuardLink > Guards > Attendance Records
 
 **View Shows:**
 - Guard name

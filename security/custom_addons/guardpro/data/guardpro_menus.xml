@@ -4,9 +4,9 @@
          GUARDPRO MENU STRUCTURE - Logically Organized
          ================================================================ -->
 
-    <!-- ROOT MENU (visible to Sentry / GuardPro users; not technical-only) -->
+    <!-- ROOT MENU (visible to GuardLink users; not technical-only) -->
     <menuitem id="menu_guardpro_root"
-              name="Sentry"
+              name="GuardLink"
               sequence="10"
               web_icon="guardpro,static/description/icon.png"
               groups="base.group_no_one"/>
@@ -1014,12 +1014,12 @@
         <field name="groups_id" eval="[(6, 0, [ref('base.group_system'), ref('base.group_erp_manager')])]"/>
     </record>
 
-    <!-- GuardPro Configuration root: only Odoo Settings / Access Rights (not GuardPro roles) -->
+    <!-- GuardLink Configuration root: only Odoo Settings / Access Rights (not GuardLink roles) -->
     <record id="menu_guardpro_configuration" model="ir.ui.menu">
         <field name="groups_id" eval="[(6, 0, [ref('base.group_system'), ref('base.group_erp_manager')])]"/>
     </record>
 
-    <!-- GuardPro Dashboard menu - exclude reception users (visible to manager, supervisor, client users, admin) -->
+    <!-- GuardLink Dashboard menu - exclude reception users (visible to manager, supervisor, client users, admin) -->
     <record id="menu_guardpro_dashboard" model="ir.ui.menu">
         <field name="groups_id" eval="[(6, 0, [ref('group_guardpro_client_user'), ref('group_guardpro_supervisor'), ref('group_guardpro_manager'), ref('group_guardpro_admin')])]"/>
     </record>

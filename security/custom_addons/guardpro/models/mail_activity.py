@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-"""GuardPro mail activity controls."""
+"""GuardLink mail activity controls."""
 
 from odoo import api, models
 
 
 class MailActivity(models.Model):
-    """Suppress assignment emails for GuardPro activity records."""
+    """Suppress assignment emails for GuardLink activity records."""
 
     _inherit = 'mail.activity'
 

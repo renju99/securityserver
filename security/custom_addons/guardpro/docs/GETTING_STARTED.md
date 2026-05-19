@@ -1,6 +1,6 @@
-# Chapter 1 — Get started with Sentry
+# Chapter 1 — Get started with GuardLink
 
-Sentry is flexible enough to run a single site or a multi-contract control room. This chapter walks you from empty database to a working patrol loop: **sites → guards → shifts → tours → proof of patrol**.
+GuardLink is flexible enough to run a single site or a multi-contract control room. This chapter walks you from empty database to a working patrol loop: **sites → guards → shifts → tours → proof of patrol**.
 
 ---
 
@@ -18,7 +18,7 @@ In this chapter you will:
 
 ## Before you begin
 
-- Odoo 18 with the **Sentry** app installed and your user in the appropriate security groups (see [Configuration](user-guide/03-configuration.md)).  
+- Odoo 18 with the **GuardLink** app installed and your user in the appropriate security groups (see [Configuration](user-guide/03-configuration.md)).  
 - **Mobile web** for guards uses the browser (installable from “Add to Home Screen” on supported devices). Legacy packaged PWA assets are not used; everything runs through Odoo routes.  
 - **CCTV** records may be stored for sites where cameras are configured; **live viewing is not exposed** in the standard web UI.  
 - **Biometric** browser capture is not part of the default frontend; attendance and verification follow your configured workflows (manual, device, or API where enabled).  
@@ -27,9 +27,9 @@ In this chapter you will:
 
 ## 1. Name your workspace
 
-1. Open **Sentry** from the main Odoo app menu.  
+1. Open **GuardLink** from the main Odoo app menu.  
 2. Confirm you can see menus for **Sites**, **Guards**, **Operations**, or equivalent (exact labels depend on your access group).  
-3. If menus are missing, ask an administrator to add you to the correct Sentry security group.  
+3. If menus are missing, ask an administrator to add you to the correct GuardLink security group.  
 
 ---
 

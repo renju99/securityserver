@@ -1,6 +1,6 @@
 # Site Setup
 
-Complete guide to creating and configuring client sites in GuardPro.
+Complete guide to creating and configuring client sites in GuardLink.
 
 ---
 
@@ -13,7 +13,7 @@ Site Setup allows you to create and manage security service locations including 
 ## Creating a New Site
 
 ### Navigation
-- GuardPro > Site Management > Sites
+- GuardLink > Site Management > Sites
 - Click **"Create"**
 
 ### Basic Information

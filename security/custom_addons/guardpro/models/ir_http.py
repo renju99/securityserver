@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""HTTP tweaks for GuardPro (e.g. allow camera on mobile PWA pages)."""
+"""HTTP tweaks for GuardLink (e.g. allow camera on mobile PWA pages)."""
 
 import logging
 
@@ -34,4 +34,4 @@ class IrHttp(models.AbstractModel):
             else:
                 headers['Permissions-Policy'] = _GUARDPRO_MOBILE_PP
         except Exception as e:
-            _logger.debug('GuardPro Permissions-Policy hook skipped: %s', e)
+            _logger.debug('GuardLink Permissions-Policy hook skipped: %s', e)

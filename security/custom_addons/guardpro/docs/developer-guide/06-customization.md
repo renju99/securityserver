@@ -1,8 +1,8 @@
-# GuardPro Customization
+# GuardLink Customization
 
 ## Overview
 
-GuardPro is designed with extensibility in mind, allowing organizations to customize the system to meet their specific security management requirements. This guide covers various customization approaches, from simple configuration changes to advanced development customizations.
+GuardLink is designed with extensibility in mind, allowing organizations to customize the system to meet their specific security management requirements. This guide covers various customization approaches, from simple configuration changes to advanced development customizations.
 
 ## Customization Levels
 
@@ -12,7 +12,7 @@ GuardPro is designed with extensibility in mind, allowing organizations to custo
 
 ```python
 # System Configuration Parameters
-class GuardProConfiguration:
+class GuardLinkConfiguration:
     def __init__(self, env):
         self.env = env
     
@@ -54,7 +54,7 @@ class GuardProConfiguration:
         """Reset configuration to defaults"""
         defaults = {
             'general': {
-                'company_name': 'GuardPro Security',
+                'company_name': 'GuardLink Security',
                 'timezone': 'UTC',
                 'currency': 'USD',
                 'date_format': '%Y-%m-%d',
@@ -89,7 +89,7 @@ class GuardProConfiguration:
 
 ```python
 # UI Customization Manager
-class GuardProUICustomization:
+class GuardLinkUICustomization:
     def __init__(self, env):
         self.env = env
     
@@ -178,16 +178,16 @@ custom_guardpro_extensions/
 
 # __manifest__.py
 {
-    'name': 'Custom GuardPro Extensions',
+    'name': 'Custom GuardLink Extensions',
     'version': '1.0.0',
     'category': 'Security',
-    'summary': 'Custom extensions for GuardPro',
+    'summary': 'Custom extensions for GuardLink',
     'description': """
-        Custom extensions for GuardPro security management system.
+        Custom extensions for GuardLink security management system.
         Includes additional fields, views, and functionality.
     """,
-    'author': 'GuardPro',
-    'website': 'https://www.sentry.app',
+    'author': 'GuardLink',
+    'website': 'https://guardlink.app',
     'depends': ['guardpro'],
     'data': [
         'security/ir.model.access.csv',
@@ -861,7 +861,7 @@ class CustomIntegrationFramework:
         
         headers = {
             'Content-Type': 'application/json',
-            'User-Agent': 'GuardPro-Integration/1.0'
+            'User-Agent': 'GuardLink-Integration/1.0'
         }
         
         # Add authentication headers
@@ -957,4 +957,4 @@ class CustomIntegrationFramework:
 
 ---
 
-*GuardPro Customization: Flexible and Extensible Security Management Solutions*
+*GuardLink Customization: Flexible and Extensible Security Management Solutions*

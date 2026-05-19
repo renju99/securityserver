@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""GuardPro PWA Controller.
+"""GuardLink PWA Controller.
 
 This module provides routes for the Progressive Web App interface.
 Optimized for fast loading with efficient queries and caching.
@@ -21,8 +21,8 @@ _memory_cache = {}
 _cache_timestamps = {}
 
 
-class GuardProPWAController(http.Controller):
-    """Controller for GuardPro Progressive Web App - Performance Optimized."""
+class GuardLinkPWAController(http.Controller):
+    """Controller for GuardLink Progressive Web App - Performance Optimized."""
 
     def _get_from_cache(self, cache_key, ttl=300):
         """Get data from memory cache if not expired.
@@ -87,12 +87,12 @@ class GuardProPWAController(http.Controller):
             '''<!DOCTYPE html>
             <html>
             <head>
-                <title>GuardPro PWA Test</title>
+                <title>GuardLink PWA Test</title>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1">
             </head>
             <body>
-                <h1>GuardPro PWA Simple Test</h1>
+                <h1>GuardLink PWA Simple Test</h1>
                 <p>If you can see this, the route and authentication are working.</p>
                 <p>User: ''' + str(request.env.user.name) + '''</p>
                 <a href="/guardpro/pwa/">Try full PWA</a>
@@ -234,7 +234,7 @@ class GuardProPWAController(http.Controller):
                 <head>
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1">
-                    <title>Error - GuardPro</title>
+                    <title>Error - GuardLink</title>
                     <style>
                         body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
                         h1 { color: #EF4444; }
@@ -286,7 +286,7 @@ class GuardProPWAController(http.Controller):
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1">
-                <title>Offline - GuardPro</title>
+                <title>Offline - GuardLink</title>
                 <style>
                     body {
                         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -382,8 +382,8 @@ class GuardProPWAController(http.Controller):
         Following Odoo 18 recommendations for PWA manifest serving.
         """
         manifest = {
-            'name': 'GuardPro - Security Management',
-            'short_name': 'GuardPro',
+            'name': 'GuardLink - Security Management',
+            'short_name': 'GuardLink',
             'version': '1.0.1',
             'description': 'Complete security guard management system with real-time tracking, incident reporting, and more',
             'lang': 'en',

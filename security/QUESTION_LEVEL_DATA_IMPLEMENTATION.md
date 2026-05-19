@@ -1,7 +1,7 @@
 # Question-Level Pass/Fail Data Implementation
 
 ## Overview
-This document describes the implementation of question-level pass/fail tracking for e-learning quiz responses in the GuardPro system.
+This document describes the implementation of question-level pass/fail tracking for e-learning quiz responses in the GuardLink system.
 
 ## What Was Implemented
 

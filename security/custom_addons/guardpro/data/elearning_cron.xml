@@ -4,7 +4,7 @@
         
         <!-- Scheduled Action: Check Expiring Certifications -->
         <record id="ir_cron_check_expiring_certifications" model="ir.cron">
-            <field name="name">GuardPro: Check Expiring Certifications</field>
+            <field name="name">GuardLink: Check Expiring Certifications</field>
             <field name="model_id" ref="model_guard_profile"/>
             <field name="state">code</field>
             <field name="code">model.check_certification_expiry()</field>

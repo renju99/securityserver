@@ -1,7 +1,7 @@
 {
-  "name": "Berkeley Guard Pro",
-  "short_name": "GuardPro",
-  "description": "Berkeley Security Guard Management Mobile App",
+  "name": "GuardLink",
+  "short_name": "GuardLink",
+  "description": "GuardLink — Security Guard Management",
   "start_url": "/guardpro/mobile",
   "display": "standalone",
   "background_color": "#1B365D",

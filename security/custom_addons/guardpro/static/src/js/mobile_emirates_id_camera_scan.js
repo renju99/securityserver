@@ -1,4 +1,4 @@
-/* GuardPro mobile PWA: Emirates ID camera capture + server OCR (plain script, web.assets_frontend). */
+/* GuardLink mobile PWA: Emirates ID camera capture + server OCR (plain script, web.assets_frontend). */
 
 /**
  * Global entry for inline onclick (reliable on Android Chrome/WebView). Assigned before the IIFE
@@ -90,7 +90,7 @@ window.guardproEidTriggerScan = function (ev, el) {
                 input.dispatchEvent(new Event('change', { bubbles: true }));
             }
         } catch (e) {
-            console.warn('[GuardPro Mobile EID] set field failed', field, e);
+            console.warn('[GuardLink Mobile EID] set field failed', field, e);
         }
     }
 
@@ -165,7 +165,7 @@ window.guardproEidTriggerScan = function (ev, el) {
                 window.MobilePushToTalk.releaseMicrophoneForCamera();
             }
         } catch (e) {
-            console.debug('[GuardPro Mobile EID] PTT mic release skipped', e);
+            console.debug('[GuardLink Mobile EID] PTT mic release skipped', e);
         }
         var md = navigator.mediaDevices;
         if (!md || typeof md.getUserMedia !== 'function') {
@@ -265,7 +265,7 @@ window.guardproEidTriggerScan = function (ev, el) {
                     window.MobilePushToTalk.resumeMicrophoneAfterCamera();
                 }
             } catch (e) {
-                console.debug('[GuardPro Mobile EID] PTT mic resume skipped', e);
+                console.debug('[GuardLink Mobile EID] PTT mic resume skipped', e);
             }
         }
 
@@ -292,7 +292,7 @@ window.guardproEidTriggerScan = function (ev, el) {
                     }).catch(function () {});
                 }
             } catch (e) {
-                console.debug('[GuardPro Mobile EID] applyConstraints skipped', e);
+                console.debug('[GuardLink Mobile EID] applyConstraints skipped', e);
             }
             var p = video.play && video.play();
             if (p && typeof p.catch === 'function') {
@@ -431,7 +431,7 @@ window.guardproEidTriggerScan = function (ev, el) {
                 }
                 octx.putImageData(img, 0, 0);
             } catch (e) {
-                console.debug('[GuardPro Mobile EID] OCR enhancement skipped', e);
+                console.debug('[GuardLink Mobile EID] OCR enhancement skipped', e);
             }
             var ocrDataUrl = ocrOut.toDataURL('image/jpeg', 0.92);
 
@@ -639,7 +639,7 @@ window.guardproEidTriggerScan = function (ev, el) {
     }
 
     function cameraErrorAlert(e) {
-        console.error('[GuardPro Mobile EID] Camera error', e);
+        console.error('[GuardLink Mobile EID] Camera error', e);
         var name = e && e.name;
         var hint =
             'When the browser asks, tap Allow. On Android: Chrome menu → Settings → Site settings → Camera, or App info → Permissions for Chrome. Installed PWAs use the browser permission, not a separate app camera toggle.';
@@ -655,7 +655,7 @@ window.guardproEidTriggerScan = function (ev, el) {
 
     function startEidScanPipeline(btn) {
         var form = btn.closest('form') || document.body;
-        console.log('[GuardPro Mobile EID] Scan started');
+        console.log('[GuardLink Mobile EID] Scan started');
         requestCameraWithFallbacks()
             .then(function (s) {
                 openScanWizard(form, s);
@@ -700,10 +700,10 @@ window.guardproEidTriggerScan = function (ev, el) {
     document.addEventListener('click', handleDelegatedEidScanPointerOrClick, true);
 
     function bindScanButtons() {
-        console.log('[GuardPro Mobile EID] Delegation + inline onclick active');
+        console.log('[GuardLink Mobile EID] Delegation + inline onclick active');
     }
 
-    window.GuardProMobileEmiratesIdScan = {
+    window.GuardLinkMobileEmiratesIdScan = {
         open: openScanWizard,
         bind: bindScanButtons,
         requestCamera: requestCameraWithFallbacks,

@@ -102,6 +102,17 @@ class SecurityTour(models.Model):
         ('daily', 'Daily'),
         ('custom', 'Custom')
     ], string='Tour Frequency', default='hourly')
+    frequency_custom = fields.Char(
+        string='Custom Frequency',
+        tracking=True,
+        help='Describe the patrol schedule when Tour Frequency is Custom '
+             '(e.g. "Twice per night shift", "Mon/Wed/Fri at 22:00").'
+    )
+    frequency_display = fields.Char(
+        string='Frequency (display)',
+        compute='_compute_frequency_display',
+        store=True,
+    )
     
     # Requirements
     requires_supervisor = fields.Boolean(
@@ -174,6 +185,24 @@ class SecurityTour(models.Model):
          'Tour code must be unique!'),
     ]
 
+    @api.depends('frequency', 'frequency_custom')
+    def _compute_frequency_display(self):
+        """Human-readable frequency for reports and mobile."""
+        labels = dict(self._fields['frequency'].selection)
+        for record in self:
+            if record.frequency == 'custom' and record.frequency_custom:
+                record.frequency_display = record.frequency_custom.strip()
+            elif record.frequency:
+                record.frequency_display = labels.get(record.frequency, record.frequency)
+            else:
+                record.frequency_display = False
+
+    @api.onchange('frequency')
+    def _onchange_frequency(self):
+        """Clear custom text when a preset frequency is chosen."""
+        if self.frequency != 'custom':
+            self.frequency_custom = False
+
     @api.depends('checkpoint_ids')
     def _compute_total_checkpoints(self):
         """Count total checkpoints in tour."""
@@ -238,6 +267,16 @@ class SecurityTour(models.Model):
             if record.estimated_duration <= 0:
                 raise ValidationError(_(
                     'Estimated duration must be greater than 0!'
+                ))
+
+    @api.constrains('frequency', 'frequency_custom')
+    def _check_frequency_custom(self):
+        """Require a description when frequency is Custom."""
+        for record in self:
+            if record.frequency == 'custom' and not (record.frequency_custom or '').strip():
+                raise ValidationError(_(
+                    'Please describe the custom tour frequency '
+                    '(e.g. "Twice per shift" or "Every 30 minutes").'
                 ))
 
     def action_activate(self):

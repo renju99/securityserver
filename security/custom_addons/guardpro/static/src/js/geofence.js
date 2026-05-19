@@ -1,7 +1,7 @@
 // import { gpsTracker } from './gps_tracker';
 
 /**
- * Geofencing Module for GuardPro
+ * Geofencing Module for GuardLink
  * Monitors guard location against site boundaries
  */
 

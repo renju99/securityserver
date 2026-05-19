@@ -20,6 +20,16 @@
                 <group invisible="operation_type != 'assign'">
                     <field name="guard_id" options="{'no_create': True}"/>
                 </group>
+
+                <group invisible="operation_type != 'assign_tours'">
+                    <field name="shift_site_ids" invisible="1"/>
+                    <field name="tour_ids"
+                           widget="many2many_tags"
+                           domain="[('site_id', 'in', shift_site_ids), ('status', 'in', ['active', 'draft'])]"
+                           options="{'no_create': True}"
+                           required="operation_type == 'assign_tours'"/>
+                    <field name="tour_assignment_mode" widget="radio"/>
+                </group>
                 
                 <group invisible="operation_type != 'cancel'">
                     <field name="cancellation_reason" placeholder="Explain why these shifts are being cancelled..."/>
@@ -29,7 +39,7 @@
                     <field name="copy_start_date"/>
                 </group>
                 
-                <group invisible="operation_type in ['unassign']">
+                <group invisible="operation_type == 'unassign'">
                     <field name="send_notifications"/>
                 </group>
                 

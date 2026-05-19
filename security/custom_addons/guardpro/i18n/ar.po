@@ -1,9 +1,9 @@
-# Translation of Sentry Security Guard Management System into Arabic
-# This file contains Arabic translations for the Sentry module
+# Translation of GuardLink Security Guard Management System into Arabic
+# This file contains Arabic translations for the GuardLink module
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Sentry 18.0.1.0.0\n"
+"Project-Id-Version: GuardLink 18.0.1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-10-11 12:00:00+0000\n"
 "PO-Revision-Date: 2025-10-11 12:00:00+0000\n"
@@ -17,8 +17,8 @@ msgstr ""
 
 #. module: guardpro
 #: model:ir.module.module,shortdesc:guardpro.module_meta_information
-msgid "GuardPro - Security Guard Management"
-msgstr "Sentry - إدارة الحراس الأمنيين"
+msgid "GuardLink - Security Guard Management"
+msgstr "GuardLink - إدارة الحراس الأمنيين"
 
 #. module: guardpro
 #: model:ir.module.module,summary:guardpro.module_meta_information
@@ -27,8 +27,8 @@ msgstr "نظام إدارة الحراس الأمنيين الشامل مع تت
 
 #. module: guardpro
 #: model:ir.ui.menu,name:guardpro.menu_guardpro_root
-msgid "GuardPro"
-msgstr "Sentry"
+msgid "GuardLink"
+msgstr "GuardLink"
 
 #. module: guardpro
 #: model:ir.ui.menu,name:guardpro.menu_guardpro_operations
@@ -235,23 +235,23 @@ msgstr "تسجيل الخروج"
 
 #. module: guardpro
 #: model:ir.cron,name:guardpro.cron_shift_reminders
-msgid "GuardPro: Send Shift Reminders"
-msgstr "GuardPro: إرسال تذكيرات المناوبة"
+msgid "GuardLink: Send Shift Reminders"
+msgstr "GuardLink: إرسال تذكيرات المناوبة"
 
 #. module: guardpro
 #: model:ir.cron,name:guardpro.cron_cleanup_location_history
-msgid "GuardPro: Cleanup Old Location History"
-msgstr "GuardPro: تنظيف سجل المواقع القديمة"
+msgid "GuardLink: Cleanup Old Location History"
+msgstr "GuardLink: تنظيف سجل المواقع القديمة"
 
 #. module: guardpro
 #: model:ir.cron,name:guardpro.cron_certification_expiry
-msgid "GuardPro: Check Certification Expiry"
-msgstr "GuardPro: التحقق من انتهاء صلاحية الشهادات"
+msgid "GuardLink: Check Certification Expiry"
+msgstr "GuardLink: التحقق من انتهاء صلاحية الشهادات"
 
 #. module: guardpro
 #: model:ir.cron,name:guardpro.cron_escalate_incidents
-msgid "GuardPro: Escalate Unresponded Critical Incidents"
-msgstr "GuardPro: تصعيد الحوادث الحرجة غير المستجاب لها"
+msgid "GuardLink: Escalate Unresponded Critical Incidents"
+msgstr "GuardLink: تصعيد الحوادث الحرجة غير المستجاب لها"
 
 #. module: guardpro
 #: code:addons/guardpro/models/guard_shift.py

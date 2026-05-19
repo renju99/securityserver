@@ -1,6 +1,6 @@
 # Performance Management
 
-Complete guide to tracking and evaluating guard performance in GuardPro.
+Complete guide to tracking and evaluating guard performance in GuardLink.
 
 ---
 
@@ -43,7 +43,7 @@ Performance Management helps you monitor guard effectiveness, conduct reviews, t
 ## Viewing Guard Performance
 
 ### Navigation
-- GuardPro > Guards > Guard Profiles
+- GuardLink > Guards > Guard Profiles
 - Open specific guard
 - Click **"Performance"** tab
 
@@ -76,7 +76,7 @@ Performance Management helps you monitor guard effectiveness, conduct reviews, t
 
 ### Conducting a Review
 
-**Step 1:** GuardPro > Performance Reviews
+**Step 1:** GuardLink > Performance Reviews
 
 **Step 2:** Click **"Schedule Review"**
 
@@ -200,7 +200,7 @@ Performance Management helps you monitor guard effectiveness, conduct reviews, t
 
 ### Recording Disciplinary Action
 
-**Step 1:** GuardPro > Guards > Disciplinary Actions
+**Step 1:** GuardLink > Guards > Disciplinary Actions
 
 **Step 2:** Click **"New Action"**
 

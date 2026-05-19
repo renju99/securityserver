@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Push-to-Talk API Controllers for GuardPro."""
+"""Push-to-Talk API Controllers for GuardLink."""
 
 from odoo import http
 from odoo.http import request

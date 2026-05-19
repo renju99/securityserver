@@ -1,4 +1,4 @@
-# GuardPro Migration 18.0.1.0.3
+# GuardLink Migration 18.0.1.0.3
 
 ## Issue Fixed
 
@@ -23,7 +23,7 @@ The migration will run automatically when you upgrade the module:
 1. Log in to Odoo as Administrator
 2. Go to **Apps** menu
 3. Remove the "Apps" filter to show installed modules
-4. Search for "GuardPro"
+4. Search for "GuardLink"
 5. Click the **Upgrade** button
 
 ### Option 2: Via Command Line

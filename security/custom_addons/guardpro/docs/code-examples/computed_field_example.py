@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Example: Creating Computed Fields in GuardPro
+Example: Creating Computed Fields in GuardLink
 
 This example demonstrates different types of computed fields and
 how to use @api.depends decorator correctly.

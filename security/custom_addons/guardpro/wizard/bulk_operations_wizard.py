@@ -21,6 +21,7 @@ class BulkShiftOperationWizard(models.TransientModel):
         ('cancel', 'Cancel Shifts'),
         ('assign', 'Assign Guards'),
         ('unassign', 'Unassign Guards'),
+        ('assign_tours', 'Assign Tours'),
         ('copy', 'Duplicate Shifts')
     ], string='Operation', required=True, default='reschedule')
     
@@ -46,6 +47,26 @@ class BulkShiftOperationWizard(models.TransientModel):
         'guard.profile',
         string='Assign to Guard'
     )
+
+    # Tour assignment fields
+    tour_ids = fields.Many2many(
+        'security.tour',
+        'bulk_shift_wizard_tour_rel',
+        'wizard_id',
+        'tour_id',
+        string='Tours to Assign',
+        help='Patrol tours linked to the selected shifts',
+    )
+    shift_site_ids = fields.Many2many(
+        'client.site',
+        compute='_compute_shift_site_ids',
+        string='Sites (from selected shifts)',
+    )
+    tour_assignment_mode = fields.Selection([
+        ('replace', 'Replace existing tours'),
+        ('add', 'Add to existing tours'),
+    ], string='Tour Assignment', default='replace',
+       help='Replace clears tours on each shift before assigning; Add keeps existing tours.')
     
     # Cancellation fields
     cancellation_reason = fields.Text(
@@ -68,6 +89,22 @@ class BulkShiftOperationWizard(models.TransientModel):
         """Compute number of selected shifts."""
         for record in self:
             record.shift_count = len(record.shift_ids)
+
+    @api.depends('shift_ids', 'shift_ids.site_id')
+    def _compute_shift_site_ids(self):
+        for record in self:
+            record.shift_site_ids = record.shift_ids.mapped('site_id')
+
+    @api.model
+    def default_get(self, fields_list):
+        """Pre-fill shifts from list view selection."""
+        res = super().default_get(fields_list)
+        if 'shift_ids' in fields_list and not res.get('shift_ids'):
+            active_model = self.env.context.get('active_model')
+            active_ids = self.env.context.get('active_ids') or []
+            if active_model == 'guard.shift' and active_ids:
+                res['shift_ids'] = [(6, 0, active_ids)]
+        return res
     
     def action_execute(self):
         """Execute the bulk operation."""
@@ -84,6 +121,8 @@ class BulkShiftOperationWizard(models.TransientModel):
             return self._assign_guards()
         elif self.operation_type == 'unassign':
             return self._unassign_guards()
+        elif self.operation_type == 'assign_tours':
+            return self._assign_tours()
         elif self.operation_type == 'copy':
             return self._copy_shifts()
     
@@ -271,6 +310,72 @@ class BulkShiftOperationWizard(models.TransientModel):
             }
         }
     
+    def _assign_tours(self):
+        """Assign patrol tour(s) to selected shifts."""
+        if not self.tour_ids:
+            raise UserError(_('Please select at least one tour to assign.'))
+
+        updated_count = 0
+        skipped_count = 0
+        tour_names = ', '.join(self.tour_ids.mapped('name'))
+
+        for shift in self.shift_ids:
+            if shift.status in ('completed', 'cancelled'):
+                skipped_count += 1
+                continue
+
+            wrong_site = self.tour_ids.filtered(
+                lambda t: t.site_id and t.site_id != shift.site_id
+            )
+            if wrong_site:
+                skipped_count += 1
+                _logger.warning(
+                    'Skipping shift %s — tour(s) %s not on site %s',
+                    shift.id,
+                    wrong_site.mapped('name'),
+                    shift.site_id.name,
+                )
+                continue
+
+            if self.tour_assignment_mode == 'add':
+                merged = list(set(shift.tour_ids.ids) | set(self.tour_ids.ids))
+                shift.write({'tour_ids': [(6, 0, merged)]})
+            else:
+                shift.write({'tour_ids': [(6, 0, self.tour_ids.ids)]})
+
+            if self.send_notifications and shift.guard_id and shift.guard_id.user_id:
+                shift.message_post(
+                    body=_(
+                        'Patrol tour(s) assigned for your shift on %(date)s: %(tours)s'
+                    ) % {
+                        'date': shift.start_datetime.strftime('%Y-%m-%d %H:%M'),
+                        'tours': tour_names,
+                    },
+                    partner_ids=shift.guard_id.user_id.partner_id.ids,
+                    message_type='notification',
+                )
+
+            updated_count += 1
+
+        message = _('%d shift(s) updated with tour(s): %s.') % (
+            updated_count, tour_names,
+        )
+        if skipped_count:
+            message += _(
+                '\n%d shift(s) skipped (completed/cancelled or tour site mismatch).'
+            ) % skipped_count
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Success') if updated_count else _('Warning'),
+                'message': message,
+                'type': 'success' if updated_count and not skipped_count else 'warning',
+                'sticky': bool(skipped_count),
+            },
+        }
+
     def _copy_shifts(self):
         """Duplicate shifts to a new date."""
         if not self.copy_start_date:
@@ -306,7 +411,7 @@ class BulkShiftOperationWizard(models.TransientModel):
                     'start_datetime': new_start,
                     'end_datetime': new_end,
                     'shift_type': shift.shift_type,
-                    'tour_id': shift.tour_id.id if shift.tour_id else False,
+                    'tour_ids': [(6, 0, shift.tour_ids.ids)],
                     'notes': shift.notes,
                     'status': 'scheduled'
                 })

@@ -68,7 +68,7 @@ class LocationService : Service() {
             val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
             wakeLock = powerManager.newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK,
-                "GuardPro::LocationWakeLock"
+                "GuardLink::LocationWakeLock"
             ).apply { setReferenceCounted(false) }
 
             createNotificationChannel()
@@ -87,7 +87,7 @@ class LocationService : Service() {
                 }
             }
 
-            Log.d(TAG, "GuardPro Location Service Created")
+            Log.d(TAG, "GuardLink Location Service Created")
         } catch (e: Exception) {
             Log.e(TAG, "Error in onCreate: ${e.message}", e)
         }
@@ -249,7 +249,7 @@ class LocationService : Service() {
                 val requestBuilder = Request.Builder()
                     .url(API_ENDPOINT)
                     .post(body)
-                    .header("User-Agent", "Berkeley-GuardPro-App-v1.0")
+                    .header("User-Agent", "GuardLink-App-v1.0")
                     .header("Accept", "application/json")
                     .header("X-Requested-With", "XMLHttpRequest")
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""GuardPro - Comprehensive Security Guard Management System."""
+"""GuardLink - Comprehensive Security Guard Management System."""
 
 
 def post_init_hook(cr, registry):

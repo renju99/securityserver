@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y \
 # Install packaging early - required for parsing version specifiers in requirements.txt
 RUN pip3 install --break-system-packages "packaging>=21.0"
 
-# Copy and install GuardPro module dependencies (as root for system-wide installation)
+# Copy and install GuardLink module dependencies (as root for system-wide installation)
 COPY --chown=root:root custom_addons/guardpro/requirements.txt /tmp/guardpro-requirements.txt
 RUN pip3 install --break-system-packages -r /tmp/guardpro-requirements.txt && rm /tmp/guardpro-requirements.txt
 

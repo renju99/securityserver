@@ -1,4 +1,4 @@
-/* Sentry Mobile Dashboard Styles */
+/* GuardLink Mobile Dashboard Styles */
 
 .guardpro-mobile-app {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -415,7 +415,7 @@
     transform: scale(0.95);
 }
 
-/* Sentry Mobile Navigation */
+/* GuardLink Mobile Navigation */
 .guardpro-mobile-nav {
     position: fixed;
     bottom: 0;

@@ -3,7 +3,7 @@
     <data noupdate="1">
         <!-- Default Analytics Dashboard -->
         <record id="default_analytics_dashboard" model="guardpro.analytics.dashboard">
-            <field name="name">GuardPro Analytics Dashboard</field>
+            <field name="name">GuardLink Analytics Dashboard</field>
         </record>
     </data>
 </odoo>

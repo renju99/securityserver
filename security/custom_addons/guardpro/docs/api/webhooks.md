@@ -1,20 +1,20 @@
-# GuardPro Webhooks
+# GuardLink Webhooks
 
 ## Overview
 
-GuardPro webhooks provide real-time notifications for various events in the security management system. Webhooks allow external systems to receive instant updates when specific events occur, enabling seamless integration and automated workflows.
+GuardLink webhooks provide real-time notifications for various events in the security management system. Webhooks allow external systems to receive instant updates when specific events occur, enabling seamless integration and automated workflows.
 
 ## Webhook Concepts
 
 ### What are Webhooks?
 
-Webhooks are HTTP callbacks that GuardPro sends to your application when specific events occur. Instead of polling the API for changes, your application receives real-time notifications, making integrations more efficient and responsive.
+Webhooks are HTTP callbacks that GuardLink sends to your application when specific events occur. Instead of polling the API for changes, your application receives real-time notifications, making integrations more efficient and responsive.
 
 ### How Webhooks Work
 
-1. **Event Occurs**: An event happens in GuardPro (e.g., guard creates a shift)
-2. **Webhook Triggered**: GuardPro identifies the event and triggers configured webhooks
-3. **HTTP Request Sent**: GuardPro sends an HTTP POST request to your webhook URL
+1. **Event Occurs**: An event happens in GuardLink (e.g., guard creates a shift)
+2. **Webhook Triggered**: GuardLink identifies the event and triggers configured webhooks
+3. **HTTP Request Sent**: GuardLink sends an HTTP POST request to your webhook URL
 4. **Your App Responds**: Your application receives the webhook and processes the event
 5. **Confirmation**: Your application responds with HTTP 200 to confirm receipt
 
@@ -737,15 +737,15 @@ DELETE /api/guardpro/webhooks/{webhook_id}
 
 ### Signature Verification
 
-GuardPro includes a signature header with each webhook request to verify authenticity:
+GuardLink includes a signature header with each webhook request to verify authenticity:
 
 ```http
-X-GuardPro-Signature: sha256=abc123def456...
+X-GuardLink-Signature: sha256=abc123def456...
 ```
 
 #### Verification Process
 
-1. **Extract Signature**: Get the signature from the `X-GuardPro-Signature` header
+1. **Extract Signature**: Get the signature from the `X-GuardLink-Signature` header
 2. **Calculate Expected Signature**: Use HMAC-SHA256 with your webhook secret
 3. **Compare Signatures**: Use constant-time comparison to prevent timing attacks
 
@@ -773,7 +773,7 @@ def verify_webhook_signature(payload, signature, secret):
 
 # Usage
 payload = request.get_data(as_text=True)
-signature = request.headers.get('X-GuardPro-Signature')
+signature = request.headers.get('X-GuardLink-Signature')
 secret = 'your-webhook-secret'
 
 if verify_webhook_signature(payload, signature, secret):
@@ -820,10 +820,10 @@ if (verifyWebhookSignature(payload, signature, secret)) {
 
 ### IP Whitelisting
 
-GuardPro webhook requests come from specific IP addresses. You can whitelist these IPs for additional security:
+GuardLink webhook requests come from specific IP addresses. You can whitelist these IPs for additional security:
 
 ```
-# GuardPro Webhook IPs
+# GuardLink Webhook IPs
 203.0.113.0/24
 198.51.100.0/24
 ```
@@ -836,7 +836,7 @@ All webhook URLs must use HTTPS to ensure secure transmission of data.
 
 ### Delivery Process
 
-1. **Event Triggered**: Event occurs in GuardPro
+1. **Event Triggered**: Event occurs in GuardLink
 2. **Webhook Queued**: Webhook added to delivery queue
 3. **HTTP Request Sent**: POST request sent to webhook URL
 4. **Response Received**: Your application responds
@@ -864,7 +864,7 @@ Failed webhooks are retried according to the configured retry policy:
 
 ### Delivery Logs
 
-GuardPro maintains delivery logs for all webhook attempts:
+GuardLink maintains delivery logs for all webhook attempts:
 
 ```json
 {
@@ -1009,10 +1009,10 @@ def verify_signature(payload, signature):
 
 @app.route('/webhook/guardpro', methods=['POST'])
 def handle_webhook():
-    """Handle GuardPro webhook"""
+    """Handle GuardLink webhook"""
     # Get payload and signature
     payload = request.get_data(as_text=True)
-    signature = request.headers.get('X-GuardPro-Signature')
+    signature = request.headers.get('X-GuardLink-Signature')
     
     # Verify signature
     if not verify_signature(payload, signature):
@@ -1313,4 +1313,4 @@ echo 'OK';
 
 ---
 
-*GuardPro Webhooks: Real-time Integration and Automation*
+*GuardLink Webhooks: Real-time Integration and Automation*

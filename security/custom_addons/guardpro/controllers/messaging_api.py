@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Messaging API Controllers for GuardPro."""
+"""Messaging API Controllers for GuardLink."""
 
 from odoo import http
 from odoo.http import request
@@ -10,7 +10,7 @@ from datetime import datetime
 _logger = logging.getLogger(__name__)
 
 
-class GuardProMessagingAPI(http.Controller):
+class GuardLinkMessagingAPI(http.Controller):
     """API endpoints for guard messaging system."""
 
     @http.route('/guardpro/api/messages/conversations', type='json', auth='user')

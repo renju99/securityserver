@@ -1,5 +1,5 @@
 /**
- * GuardPro Dashboard Statistics Widget
+ * GuardLink Dashboard Statistics Widget
  * Enhanced statistics and metrics for guards
  */
 

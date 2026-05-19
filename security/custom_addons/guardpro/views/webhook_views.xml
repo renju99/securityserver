@@ -89,7 +89,7 @@
                             <div class="alert alert-info" role="alert" invisible="not enable_signing">
                                 <i class="fa fa-info-circle" title="Information" aria-label="Information"/> 
                                 Payloads will be signed with HMAC-SHA256. The signature will be sent in the 
-                                <code>X-GuardPro-Signature</code> header.
+                                <code>X-GuardLink-Signature</code> header.
                             </div>
                         </page>
                         
@@ -177,7 +177,7 @@
                 Create a Webhook
             </p>
             <p>
-                Webhooks allow you to integrate GuardPro with external systems by sending real-time notifications.
+                Webhooks allow you to integrate GuardLink with external systems by sending real-time notifications.
             </p>
         </field>
     </record>

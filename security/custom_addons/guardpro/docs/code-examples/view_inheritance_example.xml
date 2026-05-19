@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!--
-        Example: Inheriting and Extending GuardPro Views
+        Example: Inheriting and Extending GuardLink Views
         
-        This example shows how to add custom fields to existing GuardPro views
+        This example shows how to add custom fields to existing GuardLink views
         using XML inheritance.
     -->
 
@@ -88,7 +88,7 @@
                         </group>
                     </group>
                     <group>
-                        <group string="Security Systems">
+                        <group string="GuardLink">
                             <field name="has_cctv"/>
                             <field name="has_alarm_system"/>
                             <field name="has_access_control"/>
@@ -321,7 +321,7 @@ USAGE INSTRUCTIONS:
 
 4. Install or upgrade your custom module
 
-5. The custom fields will appear in the GuardPro views
+5. The custom fields will appear in the GuardLink views
 
 XPATH TIPS:
 ===========

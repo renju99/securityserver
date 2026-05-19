@@ -3,7 +3,7 @@
     <data noupdate="1">
         
         <!-- ================================================================ -->
-        <!-- MISSING EMAIL TEMPLATES - GuardPro Module                       -->
+        <!-- MISSING EMAIL TEMPLATES - GuardLink Module                       -->
         <!-- Created: November 2025                                          -->
         <!-- ================================================================ -->
         
@@ -81,7 +81,7 @@
                     
                     <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
                         <p style="margin: 0; color: #999; font-size: 12px;">
-                            This is an automated message from GuardPro Visitor Management System
+                            This is an automated message from GuardLink Visitor Management System
                         </p>
                     </div>
                 </div>
@@ -116,7 +116,7 @@
                     
                     <h3>Required Actions:</h3>
                     <ol style="line-height: 1.8;">
-                        <li>Review the credential status in the GuardPro system</li>
+                        <li>Review the credential status in the GuardLink system</li>
                         <li>Identify all guards with expired or expiring credentials</li>
                         <li>Contact affected guards to begin renewal process</li>
                         <li>Schedule required training or testing</li>
@@ -126,7 +126,7 @@
                     <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0;">
                         <h3 style="margin-top: 0; color: #1976d2;">📊 Access the Report:</h3>
                         <p style="margin-bottom: 0;">
-                            Please log in to GuardPro and navigate to <strong>Guards → Credentials → Compliance Report</strong> 
+                            Please log in to GuardLink and navigate to <strong>Guards → Credentials → Compliance Report</strong> 
                             for detailed information about all non-compliant credentials.
                         </p>
                     </div>
@@ -145,7 +145,7 @@
                     
                     <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
                         <p style="margin: 0; color: #999; font-size: 12px;">
-                            This is an automated message from GuardPro Credential Management System
+                            This is an automated message from GuardLink Credential Management System
                         </p>
                     </div>
                 </div>
@@ -254,7 +254,7 @@
                     <div style="background: #fff3e0; border: 2px solid #f57c00; padding: 20px; margin: 30px 0; border-radius: 5px;">
                         <h3 style="margin-top: 0; color: #f57c00;">⚠ Required Actions:</h3>
                         <ol style="margin-bottom: 0; line-height: 1.8;">
-                            <li>Review the complete incident details in GuardPro system immediately</li>
+                            <li>Review the complete incident details in GuardLink system immediately</li>
                             <li>Assess the situation and determine appropriate response</li>
                             <li>Take necessary corrective actions</li>
                             <li>Update the incident status with your response</li>
@@ -275,7 +275,7 @@
                     </div>
                     
                     <div style="margin-top: 30px;">
-                        <p><strong>Access the incident:</strong> Log in to GuardPro and navigate to Incidents → ${object.incident_id.name}</p>
+                        <p><strong>Access the incident:</strong> Log in to GuardLink and navigate to Incidents → ${object.incident_id.name}</p>
                         <p>For urgent assistance, contact the Operations Center immediately.</p>
                     </div>
                     
@@ -284,7 +284,7 @@
                             URGENT - IMMEDIATE ATTENTION REQUIRED
                         </p>
                         <p style="margin: 5px 0 0 0; color: #999; font-size: 12px;">
-                            GuardPro Incident Escalation System<br/>
+                            GuardLink Incident Escalation System<br/>
                             Escalation ID: ${object.name}
                         </p>
                     </div>
@@ -377,7 +377,7 @@
                     
                     <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
                         <p style="margin: 0; color: #999; font-size: 12px;">
-                            This is an automated message from GuardPro Visitor Management System
+                            This is an automated message from GuardLink Visitor Management System
                         </p>
                     </div>
                 </div>
@@ -466,7 +466,7 @@
                     
                     <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
                         <p style="margin: 0; color: #999; font-size: 12px;">
-                            This is an automated reminder from GuardPro Key Management System
+                            This is an automated reminder from GuardLink Key Management System
                         </p>
                     </div>
                 </div>
@@ -540,7 +540,7 @@
                     
                     <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
                         <p style="margin: 0; color: #999; font-size: 12px;">
-                            This is an automated message from GuardPro Lost &amp; Found Management System
+                            This is an automated message from GuardLink Lost &amp; Found Management System
                         </p>
                     </div>
                 </div>
@@ -625,13 +625,13 @@
                     </div>
                     
                     <div style="margin-top: 30px;">
-                        <p>Please log in to GuardPro and update the maintenance status once service is completed.</p>
+                        <p>Please log in to GuardLink and update the maintenance status once service is completed.</p>
                         <p>For assistance, contact the equipment manager.</p>
                     </div>
                     
                     <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 4px; text-align: center;">
                         <p style="margin: 0; color: #999; font-size: 12px;">
-                            This is an automated message from GuardPro Equipment Management System
+                            This is an automated message from GuardLink Equipment Management System
                         </p>
                     </div>
                 </div>

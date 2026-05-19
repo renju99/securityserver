@@ -1,4 +1,4 @@
-# GuardPro Module Python Dependencies
+# GuardLink Module Python Dependencies
 # Install with: pip3 install -r requirements.txt
 
 # Image optimization for photo uploads

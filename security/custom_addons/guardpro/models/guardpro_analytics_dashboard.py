@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""GuardPro Analytics Dashboard Model."""
+"""GuardLink Analytics Dashboard Model."""
 
 from odoo import models, fields, api, _
 from odoo.tools import date_utils
@@ -12,16 +12,16 @@ import pytz
 _logger = logging.getLogger(__name__)
 
 
-class GuardProAnalyticsDashboard(models.Model):
-    """Analytics Dashboard for GuardPro System."""
+class GuardLinkAnalyticsDashboard(models.Model):
+    """Analytics Dashboard for GuardLink System."""
 
     _name = 'guardpro.analytics.dashboard'
-    _description = 'GuardPro Analytics Dashboard'
+    _description = 'GuardLink Analytics Dashboard'
 
     name = fields.Char(
         'Dashboard Name',
         required=True,
-        default='GuardPro Analytics'
+        default='GuardLink Analytics'
     )
     user_id = fields.Many2one(
         'res.users',
@@ -980,7 +980,7 @@ class GuardProAnalyticsDashboard(models.Model):
             ], limit=1)
             if not dashboard:
                 dashboard = self.create({
-                    'name': _('GuardPro Analytics'),
+                    'name': _('GuardLink Analytics'),
                     'user_id': self.env.user.id,
                 })
             

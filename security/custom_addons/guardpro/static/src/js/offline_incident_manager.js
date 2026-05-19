@@ -1,5 +1,5 @@
 /**
- * GuardPro Offline Incident Manager
+ * GuardLink Offline Incident Manager
  * Handles offline incident reporting with automatic sync
  */
 

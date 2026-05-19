@@ -563,17 +563,17 @@ class PushToTalkMessage(models.Model):
                             removed += 1
                         except Exception as remove_err:
                             _logger.warning(
-                                'GuardPro PTT temp cleanup: failed removing %s: %s',
+                                'GuardLink PTT temp cleanup: failed removing %s: %s',
                                 entry.path,
                                 remove_err,
                             )
         except Exception as scan_err:
-            _logger.error('GuardPro PTT temp cleanup scan failed: %s', scan_err)
+            _logger.error('GuardLink PTT temp cleanup scan failed: %s', scan_err)
             return False
 
         if removed:
             _logger.info(
-                'GuardPro PTT temp cleanup: removed %s stale file(s) older than %s hour(s)',
+                'GuardLink PTT temp cleanup: removed %s stale file(s) older than %s hour(s)',
                 removed,
                 retention_hours,
             )

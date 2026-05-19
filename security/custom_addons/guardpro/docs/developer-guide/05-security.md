@@ -1,8 +1,8 @@
-# GuardPro Security
+# GuardLink Security
 
 ## Overview
 
-GuardPro implements a comprehensive security framework that protects sensitive security data, ensures proper access control, and maintains audit trails for compliance. The security system is built on Odoo's robust security architecture with additional layers specific to security management operations.
+GuardLink implements a comprehensive security framework that protects sensitive security data, ensures proper access control, and maintains audit trails for compliance. The security system is built on Odoo's robust security architecture with additional layers specific to security management operations.
 
 ## Security Architecture
 
@@ -43,7 +43,7 @@ Security Layers
 
 ```python
 # Enhanced Authentication System
-class GuardProAuthentication:
+class GuardLinkAuthentication:
     def __init__(self, env):
         self.env = env
         self.max_login_attempts = 5
@@ -105,9 +105,9 @@ class GuardProAuthentication:
         if not user.active:
             raise AccessDenied(_("Account is deactivated"))
         
-        # Check if user has GuardPro access
+        # Check if user has GuardLink access
         if not user.has_group('guardpro.group_guardpro_user'):
-            raise AccessDenied(_("Access denied to GuardPro system"))
+            raise AccessDenied(_("Access denied to GuardLink system"))
         
         return user
     
@@ -252,7 +252,7 @@ class GuardProAuthentication:
 
 ```python
 # Session Management System
-class GuardProSessionManager:
+class GuardLinkSessionManager:
     def __init__(self, env):
         self.env = env
     
@@ -314,7 +314,7 @@ class GuardProSessionManager:
 
 ```python
 # Role-Based Access Control System
-class GuardProRBAC:
+class GuardLinkRBAC:
     def __init__(self, env):
         self.env = env
         self.roles = {
@@ -427,7 +427,7 @@ class GuardProRBAC:
 
 ```python
 # Record-Level Security Rules
-class GuardProRecordSecurity:
+class GuardLinkRecordSecurity:
     def __init__(self, env):
         self.env = env
     
@@ -502,7 +502,7 @@ class GuardProRecordSecurity:
 
 ```python
 # Data Encryption System
-class GuardProEncryption:
+class GuardLinkEncryption:
     def __init__(self, env):
         self.env = env
         self.encryption_key = self._get_encryption_key()
@@ -564,7 +564,7 @@ class GuardProEncryption:
 
 ```python
 # Data Masking System
-class GuardProDataMasking:
+class GuardLinkDataMasking:
     def __init__(self, env):
         self.env = env
     
@@ -675,7 +675,7 @@ class GuardProDataMasking:
 
 ```python
 # Audit Trail System
-class GuardProAuditTrail:
+class GuardLinkAuditTrail:
     def __init__(self, env):
         self.env = env
     
@@ -798,7 +798,7 @@ class GuardProAuditTrail:
 
 ```python
 # Compliance Monitoring System
-class GuardProComplianceMonitor:
+class GuardLinkComplianceMonitor:
     def __init__(self, env):
         self.env = env
     
@@ -902,7 +902,7 @@ class GuardProComplianceMonitor:
 
 ```python
 # API Access Control
-class GuardProAPISecurity:
+class GuardLinkAPISecurity:
     def __init__(self, env):
         self.env = env
     
@@ -1085,4 +1085,4 @@ class GuardProAPISecurity:
 
 ---
 
-*GuardPro Security: Comprehensive Protection for Sensitive Security Data*
+*GuardLink Security: Comprehensive Protection for Sensitive Security Data*

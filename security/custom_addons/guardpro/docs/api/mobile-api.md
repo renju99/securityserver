@@ -1,8 +1,8 @@
-# GuardPro Mobile API
+# GuardLink Mobile API
 
 ## Overview
 
-The GuardPro Mobile API is specifically designed for mobile applications, providing optimized endpoints and features for on-the-go security management. The API supports real-time updates, offline capabilities, and mobile-specific functionality like location tracking, photo capture, and push notifications.
+The GuardLink Mobile API is specifically designed for mobile applications, providing optimized endpoints and features for on-the-go security management. The API supports real-time updates, offline capabilities, and mobile-specific functionality like location tracking, photo capture, and push notifications.
 
 ## Mobile API Features
 
@@ -1259,7 +1259,7 @@ function handleVisitorNotification(data) {
 import Foundation
 import CoreLocation
 
-class GuardProMobileAPI {
+class GuardLinkMobileAPI {
     private let baseURL = "https://your-domain.com/api/guardpro/mobile"
     private var accessToken: String?
     
@@ -1404,7 +1404,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 
-class GuardProMobileAPI(private val context: Context) {
+class GuardLinkMobileAPI(private val context: Context) {
     private val baseURL = "https://your-domain.com/api/guardpro/mobile"
     private val client = OkHttpClient()
     private val gson = Gson()
@@ -1585,4 +1585,4 @@ data class PhotoData(
 
 ---
 
-*GuardPro Mobile API: On-the-Go Security Management*
+*GuardLink Mobile API: On-the-Go Security Management*
