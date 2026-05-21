@@ -6,6 +6,7 @@ from odoo.exceptions import ValidationError
 from datetime import timedelta
 from ..common.image_optimizer import ImageOptimizer
 import logging
+import re
 
 _logger = logging.getLogger(__name__)
 
@@ -98,7 +99,10 @@ class Checkpoint(models.Model):
     # NFC Configuration
     nfc_tag_id = fields.Char(
         string='NFC Tag ID',
-        help='Unique NFC tag identifier',
+        help=(
+            'Hardware UID in colon format, e.g. 04:80:ab:01:69:02:03. '
+            'Copy from NFC Tools (tag UID). Do not use compact hex without colons.'
+        ),
         index=True
     )
     nfc_tag_type = fields.Char(
@@ -396,6 +400,33 @@ class Checkpoint(models.Model):
                         'Longitude must be between -180 and 180!'
                     ))
 
+    @api.model
+    def _prepare_nfc_tag_id(self, tag_id):
+        """Normalize NFC tag ID: text labels as-is, hex UIDs as colon-separated pairs."""
+        if not tag_id:
+            return tag_id
+        raw = str(tag_id).strip()
+        compact = self._nfc_uid_compact(raw)
+        if compact:
+            return ':'.join(compact[i:i + 2] for i in range(0, len(compact), 2))
+        return raw
+
+    @api.constrains('nfc_tag_id')
+    def _check_nfc_tag_id_format(self):
+        """Reject compact hex without colons; accept text or colon-separated UID."""
+        for record in self:
+            if not record.nfc_tag_id:
+                continue
+            raw = str(record.nfc_tag_id).strip()
+            compact = record._nfc_uid_compact(raw)
+            if not compact:
+                continue
+            if ':' not in raw and len(compact) >= 8:
+                raise ValidationError(_(
+                    'NFC Tag ID must be a colon-separated UID '
+                    '(e.g. 04:80:ab:01:69:02:03). Compact hex like "%s" is not allowed.'
+                ) % raw)
+
     @api.constrains('scan_type', 'nfc_tag_id', 'qr_code')
     def _check_scan_configuration(self):
         """Validate scan type configuration."""
@@ -414,11 +445,19 @@ class Checkpoint(models.Model):
                         'Both NFC tag ID and QR code are required!'
                     ))
 
+    def write(self, vals):
+        if vals.get('nfc_tag_id'):
+            vals = dict(vals)
+            vals['nfc_tag_id'] = self._prepare_nfc_tag_id(vals['nfc_tag_id'])
+        return super().write(vals)
+
     @api.model_create_multi
     def create(self, vals_list):
         """Generate checkpoint code and QR code if not provided."""
         import uuid
         for vals in vals_list:
+            if vals.get('nfc_tag_id'):
+                vals['nfc_tag_id'] = self._prepare_nfc_tag_id(vals['nfc_tag_id'])
             # Auto-generate checkpoint code if not provided
             if not vals.get('code'):
                 vals['code'] = self.env['ir.sequence'].next_by_code('checkpoint.code') or '/'
@@ -466,44 +505,78 @@ class Checkpoint(models.Model):
             'context': {'default_checkpoint_id': self.id}
         }
 
+    def _nfc_uid_compact(self, tag_id):
+        """
+        Hex-only UID for comparison (Android sends 0480AB…, NFC Tools shows 04:80:AB…).
+        Returns empty string for non-hex labels such as CCTV-ROOM.
+        """
+        if not tag_id:
+            return ''
+        raw = str(tag_id).strip()
+        hex_only = re.sub(r'[^0-9a-fA-F]', '', raw)
+        alnum = re.sub(r'[^0-9a-zA-Z]', '', raw)
+        if len(hex_only) >= 4 and len(hex_only) == len(alnum):
+            return hex_only.lower()
+        return ''
+
     def _normalize_nfc_tag(self, tag_id):
         """
         Normalize NFC tag ID for comparison.
-        Handles different formats: serial numbers, text records, case differences, separators.
-        
-        Returns:
-            str: Normalized tag ID
+        Hex UIDs become colon-separated pairs; text labels keep readable form.
         """
         try:
             if not tag_id:
                 return ''
-            
-            # Convert to string and strip whitespace
+            compact = self._nfc_uid_compact(tag_id)
+            if compact:
+                return ':'.join(compact[i:i + 2] for i in range(0, len(compact), 2))
             normalized = str(tag_id).strip().lower()
-            
             if not normalized:
                 return ''
-            
-            # Normalize all common separators to colons
             for char in ['-', ' ', '_', '.', ',']:
                 normalized = normalized.replace(char, ':')
-            
-            # Remove any duplicate separators
             while '::' in normalized:
                 normalized = normalized.replace('::', ':')
-            
-            # Strip leading/trailing separators
-            normalized = normalized.strip(':')
-            
-            # SECRECY: Some readers might provide UIDs without separators (e.g., '044715...')
-            # while others provide separators. If it looks like a hex UID (long enough),
-            # we might want to also allow comparison without separators.
-            # But for now, we'll keep the colon-separated format as standard.
-            
-            return normalized
+            return normalized.strip(':')
         except Exception as e:
             _logger.error('[Checkpoint Normalize] Error normalizing tag_id %s: %s', tag_id, str(e))
             return str(tag_id).lower() if tag_id else ''
+
+    def _nfc_format_for_display(self, tag_id):
+        """User-facing NFC value: colon-separated UID or readable text label."""
+        if not tag_id:
+            return ''
+        prepared = self._prepare_nfc_tag_id(tag_id)
+        compact = self._nfc_uid_compact(prepared)
+        if compact:
+            return ':'.join(compact[i:i + 2] for i in range(0, len(compact), 2))
+        return str(tag_id).strip()
+
+    def _nfc_clean_scanned_label(self, scanned_data):
+        """Normalize scanned payload; strip accidental NDEF language prefixes."""
+        if not scanned_data:
+            return ''
+        scanned = str(scanned_data).strip()
+        if self._nfc_uid_compact(scanned):
+            return self._prepare_nfc_tag_id(scanned)
+        match = re.match(r'^[a-z]{2,3}(.+)$', scanned, re.IGNORECASE)
+        if match and match.group(1) and not self._nfc_uid_compact(match.group(1)):
+            return match.group(1).strip()
+        return scanned
+
+    def _nfc_tags_match(self, stored_tag_id, scanned_data):
+        """True when stored and scanned values are the same NFC UID or label."""
+        if not stored_tag_id or not scanned_data:
+            return False
+        stored = self._prepare_nfc_tag_id(stored_tag_id)
+        scanned = self._nfc_clean_scanned_label(scanned_data)
+        if stored.lower() == scanned.lower():
+            return True
+        if self._normalize_nfc_tag(stored) == self._normalize_nfc_tag(scanned):
+            return True
+        stored_compact = self._nfc_uid_compact(stored)
+        scanned_compact = self._nfc_uid_compact(scanned)
+        return bool(stored_compact and scanned_compact and stored_compact == scanned_compact)
     
     def verify_scan(self, scan_data, guard_id, latitude=None, longitude=None, tour_log_id=None):
         """
@@ -584,12 +657,14 @@ class Checkpoint(models.Model):
                         _logger.info('[Checkpoint Verify] NFC comparison - Stored: "%s" (normalized: "%s"), Scanned: "%s" (normalized: "%s")',
                                    self.nfc_tag_id, normalized_stored, scan_data, normalized_scanned)
 
-                        # Try exact match first, then normalized match
-                        if scan_data == self.nfc_tag_id or normalized_scanned == normalized_stored:
+                        if self._nfc_tags_match(self.nfc_tag_id, scan_data):
                             valid = True
                             _logger.info('[Checkpoint Verify] NFC scan SUCCESS for checkpoint %s', self.name)
                         else:
-                            validation_msg = _('NFC tag does not match. Expected: %s, Got: %s') % (self.nfc_tag_id, scan_data)
+                            validation_msg = _('NFC tag does not match. Expected: %s, Got: %s') % (
+                                self._nfc_format_for_display(self.nfc_tag_id),
+                                self._nfc_format_for_display(scan_data),
+                            )
                             _logger.warning('[Checkpoint Verify] NFC scan FAILED: %s', validation_msg)
                             _logger.warning('[Checkpoint Verify] NFC mismatch details - Expected normalized: "%s", Got normalized: "%s"',
                                           normalized_stored, normalized_scanned)
@@ -623,9 +698,7 @@ class Checkpoint(models.Model):
                     # Check NFC tag match (normalized comparison)
                     nfc_match = False
                     if has_nfc:
-                        normalized_stored = self._normalize_nfc_tag(self.nfc_tag_id)
-                        normalized_scanned = self._normalize_nfc_tag(scan_data)
-                        nfc_match = scan_data == self.nfc_tag_id or normalized_scanned == normalized_stored
+                        nfc_match = self._nfc_tags_match(self.nfc_tag_id, scan_data)
                     
                     if qr_match or nfc_match:
                         valid = True
@@ -633,7 +706,10 @@ class Checkpoint(models.Model):
                                    self.name, qr_match, nfc_match)
                     else:
                         validation_msg = _('Scan data does not match NFC (%s) or QR (%s). Got: %s') % (
-                            self.nfc_tag_id or 'not set', self.qr_code or 'not set', scan_data)
+                            self._nfc_format_for_display(self.nfc_tag_id) if self.nfc_tag_id else 'not set',
+                            self.qr_code or 'not set',
+                            self._nfc_format_for_display(scan_data),
+                        )
                         _logger.warning('[Checkpoint Verify] NFC/QR scan FAILED: %s', validation_msg)
                 except Exception as e:
                     _logger.error('[Checkpoint Verify] Error processing both-type scan: %s', str(e), exc_info=True)

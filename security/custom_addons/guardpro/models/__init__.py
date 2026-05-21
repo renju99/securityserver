@@ -7,6 +7,7 @@ from . import ir_rule
 from . import photo_attachment_mixin  # Mixin for photo attachments
 from . import mail_activity  # Suppress noisy activity assignment emails
 from . import mail_mail  # mail.mail retention (optional cron)
+from . import mail_template_guardpro  # Odoo 18 mail template syntax migration
 from . import res_partner
 from . import res_users
 from . import gps_diagnostic
@@ -24,6 +25,7 @@ from . import location_hierarchy
 from . import tenant_resident
 from . import resident_complaint
 from . import security_tour
+from . import security_tour_checkpoint_line
 from . import checkpoint
 from . import guard_shift
 from . import shift_swap_request
@@ -72,6 +74,7 @@ from . import cctv_camera  # CCTV Camera management
 from . import tour_log
 from . import tour_patrol_reminder
 from . import checkpoint_scan
+from . import facility_patrol_issue
 from . import webhook
 from . import client_feedback
 from . import training_course

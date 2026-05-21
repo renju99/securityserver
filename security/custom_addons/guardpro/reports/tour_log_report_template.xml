@@ -167,6 +167,52 @@
                                 </table>
                         </t>
 
+                        <!-- Observations -->
+                        <t t-if="doc.facility_incident_count">
+                                <h4><strong>Facility issues</strong></h4>
+                                <table class="tour-table tour-table-data">
+                                    <thead>
+                                        <tr>
+                                            <th>Reference</th>
+                                            <th>Checkpoint</th>
+                                            <th>Type</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="doc.scan_ids" t-as="fscan">
+                                            <tr t-if="fscan.facility_incident_id">
+                                                <td><span t-field="fscan.facility_incident_id.name"/></td>
+                                                <td><span t-field="fscan.checkpoint_id.name"/></td>
+                                                <td><span t-field="fscan.facility_issue_type"/></td>
+                                                <td><span t-field="fscan.facility_incident_id.status"/></td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                        </t>
+                        <t t-if="doc.checkpoint_findings or doc.observations or doc.issues_found">
+                                <h4><strong>Observations</strong></h4>
+                                <t t-if="doc.checkpoint_findings">
+                                    <p><strong>Checkpoint findings</strong></p>
+                                    <div class="tour-notes-box">
+                                        <pre style="white-space: pre-wrap; font-family: inherit; margin: 0;"><t t-esc="doc.checkpoint_findings"/></pre>
+                                    </div>
+                                </t>
+                                <t t-if="doc.observations">
+                                    <p><strong>Tour summary</strong></p>
+                                    <div class="tour-notes-box">
+                                        <span t-field="doc.observations"/>
+                                    </div>
+                                </t>
+                                <t t-if="doc.issues_found">
+                                    <p><strong>Issues / follow-up</strong></p>
+                                    <div class="tour-notes-box">
+                                        <span t-field="doc.issues_found"/>
+                                    </div>
+                                </t>
+                        </t>
+
                         <!-- GPS Tracking Data -->
                         <t t-if="doc.distance_traveled">
                                 <h4><strong>GPS Tracking</strong></h4>

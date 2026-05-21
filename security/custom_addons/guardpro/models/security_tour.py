@@ -70,18 +70,21 @@ class SecurityTour(models.Model):
         ('inactive', 'Inactive')
     ], string='Status', default='draft', required=True, tracking=True)
     
-    # Checkpoints
+    # Checkpoints (ordered via checkpoint_line_ids)
+    checkpoint_line_ids = fields.One2many(
+        'security.tour.checkpoint.line',
+        'tour_id',
+        string='Checkpoint Sequence',
+        copy=True,
+        help='Patrol order for checkpoints in this tour',
+    )
     checkpoint_ids = fields.Many2many(
         'checkpoint',
         'tour_checkpoint_rel',
         'tour_id',
         'checkpoint_id',
         string='Checkpoints',
-        help='Ordered list of checkpoints for this tour'
-    )
-    checkpoint_sequence = fields.Text(
-        string='Checkpoint Sequence',
-        help='JSON array defining the order of checkpoints'
+        help='Checkpoints linked to this tour (kept in sync with checkpoint sequence lines)',
     )
     total_checkpoints = fields.Integer(
         string='Total Checkpoints',
@@ -203,11 +206,162 @@ class SecurityTour(models.Model):
         if self.frequency != 'custom':
             self.frequency_custom = False
 
-    @api.depends('checkpoint_ids')
+    @api.depends('checkpoint_line_ids', 'checkpoint_ids')
     def _compute_total_checkpoints(self):
         """Count total checkpoints in tour."""
         for record in self:
-            record.total_checkpoints = len(record.checkpoint_ids)
+            if record.checkpoint_line_ids:
+                record.total_checkpoints = len(record.checkpoint_line_ids)
+            else:
+                record.total_checkpoints = len(record.checkpoint_ids)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        tours = super().create(vals_list)
+        for tour, vals in zip(tours, vals_list):
+            checkpoint_order = tour._extract_checkpoint_order_from_commands(
+                vals.get('checkpoint_ids')
+            )
+            if checkpoint_order:
+                tour._rebuild_checkpoint_lines(checkpoint_order)
+            elif vals.get('checkpoint_line_ids'):
+                tour._sync_checkpoint_ids_from_lines()
+            elif tour.checkpoint_ids:
+                tour._ensure_checkpoint_lines()
+        return tours
+
+    def write(self, vals):
+        if self.env.context.get('skip_checkpoint_sync'):
+            return super().write(vals)
+        checkpoint_order = None
+        if 'checkpoint_ids' in vals and 'checkpoint_line_ids' not in vals:
+            checkpoint_order = self._extract_checkpoint_order_from_commands(
+                vals['checkpoint_ids']
+            )
+        res = super().write(vals)
+        if checkpoint_order is not None:
+            self._rebuild_checkpoint_lines(checkpoint_order)
+        elif 'checkpoint_line_ids' in vals:
+            self._sync_checkpoint_ids_from_lines()
+        return res
+
+    @api.model
+    def _extract_checkpoint_order_from_commands(self, commands):
+        """Return checkpoint id list from a replace-all M2M command, if present."""
+        if not commands:
+            return None
+        for command in commands:
+            if command[0] == 6:
+                return list(command[2])
+        return None
+
+    def _ensure_checkpoint_lines(self):
+        """Create sequence lines from existing M2M links (upgrade / legacy data)."""
+        for tour in self:
+            if tour.checkpoint_line_ids or not tour.checkpoint_ids:
+                continue
+            tour._rebuild_checkpoint_lines(tour._get_m2m_checkpoint_order())
+
+    def _get_m2m_checkpoint_order(self):
+        """Build checkpoint order from legacy M2M links (stable by checkpoint id)."""
+        self.ensure_one()
+        self.env.cr.execute(
+            """
+            SELECT checkpoint_id
+            FROM tour_checkpoint_rel
+            WHERE tour_id = %s
+            ORDER BY checkpoint_id
+            """,
+            (self.id,),
+        )
+        ordered_ids = [row[0] for row in self.env.cr.fetchall()]
+        if ordered_ids:
+            return ordered_ids
+        return self.checkpoint_ids.ids
+
+    def _rebuild_checkpoint_lines(self, checkpoint_ids):
+        """Replace sequence lines using the given checkpoint id order."""
+        Line = self.env['security.tour.checkpoint.line']
+        for tour in self:
+            tour.checkpoint_line_ids.unlink()
+            if not checkpoint_ids:
+                tour.checkpoint_ids = [(5, 0, 0)]
+                continue
+            sequence = 10
+            line_vals = []
+            for checkpoint_id in checkpoint_ids:
+                line_vals.append({
+                    'tour_id': tour.id,
+                    'checkpoint_id': checkpoint_id,
+                    'sequence': sequence,
+                })
+                sequence += 10
+            Line.create(line_vals)
+            tour.with_context(skip_checkpoint_sync=True).write({
+                'checkpoint_ids': [(6, 0, list(checkpoint_ids))],
+            })
+
+    def _sync_checkpoint_ids_from_lines(self):
+        """Keep legacy M2M field aligned with ordered sequence lines."""
+        for tour in self:
+            ordered_ids = tour.checkpoint_line_ids.sorted('sequence').mapped(
+                'checkpoint_id'
+            ).ids
+            if ordered_ids != tour.checkpoint_ids.ids:
+                tour.with_context(skip_checkpoint_sync=True).write({
+                    'checkpoint_ids': [(6, 0, ordered_ids)],
+                })
+
+    def get_ordered_checkpoints(self):
+        """Return checkpoints in patrol sequence for mobile and reports."""
+        self.ensure_one()
+        if not self.checkpoint_line_ids:
+            self._ensure_checkpoint_lines()
+        if self.checkpoint_line_ids:
+            return self.checkpoint_line_ids.sorted('sequence').mapped('checkpoint_id')
+        return self.checkpoint_ids.sorted(key=lambda cp: (cp.name or '').lower())
+
+    def get_ordered_checkpoint_lines(self):
+        """Return sequence lines sorted for display."""
+        self.ensure_one()
+        if not self.checkpoint_line_ids:
+            self._ensure_checkpoint_lines()
+        return self.checkpoint_line_ids.sorted('sequence')
+
+    def get_checkpoint_api_payloads(self, scanned_checkpoint_ids=None):
+        """Build ordered checkpoint dicts for mobile/API consumers."""
+        self.ensure_one()
+        scanned = set(scanned_checkpoint_ids or [])
+        payloads = []
+        for seq, checkpoint in enumerate(self.get_ordered_checkpoints(), start=1):
+            payloads.append({
+                'id': checkpoint.id,
+                'name': checkpoint.name,
+                'code': checkpoint.code,
+                'scan_type': checkpoint.scan_type,
+                'latitude': checkpoint.latitude,
+                'longitude': checkpoint.longitude,
+                'qr_code': checkpoint.qr_code or '',
+                'nfc_tag_id': checkpoint.nfc_tag_id or '',
+                'notes': checkpoint.notes or '',
+                'sequence': seq * 10,
+                'sequence_number': seq,
+                'is_scanned': checkpoint.id in scanned,
+                'status': 'completed' if checkpoint.id in scanned else 'pending',
+            })
+        return payloads
+
+    @api.model
+    def migrate_all_tour_checkpoint_sequences(self):
+        """Post-install hook: build sequence lines for existing tours."""
+        tours = self.search([('checkpoint_ids', '!=', False)])
+        for tour in tours:
+            if not tour.checkpoint_line_ids:
+                tour._ensure_checkpoint_lines()
+        _logger.info(
+            'Migrated checkpoint sequence lines for %d security tour(s)',
+            len(tours),
+        )
 
     @api.depends('tour_log_ids', 'tour_log_ids.status', 'tour_log_ids.duration')
     def _compute_statistics(self):
@@ -322,34 +476,37 @@ class SecurityTour(models.Model):
             _logger.info('Auto-activating draft tour %s upon start', self.id)
             self.action_activate()
         
-        # Auto-complete ANY existing in-progress tours for this guard (any tour)
-        # This handles browser refresh, crashes, and multiple tour scenarios
         existing_tours = self.env['tour.log'].search([
             ('guard_id', '=', guard_id),
-            ('status', '=', 'in_progress')
-        ])
-        
+            ('status', '=', 'in_progress'),
+        ], order='start_time desc')
+
         if existing_tours:
-            _logger.info(
-                'Auto-completing %d existing in-progress tour(s) for guard %s before starting new tour',
-                len(existing_tours), guard_id
-            )
-            for old_tour in existing_tours:
-                try:
-                    old_tour.action_complete(
-                        partial=True,
-                        reason='Auto-completed: New tour started'
-                    )
-                    _logger.info('Successfully auto-completed tour %s', old_tour.id)
-                except Exception as e:
-                    _logger.warning('Failed to auto-complete old tour %s: %s', old_tour.id, str(e))
-                    # Force close it anyway
-                    old_tour.write({
-                        'status': 'completed',
-                        'end_time': fields.Datetime.now()
-                    })
-                    _logger.info('Force-closed tour %s', old_tour.id)
-        
+            same_tour_log = existing_tours.filtered(
+                lambda log: log.tour_id.id == self.id
+            )[:1]
+            if same_tour_log:
+                _logger.info(
+                    'Resuming in-progress tour log %s for guard %s (tour %s)',
+                    same_tour_log.id, guard_id, self.name,
+                )
+                return self._tour_start_response(same_tour_log, resumed=True)
+
+            blocking = existing_tours[0]
+            return {
+                'blocked': True,
+                'message': _(
+                    'You have an unfinished patrol (%(tour)s). '
+                    'Continue it on the Tours screen or use Partial Completion '
+                    'to end it before starting another tour.',
+                    tour=blocking.tour_id.name,
+                ),
+                'blocking_tours': [
+                    self._tour_blocking_payload(log)
+                    for log in existing_tours
+                ],
+            }
+
         tour_log = self.env['tour.log'].create({
             'tour_id': self.id,
             'guard_id': guard_id,
@@ -360,12 +517,64 @@ class SecurityTour(models.Model):
             'gps_tolerance': self.gps_tolerance if self.use_tour_tolerance else False
         })
         
+        checkpoints = []
+        for seq, checkpoint in enumerate(self.get_ordered_checkpoints(), start=1):
+            checkpoints.append({
+                'id': checkpoint.id,
+                'name': checkpoint.name,
+                'code': checkpoint.code,
+                'latitude': checkpoint.latitude,
+                'longitude': checkpoint.longitude,
+                'scan_type': checkpoint.scan_type,
+                'nfc_tag_id': checkpoint.nfc_tag_id,
+                'qr_code': checkpoint.qr_code,
+                'sequence': seq * 10,
+                'sequence_number': seq,
+            })
+        return self._tour_start_response(tour_log, resumed=False, checkpoints=checkpoints)
+
+    def _tour_blocking_payload(self, tour_log):
+        """Serialize an in-progress tour log for mobile conflict UI."""
         return {
             'tour_log_id': tour_log.id,
-            'checkpoints': self.checkpoint_ids.read([
-                'id', 'name', 'code', 'latitude', 'longitude',
-                'scan_type', 'nfc_tag_id', 'qr_code'
-            ])
+            'tour_id': tour_log.tour_id.id,
+            'tour_name': tour_log.tour_id.name,
+            'start_time': fields.Datetime.to_string(tour_log.start_time),
+            'scanned_checkpoints': tour_log.scanned_checkpoints,
+            'expected_checkpoints': tour_log.expected_checkpoints,
+            'completion_percentage': (
+                tour_log.completion_percentage / 100.0
+                if tour_log.completion_percentage else 0.0
+            ),
+        }
+
+    def _tour_start_response(self, tour_log, resumed=False, checkpoints=None):
+        """Build start/resume API payload with checkpoint list."""
+        if checkpoints is None:
+            scanned_ids = tour_log.scan_ids.filtered(
+                lambda s: s.status == 'verified'
+            ).mapped('checkpoint_id').ids
+            checkpoints = []
+            for seq, checkpoint in enumerate(
+                tour_log.tour_id.get_ordered_checkpoints(), start=1
+            ):
+                checkpoints.append({
+                    'id': checkpoint.id,
+                    'name': checkpoint.name,
+                    'code': checkpoint.code,
+                    'latitude': checkpoint.latitude,
+                    'longitude': checkpoint.longitude,
+                    'scan_type': checkpoint.scan_type,
+                    'nfc_tag_id': checkpoint.nfc_tag_id,
+                    'qr_code': checkpoint.qr_code,
+                    'sequence': seq * 10,
+                    'sequence_number': seq,
+                    'scanned': checkpoint.id in scanned_ids,
+                })
+        return {
+            'tour_log_id': tour_log.id,
+            'resumed': resumed,
+            'checkpoints': checkpoints,
         }
 
     def action_manual_generate_tour(self):

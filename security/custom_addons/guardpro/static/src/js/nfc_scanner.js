@@ -3,11 +3,47 @@
  * Uses Web NFC API for checkpoint scanning
  */
 
+function guardproIsBareNfcHexUid(value) {
+    if (!value) {
+        return false;
+    }
+    const raw = String(value).trim();
+    const hexOnly = raw.replace(/[^0-9a-fA-F]/g, '');
+    const alnum = raw.replace(/[^0-9a-zA-Z]/g, '');
+    return hexOnly.length >= 4 && hexOnly.length === alnum.length;
+}
+
+function guardproFormatNfcUid(value) {
+    if (!value) {
+        return value;
+    }
+    const raw = String(value).trim();
+    if (!guardproIsBareNfcHexUid(raw)) {
+        return raw;
+    }
+    const hex = raw.replace(/[^0-9a-fA-F]/g, '').toLowerCase();
+    const pairs = hex.match(/.{1,2}/g) || [];
+    return pairs.join(':');
+}
+
+function guardproResolveNfcScanPayload(ndefText, serialNumber) {
+    const serial = (serialNumber && String(serialNumber).trim()) || '';
+    if (serial) {
+        return guardproFormatNfcUid(serial);
+    }
+    const text = (ndefText && String(ndefText).trim()) || '';
+    return text ? guardproFormatNfcUid(text) : '';
+}
+
 class NFCScanner {
     constructor() {
         this.supported = 'NDEFReader' in window;
         this.reader = null;
         this.scanning = false;
+    }
+
+    _resolveNfcScanPayload(ndefText, serialNumber) {
+        return guardproResolveNfcScanPayload(ndefText, serialNumber);
     }
 
     /**
@@ -90,47 +126,26 @@ class NFCScanner {
                 try {
                     console.log('[NFC Scanner] Processing record - Type:', record.recordType, 'Media:', record.mediaType);
 
-                    const decoder = new TextDecoder(record.encoding || 'utf-8');
-                    const text = decoder.decode(record.data);
+                    const text = (typeof guardproDecodeNdefTextRecord === 'function')
+                        ? guardproDecodeNdefTextRecord(record)
+                        : '';
 
                     tagData.records.push({
                         recordType: record.recordType,
                         mediaType: record.mediaType,
                         data: text
                     });
-
-                    // Extract checkpoint ID from text/plain records first
-                    if (!checkpointId) {
-                        if (record.recordType === 'text' || record.mediaType === 'text/plain') {
-                            if (text && text.trim()) {
-                                checkpointId = text.trim();
-                                console.log('[NFC Scanner] Found text/plain record:', checkpointId);
-                            }
-                        }
-                        // Also check URL records
-                        else if (record.recordType === 'url' || record.mediaType === 'text/uri-list') {
-                            if (text && text.trim()) {
-                                checkpointId = text.trim();
-                                console.log('[NFC Scanner] Found URL record:', checkpointId);
-                            }
-                        }
-                        // Try any record with text data
-                        else if (text && text.trim()) {
-                            checkpointId = text.trim();
-                            console.log('[NFC Scanner] Found generic record:', checkpointId);
-                        }
-                    }
                 } catch (e) {
                     console.warn('[NFC Scanner] Error decoding record:', e);
                 }
             }
         }
 
-        // Fallback to serial number if no record data found
-        if (!checkpointId && event.serialNumber) {
-            checkpointId = event.serialNumber;
-            console.log('[NFC Scanner] Using serial number:', checkpointId);
+        if (event.message && typeof guardproExtractNdefText === 'function') {
+            checkpointId = guardproExtractNdefText(event.message);
         }
+        checkpointId = this._resolveNfcScanPayload(checkpointId, event.serialNumber);
+        console.log('[NFC Scanner] Resolved scan payload:', checkpointId);
 
         if (!checkpointId) {
             console.error('[NFC Scanner] Could not extract tag data');

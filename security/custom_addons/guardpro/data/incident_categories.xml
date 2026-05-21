@@ -117,6 +117,16 @@
             <field name="description">Storm, flooding, extreme heat, sandstorm, or other natural event impacting building or site safety.</field>
         </record>
 
+        <record id="incident_cat_facility_patrol" model="incident.category">
+            <field name="name">Facility / Maintenance (Patrol)</field>
+            <field name="code">FACILITY</field>
+            <field name="sequence">105</field>
+            <field name="color">3</field>
+            <field name="description">Maintenance or facilities issue reported by a guard during a patrol checkpoint scan. Assign to facilities management for follow-up.</field>
+            <field name="notification_emails">facilities@example.com</field>
+            <field name="high_priority_notification_enabled" eval="True"/>
+        </record>
+
         <record id="incident_cat_equipment" model="incident.category">
             <field name="name">Equipment Malfunction</field>
             <field name="code">EQUIP</field>

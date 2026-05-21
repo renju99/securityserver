@@ -47,7 +47,8 @@
                                 <field name="scan_type"/>
                             </group>
                             <group>
-                                <field name="nfc_tag_id" invisible="scan_type not in ['nfc', 'both']"/>
+                                <field name="nfc_tag_id" invisible="scan_type not in ['nfc', 'both']"
+                                       placeholder="04:80:ab:01:69:02:03"/>
                                 <field name="qr_code" invisible="scan_type not in ['qr', 'both']"/>
                                 <field name="qr_code_image" widget="image" invisible="scan_type not in ['qr', 'both']"/>
                                 <field name="gps_tolerance" invisible="scan_type != 'virtual'"/>

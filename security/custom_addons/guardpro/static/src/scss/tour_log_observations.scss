@@ -1,0 +1,170 @@
+/* Tour log — Observations tab (backend form) */
+.o_form_view .o_notebook .tab-pane.o_tour_observations_page {
+    width: 100%;
+
+    > .o_group,
+    > .o_field_widget,
+    > .o_tour_obs_empty,
+    > .o_horizontal_separator {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .o_tour_obs_overview {
+        margin-bottom: 0.75rem;
+
+        .o_row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+    }
+
+    .o_tour_obs_empty {
+        display: block;
+        text-align: center;
+        padding: 2rem 1.5rem;
+        margin-bottom: 1rem;
+        border: 1px dashed var(--border-color, #dee2e6);
+        border-radius: 0.5rem;
+        background: var(--o-gray-100, #f8f9fa);
+        color: var(--o-gray-600, #6c757d);
+
+        .fa {
+            font-size: 2rem;
+            opacity: 0.45;
+            margin-bottom: 0.75rem;
+        }
+    }
+
+    /* Kanban: use full notebook width */
+    .o_field_widget[name="scan_ids"] {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+
+        .o_x2m_control_panel,
+        .o_kanban_view,
+        .o_kanban_renderer {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .o_kanban_record {
+            width: 320px;
+            max-width: calc(100% - 0.5rem);
+        }
+    }
+
+    /* Tour summary: labels above full-width text areas */
+    .o_tour_summary_panel {
+        width: 100%;
+        margin-top: 0.5rem;
+        padding: 1rem 1.25rem;
+        background: var(--o-gray-100, #f8f9fa);
+        border: 1px solid var(--border-color, #dee2e6);
+        border-radius: 0.5rem;
+
+        > .o_inner_group {
+            width: 100%;
+        }
+
+        .o_wrap_field {
+            width: 100%;
+            max-width: 100%;
+            flex: 0 0 100%;
+        }
+
+        .o_cell {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .o_field_widget[name="observations"],
+        .o_field_widget[name="issues_found"] {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .o_field_widget[name="observations"] textarea,
+        .o_field_widget[name="issues_found"] textarea {
+            width: 100% !important;
+            max-width: 100%;
+            min-height: 5rem;
+            background: #fff;
+        }
+    }
+}
+
+.o_tour_observation_kanban .o_tour_observation_card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0.85rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color, #dee2e6);
+    background: var(--o-view-background-color, #fff);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+
+    &:hover {
+        border-color: var(--o-brand-primary, #714b67);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+}
+
+.o_tour_observation_card_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+}
+
+.o_tour_observation_card_title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1.3;
+    flex: 1;
+    min-width: 0;
+}
+
+.o_tour_observation_card_meta {
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.o_tour_observation_scan_type {
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.o_tour_observation_preview {
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--o-gray-800, #343a40);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.o_tour_observation_empty_hint {
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+.o_tour_observation_issue {
+    font-size: 0.8rem;
+    margin-bottom: 0.35rem !important;
+}
+
+.o_tour_observation_media {
+    margin-top: auto;
+}
+
+.o_tour_observation_card_footer {
+    margin-top: 0.65rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border-color, #eee);
+}

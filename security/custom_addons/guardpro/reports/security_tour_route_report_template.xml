@@ -71,13 +71,13 @@
                         </div>
 
                         <!-- Checkpoint Sequence -->
-                        <div class="row mt-4" t-if="o.checkpoint_ids">
+                        <div class="row mt-4" t-if="o.checkpoint_line_ids or o.checkpoint_ids">
                             <div class="col-12">
                                 <h5>Checkpoint Route Sequence</h5>
                                 <table class="table table-bordered">
                                     <thead>
                                         <tr class="table-active">
-                                            <th style="width: 60px;">Order</th>
+                                            <th style="width: 60px;">Serial #</th>
                                             <th>Checkpoint Name</th>
                                             <th>Location</th>
                                             <th>Type</th>
@@ -86,7 +86,8 @@
                                     </thead>
                                     <tbody>
                                         <t t-set="counter" t-value="1"/>
-                                        <t t-foreach="o.checkpoint_ids" t-as="cp">
+                                        <t t-foreach="o.get_ordered_checkpoint_lines()" t-as="cp_line">
+                                            <t t-set="cp" t-value="cp_line.checkpoint_id"/>
                                             <tr>
                                                 <td class="text-center">
                                                     <strong t-esc="counter"/>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Applied via post-migration when ir.model.data is noupdate (legacy ${} templates). -->
+    <data noupdate="1">
+        <function model="mail.template" name="_guardpro_migrate_odoo18_inline_templates"/>
+    </data>
+    <data noupdate="0">
+        <record id="incident_category_submit_email_template" model="mail.template">
+            <field name="subject">Incident Submitted: {{ object.name }} - {{ object.title }}</field>
+            <field name="email_from">{{ user.email_formatted }}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: #1f4e78; margin: 0 0 12px 0;">Incident Submitted</h2>
+                    <p style="margin: 0 0 16px 0;">
+                        A new incident has been submitted and requires review.
+                    </p>
+                    <table style="width: 100%; border-collapse: collapse; margin: 12px 0 18px 0;">
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 32%;">Incident Number</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.name }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Title</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.title }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Category</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.category_id.name ||| '' }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Severity</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.severity ||| '' }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Site</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.site_id.name ||| '' }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Reported By</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.guard_id.name ||| '' }}</td>
+                        </tr>
+                    </table>
+                    <p style="margin: 0;">
+                        Incident details are attached as PDF when enabled on the category configuration.
+                    </p>
+                </div>
+            </field>
+        </record>
+
+        <record id="incident_notification_email" model="mail.template">
+            <field name="subject">New Incident Report: {{ object.name }} - {{ object.title }}</field>
+            <field name="email_from">{{ user.email_formatted }}</field>
+            <field name="email_to">{{ object.site_id.site_email or object.site_id.client_id.email }}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: #d32f2f;">Incident Report Notification</h2>
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; width: 30%;">Incident Number:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">{{ object.name }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Title:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">{{ object.title }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Severity:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">{{ object.severity ||| '' }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Category:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">{{ object.category_id.name ||| '' }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Site:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">{{ object.site_id.name ||| '' }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Reporting Guard:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">{{ object.guard_id.name ||| '' }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Date/Time:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">{{ format_datetime(object.incident_datetime, dt_format='medium') }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Location:</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">{{ object.location ||| 'N/A' }}</td>
+                        </tr>
+                    </table>
+                    <h3>Description:</h3>
+                    <div style="padding: 15px; background: #f5f5f5; border-radius: 5px; margin: 20px 0;">
+                        {{ object.description }}
+                    </div>
+                    <div style="margin-top: 30px; padding: 15px; background: #e3f2fd; border-radius: 5px;">
+                        <p><strong>This is an automated notification from GuardLink.</strong></p>
+                        <p>Please review the incident in the system for full details and take appropriate action.</p>
+                    </div>
+                </div>
+            </field>
+        </record>
+    </data>
+</odoo>

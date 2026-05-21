@@ -200,11 +200,53 @@ class TourLog(models.Model):
     
     # Observations
     observations = fields.Text(
-        string='Tour Observations'
+        string='Tour Summary Notes',
+        tracking=True,
+        help='Overall patrol summary. Checkpoint-level notes are aggregated in '
+             'Checkpoint Findings and can be edited per scan below.',
     )
     issues_found = fields.Text(
-        string='Issues Found'
+        string='Tour Issues / Follow-up',
+        tracking=True,
+        help='Overall issues or supervisor follow-up for this tour.',
     )
+    checkpoint_findings = fields.Text(
+        string='Checkpoint Findings',
+        compute='_compute_checkpoint_findings',
+        store=True,
+        readonly=True,
+        help='Aggregated notes, issues, and media flags from checkpoint scans.',
+    )
+    has_checkpoint_findings = fields.Boolean(
+        compute='_compute_checkpoint_findings',
+        store=True,
+    )
+    checkpoint_issue_count = fields.Integer(
+        string='Checkpoint Issues',
+        compute='_compute_checkpoint_findings',
+        store=True,
+    )
+    facility_incident_count = fields.Integer(
+        string='Facility Work Orders',
+        compute='_compute_facility_incident_count',
+    )
+
+    def _compute_facility_incident_count(self):
+        for record in self:
+            incidents = record.scan_ids.mapped('facility_incident_id').filtered(lambda i: i)
+            record.facility_incident_count = len(incidents)
+
+    def action_view_facility_incidents(self):
+        self.ensure_one()
+        incident_ids = self.scan_ids.mapped('facility_incident_id').ids
+        return {
+            'name': _('Facility Issues'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'incident.report',
+            'view_mode': 'list,form',
+            'domain': [('id', 'in', incident_ids)],
+            'context': {'create': False},
+        }
     
     # Photos
     photo_ids = fields.Many2many(
@@ -374,6 +416,85 @@ class TourLog(models.Model):
             }
         }
 
+    @api.depends(
+        'scan_ids.observations',
+        'scan_ids.notes',
+        'scan_ids.issues_found',
+        'scan_ids.issue_description',
+        'scan_ids.facility_issue_type',
+        'scan_ids.scan_time',
+        'scan_ids.checkpoint_id',
+        'scan_ids.photo_ids',
+        'scan_ids.video_ids',
+    )
+    def _compute_checkpoint_findings(self):
+        """Roll up per-checkpoint scan notes for the Observations tab."""
+        for record in self:
+            blocks = []
+            issue_count = 0
+            for scan in record.scan_ids.sorted('scan_time'):
+                body_parts = []
+                obs = (scan.observations or '').strip()
+                notes = (scan.notes or '').strip()
+                if obs:
+                    body_parts.append(obs)
+                if notes and notes != obs:
+                    body_parts.append(_('Notes: %s') % notes)
+                if scan.issues_found:
+                    issue_count += 1
+                    type_label = dict(
+                        scan._fields['facility_issue_type'].selection
+                    ).get(scan.facility_issue_type, '')
+                    desc = (scan.issue_description or '').strip()
+                    if type_label:
+                        body_parts.append(
+                            _('Facility issue (%s): %s') % (
+                                type_label,
+                                desc or _('flagged'),
+                            )
+                        )
+                    else:
+                        body_parts.append(
+                            _('Issue: %s') % (desc or _('flagged at checkpoint'))
+                        )
+                media_bits = []
+                if scan.photo_ids:
+                    media_bits.append(
+                        _('%d photo(s)') % len(scan.photo_ids)
+                    )
+                if scan.video_ids:
+                    media_bits.append(
+                        _('%d video(s)') % len(scan.video_ids)
+                    )
+                if media_bits:
+                    body_parts.append(_('Media: %s') % ', '.join(media_bits))
+                if not body_parts:
+                    continue
+                cp = scan.checkpoint_id.display_name or _('Checkpoint')
+                if scan.scan_time:
+                    local_dt = fields.Datetime.context_timestamp(record, scan.scan_time)
+                    time_str = local_dt.strftime('%Y-%m-%d %H:%M')
+                    header = '[%s] %s' % (cp, time_str)
+                else:
+                    header = '[%s]' % cp
+                blocks.append('%s\n%s' % (header, '\n'.join(body_parts)))
+            record.checkpoint_findings = '\n\n'.join(blocks) if blocks else False
+            record.has_checkpoint_findings = bool(blocks)
+            record.checkpoint_issue_count = issue_count
+
+    @staticmethod
+    def _append_text_field(existing, new_text):
+        """Append non-empty text without duplicating the same trailing block."""
+        new_text = (new_text or '').strip()
+        if not new_text:
+            return existing
+        existing = (existing or '').strip()
+        if not existing:
+            return new_text
+        if new_text in existing:
+            return existing
+        return '%s\n\n%s' % (existing, new_text)
+
     @api.depends('incident_ids')
     def _compute_incident_count(self):
         """Count incidents during tour."""
@@ -401,12 +522,16 @@ class TourLog(models.Model):
                 record.status in ['completed', 'incomplete', 'cancelled']
             )
 
-    def action_complete(self, partial=False, reason=None):
+    def action_complete(
+        self, partial=False, reason=None, observations=None, issues_found=None
+    ):
         """Complete the tour.
         
         Args:
             partial (bool): If True, marks as partial completion
             reason (str): Reason for partial completion
+            observations (str): Optional tour-level summary notes (mobile/backend)
+            issues_found (str): Optional tour-level issues / follow-up text
         """
         self.ensure_one()
         
@@ -444,6 +569,15 @@ class TourLog(models.Model):
         if partial:
             values['is_partial_completion'] = True
             values['partial_completion_reason'] = reason or 'No reason provided'
+
+        if observations:
+            values['observations'] = self._append_text_field(
+                self.observations, observations
+            )
+        if issues_found:
+            values['issues_found'] = self._append_text_field(
+                self.issues_found, issues_found
+            )
         
         self.write(values)
 

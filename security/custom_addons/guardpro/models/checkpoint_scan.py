@@ -3,11 +3,13 @@
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
+from psycopg2 import IntegrityError
 import logging
 import base64
 from datetime import timedelta
 
 from ..common.video_optimizer import VideoOptimizer
+from ..common.image_optimizer import ImageOptimizer
 
 _logger = logging.getLogger(__name__)
 
@@ -175,6 +177,68 @@ class CheckpointScan(models.Model):
     issue_description = fields.Text(
         string='Issue Description'
     )
+    has_findings = fields.Boolean(
+        string='Has Findings',
+        compute='_compute_findings_display',
+        help='True when this scan has notes, issues, or media.',
+    )
+    findings_preview = fields.Char(
+        string='Findings Preview',
+        compute='_compute_findings_display',
+    )
+    media_summary = fields.Char(
+        string='Media Summary',
+        compute='_compute_findings_display',
+    )
+    photo_count = fields.Integer(
+        string='Photo Count',
+        compute='_compute_findings_display',
+    )
+    video_count = fields.Integer(
+        string='Video Count',
+        compute='_compute_findings_display',
+    )
+
+    @api.depends(
+        'observations',
+        'notes',
+        'issues_found',
+        'issue_description',
+        'photo_ids',
+        'video_ids',
+        'photo',
+    )
+    def _compute_findings_display(self):
+        """Lightweight display helpers for tour log Observations kanban."""
+        for scan in self:
+            photo_count = len(scan.photo_ids)
+            if scan.photo:
+                photo_count = max(photo_count, 1)
+            video_count = len(scan.video_ids)
+            scan.photo_count = photo_count
+            scan.video_count = video_count
+            scan.has_findings = bool(
+                (scan.observations or '').strip()
+                or ((scan.notes or '').strip()
+                    and (scan.notes or '').strip() != (scan.observations or '').strip())
+                or scan.issues_found
+                or photo_count
+                or video_count
+            )
+            preview = (scan.observations or '').strip()
+            if not preview:
+                preview = (scan.notes or '').strip()
+            if preview and len(preview) > 160:
+                preview = preview[:157] + '...'
+            if scan.issues_found and not preview:
+                preview = (scan.issue_description or '').strip() or _('Issue flagged')
+            scan.findings_preview = preview or False
+            bits = []
+            if photo_count:
+                bits.append(_('%d photo(s)') % photo_count)
+            if video_count:
+                bits.append(_('%d video(s)') % video_count)
+            scan.media_summary = ', '.join(bits) if bits else False
     
     # Device Information
     device_id = fields.Char(
@@ -660,6 +724,28 @@ class CheckpointScan(models.Model):
         return ids
 
     @api.model
+    def _normalize_upload_b64(self, payload_data):
+        """Strip data-URL prefix and whitespace from mobile base64 payloads."""
+        if not payload_data:
+            return None
+        if isinstance(payload_data, bytes):
+            try:
+                payload_data = payload_data.decode('ascii')
+            except Exception:
+                payload_data = base64.b64encode(payload_data).decode('ascii')
+        datas = str(payload_data).strip()
+        if ',' in datas and datas.startswith('data:'):
+            datas = datas.split(',', 1)[1]
+        datas = ''.join(datas.split())
+        if not datas:
+            return None
+        try:
+            base64.b64decode(datas, validate=True)
+        except Exception as exc:
+            raise ValidationError(_('Invalid photo data: %s') % exc) from exc
+        return datas
+
+    @api.model
     def _photo_attachment_ids_from_payloads(self, photo_payloads):
         """Create image (non-video) attachments from mobile/JSON payloads; return new attachment ids."""
         if not photo_payloads:
@@ -672,48 +758,61 @@ class CheckpointScan(models.Model):
             if self._is_video_payload_dict(payload):
                 continue
             payload_name = payload.get('name') or 'checkpoint_photo.jpg'
-            payload_data = payload.get('data')
-            if not payload_data:
-                continue
             mimetype = (
                 payload.get('mimetype')
                 or payload.get('content_type')
                 or 'image/jpeg'
+            ).lower()
+            try:
+                datas = self._normalize_upload_b64(payload.get('data'))
+            except ValidationError:
+                raise
+            except Exception as exc:
+                _logger.warning('[Checkpoint Scan] Skip photo %s: %s', payload_name, exc)
+                continue
+            if not datas:
+                continue
+            heic_like = (
+                'heic' in mimetype
+                or 'heif' in mimetype
+                or payload_name.lower().endswith(('.heic', '.heif'))
             )
-            datas = payload_data
-            if isinstance(datas, bytes):
+            if not heic_like:
                 try:
-                    datas = datas.decode('ascii')
-                except Exception:
-                    datas = base64.b64encode(datas).decode()
-            att = Attachment.create({
-                'name': payload_name,
-                'datas': datas,
-                'res_model': 'checkpoint.scan',
-                'mimetype': mimetype,
-            })
-            ids.append(att.id)
+                    optimized = ImageOptimizer.optimize_image(datas)
+                    if optimized:
+                        if isinstance(optimized, bytes):
+                            optimized = optimized.decode('ascii')
+                        datas = optimized
+                        mimetype = 'image/jpeg'
+                        if not payload_name.lower().endswith(('.jpg', '.jpeg')):
+                            base = payload_name.rsplit('.', 1)[0] if '.' in payload_name else payload_name
+                            payload_name = f'{base}.jpg'
+                except Exception as exc:
+                    _logger.warning(
+                        '[Checkpoint Scan] Photo optimize skipped for %s: %s',
+                        payload_name, exc,
+                    )
+            try:
+                att = Attachment.create({
+                    'name': payload_name,
+                    'datas': datas,
+                    'res_model': 'checkpoint.scan',
+                    'mimetype': mimetype,
+                })
+                ids.append(att.id)
+                _logger.info(
+                    '[Checkpoint Scan] Saved photo attachment %s (%s, %s bytes b64)',
+                    att.id, payload_name, len(datas),
+                )
+            except Exception as exc:
+                _logger.exception(
+                    '[Checkpoint Scan] Failed to create attachment for %s', payload_name
+                )
+                raise ValidationError(
+                    _('Could not save photo "%s": %s') % (payload_name, exc)
+                ) from exc
         return ids
-
-    def append_post_scan_evidence(self, photos_payload=None, videos_payload=None, observations_text=None):
-        """Attach optional photos/videos and append observations after the scan is recorded."""
-        self.ensure_one()
-        photo_ids_new = self._photo_attachment_ids_from_payloads(photos_payload or [])
-        video_ids_new = self._video_attachment_ids_from_payloads(videos_payload or [])
-        obs = (observations_text or '').strip()
-        vals = {}
-        if photo_ids_new:
-            vals['photo_ids'] = [(4, i) for i in photo_ids_new]
-        if video_ids_new:
-            vals['video_ids'] = [(4, i) for i in video_ids_new]
-        if obs:
-            if self.observations:
-                vals['observations'] = (self.observations or '') + '\n' + obs
-            else:
-                vals['observations'] = obs
-        if vals:
-            self.write(vals)
-        return True
 
     @api.model
     def scan_checkpoint(self, checkpoint_id, guard_id, scan_data,
@@ -786,35 +885,47 @@ class CheckpointScan(models.Model):
             latitude = False
             longitude = False
 
-        # Check for recent successful scans (duplicates) to provide a seamless experience
-        # Default interval is 60s, but we'll use a slightly shorter window for immediate success
-        # to handle app retries or double taps without creating multiple records.
+        # Idempotent: already verified on this tour (double NFC tap / duplicate request)
+        if tour_log_id:
+            existing_tour_scan = self.search([
+                ('checkpoint_id', '=', checkpoint_id),
+                ('guard_id', '=', guard_id),
+                ('tour_log_id', '=', tour_log_id),
+                ('status', '=', 'verified'),
+            ], limit=1, order='scan_time desc')
+            if existing_tour_scan:
+                _logger.info(
+                    '[Checkpoint Scan API] Checkpoint %s already verified on tour log %s (scan %s)',
+                    checkpoint.name, tour_log_id, existing_tour_scan.id,
+                )
+                return self._scan_success_response(existing_tour_scan, checkpoint, already_scanned=True)
+
+        # Recent duplicate within min_scan_interval (retries / rapid double scan)
+        interval_seconds = max(1, checkpoint.min_scan_interval or 60)
         duplicate_domain = [
             ('checkpoint_id', '=', checkpoint_id),
             ('guard_id', '=', guard_id),
             ('status', '=', 'verified'),
-            ('scan_time', '>=', fields.Datetime.now() - timedelta(seconds=min(30, checkpoint.min_scan_interval)))
+            ('scan_time', '>=', fields.Datetime.now() - timedelta(seconds=interval_seconds)),
         ]
         if tour_log_id:
             duplicate_domain.append(('tour_log_id', '=', tour_log_id))
-            
-        recent_verified = self.search(duplicate_domain, limit=1)
+
+        recent_verified = self.search(duplicate_domain, limit=1, order='scan_time desc')
         if recent_verified:
-            _logger.info('[Checkpoint Scan API] Found recent verified scan (ID: %s) for checkpoint %s, returning success without creating duplicate',
-                        recent_verified.id, checkpoint.name)
-            return {
-                'success': True,
-                'scan_id': recent_verified.id,
-                'status': 'verified',
-                'message': _('Checkpoint already scanned successfully!'),
-                'checkpoint': checkpoint.name
-            }
+            _logger.info(
+                '[Checkpoint Scan API] Recent verified scan %s for checkpoint %s, skipping duplicate create',
+                recent_verified.id, checkpoint.name,
+            )
+            return self._scan_success_response(recent_verified, checkpoint, already_scanned=True)
+
+        scan_time = self._next_unique_scan_time(checkpoint_id, guard_id)
 
         # Create scan record
         scan_vals = {
             'checkpoint_id': checkpoint_id,
             'guard_id': guard_id,
-            'scan_time': fields.Datetime.now(),
+            'scan_time': scan_time,
             'scan_type': checkpoint.scan_type,
             'scan_data': scan_data,
             'latitude': latitude,
@@ -829,43 +940,127 @@ class CheckpointScan(models.Model):
             scan_vals['video_ids'] = [(6, 0, video_att_ids)]
 
         try:
-            scan = self.create(scan_vals)
-            
-            # Check if scan was verified or failed
-            if scan.status == 'failed':
-                _logger.warning('[Checkpoint Scan API] Scan created but FAILED verification: %s', 
-                              scan.failure_reason or 'Unknown reason')
-                return {
-                    'success': False,
-                    'error': 'verification_failed',
-                    'scan_id': scan.id,
-                    'status': scan.status,
-                    'message': scan.failure_reason or _('Scan verification failed. Please try again or contact your supervisor.'),
-                    'checkpoint': checkpoint.name
-                }
-            
-            _logger.info('[Checkpoint Scan API] Scan created successfully: ID=%s, Status=%s, Tour Log=%s',
-                        scan.id, scan.status, tour_log_id or 'None')
-            
+            with self.env.cr.savepoint():
+                scan = self.create(scan_vals)
+        except IntegrityError as exc:
+            dup_exc = exc
+        except Exception as exc:
+            if not self._is_duplicate_scan_db_error(exc):
+                raise
+            dup_exc = exc
+        else:
+            dup_exc = None
+
+        if dup_exc is not None:
+            existing = self._find_duplicate_scan_record(
+                checkpoint_id, guard_id, scan_time, tour_log_id,
+            )
+            if existing:
+                _logger.info(
+                    '[Checkpoint Scan API] Concurrent duplicate scan resolved using existing record %s',
+                    existing.id,
+                )
+                return self._scan_success_response(existing, checkpoint, already_scanned=True)
+            _logger.error(
+                '[Checkpoint Scan API] Duplicate scan DB error but no matching record found: %s',
+                dup_exc,
+            )
             return {
-                'success': True,
+                'success': False,
+                'error': 'duplicate_scan',
+                'message': _('This scan was already recorded. Please refresh the tour.'),
+            }
+
+        # Check if scan was verified or failed
+        if scan.status == 'failed':
+            _logger.warning(
+                '[Checkpoint Scan API] Scan created but FAILED verification: %s',
+                scan.failure_reason or 'Unknown reason',
+            )
+            return {
+                'success': False,
+                'error': 'verification_failed',
                 'scan_id': scan.id,
                 'status': scan.status,
-                'message': _('Checkpoint scanned successfully!'),
-                'checkpoint': checkpoint.name
+                'message': scan.failure_reason or _(
+                    'Scan verification failed. Please try again or contact your supervisor.'
+                ),
+                'checkpoint': checkpoint.name,
             }
-        except ValidationError as e:
-            _logger.error('[Checkpoint Scan API] Validation error: %s', str(e))
-            return {
-                'success': False,
-                'error': 'validation_error',
-                'message': str(e)
-            }
-        except Exception as e:
-            _logger.error('[Checkpoint Scan API] Unexpected error: %s', str(e), exc_info=True)
-            return {
-                'success': False,
-                'error': 'unexpected_error',
-                'message': _('An unexpected error occurred: %s') % str(e)
-            }
+
+        _logger.info(
+            '[Checkpoint Scan API] Scan created successfully: ID=%s, Status=%s, Tour Log=%s',
+            scan.id, scan.status, tour_log_id or 'None',
+        )
+        return self._scan_success_response(scan, checkpoint, already_scanned=False)
+
+    def _scan_success_response(self, scan, checkpoint, already_scanned=False):
+        """Standard success payload for mobile clients."""
+        if scan.tour_log_id and scan.status == 'verified':
+            try:
+                scan.tour_log_id._compute_checkpoint_progress()
+            except Exception as exc:
+                _logger.warning(
+                    '[Checkpoint Scan API] Could not refresh tour progress for log %s: %s',
+                    scan.tour_log_id.id, exc,
+                )
+        return {
+            'success': True,
+            'scan_id': scan.id,
+            'status': scan.status,
+            'message': _(
+                'Checkpoint already scanned successfully!'
+                if already_scanned else 'Checkpoint scanned successfully!'
+            ),
+            'checkpoint': checkpoint.name,
+            'already_scanned': already_scanned,
+        }
+
+    @api.model
+    def _next_unique_scan_time(self, checkpoint_id, guard_id):
+        """Avoid UNIQUE(checkpoint_id, guard_id, scan_time) collisions (same-second double tap)."""
+        scan_time = fields.Datetime.now()
+        while self.search_count([
+            ('checkpoint_id', '=', checkpoint_id),
+            ('guard_id', '=', guard_id),
+            ('scan_time', '=', scan_time),
+        ]):
+            scan_time += timedelta(seconds=1)
+        return scan_time
+
+    @api.model
+    def _is_duplicate_scan_db_error(self, exc):
+        """True when PostgreSQL rejected a duplicate (checkpoint, guard, scan_time)."""
+        if isinstance(exc, IntegrityError):
+            return True
+        message = str(exc).lower()
+        return (
+            'duplicate key' in message
+            or 'unique constraint' in message
+            or 'unique_scan_time_checkpoint_guard' in message
+        )
+
+    @api.model
+    def _find_duplicate_scan_record(self, checkpoint_id, guard_id, scan_time, tour_log_id=None):
+        """Locate an existing scan after a unique-constraint race."""
+        domain = [
+            ('checkpoint_id', '=', checkpoint_id),
+            ('guard_id', '=', guard_id),
+            ('scan_time', '=', scan_time),
+        ]
+        existing = self.search(domain, limit=1)
+        if existing:
+            return existing
+        if tour_log_id:
+            return self.search([
+                ('checkpoint_id', '=', checkpoint_id),
+                ('guard_id', '=', guard_id),
+                ('tour_log_id', '=', tour_log_id),
+                ('status', '=', 'verified'),
+            ], limit=1, order='scan_time desc')
+        return self.search([
+            ('checkpoint_id', '=', checkpoint_id),
+            ('guard_id', '=', guard_id),
+            ('status', '=', 'verified'),
+        ], limit=1, order='scan_time desc')
 

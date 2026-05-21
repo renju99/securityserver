@@ -104,13 +104,18 @@ class ImageOptimizer:
                 compression_ratio
             )
             
-            # Return base64 encoded
-            return base64.b64encode(optimized_bytes)
-            
+            # Return base64-encoded string (Odoo Binary fields expect str, not bytes)
+            encoded = base64.b64encode(optimized_bytes)
+            return encoded.decode('ascii') if isinstance(encoded, bytes) else encoded
+
         except Exception as e:
             _logger.error('Error optimizing image: %s', str(e))
-            # Return original if optimization fails
-            return image_data if isinstance(image_data, str) else base64.b64encode(image_data)
+            # Return original if optimization fails (always as str)
+            if isinstance(image_data, str):
+                return image_data
+            if isinstance(image_data, bytes):
+                return base64.b64encode(image_data).decode('ascii')
+            return image_data
     
     @classmethod
     def optimize_multiple(cls, image_data_list, max_dimension=None, target_format='JPEG'):

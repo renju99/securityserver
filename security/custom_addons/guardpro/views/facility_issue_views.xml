@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_facility_issue_search" model="ir.ui.view">
+            <field name="name">incident.report.facility.search</field>
+            <field name="model">incident.report</field>
+            <field name="priority">32</field>
+            <field name="arch" type="xml">
+                <search string="Facility Issues">
+                    <field name="name"/>
+                    <field name="title"/>
+                    <field name="site_id"/>
+                    <field name="checkpoint_id"/>
+                    <field name="guard_id"/>
+                    <field name="facility_issue_type"/>
+                    <field name="incident_datetime"/>
+                    <field name="resolved_datetime"/>
+                    <separator/>
+                    <filter string="Open" name="facility_open"
+                            domain="[('status', 'not in', ['resolved', 'closed'])]"/>
+                    <filter string="Reported today" name="facility_reported_today"
+                            domain="[
+                                ('incident_datetime', '&gt;=', (context_today()).strftime('%Y-%m-%d 00:00:00')),
+                                ('incident_datetime', '&lt;', (context_today() + relativedelta(days=1)).strftime('%Y-%m-%d 00:00:00')),
+                            ]"/>
+                    <filter string="Reported yesterday" name="facility_reported_yesterday"
+                            domain="[
+                                ('incident_datetime', '&gt;=', (context_today() + relativedelta(days=-1)).strftime('%Y-%m-%d 00:00:00')),
+                                ('incident_datetime', '&lt;', (context_today()).strftime('%Y-%m-%d 00:00:00')),
+                            ]"/>
+                    <filter string="Resolved today" name="facility_resolved_today"
+                            domain="[
+                                ('status', 'in', ['resolved', 'closed']),
+                                ('resolved_datetime', '&gt;=', (context_today()).strftime('%Y-%m-%d 00:00:00')),
+                                ('resolved_datetime', '&lt;', (context_today() + relativedelta(days=1)).strftime('%Y-%m-%d 00:00:00')),
+                            ]"/>
+                    <separator/>
+                    <filter string="High severity" name="facility_high"
+                            domain="[('severity', 'in', ['high', 'critical'])]"/>
+                    <filter name="filter_incident_date" string="Reported on" date="incident_datetime"/>
+                    <filter name="filter_resolved_date" string="Resolved on" date="resolved_datetime"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                        <filter string="Checkpoint" name="group_checkpoint" context="{'group_by': 'checkpoint_id'}"/>
+                        <filter string="Issue type" name="group_issue_type" context="{'group_by': 'facility_issue_type'}"/>
+                        <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
+                        <filter string="Guard" name="group_guard" context="{'group_by': 'guard_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="view_facility_issue_list" model="ir.ui.view">
+            <field name="name">incident.report.facility.list</field>
+            <field name="model">incident.report</field>
+            <field name="priority">32</field>
+            <field name="arch" type="xml">
+                <list string="Facility Issues" decoration-danger="severity in ('high', 'critical')"
+                      decoration-muted="status in ('resolved', 'closed')">
+                    <field name="name"/>
+                    <field name="incident_datetime"/>
+                    <field name="site_id"/>
+                    <field name="checkpoint_id"/>
+                    <field name="facility_issue_type"/>
+                    <field name="title"/>
+                    <field name="guard_id"/>
+                    <field name="severity" widget="badge"/>
+                    <field name="status" widget="badge"/>
+                    <field name="resolved_datetime" optional="show"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_facility_issue_kanban" model="ir.ui.view">
+            <field name="name">incident.report.facility.kanban</field>
+            <field name="model">incident.report</field>
+            <field name="priority">32</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="status" class="o_kanban_small_column">
+                    <field name="name"/>
+                    <field name="title"/>
+                    <field name="site_id"/>
+                    <field name="checkpoint_id"/>
+                    <field name="facility_issue_type"/>
+                    <field name="severity"/>
+                    <field name="status"/>
+                    <field name="incident_datetime"/>
+                    <templates>
+                        <t t-name="card">
+                            <div class="oe_kanban_global_click">
+                                <div class="o_kanban_record_top">
+                                    <strong><field name="name"/></strong>
+                                    <field name="severity" widget="label_selection"
+                                           options="{'classes': {'low': 'success', 'medium': 'warning', 'high': 'danger', 'critical': 'danger'}}"/>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <field name="title"/>
+                                    <div class="text-muted small">
+                                        <field name="site_id"/> · <field name="checkpoint_id"/>
+                                    </div>
+                                    <field name="facility_issue_type"/>
+                                </div>
+                                <div class="o_kanban_record_bottom text-muted small">
+                                    <field name="incident_datetime" widget="datetime"/>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="action_facility_issues" model="ir.actions.act_window">
+            <field name="name">Facility Issues</field>
+            <field name="res_model">incident.report</field>
+            <field name="view_mode">list,kanban,form</field>
+            <field name="domain">[('is_facility_patrol', '=', True)]</field>
+            <field name="context" eval="{
+                'default_source': 'patrol_checkpoint',
+                'search_default_facility_open': 1,
+                'search_default_facility_reported_today': 1,
+            }"/>
+            <field name="search_view_id" ref="view_facility_issue_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No facility issues reported from patrols yet.
+                </p>
+                <p>
+                    Guards report issues after checkpoint scans in the mobile app.
+                    Use <strong>Reported today</strong> or <strong>Reported on</strong> to filter by day.
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_facility_issues"
+                  name="Facility Issues"
+                  parent="menu_incidents_submenu"
+                  action="action_facility_issues"
+                  sequence="11"
+                  groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+    </data>
+</odoo>

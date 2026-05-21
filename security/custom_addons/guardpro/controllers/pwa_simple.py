@@ -52,6 +52,88 @@ class GuardLinkPWASimple(http.Controller):
         
         return guard
 
+    def _mobile_today_utc_range(self):
+        """Start/end of 'today' in the guard user's timezone, as naive UTC for DB queries."""
+        import pytz
+        user_tz = pytz.timezone(request.env.user.tz or 'UTC')
+        now_utc = pytz.UTC.localize(datetime.utcnow())
+        now_tz = now_utc.astimezone(user_tz)
+        today_start_tz = now_tz.replace(hour=0, minute=0, second=0, microsecond=0)
+        today_end_tz = today_start_tz + timedelta(days=1)
+        today_start = today_start_tz.astimezone(pytz.UTC).replace(tzinfo=None)
+        today_end = today_end_tz.astimezone(pytz.UTC).replace(tzinfo=None)
+        now_naive = now_utc.replace(tzinfo=None)
+        return today_start, today_end, now_naive
+
+    def _mobile_guard_shifts_for_tours(self, guard, active_attendance=None):
+        """Today's shifts for this guard (exclude cancelled only, include no_show)."""
+        today_start, today_end, now = self._mobile_today_utc_range()
+        Shift = request.env['guard.shift'].sudo()
+        shifts = Shift.search([
+            ('guard_id', '=', guard.id),
+            ('status', '!=', 'cancelled'),
+            ('start_datetime', '<', today_end),
+            ('end_datetime', '>', today_start),
+        ], order='start_datetime asc')
+        if active_attendance and active_attendance.shift_id:
+            shifts |= active_attendance.shift_id
+        if not shifts:
+            # Overnight edge case: duty window crosses midnight
+            shifts = Shift.search([
+                ('guard_id', '=', guard.id),
+                ('status', '!=', 'cancelled'),
+                ('start_datetime', '<=', now + timedelta(hours=2)),
+                ('end_datetime', '>=', now - timedelta(hours=1)),
+            ], limit=3, order='start_datetime desc')
+        return shifts
+
+    def _mobile_tour_is_startable(self, tour):
+        return tour.status in ('active', 'draft')
+
+    def _mobile_tour_log_is_stale(self, tour_log):
+        """True when the patrol was started before today (guard local timezone)."""
+        if not tour_log or not tour_log.start_time:
+            return False
+        today_start, _, _ = self._mobile_today_utc_range()
+        return tour_log.start_time < today_start
+
+    def _mobile_collect_available_tours(self, guard, active_tours, active_attendance=None):
+        """Tours explicitly assigned on today's shift(s), not all historical assignments."""
+        active_tour_ids = active_tours.mapped('tour_id').ids if active_tours else []
+        shifts = self._mobile_guard_shifts_for_tours(guard, active_attendance)
+        tour_ids = []
+
+        for shift in shifts:
+            for tour in shift.tour_ids:
+                if self._mobile_tour_is_startable(tour):
+                    tour_ids.append(tour.id)
+                    _logger.info(
+                        '[Mobile Tours] Tour "%s" (id=%s) from shift %s (status=%s)',
+                        tour.name, tour.id, shift.name, shift.status,
+                    )
+
+        tour_ids = list(dict.fromkeys(tour_ids))  # preserve order, unique
+        available_ids = [tid for tid in tour_ids if tid not in active_tour_ids]
+        if available_ids:
+            available = request.env['security.tour'].sudo().browse(available_ids)
+            available = available.filtered(lambda t: t.status in ('active', 'draft'))
+        elif active_attendance and active_attendance.shift_id:
+            # Only tours on the checked-in shift — never all site tours
+            available = active_attendance.shift_id.tour_ids.filtered(
+                lambda t: t.status in ('active', 'draft') and t.id not in active_tour_ids
+            )
+        else:
+            available = request.env['security.tour'].sudo().browse([])
+
+        _, _, now = self._mobile_today_utc_range()
+        overlapping = shifts.filtered(
+            lambda s: s.start_datetime and s.end_datetime
+            and s.start_datetime <= now + timedelta(hours=2)
+            and s.end_datetime >= now - timedelta(hours=1)
+        )
+        current_shift = overlapping[:1] or shifts[:1]
+        return available, shifts, current_shift
+
     def _mobile_safe_next_url(self, raw_next, default='/guardpro/mobile/tasks'):
         """POST redirect target: only paths under /guardpro/mobile (avoid open redirects)."""
         if not raw_next:
@@ -289,7 +371,7 @@ class GuardLinkPWASimple(http.Controller):
             ('guard_id', '=', guard.id),
             ('start_datetime', '<=', now + timedelta(hours=2)),
             ('end_datetime', '>=', now - timedelta(hours=1)),
-            ('status', 'in', ['scheduled', 'confirmed', 'in_progress']),
+            ('status', 'in', ['scheduled', 'confirmed', 'in_progress', 'no_show']),
         ], limit=1, order='start_datetime asc')
         
         site_id = shift.site_id.id if shift else None
@@ -365,7 +447,16 @@ class GuardLinkPWASimple(http.Controller):
         
         if not attendance:
             return request.redirect('/guardpro/mobile?error=not_checked_in')
-        
+
+        open_tours = request.env['tour.log'].sudo().search_count([
+            ('guard_id', '=', guard.id),
+            ('status', '=', 'in_progress'),
+        ])
+        if open_tours:
+            return request.redirect(
+                '/guardpro/mobile/tours?error=tour_in_progress'
+            )
+
         # Update attendance
         vals = {
             'checkout_time': datetime.now(),
@@ -740,109 +831,41 @@ class GuardLinkPWASimple(http.Controller):
             ('checkout_time', '=', False),
         ], limit=1, order='checkin_time desc')
         
-        # Get available tours that can be started
-        # Check shifts that are relevant to today/current time (not just active status)
-        now = datetime.now()
-        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        today_end = today_start + timedelta(days=1)
-        
-        _logger.info('[Mobile Tours] ===== Checking shifts for guard %s (ID: %s) =====', 
-                    guard.name, guard.id)
-        
-        # Get shifts that are happening today or upcoming (not cancelled/no_show)
-        # Include shifts that:
-        # 1. Start today or in the future (not past completed shifts)
-        # 2. Or are currently in progress (end_datetime hasn't passed)
-        # 3. Exclude cancelled/no_show shifts
-        all_guard_shifts = request.env['guard.shift'].sudo().search([
-            ('guard_id', '=', guard.id),
-            ('status', 'not in', ['cancelled', 'no_show']),  # Exclude cancelled/no_show
-        ], limit=100, order='start_datetime desc')
-        
-        # Filter to shifts that are relevant (today or upcoming, or still in progress)
-        relevant_shifts = all_guard_shifts.filtered(lambda s: 
-            (s.start_datetime and s.start_datetime >= today_start) or  # Starts today or later
-            (s.end_datetime and s.end_datetime >= now)  # Or hasn't ended yet
+        _logger.info('[Mobile Tours] ===== Checking shifts for guard %s (ID: %s) =====',
+                     guard.name, guard.id)
+
+        available_tours, relevant_shifts, current_shift = self._mobile_collect_available_tours(
+            guard, active_tours, active_attendance
+        )
+
+        for shift in relevant_shifts:
+            _logger.info(
+                '[Mobile Tours] Shift: %s (ID: %s), Status: %s, Tours: %s',
+                shift.name, shift.id, shift.status,
+                ', '.join(shift.tour_ids.mapped('name')) or '(none)',
+            )
+        _logger.info(
+            '[Mobile Tours] ===== END - %d available tour(s), current shift: %s =====',
+            len(available_tours),
+            current_shift.name if current_shift else 'none',
         )
         
-        _logger.info('[Mobile Tours] Total relevant shifts found for guard: %d', len(relevant_shifts))
-        for shift in relevant_shifts:
-            _logger.info('[Mobile Tours] Shift: %s (ID: %s), Status: %s, Start: %s, End: %s, Tour count: %d', 
-                        shift.name, shift.id, shift.status, shift.start_datetime, shift.end_datetime, len(shift.tour_ids))
-            if shift.tour_ids:
-                for tour in shift.tour_ids:
-                    _logger.info('[Mobile Tours]   - Tour: %s (ID: %s), Status: %s', 
-                                tour.name, tour.id, tour.status)
-        
-        # Collect tour IDs from relevant shifts
-        tour_ids_from_shifts = []
-        
-        # Collect tours from all relevant shifts (not just active status)
-        # This includes shifts that are scheduled, confirmed, in_progress, or even completed if they're today
-        for shift in relevant_shifts:
-            if shift.tour_ids:
-                # Include tours with status 'active' or 'draft' (draft tours assigned to shifts should be available)
-                available_tours_in_shift = shift.tour_ids.filtered(lambda t: t.status in ['active', 'draft'])
-                if available_tours_in_shift:
-                    tour_ids_from_shifts.extend(available_tours_in_shift.ids)
-                    _logger.info('[Mobile Tours] Shift %s (ID: %s, Status: %s) has %d available tours (status: active or draft)', 
-                                shift.name, shift.id, shift.status, len(available_tours_in_shift))
-                    for tour in available_tours_in_shift:
-                        _logger.info('[Mobile Tours]     - Available tour: %s (ID: %s, Status: %s)', tour.name, tour.id, tour.status)
-        
-        # Remove duplicates
-        tour_ids_from_shifts = list(set(tour_ids_from_shifts))
-        _logger.info('[Mobile Tours] Collected %d unique tour IDs from relevant shifts: %s', 
-                    len(tour_ids_from_shifts), tour_ids_from_shifts)
-        
-        # Exclude tours that are already in progress
-        active_tour_ids = active_tours.mapped('tour_id').ids if active_tours else []
-        _logger.info('[Mobile Tours] Active tour IDs (to exclude): %s', active_tour_ids)
-        
-        if tour_ids_from_shifts:
-            # Get tours assigned to guard's shifts, excluding those already in progress
-            available_tour_ids = [tid for tid in tour_ids_from_shifts if tid not in active_tour_ids]
-            _logger.info('[Mobile Tours] Available tour IDs (after excluding active): %s', available_tour_ids)
-            
-            if available_tour_ids:
-                # Include tours with status 'active' or 'draft' (draft tours assigned to shifts should be available)
-                available_tours = request.env['security.tour'].sudo().search([
-                    ('id', 'in', available_tour_ids),
-                    ('status', 'in', ['active', 'draft']),
-                ])
-                _logger.info('[Mobile Tours] ✓✓✓ Found %d available tours assigned to guard %s shifts (%d already in progress)', 
-                            len(available_tours), guard.name, len(active_tours))
-                for tour in available_tours:
-                    _logger.info('[Mobile Tours] ✓ Available tour: %s (ID: %s)', tour.name, tour.id)
-            else:
-                available_tours = request.env['security.tour'].sudo().browse([])
-                _logger.info('[Mobile Tours] All tours from shifts are already in progress')
-        else:
-            # No tours found in shifts - try site-based fallback
-            _logger.warning('[Mobile Tours] No tours found in shifts for guard %s', guard.name)
-            if active_attendance and active_attendance.site_id:
-                available_tours = request.env['security.tour'].sudo().search([
-                    ('site_id', '=', active_attendance.site_id.id),
-                    ('status', '=', 'active'),
-                    ('id', 'not in', active_tour_ids),
-                ])
-                _logger.info('[Mobile Tours] Fallback: Found %d tours for site %s (%d already in progress)', 
-                            len(available_tours), active_attendance.site_id.name, len(active_tours))
-            else:
-                available_tours = request.env['security.tour'].sudo().browse([])
-                _logger.warning('[Mobile Tours] ✗✗✗ No tours found - guard not checked in and no tours assigned to shifts. '
-                               'Total shifts checked: %d', len(all_guard_shifts))
-        
-        _logger.info('[Mobile Tours] ===== END - Returning %d available tours =====', len(available_tours))
-        
+        stale_active = active_tours.filtered(
+            lambda log: self._mobile_tour_log_is_stale(log)
+        )
+
         response = request.render('guardpro.mobile_tours', {
             'guard': guard,
             'user': request.env.user,
             'active_tours': active_tours,
             'completed_tours': completed_tours,
             'available_tours': available_tours,
+            'current_shift': current_shift,
             'is_checked_in': bool(active_attendance),
+            'has_blocking_tour': bool(active_tours),
+            'stale_active_tours': stale_active,
             'format_datetime_tz': self._format_datetime_tz,
+            'mobile_tour_log_is_stale': self._mobile_tour_log_is_stale,
         })
         
         # Disable caching to ensure fresh tour progress data
@@ -1820,11 +1843,15 @@ class GuardLinkPWASimple(http.Controller):
                 raw = uploaded.read()
                 datas_b64 = base64.b64encode(raw).decode()
                 try:
-                    datas_b64 = ImageOptimizer.optimize_image(
+                    optimized = ImageOptimizer.optimize_image(
                         datas_b64,
                         max_dimension=1200,
                         target_format='JPEG',
                     )
+                    if optimized:
+                        if isinstance(optimized, bytes):
+                            optimized = optimized.decode('ascii')
+                        datas_b64 = optimized
                 except Exception as opt_err:
                     _logger.debug('[Mobile Compliance] Photo optimize skipped: %s', opt_err)
                 att = request.env['ir.attachment'].sudo().create({

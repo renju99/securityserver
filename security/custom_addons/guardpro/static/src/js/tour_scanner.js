@@ -101,20 +101,12 @@ class TourScanner {
 
             this.nfcReader.addEventListener('reading', ({ message, serialNumber }) => {
                 console.log('NFC tag detected:', serialNumber);
-
-                // Extract tag data
-                let tagData = serialNumber;
-
-                // Try to read NDEF records if available
-                if (message && message.records && message.records.length > 0) {
-                    const record = message.records[0];
-                    const textDecoder = new TextDecoder(record.encoding || 'utf-8');
-                    const recordData = textDecoder.decode(record.data);
-                    if (recordData) {
-                        tagData = recordData;
-                    }
-                }
-
+                const ndefText = (typeof guardproExtractNdefText === 'function')
+                    ? guardproExtractNdefText(message)
+                    : '';
+                const tagData = (typeof guardproResolveNfcScanPayload === 'function')
+                    ? guardproResolveNfcScanPayload(ndefText, serialNumber)
+                    : (ndefText || serialNumber);
                 onScanSuccess(tagData, 'nfc');
             });
 

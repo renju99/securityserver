@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_security_tour_checkpoint_line_list" model="ir.ui.view">
+            <field name="name">security.tour.checkpoint.line.list</field>
+            <field name="model">security.tour.checkpoint.line</field>
+            <field name="arch" type="xml">
+                <list string="Tour checkpoints" editable="bottom" default_order="sequence" create="1" delete="1">
+                    <field name="sequence" widget="handle"/>
+                    <field name="site_id" column_invisible="True" force_save="1"/>
+                    <field name="tour_id" column_invisible="True"/>
+                    <field name="checkpoint_id"
+                           string="Checkpoint"
+                           domain="[('site_id', '=', site_id)]"
+                           context="{'default_site_id': site_id}"
+                           options="{'no_open': True}"
+                           required="1"/>
+                    <field name="name" string="Name" column_invisible="True" optional="hide"/>
+                    <field name="code" string="Code" optional="show"/>
+                    <field name="scan_type" string="Scan type" widget="badge"
+                           decoration-info="scan_type == 'nfc'"
+                           decoration-success="scan_type == 'qr'"
+                           decoration-warning="scan_type == 'both'"
+                           decoration-muted="scan_type == 'virtual'"/>
+                    <field name="requires_photo" string="Photo" widget="boolean" optional="hide"/>
+                    <field name="requires_note" string="Note" widget="boolean" optional="hide"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_security_tour_checkpoint_line_form" model="ir.ui.view">
+            <field name="name">security.tour.checkpoint.line.form</field>
+            <field name="model">security.tour.checkpoint.line</field>
+            <field name="arch" type="xml">
+                <form string="Tour checkpoint">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="sequence" string="Order #"/>
+                                <field name="site_id" invisible="1" force_save="1"/>
+                                <field name="tour_id" invisible="1"/>
+                                <field name="checkpoint_id"
+                                       domain="[('site_id', '=', site_id)]"
+                                       context="{'default_site_id': site_id}"
+                                       options="{'no_open': True}"/>
+                            </group>
+                            <group invisible="not checkpoint_id">
+                                <field name="name" readonly="1"/>
+                                <field name="code" readonly="1"/>
+                                <field name="scan_type" readonly="1"/>
+                                <field name="requires_photo" readonly="1"/>
+                                <field name="requires_note" readonly="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

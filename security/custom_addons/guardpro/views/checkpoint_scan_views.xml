@@ -60,7 +60,9 @@
                         <group string="Observations">
                             <field name="observations" widget="text"/>
                             <field name="issues_found"/>
+                            <field name="facility_issue_type" invisible="not issues_found"/>
                             <field name="issue_description" widget="text" invisible="not issues_found"/>
+                            <field name="facility_incident_id" readonly="1" invisible="not facility_incident_id"/>
                         </group>
                         <group string="Media">
                             <field name="photo" widget="image"/>

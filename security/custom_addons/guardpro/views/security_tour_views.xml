@@ -36,6 +36,9 @@
                     </header>
                     <sheet>
                         <div class="oe_button_box">
+                            <button class="oe_stat_button" icon="fa-map-marker" invisible="total_checkpoints == 0">
+                                <field name="total_checkpoints" widget="statinfo" string="Checkpoints"/>
+                            </button>
                             <button name="action_view_logs" type="object" class="oe_stat_button" icon="fa-history">
                                 <field name="total_tours" widget="statinfo" string="Tours"/>
                             </button>
@@ -70,16 +73,17 @@
                             <field name="description"/>
                         </group>
                         <notebook>
-                            <page string="Checkpoints">
-                                <field name="checkpoint_ids">
-                                    <list>
-                                        <field name="name"/>
-                                        <field name="code"/>
-                                        <field name="scan_type"/>
-                                        <field name="requires_photo"/>
-                                        <field name="requires_note"/>
-                                    </list>
-                                </field>
+                            <page string="Checkpoints" name="checkpoint_page">
+                                <field name="site_id" invisible="1"/>
+                                <group>
+                                    <field name="checkpoint_line_ids"
+                                           string="Patrol route"
+                                           nolabel="1"
+                                           colspan="2"
+                                           context="{'default_tour_id': id, 'default_site_id': site_id}"
+                                           readonly="not site_id"
+                                           help="Select a Site and Save the tour first. Drag the handle on each row to set patrol order (1, 2, 3…). Guards follow this sequence in the mobile app."/>
+                                </group>
                             </page>
                             <page string="Requirements">
                                 <group>

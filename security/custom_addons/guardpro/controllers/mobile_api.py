@@ -452,8 +452,11 @@ class MobileAPIController(http.Controller):
 
     @rate_limit(max_requests=60, window_seconds=60)
     @http.route('/guardpro/api/checkpoint/scan/evidence', type='json', auth='user', methods=['POST'], csrf=False)
-    def checkpoint_scan_append_evidence(self, scan_id, photos=None, videos=None, observations=None):
-        """Add optional photos, videos, and observation text to an existing checkpoint scan (same guard only)."""
+    def checkpoint_scan_append_evidence(
+        self, scan_id, photos=None, videos=None, observations=None,
+        issues_found=None, facility_issue_type=None, issue_description=None,
+    ):
+        """Add optional photos, videos, notes, and facility issue to a checkpoint scan."""
         guard = request.env['guard.profile'].search([
             ('user_id', '=', request.env.user.id)
         ], limit=1)
@@ -481,8 +484,6 @@ class MobileAPIController(http.Controller):
         photos = photos or []
         videos = videos or []
         obs = (observations or '').strip() if observations else ''
-        if not photos and not videos and not obs:
-            return {'success': True, 'message': 'Nothing to attach'}
 
         scan = request.env['checkpoint.scan'].browse(scan_id)
         if not scan.exists() or scan.guard_id.id != guard.id:
@@ -492,19 +493,59 @@ class MobileAPIController(http.Controller):
                 'message': 'Scan not found or access denied',
             }
 
+        report_issue = (
+            scan._coerce_bool(issues_found)
+            if issues_found is not None
+            else False
+        )
+        if not photos and not videos and not obs and not report_issue:
+            return {'success': True, 'message': 'Nothing to attach'}
+
+        _logger.info(
+            '[API Checkpoint Evidence] scan_id=%s guard=%s photos=%s videos=%s '
+            'obs_len=%s issue=%s type=%s',
+            scan_id, guard.id, len(photos), len(videos), len(obs),
+            report_issue, facility_issue_type,
+        )
         try:
-            scan.append_post_scan_evidence(
+            facility_warning = scan.append_post_scan_evidence(
                 photos_payload=photos,
                 videos_payload=videos,
                 observations_text=obs or None,
+                issues_found=issues_found,
+                facility_issue_type=facility_issue_type,
+                issue_description=issue_description,
             )
-            return {'success': True, 'message': 'Findings saved'}
+            scan.invalidate_recordset(['facility_incident_id', 'photo_ids', 'video_ids'])
+            result = {
+                'success': True,
+                'message': 'Findings saved',
+            }
+            if facility_warning:
+                result['warning'] = facility_warning
+                result['message'] = (
+                    'Notes and photos saved, but the facility work order '
+                    'could not be created: %s'
+                ) % facility_warning
+            elif scan.facility_incident_id:
+                result['facility_incident_id'] = scan.facility_incident_id.id
+                result['facility_incident_name'] = scan.facility_incident_id.name
+                if report_issue:
+                    result['message'] = (
+                        'Findings saved. Facility issue %s logged for follow-up.'
+                        % scan.facility_incident_id.name
+                    )
+            return result
         except (AccessError, ValidationError) as e:
             _logger.warning('[API Checkpoint Evidence] %s', str(e))
             return {'success': False, 'error': 'validation', 'message': str(e)}
         except Exception as e:
             _logger.exception('[API Checkpoint Evidence] Unexpected error')
-            return {'success': False, 'error': 'unexpected', 'message': str(e)}
+            return {
+                'success': False,
+                'error': 'unexpected',
+                'message': 'Could not save photos: %s' % (str(e) or 'unknown error'),
+            }
 
     @http.route('/guardpro/api/shifts/tours', type='json', auth='user', methods=['POST'], csrf=False)
     def get_shift_tours(self, shift_id=None):
@@ -533,7 +574,7 @@ class MobileAPIController(http.Controller):
                     'estimated_duration': tour.estimated_duration,
                     'instructions': tour.instructions,
                     'site_name': tour.site_id.name
-                } for tour in shift.tour_ids if tour.status == 'active']
+                } for tour in shift.tour_ids if tour.status in ('active', 'draft')]
                 
                 # Check for active tour log for this shift
                 # Order by start_time DESC to get the most recent active tour
@@ -549,22 +590,9 @@ class MobileAPIController(http.Controller):
                         lambda s: s.status == 'verified'
                     ).mapped('checkpoint_id').ids
                     
-                    # Get all tour checkpoints with scan status
-                    tour_checkpoints = []
-                    for checkpoint in active_tour_log_rec.tour_id.checkpoint_ids:
-                        is_scanned = checkpoint.id in scanned_checkpoint_ids
-                        tour_checkpoints.append({
-                            'id': checkpoint.id,
-                            'name': checkpoint.name,
-                            'code': checkpoint.code,
-                            'scan_type': checkpoint.scan_type,
-                            'latitude': checkpoint.latitude,
-                            'longitude': checkpoint.longitude,
-                            'qr_code': checkpoint.qr_code if checkpoint.qr_code else '',
-                            'nfc_tag_id': checkpoint.nfc_tag_id if checkpoint.nfc_tag_id else '',
-                            'is_scanned': is_scanned,
-                            'notes': checkpoint.notes if checkpoint.notes else ''
-                        })
+                    tour_checkpoints = active_tour_log_rec.tour_id.get_checkpoint_api_payloads(
+                        scanned_checkpoint_ids
+                    )
                     
                     active_tour_log = {
                         'id': active_tour_log_rec.id,
@@ -600,49 +628,64 @@ class MobileAPIController(http.Controller):
         
         try:
             result = tour.start_tour(guard.id)
-            
-            # If shift_id provided, link the tour log to the shift
-            if shift_id and result.get('tour_log_id'):
-                tour_log = request.env['tour.log'].sudo().browse(result['tour_log_id'])
-                if tour_log.exists():
-                    tour_log.write({'shift_id': shift_id})
-            
-            # Automatically link pending tasks for this guard at this site to the tour
-            if result.get('tour_log_id'):
-                tour_log = request.env['tour.log'].sudo().browse(result['tour_log_id'])
-                if tour_log.exists():
-                    # Find pending tasks for this guard at this site
-                    pending_tasks = request.env['guard.task'].sudo().search([
-                        ('assigned_to', '=', guard.id),
-                        ('site_id', '=', tour.site_id.id),
-                        ('state', 'in', ['assigned', 'in_progress'])
-                    ])
-                    
-                    if pending_tasks:
-                        tour_log.write({'task_ids': [(6, 0, pending_tasks.ids)]})
-                        _logger.info(
-                            'Linked %d pending tasks to tour log %d',
-                            len(pending_tasks),
-                            tour_log.id
-                        )
-            
+
+            if result.get('blocked'):
+                return {
+                    'error': 'active_tour_exists',
+                    'message': result.get('message'),
+                    'blocking_tours': result.get('blocking_tours', []),
+                }
+
+            tour_log_id = result.get('tour_log_id')
+            if not tour_log_id:
+                return {'error': 'Could not start tour'}
+
+            tour_log = request.env['tour.log'].sudo().browse(tour_log_id)
+            if shift_id and tour_log.exists():
+                tour_log.write({'shift_id': shift_id})
+
+            if tour_log.exists() and not result.get('resumed'):
+                pending_tasks = request.env['guard.task'].sudo().search([
+                    ('assigned_to', '=', guard.id),
+                    ('site_id', '=', tour.site_id.id),
+                    ('state', 'in', ['assigned', 'in_progress']),
+                ])
+                if pending_tasks:
+                    tour_log.write({'task_ids': [(6, 0, pending_tasks.ids)]})
+                    _logger.info(
+                        'Linked %d pending tasks to tour log %d',
+                        len(pending_tasks),
+                        tour_log_id,
+                    )
+
+            if result.get('resumed'):
+                message = 'Continuing your patrol where you left off'
+            else:
+                message = 'Tour started successfully'
+
             return {
                 'success': True,
-                'tour_log_id': result.get('tour_log_id'),
-                'message': 'Tour started successfully'
+                'tour_log_id': tour_log_id,
+                'resumed': bool(result.get('resumed')),
+                'message': message,
             }
         except Exception as e:
             _logger.error('Error starting tour: %s', str(e))
             return {'error': str(e)}
 
     @http.route('/guardpro/api/tour/complete', type='json', auth='user', methods=['POST'], csrf=False)
-    def complete_tour(self, tour_log_id, partial=False, reason=None):
+    def complete_tour(
+        self, tour_log_id, partial=False, reason=None,
+        observations=None, issues_found=None,
+    ):
         """Complete a security tour.
         
         Args:
             tour_log_id (int): Tour log ID
             partial (bool): If True, marks as partial completion
             reason (str): Reason for partial completion (required if partial=True)
+            observations (str): Optional tour-level summary notes
+            issues_found (str): Optional tour-level issues / follow-up text
         """
         guard = request.env['guard.profile'].sudo().search([
             ('user_id', '=', request.env.user.id)
@@ -694,7 +737,12 @@ class MobileAPIController(http.Controller):
             }
         
         try:
-            tour_log.action_complete(partial=partial, reason=reason)
+            tour_log.action_complete(
+                partial=partial,
+                reason=reason,
+                observations=observations,
+                issues_found=issues_found,
+            )
             
             if partial:
                 message = 'Tour marked as partially complete'
@@ -1736,7 +1784,9 @@ class MobileAPIController(http.Controller):
             # Get available tours from today's shifts (tours that SHOULD be done)
             available_tours = request.env['security.tour'].sudo()
             for shift in today_shifts:
-                available_tours |= shift.tour_ids.filtered(lambda t: t.status == 'active')
+                available_tours |= shift.tour_ids.filtered(
+                    lambda t: t.status in ('active', 'draft')
+                )
             
             # Get ONLY TODAY'S tour logs for this guard
             # Only show tours that started today (not old in-progress tours)
@@ -1879,23 +1929,11 @@ class MobileAPIController(http.Controller):
                 lambda s: s.status == 'verified'
             ).mapped('checkpoint_id').ids
             
-            # Get all tour checkpoints with scan status
-            tour_checkpoints = []
-            for checkpoint in active_tour_log.tour_id.checkpoint_ids:
-                is_scanned = checkpoint.id in scanned_checkpoint_ids
-                tour_checkpoints.append({
-                    'id': checkpoint.id,
-                    'name': checkpoint.name,
-                    'code': checkpoint.code,
-                    'scan_type': checkpoint.scan_type,
-                    'latitude': checkpoint.latitude,
-                    'longitude': checkpoint.longitude,
-                    'qr_code': checkpoint.qr_code if checkpoint.qr_code else '',
-                    'nfc_tag_id': checkpoint.nfc_tag_id if checkpoint.nfc_tag_id else '',
-                    'status': 'completed' if is_scanned else 'pending',
-                    'scanned_at': None,  # Could be enhanced to get actual scan time
-                    'notes': checkpoint.notes if checkpoint.notes else ''
-                })
+            tour_checkpoints = active_tour_log.tour_id.get_checkpoint_api_payloads(
+                scanned_checkpoint_ids
+            )
+            for payload in tour_checkpoints:
+                payload.setdefault('scanned_at', None)
             
             return {
                 'success': True,

@@ -15,6 +15,8 @@
                     <field name="duration" widget="float_time"/>
                     <field name="completion_percentage" widget="progressbar"/>
                     <field name="status" widget="badge"/>
+                    <field name="has_checkpoint_findings" column_invisible="1"/>
+                    <field name="checkpoint_issue_count" optional="hide"/>
                 </list>
             </field>
         </record>
@@ -29,9 +31,21 @@
                                 invisible="status != 'in_progress'"/>
                         <button name="action_review" string="Mark Reviewed" type="object"
                                 invisible="reviewed" groups="guardpro.group_guardpro_supervisor"/>
+                        <button name="action_view_facility_incidents" type="object"
+                                class="oe_stat_button" icon="fa-wrench"
+                                invisible="not facility_incident_count">
+                            <field name="facility_incident_count" widget="statinfo"
+                                   string="Facility Issues"/>
+                        </button>
                         <field name="status" widget="statusbar"/>
                     </header>
                     <sheet>
+                        <field name="facility_incident_count" invisible="1"/>
+                        <div class="alert alert-warning mb-3" role="alert"
+                             invisible="not checkpoint_issue_count">
+                            <strong><field name="checkpoint_issue_count" class="oe_inline"/> checkpoint issue(s)</strong>
+                            reported during this tour. Review findings below.
+                        </div>
                         <group>
                             <group>
                                 <field name="tour_id"/>
@@ -51,6 +65,7 @@
                             <field name="scanned_checkpoints"/>
                             <field name="completion_percentage" widget="progressbar"/>
                         </group>
+                        <field name="has_checkpoint_findings" invisible="1"/>
                         <notebook>
                             <page string="Checkpoint Scans">
                                 <field name="scan_ids">
@@ -59,12 +74,138 @@
                                         <field name="scan_time"/>
                                         <field name="scan_type"/>
                                         <field name="status"/>
+                                        <field name="observations" optional="show"/>
+                                        <field name="issues_found" optional="hide"/>
                                     </list>
                                 </field>
                             </page>
-                            <page string="Observations">
-                                <field name="observations" widget="text"/>
-                                <field name="issues_found" widget="text"/>
+                            <page string="Observations" name="observations_page"
+                                  class="o_tour_observations_page">
+                                <field name="has_checkpoint_findings" invisible="1"/>
+                                <field name="checkpoint_findings" invisible="1"/>
+                                <group string="Overview" class="o_tour_obs_overview" colspan="2">
+                                    <field name="scanned_checkpoints" readonly="1" string="Scanned checkpoints"/>
+                                    <field name="expected_checkpoints" readonly="1" string="Expected checkpoints"/>
+                                    <field name="checkpoint_issue_count" readonly="1"
+                                           invisible="not checkpoint_issue_count"/>
+                                </group>
+                                <div class="o_tour_obs_empty" invisible="scan_ids">
+                                    <div><i class="fa fa-mobile" title="Mobile"/></div>
+                                    <p class="mb-1"><strong>No checkpoint scans yet</strong></p>
+                                    <p class="mb-0 small">Guards add notes, photos, and videos after each scan in the mobile app.</p>
+                                </div>
+                                <separator string="Checkpoint findings" colspan="2" invisible="not scan_ids"/>
+                                <field name="scan_ids" colspan="2" nolabel="1" mode="kanban"
+                                       invisible="not scan_ids">
+                                    <kanban create="0" delete="0" class="o_tour_observation_kanban">
+                                        <field name="checkpoint_id"/>
+                                        <field name="scan_time"/>
+                                        <field name="scan_type"/>
+                                        <field name="status"/>
+                                        <field name="has_findings"/>
+                                        <field name="findings_preview"/>
+                                        <field name="issues_found"/>
+                                        <field name="facility_issue_type" optional="hide"/>
+                                        <field name="facility_incident_id" optional="hide"/>
+                                        <field name="issue_description"/>
+                                        <field name="photo_count"/>
+                                        <field name="video_count"/>
+                                        <field name="media_summary"/>
+                                        <templates>
+                                            <t t-name="card">
+                                                <div class="oe_kanban_global_click o_tour_observation_card">
+                                                    <div class="o_tour_observation_card_header">
+                                                        <div class="o_tour_observation_card_title">
+                                                            <i class="fa fa-map-marker text-primary me-1" title="Checkpoint"/>
+                                                            <field name="checkpoint_id"/>
+                                                        </div>
+                                                        <field name="status" widget="badge"
+                                                               decoration-success="status == 'verified'"
+                                                               decoration-warning="status == 'pending'"
+                                                               decoration-danger="status == 'failed'"/>
+                                                    </div>
+                                                    <div class="o_tour_observation_card_meta text-muted">
+                                                        <i class="fa fa-clock-o me-1" title="Scan time"/>
+                                                        <field name="scan_time" widget="datetime"/>
+                                                        <span class="o_tour_observation_scan_type ms-2">
+                                                            <field name="scan_type"/>
+                                                        </span>
+                                                    </div>
+                                                    <div class="o_tour_observation_card_body">
+                                                        <p t-if="record.has_findings.raw_value"
+                                                           class="o_tour_observation_preview mb-2">
+                                                            <field name="findings_preview"/>
+                                                        </p>
+                                                        <p t-else="" class="o_tour_observation_empty_hint text-muted mb-2">
+                                                            No notes yet — click to add findings
+                                                        </p>
+                                                        <div t-if="record.issues_found.raw_value"
+                                                             class="o_tour_observation_issue alert alert-warning py-1 px-2 mb-2">
+                                                            <i class="fa fa-exclamation-triangle me-1" title="Issue"/>
+                                                            <field name="issue_description" invisible="not issue_description"/>
+                                                            <span t-if="!record.issue_description.raw_value">Issue reported</span>
+                                                        </div>
+                                                        <div t-if="record.media_summary.raw_value"
+                                                             class="o_tour_observation_media text-muted small">
+                                                            <span t-if="record.photo_count.raw_value">
+                                                                <i class="fa fa-camera me-1" title="Photos"/>
+                                                                <t t-esc="record.photo_count.value"/> photo(s)
+                                                            </span>
+                                                            <span t-if="record.video_count.raw_value" class="ms-2">
+                                                                <i class="fa fa-video-camera me-1" title="Videos"/>
+                                                                <t t-esc="record.video_count.value"/> video(s)
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="o_tour_observation_card_footer text-muted small">
+                                                        <i class="fa fa-pencil me-1" title="Edit"/> Click to edit notes or media
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </templates>
+                                    </kanban>
+                                    <form string="Checkpoint Finding">
+                                        <sheet>
+                                            <div class="oe_title mb-3">
+                                                <h1>
+                                                    <field name="checkpoint_id" readonly="1" class="oe_inline"/>
+                                                </h1>
+                                                <div class="text-muted">
+                                                    <field name="scan_time" readonly="1" widget="datetime"/>
+                                                    <span class="ms-2">
+                                                        <field name="scan_type" readonly="1"/>
+                                                    </span>
+                                                    <field name="status" widget="badge" readonly="1" class="ms-2"/>
+                                                </div>
+                                            </div>
+                                            <group string="Notes and issues">
+                                                <field name="observations" nolabel="1" colspan="2"
+                                                       placeholder="What did the guard observe at this checkpoint?"/>
+                                                <field name="issues_found"/>
+                                                <field name="facility_issue_type"
+                                                       invisible="not issues_found"
+                                                       required="issues_found"/>
+                                                <field name="issue_description" colspan="2"
+                                                       invisible="not issues_found"
+                                                       placeholder="Describe the issue for facilities follow-up..."
+                                                       required="issues_found"/>
+                                                <field name="facility_incident_id" readonly="1"
+                                                       invisible="not facility_incident_id"/>
+                                            </group>
+                                            <group string="Photos and videos">
+                                                <field name="photo_ids" widget="many2many_binary" nolabel="1" colspan="2"/>
+                                                <field name="video_ids" widget="many2many_binary" nolabel="1" colspan="2"
+                                                       string="Videos (optional)"/>
+                                            </group>
+                                        </sheet>
+                                    </form>
+                                </field>
+                                <group string="Tour-level summary" colspan="2" class="o_tour_summary_panel">
+                                    <field name="observations" colspan="2" widget="text"
+                                           placeholder="Overall patrol summary, handover notes, or supervisor comments..."/>
+                                    <field name="issues_found" colspan="2" widget="text"
+                                           placeholder="Overall issues or follow-up required for this tour..."/>
+                                </group>
                             </page>
                             <page string="Review">
                                 <group>
@@ -87,5 +228,3 @@
         </record>
     </data>
 </odoo>
-
-

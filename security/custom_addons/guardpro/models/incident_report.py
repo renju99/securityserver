@@ -439,6 +439,11 @@ class IncidentReport(models.Model):
         compute='_compute_incident_type',
         string='Is Community Violation Incident'
     )
+    is_facility_incident = fields.Boolean(
+        string='Is Facility Patrol Issue',
+        compute='_compute_incident_type',
+        store=False,
+    )
     is_door_lock_incident = fields.Boolean(
         compute='_compute_incident_type',
         string='Is Door Lock Incident'
@@ -853,6 +858,9 @@ class IncidentReport(models.Model):
 
             # Door Lock incidents
             record.is_door_lock_incident = category_code == 'DOOR_LOCK'
+
+            # Facility / maintenance from patrol checkpoints
+            record.is_facility_incident = category_code == 'FACILITY'
 
     @api.constrains('incident_datetime', 'reported_datetime')
     def _check_dates(self):

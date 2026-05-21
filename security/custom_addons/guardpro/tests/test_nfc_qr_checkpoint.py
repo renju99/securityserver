@@ -677,6 +677,41 @@ def run_all_tests():
     from odoo.tests.common import Form
     
     _logger.info("="*70)
+    def test_nfc_text_label_and_colon_uid(self):
+        """Text labels and colon-separated UIDs match; compact hex is normalized."""
+        checkpoint = self.env['checkpoint'].create({
+            'name': 'NFC Format Test',
+            'code': 'NFC-FMT-001',
+            'site_id': self.site.id,
+            'scan_type': 'nfc',
+            'nfc_tag_id': 'SAFI-MNT-001',
+            'latitude': self.test_lat,
+            'longitude': self.test_lng,
+            'status': 'active',
+        })
+        self.assertTrue(
+            checkpoint._nfc_tags_match('SAFI-MNT-001', 'SAFI-MNT-001')
+        )
+        uid_checkpoint = self.env['checkpoint'].create({
+            'name': 'NFC UID Test',
+            'code': 'NFC-FMT-002',
+            'site_id': self.site.id,
+            'scan_type': 'nfc',
+            'nfc_tag_id': '04:80:CC:01:06:02:03',
+            'latitude': self.test_lat,
+            'longitude': self.test_lng,
+            'status': 'active',
+        })
+        self.assertTrue(
+            uid_checkpoint._nfc_tags_match('04:80:CC:01:06:02:03', '0480CC01060203')
+        )
+        self.assertEqual(
+            uid_checkpoint._nfc_format_for_display('0480CC01060203'),
+            '04:80:cc:01:06:02:03',
+        )
+        prepared = self.env['checkpoint']._prepare_nfc_tag_id('043CCA6D396180')
+        self.assertEqual(prepared, '04:3c:ca:6d:39:61:80')
+
     _logger.info("GUARD PRO NFC & QR CODE TESTING SUITE")
     _logger.info("="*70)
     

@@ -20,7 +20,9 @@ import android.os.Looper
 import android.os.PowerManager
 import android.nfc.NfcAdapter
 import android.nfc.Tag
+import android.nfc.NdefRecord
 import android.nfc.tech.Ndef
+import org.json.JSONObject
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
@@ -643,40 +645,65 @@ class TwaLauncherActivity : AppCompatActivity() {
         }
     }
 
-    private fun processNfcTag(tag: Tag) {
-        val ndef = Ndef.get(tag)
-        var tagData = ""
-        
-        // Try to get serial number as fallback
-        val serialNumber = tag.id.joinToString("") { "%02X".format(it) }
-        
+    private fun isBareNfcHexUid(value: String): Boolean {
+        if (value.isBlank()) return false
+        val hex = value.replace(Regex("[^0-9a-fA-F]"), "")
+        val alnum = value.replace(Regex("[^0-9a-zA-Z]"), "")
+        return hex.length >= 4 && hex.length == alnum.length
+    }
+
+    private fun parseNdefTextPayload(record: NdefRecord): String {
+        val payload = record.payload ?: return ""
+        if (payload.isEmpty()) return ""
+        return try {
+            val textEncoding = if ((payload[0].toInt() and 128) == 0) Charsets.UTF_8 else Charsets.UTF_16
+            val languageCodeLength = payload[0].toInt() and 63
+            val start = languageCodeLength + 1
+            if (start >= payload.size) return ""
+            String(payload, start, payload.size - start, textEncoding).trim()
+        } catch (e: Exception) {
+            Log.w("NFC", "parseNdefTextPayload: ${e.message}")
+            ""
+        }
+    }
+
+    private fun extractNdefTextLabel(ndef: Ndef): String {
+        var fallback = ""
         try {
-            ndef?.let {
-                it.connect()
-                val ndefMessage = it.ndefMessage
-                if (ndefMessage != null && ndefMessage.records.isNotEmpty()) {
-                    val record = ndefMessage.records[0]
-                    val payload = record.payload
-                    // Usually the first byte is the encoding/language code length
-                    val textEncoding = if ((payload[0].toInt() and 128) == 0) "UTF-8" else "UTF-16"
-                    val languageCodeLength = payload[0].toInt() and 63
-                    tagData = String(payload, languageCodeLength + 1, payload.size - languageCodeLength - 1, charset(textEncoding))
+            var message = ndef.cachedNdefMessage
+            if (message == null) {
+                ndef.connect()
+                try {
+                    message = ndef.ndefMessage
+                } finally {
+                    try {
+                        ndef.close()
+                    } catch (_: Exception) {
+                    }
                 }
-                it.close()
+            }
+            message?.records?.forEach { record ->
+                val text = parseNdefTextPayload(record)
+                if (text.isEmpty()) return@forEach
+                Log.d("NFC", "NDEF record text: $text")
+                if (!isBareNfcHexUid(text)) {
+                    return text
+                }
+                if (fallback.isEmpty()) {
+                    fallback = text
+                }
             }
         } catch (e: Exception) {
             Log.e("NFC", "Error reading NDEF: ${e.message}")
         }
+        return fallback
+    }
 
-        // If NDEF failed or was empty, use serial number
-        if (tagData.isEmpty()) {
-            tagData = serialNumber
-        }
-
-        Log.d("NFC", "Scanned Tag: $tagData")
-        
-        // Inject into WebView
-        val js = "if(window.onNativeNFCScan) window.onNativeNFCScan('$tagData', '$serialNumber');"
+    private fun processNfcTag(tag: Tag) {
+        val serialNumber = tag.id.joinToString(":") { "%02x".format(it) }
+        Log.d("NFC", "Tag UID (colon): $serialNumber")
+        val serialJson = JSONObject.quote(serialNumber)
+        val js = "if(window.onNativeNFCScan) window.onNativeNFCScan('', $serialJson);"
         webView.post {
             webView.evaluateJavascript(js, null)
         }

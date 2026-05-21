@@ -94,6 +94,7 @@
                         <field name="is_safety_incident" invisible="1"/>
                         <field name="is_statement_incident" invisible="1"/>
                         <field name="is_door_lock_incident" invisible="1"/>
+                        <field name="is_facility_incident" invisible="1"/>
                         <!-- Removed legacy toggles no longer present on model -->
                         
                         <div class="oe_title">
@@ -144,7 +145,7 @@
                             <field name="longitude" string="Longitude"/>
                         </group>
                         
-                        <notebook invisible="not category_id">
+                        <notebook invisible="not category_id" class="gp_incident_notebook_sidebar">
                             <!-- DESCRIPTION - Always visible -->
                             <page string="Description" name="description">
                                 <field name="description" widget="html" placeholder="Provide detailed description of the incident..."/>
@@ -549,28 +550,20 @@
                                 </group>
                             </page>
                             
-                            <!-- PEOPLE INVOLVED - Visible for non-specific categories -->
-                            <page string="People Involved" name="people" 
-                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_safety_incident or is_statement_incident or is_found_item_incident or is_return_form_incident or is_community_violation_incident">
-                                <group>
-                                    <field name="persons_involved" widget="text" 
+                            <!-- General incidents: one tab instead of four horizontal tabs -->
+                            <page string="Response" name="response"
+                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_safety_incident or is_statement_incident or is_found_item_incident or is_return_form_incident or is_community_violation_incident or is_door_lock_incident or is_facility_incident">
+                                <group string="Actions Taken">
+                                    <field name="immediate_actions" widget="text" nolabel="1"
+                                           placeholder="Describe all actions taken in response to this incident..."/>
+                                </group>
+                                <group string="People Involved">
+                                    <field name="persons_involved" widget="text" nolabel="1"
                                            placeholder="Names and details of people involved..."/>
-                                    <field name="witnesses" widget="text"
+                                    <field name="witnesses" widget="text" nolabel="1"
                                            placeholder="Witness names and contact information..."/>
                                 </group>
-                            </page>
-                            
-                            <!-- ACTIONS TAKEN - For general incidents -->
-                            <page string="Actions Taken" name="actions" 
-                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_safety_incident or is_statement_incident or is_found_item_incident or is_return_form_incident or is_community_violation_incident or is_door_lock_incident">
-                                <field name="immediate_actions" widget="text" 
-                                       placeholder="Describe all actions taken in response to this incident..."/>
-                            </page>
-                            
-                            <!-- EMERGENCY SERVICES - For general incidents -->
-                            <page string="Emergency Services" name="emergency" 
-                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_door_lock_incident">
-                                <group>
+                                <group string="Emergency Services">
                                     <group>
                                         <field name="police_notified"/>
                                         <field name="police_report_number" invisible="not police_notified"/>
@@ -583,12 +576,7 @@
                                         <field name="client_notification_datetime" invisible="not client_notified"/>
                                     </group>
                                 </group>
-                            </page>
-                            
-                            <!-- INJURIES/DAMAGE - For general incidents -->
-                            <page string="Injuries/Damage" name="injuries_damage" 
-                                  invisible="is_medical_incident or is_fire_incident or is_security_incident or is_vehicle_incident or is_safety_incident or is_statement_incident or is_found_item_incident or is_return_form_incident or is_community_violation_incident or is_door_lock_incident">
-                                <group>
+                                <group string="Injuries &amp; Damage">
                                     <group>
                                         <field name="injuries"/>
                                         <field name="injury_details" widget="text" invisible="not injuries"/>
@@ -602,24 +590,25 @@
                             </page>
                             
                             <!-- MEDIA - Always visible -->
-                            <page string="Photos/Videos" name="media">
+                            <page string="Media" name="media">
                                 <group>
                                     <field name="photo_ids" widget="many2many_binary" string="Photos"/>
                                     <field name="video_ids" widget="many2many_binary" string="Videos"/>
                                 </group>
                             </page>
                             
-                            <!-- REVIEW - Supervisor only -->
-                            <page string="Review" name="review" groups="guardpro.group_guardpro_supervisor">
-                                <group>
-                                    <field name="reviewed_by"/>
-                                    <field name="review_datetime"/>
-                                    <field name="review_notes" widget="text"/>
+                            <!-- Supervisor workflow: review, SLA, follow-up in one tab -->
+                            <page string="Management" name="management"
+                                  groups="guardpro.group_guardpro_supervisor,guardpro.group_guardpro_manager">
+                                <group string="Review" name="review_section">
+                                    <group>
+                                        <field name="reviewed_by"/>
+                                        <field name="review_datetime"/>
+                                    </group>
+                                    <field name="review_notes" widget="text" nolabel="1"
+                                           placeholder="Supervisor review notes..."/>
                                 </group>
-                            </page>
-                            
-                            <!-- SLA TRACKING -->
-                            <page string="SLA &amp; Escalation" name="sla_tracking">
+                                <separator string="SLA &amp; Escalation"/>
                                 <div class="alert alert-info" role="alert" invisible="sla_policy_id">
                                     <p><i class="fa fa-info-circle" aria-hidden="true" title="Informational message"/> No SLA policy applies to this incident based on its severity and site.</p>
                                 </div>
@@ -682,18 +671,19 @@
                                 </field>
                             </page>
                             
-                            <!-- FOLLOW-UP - Visible for all except safety (has its own) -->
-                            <page string="Follow-up" name="followup" 
-                                  invisible="is_safety_incident">
+                            <page string="Follow-up" name="followup" invisible="is_safety_incident">
                                 <group>
                                     <field name="requires_followup"/>
-                                    <field name="followup_notes" widget="text"/>
+                                    <field name="followup_notes" widget="text"
+                                           placeholder="Follow-up or maintenance notes..."/>
                                     <field name="followup_completed"/>
+                                    <field name="resolved_datetime" string="Resolved On"
+                                           invisible="not is_facility_incident"/>
                                 </group>
                             </page>
                             
                             <!-- STATUS UPDATES - Real-time incident progress -->
-                            <page string="Status Updates" name="status_updates">
+                            <page string="Updates" name="status_updates">
                                 <field name="status_update_ids">
                                     <list string="Status Updates" editable="bottom" 
                                           decoration-info="update_type == 'progress'" 
@@ -718,7 +708,7 @@
                             </page>
                             
                             <!-- ADDITIONAL NOTES - Always visible -->
-                            <page string="Additional Notes" name="notes">
+                            <page string="Notes" name="notes">
                                 <field name="notes" widget="text" placeholder="Any additional information or notes..."/>
                             </page>
                         </notebook>

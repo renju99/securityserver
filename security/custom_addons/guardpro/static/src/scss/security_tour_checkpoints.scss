@@ -1,0 +1,17 @@
+/* Security tour — checkpoint patrol route tab */
+.o_form_view .o_notebook .o_field_widget[name="checkpoint_line_ids"] {
+    .o_list_table {
+        th[data-name="checkpoint_id"],
+        td[name="checkpoint_id"] {
+            min-width: 220px;
+        }
+        th[data-name="code"],
+        td[name="code"] {
+            min-width: 100px;
+        }
+        .o_handle_cell {
+            width: 32px !important;
+            min-width: 32px !important;
+        }
+    }
+}

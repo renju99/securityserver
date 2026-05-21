@@ -134,6 +134,9 @@
                         <t t-elif="request.params.get('error') == 'visitor_register_failed'">
                             <i class="fa fa-exclamation-circle me-2"/>Could not save the visitor. Try again or use the back office.
                         </t>
+                        <t t-elif="request.params.get('error') == 'tour_in_progress'">
+                            Finish or partially complete your active patrol on the Tours screen before checking out.
+                        </t>
                         <t t-elif="request.params.get('error') == 'task_checklist_incomplete'">
                             <i class="fa fa-exclamation-circle me-2"/>Please tick every mandatory checklist item before completing this task.
                         </t>
@@ -600,6 +603,132 @@
                 .guardpro-mobile #submitQuizBtn:disabled {
                     opacity: 0.6;
                     cursor: not-allowed;
+                }
+                /* Post-scan evidence: hidden native input + visible tap target (WebView-safe) */
+                .post-scan-file-input {
+                    position: absolute !important;
+                    width: 1px !important;
+                    height: 1px !important;
+                    padding: 0 !important;
+                    margin: -1px !important;
+                    overflow: hidden !important;
+                    clip: rect(0, 0, 0, 0) !important;
+                    white-space: nowrap !important;
+                    border: 0 !important;
+                    opacity: 0 !important;
+                }
+                #postScanEvidencePanel .btn-outline-primary {
+                    min-height: 48px;
+                    touch-action: manipulation;
+                }
+                .post-scan-save-success {
+                    text-align: center;
+                    padding: 0.5rem 0 1rem;
+                    animation: postScanSuccessFadeIn 0.35s ease-out;
+                }
+                @keyframes postScanSuccessFadeIn {
+                    from { opacity: 0; transform: translateY(8px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .post-scan-save-success__hero {
+                    width: 88px;
+                    height: 88px;
+                    margin: 0 auto 1.25rem;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 8px 24px rgba(27, 54, 93, 0.18);
+                }
+                .post-scan-save-success__hero--success {
+                    background: linear-gradient(145deg, #1B365D 0%, #2a5a8a 100%);
+                }
+                .post-scan-save-success__hero--warning {
+                    background: linear-gradient(145deg, #b8860b 0%, #d4a017 100%);
+                    box-shadow: 0 8px 24px rgba(184, 134, 11, 0.25);
+                }
+                .post-scan-save-success__icon {
+                    width: 52px;
+                    height: 52px;
+                    border-radius: 50%;
+                    background: #fff;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.5rem;
+                }
+                .post-scan-save-success__hero--success .post-scan-save-success__icon {
+                    color: #198754;
+                }
+                .post-scan-save-success__hero--warning .post-scan-save-success__icon {
+                    color: #b8860b;
+                }
+                .post-scan-save-success__title {
+                    font-size: 1.35rem;
+                    font-weight: 700;
+                    color: #1B365D;
+                    margin-bottom: 0.5rem;
+                }
+                .post-scan-save-success__message {
+                    font-size: 0.95rem;
+                    color: #5c6b7a;
+                    line-height: 1.45;
+                    margin-bottom: 1rem;
+                    padding: 0 0.5rem;
+                }
+                .post-scan-incident-badge {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.5rem;
+                    background: #e8f4fd;
+                    border: 1px solid #b8d4e8;
+                    color: #1B365D;
+                    border-radius: 999px;
+                    padding: 0.55rem 1rem;
+                    margin: 0 auto 1rem;
+                    max-width: 100%;
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                }
+                .post-scan-incident-badge i {
+                    color: #0d6efd;
+                }
+                .post-scan-save-summary {
+                    text-align: left;
+                    background: #f8f9fa;
+                    border-radius: 0.5rem;
+                    padding: 0.75rem 1rem;
+                    margin-bottom: 1.25rem;
+                    font-size: 0.875rem;
+                }
+                .post-scan-save-summary li {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 0.5rem;
+                    padding: 0.35rem 0;
+                    color: #495057;
+                }
+                .post-scan-save-summary li i {
+                    color: #1B365D;
+                    width: 1.1rem;
+                    margin-top: 0.15rem;
+                }
+                .post-scan-save-success .btn-continue-patrol {
+                    background-color: #1B365D;
+                    border-color: #1B365D;
+                    min-height: 52px;
+                    font-weight: 600;
+                    font-size: 1rem;
+                    border-radius: 0.5rem;
+                }
+                .post-scan-save-success .btn-continue-patrol:active {
+                    background-color: #142a4a;
+                    border-color: #142a4a;
+                }
+                #scannerModal .modal-body {
+                    overflow-y: auto;
+                    -webkit-overflow-scrolling: touch;
                 }
             </style>
         </t>
@@ -1341,21 +1470,43 @@
     <template id="mobile_tours" name="Guard Pro Mobile Tours">
         <t t-call="guardpro.mobile_base">
             <div class="container-fluid p-3">
+                <t t-if="request.params.get('error') == 'tour_in_progress'">
+                    <div class="alert alert-warning mb-3">
+                        <i class="fa fa-exclamation-triangle me-2"/>
+                        <strong>Active patrol in progress.</strong>
+                        Continue scanning checkpoints or use <strong>Partial Completion</strong> to close it before checking out or starting another tour.
+                    </div>
+                </t>
+                <t t-if="stale_active_tours">
+                    <div class="alert alert-info mb-3">
+                        <i class="fa fa-history me-2"/>
+                        You have an unfinished patrol from a previous session. Continue below or use <strong>Partial Completion</strong> to close it and start fresh.
+                    </div>
+                </t>
                 <!-- Active Tours with Scanning -->
                 <t t-if="active_tours">
                     <t t-foreach="active_tours" t-as="tour_log">
-                        <div class="card mb-3 shadow-sm tour-card" t-att-data-tour-log-id="tour_log.id">
-                            <div class="card-header bg-success text-white">
+                        <t t-set="tour_is_stale" t-value="mobile_tour_log_is_stale(tour_log)"/>
+                        <div class="card mb-3 shadow-sm tour-card" t-att-data-tour-log-id="tour_log.id"
+                             t-att-id="'tour-card-%s' % tour_log.id">
+                            <div t-attf-class="card-header text-white {{tour_is_stale and 'bg-warning text-dark' or 'bg-success'}}">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <h5 class="mb-0">
                                         <i class="fa fa-map-signs me-2"/>
                                         <t t-esc="tour_log.tour_id.name"/>
                                     </h5>
-                                    <span class="badge bg-white text-success fw-bold">In Progress</span>
+                                    <span t-attf-class="badge fw-bold {{tour_is_stale and 'bg-dark text-white' or 'bg-white text-success'}}">
+                                        <t t-if="tour_is_stale">Resume patrol</t>
+                                        <t t-else="">In progress</t>
+                                    </span>
                                 </div>
                                 <small class="d-block mt-2">
                                     <i class="fa fa-building me-1"/>
                                     <t t-esc="tour_log.site_id.name"/>
+                                    <span class="ms-2">
+                                        <i class="fa fa-clock-o me-1"/>
+                                        Started <t t-esc="format_datetime_tz(tour_log, tour_log.start_time, '%b %d, %H:%M')"/>
+                                    </span>
                                 </small>
                             </div>
                             <div class="card-body">
@@ -1448,13 +1599,15 @@
                                     <h6 class="mb-2">Checkpoints</h6>
                                     <!-- Pre-compute scanned checkpoint IDs for performance -->
                                     <t t-set="scanned_checkpoint_ids" t-value="[scan.checkpoint_id.id for scan in tour_log.scan_ids if scan.status == 'verified']"/>
-                                    <t t-set="total_checkpoints" t-value="len(tour_log.tour_id.checkpoint_ids)"/>
+                                    <t t-set="ordered_checkpoint_lines" t-value="tour_log.tour_id.get_ordered_checkpoint_lines()"/>
+                                    <t t-set="total_checkpoints" t-value="len(ordered_checkpoint_lines)"/>
                                     <t t-set="next_checkpoint_index" t-value="len(scanned_checkpoint_ids)"/>
                                     <div class="list-group">
-                                        <t t-foreach="tour_log.tour_id.checkpoint_ids" t-as="checkpoint">
+                                        <t t-foreach="ordered_checkpoint_lines" t-as="cp_line">
+                                            <t t-set="checkpoint" t-value="cp_line.checkpoint_id"/>
                                             <t t-set="is_scanned" t-value="checkpoint.id in scanned_checkpoint_ids"/>
-                                            <t t-set="is_next" t-value="checkpoint_index == next_checkpoint_index"/>
-                                            <t t-set="checkpoint_number" t-value="checkpoint_index + 1"/>
+                                            <t t-set="is_next" t-value="cp_line_index == next_checkpoint_index"/>
+                                            <t t-set="checkpoint_number" t-value="cp_line_index + 1"/>
                                             <div t-attf-class="list-group-item checkpoint-list-item {{is_scanned and 'scanned' or (is_next and 'next-checkpoint') or 'pending'}}" t-att-data-checkpoint-id="checkpoint.id" t-attf-style="{{is_scanned and 'opacity: 0.5;' or ''}}">
                                                 <div class="d-flex align-items-center">
                                                     <!-- Sequence Number Badge -->
@@ -1657,7 +1810,7 @@
                                     </button>
                                 </t>
                                 <t t-else="">
-                                    <button type="button" class="btn btn-success w-100 mb-2" onclick="completeTour(this)" t-att-data-tour-log-id="tour_log.id">
+                                    <button type="button" class="btn btn-success w-100 mb-2" onclick="showCompleteTourModal(this)" t-att-data-tour-log-id="tour_log.id">
                                         <i class="fa fa-check-circle me-2"/>Complete Tour
                                     </button>
                                 </t>
@@ -1677,12 +1830,24 @@
                     </div>
                 </t>
 
-                <!-- Available Tours to Start -->
-                <t t-if="is_checked_in and available_tours">
+                <!-- Tours assigned to today's shift (visible before check-in) -->
+                <t t-if="available_tours">
                     <div class="card mb-3 shadow-sm">
                         <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0"><i class="fa fa-plus-circle me-2"/>Available Tours</h5>
+                            <h5 class="mb-0"><i class="fa fa-plus-circle me-2"/>Assigned Tours</h5>
                         </div>
+                        <t t-if="has_blocking_tour and is_checked_in">
+                            <div class="alert alert-warning mb-0 mx-3 mt-3 py-2">
+                                <i class="fa fa-lock me-1"/>
+                                Finish your active patrol above (or use <strong>Partial Completion</strong>) before starting another tour.
+                            </div>
+                        </t>
+                        <t t-if="not is_checked_in">
+                            <div class="alert alert-warning mb-0 mx-3 mt-3 py-2">
+                                <i class="fa fa-sign-in me-1"/>
+                                Check in to your shift on the home screen to start a patrol.
+                            </div>
+                        </t>
                         <div class="list-group list-group-flush">
                             <t t-foreach="available_tours" t-as="tour">
                                 <div class="list-group-item">
@@ -1694,9 +1859,24 @@
                                                 <t t-esc="tour.total_checkpoints"/> checkpoints
                                             </small>
                                         </div>
-                                        <button type="button" class="btn btn-primary btn-sm" onclick="startTour(this)" t-att-data-tour-id="tour.id">
-                                            <i class="fa fa-play me-1"/>Start
-                                        </button>
+                                        <t t-if="is_checked_in">
+                                            <t t-if="has_blocking_tour">
+                                                <button type="button" class="btn btn-secondary btn-sm" disabled="disabled"
+                                                        title="Finish your active patrol first">
+                                                    <i class="fa fa-lock me-1"/>Blocked
+                                                </button>
+                                            </t>
+                                            <t t-else="">
+                                                <button type="button" class="btn btn-primary btn-sm" onclick="startTour(this)"
+                                                        t-att-data-tour-id="tour.id"
+                                                        t-att-data-shift-id="current_shift.id if current_shift else ''">
+                                                    <i class="fa fa-play me-1"/>Start
+                                                </button>
+                                            </t>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="badge text-bg-secondary">Check in first</span>
+                                        </t>
                                     </div>
                                 </div>
                             </t>
@@ -1795,18 +1975,58 @@
                                     <i class="fa fa-check-circle me-2"/>
                                     <span id="postScanSuccessMsg">Checkpoint recorded.</span>
                                 </div>
-                                <p class="text-muted small mb-3">Optional: add photos, a short video, or notes about what you found at this checkpoint.</p>
+                                <p class="text-muted small mb-3">Optional: add notes, photos, or report a facility issue for maintenance follow-up.</p>
                                 <div class="mb-2">
                                     <label class="form-label" for="postScanObservations">Notes / findings</label>
-                                    <textarea class="form-control" id="postScanObservations" rows="3" placeholder="Anything to report? (optional)"></textarea>
+                                    <textarea class="form-control" id="postScanObservations" rows="2" placeholder="General observations (optional)"></textarea>
+                                </div>
+                                <div class="mb-2 border rounded p-2 bg-light">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="postScanReportFacilityIssue"
+                                               onchange="togglePostScanFacilityIssue()"/>
+                                        <label class="form-check-label fw-semibold" for="postScanReportFacilityIssue">
+                                            Report facility issue
+                                        </label>
+                                    </div>
+                                    <p class="small text-muted mb-2">Use for maintenance or facilities — not general security incidents.</p>
+                                    <div id="postScanFacilityIssueFields" style="display:none;">
+                                        <div class="mb-2">
+                                            <label class="form-label" for="postScanFacilityIssueType">Issue type</label>
+                                            <select class="form-select" id="postScanFacilityIssueType">
+                                                <option value="">Select type...</option>
+                                                <option value="lighting">Lighting</option>
+                                                <option value="hvac">HVAC / AC</option>
+                                                <option value="plumbing">Plumbing / Leak</option>
+                                                <option value="access_door">Door / Access</option>
+                                                <option value="cleanliness">Cleanliness</option>
+                                                <option value="damage_safety">Damage / Safety</option>
+                                                <option value="elevator">Elevator / Lift</option>
+                                                <option value="landscape">Landscaping</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-0">
+                                            <label class="form-label" for="postScanIssueDescription">Describe the issue</label>
+                                            <textarea class="form-control" id="postScanIssueDescription" rows="2"
+                                                      placeholder="What needs to be fixed? (required if reporting issue)"></textarea>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="mb-2">
-                                    <label class="form-label" for="postScanPhotos">Photos</label>
-                                    <input type="file" class="form-control" id="postScanPhotos" accept="image/*" multiple="multiple"/>
+                                    <label class="form-label">Photos</label>
+                                    <input type="file" id="postScanPhotos" accept="image/jpeg,image/png,image/jpg,image/*" capture="environment" multiple="multiple" class="post-scan-file-input"/>
+                                    <button type="button" class="btn btn-outline-primary w-100" onclick="triggerPostScanFilePick('postScanPhotos')">
+                                        <i class="fa fa-camera me-2"/>Add photos
+                                    </button>
+                                    <div id="postScanPhotosList" class="small text-muted mt-1"></div>
                                 </div>
                                 <div class="mb-2">
-                                    <label class="form-label" for="postScanVideos">Videos</label>
-                                    <input type="file" class="form-control" id="postScanVideos" accept="video/*" multiple="multiple"/>
+                                    <label class="form-label">Videos</label>
+                                    <input type="file" id="postScanVideos" accept="video/*,video/mp4,video/quicktime,.mp4,.mov,.3gp" multiple="multiple" class="post-scan-file-input"/>
+                                    <button type="button" class="btn btn-outline-primary w-100" onclick="triggerPostScanFilePick('postScanVideos')">
+                                        <i class="fa fa-video-camera me-2"/>Add videos
+                                    </button>
+                                    <div id="postScanVideosList" class="small text-muted mt-1"></div>
                                 </div>
                                 <div id="postScanEvidenceError" class="alert alert-danger py-2 small" style="display:none;"></div>
                                 <div class="d-grid gap-2">
@@ -1817,8 +2037,89 @@
                                 </div>
                             </div>
 
+                            <!-- Styled confirmation after saving findings -->
+                            <div id="postScanSaveSuccessPanel" class="post-scan-save-success" style="display:none;">
+                                <div class="post-scan-save-success__hero post-scan-save-success__hero--success" id="postScanSaveSuccessHero">
+                                    <div class="post-scan-save-success__icon">
+                                        <i class="fa fa-check" id="postScanSaveSuccessIcon"></i>
+                                    </div>
+                                </div>
+                                <h4 class="post-scan-save-success__title" id="postScanSaveSuccessTitle">Findings saved</h4>
+                                <p class="post-scan-save-success__message" id="postScanSaveSuccessMessage"></p>
+                                <div id="postScanSaveSuccessBadge" class="post-scan-incident-badge" style="display:none;">
+                                    <i class="fa fa-wrench"/>
+                                    <span>Facility issue <strong id="postScanSaveSuccessIncident"></strong></span>
+                                </div>
+                                <ul id="postScanSaveSuccessSummary" class="post-scan-save-summary list-unstyled mb-0" style="display:none;"></ul>
+                                <button type="button" class="btn btn-primary btn-lg w-100 btn-continue-patrol" onclick="continueAfterPostScanSave()">
+                                    <i class="fa fa-arrow-right me-2"/>Continue patrol
+                                </button>
+                            </div>
+
                             <!-- Scan Result -->
                             <div id="scanResult" class="mt-3" style="display:none;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Unfinished patrol blocks starting another tour -->
+            <div class="modal fade" id="blockedTourModal" tabindex="-1" aria-labelledby="blockedTourModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-warning text-dark">
+                            <h5 class="modal-title" id="blockedTourModalLabel">
+                                <i class="fa fa-exclamation-triangle me-2"/>Unfinished patrol
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p id="blockedTourModalMessage" class="mb-3"/>
+                            <div id="blockedTourModalList" class="list-group mb-0"/>
+                        </div>
+                        <div class="modal-footer flex-column flex-sm-row gap-2">
+                            <button type="button" class="btn btn-primary w-100" onclick="continueBlockedPatrol()">
+                                <i class="fa fa-play me-1"/>Continue patrol
+                            </button>
+                            <button type="button" class="btn btn-warning w-100" onclick="endBlockedPatrolAndRetry()">
+                                <i class="fa fa-flag me-1"/>End patrol &amp; start new
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary w-100" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Complete Tour — optional summary notes -->
+            <div class="modal fade" id="completeTourModal" tabindex="-1" aria-labelledby="completeTourModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-success text-white">
+                            <h5 class="modal-title" id="completeTourModalLabel">
+                                <i class="fa fa-check-circle me-2"/>Complete Tour
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="text-muted small mb-3">
+                                Checkpoint notes are saved after each scan. Optionally add an overall summary for this tour.
+                            </p>
+                            <div class="mb-3">
+                                <label for="completeTourObservations" class="form-label">Tour summary (optional)</label>
+                                <textarea class="form-control" id="completeTourObservations" rows="3"
+                                          placeholder="Handover notes, overall patrol summary..."></textarea>
+                            </div>
+                            <div class="mb-0">
+                                <label for="completeTourIssues" class="form-label">Issues / follow-up (optional)</label>
+                                <textarea class="form-control" id="completeTourIssues" rows="2"
+                                          placeholder="Anything supervisors should follow up on..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-success" id="confirmCompleteTourBtn" onclick="confirmCompleteTour()">
+                                <i class="fa fa-check me-2"/>Complete Tour
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1870,12 +2171,14 @@
                 // Global scanner instance
                 let tourScanner = null;
                 let currentCheckpointId = null;
+                let scanSubmitInProgress = false;
                 let currentTourLogId = null;
                 let currentScanType = 'qr';
                 let pendingCheckpointScanId = null;
 
                 // Handle modal shown event (Bootstrap 5 event)
                 document.addEventListener('DOMContentLoaded', function() {
+                    bindPostScanFileInputs();
                     const modalEl = document.getElementById('scannerModal');
                     if (modalEl) {
                         modalEl.addEventListener('shown.bs.modal', function() {
@@ -1909,6 +2212,18 @@
                             if (pPh) pPh.value = '';
                             if (pVid) pVid.value = '';
                             if (pObs) pObs.value = '';
+                            var pIssueChk = document.getElementById('postScanReportFacilityIssue');
+                            var pIssueType = document.getElementById('postScanFacilityIssueType');
+                            var pIssueDesc = document.getElementById('postScanIssueDescription');
+                            var pIssueFields = document.getElementById('postScanFacilityIssueFields');
+                            if (pIssueChk) pIssueChk.checked = false;
+                            if (pIssueType) pIssueType.value = '';
+                            if (pIssueDesc) pIssueDesc.value = '';
+                            if (pIssueFields) pIssueFields.style.display = 'none';
+                            var pPhList = document.getElementById('postScanPhotosList');
+                            var pVidList = document.getElementById('postScanVideosList');
+                            if (pPhList) pPhList.textContent = '';
+                            if (pVidList) pVidList.textContent = '';
                             if (pErr) { pErr.style.display = 'none'; pErr.textContent = ''; }
                             const titleEl = document.getElementById('scannerModalTitle');
                             if (titleEl) titleEl.textContent = 'Scan Checkpoint';
@@ -2008,6 +2323,25 @@
                     }
                 }
 
+                function guardproExtractNdefText(message) {
+                    if (window.guardproExtractNdefText) {
+                        return window.guardproExtractNdefText(message);
+                    }
+                    return '';
+                }
+                function guardproResolveNfcScanPayload(ndefText, serialNumber) {
+                    if (window.guardproResolveNfcScanPayload && window.guardproResolveNfcScanPayload !== guardproResolveNfcScanPayload) {
+                        return window.guardproResolveNfcScanPayload(ndefText, serialNumber);
+                    }
+                    var serial = (serialNumber && String(serialNumber).trim()) || '';
+                    if (serial) {
+                        var hex = serial.replace(/[^0-9a-fA-F]/g, '').toLowerCase();
+                        var pairs = hex.match(/.{1,2}/g) || [];
+                        return pairs.join(':');
+                    }
+                    return (ndefText && String(ndefText).trim()) || '';
+                }
+
                 // Global bridge for Native NFC (Called from TwaLauncherActivity.kt)
                 window.onNativeNFCScan = function(tagData, serial) {
                     console.log('[Guard Pro Tours] NFC Tag scanned via Native Bridge:', tagData, serial);
@@ -2021,9 +2355,9 @@
                         
                         console.log('[Guard Pro Tours] Modal is active, processing native scan result');
                         
-                        // Use handleScanSuccess directly
+                        var scanPayload = guardproResolveNfcScanPayload(tagData, serial);
                         if (typeof handleScanSuccess === 'function') {
-                            handleScanSuccess(tagData, 'nfc');
+                            handleScanSuccess(scanPayload, 'nfc');
                         }
                     } else {
                         console.log('[Guard Pro Tours] Scan ignored: Modal not active or not in NFC mode');
@@ -2074,68 +2408,12 @@
                         console.log('[Guard Pro Tours] Web NFC scan started successfully');
 
                         nfcReader.onreading = ({ message, serialNumber }) => {
-                            let tagData = null;
-                            
                             console.log('[NFC Scan] Serial number:', serialNumber);
                             console.log('[NFC Scan] Message records:', message?.records?.length || 0);
-                            
-                            // First, try to extract data from NDEF records
-                            if (message && message.records && message.records.length > 0) {
-                                // Try all records, not just the first one
-                                for (const record of message.records) {
-                                    try {
-                                        console.log('[NFC Scan] Record type:', record.recordType, 'Media type:', record.mediaType);
-                                        
-                                        // Handle text/plain records
-                                        if (record.recordType === 'text' || record.mediaType === 'text/plain') {
-                                            const textDecoder = new TextDecoder(record.encoding || 'utf-8');
-                                            const recordData = textDecoder.decode(record.data);
-                                            if (recordData && recordData.trim()) {
-                                                tagData = recordData.trim();
-                                                console.log('[NFC Scan] Found text record:', tagData);
-                                                break; // Use first valid text record
-                                            }
-                                        }
-                                        // Handle URL records
-                                        else if (record.recordType === 'url' || record.mediaType === 'text/uri-list') {
-                                            const textDecoder = new TextDecoder(record.encoding || 'utf-8');
-                                            const recordData = textDecoder.decode(record.data);
-                                            if (recordData && recordData.trim()) {
-                                                tagData = recordData.trim();
-                                                console.log('[NFC Scan] Found URL record:', tagData);
-                                                break;
-                                            }
-                                        }
-                                        // Handle generic data records - try to decode as text
-                                        else if (record.data) {
-                                            try {
-                                                const textDecoder = new TextDecoder(record.encoding || 'utf-8');
-                                                const recordData = textDecoder.decode(record.data);
-                                                if (recordData && recordData.trim()) {
-                                                    tagData = recordData.trim();
-                                                    console.log('[NFC Scan] Found generic record:', tagData);
-                                                    break;
-                                                }
-                                            } catch (e) {
-                                                console.warn('[NFC Scan] Could not decode record as text:', e);
-                                            }
-                                        }
-                                    } catch (e) {
-                                        console.warn('[NFC Scan] Error processing record:', e);
-                                    }
-                                }
-                            }
-                            
-                            // Fallback to serial number if no record data found
-                            if (!tagData && serialNumber) {
-                                tagData = serialNumber;
-                                console.log('[NFC Scan] Using serial number:', tagData);
-                            }
-                            
-                            if (tagData && tagData.toString().trim()) {
-                                // Ensure tagData is a string
-                                const tagDataStr = tagData.toString().trim();
-                                console.log('[NFC Scan] Final tag data to send:', tagDataStr);
+                            const ndefText = guardproExtractNdefText(message);
+                            const tagDataStr = guardproResolveNfcScanPayload(ndefText, serialNumber);
+                            console.log('[NFC Scan] Final tag data to send:', tagDataStr);
+                            if (tagDataStr) {
                                 handleScanSuccess(tagDataStr, 'nfc');
                             } else {
                                 console.error('[NFC Scan] Invalid tag data:', tagData);
@@ -2218,11 +2496,237 @@
                     if (msgEl) msgEl.textContent = message || 'Checkpoint recorded.';
                     const errEl = document.getElementById('postScanEvidenceError');
                     if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+                    const successPanel = document.getElementById('postScanSaveSuccessPanel');
+                    if (successPanel) successPanel.style.display = 'none';
                     document.getElementById('postScanEvidencePanel').style.display = 'block';
+                    bindPostScanFileInputs();
+                    updatePostScanFileList('postScanPhotos', 'postScanPhotosList');
+                    updatePostScanFileList('postScanVideos', 'postScanVideosList');
                 }
 
                 function skipPostScanEvidence() {
                     closeModalAndReload();
+                }
+
+                function continueAfterPostScanSave() {
+                    closeModalAndReload();
+                }
+
+                function buildPostScanSaveSummaryItems() {
+                    var items = [];
+                    var obs = (document.getElementById('postScanObservations') || {}).value || '';
+                    obs = obs.trim();
+                    if (obs) {
+                        var shortObs = obs.length > 72 ? obs.substring(0, 72) + '…' : obs;
+                        items.push({ icon: 'fa-sticky-note-o', text: 'Notes: ' + shortObs });
+                    }
+                    var photosIn = document.getElementById('postScanPhotos');
+                    var videosIn = document.getElementById('postScanVideos');
+                    var photoCount = photosIn && photosIn.files ? photosIn.files.length : 0;
+                    var videoCount = videosIn && videosIn.files ? videosIn.files.length : 0;
+                    if (photoCount) {
+                        items.push({
+                            icon: 'fa-camera',
+                            text: photoCount === 1 ? '1 photo attached' : photoCount + ' photos attached',
+                        });
+                    }
+                    if (videoCount) {
+                        items.push({
+                            icon: 'fa-video-camera',
+                            text: videoCount === 1 ? '1 video attached' : videoCount + ' videos attached',
+                        });
+                    }
+                    var issueChk = document.getElementById('postScanReportFacilityIssue');
+                    if (issueChk && issueChk.checked) {
+                        var typeSel = document.getElementById('postScanFacilityIssueType');
+                        var typeLabel = typeSel && typeSel.selectedIndex > 0
+                            ? typeSel.options[typeSel.selectedIndex].text
+                            : 'Facility issue';
+                        items.push({ icon: 'fa-building-o', text: 'Reported: ' + typeLabel });
+                    }
+                    return items;
+                }
+
+                function showPostScanSaveSuccess(responseData) {
+                    responseData = responseData || {};
+                    var formPanel = document.getElementById('postScanEvidencePanel');
+                    var successPanel = document.getElementById('postScanSaveSuccessPanel');
+                    if (formPanel) formPanel.style.display = 'none';
+                    if (!successPanel) {
+                        closeModalAndReload();
+                        return;
+                    }
+                    var isWarning = !!responseData.warning;
+                    var hero = document.getElementById('postScanSaveSuccessHero');
+                    var iconEl = document.getElementById('postScanSaveSuccessIcon');
+                    var titleEl = document.getElementById('postScanSaveSuccessTitle');
+                    var msgEl = document.getElementById('postScanSaveSuccessMessage');
+                    var badge = document.getElementById('postScanSaveSuccessBadge');
+                    var incidentEl = document.getElementById('postScanSaveSuccessIncident');
+                    var summaryEl = document.getElementById('postScanSaveSuccessSummary');
+                    var modalTitle = document.getElementById('scannerModalTitle');
+                    if (modalTitle) {
+                        modalTitle.textContent = isWarning ? 'Saved with notice' : 'Findings saved';
+                    }
+                    if (hero) {
+                        hero.className = 'post-scan-save-success__hero ' + (
+                            isWarning
+                                ? 'post-scan-save-success__hero--warning'
+                                : 'post-scan-save-success__hero--success'
+                        );
+                    }
+                    if (iconEl) {
+                        iconEl.className = isWarning ? 'fa fa-exclamation' : 'fa fa-check';
+                    }
+                    if (titleEl) {
+                        titleEl.textContent = isWarning ? 'Saved with a notice' : 'Findings saved';
+                    }
+                    if (msgEl) {
+                        msgEl.textContent = responseData.message || (
+                            isWarning
+                                ? 'Your notes and photos were saved. Review the notice below.'
+                                : 'Your checkpoint findings were recorded successfully.'
+                        );
+                    }
+                    var incidentName = responseData.facility_incident_name || '';
+                    if (incidentName && badge && incidentEl) {
+                        badge.style.display = 'flex';
+                        incidentEl.textContent = incidentName;
+                    } else if (badge) {
+                        badge.style.display = 'none';
+                    }
+                    var summaryItems = buildPostScanSaveSummaryItems();
+                    if (summaryEl) {
+                        if (summaryItems.length) {
+                            summaryEl.innerHTML = summaryItems.map(function(item) {
+                                return '<li><i class="fa ' + item.icon + '"></i><span>' +
+                                    item.text.replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+                                    '</span></li>';
+                            }).join('');
+                            summaryEl.style.display = 'block';
+                        } else {
+                            summaryEl.style.display = 'none';
+                            summaryEl.innerHTML = '';
+                        }
+                    }
+                    successPanel.style.display = 'block';
+                    var modalBody = successPanel.closest('.modal-body');
+                    if (modalBody) modalBody.scrollTop = 0;
+                }
+
+                var POST_SCAN_MAX_IMAGE_DIM = 1200;
+                var POST_SCAN_JPEG_QUALITY = 0.85;
+                var POST_SCAN_MAX_VIDEO_BYTES = 80 * 1024 * 1024;
+
+                function triggerPostScanFilePick(inputId) {
+                    var input = document.getElementById(inputId);
+                    if (!input) {
+                        console.warn('[Guard Pro Tours] File input not found:', inputId);
+                        return;
+                    }
+                    try {
+                        input.value = '';
+                    } catch (e) { /* ignore */ }
+                    input.click();
+                }
+
+                function formatPostScanFileSize(bytes) {
+                    if (!bytes || bytes < 1024) {
+                        return (bytes || 0) + ' B';
+                    }
+                    if (bytes < 1024 * 1024) {
+                        return (bytes / 1024).toFixed(1) + ' KB';
+                    }
+                    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+                }
+
+                function updatePostScanFileList(inputId, listId) {
+                    var input = document.getElementById(inputId);
+                    var listEl = document.getElementById(listId);
+                    if (!input || !listEl) {
+                        return;
+                    }
+                    if (!input.files || !input.files.length) {
+                        listEl.textContent = 'No files selected';
+                        return;
+                    }
+                    var parts = [];
+                    for (var i = 0; i < input.files.length; i++) {
+                        var f = input.files[i];
+                        parts.push(f.name + ' (' + formatPostScanFileSize(f.size) + ')');
+                    }
+                    listEl.textContent = parts.join(', ');
+                }
+
+                function bindPostScanFileInputs() {
+                    var photoIn = document.getElementById('postScanPhotos');
+                    var videoIn = document.getElementById('postScanVideos');
+                    if (photoIn && !photoIn.dataset.bound) {
+                        photoIn.dataset.bound = '1';
+                        photoIn.addEventListener('change', function() {
+                            updatePostScanFileList('postScanPhotos', 'postScanPhotosList');
+                        });
+                    }
+                    if (videoIn && !videoIn.dataset.bound) {
+                        videoIn.dataset.bound = '1';
+                        videoIn.addEventListener('change', function() {
+                            updatePostScanFileList('postScanVideos', 'postScanVideosList');
+                        });
+                    }
+                }
+
+                function compressImageFileForUpload(file) {
+                    return new Promise(function(resolve, reject) {
+                        if (!file || !file.type || file.type.indexOf('image/') !== 0) {
+                            fileToBase64Payload(file).then(resolve).catch(reject);
+                            return;
+                        }
+                        var url = URL.createObjectURL(file);
+                        var img = new Image();
+                        img.onload = function() {
+                            URL.revokeObjectURL(url);
+                            var maxDim = POST_SCAN_MAX_IMAGE_DIM;
+                            var w = img.naturalWidth || img.width;
+                            var h = img.naturalHeight || img.height;
+                            if (w > maxDim || h > maxDim) {
+                                var ratio = Math.min(maxDim / w, maxDim / h);
+                                w = Math.round(w * ratio);
+                                h = Math.round(h * ratio);
+                            }
+                            var canvas = document.createElement('canvas');
+                            canvas.width = w;
+                            canvas.height = h;
+                            var ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, w, h);
+                            canvas.toBlob(function(blob) {
+                                if (!blob) {
+                                    fileToBase64Payload(file).then(resolve).catch(reject);
+                                    return;
+                                }
+                                var reader = new FileReader();
+                                reader.onload = function() {
+                                    var res = reader.result;
+                                    var comma = res.indexOf(',');
+                                    var base64 = comma >= 0 ? res.substring(comma + 1) : res;
+                                    var baseName = (file.name || 'photo').replace(/\.[^.]+$/, '');
+                                    resolve({
+                                        name: baseName + '.jpg',
+                                        data: base64,
+                                        mimetype: 'image/jpeg'
+                                    });
+                                };
+                                reader.onerror = function() {
+                                    fileToBase64Payload(file).then(resolve).catch(reject);
+                                };
+                                reader.readAsDataURL(blob);
+                            }, 'image/jpeg', POST_SCAN_JPEG_QUALITY);
+                        };
+                        img.onerror = function() {
+                            URL.revokeObjectURL(url);
+                            fileToBase64Payload(file).then(resolve).catch(reject);
+                        };
+                        img.src = url;
+                    });
                 }
 
                 function fileToBase64Payload(file) {
@@ -2243,6 +2747,57 @@
                     });
                 }
 
+                function togglePostScanFacilityIssue() {
+                    var chk = document.getElementById('postScanReportFacilityIssue');
+                    var box = document.getElementById('postScanFacilityIssueFields');
+                    if (box) {
+                        box.style.display = (chk && chk.checked) ? 'block' : 'none';
+                    }
+                }
+
+                function getPostScanFacilityIssueParams() {
+                    var chk = document.getElementById('postScanReportFacilityIssue');
+                    if (!chk || !chk.checked) {
+                        return {};
+                    }
+                    var typeEl = document.getElementById('postScanFacilityIssueType');
+                    var descEl = document.getElementById('postScanIssueDescription');
+                    var issueType = typeEl ? typeEl.value : '';
+                    var issueDesc = descEl ? descEl.value.trim() : '';
+                    if (!issueType) {
+                        throw new Error('Please select a facility issue type.');
+                    }
+                    if (!issueDesc || issueDesc.length < 10) {
+                        throw new Error('Please describe the facility issue (at least 10 characters).');
+                    }
+                    return {
+                        issues_found: true,
+                        facility_issue_type: issueType,
+                        issue_description: issueDesc,
+                    };
+                }
+
+                function parseEvidenceApiResponse(httpResponse, jsonBody) {
+                    if (jsonBody && jsonBody.error) {
+                        var errData = jsonBody.error.data || {};
+                        var msg = errData.message || jsonBody.error.message || 'Server error';
+                        if (Array.isArray(msg)) {
+                            msg = msg.join('\n');
+                        }
+                        throw new Error(msg);
+                    }
+                    var data = (jsonBody && jsonBody.result !== undefined) ? jsonBody.result : jsonBody;
+                    if (!httpResponse.ok) {
+                        throw new Error('Server error (' + httpResponse.status + '). Try again.');
+                    }
+                    if (!data || data.success === false) {
+                        throw new Error(
+                            (data && (data.message || data.error)) || 'Could not save findings'
+                        );
+                    }
+                    return data;
+                }
+
                 async function submitPostScanEvidence() {
                     if (!pendingCheckpointScanId) {
                         skipPostScanEvidence();
@@ -2256,18 +2811,54 @@
                         var photosIn = document.getElementById('postScanPhotos').files;
                         var videosIn = document.getElementById('postScanVideos').files;
                         var obs = document.getElementById('postScanObservations').value.trim();
+                        var issueChk = document.getElementById('postScanReportFacilityIssue');
+                        var reportIssue = issueChk && issueChk.checked;
+                        var issueParams = reportIssue ? getPostScanFacilityIssueParams() : {};
                         var photos = [];
                         var videos = [];
                         var i;
                         for (i = 0; i < photosIn.length; i++) {
-                            photos.push(await fileToBase64Payload(photosIn[i]));
+                            var pf = photosIn[i];
+                            var mt = (pf.type || '').toLowerCase();
+                            if (mt.indexOf('heic') >= 0 || mt.indexOf('heif') >= 0 ||
+                                /\.heic$/i.test(pf.name) || /\.heif$/i.test(pf.name)) {
+                                throw new Error(
+                                    'Photo "' + pf.name + '" is HEIC format. On iPhone: Settings → Camera → Formats → Most Compatible, then take the photo again.'
+                                );
+                            }
+                            photos.push(await compressImageFileForUpload(pf));
                         }
                         for (i = 0; i < videosIn.length; i++) {
-                            videos.push(await fileToBase64Payload(videosIn[i]));
+                            var vf = videosIn[i];
+                            if (vf.size > POST_SCAN_MAX_VIDEO_BYTES) {
+                                throw new Error(
+                                    'Video "' + vf.name + '" is too large (' +
+                                    formatPostScanFileSize(vf.size) +
+                                    '). Please use a shorter clip or lower resolution (max ~80 MB).'
+                                );
+                            }
+                            videos.push(await fileToBase64Payload(vf));
                         }
-                        if (!photos.length && !videos.length && !obs) {
+                        if (!photos.length && !videos.length && !obs && !reportIssue) {
                             skipPostScanEvidence();
                             return;
+                        }
+                        var params = {
+                            scan_id: pendingCheckpointScanId,
+                            issues_found: reportIssue,
+                        };
+                        if (obs) {
+                            params.observations = obs;
+                        }
+                        if (photos.length) {
+                            params.photos = photos;
+                        }
+                        if (videos.length) {
+                            params.videos = videos;
+                        }
+                        if (reportIssue) {
+                            params.facility_issue_type = issueParams.facility_issue_type;
+                            params.issue_description = issueParams.issue_description;
                         }
                         var response = await fetch('/guardpro/api/checkpoint/scan/evidence', {
                             method: 'POST',
@@ -2275,26 +2866,16 @@
                             body: JSON.stringify({
                                 jsonrpc: '2.0',
                                 method: 'call',
-                                params: {
-                                    scan_id: pendingCheckpointScanId,
-                                    photos: photos.length ? photos : undefined,
-                                    videos: videos.length ? videos : undefined,
-                                    observations: obs || undefined
-                                }
-                            })
+                                params: params,
+                            }),
                         });
                         var result = await response.json();
-                        var responseData = result.result !== undefined ? result.result : result;
-                        if (responseData && responseData.success) {
-                            closeModalAndReload();
-                        } else {
-                            var errMsg = (responseData && (responseData.message || responseData.error)) || 'Could not save findings';
-                            if (errEl) { errEl.textContent = errMsg; errEl.style.display = 'block'; }
-                        }
+                        var responseData = parseEvidenceApiResponse(response, result);
+                        showPostScanSaveSuccess(responseData);
                     } catch (e) {
                         console.error('[Guard Pro Tours] Evidence submit error:', e);
                         if (errEl) {
-                            errEl.textContent = 'Failed to save. You can skip and try again from the back office.';
+                            errEl.textContent = e.message || 'Failed to save. You can skip and try again from the back office.';
                             errEl.style.display = 'block';
                         }
                     } finally {
@@ -2303,6 +2884,12 @@
                 }
 
                 async function handleScanSuccess(scanData, scanType) {
+                    if (scanSubmitInProgress) {
+                        console.log('[Guard Pro Tours] Scan already in progress, ignoring duplicate read');
+                        return;
+                    }
+                    scanSubmitInProgress = true;
+                    try {
                     await stopScanning();
 
                     // Validate scan data
@@ -2385,7 +2972,9 @@
                             await stopScanning();
                             const sid = responseData.scan_id;
                             const st = responseData.status;
-                            if (sid && st !== 'failed') {
+                            if (responseData.already_scanned) {
+                                setTimeout(function() { closeModalAndReload(); }, 700);
+                            } else if (sid && st !== 'failed') {
                                 pendingCheckpointScanId = sid;
                                 setTimeout(function() {
                                     showPostScanEvidenceStep(sid, responseData.message || 'Checkpoint recorded.');
@@ -2421,6 +3010,9 @@
                                 modal.hide();
                             }
                         }, 2000);
+                    }
+                    } finally {
+                        scanSubmitInProgress = false;
                     }
                 }
 
@@ -2526,110 +3118,184 @@
                     resultDiv.style.display = 'block';
                 }
 
+                let pendingStartTourBtn = null;
+                let blockedPatrolTourLogId = null;
+                let partialCompleteTourLogId = null;
+
+                function showBlockedTourModal(message, blockingTours, pendingBtn) {
+                    pendingStartTourBtn = pendingBtn || null;
+                    blockedPatrolTourLogId = blockingTours && blockingTours.length
+                        ? blockingTours[0].tour_log_id
+                        : null;
+                    const msgEl = document.getElementById('blockedTourModalMessage');
+                    const listEl = document.getElementById('blockedTourModalList');
+                    if (msgEl) {
+                        msgEl.textContent = message || 'Finish your current patrol before starting another.';
+                    }
+                    if (listEl) {
+                        listEl.innerHTML = '';
+                        (blockingTours || []).forEach(function (t) {
+                            const pct = t.completion_percentage != null
+                                ? Math.round(t.completion_percentage * 100)
+                                : 0;
+                            const item = document.createElement('div');
+                            item.className = 'list-group-item';
+                            item.innerHTML =
+                                '<strong>' + (t.tour_name || 'Patrol') + '</strong><br/>' +
+                                '<small class="text-muted">' +
+                                (t.scanned_checkpoints || 0) + '/' + (t.expected_checkpoints || 0) +
+                                ' checkpoints (' + pct + '%)</small>';
+                            listEl.appendChild(item);
+                        });
+                    }
+                    $('#blockedTourModal').modal('show');
+                }
+
+                function continueBlockedPatrol() {
+                    $('#blockedTourModal').modal('hide');
+                    if (blockedPatrolTourLogId) {
+                        const card = document.getElementById('tour-card-' + blockedPatrolTourLogId);
+                        if (card) {
+                            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            card.classList.add('border', 'border-primary');
+                            setTimeout(function () {
+                                card.classList.remove('border', 'border-primary');
+                            }, 2500);
+                        }
+                    }
+                }
+
+                function endBlockedPatrolAndRetry() {
+                    if (!blockedPatrolTourLogId) {
+                        return;
+                    }
+                    $('#blockedTourModal').modal('hide');
+                    partialCompleteTourLogId = blockedPatrolTourLogId;
+                    document.getElementById('partialCompletionReason').value = '';
+                    $('#partialCompleteModal').modal('show');
+                }
+
                 async function startTour(btn) {
-                    const tourId = parseInt(btn.dataset.tourId);
-                    console.log('[DEBUG] startTour triggered for tourId:', tourId);
-                    
+                    const tourId = parseInt(btn.dataset.tourId, 10);
+                    const shiftId = btn.dataset.shiftId ? parseInt(btn.dataset.shiftId, 10) : null;
+                    const origHtml = btn.innerHTML;
                     btn.disabled = true;
                     btn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i>Starting...';
 
                     try {
-                        console.log('[DEBUG] Sending fetch request to /guardpro/api/tour/start');
+                        const params = { tour_id: tourId };
+                        if (shiftId) {
+                            params.shift_id = shiftId;
+                        }
                         const response = await fetch('/guardpro/api/tour/start', {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 jsonrpc: '2.0',
                                 method: 'call',
-                                params: {
-                                    tour_id: tourId
-                                }
-                            })
+                                params: params,
+                            }),
                         });
-
-                        console.log('[DEBUG] Fetch response received:', response.status);
                         const result = await response.json();
-                        console.log('[DEBUG] JSON result:', result);
-                        
-                        if (result.result && result.result.success) {
+                        const data = result.result || {};
+
+                        if (data.success) {
+                            if (data.resumed) {
+                                alert(data.message || 'Continuing your patrol.');
+                            }
                             window.location.reload();
-                        } else {
-                            alert(result.result?.error || 'Failed to start tour');
-                            btn.disabled = false;
-                            btn.innerHTML = '<i class="fa fa-play me-1"></i>Start';
+                            return;
                         }
+                        if (data.error === 'active_tour_exists') {
+                            showBlockedTourModal(
+                                data.message,
+                                data.blocking_tours,
+                                btn
+                            );
+                            return;
+                        }
+                        alert(data.error || data.message || 'Failed to start tour');
                     } catch (error) {
                         console.error('Start tour error:', error);
                         alert('Failed to start tour');
+                    } finally {
                         btn.disabled = false;
-                        btn.innerHTML = '<i class="fa fa-play me-1"></i>Start';
+                        btn.innerHTML = origHtml;
                     }
                 }
 
-                async function completeTour(btn) {
-                    const tourLogId = parseInt(btn.dataset.tourLogId);
-                    
-                    if (!confirm('Are you sure you want to complete this tour?')) {
+                let completeTourLogId = null;
+
+                function showCompleteTourModal(btn) {
+                    completeTourLogId = parseInt(btn.dataset.tourLogId, 10);
+                    const obs = document.getElementById('completeTourObservations');
+                    const iss = document.getElementById('completeTourIssues');
+                    if (obs) obs.value = '';
+                    if (iss) iss.value = '';
+                    $('#completeTourModal').modal('show');
+                }
+
+                async function confirmCompleteTour() {
+                    const tourLogId = completeTourLogId;
+                    if (!tourLogId) {
                         return;
                     }
-
-                    btn.disabled = true;
-                    btn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i>Completing...';
-
+                    const obsEl = document.getElementById('completeTourObservations');
+                    const issEl = document.getElementById('completeTourIssues');
+                    const observations = obsEl ? obsEl.value.trim() : '';
+                    const issuesFound = issEl ? issEl.value.trim() : '';
+                    const confirmBtn = document.getElementById('confirmCompleteTourBtn');
+                    if (confirmBtn) {
+                        confirmBtn.disabled = true;
+                        confirmBtn.innerHTML = '<i class="fa fa-spinner fa-spin me-2"></i>Completing...';
+                    }
                     try {
                         const response = await fetch('/guardpro/api/tour/complete', {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 jsonrpc: '2.0',
                                 method: 'call',
                                 params: {
                                     tour_log_id: tourLogId,
-                                    partial: false
+                                    partial: false,
+                                    observations: observations || undefined,
+                                    issues_found: issuesFound || undefined,
                                 }
                             })
                         });
-
                         const result = await response.json();
-                        
                         if (result.result && result.result.success) {
+                            $('#completeTourModal').modal('hide');
                             window.location.reload();
+                            return;
+                        }
+                        if (result.result?.checkpoint_status) {
+                            const status = result.result.checkpoint_status;
+                            alert(
+                                'Cannot complete tour!\n\nYou must scan all checkpoints first:\n\n' +
+                                'Scanned: ' + status.scanned + '/' + status.expected + '\n' +
+                                'Missing: ' + status.missing + '\n' +
+                                'Progress: ' + (status.completion_percentage * 100).toFixed(1) + '%'
+                            );
+                        } else if (result.result?.pending_tasks && result.result.pending_tasks.length > 0) {
+                            const taskList = result.result.pending_tasks
+                                .map(function (task) { return '• ' + task.name + ' (' + task.state + ')'; })
+                                .join('\n');
+                            alert('Cannot complete tour!\n\nComplete these tasks first:\n\n' + taskList);
                         } else {
-                            // Check if error is due to incomplete checkpoints
-                            if (result.result?.checkpoint_status) {
-                                const status = result.result.checkpoint_status;
-                                alert(`Cannot complete tour!\n\nYou must scan all checkpoints first:\n\n` +
-                                      `✓ Scanned: ${status.scanned}/${status.expected}\n` +
-                                      `✗ Missing: ${status.missing}\n` +
-                                      `Progress: ${status.completion_percentage.toFixed(1)}%\n\n` +
-                                      `Please complete all checkpoints and try again.`);
-                            }
-                            // Check if error is due to pending tasks
-                            else if (result.result?.pending_tasks && result.result.pending_tasks.length > 0) {
-                                const taskList = result.result.pending_tasks
-                                    .map(task => `• ${task.name} (${task.state})`)
-                                    .join('\n');
-                                alert(`Cannot complete tour!\n\nYou must complete these tasks first:\n\n${taskList}\n\nPlease complete all tasks and try again.`);
-                            } else {
-                                alert(result.result?.error || 'Failed to complete tour');
-                            }
-                            btn.disabled = false;
-                            btn.innerHTML = '<i class="fa fa-check-circle me-2"></i>Complete Tour';
+                            alert(result.result?.error || 'Failed to complete tour');
                         }
                     } catch (error) {
                         console.error('Complete tour error:', error);
                         alert('Failed to complete tour');
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fa fa-check-circle me-2"></i>Complete Tour';
+                    } finally {
+                        if (confirmBtn) {
+                            confirmBtn.disabled = false;
+                            confirmBtn.innerHTML = '<i class="fa fa-check me-2"></i>Complete Tour';
+                        }
                     }
                 }
-
-                // Global variable to store tour log ID for partial completion
-                let partialCompleteTourLogId = null;
 
                 function showPartialCompleteModal(btn) {
                     partialCompleteTourLogId = parseInt(btn.dataset.tourLogId);
@@ -2681,12 +3347,17 @@
                         const result = await response.json();
                         
                         if (result.result && result.result.success) {
-                            // Close modal using jQuery
                             $('#partialCompleteModal').modal('hide');
-                            
-                            // Show success message
+                            if (pendingStartTourBtn) {
+                                const btn = pendingStartTourBtn;
+                                pendingStartTourBtn = null;
+                                partialCompleteTourLogId = null;
+                                blockedPatrolTourLogId = null;
+                                alert('Patrol closed. Starting your new tour...');
+                                await startTour(btn);
+                                return;
+                            }
                             alert('Tour marked as partially complete.\n\nYour reason has been recorded and will be reviewed by your supervisor.');
-                            
                             window.location.reload();
                         } else {
                             alert(result.result?.error || 'Failed to partially complete tour');

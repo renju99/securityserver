@@ -1,0 +1,94 @@
+// Incident report form: vertical sidebar tabs (avoids horizontal tab overflow)
+
+.o_form_view .o_notebook.gp_incident_notebook_sidebar.o_notebook.horizontal {
+    flex-direction: row !important;
+    align-items: stretch;
+    margin-top: 0.5rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    background: #fff;
+
+    > .o_notebook_headers {
+        flex: 0 0 10.5rem;
+        min-width: 10.5rem;
+        max-width: 12rem;
+        overflow: visible;
+        border-right: 1px solid #dee2e6;
+        background: #f8f9fa;
+
+        .nav-tabs {
+            flex-direction: column !important;
+            flex-wrap: nowrap;
+            border-bottom: 0;
+            padding: 0.35rem 0;
+
+            .nav-item {
+                width: 100%;
+                margin: 0;
+                white-space: normal;
+            }
+
+            .nav-link {
+                text-align: left;
+                white-space: normal;
+                line-height: 1.25;
+                padding: 0.55rem 0.75rem;
+                font-size: 0.8125rem;
+                border-radius: 0;
+                border-left: 3px solid transparent;
+                color: #495057;
+
+                &.active {
+                    background: #fff;
+                    color: #1b365d;
+                    font-weight: 600;
+                    border-left-color: #1b365d;
+                    border-bottom-color: #dee2e6;
+                }
+            }
+        }
+    }
+
+    > .o_notebook_content {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding: 1rem 1.25rem;
+
+        .tab-pane {
+            padding: 0;
+        }
+    }
+}
+
+@media (max-width: 991.98px) {
+    .o_form_view .o_notebook.gp_incident_notebook_sidebar.o_notebook.horizontal {
+        flex-direction: column !important;
+
+        > .o_notebook_headers {
+            flex: 0 0 auto;
+            max-width: none;
+            border-right: 0;
+            border-bottom: 1px solid #dee2e6;
+
+            .nav-tabs {
+                flex-direction: row !important;
+                flex-wrap: wrap;
+                overflow-x: auto;
+
+                .nav-item {
+                    width: auto;
+                }
+
+                .nav-link {
+                    white-space: nowrap;
+                    border-left: 0;
+                    border-bottom: 3px solid transparent;
+
+                    &.active {
+                        border-bottom-color: #1b365d;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'GuardLink - Security Guard Management',
-    'version': '18.0.1.1.72',
+    'version': '18.0.1.1.102',
     'category': 'Services/Security',
     'summary': 'Win premium guard contracts with an Odoo-native suite for mobile patrols, SLA automation, client portals, and analytics.',
     'description': """
@@ -115,9 +115,11 @@ Support & Roadmap
         
         # Master Data (always load)
         'data/incident_categories.xml',
+        'data/facility_issue_filters.xml',
         'data/checkpoint_types.xml',
         'data/shift_management_config.xml',  # Shift conflict detection configuration
         'data/email_templates.xml',
+        'data/email_templates_odoo18.xml',
         'data/portal_email_templates.xml',
         'data/additional_email_templates.xml',  # High-priority email templates (Oct 2025)
         'data/missing_email_templates.xml',  # Missing email templates (Nov 2025)
@@ -218,6 +220,7 @@ Support & Roadmap
         'views/client_site_views.xml',
         'views/tenant_resident_views.xml',
         'views/resident_complaint_views.xml',
+        'views/security_tour_checkpoint_line_views.xml',
         'views/security_tour_views.xml',
         'views/checkpoint_map_creator.xml',
         'views/checkpoint_views.xml',
@@ -258,6 +261,7 @@ Support & Roadmap
         # OPTIONAL: Requires project module
         # 'views/project_task_guard_views.xml',  # Native project module extension
         'views/tour_log_views.xml',
+        'views/facility_issue_views.xml',
         'views/checkpoint_scan_views.xml',
         'views/daily_activity_report_views.xml',
         'views/webhook_views.xml',
@@ -407,6 +411,10 @@ Support & Roadmap
             'guardpro/static/src/scss/dashboard.scss',
             'guardpro/static/src/scss/guardpro_analytics_dashboard.scss',
             'guardpro/static/src/scss/guardpro_tours_dashboard.scss',
+            'guardpro/static/src/scss/security_tour_checkpoints.scss',
+            'guardpro/static/src/scss/tour_log_observations.scss',
+            'guardpro/static/src/scss/incident_report_form.scss',
+            'guardpro/static/src/js/security_tour_checkpoint_dropdown.js',
             'guardpro/static/src/css/guard_map.css',
             'guardpro/static/src/css/emergency_broadcast_popup.css',
             'guardpro/static/src/css/analytics_dashboard_filters.css',
@@ -454,6 +462,7 @@ Support & Roadmap
             'guardpro/static/src/js/guard_gps_auto_init.js',  # Auto-start GPS for guards
             'guardpro/static/src/js/mobile_navigation.js',
             'guardpro/static/src/js/guard_elearning_navigation.js',  # Back to Mobile button for guards
+            'guardpro/static/src/js/nfc_ndef_utils.js',  # NDEF text decode + UID formatting
             'guardpro/static/src/js/tour_scanner.js',  # QR/NFC scanning for tours
             'guardpro/static/src/js/mobile_emergency_broadcast.js',  # Poll and show emergency broadcasts in mobile PWA
             'guardpro/static/src/js/mobile_patrol_reminder.js',  # Patrol 30/10 min reminders + acknowledge

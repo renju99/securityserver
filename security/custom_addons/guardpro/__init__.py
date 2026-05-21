@@ -14,6 +14,9 @@ def post_init_hook(cr, registry):
             "restart all Odoo workers, then run: "
             "odoo -u guardpro -d <database> --stop-after-init"
         )
+    from odoo import api, SUPERUSER_ID
+    env = api.Environment(cr, SUPERUSER_ID, {})
+    env['security.tour'].migrate_all_tour_checkpoint_sequences()
 
 
 from . import models
