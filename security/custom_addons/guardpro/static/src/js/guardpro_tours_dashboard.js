@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Component, useState, onWillStart, onMounted } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
@@ -200,7 +201,6 @@ class GuardLinkToursDashboard extends Component {
     async exportPDF() {
         try {
             this.state.loading = true;
-            // Prepare filter parameters
             const filterParams = {
                 date_from: this.state.filters.date_from,
                 date_to: this.state.filters.date_to,
@@ -209,52 +209,19 @@ class GuardLinkToursDashboard extends Component {
                 period: this.state.filters.period
             };
 
-            // Get or create dashboard record
-            const userId = this.env.user ? this.env.user.userId : 1;
-            const userName = this.env.user ? this.env.user.name : 'User';
-
-            let dashboard = await this.orm.searchRead(
+            const action = await this.orm.call(
                 'guardpro.tours.dashboard',
-                [['user_id', '=', userId]],
-                ['id'],
-                { limit: 1 }
+                'action_print_tours_dashboard_pdf',
+                [filterParams]
             );
-
-            let dashboardId;
-            if (!dashboard || dashboard.length === 0) {
-                dashboardId = await this.orm.create(
-                    'guardpro.tours.dashboard',
-                    {
-                        name: 'Tours Dashboard - ' + userName,
-                        user_id: userId
-                    }
-                );
-            } else {
-                dashboardId = dashboard[0].id;
+            if (action) {
+                await this.action.doAction(action);
             }
-
-            // Call the report action
-            const reportAction = {
-                type: 'ir.actions.report',
-                report_name: 'guardpro.report_tours_dashboard_pdf',
-                report_type: 'qweb-pdf',
-                res_ids: [dashboardId],
-                context: {
-                    active_id: dashboardId,
-                    active_ids: [dashboardId],
-                    filter_params: filterParams
-                },
-                data: {
-                    filters: filterParams
-                }
-            };
-
-            await this.action.doAction(reportAction);
-            this.state.loading = false;
         } catch (error) {
-            this.state.loading = false;
             console.error("Error exporting PDF:", error);
             alert("Failed to export PDF: " + (error.message || error));
+        } finally {
+            this.state.loading = false;
         }
     }
 

@@ -1104,30 +1104,50 @@ class GuardLinkPWAController(http.Controller):
                 if not emergency_category:
                     emergency_category = request.env['incident.category'].sudo().search([], limit=1)
                 
-                # Get site (required field)
+                # Get site from current site or assigned projects only (never arbitrary DB site)
                 site_id = None
                 if hasattr(guard, 'current_site_id') and guard.current_site_id:
                     site_id = guard.current_site_id.id
+                elif guard.site_ids:
+                    site_id = guard.site_ids[0].id
+                elif guard.user_id and guard.user_id.site_ids:
+                    site_id = guard.user_id.site_ids[0].id
+
+                user_sites = set(request.env.user.site_ids.ids)
+                if (
+                    site_id
+                    and not request.env.user.has_group('guardpro.group_guardpro_admin')
+                    and user_sites
+                    and site_id not in user_sites
+                ):
+                    _logger.warning(
+                        'Panic incident skipped for guard %s: site %s outside assignments',
+                        guard.id, site_id,
+                    )
+                    site_id = None
+
+                if not site_id:
+                    _logger.warning(
+                        'Panic incident skipped for guard %s: no assigned site',
+                        guard.id,
+                    )
                 else:
-                    any_site = request.env['client.site'].sudo().search([], limit=1)
-                    site_id = any_site.id if any_site else None
-                
-                incident_vals = {
-                    'guard_id': guard.id,
-                    'site_id': site_id,
-                    'category_id': emergency_category.id if emergency_category else False,
-                    'severity': 'critical',
-                    'title': 'PANIC ALERT',
-                    'description': f'Panic button activated by {guard.name}',
-                    'incident_datetime': datetime.now(),
-                    'status': 'draft',
-                }
-                if latitude and longitude:
-                    incident_vals.update({
-                        'latitude': float(latitude),
-                        'longitude': float(longitude),
-                    })
-                request.env['incident.report'].sudo().create(incident_vals)
+                    incident_vals = {
+                        'guard_id': guard.id,
+                        'site_id': site_id,
+                        'category_id': emergency_category.id if emergency_category else False,
+                        'severity': 'critical',
+                        'title': 'PANIC ALERT',
+                        'description': f'Panic button activated by {guard.name}',
+                        'incident_datetime': datetime.now(),
+                        'status': 'draft',
+                    }
+                    if latitude and longitude:
+                        incident_vals.update({
+                            'latitude': float(latitude),
+                            'longitude': float(longitude),
+                        })
+                    request.env['incident.report'].sudo().create(incident_vals)
             except Exception as incident_error:
                 _logger.error(f"Failed to create panic incident: {incident_error}")
             

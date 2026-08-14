@@ -114,7 +114,7 @@
                                     multiple="multiple"
                                     size="5"
                                     t-on-change="(ev) => this.onMultiSelectChange('site_ids', Array.from(ev.target.selectedOptions).map(opt => opt.value))">
-                                <option value="">All Sites</option>
+                                <option value="">All Projects</option>
                                 <t t-if="state.filterOptions.sites and state.filterOptions.sites.length > 0">
                                     <t t-foreach="state.filterOptions.sites" t-as="site" t-key="site.id">
                                         <option t-att-value="site.id" 

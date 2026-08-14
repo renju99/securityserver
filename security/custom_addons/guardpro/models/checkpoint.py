@@ -35,10 +35,19 @@ class Checkpoint(models.Model):
     )
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=True,
         ondelete='cascade',
         tracking=True
+    )
+    zone_id = fields.Many2one(
+        'site.zone',
+        string='Zone',
+        domain="[('site_id', '=', site_id)]",
+        ondelete='set null',
+        tracking=True,
+        index=True,
+        help='Operational zone for access control and reporting',
     )
 
     # Location Hierarchy
@@ -93,8 +102,11 @@ class Checkpoint(models.Model):
         ('nfc', 'NFC Tag'),
         ('qr', 'QR Code'),
         ('virtual', 'Virtual (GPS)'),
-        ('both', 'NFC + QR')
-    ], string='Scan Type', default='nfc', required=True, tracking=True)
+        ('both', 'NFC + QR'),
+        ('walkaround', 'General Walkaround'),
+    ], string='Scan Type', default='nfc', required=True, tracking=True,
+       help='General Walkaround requires no NFC, QR, or GPS validation — '
+            'guards mark the checkpoint as visited manually.')
     
     # NFC Configuration
     nfc_tag_id = fields.Char(
@@ -467,11 +479,19 @@ class Checkpoint(models.Model):
                 vals['qr_code'] = 'CP-' + str(uuid.uuid4())[:8].upper()
         return super().create(vals_list)
 
+    @api.onchange('zone_id')
+    def _onchange_zone_id(self):
+        if self.zone_id and not self.site_id:
+            self.site_id = self.zone_id.site_id
+
     @api.onchange('building_id')
     def _onchange_building_id(self):
         """Update site_id when building is selected."""
-        if self.building_id and not self.site_id:
-            self.site_id = self.building_id.site_id
+        if self.building_id:
+            if not self.site_id:
+                self.site_id = self.building_id.site_id
+            if not self.zone_id and self.building_id.zone_id:
+                self.zone_id = self.building_id.zone_id
 
     @api.onchange('floor_id')
     def _onchange_floor_id(self):
@@ -739,6 +759,14 @@ class Checkpoint(models.Model):
             else:
                 validation_msg = _('GPS coordinates not provided for virtual checkpoint')
                 _logger.warning('[Checkpoint Verify] GPS scan FAILED: %s', validation_msg)
+
+        elif scan_type == 'walkaround':
+            # General walkaround: no NFC / QR / GPS validation required
+            valid = True
+            _logger.info(
+                '[Checkpoint Verify] Walkaround SUCCESS for checkpoint %s (no validation)',
+                self.name,
+            )
         else:
             # Unknown scan type
             _logger.error('[Checkpoint Verify] Unknown scan_type "%s" for checkpoint %s', scan_type, self.name)

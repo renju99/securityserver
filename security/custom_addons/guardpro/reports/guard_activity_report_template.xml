@@ -1,0 +1,540 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="guard_activity_report_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <style>
+                            /* Page breaks: keep headers with content; allow long tables to split */
+                            .gar-header,
+                            .info-card,
+                            .section-keep,
+                            .notes-section {
+                                page-break-inside: avoid;
+                                break-inside: avoid;
+                            }
+                            .section-block {
+                                page-break-inside: auto;
+                                break-inside: auto;
+                            }
+                            .section-block > .section-header {
+                                page-break-after: avoid;
+                                break-after: avoid-page;
+                                page-break-inside: avoid;
+                            }
+                            .section-block > .empty-section,
+                            .section-block > .stats-grid {
+                                page-break-before: avoid;
+                                break-before: avoid-page;
+                            }
+                            .section-keep > .section-header {
+                                page-break-after: avoid;
+                                break-after: avoid-page;
+                            }
+                            .enhanced-table {
+                                page-break-inside: auto;
+                                break-inside: auto;
+                            }
+                            .enhanced-table thead {
+                                display: table-header-group;
+                            }
+                            .enhanced-table tbody {
+                                display: table-row-group;
+                            }
+                            .enhanced-table tr {
+                                page-break-inside: avoid;
+                                break-inside: avoid;
+                                page-break-after: auto;
+                            }
+
+                            .gar-header {
+                                background-color: #1e3a5f;
+                                color: #ffffff;
+                                padding: 16px 18px;
+                                margin-bottom: 12px;
+                                border: 1px solid #1e3a5f;
+                            }
+                            .gar-header h2 {
+                                margin: 0;
+                                font-size: 22px;
+                                font-weight: 700;
+                                color: #ffffff;
+                            }
+                            .gar-header .subtitle {
+                                font-size: 14px;
+                                margin-top: 6px;
+                                color: #ffffff;
+                                font-weight: 600;
+                            }
+                            .info-card {
+                                background-color: #f4f6f8;
+                                border: 1px solid #c5cdd6;
+                                border-left: 4px solid #1e3a5f;
+                                padding: 12px 14px;
+                                margin-bottom: 12px;
+                            }
+                            .info-card h5 {
+                                color: #1e3a5f;
+                                font-weight: 700;
+                                margin: 0 0 8px 0;
+                                font-size: 14px;
+                            }
+                            .info-grid { display: table; width: 100%; }
+                            .info-row { display: table-row; }
+                            .info-label {
+                                display: table-cell;
+                                font-weight: 700;
+                                padding: 6px 10px;
+                                width: 28%;
+                                color: #1a202c;
+                                background-color: #edf2f7;
+                                border: 1px solid #c5cdd6;
+                            }
+                            .info-value {
+                                display: table-cell;
+                                padding: 6px 10px;
+                                color: #1a202c;
+                                background-color: #ffffff;
+                                border: 1px solid #c5cdd6;
+                                border-left: none;
+                            }
+                            .stats-grid {
+                                display: table;
+                                width: 100%;
+                                border-collapse: separate;
+                                border-spacing: 6px;
+                                margin: 0 0 8px 0;
+                            }
+                            .stat-box {
+                                display: table-cell;
+                                background-color: #ffffff;
+                                padding: 12px 6px;
+                                text-align: center;
+                                width: 16.66%;
+                                border: 2px solid #1e3a5f;
+                                vertical-align: middle;
+                            }
+                            .stat-box .number {
+                                font-size: 22px;
+                                font-weight: 700;
+                                display: block;
+                                margin-bottom: 3px;
+                                color: #1e3a5f;
+                            }
+                            .stat-box .label {
+                                font-size: 9px;
+                                text-transform: uppercase;
+                                letter-spacing: 0.3px;
+                                color: #2d3748;
+                                font-weight: 600;
+                            }
+                            .section-header {
+                                background-color: #1e3a5f;
+                                color: #ffffff;
+                                padding: 9px 12px;
+                                margin-top: 14px;
+                                margin-bottom: 0;
+                                font-weight: 700;
+                                font-size: 12px;
+                            }
+                            .enhanced-table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin: 0 0 10px 0;
+                                border: 1px solid #c5cdd6;
+                            }
+                            .enhanced-table thead { background-color: #1e3a5f; color: #ffffff; }
+                            .enhanced-table th {
+                                padding: 7px 8px;
+                                text-align: left;
+                                font-weight: 700;
+                                font-size: 10px;
+                                text-transform: uppercase;
+                                color: #ffffff;
+                                border: 1px solid #1e3a5f;
+                            }
+                            .enhanced-table td {
+                                padding: 7px 8px;
+                                border: 1px solid #d0d7de;
+                                font-size: 11px;
+                                color: #1a202c;
+                                background-color: #ffffff;
+                            }
+                            .enhanced-table tbody tr:nth-child(even) td { background-color: #f7fafc; }
+                            .empty-section {
+                                text-align: center;
+                                padding: 12px;
+                                color: #4a5568;
+                                font-style: italic;
+                                background-color: #edf2f7;
+                                border: 1px solid #cbd5e0;
+                                border-top: none;
+                                margin: 0 0 10px 0;
+                                font-size: 11px;
+                            }
+                            .notes-section {
+                                background-color: #fffbeb;
+                                border: 2px solid #d69e2e;
+                                padding: 12px;
+                                margin: 12px 0 0 0;
+                            }
+                            .notes-section h5 {
+                                color: #744210;
+                                font-weight: 700;
+                                margin: 0 0 8px 0;
+                            }
+                            .badge-custom {
+                                padding: 2px 7px;
+                                font-size: 9px;
+                                font-weight: 700;
+                                text-transform: uppercase;
+                                display: inline-block;
+                            }
+                            .badge-critical { background-color: #c53030; color: #ffffff; }
+                            .badge-high { background-color: #c05621; color: #ffffff; }
+                            .badge-medium { background-color: #d69e2e; color: #1a202c; }
+                            .badge-low { background-color: #2b6cb0; color: #ffffff; }
+                            .badge-success-custom { background-color: #276749; color: #ffffff; }
+                            .badge-info { background-color: #2b6cb0; color: #ffffff; }
+                            .badge-warning-custom { background-color: #d69e2e; color: #1a202c; }
+                        </style>
+
+                        <div class="gar-header">
+                            <h2>GUARD ACTIVITY REPORT (GAR)</h2>
+                            <div class="subtitle">
+                                <strong><span t-field="doc.name"/></strong>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <h5>GUARD &amp; REPORT INFORMATION</h5>
+                            <div class="info-grid">
+                                <div class="info-row">
+                                    <div class="info-label">Guard:</div>
+                                    <div class="info-value"><strong><span t-field="doc.guard_id.name"/></strong></div>
+                                </div>
+                                <div class="info-row" t-if="doc.badge_number">
+                                    <div class="info-label">Badge No.:</div>
+                                    <div class="info-value"><span t-field="doc.badge_number"/></div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Site:</div>
+                                    <div class="info-value"><strong><span t-field="doc.site_id.name"/></strong></div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Client:</div>
+                                    <div class="info-value"><span t-field="doc.client_id.name"/></div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Report Date:</div>
+                                    <div class="info-value">
+                                        <strong><span t-field="doc.report_date" t-options='{"widget": "date", "format": "EEEE, MMMM d, yyyy"}'/></strong>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Hours Worked:</div>
+                                    <div class="info-value"><t t-esc="'%.1f' % (doc.hours_worked or 0.0)"/></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-keep">
+                            <div class="section-header">SUMMARY STATISTICS</div>
+                            <div class="stats-grid">
+                                <div class="stat-box">
+                                    <span class="number"><t t-esc="doc.incident_count"/></span>
+                                    <span class="label">Incidents</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="number"><t t-esc="doc.tours_completed"/></span>
+                                    <span class="label">Tours Done</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="number"><t t-esc="doc.visitor_count"/></span>
+                                    <span class="label">Visitors</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="number"><t t-esc="doc.task_completed_count"/>/<t t-esc="doc.task_count"/></span>
+                                    <span class="label">Tasks Done</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="number"><t t-esc="doc.package_count"/></span>
+                                    <span class="label">Packages</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="number"><t t-esc="'%.1f' % (doc.hours_worked or 0.0)"/></span>
+                                    <span class="label">Hours</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Attendance -->
+                        <div t-attf-class="section-block #{'section-keep' if not doc.attendance_ids or len(doc.attendance_ids) &lt;= 8 else ''}">
+                            <div class="section-header">
+                                ATTENDANCE (<t t-esc="len(doc.attendance_ids)"/>)
+                            </div>
+                            <t t-if="doc.attendance_ids">
+                                <table class="enhanced-table">
+                                    <thead>
+                                        <tr>
+                                            <th width="18%">Check-In</th>
+                                            <th width="18%">Check-Out</th>
+                                            <th width="12%">Hours</th>
+                                            <th width="22%">Shift</th>
+                                            <th width="14%">Status</th>
+                                            <th width="16%">Location</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="doc.attendance_ids" t-as="attendance">
+                                            <td><span t-field="attendance.checkin_time" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                            <td><span t-field="attendance.checkout_time" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                            <td><t t-esc="'%.1f' % (attendance.hours_worked or 0.0)"/></td>
+                                            <td><span t-field="attendance.shift_id.name"/></td>
+                                            <td><span t-field="attendance.status"/></td>
+                                            <td>
+                                                <t t-if="attendance.checkin_latitude or attendance.checkin_longitude">
+                                                    <t t-esc="'%.5f, %.5f' % (attendance.checkin_latitude or 0.0, attendance.checkin_longitude or 0.0)"/>
+                                                </t>
+                                                <t t-else="">—</t>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </t>
+                            <t t-else="">
+                                <div class="empty-section">No attendance records for this guard on this date</div>
+                            </t>
+                        </div>
+
+                        <!-- Incidents -->
+                        <div t-attf-class="section-block #{'section-keep' if not doc.incident_ids or len(doc.incident_ids) &lt;= 8 else ''}">
+                            <div class="section-header">
+                                INCIDENTS REPORTED (<t t-esc="len(doc.incident_ids)"/>)
+                            </div>
+                            <t t-if="doc.incident_ids">
+                                <table class="enhanced-table">
+                                    <thead>
+                                        <tr>
+                                            <th width="14%">Reference</th>
+                                            <th width="28%">Title</th>
+                                            <th width="18%">Category</th>
+                                            <th width="12%">Severity</th>
+                                            <th width="12%">Time</th>
+                                            <th width="16%">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="doc.incident_ids" t-as="incident">
+                                            <td><strong><span t-field="incident.name"/></strong></td>
+                                            <td><span t-field="incident.title"/></td>
+                                            <td><span t-field="incident.category_id.name"/></td>
+                                            <td>
+                                                <span class="badge-custom"
+                                                      t-att-class="{'badge-critical': incident.severity == 'critical',
+                                                                    'badge-high': incident.severity == 'high',
+                                                                    'badge-medium': incident.severity == 'medium',
+                                                                    'badge-low': incident.severity == 'low'}">
+                                                    <t t-esc="(incident.severity or '').upper()"/>
+                                                </span>
+                                            </td>
+                                            <td><span t-field="incident.incident_datetime" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                            <td><span t-field="incident.status"/></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </t>
+                            <t t-else="">
+                                <div class="empty-section">No incidents reported by this guard</div>
+                            </t>
+                        </div>
+
+                        <!-- Tours -->
+                        <div t-attf-class="section-block #{'section-keep' if not doc.tour_log_ids or len(doc.tour_log_ids) &lt;= 8 else ''}">
+                            <div class="section-header">
+                                SECURITY PATROL TOURS (<t t-esc="len(doc.tour_log_ids)"/>)
+                            </div>
+                            <t t-if="doc.tour_log_ids">
+                                <table class="enhanced-table">
+                                    <thead>
+                                        <tr>
+                                            <th width="14%">Reference</th>
+                                            <th width="24%">Tour Name</th>
+                                            <th width="12%">Start</th>
+                                            <th width="12%">End</th>
+                                            <th width="14%">Duration</th>
+                                            <th width="12%">Scans</th>
+                                            <th width="12%">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="doc.tour_log_ids" t-as="tour">
+                                            <td><strong><span t-field="tour.name"/></strong></td>
+                                            <td><span t-field="tour.tour_id.name"/></td>
+                                            <td><span t-field="tour.start_time" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                            <td><span t-field="tour.end_time" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                            <td><t t-if="tour.duration"><t t-esc="'%.0f min' % tour.duration"/></t></td>
+                                            <td><t t-esc="len(tour.scan_ids)"/> / <t t-esc="len(tour.tour_id.checkpoint_ids)"/></td>
+                                            <td><span t-field="tour.status"/></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </t>
+                            <t t-else="">
+                                <div class="empty-section">No patrol tours logged by this guard</div>
+                            </t>
+                        </div>
+
+                        <!-- Visitors -->
+                        <div t-attf-class="section-block #{'section-keep' if not doc.visitor_ids or len(doc.visitor_ids) &lt;= 8 else ''}">
+                            <div class="section-header">
+                                VISITOR LOG (<t t-esc="len(doc.visitor_ids)"/>)
+                            </div>
+                            <t t-if="doc.visitor_ids">
+                                <table class="enhanced-table">
+                                    <thead>
+                                        <tr>
+                                            <th width="22%">Visitor</th>
+                                            <th width="14%">Type</th>
+                                            <th width="18%">Host</th>
+                                            <th width="12%">In</th>
+                                            <th width="12%">Out</th>
+                                            <th width="22%">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="doc.visitor_ids" t-as="visitor">
+                                            <td><strong><span t-field="visitor.name"/></strong></td>
+                                            <td><span t-field="visitor.visitor_type"/></td>
+                                            <td><span t-field="visitor.host_name"/></td>
+                                            <td><span t-field="visitor.checkin_time" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                            <td><span t-field="visitor.checkout_time" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                            <td><span t-field="visitor.state"/></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </t>
+                            <t t-else="">
+                                <div class="empty-section">No visitors checked in/out by this guard</div>
+                            </t>
+                        </div>
+
+                        <!-- Tasks -->
+                        <div t-attf-class="section-block #{'section-keep' if not doc.task_ids or len(doc.task_ids) &lt;= 8 else ''}">
+                            <div class="section-header">
+                                TASKS (<t t-esc="len(doc.task_ids)"/>)
+                            </div>
+                            <t t-if="doc.task_ids">
+                                <table class="enhanced-table">
+                                    <thead>
+                                        <tr>
+                                            <th width="40%">Task</th>
+                                            <th width="16%">Type</th>
+                                            <th width="14%">Priority</th>
+                                            <th width="16%">Due / Done</th>
+                                            <th width="14%">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="doc.task_ids" t-as="task">
+                                            <td><strong><span t-field="task.name"/></strong></td>
+                                            <td><span t-field="task.task_type"/></td>
+                                            <td><span t-field="task.priority"/></td>
+                                            <td>
+                                                <t t-if="task.completed_date">
+                                                    <span t-field="task.completed_date" t-options='{"widget": "datetime", "format": "HH:mm"}'/>
+                                                </t>
+                                                <t t-elif="task.due_date">
+                                                    <span t-field="task.due_date" t-options='{"widget": "datetime", "format": "HH:mm"}'/>
+                                                </t>
+                                            </td>
+                                            <td><span t-field="task.state"/></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </t>
+                            <t t-else="">
+                                <div class="empty-section">No tasks assigned for this guard on this date</div>
+                            </t>
+                        </div>
+
+                        <!-- Packages -->
+                        <div t-if="doc.package_ids" t-attf-class="section-block #{'section-keep' if len(doc.package_ids) &lt;= 8 else ''}">
+                            <div class="section-header">
+                                PACKAGES RECEIVED (<t t-esc="len(doc.package_ids)"/>)
+                            </div>
+                            <table class="enhanced-table">
+                                <thead>
+                                    <tr>
+                                        <th width="16%">Reference</th>
+                                        <th width="16%">Type</th>
+                                        <th width="20%">Courier</th>
+                                        <th width="22%">Recipient</th>
+                                        <th width="12%">Time</th>
+                                        <th width="14%">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="doc.package_ids" t-as="package">
+                                        <td><strong><span t-field="package.name"/></strong></td>
+                                        <td><span t-field="package.package_type"/></td>
+                                        <td><span t-field="package.courier_company"/></td>
+                                        <td><span t-field="package.recipient_name"/></td>
+                                        <td><span t-field="package.received_date" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                        <td><span t-field="package.state"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Lost & Found -->
+                        <div t-if="doc.lost_found_ids" t-attf-class="section-block #{'section-keep' if len(doc.lost_found_ids) &lt;= 8 else ''}">
+                            <div class="section-header">
+                                LOST &amp; FOUND (<t t-esc="len(doc.lost_found_ids)"/>)
+                            </div>
+                            <table class="enhanced-table">
+                                <thead>
+                                    <tr>
+                                        <th width="16%">Reference</th>
+                                        <th width="16%">Category</th>
+                                        <th width="28%">Description</th>
+                                        <th width="18%">Location</th>
+                                        <th width="10%">Found</th>
+                                        <th width="12%">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="doc.lost_found_ids" t-as="item">
+                                        <td><strong><span t-field="item.name"/></strong></td>
+                                        <td><span t-field="item.item_category"/></td>
+                                        <td><span t-field="item.description"/></td>
+                                        <td><span t-field="item.location_found"/></td>
+                                        <td><span t-field="item.found_date" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                        <td><span t-field="item.state"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="notes-section" t-if="doc.notes">
+                            <h5>SUPERVISOR NOTES</h5>
+                            <div t-field="doc.notes"/>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_guard_activity_report_pdf" model="ir.actions.report">
+        <field name="name">Guard Activity Report</field>
+        <field name="model">guard.activity.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">guardpro.guard_activity_report_pdf_template</field>
+        <field name="report_file">guardpro.guard_activity_report_pdf_template</field>
+        <field name="print_report_name">'GAR_%s_%s_%s' % (object.guard_id.name, object.site_id.name, object.report_date)</field>
+        <field name="binding_model_id" ref="model_guard_activity_report"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

@@ -108,7 +108,7 @@
                                 <td><t t-esc="o.shift_id.name if o.shift_id else 'N/A'"/></td>
                             </tr>
                             <tr>
-                                <th style="background-color: #f5f5f5;">Site</th>
+                                <th style="background-color: #f5f5f5;">Project</th>
                                 <td><t t-esc="o.shift_id.site_id.name if o.shift_id and o.shift_id.site_id else 'N/A'"/></td>
                             </tr>
                             <tr>
@@ -144,7 +144,7 @@
                                     <td><t t-esc="o.compensation_shift_id.name"/></td>
                                 </tr>
                                 <tr>
-                                    <th style="background-color: #f5f5f5;">Site</th>
+                                    <th style="background-color: #f5f5f5;">Project</th>
                                     <td><t t-esc="o.compensation_shift_id.site_id.name if o.compensation_shift_id.site_id else 'N/A'"/></td>
                                 </tr>
                                 <tr>

@@ -24,7 +24,7 @@ class GuardShiftTemplate(models.Model):
     
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=True
     )
     
@@ -197,7 +197,9 @@ class GuardShiftTemplate(models.Model):
                     ('template_id', '=', self.id)
                 ])
                 
-                if not existing:
+                if existing:
+                    existing.write({'tour_ids': [(6, 0, self.tour_ids.ids)]})
+                else:
                     # Create shifts for required guards
                     for i in range(self.required_guards):
                         # Try to assign preferred employee if available

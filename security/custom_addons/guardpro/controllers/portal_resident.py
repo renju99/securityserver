@@ -232,11 +232,24 @@ class ResidentPortal(CustomerPortal):
                 'overall_rating': post.get('overall_rating'),
                 'comments': post.get('comments'),
             }
-            
-            # Guard is optional for general feedback
-            if post.get('guard_id'):
-                values['guard_id'] = int(post.get('guard_id'))
-            
+
+            # Guard is optional; if provided must cover the resident's site.
+            guard_id_raw = post.get('guard_id')
+            if guard_id_raw:
+                try:
+                    guard_id = int(guard_id_raw)
+                except (TypeError, ValueError):
+                    return request.redirect('/my/resident/feedback/new?error=invalid_guard')
+                guard = request.env['guard.profile'].sudo().browse(guard_id)
+                site_id = resident.site_id.id if resident.site_id else False
+                if (
+                    not guard.exists()
+                    or not site_id
+                    or site_id not in guard.site_ids.ids
+                ):
+                    return request.redirect('/my/resident/feedback/new?error=invalid_guard')
+                values['guard_id'] = guard_id
+
             # Optional detailed ratings (only relevant if guard specified)
             if post.get('professionalism_rating'):
                 values['professionalism_rating'] = post.get('professionalism_rating')
@@ -246,19 +259,20 @@ class ResidentPortal(CustomerPortal):
                 values['communication_rating'] = post.get('communication_rating')
             if post.get('appearance_rating'):
                 values['appearance_rating'] = post.get('appearance_rating')
-            
+
             feedback = request.env['client.feedback'].sudo().create(values)
             return request.redirect('/my/resident/feedback?message=created')
-        
+
         # Get guards from resident's site (optional)
         guards = request.env['guard.profile'].sudo().search([
-            ('site_ids', 'in', [resident.site_id.id])
-        ])
-        
+            ('site_ids', 'in', [resident.site_id.id]),
+        ]) if resident.site_id else request.env['guard.profile'].browse()
+
         values = {
             'resident': resident,
             'guards': guards,
             'page_name': 'new_feedback',
+            'error': request.params.get('error'),
         }
         return request.render("guardpro.portal_create_feedback", values)
 

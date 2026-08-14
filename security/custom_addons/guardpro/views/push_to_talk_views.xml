@@ -107,13 +107,13 @@
                 <filter string="Active" name="active" domain="[('active', '=', True)]"/>
                 <filter string="Inactive" name="inactive" domain="[('active', '=', False)]"/>
                 <filter string="Public" name="public" domain="[('is_public', '=', True)]"/>
-                <filter string="All Sites" name="all_sites" domain="[('all_sites_access', '=', True)]"/>
-                <filter string="Site Channels" name="site" domain="[('channel_type', '=', 'site')]"/>
+                <filter string="All Projects" name="all_sites" domain="[('all_sites_access', '=', True)]"/>
+                <filter string="Project Channels" name="site" domain="[('channel_type', '=', 'site')]"/>
                 <filter string="Team Channels" name="team" domain="[('channel_type', '=', 'team')]"/>
                 <filter string="Emergency Channels" name="emergency" domain="[('channel_type', '=', 'emergency')]"/>
                 <group expand="0" string="Group By">
                     <filter string="Channel Type" name="group_type" context="{'group_by': 'channel_type'}"/>
-                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Project" name="group_site" context="{'group_by': 'site_id'}"/>
                     <filter string="Active Status" name="group_active" context="{'group_by': 'active'}"/>
                 </group>
             </search>

@@ -291,7 +291,7 @@
                     <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
                     <filter string="Type" name="group_type" context="{'group_by': 'investigation_type'}"/>
                     <filter string="Lead Investigator" name="group_lead" context="{'group_by': 'lead_investigator_id'}"/>
-                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Project" name="group_site" context="{'group_by': 'site_id'}"/>
                 </group>
             </search>
         </field>

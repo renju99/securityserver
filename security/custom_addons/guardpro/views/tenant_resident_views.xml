@@ -109,7 +109,7 @@
                 <filter name="with_portal" string="With Portal Access" domain="[('portal_access', '=', True)]"/>
                 <filter name="without_portal" string="Without Portal Access" domain="[('portal_access', '=', False)]"/>
                 <group expand="0" string="Group By">
-                    <filter name="group_by_site" string="Site" context="{'group_by': 'site_id'}"/>
+                    <filter name="group_by_site" string="Project" context="{'group_by': 'site_id'}"/>
                     <filter name="group_by_status" string="Status" context="{'group_by': 'status'}"/>
                 </group>
             </search>
@@ -175,7 +175,7 @@
                 Create your first resident/tenant
             </p>
             <p>
-                Manage residents and tenants for community sites. Enable portal access
+                Manage residents and tenants for community projects. Enable portal access
                 to allow them to submit feedback and view security information.
             </p>
         </field>

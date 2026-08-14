@@ -19,7 +19,7 @@ class ComplianceAuditCreateWizard(models.TransientModel):
         help='Audit template to use'
     )
     audit_type = fields.Selection([
-        ('site', 'Site Audit'),
+        ('site', 'Project Audit'),
         ('guard', 'Guard Performance Audit'),
         ('equipment', 'Equipment Audit'),
         ('training', 'Training Compliance'),
@@ -33,8 +33,8 @@ class ComplianceAuditCreateWizard(models.TransientModel):
     # Audit Target
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
-        help='Site to audit'
+        string='Project',
+        help='Project to audit'
     )
     guard_id = fields.Many2one(
         'guard.profile',
@@ -110,7 +110,7 @@ class ComplianceAuditCreateWizard(models.TransientModel):
         """Validate audit target matches audit type"""
         for wizard in self:
             if wizard.audit_type == 'site' and not wizard.site_id:
-                raise ValidationError(_('Site audit requires a site to be selected.'))
+                raise ValidationError(_('Project audit requires a project to be selected.'))
             elif wizard.audit_type == 'guard' and not wizard.guard_id:
                 raise ValidationError(_('Guard audit requires a guard to be selected.'))
             elif wizard.audit_type == 'equipment' and not wizard.equipment_id:

@@ -25,7 +25,7 @@ Core Functionality
 ~~~~~~~~~~~~~~~~~~
 
 * **Guard Profile Management**: Complete guard information, certifications, skills, and performance tracking
-* **Client Site Management**: Site locations with geofencing (circular and polygon)
+* **Client Project Management**: Site locations with geofencing (circular and polygon)
 * **Security Tours**: Define patrol routes with checkpoints
 * **Shift Scheduling**: Advanced scheduling with calendar view and drag-drop support
 * **Real-time GPS Tracking**: Monitor guard locations with 30-second updates
@@ -122,11 +122,11 @@ Create Guard Profiles
 * Create guard profiles linked to HR employees
 * Add certifications, skills, and contact information
 
-Setup Client Sites
+Setup Projects
 ^^^^^^^^^^^^^^^^^^
 
 * Go to **Documentation > Resources > Sites**
-* Create client sites with GPS coordinates
+* Create client projects with GPS coordinates
 * Configure geofencing (circular or polygon)
 * Add access instructions and emergency contacts
 
@@ -257,7 +257,7 @@ Record Rules
 ~~~~~~~~~~~~
 
 * Guards can only view their own shifts, attendance, and tours
-* Clients can only view data for their sites
+* Clients can only view data for their projects
 * Supervisors can view all operational data
 * Managers have full access
 
@@ -295,7 +295,7 @@ Data Models
 ~~~~~~~~~~~
 
 * ``guard.profile`` - Guard information
-* ``client.site`` - Client site locations
+* ``client.site`` - Client project locations
 * ``security.tour`` - Patrol routes
 * ``checkpoint`` - Verification points
 * ``guard.shift`` - Shift schedules

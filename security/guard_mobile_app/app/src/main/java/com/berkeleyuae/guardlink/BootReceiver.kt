@@ -1,4 +1,4 @@
-package com.berkeleyuae.guardpro
+package com.berkeleyuae.guardlink
 
 import android.content.BroadcastReceiver
 import android.content.Context

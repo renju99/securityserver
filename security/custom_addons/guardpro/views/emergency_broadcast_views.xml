@@ -115,7 +115,7 @@
                 <group expand="0" string="Group By">
                     <filter name="group_priority" string="Priority" context="{'group_by': 'priority'}"/>
                     <filter name="group_state" string="State" context="{'group_by': 'state'}"/>
-                    <filter name="group_site" string="Site" context="{'group_by': 'site_id'}"/>
+                    <filter name="group_site" string="Project" context="{'group_by': 'site_id'}"/>
                     <filter name="group_sent_by" string="Sent By" context="{'group_by': 'sent_by'}"/>
                 </group>
             </search>

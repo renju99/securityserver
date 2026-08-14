@@ -69,7 +69,7 @@
                                         <td t-field="o.sla_id.contract_reference"/>
                                     </tr>
                                     <tr t-if="o.site_id">
-                                        <td><strong>Site:</strong></td>
+                                        <td><strong>Project:</strong></td>
                                         <td t-field="o.site_id.name"/>
                                     </tr>
                                     <tr>

@@ -68,6 +68,17 @@
                             font-size: 14px;
                             font-weight: 600;
                             color: #2c3e50;
+                            page-break-after: avoid;
+                        }
+
+                        .chart-section,
+                        .table-section {
+                            margin-bottom: 15px;
+                        }
+
+                        .report-footer {
+                            page-break-inside: avoid;
+                            margin-top: 20px;
                         }
                         
                         .chart-table {
@@ -75,6 +86,13 @@
                             border-collapse: collapse;
                             font-size: 10px;
                             margin-bottom: 15px;
+                            page-break-inside: auto;
+                        }
+                        .chart-table thead {
+                            display: table-header-group;
+                        }
+                        .chart-table tr {
+                            page-break-inside: avoid;
                         }
                         .chart-table th {
                             background: #f8f9fa;
@@ -93,6 +111,13 @@
                             border-collapse: collapse;
                             font-size: 10px;
                             margin-bottom: 20px;
+                            page-break-inside: auto;
+                        }
+                        .data-table thead {
+                            display: table-header-group;
+                        }
+                        .data-table tr {
+                            page-break-inside: avoid;
                         }
                         .data-table th {
                             background: #3498db;
@@ -114,8 +139,14 @@
                     <t t-if="context and context.get('filter_params')">
                         <t t-set="filter_params" t-value="context['filter_params']"/>
                     </t>
+                    <t t-elif="context and context.get('filters')">
+                        <t t-set="filter_params" t-value="context['filters']"/>
+                    </t>
                     <t t-elif="data and data.get('filters')">
                         <t t-set="filter_params" t-value="data['filters']"/>
+                    </t>
+                    <t t-elif="options and options.get('filters')">
+                        <t t-set="filter_params" t-value="options['filters']"/>
                     </t>
                     
                     <!-- Call method to get report data -->
@@ -157,7 +188,7 @@
                             <div style="background: #eef7fd; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 10px;">
                                 <strong>Filters Applied:</strong>
                                 <t t-if="report_data['filters'].get('site_names')">
-                                    <br/><strong>Sites:</strong> <t t-esc="', '.join(report_data['filters']['site_names'])"/>
+                                    <br/><strong>Projects:</strong> <t t-esc="', '.join(report_data['filters']['site_names'])"/>
                                 </t>
                                 <t t-if="report_data['filters'].get('guard_names')">
                                     <br/><strong>Guards:</strong> <t t-esc="', '.join(report_data['filters']['guard_names'])"/>
@@ -168,7 +199,7 @@
                         <!-- Charts Section (as tables in PDF) -->
                         <t t-if="report_data.get('charts')">
                             <t t-foreach="report_data['charts']" t-as="chart">
-                                <div style="page-break-inside: avoid;">
+                                <div class="chart-section">
                                     <div class="section-header"><t t-esc="chart.get('title')"/></div>
                                     <table class="chart-table">
                                         <thead>
@@ -193,7 +224,7 @@
                         <!-- Tables Section -->
                         <t t-if="report_data.get('tables')">
                             <t t-foreach="report_data['tables']" t-as="table">
-                                <div style="page-break-inside: avoid;">
+                                <div class="table-section">
                                     <div class="section-header"><t t-esc="table.get('title')"/></div>
                                     <table class="data-table">
                                         <thead>
@@ -206,7 +237,7 @@
                                         <tbody>
                                             <t t-foreach="table.get('rows', [])" t-as="row">
                                                 <tr>
-                                                    <t t-foreach="row" t-as="cell">
+                                                    <t t-foreach="row.get('data', [])" t-as="cell">
                                                         <td><t t-esc="cell"/></td>
                                                     </t>
                                                 </tr>
@@ -217,7 +248,7 @@
                             </t>
                         </t>
                         
-                        <div class="footer" style="border-top: 1px solid #eee; padding-top: 10px; font-size: 8px; color: #999; text-align: center; margin-top: 30px;">
+                        <div class="report-footer footer" style="border-top: 1px solid #eee; padding-top: 10px; font-size: 8px; color: #999; text-align: center;">
                             GuardLink Security Suite - Tours Dashboard Analytics. Confidential Report.
                         </div>
                     </div>

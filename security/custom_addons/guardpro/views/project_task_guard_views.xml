@@ -27,7 +27,7 @@
                         class="btn-secondary"
                         invisible="not is_guard_task or not shift_id"/>
                 <button name="action_view_site" 
-                        string="View Site" 
+                        string="View Project" 
                         type="object" 
                         class="btn-secondary"
                         invisible="not is_guard_task or not site_id"/>
@@ -223,7 +223,7 @@
                 
                 <separator/>
                 <group expand="0" string="Group By">
-                    <filter name="group_site" string="Site" context="{'group_by': 'site_id'}"/>
+                    <filter name="group_site" string="Project" context="{'group_by': 'site_id'}"/>
                     <filter name="group_guard" string="Guard" context="{'group_by': 'assigned_guard_id'}"/>
                     <filter name="group_type" string="Task Type" context="{'group_by': 'task_type'}"/>
                     <filter name="group_stage" string="Stage" context="{'group_by': 'stage_id'}"/>

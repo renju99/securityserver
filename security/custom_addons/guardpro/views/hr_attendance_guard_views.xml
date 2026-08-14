@@ -122,7 +122,7 @@
                         domain="[('tour_count', '>', 0)]"/>
                 <group expand="0" string="Group By">
                     <filter name="group_employee" string="Employee" context="{'group_by': 'employee_id'}"/>
-                    <filter name="group_site" string="Site" context="{'group_by': 'site_id'}"/>
+                    <filter name="group_site" string="Project" context="{'group_by': 'site_id'}"/>
                     <filter name="group_shift_type" string="Shift Type" context="{'group_by': 'shift_type'}"/>
                     <filter name="group_date" string="Date" context="{'group_by': 'check_in:day'}"/>
                 </group>

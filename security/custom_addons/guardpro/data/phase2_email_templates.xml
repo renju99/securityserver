@@ -74,7 +74,7 @@
                                     &lt;/td&gt;
                                 &lt;/tr&gt;
                                 &lt;tr&gt;
-                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 2px solid #ddd;"&gt;Expected Site&lt;/th&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 2px solid #ddd;"&gt;Expected Project&lt;/th&gt;
                                     &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.site_id.name if object.site_id else 'N/A'}&lt;/td&gt;
                                 &lt;/tr&gt;
                                 &lt;tr&gt;
@@ -82,7 +82,7 @@
                                     &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${format_datetime(object.alert_datetime, dt_format='medium', tz='UTC') if object.alert_datetime else 'N/A'}&lt;/td&gt;
                                 &lt;/tr&gt;
                                 &lt;tr&gt;
-                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 2px solid #ddd;"&gt;Distance from Site&lt;/th&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 2px solid #ddd;"&gt;Distance from Project&lt;/th&gt;
                                     &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;
                                         &lt;strong style="color: #d32f2f;"&gt;
                                             % if object.distance_from_site:
@@ -174,7 +174,7 @@
         <record id="email_template_emergency_activation" model="mail.template">
             <field name="name">Emergency Procedure Activation Alert</field>
             <field name="model_id" ref="model_emergency_procedure"/>
-            <field name="subject">🚨 EMERGENCY ACTIVATED: ${object.emergency_type or 'Emergency'} - ${object.site_id.name or 'Site'}</field>
+            <field name="subject">🚨 EMERGENCY ACTIVATED: ${object.emergency_type or 'Emergency'} - ${object.site_id.name or 'Project'}</field>
             <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
             <field name="email_to">${(object.site_id.manager_id.email if object.site_id and object.site_id.manager_id else object.site_id.client_id.email if object.site_id and object.site_id.client_id else '')|safe}</field>
             <field name="body_html" type="html">
@@ -238,11 +238,11 @@
                                     &lt;/td&gt;
                                 &lt;/tr&gt;
                                 &lt;tr&gt;
-                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 1px solid #ddd;"&gt;Site Location&lt;/th&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 1px solid #ddd;"&gt;Project Location&lt;/th&gt;
                                     &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.site_id.name if object.site_id else 'N/A'}&lt;/td&gt;
                                 &lt;/tr&gt;
                                 &lt;tr&gt;
-                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 1px solid #ddd;"&gt;Site Address&lt;/th&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; border-bottom: 1px solid #ddd;"&gt;Project Address&lt;/th&gt;
                                     &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;
                                         % if object.site_id:
                                             ${object.site_id.street or ''} ${object.site_id.street2 or ''}&lt;br/&gt;
@@ -294,7 +294,7 @@
                                         &lt;h4 style="margin: 0 0 10px 0; color: #c62828;"&gt;EMERGENCY CONTACTS:&lt;/h4&gt;
                                         &lt;p style="margin: 5px 0;"&gt;
                                             &lt;strong&gt;Emergency Services:&lt;/strong&gt; 911&lt;br/&gt;
-                                            &lt;strong&gt;Site Manager:&lt;/strong&gt; ${object.site_id.manager_id.phone if object.site_id and object.site_id.manager_id else 'N/A'}&lt;br/&gt;
+                                            &lt;strong&gt;Project Manager:&lt;/strong&gt; ${object.site_id.manager_id.phone if object.site_id and object.site_id.manager_id else 'N/A'}&lt;br/&gt;
                                             &lt;strong&gt;Security Operations:&lt;/strong&gt; ${object.company_id.phone or 'N/A'}&lt;br/&gt;
                                             &lt;strong&gt;Email:&lt;/strong&gt; &lt;a href="mailto:${object.company_id.email or ''}" style="color: #0288d1;"&gt;${object.company_id.email or 'N/A'}&lt;/a&gt;
                                         &lt;/p&gt;
@@ -393,7 +393,7 @@
                                     &lt;/th&gt;
                                 &lt;/tr&gt;
                                 &lt;tr&gt;
-                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; width: 40%;"&gt;Site&lt;/th&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; width: 40%;"&gt;Project&lt;/th&gt;
                                     &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.shift_id.site_id.name if object.shift_id and object.shift_id.site_id else 'N/A'}&lt;/td&gt;
                                 &lt;/tr&gt;
                                 &lt;tr&gt;
@@ -422,7 +422,7 @@
                                     &lt;/th&gt;
                                 &lt;/tr&gt;
                                 &lt;tr&gt;
-                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; width: 40%;"&gt;Site&lt;/th&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; width: 40%;"&gt;Project&lt;/th&gt;
                                     &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.compensation_shift_id.site_id.name if object.compensation_shift_id.site_id else 'N/A'}&lt;/td&gt;
                                 &lt;/tr&gt;
                                 &lt;tr&gt;
@@ -494,7 +494,7 @@
         <record id="email_template_shift_swap_approved" model="mail.template">
             <field name="name">Shift Swap Approved Notification</field>
             <field name="model_id" ref="model_shift_swap_request"/>
-            <field name="subject">✅ Shift Swap Approved - ${object.shift_id.site_id.name or 'Site'} - ${format_date(object.swap_date) if object.swap_date else ''}</field>
+            <field name="subject">✅ Shift Swap Approved - ${object.shift_id.site_id.name or 'Project'} - ${format_date(object.swap_date) if object.swap_date else ''}</field>
             <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
             <field name="email_to">${(object.requesting_guard_id.user_id.email if object.requesting_guard_id and object.requesting_guard_id.user_id else '')|safe},${(object.target_guard_id.user_id.email if object.target_guard_id and object.target_guard_id.user_id else '')|safe}</field>
             <field name="body_html" type="html">
@@ -540,7 +540,7 @@
                                     &lt;/td&gt;
                                 &lt;/tr&gt;
                                 &lt;tr&gt;
-                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Site&lt;/th&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Project&lt;/th&gt;
                                     &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.site_id.name if object.site_id else 'N/A'}&lt;/td&gt;
                                 &lt;/tr&gt;
                                 &lt;tr&gt;
@@ -798,7 +798,7 @@
         <record id="email_template_client_feedback_request" model="mail.template">
             <field name="name">Client Feedback Request</field>
             <field name="model_id" ref="model_client_site"/>
-            <field name="subject">We Value Your Feedback - ${object.name or 'Site'} Security Services</field>
+            <field name="subject">We Value Your Feedback - ${object.name or 'Project'} Security Services</field>
             <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
             <field name="email_to">${(object.manager_id.email if object.manager_id else object.client_id.email if object.client_id else '')|safe}</field>
             <field name="body_html" type="html">
@@ -829,7 +829,7 @@
                             
                             &lt;table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 20px 0;"&gt;
                                 &lt;tr&gt;
-                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; width: 40%;"&gt;Site&lt;/th&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left; width: 40%;"&gt;Project&lt;/th&gt;
                                     &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.name or 'N/A'}&lt;/td&gt;
                                 &lt;/tr&gt;
                                 &lt;tr&gt;
@@ -942,7 +942,7 @@
                                     &lt;td style="padding: 12px; border-bottom: 1px solid #ddd; font-weight: bold;"&gt;${object.name or 'N/A'}&lt;/td&gt;
                                 &lt;/tr&gt;
                                 &lt;tr&gt;
-                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Site&lt;/th&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Project&lt;/th&gt;
                                     &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.site_id.name if object.site_id else 'N/A'}&lt;/td&gt;
                                 &lt;/tr&gt;
                                 &lt;tr&gt;
@@ -1035,7 +1035,7 @@
         <record id="email_template_client_feedback_response" model="mail.template">
             <field name="name">Client Feedback Response Acknowledgment</field>
             <field name="model_id" ref="model_client_feedback"/>
-            <field name="subject">Thank You for Your Feedback - ${object.site_id.name or 'Site'}</field>
+            <field name="subject">Thank You for Your Feedback - ${object.site_id.name or 'Project'}</field>
             <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
             <field name="email_to">${(object.client_id.email if object.client_id else object.resident_id.email if object.resident_id else '')|safe}</field>
             <field name="body_html" type="html">
@@ -1066,7 +1066,7 @@
                                     &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.name or 'N/A'}&lt;/td&gt;
                                 &lt;/tr&gt;
                                 &lt;tr&gt;
-                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Site&lt;/th&gt;
+                                    &lt;th style="background-color: #f5f5f5; padding: 12px; text-align: left;"&gt;Project&lt;/th&gt;
                                     &lt;td style="padding: 12px; border-bottom: 1px solid #ddd;"&gt;${object.site_id.name if object.site_id else 'N/A'}&lt;/td&gt;
                                 &lt;/tr&gt;
                                 &lt;tr&gt;

@@ -225,7 +225,7 @@ class EmergencyChecklistExecution(models.Model):
     
     site_id = fields.Many2one(
         related='incident_id.site_id',
-        string='Site',
+        string='Project',
         store=True
     )
     

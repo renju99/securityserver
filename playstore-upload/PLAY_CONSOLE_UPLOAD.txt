@@ -1,0 +1,28 @@
+GuardLink Android — Play Console upload package
+================================================
+Built: 2026-08-14 07:29:09 UTC
+Application ID: com.berkeleyuae.guardlink
+versionName: 1.2.32
+versionCode: 44
+targetSdkVersion: 
+
+UPLOAD THIS FILE TO PLAY CONSOLE
+--------------------------------
+/home/azureuser/playstore-upload/guardlink-1.2.32-44.aab
+
+(Optional sideload / internal testing APK)
+/home/azureuser/playstore-upload/guardlink-1.2.32-44.apk
+
+How to upload
+-------------
+1. Open Google Play Console → GuardLink app
+2. Testing (internal/closed) first, then Production → Create new release
+3. Upload the .aab file above
+4. Paste release notes (see WHATS_NEW.txt)
+5. Review and roll out to production
+
+Notes
+-----
+• Play Console requires .aab (Android App Bundle), not .apk
+• versionCode must be higher than the last uploaded build (44)
+• Google requires targetSdk 36 (Android 16) — this build targets 

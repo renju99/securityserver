@@ -302,7 +302,13 @@ export class PushToTalkWidget extends Component {
 
     async processRecording() {
         try {
-            if (this.audioChunks.length === 0) return;
+            const hasAudio = this.audioChunks.length > 0
+                || this.pendingChunkQueue.length > 0
+                || this.pendingFinalChunk
+                || this.streamingMessageId;
+            if (!hasAudio) {
+                return;
+            }
             await this.sendStreamingChunk(true);
             await this.flushPendingChunks();
             this.loadMessages(this.state.currentChannel.id);

@@ -13,42 +13,101 @@ _logger = logging.getLogger(__name__)
 class GuardLinkMessagingAPI(http.Controller):
     """API endpoints for guard messaging system."""
 
+    def _user_can_access_conversation(self, user, conversation):
+        """Return True if ``user`` is a participant (or admin) of ``conversation``."""
+        if not user or not conversation or not conversation.exists():
+            return False
+        if user.has_group('guardpro.group_guardpro_admin'):
+            return True
+
+        if conversation.supervisor_id and conversation.supervisor_id.id == user.id:
+            return True
+        if user in conversation.supervisor_participant_ids:
+            return True
+
+        guard = request.env['guard.profile'].sudo().search([
+            ('user_id', '=', user.id)
+        ], limit=1)
+        if not guard:
+            return False
+
+        if conversation.guard_id and conversation.guard_id.id == guard.id:
+            return True
+        if conversation.guard1_id and conversation.guard1_id.id == guard.id:
+            return True
+        if conversation.guard2_id and conversation.guard2_id.id == guard.id:
+            return True
+        if guard in conversation.participant_ids:
+            return True
+        return False
+
     @http.route('/guardpro/api/messages/conversations', type='json', auth='user')
     def get_conversations(self, limit=20, **kwargs):
         """Get list of conversations for current user."""
         try:
-            # Get current user's guard profile
-            guard = request.env['guard.profile'].search([
-                ('user_id', '=', request.env.user.id)
+            user = request.env.user
+            guard = request.env['guard.profile'].sudo().search([
+                ('user_id', '=', user.id)
             ], limit=1)
 
-            if not guard:
+            Conversation = request.env['guard.conversation'].sudo()
+            if guard:
+                conversations = Conversation.search([
+                    ('is_active', '=', True),
+                    '|', '|', '|',
+                    ('guard_id', '=', guard.id),
+                    ('guard1_id', '=', guard.id),
+                    ('guard2_id', '=', guard.id),
+                    ('participant_ids', 'in', [guard.id]),
+                ], order='last_message_time desc nulls last', limit=limit)
+            elif user.has_group('guardpro.group_guardpro_supervisor') or user.has_group('guardpro.group_guardpro_manager'):
+                # Supervisors/managers without a guard profile: threads they own
+                conversations = Conversation.search([
+                    ('is_active', '=', True),
+                    '|',
+                    ('supervisor_id', '=', user.id),
+                    ('supervisor_participant_ids', 'in', [user.id]),
+                ], order='last_message_time desc nulls last', limit=limit)
+            else:
                 return {'success': False, 'error': 'Guard profile not found'}
-
-            # Get conversations
-            Conversation = request.env['guard.conversation']
-            conversations = Conversation.search([
-                ('guard_id', '=', guard.id),
-                ('is_active', '=', True)
-            ], order='last_message_time desc', limit=limit)
 
             conversations_list = []
             for conv in conversations:
+                # Determine other party name for display
+                if conv.conversation_type == 'guard_supervisor':
+                    if guard and conv.supervisor_id and user.id != conv.supervisor_id.id:
+                        other_name = conv.supervisor_id.name
+                    else:
+                        other_name = conv.guard_id.name if conv.guard_id else 'Guard'
+                elif conv.conversation_type == 'guard_guard':
+                    if guard and conv.guard1_id and conv.guard1_id.id == guard.id:
+                        other = conv.guard2_id
+                    elif guard and conv.guard2_id and conv.guard2_id.id == guard.id:
+                        other = conv.guard1_id
+                    else:
+                        other = False
+                    other_name = other.name if other else (conv.name or 'Guard')
+                else:
+                    other_name = conv.name or 'Group'
+
+                unread = (
+                    conv.unread_count_guard if guard
+                    else conv.unread_count_supervisor
+                )
                 conversations_list.append({
                     'id': conv.id,
-                    'name': conv.name,
-                    'supervisor_name': conv.supervisor_id.name,
-                    'supervisor_id': conv.supervisor_id.id,
+                    'name': other_name,
+                    'conversation_type': conv.conversation_type,
                     'last_message': conv.last_message,
                     'last_message_time': conv.last_message_time.isoformat() if conv.last_message_time else None,
-                    'unread_count': conv.unread_count_guard,
-                    'is_active': conv.is_active
+                    'unread_count': unread,
+                    'is_active': conv.is_active,
                 })
 
             return {
                 'success': True,
                 'conversations': conversations_list,
-                'total': len(conversations_list)
+                'total': len(conversations_list),
             }
 
         except Exception as e:
@@ -59,18 +118,12 @@ class GuardLinkMessagingAPI(http.Controller):
     def get_conversation_messages(self, conversation_id, limit=50, offset=0, **kwargs):
         """Get messages in a conversation."""
         try:
-            Conversation = request.env['guard.conversation']
-            conversation = Conversation.browse(conversation_id)
+            conversation = request.env['guard.conversation'].sudo().browse(conversation_id)
 
             if not conversation.exists():
                 return {'success': False, 'error': 'Conversation not found'}
 
-            # Verify user has access to this conversation
-            guard = request.env['guard.profile'].search([
-                ('user_id', '=', request.env.user.id)
-            ], limit=1)
-
-            if guard and conversation.guard_id.id != guard.id:
+            if not self._user_can_access_conversation(request.env.user, conversation):
                 return {'success': False, 'error': 'Access denied'}
 
             # Get messages
@@ -131,9 +184,11 @@ class GuardLinkMessagingAPI(http.Controller):
             # Get or create conversation first so we can resolve the
             # receiver from it when the caller didn't supply one.
             if conversation_id:
-                conversation = request.env['guard.conversation'].browse(conversation_id)
+                conversation = request.env['guard.conversation'].sudo().browse(conversation_id)
                 if not conversation.exists():
                     return {'success': False, 'error': 'Conversation not found'}
+                if not self._user_can_access_conversation(sender, conversation):
+                    return {'success': False, 'error': 'Access denied'}
                 # Resolve the counterparty user id from the thread:
                 # for guard-supervisor threads the "other side" flips
                 # depending on who the sender is; for guard-guard
@@ -589,59 +644,63 @@ class GuardLinkMessagingAPI(http.Controller):
         """Send a message to another guard."""
         try:
             sender = request.env.user
-            sender_guard = request.env['guard.profile'].search([
+            sender_guard = request.env['guard.profile'].sudo().search([
                 ('user_id', '=', sender.id)
             ], limit=1)
-            
+
             if not sender_guard:
                 return {'success': False, 'error': 'Guard profile not found'}
-            
-            # Get receiver guard
-            receiver_guard = request.env['guard.profile'].browse(guard_id)
+
+            # Get receiver guard with sudo to avoid res.users ACL issues
+            receiver_guard = request.env['guard.profile'].sudo().browse(guard_id)
             if not receiver_guard.exists() or not receiver_guard.user_id:
                 return {'success': False, 'error': 'Receiver guard not found or has no user account'}
 
-            # Multi-site: only message guards who share at least one assigned site
-            su = sender
-            ru = receiver_guard.user_id
-            if su.site_ids and ru.site_ids:
-                if not (set(su.site_ids.ids) & set(ru.site_ids.ids)):
-                    return {
-                        'success': False,
-                        'error': 'You can only message guards assigned to the same site(s) as you.',
-                    }
-            
+            # Multi-site: only message guards who share at least one assigned site.
+            # Empty site lists deny messaging (fail closed) instead of allowing all peers.
+            sender_site_ids = set(sender_guard.site_ids.ids)
+            receiver_site_ids = set(receiver_guard.site_ids.ids)
+            if not sender_site_ids or not receiver_site_ids:
+                return {
+                    'success': False,
+                    'error': 'You can only message guards assigned to the same site(s) as you.',
+                }
+            if not (sender_site_ids & receiver_site_ids):
+                return {
+                    'success': False,
+                    'error': 'You can only message guards assigned to the same site(s) as you.',
+                }
+
             # Get or create conversation
-            Conversation = request.env['guard.conversation']
-            conversation = Conversation.get_or_create_guard_conversation(
+            conversation = request.env['guard.conversation'].sudo().get_or_create_guard_conversation(
                 sender_guard.id,
-                receiver_guard.id
+                receiver_guard.id,
             )
-            
+
             # Create message
-            Message = request.env['guard.message']
-            message = Message.create({
+            message = request.env['guard.message'].sudo().create({
                 'conversation_id': conversation.id,
                 'sender_id': sender.id,
                 'receiver_id': receiver_guard.user_id.id,
                 'message_type': message_type,
                 'content': content,
                 'is_urgent': is_urgent,
-                'media_url': kwargs.get('media_url'),
-                'media_duration': kwargs.get('media_duration'),
-                'created_at': datetime.now()
+                'created_at': datetime.now(),
             })
-            
-            # Create notification
-            message.create_notification()
-            
+
+            # Best-effort notification
+            try:
+                message.create_notification()
+            except Exception:
+                pass
+
             return {
                 'success': True,
                 'message_id': message.id,
                 'conversation_id': conversation.id,
-                'created_at': message.created_at.isoformat()
+                'created_at': message.created_at.isoformat(),
             }
-            
+
         except Exception as e:
             _logger.error('Error sending message to guard: %s', str(e))
             return {'success': False, 'error': str(e)}
@@ -719,7 +778,37 @@ class GuardLinkMessagingAPI(http.Controller):
             
             if not can_broadcast:
                 return {'success': False, 'error': 'Only supervisors and managers can send broadcasts'}
-            
+
+            user = request.env.user
+            if not user.has_group('guardpro.group_guardpro_admin'):
+                if broadcast_type == 'all_guards':
+                    return {
+                        'success': False,
+                        'error': 'Company-wide broadcasts require administrator access. '
+                                 'Use site or custom recipients instead.',
+                    }
+                if broadcast_type == 'site_guards':
+                    if not site_id or site_id not in user.site_ids.ids:
+                        return {
+                            'success': False,
+                            'error': 'You can only broadcast to sites assigned to your account.',
+                        }
+                if broadcast_type == 'shift_guards' and shift_id:
+                    shift = request.env['guard.shift'].sudo().browse(shift_id)
+                    if not shift.exists() or not shift.site_id or shift.site_id.id not in user.site_ids.ids:
+                        return {
+                            'success': False,
+                            'error': 'You can only broadcast to shifts at your assigned projects.',
+                        }
+                if broadcast_type == 'custom_group' and recipient_ids:
+                    peers = request.env['guard.profile'].sudo().browse(recipient_ids)
+                    allowed = peers.filtered(lambda g: set(g.site_ids.ids) & set(user.site_ids.ids))
+                    if len(allowed) != len(peers):
+                        return {
+                            'success': False,
+                            'error': 'Some recipients are outside your assigned projects.',
+                        }
+
             # Send broadcast
             Message = request.env['guard.message']
             message = Message.send_broadcast(
@@ -759,8 +848,14 @@ class GuardLinkMessagingAPI(http.Controller):
             domain = [('status', '=', 'active')]
             if current_guard:
                 domain.append(('id', '!=', current_guard.id))
-            if user.site_ids:
-                domain.append(('site_ids', 'in', user.site_ids.ids))
+            # Fail closed: no site assignment => no peer directory
+            if not user.site_ids:
+                return {
+                    'success': True,
+                    'guards': [],
+                    'total': 0,
+                }
+            domain.append(('site_ids', 'in', user.site_ids.ids))
 
             guards = request.env['guard.profile'].sudo().search(domain)
             

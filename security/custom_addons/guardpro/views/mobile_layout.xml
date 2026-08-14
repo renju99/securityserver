@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+      Lightweight mobile layout: same Bootstrap look as frontend_layout, but
+      skips web.assets_frontend_lazy (~2.3MB JS). Guard mobile pages load a
+      small GuardLink bundle instead; heavy features (PTT / messages / EID)
+      are optional per-page via t-set flags.
+    -->
+    <template id="mobile_layout" name="GuardLink Mobile Layout" inherit_id="web.frontend_layout" primary="True">
+        <xpath expr="//t[@t-call-assets='web.assets_frontend_lazy']" position="replace">
+            <!-- Core mobile JS (pollers, nav, GPS, incident helpers) -->
+            <t t-call-assets="guardpro.assets_mobile" defer_load="True"/>
+            <!-- Optional page bundles — set on child templates -->
+            <t t-if="load_mobile_ptt">
+                <t t-call-assets="guardpro.assets_mobile_ptt" defer_load="True"/>
+            </t>
+            <t t-if="load_mobile_messages">
+                <t t-call-assets="guardpro.assets_mobile_messages" defer_load="True"/>
+            </t>
+            <t t-if="load_mobile_eid">
+                <t t-call-assets="guardpro.assets_mobile_eid" defer_load="True"/>
+            </t>
+        </xpath>
+    </template>
+</odoo>

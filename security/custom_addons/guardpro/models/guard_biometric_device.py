@@ -52,7 +52,7 @@ class GuardBiometricDevice(models.Model):
     # Location
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         tracking=True,
         help='Site where device is installed'
     )

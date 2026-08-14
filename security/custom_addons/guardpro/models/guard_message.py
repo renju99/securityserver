@@ -251,7 +251,7 @@ class GuardMessage(models.Model):
     )
     broadcast_type = fields.Selection([
         ('all_guards', 'All Guards'),
-        ('site_guards', 'Site Guards'),
+        ('site_guards', 'Project Guards'),
         ('shift_guards', 'Shift Guards'),
         ('custom_group', 'Custom Group')
     ], string='Broadcast Type', help='Type of broadcast message')
@@ -391,7 +391,7 @@ class GuardMessage(models.Model):
     )
     related_site_id = fields.Many2one(
         'client.site',
-        string='Related Site',
+        string='Related Project',
         help='Site this message relates to'
     )
     
@@ -544,8 +544,20 @@ class GuardMessage(models.Model):
         recipients = GuardProfile.browse()
         
         if broadcast_type == 'all_guards':
+            if not self.env.user.has_group('guardpro.group_guardpro_admin'):
+                raise ValidationError(_(
+                    'Only administrators can broadcast to all guards. '
+                    'Choose a site-scoped or custom recipient list.'
+                ))
             recipients = GuardProfile.search([('status', '=', 'active')])
         elif broadcast_type == 'site_guards' and site_id:
+            if (
+                not self.env.user.has_group('guardpro.group_guardpro_admin')
+                and site_id not in self.env.user.site_ids.ids
+            ):
+                raise ValidationError(_(
+                    'You can only broadcast to sites assigned to your account.'
+                ))
             site = self.env['client.site'].browse(site_id)
             if site.exists():
                 # Get guards assigned to this site
@@ -556,6 +568,16 @@ class GuardMessage(models.Model):
         elif broadcast_type == 'shift_guards' and shift_id:
             shift = self.env['guard.shift'].browse(shift_id)
             if shift.exists():
+                if (
+                    not self.env.user.has_group('guardpro.group_guardpro_admin')
+                    and (
+                        not shift.site_id
+                        or shift.site_id.id not in self.env.user.site_ids.ids
+                    )
+                ):
+                    raise ValidationError(_(
+                        'You can only broadcast to shifts at your assigned projects.'
+                    ))
                 # Get guards on this shift
                 recipients = GuardProfile.search([
                     ('status', '=', 'active'),
@@ -724,7 +746,7 @@ class GuardMessageChannel(models.Model):
         help='Channel purpose and guidelines'
     )
     channel_type = fields.Selection([
-        ('site', 'Site Channel'),
+        ('site', 'Project Channel'),
         ('shift', 'Shift Channel'),
         ('team', 'Team Channel'),
         ('project', 'Project Channel'),
@@ -769,7 +791,7 @@ class GuardMessageChannel(models.Model):
     # Related records
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         help='Site this channel is for (for site channels)'
     )
     shift_id = fields.Many2one(
@@ -803,7 +825,7 @@ class GuardMessageChannel(models.Model):
     def is_accessible_by_guard(self, guard):
         """Team chat channel: membership/public rules + site scope (user.site_ids).
 
-        Site-assigned guards only see channels linked to one of their sites, or
+        Project-assigned guards only see channels linked to one of their sites, or
         legacy channels with no site if they are explicit members (not public).
 
         If ``all_sites_access`` is enabled, members may use the channel regardless

@@ -345,7 +345,7 @@
                 <separator/>
                 <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
                 <group expand="0" string="Group By">
-                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Project" name="group_site" context="{'group_by': 'site_id'}"/>
                     <filter string="Status" name="group_status" context="{'group_by': 'state'}"/>
                     <filter string="Report Date" name="group_date" context="{'group_by': 'report_date'}"/>
                     <filter string="Submitted By" name="group_submitted" context="{'group_by': 'submitted_by'}"/>
@@ -400,7 +400,7 @@
         </field>
     </record>
 
-    <!-- Client Site Form View Extension -->
+    <!-- Client Project Form View Extension -->
     <record id="view_client_site_form_dar_settings" model="ir.ui.view">
         <field name="name">client.site.form.dar.settings</field>
         <field name="model">client.site</field>

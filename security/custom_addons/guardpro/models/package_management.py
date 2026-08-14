@@ -5,8 +5,14 @@ from odoo.exceptions import ValidationError, UserError
 from odoo.tools import html_sanitize, email_normalize
 from ..common.image_optimizer import ImageOptimizer
 from ..common import constants as PMC
+from ..common.upload_validation import (
+    UploadValidationError,
+    decode_payload_to_bytes,
+    validate_media_bytes,
+)
 from markupsafe import Markup
 import logging
+import base64
 
 _logger = logging.getLogger(__name__)
 
@@ -79,7 +85,7 @@ class PackageManagement(models.Model):
     # Location
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=True,
         tracking=True,
         index=True,
@@ -334,6 +340,25 @@ class PackageManagement(models.Model):
         
         return res
 
+    def _validate_package_image_field(self, vals, field_name):
+        """Reject non-image / oversized Binary/Image field values."""
+        if field_name not in vals or not vals.get(field_name):
+            return
+        raw = decode_payload_to_bytes(vals[field_name])
+        if not raw:
+            raise ValidationError(_('Invalid %s upload.') % field_name)
+        try:
+            validated = validate_media_bytes(
+                raw,
+                filename='%s.jpg' % field_name,
+                content_type='image/jpeg',
+                allow_video=False,
+                allow_image=True,
+            )
+        except UploadValidationError as exc:
+            raise ValidationError(str(exc)) from exc
+        vals[field_name] = base64.b64encode(validated['data']).decode('ascii')
+
     @api.depends('photo_ids')
     def _compute_photo_count(self):
         """Compute number of photo attachments."""
@@ -366,6 +391,10 @@ class PackageManagement(models.Model):
                         vals.get('recipient_email'),
                         str(e)
                     )
+
+            self._validate_package_image_field(vals, 'package_photo')
+            self._validate_package_image_field(vals, 'label_photo')
+            self._validate_package_image_field(vals, 'damage_photo')
         
         packages = super().create(vals_list)
         
@@ -399,6 +428,10 @@ class PackageManagement(models.Model):
                     str(e)
                 )
         
+        self._validate_package_image_field(vals, 'package_photo')
+        self._validate_package_image_field(vals, 'label_photo')
+        self._validate_package_image_field(vals, 'damage_photo')
+
         result = super().write(vals)
         if 'photo_ids' in vals or 'damage_photo' in vals:
             self._optimize_photos()

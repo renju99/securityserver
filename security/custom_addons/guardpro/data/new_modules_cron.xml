@@ -43,9 +43,9 @@
             <field name="active" eval="False"/>
         </record>
 
-        <!-- Daily Visitor Log Email (6 PM Dubai time, one send per day) -->
+        <!-- Daily Visitor Log Email (6 PM Dubai): one email per site, site recipients only -->
         <record id="cron_daily_visitor_log_email" model="ir.cron">
-            <field name="name">GuardLink: Daily Visitor Log Email</field>
+            <field name="name">GuardLink: Daily Visitor Log Email (per site)</field>
             <field name="model_id" ref="model_visitor_management"/>
             <field name="state">code</field>
             <field name="code">model.send_daily_visitor_log_email()</field>

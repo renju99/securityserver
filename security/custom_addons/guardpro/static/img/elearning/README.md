@@ -13,7 +13,7 @@ This directory contains screenshots and images used in the GuardLink eLearning c
 | `05_operations_menu.png` | Operations dropdown menu | Fundamentals - Module 5: Basic Operations |
 | `06_incidents_emergency_menu.png` | Incidents & Emergency submenu | N/A (Available for future use) |
 | `07_guard_management_tab.png` | Guard Management dashboard tab | Supervisor Ops - Module 2: Shift Management |
-| `08_site_coverage_tab.png` | Site Coverage analytics view | Manager Advanced - Module 2: Analytics and Reporting |
+| `08_site_coverage_tab.png` | Project Coverage analytics view | Manager Advanced - Module 2: Analytics and Reporting |
 | `09_incident_management_tab.png` | Incident Management dashboard | Supervisor Ops - Module 3: Incident Investigation |
 | `10_tours_patrols_tab.png` | Tours & Patrols dashboard | Guard Operations - Module 4: Security Tours |
 | `11_shifts_calendar_view.png` | Weekly shifts calendar view | Guard Operations - Module 2: Shift Check-In/Check-Out |

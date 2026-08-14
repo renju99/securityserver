@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 /**
  * Task Assignment poller (PWA /guardpro/mobile/*)
  * -----------------------------------------------
@@ -11,11 +9,12 @@
  *
  * Mirrors ``mobile_emergency_broadcast.js`` so behaviour is consistent
  * across the three guard-facing alert channels.
+ * Plain script (no @odoo-module) so it runs on the lightweight mobile layout.
  */
 (function () {
     "use strict";
 
-    const POLL_INTERVAL_MS = 4000;
+    const POLL_INTERVAL_MS = 8000;
     let pollingTimer = null;
     let activeTaskId = null;
 
@@ -46,7 +45,7 @@
             }
             const title = "New task assigned: " + String(data.name || "Task");
             const lines = [];
-            if (data.site_name) lines.push("Site: " + data.site_name);
+            if (data.site_name) lines.push("Project: " + data.site_name);
             if (data.priority_label) lines.push("Priority: " + data.priority_label);
             if (data.due_date) {
                 try {
@@ -148,7 +147,7 @@
         titleEl.textContent = data.name || "Task";
 
         const metaLines = [];
-        if (data.site_name) metaLines.push("Site: " + data.site_name);
+        if (data.site_name) metaLines.push("Project: " + data.site_name);
         if (data.assigned_by) metaLines.push("By: " + data.assigned_by);
         if (data.due_date) {
             try {
@@ -193,6 +192,7 @@
     }
 
     async function pollTaskAssignments() {
+        if (window.__gpSessionDead) return;
         if (emergencyOverlayVisible()) return;
         try {
             const response = await fetch(
@@ -204,6 +204,16 @@
                     cache: "no-store",
                 }
             );
+            const ct = (response.headers.get("content-type") || "").toLowerCase();
+            if (
+                response.status === 401 ||
+                response.status === 403 ||
+                response.redirected ||
+                ct.indexOf("json") === -1
+            ) {
+                window.__gpSessionDead = true;
+                return;
+            }
             const payload = await response.json();
             const list =
                 payload && payload.success && Array.isArray(payload.tasks)

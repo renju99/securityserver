@@ -226,7 +226,7 @@
                     <filter name="filter_start_date" string="Start Date" date="start_datetime"/>
                     <group expand="0" string="Group By">
                         <filter name="group_guard" string="Guard" context="{'group_by': 'guard_id'}"/>
-                        <filter name="group_site" string="Site" context="{'group_by': 'site_id'}"/>
+                        <filter name="group_site" string="Project" context="{'group_by': 'site_id'}"/>
                         <filter name="group_status" string="Status" context="{'group_by': 'status'}"/>
                         <filter name="group_conflict" string="Conflict Type" context="{'group_by': 'conflict_type'}"/>
                         <filter name="group_date" string="Date" context="{'group_by': 'start_datetime:day'}"/>

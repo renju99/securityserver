@@ -23,7 +23,7 @@ class TourManualGenerationWizard(models.TransientModel):
     )
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=True,
         readonly=True
     )

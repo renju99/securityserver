@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'GuardLink - Security Guard Management',
-    'version': '18.0.1.1.102',
+    'version': '18.0.1.1.225',
     'category': 'Services/Security',
     'summary': 'Win premium guard contracts with an Odoo-native suite for mobile patrols, SLA automation, client portals, and analytics.',
     'description': """
@@ -40,7 +40,7 @@ Automation & Integrations
 
 Included Components
 -------------------
-* Models: guard profiles, client sites, tours, checkpoints, shifts, incidents, attendance, credentials, equipment, analytics, and more
+* Models: guard profiles, client projects, tours, checkpoints, shifts, incidents, attendance, credentials, equipment, analytics, and more
 * Views: form, kanban, calendar, map, dashboard templates, portal pages, mobile layouts, and documentation center
 * Wizards: shift assignment, conflict resolver, route optimizer, GDPR requests, emergency broadcast, task creation, package collection
 * Reports: full PDF suite (incidents, daily activity reports, attendance, site summary, training certificates, compliance, equipment)
@@ -103,6 +103,8 @@ Support & Roadmap
         # CSV file MUST be loaded AFTER all group definitions
         'security/ir.model.access.csv',
         'security/guardpro_record_rules.xml',
+        'security/guardpro_isolation_rules.xml',
+        'security/guardpro_zone_record_rules.xml',
         # OPTIONAL: Requires hr_attendance module
         # 'security/hr_attendance_guard_security.csv',
         # OPTIONAL: Requires project module
@@ -157,6 +159,7 @@ Support & Roadmap
         # Scheduled Actions (Cron Jobs)
         'data/mail_mail_retention_config.xml',
         'data/ir_cron.xml',
+        'data/attendance_auto_checkout_cron.xml',
         'data/new_modules_cron.xml',
         'data/elearning_cron.xml',
         'data/messaging_cron.xml',
@@ -218,6 +221,7 @@ Support & Roadmap
         'views/guard_location_history_views.xml',
         'views/geofence_alert_views.xml',
         'views/client_site_views.xml',
+        'views/guard_site_views.xml',
         'views/tenant_resident_views.xml',
         'views/resident_complaint_views.xml',
         'views/security_tour_checkpoint_line_views.xml',
@@ -242,6 +246,7 @@ Support & Roadmap
         'views/sla_template_views.xml',
         'views/sla_wizard_views.xml',
         'views/incident_report_views.xml',
+        'views/incident_form_definition_views.xml',
         'views/incident_sla_policy_views.xml',
         'views/incident_escalation_log_views.xml',
         'views/incident_investigation_views.xml',
@@ -264,10 +269,12 @@ Support & Roadmap
         'views/facility_issue_views.xml',
         'views/checkpoint_scan_views.xml',
         'views/daily_activity_report_views.xml',
+        'views/guard_activity_report_views.xml',
         'views/webhook_views.xml',
         'views/client_feedback_views.xml',
         'views/client_dashboard_views.xml',
         'views/training_views.xml',
+        'views/training_session_views.xml',
         # eLearning integration views (requires website_slides module)
         'views/guard_elearning_views.xml',
         'views/quiz_response_views.xml',  # Question-level quiz response views
@@ -290,6 +297,7 @@ Support & Roadmap
         'reports/tour_log_report_template.xml',
         'reports/attendance_report_template.xml',
         'reports/daily_activity_report_template.xml',
+        'reports/guard_activity_report_template.xml',
         'reports/visitor_management_report_template.xml',
         'reports/incident_statement_report_template.xml',
         'reports/incident_lost_found_forms_report_template.xml',
@@ -386,6 +394,7 @@ Support & Roadmap
         # Homepage Template
         'views/guardpro_homepage_template.xml',
         'views/berkeley_homepage_template.xml',  # GuardLink branded homepage
+        'views/privacy_policy_template.xml',  # Public Privacy Policy (Play / App Store)
         # PWA Templates (Legacy - DISABLED - files removed to avoid 404 errors)
         # 'views/pwa_templates.xml',  # References deleted static/pwa/ files
         # 'views/pwa_optimized_templates.xml',  # References deleted static/pwa/ files
@@ -394,6 +403,7 @@ Support & Roadmap
         
         # Mobile Templates (Odoo-native, minimal JS)
         # Note: mobile_dashboard.xml and mobile_app_layout.xml removed - duplicates of mobile_simple_templates.xml
+        'views/mobile_layout.xml',  # Lightweight mobile layout (skips frontend_lazy JS)
         'views/mobile_simple_templates.xml',  # Main mobile interface templates
         'views/mobile_views.xml',  # Mobile-optimized backend views (kanban, forms)
     ],
@@ -449,33 +459,33 @@ Support & Roadmap
             ('include', 'web._assets_helpers'),
             ('include', 'web.chartjs_lib'),  # Use Odoo's built-in Chart.js instead of CDN
         ],
-        # Portal and Mobile assets - Minimal (old PWA assets removed)
+        # Portal CSS only on website frontend (JS moved to guardpro.assets_mobile*)
         'web.assets_frontend': [
-            # CSS
             'guardpro/static/src/css/portal.css',
             'guardpro/static/src/css/mobile_dashboard.css',
-            'guardpro/static/src/css/tour_scanner.css',  # Tour scanning UI
-            
-            # Essential JavaScript only
-            'guardpro/static/lib/jsQR.js',  # For QR scanning if needed
-            'guardpro/static/src/js/gps_tracker.js',  # GPS tracking for location updates
-            'guardpro/static/src/js/guard_gps_auto_init.js',  # Auto-start GPS for guards
+            'guardpro/static/src/css/tour_scanner.css',
+            'guardpro/static/src/js/guard_elearning_navigation.js',  # eLearning pages still use website layout
+        ],
+        # Core GuardLink mobile PWA scripts (loaded instead of web.assets_frontend_lazy)
+        'guardpro.assets_mobile': [
+            'guardpro/static/src/js/gps_tracker.js',
+            'guardpro/static/src/js/guard_gps_mobile_init.js',
             'guardpro/static/src/js/mobile_navigation.js',
-            'guardpro/static/src/js/guard_elearning_navigation.js',  # Back to Mobile button for guards
-            'guardpro/static/src/js/nfc_ndef_utils.js',  # NDEF text decode + UID formatting
-            'guardpro/static/src/js/tour_scanner.js',  # QR/NFC scanning for tours
-            'guardpro/static/src/js/mobile_emergency_broadcast.js',  # Poll and show emergency broadcasts in mobile PWA
-            'guardpro/static/src/js/mobile_patrol_reminder.js',  # Patrol 30/10 min reminders + acknowledge
-            'guardpro/static/src/js/mobile_task_assignment.js',  # Task assignment alerts + acknowledge
-            'guardpro/static/src/js/mobile_outbox.js',  # Unified notification outbox (shifts, incidents, credentials, messages...)
-            'guardpro/static/src/js/mobile_guard_messages.js',  # Text chat inbox (guard.message + channels)
-            'guardpro/static/src/js/mobile_push_to_talk.js',  # Push-to-Talk for mobile interface
-            'guardpro/static/src/js/mobile_emirates_id_camera_scan.js',  # Emirates ID camera OCR on mobile PWA
-            # Note: biometric_capture.js removed from frontend and backend assets
-            
-            # Note: Old complex PWA files removed
-            # See docs/PWA_MIGRATION_SUMMARY.md for details
-            # Backup available in backup_old_pwa_js/
+            'guardpro/static/src/js/mobile_incident_wizard.js',
+            'guardpro/static/src/js/mobile_emergency_broadcast.js',
+            'guardpro/static/src/js/mobile_patrol_reminder.js',
+            'guardpro/static/src/js/mobile_task_assignment.js',
+            'guardpro/static/src/js/mobile_outbox.js',
+        ],
+        'guardpro.assets_mobile_ptt': [
+            'guardpro/static/src/css/push_to_talk.css',
+            'guardpro/static/src/js/mobile_push_to_talk.js',
+        ],
+        'guardpro.assets_mobile_messages': [
+            'guardpro/static/src/js/mobile_guard_messages.js',
+        ],
+        'guardpro.assets_mobile_eid': [
+            'guardpro/static/src/js/mobile_emirates_id_camera_scan.js',
         ],
     },
     'demo': [

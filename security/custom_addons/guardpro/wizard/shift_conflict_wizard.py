@@ -31,7 +31,7 @@ class GuardShiftConflictWizard(models.TransientModel):
     
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         related='shift_id.site_id',
         readonly=True
     )

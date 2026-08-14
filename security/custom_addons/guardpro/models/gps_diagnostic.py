@@ -192,7 +192,7 @@ class GPSDiagnostic(models.TransientModel):
             if active_attendance:
                 messages.append(
                     f'<p style="color: green;">✓ <strong>Active Attendance:</strong> '
-                    f'Checked in at {active_attendance.site_id.name if active_attendance.site_id else "Unknown Site"}</p>'
+                    f'Checked in at {active_attendance.site_id.name if active_attendance.site_id else "Unknown Project"}</p>'
                 )
             else:
                 messages.append(

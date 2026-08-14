@@ -36,7 +36,7 @@ class CCTVCamera(models.Model):
     # Site Association
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=True,
         tracking=True,
         ondelete='cascade',

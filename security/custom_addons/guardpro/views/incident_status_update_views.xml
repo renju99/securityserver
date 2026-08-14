@@ -86,7 +86,7 @@
                 <group expand="0" string="Group By">
                     <filter name="group_by_incident" string="Incident" context="{'group_by': 'incident_id'}"/>
                     <filter name="group_by_type" string="Update Type" context="{'group_by': 'update_type'}"/>
-                    <filter name="group_by_site" string="Site" context="{'group_by': 'site_id'}"/>
+                    <filter name="group_by_site" string="Project" context="{'group_by': 'site_id'}"/>
                 </group>
             </search>
         </field>

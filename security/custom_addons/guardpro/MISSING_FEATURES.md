@@ -14,7 +14,7 @@ The following items were identified as broken or disabled and have been **fixed*
     *   **Key Overdue Notification**: Re-enabled this template. It was commented out due to a belief that `model_key_register` did not exist. Verification confirmed `models/key_management.py` defines `key.register`, so the template is now active and functional.
 
 *   **Mobile App** (`static/src/js/mobile_navigation.js`):
-    *   **Implemented Views**: Profile, Site Info, Emergency Procedures, Settings.
+    *   **Implemented Views**: Profile, Project Info, Emergency Procedures, Settings.
     *   **Action**: Created new controller routes, QWeb templates, and updated JavaScript navigation logic to enable these previously missing sections.
 
 ### 2. Disabled Features (Requires Action)

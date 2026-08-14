@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Project Training Session Form -->
+    <record id="view_training_session_form" model="ir.ui.view">
+        <field name="name">training.session.form</field>
+        <field name="model">training.session</field>
+        <field name="arch" type="xml">
+            <form string="Project Training Record">
+                <header>
+                    <button name="action_mark_completed" string="Mark Completed" type="object"
+                            class="oe_highlight"
+                            invisible="state != 'draft'"/>
+                    <button name="action_reset_draft" string="Reset to Draft" type="object"
+                            invisible="state == 'draft'"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state != 'draft'"
+                            confirm="Cancel this training record?"/>
+                    <field name="state" widget="statusbar"
+                             statusbar_visible="draft,completed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="topic"/>
+                        <h1>
+                            <field name="topic" placeholder="e.g. Fire extinguisher refresher"/>
+                        </h1>
+                        <h3>
+                            <field name="name" readonly="1"/>
+                        </h3>
+                    </div>
+                    <group>
+                        <group string="Session">
+                            <field name="session_type"/>
+                            <field name="session_date"/>
+                            <field name="start_time" widget="float_time"/>
+                            <field name="end_time" widget="float_time"/>
+                            <field name="duration_hours" widget="float_time"/>
+                            <field name="location"/>
+                        </group>
+                        <group string="Project">
+                            <field name="site_id" options="{'no_create': True}"/>
+                            <field name="zone_id" options="{'no_create': True}"/>
+                            <field name="trainer_id"/>
+                            <field name="trainer_name"/>
+                            <field name="trainer_company"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Content" name="content">
+                            <field name="description"
+                                     placeholder="Agenda, talking points, procedures covered..."/>
+                            <group>
+                                <field name="notes" placeholder="Observations, follow-ups, issues raised..."/>
+                            </group>
+                        </page>
+                        <page string="Attendees" name="attendees">
+                            <group>
+                                <group>
+                                    <field name="available_guard_count"/>
+                                    <field name="attendee_count"/>
+                                    <field name="external_attendee_count"/>
+                                    <field name="total_attendee_count"/>
+                                    <field name="sync_guard_records"
+                                              invisible="state == 'cancelled'"/>
+                                </group>
+                            </group>
+                            <div class="alert alert-info" role="alert" invisible="site_id">
+                                Select a site first to load the guards assigned to that site.
+                            </div>
+                            <div class="alert alert-warning" role="alert"
+                                 invisible="not site_id or available_guard_count">
+                                No active guards are assigned to this site.
+                            </div>
+                            <separator string="Guards Present"/>
+                            <div class="mb-2" invisible="not site_id or state == 'cancelled'">
+                                <button name="action_add_all_site_guards" type="object"
+                                        string="Select all site guards"
+                                        class="btn btn-secondary"
+                                        icon="fa-check-square-o"
+                                        invisible="state != 'draft'"/>
+                                <button name="action_clear_attendees" type="object"
+                                        string="Clear selection"
+                                        class="btn btn-link"
+                                        invisible="state != 'draft' or not attendee_count"/>
+                            </div>
+                            <field name="available_guard_ids" invisible="1"/>
+                            <field name="attendee_ids" nolabel="1"
+                                     widget="many2many_checkboxes"
+                                     domain="[('status', '=', 'active'), '|', ('site_ids', 'in', site_id), ('current_site_id', '=', site_id)]"
+                                     invisible="not site_id"
+                                     readonly="state != 'draft'"/>
+                            <p class="text-muted" invisible="not site_id or state != 'draft'">
+                                Tick the guards who attended. Only active guards assigned to this site are shown.
+                            </p>
+                            <separator string="Other Attendees"/>
+                            <field name="external_attendees"
+                                     placeholder="One name per line (client staff, contractors, visitors)..."
+                                     readonly="state != 'draft'"/>
+                        </page>
+                        <page string="Attachments" name="attachments">
+                            <field name="attachment_ids" widget="many2many_binary"/>
+                            <p class="text-muted">
+                                Upload attendance sheets, presentations, photos, or certificates.
+                            </p>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- List -->
+    <record id="view_training_session_list" model="ir.ui.view">
+        <field name="name">training.session.list</field>
+        <field name="model">training.session</field>
+        <field name="arch" type="xml">
+            <list string="Project Training Records" multi_edit="1" sample="1">
+                <field name="name"/>
+                <field name="session_date"/>
+                <field name="site_id"/>
+                <field name="session_type"/>
+                <field name="topic"/>
+                <field name="trainer_id" optional="show"/>
+                <field name="total_attendee_count" string="Attendees"/>
+                <field name="duration_hours" widget="float_time" optional="hide"/>
+                <field name="state" widget="badge"
+                         decoration-success="state == 'completed'"
+                         decoration-muted="state == 'draft'"
+                         decoration-danger="state == 'cancelled'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Kanban -->
+    <record id="view_training_session_kanban" model="ir.ui.view">
+        <field name="name">training.session.kanban</field>
+        <field name="model">training.session</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1" default_group_by="state">
+                <field name="name"/>
+                <field name="topic"/>
+                <field name="session_date"/>
+                <field name="site_id"/>
+                <field name="session_type"/>
+                <field name="total_attendee_count"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_card oe_kanban_global_click">
+                            <div class="o_kanban_record_title">
+                                <strong><field name="topic"/></strong>
+                            </div>
+                            <div class="text-muted">
+                                <field name="name"/> · <field name="session_date"/>
+                            </div>
+                            <div>
+                                <field name="site_id"/>
+                            </div>
+                            <div class="mt-1">
+                                <span class="badge text-bg-secondary">
+                                    <field name="session_type"/>
+                                </span>
+                                <span class="badge text-bg-info ms-1">
+                                    <field name="total_attendee_count"/> attendees
+                                </span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Search -->
+    <record id="view_training_session_search" model="ir.ui.view">
+        <field name="name">training.session.search</field>
+        <field name="model">training.session</field>
+        <field name="arch" type="xml">
+            <search string="Search Project Training">
+                <field name="name"/>
+                <field name="topic"/>
+                <field name="site_id"/>
+                <field name="trainer_id"/>
+                <field name="trainer_name"/>
+                <field name="attendee_ids"/>
+                <filter string="Draft" name="filter_draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Completed" name="filter_completed" domain="[('state', '=', 'completed')]"/>
+                <filter string="Cancelled" name="filter_cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+                <filter string="This Month" name="filter_this_month"
+                        domain="[('session_date', '&gt;=', context_today() + relativedelta(day=1))]"/>
+                <separator/>
+                <filter string="Toolbox Talks" name="filter_toolbox" domain="[('session_type', '=', 'toolbox')]"/>
+                <filter string="Inductions" name="filter_induction" domain="[('session_type', '=', 'induction')]"/>
+                <filter string="HSE / Safety" name="filter_hse" domain="[('session_type', '=', 'hse')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Project" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Type" name="group_type" context="{'group_by': 'session_type'}"/>
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'session_date'}"/>
+                    <filter string="Conducted By" name="group_trainer" context="{'group_by': 'trainer_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_training_session" model="ir.actions.act_window">
+        <field name="name">Project Training Records</field>
+        <field name="res_model">training.session</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="search_view_id" ref="view_training_session_search"/>
+        <field name="context">{'search_default_filter_this_month': 0}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Record a training conducted at site
+            </p>
+            <p>
+                Log toolbox talks, inductions, HSE briefings, fire drills, and other
+                on-site training with attendees, agenda, and attachments.
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -27,7 +27,7 @@ class GuardAttendance(models.Model):
     )
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=True,
         tracking=True,
         index=True,
@@ -275,6 +275,59 @@ class GuardAttendance(models.Model):
                     'Shift end time must be after shift start time!'
                 ))
 
+    def write(self, vals):
+        res = super().write(vals)
+        if any(k in vals for k in ('checkout_time', 'shift_id', 'checkin_time', 'status')):
+            self._sync_linked_shift_status()
+        return res
+
+    def _sync_linked_shift_status(self):
+        """Keep linked guard.shift.status aligned with attendance.
+
+        Mobile/PWA paths create attendance without updating the shift. The
+        missed-checkin cron can stamp ``no_show`` first; later check-in then
+        leaves hours on a No Show row. Clear that here for every create path.
+        """
+        now = fields.Datetime.now()
+        shifts = self.mapped('shift_id').filtered(
+            lambda s: s and s.status not in ('cancelled', 'completed')
+        )
+        for shift in shifts:
+            # Search (not One2many cache) so create() sees the new row
+            atts = self.env['guard.attendance'].sudo().search([
+                ('shift_id', '=', shift.id),
+            ])
+            if not atts:
+                continue
+
+            open_atts = atts.filtered(
+                lambda a: a.checkin_time and not a.checkout_time
+            )
+            vals = {}
+            if open_atts:
+                if shift.status in ('scheduled', 'confirmed', 'no_show'):
+                    vals['status'] = 'in_progress'
+                first_in = min(open_atts.mapped('checkin_time'))
+                if not shift.checkin_time:
+                    vals['checkin_time'] = first_in
+            else:
+                # Had attendance, all closed — never leave as no_show
+                if shift.status == 'no_show':
+                    vals['status'] = (
+                        'completed' if now >= shift.end_datetime else 'in_progress'
+                    )
+                elif (
+                    shift.status in ('scheduled', 'confirmed', 'in_progress')
+                    and now >= shift.end_datetime
+                ):
+                    vals['status'] = 'completed'
+                closed = atts.filtered('checkout_time')
+                if closed and not shift.checkout_time:
+                    vals['checkout_time'] = max(closed.mapped('checkout_time'))
+
+            if vals:
+                shift.sudo().write(vals)
+
     def action_approve(self):
         """Approve attendance record."""
         self.write({
@@ -303,9 +356,64 @@ class GuardAttendance(models.Model):
                 latitude, longitude
             )
 
+    # Max open session length before automatic checkout (hours)
+    AUTO_CHECKOUT_MAX_HOURS = 13
+
+    @api.model
+    def cron_auto_checkout_stale_sessions(self, max_hours=None):
+        """Automatically check out open attendances older than max_hours.
+
+        Caps checkout at check-in + max_hours so working hours cannot balloon
+        when a guard forgets to check out.
+        """
+        from datetime import timedelta
+
+        max_hours = max_hours if max_hours is not None else self.AUTO_CHECKOUT_MAX_HOURS
+        now = fields.Datetime.now()
+        cutoff = now - timedelta(hours=max_hours)
+
+        stale = self.sudo().search([
+            ('checkout_time', '=', False),
+            ('checkin_time', '!=', False),
+            ('checkin_time', '<=', cutoff),
+        ])
+        if not stale:
+            return True
+
+        _logger.info(
+            'Auto-checkout: closing %s open attendance(s) older than %sh',
+            len(stale), max_hours,
+        )
+        note = _(
+            'Automatically checked out after %(hours)s hours (forgot check-out).'
+        ) % {'hours': max_hours}
+
+        for att in stale:
+            checkout_at = att.checkin_time + timedelta(hours=max_hours)
+            # Never set checkout in the future
+            if checkout_at > now:
+                checkout_at = now
+            existing = (att.checkout_notes or '').strip()
+            att.write({
+                'checkout_time': checkout_at,
+                'checkout_method': 'manual',
+                'checkout_notes': (
+                    '%s\n%s' % (existing, note) if existing else note
+                ),
+            })
+            _logger.info(
+                'Auto-checkout attendance %s guard=%s checkin=%s checkout=%s',
+                att.id,
+                att.guard_id.name,
+                att.checkin_time,
+                checkout_at,
+            )
+
+        return True
+
     @api.model_create_multi
     def create(self, vals_list):
-        """Verify GPS on shift start."""
+        """Verify GPS on shift start and sync linked shift status."""
         records = super().create(vals_list)
         
         # Verify shift start location for each record
@@ -316,7 +424,8 @@ class GuardAttendance(models.Model):
                     record.checkin_latitude,
                     record.checkin_longitude
                 )
-        
+
+        records._sync_linked_shift_status()
         return records
     
     def init(self):

@@ -16,12 +16,22 @@
                            options="{'no_open': True}"
                            required="1"/>
                     <field name="name" string="Name" column_invisible="True" optional="hide"/>
-                    <field name="code" string="Code" optional="show"/>
+                    <field name="code" string="Code" optional="hide"/>
+                    <field name="nfc_tag_id" string="NFC Tag ID"
+                           optional="show"
+                           placeholder="04:80:ab:01:69:02:03"
+                           invisible="scan_type not in ('nfc', 'both')"
+                           readonly="scan_type not in ('nfc', 'both')"/>
+                    <field name="qr_code" string="QR Code"
+                           optional="hide"
+                           invisible="scan_type not in ('qr', 'both')"
+                           readonly="scan_type not in ('qr', 'both')"/>
                     <field name="scan_type" string="Scan type" widget="badge"
                            decoration-info="scan_type == 'nfc'"
                            decoration-success="scan_type == 'qr'"
                            decoration-warning="scan_type == 'both'"
-                           decoration-muted="scan_type == 'virtual'"/>
+                           decoration-muted="scan_type == 'virtual'"
+                           decoration-primary="scan_type == 'walkaround'"/>
                     <field name="requires_photo" string="Photo" widget="boolean" optional="hide"/>
                     <field name="requires_note" string="Note" widget="boolean" optional="hide"/>
                 </list>
@@ -47,6 +57,13 @@
                             <group invisible="not checkpoint_id">
                                 <field name="name" readonly="1"/>
                                 <field name="code" readonly="1"/>
+                                <field name="nfc_tag_id"
+                                       invisible="scan_type not in ('nfc', 'both')"
+                                       readonly="scan_type not in ('nfc', 'both')"
+                                       placeholder="04:80:ab:01:69:02:03"/>
+                                <field name="qr_code"
+                                       invisible="scan_type not in ('qr', 'both')"
+                                       readonly="scan_type not in ('qr', 'both')"/>
                                 <field name="scan_type" readonly="1"/>
                                 <field name="requires_photo" readonly="1"/>
                                 <field name="requires_note" readonly="1"/>

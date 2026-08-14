@@ -230,7 +230,7 @@
                 <separator/>
                 <!-- <filter string="Archived" name="archived" domain="[('active', '=', False)]"/> -->
                 <group expand="0" string="Group By">
-                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Project" name="group_site" context="{'group_by': 'site_id'}"/>
                     <filter string="Assigned To" name="group_assigned" context="{'group_by': 'assigned_to'}"/>
                     <filter string="Task Type" name="group_type" context="{'group_by': 'task_type'}"/>
                     <filter string="Status" name="group_status" context="{'group_by': 'state'}"/>

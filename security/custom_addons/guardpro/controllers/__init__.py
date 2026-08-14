@@ -18,6 +18,7 @@ from . import notification_api
 from . import documentation
 from . import pwa_controller
 from . import pwa_simple
+from . import mobile_entry
 from . import offline_sync_api
 from . import visitor_ocr_api
 

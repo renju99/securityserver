@@ -214,7 +214,7 @@
               groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- ================================================================
-         3. SITE MANAGEMENT - Site-Level Operations
+         3. SITE MANAGEMENT - Project-Level Operations
          ================================================================ -->
     <menuitem id="menu_guardpro_site_management"
               name="Visitor Management"
@@ -408,6 +408,14 @@
               sequence="20"
               groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
+    <!-- 5.2b Guard Activity Reports -->
+    <menuitem id="menu_guard_activity_report"
+              name="Guard Activity Reports (GARs)"
+              parent="menu_guardpro_compliance"
+              action="action_guard_activity_report"
+              sequence="25"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
     <!-- 5.3 SLA Management -->
     <menuitem id="menu_sla_submenu"
               name="SLA Management"
@@ -451,43 +459,54 @@
               groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_client_site"
-              name="Sites"
+              name="Projects"
               parent="menu_guardpro_resources"
               sequence="20"
               groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
+    <!-- Old entry: list of Projects (NSHAMA, etc.) -->
     <menuitem id="menu_client_sites_view"
-              name="View Sites"
+              name="Projects"
               parent="menu_client_site"
               action="action_client_site"
               sequence="5"
+              active="True"
               groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
+    <!-- Physical sites under a project (separate from Projects list) -->
     <menuitem id="menu_location_hierarchy"
-              name="Location Hierarchy"
+              name="Sites"
               parent="menu_client_site"
+              action="action_guard_site"
               sequence="10"
+              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <menuitem id="menu_zones"
+              name="Zones"
+              parent="menu_client_site"
+              action="action_site_zones"
+              sequence="20"
               groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_buildings"
               name="Buildings"
-              parent="menu_location_hierarchy"
+              parent="menu_client_site"
               action="action_site_buildings"
-              sequence="10"
+              sequence="30"
               groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_floors"
               name="Floors"
-              parent="menu_location_hierarchy"
+              parent="menu_client_site"
               action="action_building_floors"
-              sequence="20"
+              sequence="40"
               groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_areas"
               name="Areas/Rooms"
-              parent="menu_location_hierarchy"
+              parent="menu_client_site"
               action="action_floor_areas"
-              sequence="30"
+              sequence="50"
               groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <menuitem id="menu_checkpoint"
@@ -660,6 +679,14 @@
               action="action_expiring_certifications"
               sequence="30"
               groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+
+    <!-- Site-conducted training log (toolbox, induction, HSE, etc.) -->
+    <menuitem id="menu_site_training_records"
+              name="Project Training Records"
+              parent="menu_guardpro_training_knowledge"
+              action="action_training_session"
+              sequence="15"
+              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin,group_guardpro_client_user"/>
 
     <!-- 7.2 Knowledge Base & SOPs -->
     <menuitem id="menu_knowledge_submenu"

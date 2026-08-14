@@ -8,7 +8,17 @@ import json
 import base64
 from datetime import datetime
 
+from odoo.addons.guardpro.common.upload_validation import (
+    UploadValidationError,
+    validate_b64_payload,
+)
+
 _logger = logging.getLogger(__name__)
+
+
+def _b64_for_binary_field(validated):
+    """Odoo Binary fields expect base64 text."""
+    return base64.b64encode(validated['data']).decode('ascii')
 
 
 class GuardLinkSmartFeaturesAPI(http.Controller):
@@ -147,14 +157,21 @@ class GuardLinkSmartFeaturesAPI(http.Controller):
             if not guard:
                 return {'success': False, 'error': 'Guard profile not found'}
 
-            # Get templates
+            # Site-scoped + intentional globals (empty site_id)
+            user = request.env.user
+            if user.has_group('guardpro.group_guardpro_admin'):
+                template_domain = [('active', '=', True)]
+            else:
+                allowed_sites = list(user.site_ids.ids)
+                template_domain = [
+                    ('active', '=', True),
+                    '|',
+                    ('site_id', '=', False),
+                    ('site_id', 'in', allowed_sites),
+                ]
+
             Template = request.env['guard.task.template']
-            templates = Template.search([
-                ('active', '=', True),
-                '|',
-                ('site_id', '=', False),
-                ('site_id', '=', guard.current_site_id.id if guard.current_site_id else False)
-            ], order='sequence, name')
+            templates = Template.search(template_domain, order='sequence, name')
 
             templates_list = []
             for template in templates:
@@ -191,12 +208,28 @@ class GuardLinkSmartFeaturesAPI(http.Controller):
             if not guard:
                 return {'success': False, 'error': 'Guard profile not found'}
 
-            # Get template
+            # Get template (record rules enforce site / global visibility)
             Template = request.env['guard.task.template']
             template = Template.browse(template_id)
 
             if not template.exists():
                 return {'success': False, 'error': 'Template not found'}
+
+            user = request.env.user
+            if (
+                not user.has_group('guardpro.group_guardpro_admin')
+                and template.site_id
+                and template.site_id.id not in user.site_ids.ids
+            ):
+                return {'success': False, 'error': 'Template not found'}
+
+            site_id = False
+            if guard.current_site_id and guard.current_site_id.id in user.site_ids.ids:
+                site_id = guard.current_site_id.id
+            elif user.site_ids:
+                site_id = user.site_ids.ids[0]
+            if template.site_id:
+                site_id = template.site_id.id
 
             # Create task
             Task = request.env['guard.task']
@@ -206,7 +239,7 @@ class GuardLinkSmartFeaturesAPI(http.Controller):
                 'task_type': template.task_type,
                 'priority': template.priority,
                 'assigned_to': guard.id,
-                'site_id': guard.current_site_id.id if guard.current_site_id else False,
+                'site_id': site_id,
                 'template_id': template.id,
                 'state': 'assigned',
                 'due_date': fields.Date.today()
@@ -348,17 +381,36 @@ class GuardLinkSmartFeaturesAPI(http.Controller):
             if not incident.exists():
                 return {'success': False, 'error': 'Incident not found'}
 
-            # Decode base64 media
-            original_media = base64.b64decode(original_media_base64.split(',')[1])
-            annotated_media = base64.b64decode(annotated_media_base64.split(',')[1])
+            mt = (media_type or 'photo').strip().lower()
+            if mt not in ('photo', 'video'):
+                return {'success': False, 'error': 'media_type must be photo or video'}
 
-            # Create annotation record
+            allow_image = mt == 'photo'
+            allow_video = mt == 'video'
+            try:
+                original = validate_b64_payload(
+                    original_media_base64,
+                    filename='original.%s' % ('jpg' if allow_image else 'mp4'),
+                    allow_video=allow_video,
+                    allow_image=allow_image,
+                    allow_audio=False,
+                )
+                annotated = validate_b64_payload(
+                    annotated_media_base64,
+                    filename='annotated.%s' % ('jpg' if allow_image else 'mp4'),
+                    allow_video=allow_video,
+                    allow_image=allow_image,
+                    allow_audio=False,
+                )
+            except UploadValidationError as exc:
+                return {'success': False, 'error': str(exc)}
+
             Annotation = request.env['incident.media.annotation']
             annotation = Annotation.create({
                 'incident_id': incident_id,
-                'media_type': media_type,
-                'original_media': original_media,
-                'annotated_media': annotated_media,
+                'media_type': mt,
+                'original_media': _b64_for_binary_field(original),
+                'annotated_media': _b64_for_binary_field(annotated),
                 'annotation_data': json.dumps(annotation_data) if isinstance(annotation_data, dict) else annotation_data
             })
 
@@ -382,12 +434,20 @@ class GuardLinkSmartFeaturesAPI(http.Controller):
             if not task.exists():
                 return {'success': False, 'error': 'Task not found'}
 
-            # Decode voice data
-            voice_data = base64.b64decode(voice_data_base64.split(',')[1])
+            try:
+                voice = validate_b64_payload(
+                    voice_data_base64,
+                    filename='voice.webm',
+                    content_type='audio/webm',
+                    allow_video=False,
+                    allow_image=False,
+                    allow_audio=True,
+                )
+            except UploadValidationError as exc:
+                return {'success': False, 'error': str(exc)}
 
-            # Update task with voice notes
             task.write({
-                'completion_notes_voice': voice_data,
+                'completion_notes_voice': _b64_for_binary_field(voice),
                 'voice_notes_text': transcription
             })
 
@@ -410,23 +470,27 @@ class GuardLinkSmartFeaturesAPI(http.Controller):
             if not incident.exists():
                 return {'success': False, 'error': 'Incident not found'}
 
-            # Decode video data
-            video_data = base64.b64decode(video_data_base64.split(',')[1])
+            try:
+                validated = validate_b64_payload(
+                    video_data_base64,
+                    filename='evidence.mp4',
+                    content_type='video/mp4',
+                    allow_video=True,
+                    allow_image=False,
+                    allow_audio=False,
+                )
+            except UploadValidationError as exc:
+                return {'success': False, 'error': str(exc)}
 
-            # Validate size (max 20MB)
-            if len(video_data) > 20 * 1024 * 1024:
-                return {'success': False, 'error': 'Video too large. Maximum 20MB allowed.'}
-
-            # Update incident with video
             incident.write({
-                'video_evidence': video_data,
+                'video_evidence': _b64_for_binary_field(validated),
                 'video_duration': duration
             })
 
             return {
                 'success': True,
                 'message': 'Video uploaded successfully',
-                'video_size': len(video_data)
+                'video_size': len(validated['data'])
             }
 
         except Exception as e:

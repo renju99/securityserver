@@ -6,6 +6,7 @@ from . import shift_report_pdf
 from . import tour_log_report_pdf
 from . import attendance_report_pdf
 from . import daily_activity_report_pdf
+from . import guard_activity_report_pdf
 from . import guard_id_card_pdf
 from . import visitor_management_report_pdf
 from . import package_management_report_pdf

@@ -2,15 +2,16 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-    namespace "com.berkeleyuae.guardpro"
-    compileSdkVersion 34
-    
+    namespace "com.berkeleyuae.guardlink"
+    compileSdkVersion 36
+
     defaultConfig {
-        applicationId "com.berkeleyuae.guardpro"
+        applicationId "com.berkeleyuae.guardlink"
         minSdkVersion 24
-        targetSdkVersion 34
-        versionCode 16
-        versionName "1.2.4"
+        targetSdkVersion 36
+        // Release APK/AAB output: app/build/outputs/{apk,bundle}/release/
+        versionCode 45
+        versionName "1.2.33"
     }
 
     signingConfigs {
@@ -29,14 +30,20 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    
+
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+
+    applicationVariants.configureEach { variant ->
+        variant.outputs.configureEach { output ->
+            output.outputFileName = "guardlink-${variant.versionName}-${variant.versionCode}.apk"
+        }
     }
 }
 
@@ -44,12 +51,16 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.0"
     implementation "androidx.core:core-ktx:1.12.0"
     implementation "androidx.appcompat:appcompat:1.6.1"
-    
+    implementation "androidx.activity:activity-ktx:1.8.2"
+
     // TWA / Browser Dependencies
     implementation "androidx.browser:browser:1.7.0"
-    
+
     // Location Dependencies
     implementation "com.google.android.gms:play-services-location:21.0.1"
+
+    // WebM/Opus playback for background push-to-talk
+    implementation "androidx.media3:media3-exoplayer:1.4.1"
 
     // Networking
     implementation "com.squareup.retrofit2:retrofit:2.9.0"

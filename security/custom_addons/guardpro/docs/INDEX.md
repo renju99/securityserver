@@ -76,6 +76,10 @@ Documentation matches **what ships today**, not a future roadmap.
 
 ---
 
+### Client due diligence
+
+- [Security, data protection & hosting overview](CLIENT_SECURITY_DATA_PROTECTION_HOSTING.md) — client-shareable assurance brief (access control, isolation, TLS hosting, privacy FAQ)
+
 ## Additional reference material
 
 Specialized notes (deployment, testing, planning) live alongside this guide, for example:

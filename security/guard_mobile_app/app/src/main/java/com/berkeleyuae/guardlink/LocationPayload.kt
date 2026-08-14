@@ -1,4 +1,4 @@
-package com.berkeleyuae.guardpro
+package com.berkeleyuae.guardlink
 
 data class LocationPayload(
     val lat: Double,

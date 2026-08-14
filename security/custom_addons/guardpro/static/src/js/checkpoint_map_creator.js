@@ -84,7 +84,7 @@ class CheckpointMapCreator extends Component {
             if (!this.state.selectedSiteId) {
                 this.notification.add('Please select a site first!', {
                     type: 'warning',
-                    title: 'No Site Selected'
+                    title: 'No Project Selected'
                 });
                 return;
             }
@@ -143,7 +143,7 @@ class CheckpointMapCreator extends Component {
             });
             this.map.setZoom(16);
             
-            // Show site geofence
+            // Show project geofence
             this.showSiteGeofence(site);
             
             // Load existing checkpoints for this site
@@ -152,7 +152,7 @@ class CheckpointMapCreator extends Component {
     }
 
     /**
-     * Show site geofence boundary
+     * Show project geofence boundary
      */
     showSiteGeofence(site) {
         // Clear previous geofence
@@ -360,6 +360,7 @@ class CheckpointMapCreator extends Component {
                         <option value="qr">QR Code</option>
                         <option value="virtual" selected>Virtual (GPS)</option>
                         <option value="both">NFC + QR</option>
+                        <option value="walkaround">General Walkaround</option>
                     </select>
                 </div>
                 

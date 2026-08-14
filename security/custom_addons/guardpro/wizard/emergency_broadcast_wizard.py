@@ -30,14 +30,14 @@ class EmergencyBroadcastWizard(models.TransientModel):
 
     broadcast_type = fields.Selection([
         ('all', 'All Guards'),
-        ('by_site', 'Guards by Site'),
+        ('by_site', 'Guards by Project'),
         ('active_only', 'Only Active Guards on Duty')
     ], string='Broadcast To', default='all', required=True)
 
     site_id = fields.Many2one(
         'client.site',
-        string='Select Site',
-        help='Select specific site (only applies if "Guards by Site" is selected)'
+        string='Select Project',
+        help='Select specific site (only applies if "Guards by Project" is selected)'
     )
 
     guard_count = fields.Integer(

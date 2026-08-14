@@ -9,7 +9,7 @@ _logger = logging.getLogger(__name__)
 
 
 class TenantResident(models.Model):
-    """Tenant/Resident for community sites - enables feedback from residents."""
+    """Tenant/Resident for community projects - enables feedback from residents."""
     
     _name = 'tenant.resident'
     _description = 'Tenant/Resident'
@@ -51,7 +51,7 @@ class TenantResident(models.Model):
     
     site_id = fields.Many2one(
         'client.site',
-        string='Site/Community',
+        string='Project/Community',
         required=True,
         tracking=True,
         index=True,
@@ -198,19 +198,26 @@ class TenantResident(models.Model):
             # Set partner without triggering notifications
             self.with_context(mail_notrack=True).write({'partner_id': partner.id})
         
-        # Create portal user with signup capability
+        # Create portal user: portal + Resident/Tenant only (never Client User / Internal)
         portal_group = self.env.ref('base.group_portal')
         resident_group = self.env.ref('guardpro.group_guardpro_resident_user')
+        client_group = self.env.ref(
+            'guardpro.group_guardpro_client_user', raise_if_not_found=False
+        )
+        group_ids = [portal_group.id, resident_group.id]
         
         user_vals = {
             'name': self.name,
             'login': self.email,
             'partner_id': self.partner_id.id,
-            'groups_id': [(6, 0, [portal_group.id, resident_group.id])],
+            'groups_id': [(6, 0, group_ids)],
             'site_ids': [(6, 0, [self.site_id.id])],
         }
         
         user = self.env['res.users'].with_context(no_reset_password=True).create(user_vals)
+        # Belt-and-suspenders: strip Client User if somehow present
+        if client_group and client_group in user.groups_id:
+            user.write({'groups_id': [(3, client_group.id)]})
         
         # Set user_id without triggering mail notifications
         self.with_context(mail_notrack=True, mail_create_nolog=True).write({'user_id': user.id})
@@ -236,6 +243,16 @@ class TenantResident(models.Model):
             self._create_portal_user()
         else:
             self.user_id.active = True
+            # Ensure resident portal groups; strip Internal Client User if present
+            resident_group = self.env.ref('guardpro.group_guardpro_resident_user')
+            portal_group = self.env.ref('base.group_portal')
+            client_group = self.env.ref(
+                'guardpro.group_guardpro_client_user', raise_if_not_found=False
+            )
+            cmds = [(4, portal_group.id), (4, resident_group.id)]
+            if client_group:
+                cmds.append((3, client_group.id))
+            self.user_id.write({'groups_id': cmds})
 
         self.portal_access = True
 
@@ -443,7 +460,7 @@ class TenantResident(models.Model):
 
 
 class ClientSite(models.Model):
-    """Extend client site with resident management."""
+    """Extend client project with resident management."""
     
     _inherit = 'client.site'
     

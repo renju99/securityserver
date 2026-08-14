@@ -25,17 +25,38 @@ class EmergencyBroadcastAPIController(http.Controller):
         try:
             user = request.env.user
             
-            # Get pending acknowledgments for this user
+            # Only live "sent" broadcasts. Expired/draft rows must never block
+            # the mobile UI (Play testers were stuck behind old Test floods).
             acknowledgments = request.env['emergency.broadcast.acknowledgment'].sudo().search(
                 [
                     ('user_id', '=', user.id),
                     ('is_acknowledged', '=', False),
+                    ('broadcast_id.state', '=', 'sent'),
                 ],
                 order='create_date desc',
+                limit=5,
             )
+
+            # Self-heal: any still-open ack pointing at expired/draft noise.
+            stale = request.env['emergency.broadcast.acknowledgment'].sudo().search(
+                [
+                    ('user_id', '=', user.id),
+                    ('is_acknowledged', '=', False),
+                    ('broadcast_id.state', '!=', 'sent'),
+                ],
+                limit=100,
+            )
+            if stale:
+                stale.action_acknowledge()
+                _logger.info(
+                    'Auto-acked %s stale emergency ack(s) for user %s',
+                    len(stale), user.login,
+                )
 
             broadcasts = []
             for ack in acknowledgments:
+                if not ack.broadcast_id or ack.broadcast_id.state != 'sent':
+                    continue
                 broadcasts.append({
                     'id': ack.broadcast_id.id,
                     'ack_id': ack.id,
@@ -98,8 +119,17 @@ class EmergencyBroadcastAPIController(http.Controller):
                     'error': 'Acknowledgment not found or not authorized'
                 }, status=404)
 
-            # Acknowledge it
-            acknowledgment.action_acknowledge()
+            # Acknowledge it (idempotent if already acked / expired)
+            if not acknowledgment.is_acknowledged:
+                acknowledgment.action_acknowledge()
+            # If broadcast is no longer live, still treat as success so the
+            # mobile modal / TWA notification can dismiss.
+            if acknowledgment.broadcast_id.state != 'sent':
+                return request.make_json_response({
+                    'success': True,
+                    'message': 'Broadcast no longer active; acknowledgment cleared',
+                    'dismissed': True,
+                })
 
             return request.make_json_response({
                 'success': True,

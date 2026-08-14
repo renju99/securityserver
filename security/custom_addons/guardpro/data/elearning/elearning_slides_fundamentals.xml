@@ -476,7 +476,7 @@
                     &lt;li&gt;&lt;strong&gt;Communication Log:&lt;/strong&gt; Recent messages and updates&lt;/li&gt;
                 &lt;/ul&gt;
 
-                &lt;h3&gt;Site Coverage Overview&lt;/h3&gt;
+                &lt;h3&gt;Project Coverage Overview&lt;/h3&gt;
                 &lt;p&gt;Visual representation of security coverage across all sites:&lt;/p&gt;
                 &lt;ul&gt;
                     &lt;li&gt;&lt;strong&gt;Coverage Map:&lt;/strong&gt; Geographic view of guard locations&lt;/li&gt;
@@ -905,7 +905,7 @@
         </record>
 
         <record id="quiz_final_q13" model="slide.question">
-            <field name="question">The Site Coverage Overview provides a visual representation of:</field>
+            <field name="question">The Project Coverage Overview provides a visual representation of:</field>
             <field name="slide_id" ref="slide_fundamentals_final"/>
             <field name="sequence">13</field>
         </record>

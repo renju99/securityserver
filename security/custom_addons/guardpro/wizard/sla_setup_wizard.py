@@ -46,8 +46,8 @@ class SLASetupWizard(models.TransientModel):
     )
     site_ids = fields.Many2many(
         'client.site',
-        string='Sites',
-        help='Sites covered by this SLA'
+        string='Projects',
+        help='Projects covered by this SLA'
     )
     
     # Contract Details
@@ -313,7 +313,7 @@ class SLASetupWizardKPI(models.TransientModel):
         help='Calculate from audit scores'
     )
     linked_audit_type = fields.Selection([
-        ('site', 'Site Audit'),
+        ('site', 'Project Audit'),
         ('guard', 'Guard Performance Audit'),
         ('equipment', 'Equipment Audit'),
         ('training', 'Training Compliance'),
@@ -445,7 +445,7 @@ class SLAKPIQuickWizard(models.TransientModel):
         default=False
     )
     linked_audit_type = fields.Selection([
-        ('site', 'Site Audit'),
+        ('site', 'Project Audit'),
         ('guard', 'Guard Performance Audit'),
         ('equipment', 'Equipment Audit'),
         ('training', 'Training Compliance'),

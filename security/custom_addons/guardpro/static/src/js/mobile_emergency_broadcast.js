@@ -1,16 +1,15 @@
-/** @odoo-module **/
-
 /**
  * Mobile Emergency Broadcast Poller
  * ---------------------------------
  * Frontend (website/PWA) pages do not run backend webclient services,
  * so we poll the mobile JSON endpoint and show a blocking modal.
+ * Plain script (no @odoo-module) so it runs on the lightweight mobile layout.
  */
 (function () {
     "use strict";
 
     /** Foreground poll; WebView may throttle this to ~30s when app is in background. */
-    const POLL_INTERVAL_MS = 2500;
+    const POLL_INTERVAL_MS = 5000;
     let pollingTimer = null;
     let activeAckId = null;
 
@@ -137,6 +136,7 @@
         ackBtn.onclick = async function () {
             if (!activeAckId) {
                 overlay.style.display = "none";
+                dismissAndroidTwaEmergency();
                 return;
             }
             ackBtn.disabled = true;
@@ -145,14 +145,17 @@
                 const result = await postJson("/guardpro/api/emergency_broadcasts/acknowledge", {
                     acknowledgment_id: activeAckId,
                 });
-                if (result && result.success) {
+                // Always dismiss when server says success OR the alert is gone.
+                if (!result || result.success || result.dismissed) {
                     overlay.style.display = "none";
                     activeAckId = null;
                     dismissAndroidTwaEmergency();
-                } else {
-                    ackBtn.disabled = false;
-                    ackBtn.textContent = "Acknowledge";
+                    // Immediately re-poll so expired/cleared alerts do not stick.
+                    window.setTimeout(pollEmergency, 200);
+                    return;
                 }
+                ackBtn.disabled = false;
+                ackBtn.textContent = "Acknowledge";
             } catch (_err) {
                 ackBtn.disabled = false;
                 ackBtn.textContent = "Acknowledge";
@@ -162,6 +165,7 @@
 
     async function pollEmergency() {
         try {
+            if (window.__gpSessionDead) return;
             const url =
                 "/guardpro/api/emergency_broadcasts/pending?_=" +
                 String(Date.now());
@@ -171,6 +175,18 @@
                 headers: { Accept: "application/json" },
                 cache: "no-store",
             });
+            // Expired session → login HTML / redirect. Stop polling so the
+            // WebView is not flooded and does not feel "stuck".
+            const ct = (response.headers.get("content-type") || "").toLowerCase();
+            if (
+                response.status === 401 ||
+                response.status === 403 ||
+                response.redirected ||
+                ct.indexOf("json") === -1
+            ) {
+                window.__gpSessionDead = true;
+                return;
+            }
             const payload = await response.json();
             const list =
                 payload && payload.success && Array.isArray(payload.broadcasts)

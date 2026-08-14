@@ -29,9 +29,9 @@ class GeofenceAlert(models.Model):
     )
     site_id = fields.Many2one(
         'client.site',
-        string='Expected Site',
+        string='Expected Project',
         ondelete='set null',
-        help='Site the guard was supposed to be at'
+        help='Project the guard was supposed to be at'
     )
     shift_id = fields.Many2one(
         'guard.shift',
@@ -42,7 +42,7 @@ class GeofenceAlert(models.Model):
     
     alert_type = fields.Selection([
         ('outside_geofence', 'Outside Geofence'),
-        ('wrong_site', 'At Wrong Site'),
+        ('wrong_site', 'At Wrong Project'),
         ('no_location', 'Location Not Updating')
     ], string='Alert Type', required=True, index=True)
     
@@ -65,7 +65,7 @@ class GeofenceAlert(models.Model):
     )
     
     distance_from_site = fields.Float(
-        string='Distance from Site (km)',
+        string='Distance from Project (km)',
         help='Distance from expected site'
     )
     

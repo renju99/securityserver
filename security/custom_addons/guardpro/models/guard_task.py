@@ -28,7 +28,7 @@ class GuardTask(models.Model):
     )
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=True,
         tracking=True,
         index=True,
@@ -36,6 +36,14 @@ class GuardTask(models.Model):
         # at a site. Block site deletion while tasks exist.
         ondelete='restrict',
         help='Site where the task should be performed'
+    )
+    zone_id = fields.Many2one(
+        'site.zone',
+        string='Zone',
+        domain="[('site_id', '=', site_id)]",
+        ondelete='set null',
+        tracking=True,
+        index=True,
     )
     task_type = fields.Selection([
         ('patrol', 'Patrol'),

@@ -32,7 +32,7 @@ class HrAttendanceGuard(models.Model):
     
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=False,
         tracking=True,
         index=True,
@@ -177,7 +177,7 @@ class HrAttendanceGuard(models.Model):
     
     @api.constrains('checkin_latitude', 'checkin_longitude', 'site_id')
     def _check_geofence_checkin(self):
-        """Validate check-in is within site geofence if enabled."""
+        """Validate check-in is within project geofence if enabled."""
         for record in self:
             if record.site_id and record.site_id.geofence_enabled:
                 if record.checkin_latitude and record.checkin_longitude:
@@ -237,7 +237,7 @@ class HrAttendanceGuard(models.Model):
         
         Args:
             employee_id: HR employee ID
-            site_id: Client site ID
+            site_id: Client project ID
             latitude: GPS latitude
             longitude: GPS longitude
             notes: Optional check-in notes
@@ -252,7 +252,7 @@ class HrAttendanceGuard(models.Model):
             raise ValidationError(_('Employee not found!'))
         
         if not site.exists():
-            raise ValidationError(_('Site not found!'))
+            raise ValidationError(_('Project not found!'))
         
         # Check for existing open attendance
         existing = self.search([
@@ -268,7 +268,7 @@ class HrAttendanceGuard(models.Model):
         # Verify geofence if enabled
         if site.geofence_enabled and latitude and longitude:
             if not site.check_guard_in_geofence(latitude, longitude):
-                raise ValidationError(_('You are not within the site geofence!'))
+                raise ValidationError(_('You are not within the project geofence!'))
         
         # Create attendance record
         attendance = self.create({
@@ -316,7 +316,7 @@ class HrAttendanceGuard(models.Model):
         if attendance.site_id and attendance.site_id.geofence_enabled:
             if latitude and longitude:
                 if not attendance.site_id.check_guard_in_geofence(latitude, longitude):
-                    raise ValidationError(_('You are not within the site geofence!'))
+                    raise ValidationError(_('You are not within the project geofence!'))
         
         # Update attendance record
         attendance.write({

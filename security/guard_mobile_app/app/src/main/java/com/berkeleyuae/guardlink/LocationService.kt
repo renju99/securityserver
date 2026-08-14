@@ -1,4 +1,4 @@
-package com.berkeleyuae.guardpro
+package com.berkeleyuae.guardlink
 
 import android.app.*
 import android.content.Context
@@ -48,6 +48,13 @@ class LocationService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private lateinit var deviceId: String
     private var isTracking = false
+    private val pttPollHandler = Handler(Looper.getMainLooper())
+    private val pttPollRunnable = object : Runnable {
+        override fun run() {
+            serviceScope.launch { pollPendingPtt() }
+            pttPollHandler.postDelayed(this, PTT_POLL_INTERVAL_MS)
+        }
+    }
 
     // Shared OkHttp client - connection pool + keepalive keeps pings light.
     private val httpClient: OkHttpClient by lazy {
@@ -121,6 +128,9 @@ class LocationService : Service() {
 
             // Opportunistically drain any queued (offline) pings.
             serviceScope.launch { flushQueue() }
+
+            pttPollHandler.removeCallbacks(pttPollRunnable)
+            pttPollHandler.post(pttPollRunnable)
 
             Log.d(TAG, "Service Started and Tracking Requested")
         } catch (e: Exception) {
@@ -353,6 +363,54 @@ class LocationService : Service() {
         return null
     }
 
+    /**
+     * Keep listening for walkie-talkie clips while the TWA is minimized.
+     * This runs inside the existing location foreground service so Android 12+
+     * allows starting [PttPlaybackService] from the background.
+     */
+    private fun pollPendingPtt() {
+        if (PttPlaybackService.twaPollerActive) return
+        if (PttPlaybackService.playbackBusy) return
+        val cookie = getSessionCookieHeader() ?: return
+        try {
+            val req = Request.Builder()
+                .url("$API_ORIGIN/guardpro/api/push-to-talk/pending?_=${System.currentTimeMillis()}")
+                .header("Cookie", cookie)
+                .header("Accept", "application/json")
+                .header("Cache-Control", "no-cache")
+                .header("User-Agent", "GuardLink-App-v1.0")
+                .get()
+                .build()
+            httpClient.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) {
+                    Log.w(TAG, "PTT pending HTTP ${resp.code}")
+                    return
+                }
+                val body = resp.body?.string().orEmpty()
+                val obj = JSONObject(body)
+                if (!obj.optBoolean("success", false)) return
+                val msg = obj.optJSONObject("message") ?: return
+                val messageId = msg.optInt("id", 0)
+                val audioUrl = msg.optString("audio_url", "")
+                if (messageId <= 0 || audioUrl.isBlank()) return
+                if (PttPlaybackService.wasPlayed(messageId)) return
+                val title = "GuardLink"
+                val bodyText = "Playing radio"
+                Log.i(TAG, "PTT pending message $messageId — starting native playback")
+                PttPlaybackService.start(
+                    applicationContext,
+                    messageId,
+                    audioUrl,
+                    cookie,
+                    title,
+                    bodyText,
+                )
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "PTT poll error: ${e.message}")
+        }
+    }
+
     private fun readCachedSessionCookie(): String? {
         return try {
             val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
@@ -472,6 +530,7 @@ class LocationService : Service() {
 
     override fun onDestroy() {
         isTracking = false
+        pttPollHandler.removeCallbacks(pttPollRunnable)
         serviceScope.cancel()
         try {
             if (wakeLock?.isHeld == true) wakeLock?.release()
@@ -499,5 +558,6 @@ class LocationService : Service() {
         private const val QUEUE_KEY = "pending"
         private const val MAX_QUEUE = 500
         private const val WAKELOCK_TIMEOUT_MS = 30 * 60 * 1000L
+        private const val PTT_POLL_INTERVAL_MS = 1500L
     }
 }

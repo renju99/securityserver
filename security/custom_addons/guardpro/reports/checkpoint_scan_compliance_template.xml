@@ -48,7 +48,7 @@
                             <tr>
                                 <th style="background-color: #f5f5f5;">Guard</th>
                                 <td><strong><t t-esc="o.guard_id.name if o.guard_id else 'N/A'"/></strong></td>
-                                <th style="background-color: #f5f5f5;">Site</th>
+                                <th style="background-color: #f5f5f5;">Project</th>
                                 <td><t t-esc="o.site_id.name if o.site_id else 'N/A'"/></td>
                             </tr>
                             <tr>

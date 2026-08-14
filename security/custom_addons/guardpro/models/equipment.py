@@ -405,7 +405,7 @@ class EquipmentAssignmentLog(models.Model):
     )
     site_id = fields.Many2one(
         'client.site',
-        string='Site'
+        string='Project'
     )
     assignment_date = fields.Date(
         string='Assignment Date',
@@ -497,7 +497,7 @@ class EquipmentHandover(models.Model):
     )
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         tracking=True,
         index=True,
     )

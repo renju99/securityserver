@@ -17,7 +17,7 @@ class CCTVViewerWizard(models.TransientModel):
     # Step 1: Site Selection
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=True,
         help='Select a site to view its CCTV cameras'
     )

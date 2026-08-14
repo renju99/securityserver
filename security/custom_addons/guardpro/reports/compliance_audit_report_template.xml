@@ -67,7 +67,7 @@
                                         </td>
                                     </tr>
                                     <tr t-if="o.site_id">
-                                        <td><strong>Site:</strong></td>
+                                        <td><strong>Project:</strong></td>
                                         <td>
                                             <span t-field="o.site_id.name"/>
                                         </td>

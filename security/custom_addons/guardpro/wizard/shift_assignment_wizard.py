@@ -14,7 +14,7 @@ class ShiftAssignmentWizard(models.TransientModel):
 
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=True
     )
     guard_ids = fields.Many2many(

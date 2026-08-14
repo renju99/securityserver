@@ -15,7 +15,7 @@
                                     <tr><td width="30%"><strong>Incident Number</strong></td><td width="70%"><span t-field="doc.name"/></td></tr>
                                     <tr><td><strong>Category</strong></td><td><span t-field="doc.category_id.name"/></td></tr>
                                     <tr><td><strong>Title</strong></td><td><span t-field="doc.title"/></td></tr>
-                                    <tr><td><strong>Site</strong></td><td><span t-field="doc.site_id.name"/></td></tr>
+                                    <tr><td><strong>Project</strong></td><td><span t-field="doc.site_id.name"/></td></tr>
                                     <tr><td><strong>Reported By</strong></td><td><span t-field="doc.guard_id.name"/></td></tr>
                                     <tr><td><strong>Date/Time</strong></td><td><span t-field="doc.incident_datetime" t-options='{"widget": "datetime"}'/></td></tr>
                                     <tr><td><strong>Severity</strong></td><td><span t-field="doc.severity"/></td></tr>

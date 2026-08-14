@@ -82,7 +82,7 @@
                                         <td><span t-field="doc.guard_id.name"/></td>
                                     </tr>
                                     <tr>
-                                        <td><strong>Site:</strong></td>
+                                        <td><strong>Project:</strong></td>
                                         <td><span t-field="doc.site_id.name"/></td>
                                     </tr>
                                     <tr>
@@ -133,13 +133,25 @@
                         </div>
 
                         <!-- People Involved -->
-                        <div class="row mb-3" t-if="doc.persons_involved or doc.witnesses">
+                        <div class="row mb-3" t-if="doc.persons_involved or doc.witnesses or doc.involved_community or doc.involved_unit_number or doc.involved_parking_slot">
                             <div class="col-12">
                                 <h4><strong>People Involved</strong></h4>
                                 <table class="table table-bordered table-sm">
                                     <tr t-if="doc.persons_involved">
                                         <td width="25%"><strong>Persons Involved:</strong></td>
                                         <td width="75%"><span t-field="doc.persons_involved"/></td>
+                                    </tr>
+                                    <tr t-if="doc.involved_community">
+                                        <td><strong>Community:</strong></td>
+                                        <td><span t-field="doc.involved_community"/></td>
+                                    </tr>
+                                    <tr t-if="doc.involved_unit_number">
+                                        <td><strong>Unit Number:</strong></td>
+                                        <td><span t-field="doc.involved_unit_number"/></td>
+                                    </tr>
+                                    <tr t-if="doc.involved_parking_slot">
+                                        <td><strong>Parking Slot:</strong></td>
+                                        <td><span t-field="doc.involved_parking_slot"/></td>
                                     </tr>
                                     <tr t-if="doc.witnesses">
                                         <td><strong>Witnesses:</strong></td>
@@ -380,7 +392,7 @@
                                         <td><span t-field="doc.guard_id.name"/></td>
                                     </tr>
                                     <tr>
-                                        <td><strong>Site Location:</strong></td>
+                                        <td><strong>Project Location:</strong></td>
                                         <td><span t-field="doc.site_id.name"/></td>
                                     </tr>
                                     <tr t-if="doc.location">
@@ -569,7 +581,7 @@
                                         <td><span t-field="doc.guard_id.name"/></td>
                                     </tr>
                                     <tr>
-                                        <td><strong>Site Location:</strong></td>
+                                        <td><strong>Project Location:</strong></td>
                                         <td><span t-field="doc.site_id.name"/></td>
                                     </tr>
                                     <tr t-if="doc.location">
@@ -811,7 +823,7 @@
                                         <td><span t-field="doc.guard_id.name"/></td>
                                     </tr>
                                     <tr>
-                                        <td><strong>Site Location:</strong></td>
+                                        <td><strong>Project Location:</strong></td>
                                         <td><span t-field="doc.site_id.name"/></td>
                                     </tr>
                                     <tr t-if="doc.location">
@@ -1033,7 +1045,7 @@
                                         <td><span t-field="doc.guard_id.name"/></td>
                                     </tr>
                                     <tr>
-                                        <td><strong>Site Location:</strong></td>
+                                        <td><strong>Project Location:</strong></td>
                                         <td><span t-field="doc.site_id.name"/></td>
                                     </tr>
                                     <tr t-if="doc.location">
@@ -1263,7 +1275,7 @@
                                         <td><span t-field="doc.guard_id.name"/></td>
                                     </tr>
                                     <tr>
-                                        <td><strong>Site Location:</strong></td>
+                                        <td><strong>Project Location:</strong></td>
                                         <td><span t-field="doc.site_id.name"/></td>
                                     </tr>
                                     <tr t-if="doc.location">
@@ -1404,7 +1416,7 @@
                             </div>
                             <div class="col-4">
                                 <p>__________________________<br/>
-                                   Site Manager Signature<br/>
+                                   Project Manager Signature<br/>
                                    Date: _______________
                                 </p>
                             </div>

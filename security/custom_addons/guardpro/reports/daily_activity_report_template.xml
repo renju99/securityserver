@@ -7,203 +7,208 @@
                 <t t-call="web.external_layout">
                     <div class="page">
                         <style>
-                            /* Enhanced DAR PDF Styling */
-                            
-                            /* Page Break Controls */
-                            .page-break-before {
-                                page-break-before: always;
+                            /* PDF-safe styles + page breaks */
+                            .page-break-before { page-break-before: always; break-before: page; }
+                            .page-break-after { page-break-after: always; break-after: page; }
+                            .dar-header,
+                            .info-card,
+                            .section-keep,
+                            .notes-section,
+                            .signature-section {
+                                page-break-inside: avoid;
+                                break-inside: avoid;
                             }
-                            .page-break-after {
-                                page-break-after: always;
+                            .section-block {
+                                page-break-inside: auto;
+                                break-inside: auto;
                             }
-                            .page-break-avoid {
+                            .section-block > .section-header {
+                                page-break-after: avoid;
+                                break-after: avoid-page;
                                 page-break-inside: avoid;
                             }
-                            .section-header {
+                            .section-block > .empty-section,
+                            .section-block > .stats-grid,
+                            .section-keep > .section-header {
+                                page-break-before: avoid;
+                                break-before: avoid-page;
+                            }
+                            .section-keep > .section-header {
                                 page-break-after: avoid;
+                                break-after: avoid-page;
                             }
                             .enhanced-table {
                                 page-break-inside: auto;
+                                break-inside: auto;
                             }
-                            .enhanced-table thead {
-                                display: table-header-group;
-                            }
+                            .enhanced-table thead { display: table-header-group; }
+                            .enhanced-table tbody { display: table-row-group; }
                             .enhanced-table tr {
                                 page-break-inside: avoid;
+                                break-inside: avoid;
                                 page-break-after: auto;
                             }
-                            .info-card {
-                                page-break-inside: avoid;
-                            }
-                            .notes-section {
-                                page-break-inside: avoid;
-                            }
-                            .signature-section {
-                                page-break-inside: avoid;
-                            }
-                            
+
                             .dar-header {
-                                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                                color: white;
-                                padding: 25px;
-                                border-radius: 8px;
-                                margin-bottom: 20px;
-                                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                                page-break-inside: avoid;
+                                background-color: #1e3a5f;
+                                color: #ffffff;
+                                padding: 18px 20px;
+                                margin-bottom: 16px;
+                                border: 1px solid #1e3a5f;
                             }
                             .dar-header h2 {
                                 margin: 0;
-                                font-size: 28px;
+                                font-size: 22px;
                                 font-weight: 700;
-                                letter-spacing: 1px;
+                                color: #ffffff;
+                                letter-spacing: 0.5px;
                             }
                             .dar-header .subtitle {
-                                font-size: 16px;
-                                opacity: 0.95;
-                                margin-top: 8px;
+                                font-size: 14px;
+                                margin-top: 6px;
+                                color: #ffffff;
+                                font-weight: 600;
                             }
                             .info-card {
-                                background: #f8f9fa;
-                                border-left: 4px solid #667eea;
-                                padding: 15px;
-                                margin-bottom: 15px;
-                                border-radius: 4px;
+                                background-color: #f4f6f8;
+                                border: 1px solid #c5cdd6;
+                                border-left: 4px solid #1e3a5f;
+                                padding: 12px 14px;
+                                margin-bottom: 14px;
                             }
                             .info-card h5 {
-                                color: #667eea;
-                                font-weight: 600;
-                                margin-bottom: 10px;
-                                font-size: 16px;
+                                color: #1e3a5f;
+                                font-weight: 700;
+                                margin: 0 0 10px 0;
+                                font-size: 14px;
                             }
                             .stats-grid {
                                 display: table;
                                 width: 100%;
                                 border-collapse: separate;
-                                border-spacing: 10px;
+                                border-spacing: 8px;
                                 page-break-inside: avoid;
+                                margin: 0 0 16px 0;
                             }
                             .stat-box {
                                 display: table-cell;
-                                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                                color: white;
-                                padding: 20px;
-                                border-radius: 8px;
+                                background-color: #ffffff;
+                                color: #1a202c;
+                                padding: 14px 8px;
                                 text-align: center;
                                 width: 16.66%;
-                                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                                page-break-inside: avoid;
+                                border: 2px solid #1e3a5f;
+                                vertical-align: middle;
                             }
                             .stat-box .number {
-                                font-size: 32px;
+                                font-size: 26px;
                                 font-weight: 700;
                                 display: block;
-                                margin-bottom: 5px;
+                                margin-bottom: 4px;
+                                color: #1e3a5f;
+                                line-height: 1.2;
                             }
                             .stat-box .label {
-                                font-size: 12px;
-                                opacity: 0.9;
+                                font-size: 10px;
                                 text-transform: uppercase;
-                                letter-spacing: 0.5px;
-                            }
-                            .section-header {
-                                background: #667eea;
-                                color: white;
-                                padding: 12px 15px;
-                                border-radius: 5px;
-                                margin-top: 25px;
-                                margin-bottom: 15px;
+                                letter-spacing: 0.4px;
+                                color: #2d3748;
                                 font-weight: 600;
-                                font-size: 16px;
+                            }
+                            .stat-box-critical {
+                                border-color: #c53030;
+                            }
+                            .stat-box-critical .number { color: #c53030; }
+                            .section-header {
+                                background-color: #1e3a5f;
+                                color: #ffffff;
+                                padding: 9px 12px;
+                                margin-top: 14px;
+                                margin-bottom: 0;
+                                font-weight: 700;
+                                font-size: 12px;
                                 page-break-after: avoid;
-                                page-break-inside: avoid;
-                            }
-                            .section-header i {
-                                margin-right: 8px;
-                            }
-                            /* Keep section header with its content */
-                            .section-wrapper {
                                 page-break-inside: avoid;
                             }
                             .enhanced-table {
                                 width: 100%;
                                 border-collapse: collapse;
-                                margin-bottom: 20px;
-                                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                                margin: 0 0 10px 0;
+                                border: 1px solid #c5cdd6;
                             }
                             .enhanced-table thead {
-                                background: #667eea;
-                                color: white;
+                                background-color: #1e3a5f;
+                                color: #ffffff;
                             }
                             .enhanced-table th {
-                                padding: 12px;
+                                padding: 8px 10px;
                                 text-align: left;
-                                font-weight: 600;
-                                font-size: 13px;
+                                font-weight: 700;
+                                font-size: 11px;
                                 text-transform: uppercase;
-                                letter-spacing: 0.5px;
+                                color: #ffffff;
+                                border: 1px solid #1e3a5f;
                             }
                             .enhanced-table td {
-                                padding: 10px 12px;
-                                border-bottom: 1px solid #e9ecef;
-                                font-size: 13px;
+                                padding: 8px 10px;
+                                border: 1px solid #d0d7de;
+                                font-size: 12px;
+                                color: #1a202c;
+                                background-color: #ffffff;
                             }
-                            .enhanced-table tbody tr:hover {
-                                background: #f8f9fa;
-                            }
-                            .enhanced-table tbody tr:last-child td {
-                                border-bottom: none;
+                            .enhanced-table tbody tr:nth-child(even) td {
+                                background-color: #f7fafc;
                             }
                             .badge-custom {
-                                padding: 5px 12px;
-                                border-radius: 12px;
-                                font-size: 11px;
-                                font-weight: 600;
+                                padding: 3px 8px;
+                                font-size: 10px;
+                                font-weight: 700;
                                 text-transform: uppercase;
-                                letter-spacing: 0.5px;
+                                letter-spacing: 0.3px;
+                                display: inline-block;
+                                border: 1px solid transparent;
                             }
-                            .badge-critical { background: #dc3545; color: white; }
-                            .badge-high { background: #fd7e14; color: white; }
-                            .badge-medium { background: #ffc107; color: #212529; }
-                            .badge-low { background: #17a2b8; color: white; }
-                            .badge-info { background: #0dcaf0; color: #212529; }
-                            .badge-success-custom { background: #198754; color: white; }
-                            .badge-warning-custom { background: #ffc107; color: #212529; }
-                            .badge-secondary-custom { background: #6c757d; color: white; }
+                            .badge-critical { background-color: #c53030; color: #ffffff; }
+                            .badge-high { background-color: #c05621; color: #ffffff; }
+                            .badge-medium { background-color: #d69e2e; color: #1a202c; }
+                            .badge-low { background-color: #2b6cb0; color: #ffffff; }
+                            .badge-info { background-color: #2b6cb0; color: #ffffff; }
+                            .badge-success-custom { background-color: #276749; color: #ffffff; }
+                            .badge-warning-custom { background-color: #d69e2e; color: #1a202c; }
+                            .badge-secondary-custom { background-color: #4a5568; color: #ffffff; }
                             .notes-section {
-                                background: #fff8dc;
-                                border: 2px solid #ffc107;
-                                border-radius: 6px;
-                                padding: 15px;
-                                margin: 15px 0;
+                                background-color: #fffbeb;
+                                border: 2px solid #d69e2e;
+                                padding: 12px;
+                                margin: 12px 0;
                             }
                             .notes-section h5 {
-                                color: #856404;
-                                font-weight: 600;
-                                margin-bottom: 10px;
+                                color: #744210;
+                                font-weight: 700;
+                                margin: 0 0 8px 0;
                             }
                             .signature-section {
-                                margin-top: 40px;
-                                padding-top: 30px;
-                                border-top: 2px solid #dee2e6;
+                                margin-top: 28px;
+                                padding-top: 20px;
+                                border-top: 2px solid #c5cdd6;
                             }
                             .signature-box {
                                 text-align: center;
-                                padding: 20px;
-                                border: 2px dashed #dee2e6;
-                                border-radius: 6px;
-                                min-height: 100px;
+                                padding: 16px;
+                                border: 2px dashed #a0aec0;
+                                min-height: 90px;
                             }
                             .signature-box .line {
-                                border-bottom: 2px solid #212529;
+                                border-bottom: 2px solid #1a202c;
                                 width: 200px;
-                                margin: 0 auto 10px;
-                                padding-top: 60px;
+                                margin: 0 auto 8px;
+                                padding-top: 50px;
                             }
                             .attachment-grid {
                                 display: table;
                                 width: 100%;
                                 border-collapse: separate;
-                                border-spacing: 10px;
+                                border-spacing: 8px;
                                 page-break-inside: avoid;
                             }
                             .attachment-item {
@@ -214,58 +219,56 @@
                             }
                             .attachment-item img {
                                 max-width: 100%;
-                                max-height: 250px;
-                                border: 2px solid #dee2e6;
-                                border-radius: 6px;
-                                margin-bottom: 8px;
-                                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                                max-height: 220px;
+                                border: 1px solid #c5cdd6;
+                                margin-bottom: 6px;
                             }
                             .attachment-item .caption {
-                                font-size: 11px;
-                                color: #6c757d;
-                                margin-top: 5px;
+                                font-size: 10px;
+                                color: #4a5568;
+                                margin-top: 4px;
                             }
                             .status-badge-container {
                                 text-align: right;
-                                margin-bottom: 15px;
+                                margin-bottom: 10px;
                             }
                             .empty-section {
                                 text-align: center;
-                                padding: 30px;
-                                color: #6c757d;
+                                padding: 12px;
+                                color: #4a5568;
                                 font-style: italic;
-                                background: #f8f9fa;
-                                border-radius: 6px;
-                                margin: 10px 0;
+                                background-color: #edf2f7;
+                                border: 1px solid #cbd5e0;
+                                border-top: none;
+                                margin: 0 0 10px 0;
+                                font-size: 11px;
                             }
-                            .info-grid {
-                                display: table;
-                                width: 100%;
-                            }
-                            .info-row {
-                                display: table-row;
-                            }
+                            .info-grid { display: table; width: 100%; }
+                            .info-row { display: table-row; }
                             .info-label {
                                 display: table-cell;
-                                font-weight: 600;
-                                padding: 8px 12px;
-                                width: 30%;
-                                background: #f8f9fa;
-                                border: 1px solid #dee2e6;
+                                font-weight: 700;
+                                padding: 7px 10px;
+                                width: 28%;
+                                color: #1a202c;
+                                background-color: #edf2f7;
+                                border: 1px solid #c5cdd6;
                             }
                             .info-value {
                                 display: table-cell;
-                                padding: 8px 12px;
-                                border: 1px solid #dee2e6;
+                                padding: 7px 10px;
+                                color: #1a202c;
+                                background-color: #ffffff;
+                                border: 1px solid #c5cdd6;
                                 border-left: none;
                             }
                             .report-footer {
-                                margin-top: 30px;
-                                padding-top: 20px;
-                                border-top: 1px solid #dee2e6;
+                                margin-top: 24px;
+                                padding-top: 12px;
+                                border-top: 1px solid #c5cdd6;
                                 text-align: center;
-                                color: #6c757d;
-                                font-size: 11px;
+                                color: #4a5568;
+                                font-size: 10px;
                             }
                         </style>
 
@@ -280,7 +283,14 @@
                                 </div>
                                 <div class="status-badge-container" style="display: table-cell; vertical-align: middle; text-align: right;">
                                     <span class="badge-custom" 
-                                          t-att-style="'background: %s; color: white;' % ('#198754' if doc.state == 'sent' else '#0dcaf0' if doc.state == 'approved' else '#ffc107' if doc.state == 'submitted' else '#6c757d' if doc.state == 'draft' else '#dc3545')">
+                                          t-att-style="'background-color: %s; color: %s;' % (
+                                              '#276749' if doc.state == 'sent' else
+                                              '#2b6cb0' if doc.state == 'approved' else
+                                              '#b7791f' if doc.state == 'submitted' else
+                                              '#4a5568' if doc.state == 'draft' else
+                                              '#c53030',
+                                              '#ffffff'
+                                          )">
                                         <t t-esc="doc.state.replace('_', ' ').upper()"/>
                                     </span>
                                     <br t-if="doc.sent_to_client"/>
@@ -296,7 +306,7 @@
                             <h5>REPORT INFORMATION</h5>
                             <div class="info-grid">
                                 <div class="info-row">
-                                    <div class="info-label">Site:</div>
+                                    <div class="info-label">Project:</div>
                                     <div class="info-value"><strong><span t-field="doc.site_id.name"/></strong></div>
                                 </div>
                                 <div class="info-row">
@@ -318,95 +328,97 @@
                                     <div class="info-value"><span t-field="doc.weather_conditions"/></div>
                                 </div>
                                 <div class="info-row" t-if="doc.site_id.address">
-                                    <div class="info-label">Site Address:</div>
+                                    <div class="info-label">Project Address:</div>
                                     <div class="info-value"><span t-field="doc.site_id.address"/></div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Summary Statistics Dashboard -->
-                        <div class="section-header">
-                            SUMMARY STATISTICS
-                        </div>
-                        <div class="stats-grid" style="margin-bottom: 25px;">
-                            <div class="stat-box">
-                                <span class="number"><t t-esc="doc.total_incidents"/></span>
-                                <span class="label">Total Incidents</span>
+                        <div class="section-keep">
+                            <div class="section-header">
+                                SUMMARY STATISTICS
                             </div>
-                            <div class="stat-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);" t-if="doc.critical_incidents > 0">
-                                <span class="number"><t t-esc="doc.critical_incidents"/></span>
-                                <span class="label">Critical</span>
-                            </div>
-                            <div class="stat-box" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                                <span class="number"><t t-esc="doc.tours_completed"/></span>
-                                <span class="label">Tours Done</span>
-                            </div>
-                            <div class="stat-box" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                                <span class="number"><t t-esc="doc.visitor_count"/></span>
-                                <span class="label">Visitors</span>
-                            </div>
-                            <div class="stat-box" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
-                                <span class="number"><t t-esc="doc.guards_on_duty_count"/></span>
-                                <span class="label">Guards</span>
-                            </div>
-                            <div class="stat-box" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
-                                <span class="number"><t t-esc="doc.task_completed_count"/>/<t t-esc="doc.task_count"/></span>
-                                <span class="label">Tasks Done</span>
+                            <div class="stats-grid">
+                                <div class="stat-box">
+                                    <span class="number"><t t-esc="doc.total_incidents"/></span>
+                                    <span class="label">Total Incidents</span>
+                                </div>
+                                <div class="stat-box stat-box-critical" t-if="doc.critical_incidents &gt; 0">
+                                    <span class="number"><t t-esc="doc.critical_incidents"/></span>
+                                    <span class="label">Critical</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="number"><t t-esc="doc.tours_completed"/></span>
+                                    <span class="label">Tours Done</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="number"><t t-esc="doc.visitor_count"/></span>
+                                    <span class="label">Visitors</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="number"><t t-esc="doc.guards_on_duty_count"/></span>
+                                    <span class="label">Guards</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="number"><t t-esc="doc.task_completed_count"/>/<t t-esc="doc.task_count"/></span>
+                                    <span class="label">Tasks Done</span>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Incidents Section -->
-                        <t t-if="doc.incident_ids">
+                        <div t-attf-class="section-block #{'section-keep' if not doc.incident_ids or len(doc.incident_ids) &lt;= 8 else ''}">
                             <div class="section-header">
                                 INCIDENTS REPORTED (<t t-esc="len(doc.incident_ids)"/>)
                             </div>
-                            <table class="enhanced-table">
-                                <thead>
-                                    <tr>
-                                        <th width="12%">Reference</th>
-                                        <th width="25%">Title</th>
-                                        <th width="15%">Category</th>
-                                        <th width="12%">Severity</th>
-                                        <th width="10%">Time</th>
-                                        <th width="13%">Reported By</th>
-                                        <th width="13%">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr t-foreach="doc.incident_ids" t-as="incident">
-                                        <td><strong><span t-field="incident.name"/></strong></td>
-                                        <td><span t-field="incident.title"/></td>
-                                        <td><span t-field="incident.category_id.name"/></td>
-                                        <td>
-                                            <span class="badge-custom" 
-                                                  t-att-class="{'badge-critical': incident.severity == 'critical',
-                                                                'badge-high': incident.severity == 'high',
-                                                                'badge-medium': incident.severity == 'medium',
-                                                                'badge-low': incident.severity == 'low'}">
-                                                <t t-esc="incident.severity.upper()"/>
-                                            </span>
-                                        </td>
-                                        <td><span t-field="incident.incident_datetime" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
-                                        <td><span t-field="incident.guard_id.name"/></td>
-                                        <td><span t-field="incident.status"/></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </t>
-                        <t t-else="">
-                            <div class="section-header">
-                                INCIDENTS REPORTED (0)
-                            </div>
-                            <div class="empty-section">
-                                No incidents reported during this period
-                            </div>
-                        </t>
+                            <t t-if="doc.incident_ids">
+                                <table class="enhanced-table">
+                                    <thead>
+                                        <tr>
+                                            <th width="12%">Reference</th>
+                                            <th width="25%">Title</th>
+                                            <th width="15%">Category</th>
+                                            <th width="12%">Severity</th>
+                                            <th width="10%">Time</th>
+                                            <th width="13%">Reported By</th>
+                                            <th width="13%">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="doc.incident_ids" t-as="incident">
+                                            <td><strong><span t-field="incident.name"/></strong></td>
+                                            <td><span t-field="incident.title"/></td>
+                                            <td><span t-field="incident.category_id.name"/></td>
+                                            <td>
+                                                <span class="badge-custom" 
+                                                      t-att-class="{'badge-critical': incident.severity == 'critical',
+                                                                    'badge-high': incident.severity == 'high',
+                                                                    'badge-medium': incident.severity == 'medium',
+                                                                    'badge-low': incident.severity == 'low'}">
+                                                    <t t-esc="incident.severity.upper()"/>
+                                                </span>
+                                            </td>
+                                            <td><span t-field="incident.incident_datetime" t-options='{"widget": "datetime", "format": "HH:mm"}'/></td>
+                                            <td><span t-field="incident.guard_id.name"/></td>
+                                            <td><span t-field="incident.status"/></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </t>
+                            <t t-else="">
+                                <div class="empty-section">
+                                    No incidents reported during this period
+                                </div>
+                            </t>
+                        </div>
 
                         <!-- Security Tours Section -->
-                        <t t-if="doc.tour_log_ids">
+                        <div t-attf-class="section-block #{'section-keep' if not doc.tour_log_ids or len(doc.tour_log_ids) &lt;= 8 else ''}">
                             <div class="section-header">
                                 SECURITY PATROL TOURS (<t t-esc="len(doc.tour_log_ids)"/>)
                             </div>
+                            <t t-if="doc.tour_log_ids">
                             <table class="enhanced-table">
                                 <thead>
                                     <tr>
@@ -440,21 +452,20 @@
                                     </tr>
                                 </tbody>
                             </table>
-                        </t>
-                        <t t-else="">
-                            <div class="section-header">
-                                SECURITY PATROL TOURS (0)
-                            </div>
-                            <div class="empty-section">
-                                No patrol tours logged during this period
-                            </div>
-                        </t>
+                            </t>
+                            <t t-else="">
+                                <div class="empty-section">
+                                    No patrol tours logged during this period
+                                </div>
+                            </t>
+                        </div>
 
                         <!-- Visitors Section -->
-                        <t t-if="doc.visitor_ids">
+                        <div t-attf-class="section-block #{'section-keep' if not doc.visitor_ids or len(doc.visitor_ids) &lt;= 8 else ''}">
                             <div class="section-header">
                                 VISITOR LOG (<t t-esc="len(doc.visitor_ids)"/>)
                             </div>
+                            <t t-if="doc.visitor_ids">
                             <table class="enhanced-table">
                                 <thead>
                                     <tr>
@@ -485,21 +496,20 @@
                                     </tr>
                                 </tbody>
                             </table>
-                        </t>
-                        <t t-else="">
-                            <div class="section-header">
-                                VISITOR LOG (0)
-                            </div>
-                            <div class="empty-section">
-                                No visitors logged during this period
-                            </div>
-                        </t>
+                            </t>
+                            <t t-else="">
+                                <div class="empty-section">
+                                    No visitors logged during this period
+                                </div>
+                            </t>
+                        </div>
 
                         <!-- Guard Attendance Section -->
-                        <t t-if="doc.attendance_ids">
+                        <div t-attf-class="section-block #{'section-keep' if not doc.attendance_ids or len(doc.attendance_ids) &lt;= 8 else ''}">
                             <div class="section-header">
                                 GUARD ATTENDANCE RECORD (<t t-esc="len(doc.attendance_ids)"/>)
                             </div>
+                            <t t-if="doc.attendance_ids">
                             <table class="enhanced-table">
                                 <thead>
                                     <tr>
@@ -528,25 +538,29 @@
                                                 <t t-esc="attendance.status"/>
                                             </span>
                                         </td>
-                                        <td><span t-field="attendance.checkin_location"/></td>
+                                        <td>
+                                            <t t-if="attendance.checkin_latitude or attendance.checkin_longitude">
+                                                <t t-esc="'%.5f, %.5f' % (attendance.checkin_latitude or 0.0, attendance.checkin_longitude or 0.0)"/>
+                                            </t>
+                                            <t t-else="">—</t>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
-                        </t>
-                        <t t-else="">
-                            <div class="section-header">
-                                GUARD ATTENDANCE RECORD (0)
-                            </div>
-                            <div class="empty-section">
-                                No attendance records for this period
-                            </div>
-                        </t>
+                            </t>
+                            <t t-else="">
+                                <div class="empty-section">
+                                    No attendance records for this period
+                                </div>
+                            </t>
+                        </div>
 
                         <!-- Tasks Section -->
-                        <t t-if="doc.task_ids">
+                        <div t-attf-class="section-block #{'section-keep' if not doc.task_ids or len(doc.task_ids) &lt;= 8 else ''}">
                             <div class="section-header">
                                 TASKS &amp; ASSIGNMENTS (<t t-esc="len(doc.task_ids)"/>)
                             </div>
+                            <t t-if="doc.task_ids">
                             <table class="enhanced-table">
                                 <thead>
                                     <tr>
@@ -588,21 +602,20 @@
                                     </tr>
                                 </tbody>
                             </table>
-                        </t>
-                        <t t-else="">
-                            <div class="section-header">
-                                TASKS &amp; ASSIGNMENTS (0)
-                            </div>
-                            <div class="empty-section">
-                                No tasks recorded for this period
-                            </div>
-                        </t>
+                            </t>
+                            <t t-else="">
+                                <div class="empty-section">
+                                    No tasks recorded for this period
+                                </div>
+                            </t>
+                        </div>
 
                         <!-- Packages Section -->
-                        <t t-if="doc.package_ids">
+                        <div t-attf-class="section-block #{'section-keep' if not doc.package_ids or len(doc.package_ids) &lt;= 8 else ''}">
                             <div class="section-header">
                                 PACKAGE MANAGEMENT (<t t-esc="len(doc.package_ids)"/>)
                             </div>
+                            <t t-if="doc.package_ids">
                             <table class="enhanced-table">
                                 <thead>
                                     <tr>
@@ -636,21 +649,20 @@
                                     </tr>
                                 </tbody>
                             </table>
-                        </t>
-                        <t t-else="">
-                            <div class="section-header">
-                                PACKAGE MANAGEMENT (0)
-                            </div>
-                            <div class="empty-section">
-                                No packages received during this period
-                            </div>
-                        </t>
+                            </t>
+                            <t t-else="">
+                                <div class="empty-section">
+                                    No packages received during this period
+                                </div>
+                            </t>
+                        </div>
 
                         <!-- Lost &amp; Found Section -->
-                        <t t-if="doc.lost_found_ids">
+                        <div t-attf-class="section-block #{'section-keep' if not doc.lost_found_ids or len(doc.lost_found_ids) &lt;= 8 else ''}">
                             <div class="section-header">
                                 LOST &amp; FOUND ITEMS (<t t-esc="len(doc.lost_found_ids)"/>)
                             </div>
+                            <t t-if="doc.lost_found_ids">
                             <table class="enhanced-table">
                                 <thead>
                                     <tr>
@@ -682,15 +694,13 @@
                                     </tr>
                                 </tbody>
                             </table>
-                        </t>
-                        <t t-else="">
-                            <div class="section-header">
-                                LOST &amp; FOUND ITEMS (0)
-                            </div>
-                            <div class="empty-section">
-                                No lost &amp; found items logged during this period
-                            </div>
-                        </t>
+                            </t>
+                            <t t-else="">
+                                <div class="empty-section">
+                                    No lost &amp; found items logged during this period
+                                </div>
+                            </t>
+                        </div>
 
                         <!-- Special Notes Section -->
                         <t t-if="doc.special_notes">
@@ -824,7 +834,7 @@
                             <div style="border-top: 2px solid #667eea; padding-top: 15px; margin-top: 20px;">
                                 <p style="margin: 5px 0;">
                                     <strong>Report Reference:</strong> <span t-field="doc.name"/> | 
-                                    <strong>Site:</strong> <span t-field="doc.site_id.name"/> | 
+                                    <strong>Project:</strong> <span t-field="doc.site_id.name"/> | 
                                     <strong>Date:</strong> <span t-field="doc.report_date" t-options='{"widget": "date"}'/>
                                 </p>
                                 <p style="margin: 5px 0;">

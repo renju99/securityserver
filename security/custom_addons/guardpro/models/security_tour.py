@@ -31,10 +31,19 @@ class SecurityTour(models.Model):
     )
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=True,
         ondelete='cascade',
         tracking=True
+    )
+    zone_id = fields.Many2one(
+        'site.zone',
+        string='Zone',
+        domain="[('site_id', '=', site_id)]",
+        ondelete='set null',
+        tracking=True,
+        index=True,
+        help='Operational zone for this tour (used for user access filtering)',
     )
 
     # Location Hierarchy (optional - tours can be site-wide or specific to locations)
@@ -343,6 +352,9 @@ class SecurityTour(models.Model):
                 'longitude': checkpoint.longitude,
                 'qr_code': checkpoint.qr_code or '',
                 'nfc_tag_id': checkpoint.nfc_tag_id or '',
+                'nfc_tag_normalized': checkpoint._prepare_nfc_tag_id(
+                    checkpoint.nfc_tag_id
+                ) if checkpoint.nfc_tag_id else '',
                 'notes': checkpoint.notes or '',
                 'sequence': seq * 10,
                 'sequence_number': seq,
@@ -388,11 +400,19 @@ class SecurityTour(models.Model):
             else:
                 record.average_duration = 0.0
 
+    @api.onchange('zone_id')
+    def _onchange_zone_id(self):
+        if self.zone_id and not self.site_id:
+            self.site_id = self.zone_id.site_id
+
     @api.onchange('building_id')
     def _onchange_building_id(self):
         """Update site_id when building is selected."""
-        if self.building_id and not self.site_id:
-            self.site_id = self.building_id.site_id
+        if self.building_id:
+            if not self.site_id:
+                self.site_id = self.building_id.site_id
+            if not self.zone_id and self.building_id.zone_id:
+                self.zone_id = self.building_id.zone_id
 
     @api.onchange('floor_id')
     def _onchange_floor_id(self):

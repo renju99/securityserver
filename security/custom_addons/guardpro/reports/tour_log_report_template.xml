@@ -81,7 +81,7 @@
                                         <td><span t-field="doc.guard_id.name"/></td>
                                     </tr>
                                     <tr>
-                                        <td class="tour-label-cell"><strong>Site</strong></td>
+                                        <td class="tour-label-cell"><strong>Project</strong></td>
                                         <td><span t-field="doc.site_id.name"/></td>
                                     </tr>
                                     <tr>

@@ -115,7 +115,7 @@
                 <filter name="active" string="Active" domain="[('active', '=', True)]"/>
                 <filter name="inactive" string="Inactive" domain="[('active', '=', False)]"/>
                 <group expand="0" string="Group By">
-                    <filter name="group_site" string="Site" context="{'group_by': 'site_id'}"/>
+                    <filter name="group_site" string="Project" context="{'group_by': 'site_id'}"/>
                     <filter name="group_shift_type" string="Shift Type" context="{'group_by': 'shift_type'}"/>
                 </group>
             </search>

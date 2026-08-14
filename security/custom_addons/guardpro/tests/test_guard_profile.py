@@ -110,7 +110,7 @@ class TestGuardProfile(TransactionCase):
         self.assertIsNotNone(guard.last_location_update)
     
     def test_compute_site_ids(self):
-        """Test computation of assigned sites."""
+        """Test computation of assigned projects."""
         # This test requires creating shifts with sites
         # For now, just verify the field exists
         guard = self.Guard.create({

@@ -296,7 +296,7 @@ class SLAPerformance(models.Model):
     )
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         index=True,
         help='Specific site for this performance record'
     )

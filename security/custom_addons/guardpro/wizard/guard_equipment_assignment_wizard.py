@@ -26,7 +26,7 @@ class GuardEquipmentAssignmentWizard(models.TransientModel):
     
     current_site_id = fields.Many2one(
         'client.site',
-        string='Current Site',
+        string='Current Project',
         readonly=True
     )
     

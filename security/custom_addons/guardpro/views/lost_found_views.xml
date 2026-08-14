@@ -236,7 +236,7 @@
                 <separator/>
                 <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
                 <group expand="0" string="Group By">
-                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Project" name="group_site" context="{'group_by': 'site_id'}"/>
                     <filter string="Category" name="group_category" context="{'group_by': 'item_category'}"/>
                     <filter string="Status" name="group_status" context="{'group_by': 'state'}"/>
                     <filter string="Found Date" name="group_found_date" context="{'group_by': 'found_date'}"/>

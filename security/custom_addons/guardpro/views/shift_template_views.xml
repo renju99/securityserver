@@ -56,7 +56,8 @@
                             <field name="shift_type"/>
                             <field name="start_time" widget="float_time"/>
                             <field name="duration_hours" widget="float_time"/>
-                            <field name="tour_id" domain="[('site_id', '=', site_id)]" 
+                            <field name="tour_ids" widget="many2many_tags"
+                                   domain="[('site_id', '=', site_id)]"
                                    options="{'no_create': True}"/>
                             <field name="active"/>
                         </group>
@@ -175,7 +176,7 @@
                 <filter string="Monthly Recurrence" name="monthly" domain="[('recurrence_type', '=', 'monthly')]"/>
                 <separator/>
                 <group expand="0" string="Group By">
-                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Project" name="group_site" context="{'group_by': 'site_id'}"/>
                     <filter string="Shift Type" name="group_shift_type" context="{'group_by': 'shift_type'}"/>
                     <filter string="Recurrence" name="group_recurrence" context="{'group_by': 'recurrence_type'}"/>
                 </group>

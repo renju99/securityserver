@@ -38,13 +38,13 @@ class EmergencyBroadcast(models.Model):
     # Broadcast Target
     broadcast_type = fields.Selection([
         ('all', 'All Guards'),
-        ('by_site', 'Guards by Site'),
+        ('by_site', 'Guards by Project'),
         ('active_only', 'Only Active Guards on Duty')
     ], string='Broadcast To', default='all', required=True)
     
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         help='Specific site (only for by_site broadcast type)'
     )
 
@@ -295,9 +295,14 @@ class EmergencyBroadcastAcknowledgment(models.Model):
                 )
 
     def get_pending_broadcasts(self, user_id):
-        """Get all pending (unacknowledged) broadcasts for a user."""
+        """Get pending unacknowledged broadcasts still in 'sent' state.
+
+        Expired / draft broadcasts must not keep modal popups stuck in a
+        stack for portal or web users (Play testers included).
+        """
         return self.search([
             ('user_id', '=', user_id),
-            ('is_acknowledged', '=', False)
-        ])
+            ('is_acknowledged', '=', False),
+            ('broadcast_id.state', '=', 'sent'),
+        ], limit=20)
 

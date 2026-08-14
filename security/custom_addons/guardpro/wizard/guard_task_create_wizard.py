@@ -40,7 +40,7 @@ class GuardTaskCreateWizard(models.TransientModel):
     
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=True
     )
     assigned_to = fields.Many2one(

@@ -244,14 +244,14 @@
                 <field name="name"/>
                 <field name="site_id"/>
                 <filter string="Public" name="public" domain="[('is_public', '=', True)]"/>
-                <filter string="All Sites" name="all_sites" domain="[('all_sites_access', '=', True)]"/>
+                <filter string="All Projects" name="all_sites" domain="[('all_sites_access', '=', True)]"/>
                 <filter string="Archived" name="archived" domain="[('is_archived', '=', True)]"/>
                 <separator/>
-                <filter string="Site Channel" name="site" domain="[('channel_type', '=', 'site')]"/>
+                <filter string="Project Channel" name="site" domain="[('channel_type', '=', 'site')]"/>
                 <filter string="Team Channel" name="team" domain="[('channel_type', '=', 'team')]"/>
                 <group expand="0" string="Group By">
                     <filter string="Type" name="group_type" context="{'group_by': 'channel_type'}"/>
-                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Project" name="group_site" context="{'group_by': 'site_id'}"/>
                 </group>
             </search>
         </field>

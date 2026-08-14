@@ -19,10 +19,10 @@
                     <i class="fa fa-cog"></i> Checkpoint Settings
                 </h3>
                 
-                <!-- Site Selector -->
+                <!-- Project Selector -->
                 <div style="margin-bottom: 15px;">
                     <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px;">
-                        <i class="fa fa-building"></i> Select Site *
+                        <i class="fa fa-building"></i> Select Project *
                     </label>
                     <select class="form-control" t-on-change="(ev) => this.onSiteChange(ev)">
                         <option value="">-- Choose a site --</option>

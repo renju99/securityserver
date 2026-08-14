@@ -115,7 +115,7 @@
     </div>
     
     <p><strong>Incident:</strong> ${object.incident_id.name}</p>
-    <p><strong>Site:</strong> ${object.site_id.name}</p>
+    <p><strong>Project:</strong> ${object.site_id.name}</p>
     <p><strong>Update Time:</strong> ${format_datetime(object.update_datetime, dt_format='medium')}</p>
     <p><strong>Update Type:</strong> ${object.update_type.replace('_', ' ').title()}</p>
     

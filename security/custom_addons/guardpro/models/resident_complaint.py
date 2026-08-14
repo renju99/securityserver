@@ -42,7 +42,7 @@ class ResidentComplaint(models.Model):
     
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=True,
         tracking=True,
         ondelete='restrict',

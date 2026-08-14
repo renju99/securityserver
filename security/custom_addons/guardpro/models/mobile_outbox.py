@@ -42,7 +42,7 @@ KIND_SELECTION = [
     ('dar_decision', 'Daily Activity Report'),
     ('dar_rejected', 'DAR Rejected'),
     ('message_received', 'New Message'),
-    # Resident / client-side events (community sites).
+    # Resident / client-side events (community projects).
     ('visitor_arrival', 'Visitor Arrival'),
     ('package_ready', 'Package Ready'),
     ('portal_access', 'Portal Access Granted'),
@@ -149,6 +149,14 @@ class MobileOutbox(models.Model):
         an iterable of records/ids. Safe to call from sudo context
         (most callers are crons).
         """
+        # Shift acknowledgements disabled — guards do not need to ack
+        # assigned/changed/cancelled/swap notifications on mobile.
+        if kind in (
+            'shift_assigned', 'shift_changed',
+            'shift_cancelled', 'shift_swap_decision',
+        ):
+            return self.browse()
+
         users = self._coerce_users(user)
         if not users:
             return self.browse()
@@ -234,12 +242,48 @@ class MobileOutbox(models.Model):
         })
         return True
 
+    @api.model
+    def _discard_all_shift_notifications(self, user=None):
+        """Acknowledge every pending shift-related outbox row.
+
+        Shift acknowledgements are disabled; this clears leftovers so
+        they never resurface on mobile.
+        """
+        Outbox = self.sudo()
+        domain = [
+            ('acked', '=', False),
+            ('kind', 'in', [
+                'shift_assigned', 'shift_changed',
+                'shift_cancelled', 'shift_swap_decision',
+            ]),
+        ]
+        if user:
+            domain.append(('user_id', '=', user.id))
+        rows = Outbox.search(domain)
+        if rows:
+            rows.write({
+                'acked': True,
+                'acked_on': fields.Datetime.now(),
+            })
+            _logger.info(
+                'mobile_outbox discarded %s shift notification(s)',
+                len(rows),
+            )
+        return len(rows)
+
+    @api.model
+    def _auto_ack_stale_shift_notifications(self, user=None):
+        """Compat wrapper — shift acks are fully disabled."""
+        return self._discard_all_shift_notifications(user=user)
+
     # ---------------------------------------------------------------
     # Cron: purge
     # ---------------------------------------------------------------
     @api.model
     def _cron_purge_outbox(self):
         """Delete acknowledged rows older than 24h and expired rows."""
+        # Clear backlog of finished-shift notifications first.
+        self._auto_ack_stale_shift_notifications()
         now = fields.Datetime.now()
         old_ack = self.sudo().search([
             ('acked', '=', True),

@@ -14,24 +14,24 @@
             - Supervisor: Sites assigned via user.site_ids (read-only, limited write where specified)
             
             Note: Manager group implies Supervisor group, so managers inherit supervisor permissions
-            but have additional write/create/delete permissions on records at their assigned sites.
+            but have additional write/create/delete permissions on records at their assigned projects.
         -->
 
         <!-- ================================================================ -->
         <!-- CLIENT.SITE RECORD RULES                                          -->
         <!-- ================================================================ -->
         
-        <!-- Administrator: All Sites -->
+        <!-- Administrator: All Projects -->
         <record id="rule_client_site_admin" model="ir.rule">
-            <field name="name">Administrator: All Sites</field>
+            <field name="name">Administrator: All Projects</field>
             <field name="model_id" ref="model_client_site"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Client User, Guard Portal, Supervisor: Assigned Sites Only (Read Only) -->
+        <!-- Client User, Guard Portal, Supervisor: Assigned Projects Only (Read Only) -->
         <record id="rule_client_site_assigned" model="ir.rule">
-            <field name="name">Non-Admin/Non-Manager: Assigned Sites Only</field>
+            <field name="name">Non-Admin/Non-Manager: Assigned Projects Only</field>
             <field name="model_id" ref="model_client_site"/>
             <field name="domain_force">[('id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -41,11 +41,50 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Manager: Full Access to Assigned Sites -->
+        <!-- Manager: Full Access to Assigned Projects -->
         <record id="rule_client_site_manager" model="ir.rule">
-            <field name="name">Manager: Full Access to Assigned Sites</field>
+            <field name="name">Manager: Full Access to Assigned Projects</field>
             <field name="model_id" ref="model_client_site"/>
             <field name="domain_force">[('id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <!-- ================================================================ -->
+        <!-- GUARD.SITE (physical sites under a project)                       -->
+        <!-- ================================================================ -->
+        <record id="rule_guard_site_admin" model="ir.rule">
+            <field name="name">Administrator: All Sites</field>
+            <field name="model_id" ref="model_guard_site"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_guard_site_assigned" model="ir.rule">
+            <field name="name">Non-Admin/Non-Manager: Assigned Projects/Sites</field>
+            <field name="model_id" ref="model_guard_site"/>
+            <!-- Project-only → all sites under that project; specific sites → only those -->
+            <field name="domain_force">['|',
+                ('id', 'in', user.guard_site_ids.ids),
+                '&amp;',
+                    ('project_id', 'in', user.site_ids.ids),
+                    ('project_id', 'not in', user.guard_site_ids.project_id.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_reception'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+        <record id="rule_guard_site_manager" model="ir.rule">
+            <field name="name">Manager: Assigned Projects/Sites</field>
+            <field name="model_id" ref="model_guard_site"/>
+            <field name="domain_force">['|',
+                ('id', 'in', user.guard_site_ids.ids),
+                '&amp;',
+                    ('project_id', 'in', user.site_ids.ids),
+                    ('project_id', 'not in', user.guard_site_ids.project_id.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
@@ -66,9 +105,9 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Users: Read Guard Profiles at Assigned Sites or Own Profile -->
+        <!-- Guard Users: Read Guard Profiles at Assigned Projects or Own Profile -->
         <record id="rule_guard_profile_guard_user_read" model="ir.rule">
-            <field name="name">Guard Users: Read Guard Profiles at Assigned Sites or Own Profile</field>
+            <field name="name">Guard Users: Read Guard Profiles at Assigned Projects or Own Profile</field>
             <field name="model_id" ref="model_guard_profile"/>
             <field name="domain_force">['|', ('site_ids', 'in', user.site_ids.ids), ('user_id', '=', user.id)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
@@ -90,9 +129,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Client User, Supervisor: Guards at Assigned Sites (Read Only) -->
+        <!-- Client User, Supervisor: Guards at Assigned Projects (Read Only) -->
         <record id="rule_guard_profile_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin/Non-Guard/Non-Manager: Guards at Assigned Sites</field>
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Guards at Assigned Projects</field>
             <field name="model_id" ref="model_guard_profile"/>
             <field name="domain_force">[('site_ids', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -102,9 +141,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Manager: Full Access to Guards at Assigned Sites -->
+        <!-- Manager: Full Access to Guards at Assigned Projects -->
         <record id="rule_guard_profile_manager" model="ir.rule">
-            <field name="name">Manager: Full Access to Guards at Assigned Sites</field>
+            <field name="name">Manager: Full Access to Guards at Assigned Projects</field>
             <field name="model_id" ref="model_guard_profile"/>
             <field name="domain_force">[('site_ids', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
@@ -127,9 +166,9 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal: All Shifts at Assigned Sites -->
+        <!-- Guard Portal: All Shifts at Assigned Projects -->
         <record id="rule_guard_shift_guard_portal" model="ir.rule">
-            <field name="name">Guard Portal: All Shifts at Assigned Sites</field>
+            <field name="name">Guard Portal: All Shifts at Assigned Projects</field>
             <field name="model_id" ref="model_guard_shift"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
@@ -139,9 +178,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Client User, Supervisor: Shifts at Assigned Sites (Read Only) -->
+        <!-- Client User, Supervisor: Shifts at Assigned Projects (Read Only) -->
         <record id="rule_guard_shift_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin/Non-Guard/Non-Manager: Shifts at Assigned Sites</field>
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Shifts at Assigned Projects</field>
             <field name="model_id" ref="model_guard_shift"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -151,9 +190,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Manager: Full Access to Shifts at Assigned Sites -->
+        <!-- Manager: Full Access to Shifts at Assigned Projects -->
         <record id="rule_guard_shift_manager" model="ir.rule">
-            <field name="name">Manager: Full Access to Shifts at Assigned Sites</field>
+            <field name="name">Manager: Full Access to Shifts at Assigned Projects</field>
             <field name="model_id" ref="model_guard_shift"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
@@ -176,9 +215,9 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal: All Incidents at Assigned Sites -->
+        <!-- Guard Portal: All Incidents at Assigned Projects -->
         <record id="rule_incident_report_guard_portal" model="ir.rule">
-            <field name="name">Guard Portal: All Incidents at Assigned Sites</field>
+            <field name="name">Guard Portal: All Incidents at Assigned Projects</field>
             <field name="model_id" ref="model_incident_report"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
@@ -188,9 +227,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Client User, Supervisor: Incidents at Assigned Sites (Read Only) -->
+        <!-- Client User, Supervisor: Incidents at Assigned Projects (Read Only) -->
         <record id="rule_incident_report_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin/Non-Guard/Non-Manager: Incidents at Assigned Sites</field>
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Incidents at Assigned Projects</field>
             <field name="model_id" ref="model_incident_report"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -200,9 +239,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Manager: Full Access to Incidents at Assigned Sites -->
+        <!-- Manager: Full Access to Incidents at Assigned Projects -->
         <record id="rule_incident_report_manager" model="ir.rule">
-            <field name="name">Manager: Full Access to Incidents at Assigned Sites</field>
+            <field name="name">Manager: Full Access to Incidents at Assigned Projects</field>
             <field name="model_id" ref="model_incident_report"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
@@ -225,9 +264,9 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal, Client User, Supervisor: Tours at Assigned Sites (Read Only) -->
+        <!-- Guard Portal, Client User, Supervisor: Tours at Assigned Projects (Read Only) -->
         <record id="rule_security_tour_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin/Non-Manager: Tours at Assigned Sites</field>
+            <field name="name">Non-Admin/Non-Manager: Tours at Assigned Projects</field>
             <field name="model_id" ref="model_security_tour"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -237,9 +276,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Manager: Full Access to Tours at Assigned Sites -->
+        <!-- Manager: Full Access to Tours at Assigned Projects -->
         <record id="rule_security_tour_manager" model="ir.rule">
-            <field name="name">Manager: Full Access to Tours at Assigned Sites</field>
+            <field name="name">Manager: Full Access to Tours at Assigned Projects</field>
             <field name="model_id" ref="model_security_tour"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
@@ -262,9 +301,9 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal, Client User, Supervisor: Checkpoints at Assigned Sites (Read Only) -->
+        <!-- Guard Portal, Client User, Supervisor: Checkpoints at Assigned Projects (Read Only) -->
         <record id="rule_checkpoint_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin/Non-Manager: Checkpoints at Assigned Sites</field>
+            <field name="name">Non-Admin/Non-Manager: Checkpoints at Assigned Projects</field>
             <field name="model_id" ref="model_checkpoint"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -274,9 +313,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Manager: Full Access to Checkpoints at Assigned Sites -->
+        <!-- Manager: Full Access to Checkpoints at Assigned Projects -->
         <record id="rule_checkpoint_manager" model="ir.rule">
-            <field name="name">Manager: Full Access to Checkpoints at Assigned Sites</field>
+            <field name="name">Manager: Full Access to Checkpoints at Assigned Projects</field>
             <field name="model_id" ref="model_checkpoint"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
@@ -299,9 +338,9 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal: Own Scans or Scans at Assigned Sites -->
+        <!-- Guard Portal: Own Scans or Scans at Assigned Projects -->
         <record id="rule_checkpoint_scan_guard_portal" model="ir.rule">
-            <field name="name">Guard Portal: Own Scans or at Assigned Sites</field>
+            <field name="name">Guard Portal: Own Scans or at Assigned Projects</field>
             <field name="model_id" ref="model_checkpoint_scan"/>
             <field name="domain_force">['|', ('guard_id.user_id', '=', user.id), ('checkpoint_id.site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
@@ -311,9 +350,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Client User, Supervisor: Scans at Assigned Sites (Read Only) -->
+        <!-- Client User, Supervisor: Scans at Assigned Projects (Read Only) -->
         <record id="rule_checkpoint_scan_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin/Non-Guard/Non-Manager: Scans at Assigned Sites</field>
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Scans at Assigned Projects</field>
             <field name="model_id" ref="model_checkpoint_scan"/>
             <field name="domain_force">[('checkpoint_id.site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -323,9 +362,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Manager: Full Access to Scans at Assigned Sites -->
+        <!-- Manager: Full Access to Scans at Assigned Projects -->
         <record id="rule_checkpoint_scan_manager" model="ir.rule">
-            <field name="name">Manager: Full Access to Scans at Assigned Sites</field>
+            <field name="name">Manager: Full Access to Scans at Assigned Projects</field>
             <field name="model_id" ref="model_checkpoint_scan"/>
             <field name="domain_force">[('checkpoint_id.site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
@@ -348,9 +387,9 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal: Own Tour Logs or Tour Logs at Assigned Sites -->
+        <!-- Guard Portal: Own Tour Logs or Tour Logs at Assigned Projects -->
         <record id="rule_tour_log_guard_portal" model="ir.rule">
-            <field name="name">Guard Portal: Own Tour Logs or at Assigned Sites</field>
+            <field name="name">Guard Portal: Own Tour Logs or at Assigned Projects</field>
             <field name="model_id" ref="model_tour_log"/>
             <field name="domain_force">['|', ('guard_id.user_id', '=', user.id), ('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
@@ -360,9 +399,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Client User, Supervisor: Tour Logs at Assigned Sites (Read Only) -->
+        <!-- Client User, Supervisor: Tour Logs at Assigned Projects (Read Only) -->
         <record id="rule_tour_log_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin/Non-Guard/Non-Manager: Tour Logs at Assigned Sites</field>
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Tour Logs at Assigned Projects</field>
             <field name="model_id" ref="model_tour_log"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -372,9 +411,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Manager: Full Access to Tour Logs at Assigned Sites -->
+        <!-- Manager: Full Access to Tour Logs at Assigned Projects -->
         <record id="rule_tour_log_manager" model="ir.rule">
-            <field name="name">Manager: Full Access to Tour Logs at Assigned Sites</field>
+            <field name="name">Manager: Full Access to Tour Logs at Assigned Projects</field>
             <field name="model_id" ref="model_tour_log"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
@@ -397,9 +436,9 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal: All Attendance at Assigned Sites (Write only own records) -->
+        <!-- Guard Portal: All Attendance at Assigned Projects (Write only own records) -->
         <record id="rule_guard_attendance_guard_portal_read" model="ir.rule">
-            <field name="name">Guard Portal: Read All Attendance at Assigned Sites</field>
+            <field name="name">Guard Portal: Read All Attendance at Assigned Projects</field>
             <field name="model_id" ref="model_guard_attendance"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
@@ -421,9 +460,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Client User, Supervisor: Attendance at Assigned Sites (Read Only) -->
+        <!-- Client User, Supervisor: Attendance at Assigned Projects (Read Only) -->
         <record id="rule_guard_attendance_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin/Non-Guard/Non-Manager: Attendance at Assigned Sites</field>
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Attendance at Assigned Projects</field>
             <field name="model_id" ref="model_guard_attendance"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -433,9 +472,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Manager: Full Access to Attendance at Assigned Sites -->
+        <!-- Manager: Full Access to Attendance at Assigned Projects -->
         <record id="rule_guard_attendance_manager" model="ir.rule">
-            <field name="name">Manager: Full Access to Attendance at Assigned Sites</field>
+            <field name="name">Manager: Full Access to Attendance at Assigned Projects</field>
             <field name="model_id" ref="model_guard_attendance"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
@@ -458,11 +497,11 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal: Equipment at Assigned Sites or Assigned to User -->
+        <!-- Guard Portal: Equipment at Assigned Projects or Assigned to User -->
         <record id="rule_equipment_guard_portal" model="ir.rule">
-            <field name="name">Guard Portal: Assigned Equipment or at Assigned Sites</field>
+            <field name="name">Guard Portal: Assigned Equipment or at Assigned Projects</field>
             <field name="model_id" ref="model_guardpro_equipment"/>
-            <field name="domain_force">['|', '|', ('assigned_to.user_id', '=', user.id), ('assigned_site', 'in', user.site_ids.ids), ('assigned_site', '=', False)]</field>
+            <field name="domain_force">['|', ('assigned_to.user_id', '=', user.id), ('assigned_site', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
@@ -470,11 +509,11 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Client User, Supervisor: Equipment at Assigned Sites (Read Only) -->
+        <!-- Client User, Supervisor: Equipment at Assigned Projects (Read Only) -->
         <record id="rule_equipment_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin/Non-Guard/Non-Manager: Equipment at Assigned Sites</field>
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Equipment at Assigned Projects</field>
             <field name="model_id" ref="model_guardpro_equipment"/>
-            <field name="domain_force">['|', ('assigned_site', 'in', user.site_ids.ids), ('assigned_site', '=', False)]</field>
+            <field name="domain_force">[('assigned_site', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
@@ -482,11 +521,11 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Manager: Full Access to Equipment at Assigned Sites -->
+        <!-- Manager: Full Access to Equipment at Assigned Projects -->
         <record id="rule_equipment_manager" model="ir.rule">
-            <field name="name">Manager: Full Access to Equipment at Assigned Sites</field>
+            <field name="name">Manager: Full Access to Equipment at Assigned Projects</field>
             <field name="model_id" ref="model_guardpro_equipment"/>
-            <field name="domain_force">['|', ('assigned_site', 'in', user.site_ids.ids), ('assigned_site', '=', False)]</field>
+            <field name="domain_force">[('assigned_site', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
@@ -536,9 +575,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Client User, Manager, Supervisor: Training of Guards at Assigned Sites -->
+        <!-- Client User, Manager, Supervisor: Training of Guards at Assigned Projects -->
         <record id="rule_guard_training_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin/Non-Guard: Training of Guards at Assigned Sites</field>
+            <field name="name">Non-Admin/Non-Guard: Training of Guards at Assigned Projects</field>
             <field name="model_id" ref="model_guard_training"/>
             <field name="domain_force">[('guard_id.site_ids', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -573,9 +612,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Client User, Manager, Supervisor: Equipment Assignments at Assigned Sites -->
+        <!-- Client User, Manager, Supervisor: Equipment Assignments at Assigned Projects -->
         <record id="rule_equipment_assignment_log_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin/Non-Guard: Equipment Assignments at Assigned Sites</field>
+            <field name="name">Non-Admin/Non-Guard: Equipment Assignments at Assigned Projects</field>
             <field name="model_id" ref="model_equipment_assignment_log"/>
             <field name="domain_force">['|', ('equipment_id.assigned_site', 'in', user.site_ids.ids), ('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -598,14 +637,14 @@
         </record>
 
         <record id="rule_equipment_handover_manager" model="ir.rule">
-            <field name="name">Manager: Equipment Handovers at Assigned Sites</field>
+            <field name="name">Manager: Equipment Handovers at Assigned Projects</field>
             <field name="model_id" ref="guardpro.model_equipment_handover"/>
             <field name="domain_force">['|', ('site_id', 'in', user.site_ids.ids), ('equipment_id.assigned_site', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
         </record>
 
         <record id="rule_equipment_handover_supervisor" model="ir.rule">
-            <field name="name">Supervisor: Equipment Handovers at Assigned Sites</field>
+            <field name="name">Supervisor: Equipment Handovers at Assigned Projects</field>
             <field name="model_id" ref="guardpro.model_equipment_handover"/>
             <field name="domain_force">['|', ('site_id', 'in', user.site_ids.ids), ('equipment_id.assigned_site', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_supervisor'))]"/>
@@ -627,7 +666,7 @@
         </record>
 
         <record id="rule_equipment_handover_client_user" model="ir.rule">
-            <field name="name">Client User: Equipment Handovers at Assigned Sites</field>
+            <field name="name">Client User: Equipment Handovers at Assigned Projects</field>
             <field name="model_id" ref="guardpro.model_equipment_handover"/>
             <field name="domain_force">['|', ('site_id', 'in', user.site_ids.ids), ('equipment_id.assigned_site', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user'))]"/>
@@ -662,9 +701,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Client User, Manager, Supervisor: Equipment Maintenance at Assigned Sites -->
+        <!-- Client User, Manager, Supervisor: Equipment Maintenance at Assigned Projects -->
         <record id="rule_equipment_maintenance_log_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin/Non-Guard: Equipment Maintenance at Assigned Sites</field>
+            <field name="name">Non-Admin/Non-Guard: Equipment Maintenance at Assigned Projects</field>
             <field name="model_id" ref="model_equipment_maintenance_log"/>
             <field name="domain_force">[('equipment_id.assigned_site', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -715,9 +754,9 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal, Client User, Manager, Supervisor: Visitors at Assigned Sites -->
+        <!-- Guard Portal, Client User, Manager, Supervisor: Visitors at Assigned Projects -->
         <record id="rule_visitor_management_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin: Visitors at Assigned Sites</field>
+            <field name="name">Non-Admin: Visitors at Assigned Projects</field>
             <field name="model_id" ref="model_visitor_management"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -732,16 +771,36 @@
         <!-- VISITOR.WATCHLIST RECORD RULES                                    -->
         <!-- ================================================================ -->
         
-        <!-- All Users: All Watchlist Entries (Read Only for Guards) -->
-        <record id="rule_visitor_watchlist_all" model="ir.rule">
-            <field name="name">All Users: All Visitor Watchlist</field>
+        <!-- Admin: all watchlist entries -->
+        <record id="rule_visitor_watchlist_admin" model="ir.rule">
+            <field name="name">Administrator: All Visitor Watchlist</field>
             <field name="model_id" ref="model_visitor_watchlist"/>
             <field name="domain_force">[(1, '=', 1)]</field>
-            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_admin'))]"/>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <!-- Non-admin: entries assigned to overlapping sites -->
+        <record id="rule_visitor_watchlist_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Visitor Watchlist at Assigned Projects</field>
+            <field name="model_id" ref="model_visitor_watchlist"/>
+            <field name="domain_force">[('site_ids', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_reception'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>
             <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Supervisor/Manager write on assigned-site watchlist -->
+        <record id="rule_visitor_watchlist_manager_write" model="ir.rule">
+            <field name="name">Supervisor/Manager: Manage Watchlist at Assigned Projects</field>
+            <field name="model_id" ref="model_visitor_watchlist"/>
+            <field name="domain_force">[('site_ids', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
         </record>
 
 
@@ -757,9 +816,9 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal, Client User, Manager, Supervisor: Packages at Assigned Sites -->
+        <!-- Guard Portal, Client User, Manager, Supervisor: Packages at Assigned Projects -->
         <record id="rule_package_management_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin: Packages at Assigned Sites</field>
+            <field name="name">Non-Admin: Packages at Assigned Projects</field>
             <field name="model_id" ref="model_package_management"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -782,9 +841,9 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal, Client User, Manager, Supervisor: Lost &amp; Found at Assigned Sites -->
+        <!-- Guard Portal, Client User, Manager, Supervisor: Lost &amp; Found at Assigned Projects -->
         <record id="rule_lost_found_item_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin: Lost &amp; Found at Assigned Sites</field>
+            <field name="name">Non-Admin: Lost &amp; Found at Assigned Projects</field>
             <field name="model_id" ref="model_lost_found_item"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -807,9 +866,9 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal, Client User, Manager, Supervisor: Keys at Assigned Sites -->
+        <!-- Guard Portal, Client User, Manager, Supervisor: Keys at Assigned Projects -->
         <record id="rule_key_register_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin: Keys at Assigned Sites</field>
+            <field name="name">Non-Admin: Keys at Assigned Projects</field>
             <field name="model_id" ref="model_key_register"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -832,9 +891,9 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal, Client User, Manager, Supervisor: Key Transactions at Assigned Sites -->
+        <!-- Guard Portal, Client User, Manager, Supervisor: Key Transactions at Assigned Projects -->
         <record id="rule_key_transaction_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin: Key Transactions at Assigned Sites</field>
+            <field name="name">Non-Admin: Key Transactions at Assigned Projects</field>
             <field name="model_id" ref="model_key_transaction"/>
             <field name="domain_force">[('key_id.site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -857,9 +916,9 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal: Tasks at Assigned Sites -->
+        <!-- Guard Portal: Tasks at Assigned Projects -->
         <record id="rule_guard_task_guard_portal" model="ir.rule">
-            <field name="name">Guard Portal: Tasks at Assigned Sites</field>
+            <field name="name">Guard Portal: Tasks at Assigned Projects</field>
             <field name="model_id" ref="model_guard_task"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
@@ -869,9 +928,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Client User, Supervisor: Tasks at Assigned Sites (Read Only) -->
+        <!-- Client User, Supervisor: Tasks at Assigned Projects (Read Only) -->
         <record id="rule_guard_task_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin/Non-Guard/Non-Manager: Tasks at Assigned Sites</field>
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Tasks at Assigned Projects</field>
             <field name="model_id" ref="model_guard_task"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -881,9 +940,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Manager: Full Access to Tasks at Assigned Sites -->
+        <!-- Manager: Full Access to Tasks at Assigned Projects -->
         <record id="rule_guard_task_manager" model="ir.rule">
-            <field name="name">Manager: Full Access to Tasks at Assigned Sites</field>
+            <field name="name">Manager: Full Access to Tasks at Assigned Projects</field>
             <field name="model_id" ref="model_guard_task"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
@@ -897,13 +956,21 @@
         <!-- ================================================================ -->
         <!-- GUARD.TASK.CHECKLIST RECORD RULES                                 -->
         <!-- ================================================================ -->
-        
-        <!-- All Users: Checklist items via parent task's site -->
-        <record id="rule_guard_task_checklist_all" model="ir.rule">
-            <field name="name">All Users: Task Checklist via Parent Task</field>
+        <!-- Fail closed: never OR in task_id=False (orphan rows must not be -->
+        <!-- world-readable). Admins only get unrestricted access.             -->
+
+        <record id="rule_guard_task_checklist_admin" model="ir.rule">
+            <field name="name">Administrator: All Task Checklists</field>
             <field name="model_id" ref="model_guard_task_checklist"/>
-            <field name="domain_force">['|', ('task_id.site_id', 'in', user.site_ids.ids), ('task_id', '=', False)]</field>
-            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_admin'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <record id="rule_guard_task_checklist_all" model="ir.rule">
+            <field name="name">Non-Admin: Task Checklist via Parent Task Project</field>
+            <field name="model_id" ref="model_guard_task_checklist"/>
+            <field name="domain_force">[('task_id.site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
             <field name="perm_create" eval="True"/>
@@ -914,13 +981,62 @@
         <!-- ================================================================ -->
         <!-- GUARD.TASK.TEMPLATE RECORD RULES                                  -->
         <!-- ================================================================ -->
-        
-        <!-- All Users: All Task Templates (Read Only for Guards) -->
-        <record id="rule_guard_task_template_all" model="ir.rule">
-            <field name="name">All Users: All Task Templates</field>
+        <!-- Empty site_id = intentional global template (see field help).     -->
+        <!-- Site-specific templates are visible only at assigned projects.      -->
+
+        <record id="rule_guard_task_template_admin" model="ir.rule">
+            <field name="name">Administrator: All Task Templates</field>
             <field name="model_id" ref="model_guard_task_template"/>
             <field name="domain_force">[(1, '=', 1)]</field>
-            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_admin'))]"/>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <record id="rule_guard_task_template_all" model="ir.rule">
+            <field name="name">Non-Admin: Project Templates + Global</field>
+            <field name="model_id" ref="model_guard_task_template"/>
+            <field name="domain_force">['|', ('site_id', 'in', user.site_ids.ids), ('site_id', '=', False)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- GUARD.TASK.CHECKLIST.TEMPLATE / .ITEM (via parent template)       -->
+        <!-- ================================================================ -->
+
+        <record id="rule_guard_task_checklist_template_admin" model="ir.rule">
+            <field name="name">Administrator: All Checklist Templates</field>
+            <field name="model_id" ref="model_guard_task_checklist_template"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <record id="rule_guard_task_checklist_template_sites" model="ir.rule">
+            <field name="name">Non-Admin: Checklist Templates via Parent Project / Global</field>
+            <field name="model_id" ref="model_guard_task_checklist_template"/>
+            <field name="domain_force">['|', ('template_id.site_id', 'in', user.site_ids.ids), ('template_id.site_id', '=', False)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_guard_task_checklist_item_admin" model="ir.rule">
+            <field name="name">Administrator: All Template Checklist Items</field>
+            <field name="model_id" ref="model_guard_task_checklist_item"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <record id="rule_guard_task_checklist_item_sites" model="ir.rule">
+            <field name="name">Non-Admin: Template Checklist Items via Parent Project / Global</field>
+            <field name="model_id" ref="model_guard_task_checklist_item"/>
+            <field name="domain_force">['|', ('template_id.site_id', 'in', user.site_ids.ids), ('template_id.site_id', '=', False)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>
@@ -940,12 +1056,35 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal, Client User, Manager, Supervisor: DARs at Assigned Sites -->
+        <!-- Guard Portal, Client User, Manager, Supervisor: DARs at Assigned Projects -->
         <record id="rule_daily_activity_report_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin: Daily Activity Reports at Assigned Sites</field>
+            <field name="name">Non-Admin: Daily Activity Reports at Assigned Projects</field>
             <field name="model_id" ref="model_daily_activity_report"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
+        <!-- GUARD.ACTIVITY.REPORT RECORD RULES                                -->
+        <!-- ================================================================ -->
+
+        <record id="rule_guard_activity_report_admin" model="ir.rule">
+            <field name="name">Administrator: All Guard Activity Reports</field>
+            <field name="model_id" ref="model_guard_activity_report"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <record id="rule_guard_activity_report_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Guard Activity Reports at Assigned Projects</field>
+            <field name="model_id" ref="model_guard_activity_report"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
             <field name="perm_create" eval="True"/>
@@ -965,9 +1104,9 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal, Client User, Manager, Supervisor: Audits at Assigned Sites -->
+        <!-- Guard Portal, Client User, Manager, Supervisor: Audits at Assigned Projects -->
         <record id="rule_compliance_audit_assigned_sites" model="ir.rule">
-            <field name="name">Portal/Client: Compliance Audits at Assigned Sites</field>
+            <field name="name">Portal/Client: Compliance Audits at Assigned Projects</field>
             <field name="model_id" ref="model_compliance_audit"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user'))]"/>
@@ -977,7 +1116,7 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Managers and Supervisors: manage audits for assigned sites or as auditor -->
+        <!-- Managers and Supervisors: manage audits for assigned projects or as auditor -->
         <record id="rule_compliance_audit_editable_management" model="ir.rule">
             <field name="name">Management: Manage Assigned Compliance Audits</field>
             <field name="model_id" ref="model_compliance_audit"/>
@@ -1018,11 +1157,11 @@
             <field name="perm_unlink" eval="True"/>
         </record>
         
-        <!-- Managers and Supervisors: All audit items (unrestricted) -->
+        <!-- Managers and Supervisors: Audit items at assigned projects -->
         <record id="rule_compliance_audit_item_manager_supervisor" model="ir.rule">
-            <field name="name">Managers and Supervisors: All Audit Items</field>
+            <field name="name">Managers and Supervisors: Audit Items at Assigned Projects</field>
             <field name="model_id" ref="model_compliance_audit_item"/>
-            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="domain_force">[('audit_id.site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
@@ -1032,9 +1171,9 @@
         
         <!-- Guards and Clients: Audit items via parent audit's site -->
         <record id="rule_compliance_audit_item_site_based" model="ir.rule">
-            <field name="name">Portal/Client: Audit Items via Site</field>
+            <field name="name">Portal/Client: Audit Items via Project</field>
             <field name="model_id" ref="model_compliance_audit_item"/>
-            <field name="domain_force">['|', '|', ('audit_id.site_id', 'in', user.site_ids.ids), ('audit_id.site_id', '=', False), ('audit_id', '=', False)]</field>
+            <field name="domain_force">[('audit_id.site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
@@ -1092,11 +1231,11 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal: Broadcasts for Assigned Sites or All Guards -->
+        <!-- Guard Portal: site broadcasts or intentional company-wide type=all -->
         <record id="rule_emergency_broadcast_guard_portal" model="ir.rule">
             <field name="name">Guard Portal: Relevant Emergency Broadcasts</field>
             <field name="model_id" ref="model_emergency_broadcast"/>
-            <field name="domain_force">['|', '|', ('site_id', 'in', user.site_ids.ids), ('site_id', '=', False), ('broadcast_type', '=', 'all')]</field>
+            <field name="domain_force">['|', ('site_id', 'in', user.site_ids.ids), ('broadcast_type', '=', 'all')]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
@@ -1104,11 +1243,11 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Client User, Manager, Supervisor: Broadcasts at Assigned Sites -->
+        <!-- Client User, Manager, Supervisor: Broadcasts at Assigned Projects -->
         <record id="rule_emergency_broadcast_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin/Non-Guard: Emergency Broadcasts at Assigned Sites</field>
+            <field name="name">Non-Admin/Non-Guard: Emergency Broadcasts at Assigned Projects</field>
             <field name="model_id" ref="model_emergency_broadcast"/>
-            <field name="domain_force">['|', ('site_id', 'in', user.site_ids.ids), ('site_id', '=', False)]</field>
+            <field name="domain_force">['|', ('site_id', 'in', user.site_ids.ids), ('broadcast_type', '=', 'all')]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
@@ -1143,9 +1282,9 @@
 
         <!-- Client User, Manager, Supervisor: Acknowledgments via broadcast's site -->
         <record id="rule_emergency_broadcast_acknowledgment_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin/Non-Guard: Broadcast Acknowledgments at Sites</field>
+            <field name="name">Non-Admin/Non-Guard: Broadcast Acknowledgments at Projects</field>
             <field name="model_id" ref="model_emergency_broadcast_acknowledgment"/>
-            <field name="domain_force">['|', ('broadcast_id.site_id', 'in', user.site_ids.ids), ('broadcast_id.site_id', '=', False)]</field>
+            <field name="domain_force">['|', ('broadcast_id.site_id', 'in', user.site_ids.ids), ('broadcast_id.broadcast_type', '=', 'all')]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
@@ -1176,7 +1315,7 @@
         </record>
 
         <record id="rule_tour_patrol_reminder_manager" model="ir.rule">
-            <field name="name">Manager: Patrol Reminders at Assigned Sites</field>
+            <field name="name">Manager: Patrol Reminders at Assigned Projects</field>
             <field name="model_id" ref="model_tour_patrol_reminder"/>
             <field name="domain_force">[('shift_id.site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
@@ -1187,7 +1326,7 @@
         </record>
 
         <record id="rule_tour_patrol_reminder_supervisor" model="ir.rule">
-            <field name="name">Supervisor: Patrol Reminders at Assigned Sites</field>
+            <field name="name">Supervisor: Patrol Reminders at Assigned Projects</field>
             <field name="model_id" ref="model_tour_patrol_reminder"/>
             <field name="domain_force">[('shift_id.site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_supervisor'))]"/>
@@ -1222,9 +1361,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Client User, Supervisor: Geofence Alerts at Assigned Sites (Read Only) -->
+        <!-- Client User, Supervisor: Geofence Alerts at Assigned Projects (Read Only) -->
         <record id="rule_geofence_alert_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin/Non-Guard/Non-Manager: Geofence Alerts at Assigned Sites</field>
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Geofence Alerts at Assigned Projects</field>
             <field name="model_id" ref="model_geofence_alert"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -1234,9 +1373,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Manager: Full Access to Geofence Alerts at Assigned Sites -->
+        <!-- Manager: Full Access to Geofence Alerts at Assigned Projects -->
         <record id="rule_geofence_alert_manager" model="ir.rule">
-            <field name="name">Manager: Full Access to Geofence Alerts at Assigned Sites</field>
+            <field name="name">Manager: Full Access to Geofence Alerts at Assigned Projects</field>
             <field name="model_id" ref="model_geofence_alert"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
@@ -1271,9 +1410,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Client User, Supervisor: Location History at Assigned Sites (Read Only) -->
+        <!-- Client User, Supervisor: Location History at Assigned Projects (Read Only) -->
         <record id="rule_guard_location_history_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin/Non-Guard/Non-Manager: Location History at Assigned Sites</field>
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Location History at Assigned Projects</field>
             <field name="model_id" ref="model_guard_location_history"/>
             <field name="domain_force">['|', ('site_id', 'in', user.site_ids.ids), ('guard_id.site_ids', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -1283,9 +1422,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Manager: Full Access to Location History at Assigned Sites -->
+        <!-- Manager: Full Access to Location History at Assigned Projects -->
         <record id="rule_guard_location_history_manager" model="ir.rule">
-            <field name="name">Manager: Full Access to Location History at Assigned Sites</field>
+            <field name="name">Manager: Full Access to Location History at Assigned Projects</field>
             <field name="model_id" ref="model_guard_location_history"/>
             <field name="domain_force">['|', ('site_id', 'in', user.site_ids.ids), ('guard_id.site_ids', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
@@ -1308,9 +1447,9 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal: Own Shift Swap Requests or Requests at Assigned Sites -->
+        <!-- Guard Portal: Own Shift Swap Requests or Requests at Assigned Projects -->
         <record id="rule_shift_swap_request_guard_portal" model="ir.rule">
-            <field name="name">Guard Portal: Shift Swap Requests at Assigned Sites</field>
+            <field name="name">Guard Portal: Shift Swap Requests at Assigned Projects</field>
             <field name="model_id" ref="model_shift_swap_request"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
@@ -1320,9 +1459,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Client User, Supervisor: Shift Swap Requests at Assigned Sites (Read Only) -->
+        <!-- Client User, Supervisor: Shift Swap Requests at Assigned Projects (Read Only) -->
         <record id="rule_shift_swap_request_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin/Non-Guard/Non-Manager: Shift Swap Requests at Assigned Sites</field>
+            <field name="name">Non-Admin/Non-Guard/Non-Manager: Shift Swap Requests at Assigned Projects</field>
             <field name="model_id" ref="model_shift_swap_request"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -1332,9 +1471,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Manager: Full Access to Shift Swap Requests at Assigned Sites -->
+        <!-- Manager: Full Access to Shift Swap Requests at Assigned Projects -->
         <record id="rule_shift_swap_request_manager" model="ir.rule">
-            <field name="name">Manager: Full Access to Shift Swap Requests at Assigned Sites</field>
+            <field name="name">Manager: Full Access to Shift Swap Requests at Assigned Projects</field>
             <field name="model_id" ref="model_shift_swap_request"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
@@ -1357,9 +1496,9 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal: Feedback at Assigned Sites (Read Only) -->
+        <!-- Guard Portal: Feedback at Assigned Projects (Read Only) -->
         <record id="rule_client_feedback_guard_portal" model="ir.rule">
-            <field name="name">Guard Portal: Client Feedback at Assigned Sites</field>
+            <field name="name">Guard Portal: Client Feedback at Assigned Projects</field>
             <field name="model_id" ref="model_client_feedback"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
@@ -1369,9 +1508,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Client User, Manager, Supervisor: Feedback at Assigned Sites -->
+        <!-- Client User, Manager, Supervisor: Feedback at Assigned Projects -->
         <record id="rule_client_feedback_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin/Non-Guard: Client Feedback at Assigned Sites</field>
+            <field name="name">Non-Admin/Non-Guard: Client Feedback at Assigned Projects</field>
             <field name="model_id" ref="model_client_feedback"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -1394,9 +1533,9 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal, Client User, Manager, Supervisor: Templates at Assigned Sites -->
+        <!-- Guard Portal, Client User, Manager, Supervisor: Templates at Assigned Projects -->
         <record id="rule_shift_template_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin: Shift Templates at Assigned Sites</field>
+            <field name="name">Non-Admin: Shift Templates at Assigned Projects</field>
             <field name="model_id" ref="model_shift_template"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -1453,11 +1592,11 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal, Client User, Manager, Supervisor: Executions at Assigned Sites -->
+        <!-- Guard Portal, Client User, Manager, Supervisor: Executions at Assigned Projects -->
         <record id="rule_emergency_checklist_execution_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin: Emergency Checklist Executions at Sites</field>
+            <field name="name">Non-Admin: Emergency Checklist Executions at Projects</field>
             <field name="model_id" ref="model_emergency_checklist_execution"/>
-            <field name="domain_force">['|', ('site_id', 'in', user.site_ids.ids), ('site_id', '=', False)]</field>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
@@ -1480,9 +1619,9 @@
         
         <!-- Non-Admin Users: Step Executions via Parent Execution -->
         <record id="rule_emergency_checklist_step_execution_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin: Emergency Step Executions at Sites</field>
+            <field name="name">Non-Admin: Emergency Step Executions at Projects</field>
             <field name="model_id" ref="model_emergency_checklist_step_execution"/>
-            <field name="domain_force">['|', ('execution_id.site_id', 'in', user.site_ids.ids), ('execution_id.site_id', '=', False)]</field>
+            <field name="domain_force">[('execution_id.site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
@@ -1537,9 +1676,9 @@
             <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
 
-        <!-- Guard Portal, Client User, Manager, Supervisor: SLA Performance at Assigned Sites -->
+        <!-- Guard Portal, Client User, Manager, Supervisor: SLA Performance at Assigned Projects -->
         <record id="rule_sla_performance_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin: SLA Performance at Assigned Sites</field>
+            <field name="name">Non-Admin: SLA Performance at Assigned Projects</field>
             <field name="model_id" ref="model_sla_performance"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_supervisor'))]"/>
@@ -1632,6 +1771,72 @@
             <field name="perm_write" eval="True"/>
             <field name="perm_create" eval="True"/>
             <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <!-- ================================================================ -->
+        <!-- SITE.ZONE RECORD RULES (site-level access; zone group adds more) -->
+        <!-- ================================================================ -->
+
+        <record id="rule_site_zone_admin" model="ir.rule">
+            <field name="name">Administrator: All Zones</field>
+            <field name="model_id" ref="model_site_zone"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <record id="rule_site_zone_assigned" model="ir.rule">
+            <field name="name">Non-Admin/Non-Manager: Zones at Assigned Projects</field>
+            <field name="model_id" ref="model_site_zone"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_site_zone_manager" model="ir.rule">
+            <field name="name">Manager: Full Access to Zones at Assigned Projects</field>
+            <field name="model_id" ref="model_site_zone"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <!-- ================================================================ -->
+        <!-- TRAINING.SESSION RECORD RULES                                    -->
+        <!-- ================================================================ -->
+
+        <record id="rule_training_session_admin" model="ir.rule">
+            <field name="name">Administrator: All Project Training Sessions</field>
+            <field name="model_id" ref="model_training_session"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <record id="rule_training_session_management" model="ir.rule">
+            <field name="name">Supervisor/Manager: Project Training at Assigned Projects</field>
+            <field name="model_id" ref="model_training_session"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_training_session_readonly_sites" model="ir.rule">
+            <field name="name">Guard/Client: Project Training at Assigned Projects (read)</field>
+            <field name="model_id" ref="model_training_session"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
         </record>
 
     </data>

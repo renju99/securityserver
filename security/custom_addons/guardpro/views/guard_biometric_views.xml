@@ -340,7 +340,7 @@
                 <filter string="Mobile" name="mobile" domain="[('connection_type', '=', 'mobile_app')]"/>
                 <group expand="0" string="Group By">
                     <filter string="Type" name="group_type" context="{'group_by': 'device_type'}"/>
-                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Project" name="group_site" context="{'group_by': 'site_id'}"/>
                     <filter string="Status" name="group_status" context="{'group_by': 'last_seen_status'}"/>
                 </group>
             </search>

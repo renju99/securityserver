@@ -15,12 +15,37 @@ class GuardPortal(CustomerPortal):
 
     @http.route(['/my', '/my/home'], type='http', auth="user", website=True)
     def home(self, **kw):
-        """Override default portal home to auto-redirect guards to mobile dashboard."""
-        # Check if user is a guard - if so, redirect to mobile dashboard
-        if request.env.user.has_group('guardpro.group_guardpro_guard_portal'):
+        """Send GuardLink app / phones to the mobile shell; desktop staff to /web."""
+        user = request.env.user
+        wants_mobile = False
+        ua = (request.httprequest.user_agent.string or '').lower()
+        if 'guardlink-app' in ua or request.httprequest.args.get('mobile') in ('1', 'true', 'yes'):
+            wants_mobile = True
+        else:
+            wants_mobile = any(t in ua for t in (
+                'iphone', 'ipad', 'ipod', 'android', 'mobile', 'silk/', 'blackberry',
+            ))
+
+        is_guard = user.has_group('guardpro.group_guardpro_guard_portal')
+        is_staff = (
+            user.has_group('guardpro.group_guardpro_supervisor')
+            or user.has_group('guardpro.group_guardpro_manager')
+            or user.has_group('guardpro.group_guardpro_admin')
+        )
+        is_client = user.has_group('guardpro.group_guardpro_client_user')
+        has_guard_profile = bool(request.env['guard.profile'].sudo().search([
+            ('user_id', '=', user.id)
+        ], limit=1))
+
+        if wants_mobile and (has_guard_profile or is_guard or is_staff or is_client):
             return request.redirect('/guardpro/mobile')
-        
-        # For non-guard users, show default portal
+        if is_guard or has_guard_profile:
+            return request.redirect('/guardpro/mobile')
+        if not wants_mobile and is_staff:
+            return request.redirect('/web')
+        if not wants_mobile and is_client:
+            return request.redirect('/my/dashboard')
+
         return super(GuardPortal, self).home(**kw)
 
     def _prepare_portal_layout_values(self):
@@ -203,7 +228,7 @@ class GuardPortal(CustomerPortal):
         # Sorting options
         searchbar_sortings = {
             'date': {'label': _('Date'), 'order': 'start_datetime desc'},
-            'site': {'label': _('Site'), 'order': 'site_id'},
+            'site': {'label': _('Project'), 'order': 'site_id'},
             'status': {'label': _('Status'), 'order': 'status'},
         }
         
@@ -323,8 +348,9 @@ class GuardPortal(CustomerPortal):
         if not guard_profile:
             return request.render("guardpro.portal_not_guard", values)
         
-        # Prepare search domain
-        domain = [('guard_id', '=', guard_profile.id)]
+        domain = request.env['incident.report']._domain_security_incidents([
+            ('guard_id', '=', guard_profile.id),
+        ])
         
         # Sorting options
         searchbar_sortings = {

@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!--
+            Additional site isolation for models that previously had ACL only.
+            Pattern: Admin unrestricted; everyone else limited to user.site_ids
+            (or participant-based domains for messaging).
+        -->
+
+        <!-- ========== Reception baseline site access ========== -->
+        <record id="rule_client_site_reception" model="ir.rule">
+            <field name="name">Reception: Assigned Projects Only</field>
+            <field name="model_id" ref="model_client_site"/>
+            <field name="domain_force">[('id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_reception'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_guard_profile_reception" model="ir.rule">
+            <field name="name">Reception: Guards at Assigned Projects</field>
+            <field name="model_id" ref="model_guard_profile"/>
+            <field name="domain_force">[('site_ids', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_reception'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- ========== CCTV ========== -->
+        <record id="rule_cctv_camera_admin" model="ir.rule">
+            <field name="name">Administrator: All CCTV Cameras</field>
+            <field name="model_id" ref="model_cctv_camera"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_cctv_camera_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: CCTV at Assigned Projects</field>
+            <field name="model_id" ref="model_cctv_camera"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+        </record>
+
+        <!-- ========== Investigations ========== -->
+        <record id="rule_incident_investigation_admin" model="ir.rule">
+            <field name="name">Administrator: All Investigations</field>
+            <field name="model_id" ref="model_incident_investigation"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_incident_investigation_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Investigations at Assigned Projects</field>
+            <field name="model_id" ref="model_incident_investigation"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+        </record>
+
+        <record id="rule_incident_investigation_evidence_admin" model="ir.rule">
+            <field name="name">Administrator: All Investigation Evidence</field>
+            <field name="model_id" ref="model_incident_investigation_evidence"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_incident_investigation_evidence_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Investigation Evidence at Assigned Projects</field>
+            <field name="model_id" ref="model_incident_investigation_evidence"/>
+            <field name="domain_force">[('investigation_id.site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+        </record>
+
+        <record id="rule_incident_investigation_witness_admin" model="ir.rule">
+            <field name="name">Administrator: All Investigation Witnesses</field>
+            <field name="model_id" ref="model_incident_investigation_witness"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_incident_investigation_witness_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Investigation Witnesses at Assigned Projects</field>
+            <field name="model_id" ref="model_incident_investigation_witness"/>
+            <field name="domain_force">[('investigation_id.site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+        </record>
+
+        <record id="rule_incident_investigation_timeline_admin" model="ir.rule">
+            <field name="name">Administrator: All Investigation Timeline</field>
+            <field name="model_id" ref="model_incident_investigation_timeline"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_incident_investigation_timeline_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Investigation Timeline at Assigned Projects</field>
+            <field name="model_id" ref="model_incident_investigation_timeline"/>
+            <field name="domain_force">[('investigation_id.site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+        </record>
+
+        <record id="rule_incident_investigation_finding_admin" model="ir.rule">
+            <field name="name">Administrator: All Investigation Findings</field>
+            <field name="model_id" ref="model_incident_investigation_finding"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_incident_investigation_finding_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Investigation Findings at Assigned Projects</field>
+            <field name="model_id" ref="model_incident_investigation_finding"/>
+            <field name="domain_force">[('investigation_id.site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+        </record>
+
+        <record id="rule_incident_investigation_checklist_admin" model="ir.rule">
+            <field name="name">Administrator: All Investigation Checklists</field>
+            <field name="model_id" ref="model_incident_investigation_checklist"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_incident_investigation_checklist_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Investigation Checklists at Assigned Projects</field>
+            <field name="model_id" ref="model_incident_investigation_checklist"/>
+            <field name="domain_force">[('investigation_id.site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+        </record>
+
+        <record id="rule_incident_investigation_custody_admin" model="ir.rule">
+            <field name="name">Administrator: All Evidence Custody</field>
+            <field name="model_id" ref="model_incident_investigation_evidence_custody"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_incident_investigation_custody_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Evidence Custody at Assigned Projects</field>
+            <field name="model_id" ref="model_incident_investigation_evidence_custody"/>
+            <field name="domain_force">[('evidence_id.investigation_id.site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+        </record>
+
+        <!-- ========== Buildings / floors / areas ========== -->
+        <record id="rule_site_building_admin" model="ir.rule">
+            <field name="name">Administrator: All Buildings</field>
+            <field name="model_id" ref="model_site_building"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_site_building_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Buildings at Assigned Projects</field>
+            <field name="model_id" ref="model_site_building"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_guard_portal'))]"/>
+        </record>
+
+        <record id="rule_building_floor_admin" model="ir.rule">
+            <field name="name">Administrator: All Floors</field>
+            <field name="model_id" ref="model_building_floor"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_building_floor_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Floors at Assigned Projects</field>
+            <field name="model_id" ref="model_building_floor"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_guard_portal'))]"/>
+        </record>
+
+        <record id="rule_floor_area_admin" model="ir.rule">
+            <field name="name">Administrator: All Areas</field>
+            <field name="model_id" ref="model_floor_area"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_floor_area_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Areas at Assigned Projects</field>
+            <field name="model_id" ref="model_floor_area"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_guard_portal'))]"/>
+        </record>
+
+        <!-- ========== Tenant residents ========== -->
+        <record id="rule_tenant_resident_admin" model="ir.rule">
+            <field name="name">Administrator: All Residents</field>
+            <field name="model_id" ref="model_tenant_resident"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_tenant_resident_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Residents at Assigned Projects</field>
+            <field name="model_id" ref="model_tenant_resident"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+        </record>
+
+        <!-- ========== Push-to-talk ========== -->
+        <record id="rule_ptt_channel_admin" model="ir.rule">
+            <field name="name">Administrator: All PTT Channels</field>
+            <field name="model_id" ref="model_push_to_talk_channel"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_ptt_channel_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: PTT Channels at Assigned Projects or Membership</field>
+            <field name="model_id" ref="model_push_to_talk_channel"/>
+            <field name="domain_force">['|', '|', ('site_id', 'in', user.site_ids.ids), ('supervisor_ids', 'in', [user.id]), ('member_ids.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+        </record>
+
+        <record id="rule_ptt_message_admin" model="ir.rule">
+            <field name="name">Administrator: All PTT Messages</field>
+            <field name="model_id" ref="model_push_to_talk_message"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_ptt_message_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: PTT Messages via Channel Access</field>
+            <field name="model_id" ref="model_push_to_talk_message"/>
+            <field name="domain_force">['|', '|', ('channel_id.site_id', 'in', user.site_ids.ids), ('channel_id.supervisor_ids', 'in', [user.id]), ('channel_id.member_ids.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+        </record>
+
+        <!-- ========== Messaging ========== -->
+        <record id="rule_guard_conversation_admin" model="ir.rule">
+            <field name="name">Administrator: All Conversations</field>
+            <field name="model_id" ref="model_guard_conversation"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_guard_conversation_participants" model="ir.rule">
+            <field name="name">Non-Admin: Own Conversations Only</field>
+            <field name="model_id" ref="model_guard_conversation"/>
+            <field name="domain_force">['|', '|', '|', '|', '|', ('guard_id.user_id', '=', user.id), ('guard1_id.user_id', '=', user.id), ('guard2_id.user_id', '=', user.id), ('participant_ids.user_id', '=', user.id), ('supervisor_id', '=', user.id), ('supervisor_participant_ids', 'in', [user.id])]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+        </record>
+
+        <record id="rule_guard_message_admin" model="ir.rule">
+            <field name="name">Administrator: All Guard Messages</field>
+            <field name="model_id" ref="model_guard_message"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_guard_message_participants" model="ir.rule">
+            <field name="name">Non-Admin: Own / Site / Channel Messages</field>
+            <field name="model_id" ref="model_guard_message"/>
+            <field name="domain_force">['|', '|', '|', '|', ('sender_id', '=', user.id), ('receiver_id', '=', user.id), ('related_site_id', 'in', user.site_ids.ids), ('channel_id.site_id', 'in', user.site_ids.ids), ('broadcast_recipient_ids.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+        </record>
+
+        <record id="rule_guard_message_channel_admin" model="ir.rule">
+            <field name="name">Administrator: All Message Channels</field>
+            <field name="model_id" ref="model_guard_message_channel"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_guard_message_channel_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Message Channels at Assigned Projects or Membership</field>
+            <field name="model_id" ref="model_guard_message_channel"/>
+            <field name="domain_force">['|', '|', ('site_id', 'in', user.site_ids.ids), ('supervisor_ids', 'in', [user.id]), ('member_ids.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+        </record>
+
+        <!-- ========== Approval requests ========== -->
+        <record id="rule_guard_approval_request_admin" model="ir.rule">
+            <field name="name">Administrator: All Approval Requests</field>
+            <field name="model_id" ref="model_guard_approval_request"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_guard_approval_request_own" model="ir.rule">
+            <field name="name">Guard: Own Approval Requests</field>
+            <field name="model_id" ref="model_guard_approval_request"/>
+            <field name="domain_force">[('guard_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+        <record id="rule_guard_approval_request_assigned_sites" model="ir.rule">
+            <field name="name">Supervisor/Manager: Approvals at Assigned Projects</field>
+            <field name="model_id" ref="model_guard_approval_request"/>
+            <field name="domain_force">['|', ('site_id', 'in', user.site_ids.ids), '&amp;', ('site_id', '=', False), ('guard_id.site_ids', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
+        </record>
+
+        <!-- ========== Visitor host ========== -->
+        <record id="rule_visitor_host_admin" model="ir.rule">
+            <field name="name">Administrator: All Visitor Hosts</field>
+            <field name="model_id" ref="model_visitor_host"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+        <record id="rule_visitor_host_assigned_sites" model="ir.rule">
+            <field name="name">Non-Admin: Visitor Hosts at Assigned Projects</field>
+            <field name="model_id" ref="model_visitor_host"/>
+            <field name="domain_force">[('site_ids', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_reception')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_guard_portal'))]"/>
+        </record>
+
+    </data>
+</odoo>

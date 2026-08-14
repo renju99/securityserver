@@ -267,7 +267,7 @@
                 &lt;ol&gt;
                     &lt;li&gt;&lt;strong&gt;Access Operations Module:&lt;/strong&gt; Navigate to Operations → Shifts in GuardLink&lt;/li&gt;
                     &lt;li&gt;&lt;strong&gt;Initiate Creation:&lt;/strong&gt; Click the "Create" button to start a new shift&lt;/li&gt;
-                    &lt;li&gt;&lt;strong&gt;Select Site and Type:&lt;/strong&gt; Choose the appropriate site location and shift category&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Select Project and Type:&lt;/strong&gt; Choose the appropriate site location and shift category&lt;/li&gt;
                     &lt;li&gt;&lt;strong&gt;Set Schedule Parameters:&lt;/strong&gt; Define start date, time, duration, and end time&lt;/li&gt;
                     &lt;li&gt;&lt;strong&gt;Assign Personnel:&lt;/strong&gt; Select qualified guards based on skills and availability&lt;/li&gt;
                     &lt;li&gt;&lt;strong&gt;Add Special Instructions:&lt;/strong&gt; Include site-specific requirements or special circumstances&lt;/li&gt;

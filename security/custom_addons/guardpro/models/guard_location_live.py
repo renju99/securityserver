@@ -66,7 +66,7 @@ class GuardLocationLive(models.Model):
     # Context
     site_id = fields.Many2one(
         'client.site',
-        string='Current Site',
+        string='Current Project',
         index=True,
         ondelete='set null'
     )
@@ -130,7 +130,7 @@ class GuardLocationLive(models.Model):
     
     site_name = fields.Char(
         related='site_id.name',
-        string='Site Name',
+        string='Project Name',
         readonly=True,
         store=True
     )

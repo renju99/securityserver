@@ -74,6 +74,22 @@ function setFormField(field, val) {
     }
 }
 
+function setFormFieldIfEmpty(field, val) {
+    let input = document.querySelector(
+        `[name="${field}"] select, [name="${field}"] textarea, [name="${field}"] input:not([type="hidden"]), [name="${field}"] input[type="text"], [name="${field}"] input[type="date"]`
+    );
+    if (!input) {
+        input = document.querySelector(`[name="${field}"] input`);
+    }
+    if (!input) {
+        return;
+    }
+    if ((input.value || "").trim()) {
+        return;
+    }
+    setFormField(field, val);
+}
+
 function setIdPhotoFromB64(b64) {
     if (!b64) {
         return;
@@ -376,12 +392,45 @@ function openScanWizard() {
         const btnApply = mkBtn(_t("Apply to form"), "primary");
         const btnClose = mkBtn(_t("Close"));
         btnClose.addEventListener("click", closeAll);
-        btnApply.addEventListener("click", () => {
+        btnApply.addEventListener("click", async () => {
             reviewForm.querySelectorAll("[data-field]").forEach((inp) => {
                 setFormField(inp.dataset.field, inp.value);
             });
             if (frontDataUrl) {
                 setIdPhotoFromB64(dataUrlToRawB64(frontDataUrl));
+            }
+            // Merge prior visit details (mobile/email/host) for returning visitors
+            const idInput = reviewForm.querySelector('[data-field="id_number"]');
+            const idNumber = idInput && idInput.value ? idInput.value.trim() : "";
+            if (idNumber) {
+                try {
+                    const lookup = await jsonRpc("/guardpro/api/visitor/lookup_by_id", {
+                        id_number: idNumber,
+                    });
+                    if (lookup && lookup.success && lookup.found && lookup.fields) {
+                        const fields = lookup.fields;
+                        const preferEmpty = [
+                            "mobile_number", "email", "company",
+                            "host_name", "host_phone", "host_email",
+                            "host_community", "host_unit_number", "host_department",
+                            "occupation", "employer_name", "issuing_place",
+                        ];
+                        for (const key of preferEmpty) {
+                            if (fields[key]) {
+                                setFormFieldIfEmpty(key, fields[key]);
+                            }
+                        }
+                        alert(
+                            _t(
+                                "Fields updated. Returning visitor details were also loaded where available. Please verify and save."
+                            )
+                        );
+                        closeAll();
+                        return;
+                    }
+                } catch (e) {
+                    console.warn("[EID Camera] Returning visitor lookup failed", e);
+                }
             }
             alert(_t("Fields updated. Please verify and save the visitor record."));
             closeAll();

@@ -292,7 +292,7 @@ class SLAKPI(models.Model):
         help='This KPI is automatically calculated from compliance audit scores'
     )
     linked_audit_type = fields.Selection([
-        ('site', 'Site Audit'),
+        ('site', 'Project Audit'),
         ('guard', 'Guard Performance Audit'),
         ('equipment', 'Equipment Audit'),
         ('training', 'Training Compliance'),

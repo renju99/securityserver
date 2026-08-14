@@ -40,7 +40,7 @@ class ProjectTask(models.Model):
     # Site and Guard Assignment
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         tracking=True,
         index=True,
         help='Site where the task should be performed'

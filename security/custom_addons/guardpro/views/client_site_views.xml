@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <!-- Client Site List View -->
+        <!-- Client Project List View -->
         <record id="view_client_site_list" model="ir.ui.view">
             <field name="name">client.site.list</field>
             <field name="model">client.site</field>
             <field name="arch" type="xml">
-                <list string="Client Sites" sample="1">
+                <list string="Projects" sample="1">
                     <field name="code"/>
                     <field name="name"/>
                     <field name="client_id"/>
@@ -25,17 +25,20 @@
             </field>
         </record>
 
-        <!-- Client Site Form View -->
+        <!-- Client Project Form View -->
         <record id="view_client_site_form" model="ir.ui.view">
             <field name="name">client.site.form</field>
             <field name="model">client.site</field>
             <field name="arch" type="xml">
-                <form string="Client Site">
+                <form string="Project">
                     <header>
                         <field name="status" widget="statusbar"/>
                     </header>
                     <sheet>
                         <div class="oe_button_box" name="button_box">
+                            <button name="action_view_project_sites" type="object" class="oe_stat_button" icon="fa-building">
+                                <field name="site_count" widget="statinfo" string="Sites"/>
+                            </button>
                             <button name="action_view_shifts" type="object" class="oe_stat_button" icon="fa-calendar">
                                 <field name="total_shifts" widget="statinfo" string="Shifts"/>
                             </button>
@@ -53,9 +56,9 @@
                         </div>
                         <div class="oe_title">
                             <label for="name"/>
-                            <h1><field name="name" placeholder="Site Name"/></h1>
+                            <h1><field name="name" placeholder="Project Name"/></h1>
                             <label for="code"/>
-                            <h3><field name="code" placeholder="Site Code"/></h3>
+                            <h3><field name="code" placeholder="Project Code"/></h3>
                         </div>
                         <group>
                             <group string="Client Information">
@@ -72,7 +75,7 @@
                                 <field name="armed_required"/>
                             </group>
                         </group>
-                        <group string="Site Type">
+                        <group string="Project Type">
                             <group>
                                 <field name="site_type"/>
                                 <field name="is_community" string="Is Community/Residential"/>
@@ -112,6 +115,27 @@
                             <field name="emergency_phone"/>
                         </group>
                         <notebook>
+                            <page string="Sites">
+                                <field name="project_site_ids">
+                                    <list editable="bottom">
+                                        <field name="name"/>
+                                        <field name="code"/>
+                                        <field name="city" optional="show"/>
+                                        <field name="status"/>
+                                        <field name="active" column_invisible="1"/>
+                                    </list>
+                                </field>
+                            </page>
+                            <page string="Zones">
+                                <field name="zone_ids">
+                                    <list editable="bottom">
+                                        <field name="name"/>
+                                        <field name="code"/>
+                                        <field name="zone_type"/>
+                                        <field name="status"/>
+                                    </list>
+                                </field>
+                            </page>
                             <page string="Instructions">
                                 <group>
                                     <field name="access_instructions" widget="text"/>
@@ -119,7 +143,7 @@
                                     <field name="special_instructions" widget="text"/>
                                 </group>
                             </page>
-                            <page string="Site Map">
+                            <page string="Project Map">
                                 <field name="site_map" widget="image"/>
                                 <field name="site_photos" widget="many2many_binary"/>
                             </page>
@@ -133,7 +157,7 @@
             </field>
         </record>
 
-        <!-- Client Site Kanban View -->
+        <!-- Client Project Kanban View -->
         <record id="view_client_site_kanban" model="ir.ui.view">
             <field name="name">client.site.kanban</field>
             <field name="model">client.site</field>
@@ -173,12 +197,12 @@
             </field>
         </record>
 
-        <!-- Client Site Search View -->
+        <!-- Client Project Search View -->
         <record id="view_client_site_search" model="ir.ui.view">
             <field name="name">client.site.search</field>
             <field name="model">client.site</field>
             <field name="arch" type="xml">
-                <search string="Sites">
+                <search string="Projects">
                     <field name="name"/>
                     <field name="code"/>
                     <field name="client_id"/>
@@ -187,27 +211,27 @@
                     <filter string="Active" name="active" domain="[('status', '=', 'active')]"/>
                     <filter string="Inactive" name="inactive" domain="[('status', '=', 'inactive')]"/>
                     <separator/>
-                    <filter string="Community/Residential Sites" name="community" domain="[('is_community', '=', True)]"/>
-                    <filter string="Commercial Sites" name="commercial" domain="[('is_community', '=', False)]"/>
+                    <filter string="Community/Residential Projects" name="community" domain="[('is_community', '=', True)]"/>
+                    <filter string="Commercial Projects" name="commercial" domain="[('is_community', '=', False)]"/>
                     <group expand="0" string="Group By">
                         <filter name="group_client" string="Client" context="{'group_by': 'client_id'}"/>
                         <filter name="group_city" string="City" context="{'group_by': 'city'}"/>
                         <filter name="group_status" string="Status" context="{'group_by': 'status'}"/>
-                        <filter name="group_site_type" string="Site Type" context="{'group_by': 'site_type'}"/>
+                        <filter name="group_site_type" string="Project Type" context="{'group_by': 'site_type'}"/>
                     </group>
                 </search>
             </field>
         </record>
 
-        <!-- Client Site Action -->
+        <!-- Client Project Action -->
         <record id="action_client_site" model="ir.actions.act_window">
-            <field name="name">Client Sites</field>
+            <field name="name">Projects</field>
             <field name="res_model">client.site</field>
             <field name="view_mode">kanban,list,form</field>
             <field name="context">{'search_default_active': 1}</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
-                    Create your first client site
+                    Create your first project
                 </p>
                 <p>
                     Manage client locations with geofencing and checkpoint tracking.

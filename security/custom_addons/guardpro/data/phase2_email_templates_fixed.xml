@@ -39,7 +39,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;">Expected Site</th>
+                                <th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;">Expected Project</th>
                                 <td style="padding: 10px; border: 1px solid #ddd;">${object.site_id.name if object.site_id else 'N/A'}</td>
                             </tr>
                             <tr>
@@ -47,7 +47,7 @@
                                 <td style="padding: 10px; border: 1px solid #ddd;">${format_datetime(object.alert_datetime, dt_format='medium', tz='UTC') if object.alert_datetime else 'N/A'}</td>
                             </tr>
                             <tr>
-                                <th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;">Distance from Site</th>
+                                <th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;">Distance from Project</th>
                                 <td style="padding: 10px; border: 1px solid #ddd;">
                                     <strong style="color: #d32f2f;">
                                         % if object.distance_from_site:

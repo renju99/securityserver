@@ -96,7 +96,7 @@ class ShiftSwapRequest(models.Model):
     
     site_id = fields.Many2one(
         related='shift_id.site_id',
-        string='Site',
+        string='Project',
         store=True
     )
     

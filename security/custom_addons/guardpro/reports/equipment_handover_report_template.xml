@@ -72,7 +72,7 @@
                                         <td><span t-field="o.equipment_id.serial_number"/></td>
                                     </tr>
                                     <tr t-if="o.site_id">
-                                        <td><strong>Site:</strong></td>
+                                        <td><strong>Project:</strong></td>
                                         <td><span t-field="o.site_id.name"/></td>
                                     </tr>
                                     <tr>

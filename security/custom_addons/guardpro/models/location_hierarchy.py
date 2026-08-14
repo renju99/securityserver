@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Location Hierarchy Models - Buildings, Floors, Areas."""
+"""Location Hierarchy Models - Zones, Buildings, Floors, Areas."""
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
@@ -8,8 +8,137 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
+class SiteZone(models.Model):
+    """Patrol/operational zones within a client project."""
+
+    _name = 'site.zone'
+    _description = 'Site Zone'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _order = 'site_id, name'
+
+    name = fields.Char(
+        string='Zone Name',
+        required=True,
+        tracking=True,
+        index=True,
+    )
+    code = fields.Char(
+        string='Zone Code',
+        required=True,
+        copy=False,
+        tracking=True,
+        index=True,
+    )
+    site_id = fields.Many2one(
+        'client.site',
+        string='Project',
+        required=True,
+        ondelete='cascade',
+        tracking=True,
+    )
+    description = fields.Text(string='Description')
+    zone_type = fields.Selection([
+        ('campus', 'Campus Sector'),
+        ('parking', 'Parking'),
+        ('perimeter', 'Perimeter'),
+        ('building_cluster', 'Building Cluster'),
+        ('retail', 'Retail Area'),
+        ('residential', 'Residential Block'),
+        ('industrial', 'Industrial Yard'),
+        ('other', 'Other'),
+    ], string='Zone Type', default='other', tracking=True)
+    active = fields.Boolean(string='Active', default=True)
+    status = fields.Selection([
+        ('active', 'Active'),
+        ('inactive', 'Inactive'),
+        ('maintenance', 'Under Maintenance'),
+    ], string='Status', default='active', required=True, tracking=True)
+    color = fields.Integer(string='Color Index', default=0)
+
+    building_ids = fields.One2many(
+        'site.building',
+        'zone_id',
+        string='Buildings',
+    )
+    checkpoint_ids = fields.One2many(
+        'checkpoint',
+        'zone_id',
+        string='Checkpoints',
+    )
+    tour_ids = fields.One2many(
+        'security.tour',
+        'zone_id',
+        string='Tours',
+    )
+    incident_ids = fields.One2many(
+        'incident.report',
+        'zone_id',
+        string='Incidents',
+    )
+
+    total_buildings = fields.Integer(
+        string='Buildings',
+        compute='_compute_statistics',
+        store=True,
+    )
+    total_checkpoints = fields.Integer(
+        string='Checkpoints',
+        compute='_compute_statistics',
+        store=True,
+    )
+
+    _sql_constraints = [
+        ('code_unique', 'unique(code)', 'Zone code must be unique!'),
+        ('name_site_unique', 'unique(name, site_id)',
+         'Zone name must be unique within a site!'),
+    ]
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if not vals.get('code'):
+                vals['code'] = (
+                    self.env['ir.sequence'].next_by_code('site.zone') or '/'
+                )
+        return super().create(vals_list)
+
+    @api.depends('building_ids', 'checkpoint_ids')
+    def _compute_statistics(self):
+        for record in self:
+            record.total_buildings = len(record.building_ids)
+            record.total_checkpoints = len(record.checkpoint_ids)
+
+    def action_view_buildings(self):
+        self.ensure_one()
+        return {
+            'name': _('Buildings - %s') % self.name,
+            'type': 'ir.actions.act_window',
+            'res_model': 'site.building',
+            'view_mode': 'list,form',
+            'domain': [('zone_id', '=', self.id)],
+            'context': {
+                'default_zone_id': self.id,
+                'default_site_id': self.site_id.id,
+            },
+        }
+
+    def action_view_checkpoints(self):
+        self.ensure_one()
+        return {
+            'name': _('Checkpoints - %s') % self.name,
+            'type': 'ir.actions.act_window',
+            'res_model': 'checkpoint',
+            'view_mode': 'list,form',
+            'domain': [('zone_id', '=', self.id)],
+            'context': {
+                'default_zone_id': self.id,
+                'default_site_id': self.site_id.id,
+            },
+        }
+
+
 class SiteBuilding(models.Model):
-    """Buildings within client sites."""
+    """Buildings within client projects."""
 
     _name = 'site.building'
     _description = 'Site Building'
@@ -32,10 +161,18 @@ class SiteBuilding(models.Model):
     )
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=True,
         ondelete='cascade',
         tracking=True
+    )
+    zone_id = fields.Many2one(
+        'site.zone',
+        string='Zone',
+        domain="[('site_id', '=', site_id)]",
+        ondelete='set null',
+        tracking=True,
+        help='Operational zone this building belongs to',
     )
 
     # Location Details
@@ -238,10 +375,17 @@ class BuildingFloor(models.Model):
     )
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         related='building_id.site_id',
         store=True,
         readonly=True
+    )
+    zone_id = fields.Many2one(
+        'site.zone',
+        string='Zone',
+        related='building_id.zone_id',
+        store=True,
+        readonly=True,
     )
 
     # Floor Details
@@ -403,10 +547,17 @@ class FloorArea(models.Model):
     )
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         related='floor_id.site_id',
         store=True,
         readonly=True
+    )
+    zone_id = fields.Many2one(
+        'site.zone',
+        string='Zone',
+        related='floor_id.zone_id',
+        store=True,
+        readonly=True,
     )
 
     # Area Details

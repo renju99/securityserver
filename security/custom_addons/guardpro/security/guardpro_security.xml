@@ -17,15 +17,15 @@
             <field name="name">Guard User</field>
             <field name="category_id" ref="module_category_guardpro"/>
             <field name="implied_ids" eval="[(4, ref('base.group_portal'))]"/>
-            <field name="comment">Portal user access for guards. Guards can access the mobile portal to view shifts, report incidents, complete tours, and manage attendance. Access limited to their assigned sites.</field>
+            <field name="comment">Portal user access for guards. Guards can access the mobile portal to view shifts, report incidents, complete tours, and manage attendance. Access limited to their assigned projects.</field>
         </record>
 
-        <!-- Client User Group - Backend access for clients to view their sites -->
+        <!-- Client User Group - Backend access for B2B client company staff (NOT residents) -->
         <record id="group_guardpro_client_user" model="res.groups">
             <field name="name">Client User</field>
             <field name="category_id" ref="module_category_guardpro"/>
             <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
-            <field name="comment">Backend client access - can view all information (shifts, incidents, attendance, tours, checkpoints, etc.) for assigned sites. Read-only access to most data.</field>
+            <field name="comment">INTERNAL User for B2B client-company staff (site report access in the backend). Never assign to residential tenants — use Resident/Tenant User (portal) instead. Assigning this group grants Internal User privileges.</field>
         </record>
 
         <!-- Supervisor Group - Backend access -->
@@ -33,7 +33,7 @@
             <field name="name">Supervisor</field>
             <field name="category_id" ref="module_category_guardpro"/>
             <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
-            <field name="comment">Backend supervisor access - can manage shifts, review incidents, approve attendance. Access limited to assigned sites.</field>
+            <field name="comment">Backend supervisor access - can manage shifts, review incidents, approve attendance. Access limited to assigned projects.</field>
         </record>
 
         <!-- Manager Group - Backend access -->
@@ -41,7 +41,7 @@
             <field name="name">Manager</field>
             <field name="category_id" ref="module_category_guardpro"/>
             <field name="implied_ids" eval="[(4, ref('group_guardpro_supervisor'))]"/>
-            <field name="comment">Backend management access - can manage all guards, shifts, tours, equipment. Access limited to assigned sites.</field>
+            <field name="comment">Backend management access - can manage all guards, shifts, tours, equipment. Access limited to assigned projects.</field>
         </record>
 
         <!-- Reception/Front Desk Group - Limited backend access -->
@@ -58,6 +58,13 @@
             <field name="category_id" ref="module_category_guardpro"/>
             <field name="implied_ids" eval="[(4, ref('group_guardpro_manager'))]"/>
             <field name="comment">Full system access including configuration and settings. Access to all sites.</field>
+        </record>
+
+        <!-- Zone-restricted access (auto-assigned when user has zone_ids) -->
+        <record id="group_guardpro_zone_restricted" model="res.groups">
+            <field name="name">Zone-Restricted Access</field>
+            <field name="category_id" ref="module_category_guardpro"/>
+            <field name="comment">Internal flag: user access is limited to assigned zones. Assigned automatically when zones are set on the user.</field>
         </record>
 
     </data>

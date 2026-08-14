@@ -18,6 +18,45 @@ class GuardLinkAnalyticsDashboard(models.Model):
     _name = 'guardpro.analytics.dashboard'
     _description = 'GuardLink Analytics Dashboard'
 
+    def _safe_related_name(self, record, field='name', default=''):
+        """Read a related record's display field without AccessError.
+
+        Parent rows (shifts/tasks/attendance) are already site-scoped. Related
+        ``guard.profile`` rows can still be unreadable when the guard's
+        ``site_ids`` are empty or out of sync with the shift site.
+        """
+        if not record:
+            return default
+        value = record.sudo()[field]
+        return value if value not in (False, None) else default
+
+    def _resolve_drilldown_site_ids(self, filter_params=None):
+        """Site IDs for KPI drill-downs — always scoped to the user's sites."""
+        if not isinstance(filter_params, dict):
+            filter_params = {}
+
+        def _sanitize_ids(ids):
+            if not ids:
+                return []
+            if isinstance(ids, (int, str)):
+                ids = [ids]
+            return [int(i) for i in ids if i and str(i).lstrip('-').isdigit()]
+
+        requested = _sanitize_ids(filter_params.get('site_ids', []))
+        user = self.env.user
+        is_admin = user.has_group('guardpro.group_guardpro_admin') or user.has_group(
+            'base.group_system'
+        )
+        if is_admin:
+            return requested
+
+        assigned = user.site_ids.ids
+        if not assigned:
+            return [-1]  # fail closed
+        if requested:
+            return [sid for sid in requested if sid in assigned] or [-1]
+        return list(assigned)
+
     name = fields.Char(
         'Dashboard Name',
         required=True,
@@ -132,7 +171,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
         # Apply site filter to guards if sites are selected
         # NOTE: Only filter by sites if there are valid site IDs
         if site_domain and len(site_domain) > 0 and not guard_ids:
-            # Filter guards by assigned sites (guard.profile.site_ids is Many2many related to user_id.site_ids)
+            # Filter guards by assigned projects (guard.profile.site_ids is Many2many related to user_id.site_ids)
             guard_domain += [('site_ids', 'in', site_domain)]
         
         _logger.info(f"KPI Data - Guard Domain: {guard_domain}")
@@ -708,7 +747,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
             'columns': [
                 _('Incident #'),
                 _('Title'),
-                _('Site'),
+                _('Project'),
                 _('Severity'),
                 _('Date'),
                 _('Status')
@@ -749,7 +788,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
             'columns': [
                 _('Task'),
                 _('Assigned To'),
-                _('Site'),
+                _('Project'),
                 _('Due Date'),
                 _('Priority'),
                 _('Status')
@@ -758,7 +797,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
                 'id': task.id,
                 'data': [
                     task.name,
-                    task.assigned_to.name if task.assigned_to else _('Unassigned'),
+                    self._safe_related_name(task.assigned_to, default=_('Unassigned')),
                     task.site_id.name,
                     self._convert_to_user_tz(task.due_date).strftime('%Y-%m-%d %H:%M') if task.due_date else '',
                     dict(task._fields['priority'].selection)[task.priority],
@@ -791,7 +830,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
             'res_model': 'guard.shift',
             'columns': [
                 _('Guard'),
-                _('Site'),
+                _('Project'),
                 _('Start Time'),
                 _('End Time'),
                 _('Type'),
@@ -800,7 +839,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
             'rows': [{
                 'id': shift.id,
                 'data': [
-                    shift.guard_id.name,
+                    self._safe_related_name(shift.guard_id),
                     shift.site_id.name,
                     self._convert_to_user_tz(shift.start_datetime).strftime('%H:%M')
                     if shift.start_datetime else '',
@@ -825,40 +864,40 @@ class GuardLinkAnalyticsDashboard(models.Model):
         sanitized_sites = set(site_ids)
         force_empty = False
 
-        _logger.info(f"Sanitizing Sites - Initial: {site_ids}, Clients: {client_ids}")
+        _logger.info(f"Sanitizing Projects - Initial: {site_ids}, Clients: {client_ids}")
 
         if client_ids:
             client_site_ids = self.env['client.site'].search([
                 ('client_id', 'in', client_ids)
             ]).ids
             client_site_ids = set(client_site_ids)
-            _logger.info(f"Sanitizing Sites - Client Sites: {client_site_ids}")
+            _logger.info(f"Sanitizing Projects - Projects: {client_site_ids}")
             sanitized_sites = (sanitized_sites & client_site_ids) if sanitized_sites else client_site_ids
 
         if enforce_limits:
             assigned_set = set(assigned_site_ids)
-            _logger.info(f"Sanitizing Sites - Enforcing Limits. Assigned: {assigned_set}")
+            _logger.info(f"Sanitizing Projects - Enforcing Limits. Assigned: {assigned_set}")
             if not assigned_set:
-                _logger.warning("Sanitizing Sites - User has no assigned sites!")
+                _logger.warning("Sanitizing Projects - User has no assigned projects!")
                 return [], _('No sites are assigned to your user. Please contact your administrator.'), False
             
             if sanitized_sites:
                 before_intersection = set(sanitized_sites)
                 sanitized_sites &= assigned_set
-                _logger.info(f"Sanitizing Sites - Intersection: {before_intersection} & {assigned_set} = {sanitized_sites}")
+                _logger.info(f"Sanitizing Projects - Intersection: {before_intersection} & {assigned_set} = {sanitized_sites}")
             elif not filter_requested:
                 sanitized_sites = assigned_set
-                _logger.info("Sanitizing Sites - Using all assigned sites.")
+                _logger.info("Sanitizing Projects - Using all assigned projects.")
             else:
-                _logger.info("Sanitizing Sites - Filter requested but yields no assigned sites.")
+                _logger.info("Sanitizing Projects - Filter requested but yields no assigned projects.")
                 force_empty = True
 
         if filter_requested and not sanitized_sites:
-            _logger.info("Sanitizing Sites - Final check: Filter was requested but resulting site list is empty.")
+            _logger.info("Sanitizing Projects - Final check: Filter was requested but resulting site list is empty.")
             force_empty = True
 
         result = sorted(sanitized_sites)
-        _logger.info(f"Sanitizing Sites - Result: {result}, force_empty: {force_empty}")
+        _logger.info(f"Sanitizing Projects - Result: {result}, force_empty: {force_empty}")
         return result, None, force_empty
 
     def _sanitize_guard_filters(self, guard_ids=None, allowed_site_ids=None):
@@ -1018,13 +1057,13 @@ class GuardLinkAnalyticsDashboard(models.Model):
     @api.model
     def action_view_guards(self, filter_params=None):
         """Navigate to guards list."""
-        filter_params = filter_params or {}
-        site_ids = filter_params.get('site_ids', [])
-        
+        filter_params = filter_params if isinstance(filter_params, dict) else {}
+        site_ids = self._resolve_drilldown_site_ids(filter_params)
+
         domain = [('status', '=', 'active')]
         if site_ids:
             domain += [('site_ids', 'in', site_ids)]
-            
+
         return {
             'type': 'ir.actions.act_window',
             'name': _('Active Guards'),
@@ -1039,28 +1078,28 @@ class GuardLinkAnalyticsDashboard(models.Model):
     @api.model
     def action_view_shifts_today(self, filter_params=None):
         """Navigate to today's shifts."""
-        filter_params = filter_params or {}
+        filter_params = filter_params if isinstance(filter_params, dict) else {}
         today = fields.Date.today()
         if filter_params.get('date_to'):
             today = fields.Date.from_string(filter_params['date_to'])
-            
+
         today_start = fields.Datetime.to_datetime(today)
         today_end = today_start + timedelta(days=1)
-        
-        site_ids = filter_params.get('site_ids', [])
+
+        site_ids = self._resolve_drilldown_site_ids(filter_params)
         guard_ids = filter_params.get('guard_ids', [])
-        
+
         domain = [
             ('start_datetime', '>=', today_start),
             ('start_datetime', '<', today_end),
             ('status', 'in', ['scheduled', 'confirmed', 'in_progress'])
         ]
-        
+
         if site_ids:
             domain += [('site_id', 'in', site_ids)]
         if guard_ids:
             domain += [('guard_id', 'in', guard_ids)]
-            
+
         return {
             'type': 'ir.actions.act_window',
             'name': _('Active Shifts Today'),
@@ -1074,7 +1113,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
     @api.model
     def action_view_incidents(self, filter_params=None):
         """Navigate to incidents this month."""
-        filter_params = filter_params or {}
+        filter_params = filter_params if isinstance(filter_params, dict) else {}
         date_from = filter_params.get('date_from')
         date_to = filter_params.get('date_to')
         
@@ -1088,7 +1127,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
         else:
             end_date = fields.Datetime.now()
             
-        site_ids = filter_params.get('site_ids', [])
+        site_ids = self._resolve_drilldown_site_ids(filter_params)
         guard_ids = filter_params.get('guard_ids', [])
         
         domain = [
@@ -1114,7 +1153,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
     @api.model
     def action_view_tasks(self, filter_params=None):
         """Navigate to completed tasks."""
-        filter_params = filter_params or {}
+        filter_params = filter_params if isinstance(filter_params, dict) else {}
         date_from = filter_params.get('date_from')
         date_to = filter_params.get('date_to')
         
@@ -1128,7 +1167,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
         else:
             end_date = fields.Date.today()
             
-        site_ids = filter_params.get('site_ids', [])
+        site_ids = self._resolve_drilldown_site_ids(filter_params)
         guard_ids = filter_params.get('guard_ids', [])
         
         domain = [
@@ -1155,7 +1194,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
     @api.model
     def action_view_visitors(self, filter_params=None):
         """Navigate to today's visitors."""
-        filter_params = filter_params or {}
+        filter_params = filter_params if isinstance(filter_params, dict) else {}
         date_from = filter_params.get('date_from')
         date_to = filter_params.get('date_to')
         
@@ -1169,7 +1208,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
         else:
             end_date = start_date + timedelta(days=1)
             
-        site_ids = filter_params.get('site_ids', [])
+        site_ids = self._resolve_drilldown_site_ids(filter_params)
         
         domain = [
             ('checkin_time', '>=', start_date),
@@ -1192,8 +1231,8 @@ class GuardLinkAnalyticsDashboard(models.Model):
     @api.model
     def action_view_packages(self, filter_params=None):
         """Navigate to pending packages."""
-        filter_params = filter_params or {}
-        site_ids = filter_params.get('site_ids', [])
+        filter_params = filter_params if isinstance(filter_params, dict) else {}
+        site_ids = self._resolve_drilldown_site_ids(filter_params)
         
         domain = [('state', 'in', ['received', 'notified'])]
         if site_ids:
@@ -1212,7 +1251,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
     @api.model
     def action_view_tours(self, filter_params=None):
         """Navigate to tour logs."""
-        filter_params = filter_params or {}
+        filter_params = filter_params if isinstance(filter_params, dict) else {}
         date_from = filter_params.get('date_from')
         date_to = filter_params.get('date_to')
         
@@ -1226,7 +1265,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
         else:
             end_date = fields.Datetime.now()
             
-        site_ids = filter_params.get('site_ids', [])
+        site_ids = self._resolve_drilldown_site_ids(filter_params)
         guard_ids = filter_params.get('guard_ids', [])
         
         domain = [
@@ -1252,7 +1291,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
     @api.model
     def action_view_sla(self, filter_params=None):
         """Navigate to SLA records."""
-        filter_params = filter_params or {}
+        filter_params = filter_params if isinstance(filter_params, dict) else {}
         date_from = filter_params.get('date_from')
         date_to = filter_params.get('date_to')
         
@@ -1266,7 +1305,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
         else:
             end_date = fields.Datetime.now()
             
-        site_ids = filter_params.get('site_ids', [])
+        site_ids = self._resolve_drilldown_site_ids(filter_params)
         
         domain = [
             ('period_start', '>=', start_date),
@@ -1440,8 +1479,8 @@ class GuardLinkAnalyticsDashboard(models.Model):
                 checkout_local = self._convert_to_user_tz(att.checkout_time) if att.checkout_time else None
                 
                 attendance_list.append({
-                    'guard_name': att.guard_id.name if att.guard_id else 'N/A',
-                    'badge_number': att.guard_id.badge_number if att.guard_id else '',
+                    'guard_name': self._safe_related_name(att.guard_id, default='N/A'),
+                    'badge_number': self._safe_related_name(att.guard_id, field='badge_number', default=''),
                     'site_name': att.site_id.name if att.site_id else 'N/A',
                     'date': checkin_local.strftime('%Y-%m-%d') if checkin_local else 'N/A',
                     'checkin_time': checkin_local.strftime('%H:%M:%S') if checkin_local else 'N/A',
@@ -1516,8 +1555,8 @@ class GuardLinkAnalyticsDashboard(models.Model):
                     continue
                 
                 guard_id = att.guard_id.id
-                guard_name = att.guard_id.name
-                badge_number = att.guard_id.badge_number or ''
+                guard_name = self._safe_related_name(att.guard_id)
+                badge_number = self._safe_related_name(att.guard_id, field='badge_number', default='')
                 
                 # Store guard info
                 guard_names[guard_id] = {
@@ -1570,7 +1609,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
                 - Collection rates
                 - Overdue statistics
                 - Package type distribution
-                - Site-wise breakdown
+                - Project-wise breakdown
         """
         filter_context = filter_context or {}
         
@@ -1664,7 +1703,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
                 for data in package_types_data if data['package_type']
             }
             
-            # Site-wise package statistics
+            # Project-wise package statistics
             site_stats = []
             if site_domain:
                 for site_id in site_domain:

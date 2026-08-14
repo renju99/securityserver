@@ -5,9 +5,9 @@
  * Handles offline caching, data synchronization, and conflict resolution
  */
 
-const CACHE_NAME = 'guardpro-cache-v1';
+const CACHE_NAME = 'guardpro-cache-v2';
 const OFFLINE_QUEUE_NAME = 'guardpro-offline-queue';
-const DATA_CACHE_NAME = 'guardpro-data-cache-v1';
+const DATA_CACHE_NAME = 'guardpro-data-cache-v2';
 
 // Static assets to cache on install
 const STATIC_ASSETS = [
@@ -26,11 +26,12 @@ const STATIC_ASSETS = [
     '/guardpro/static/src/img/icon-512x512.png',
 ];
 
-// API routes that should be cached (GET requests)
+// API routes that may be cached when offline (GET). Never cache
+// notification/pending endpoints — stale "alert" payloads re-show
+// forever and feel stuck after the server has already cleared them.
 const CACHEABLE_API_ROUTES = [
     '/guardpro/api/guard/profile',
     '/guardpro/api/shifts/today',
-    '/guardpro/api/tasks/pending',
     '/guardpro/api/tours/active',
     '/guardpro/api/checkpoints',
 ];

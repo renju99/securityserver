@@ -39,10 +39,20 @@
             <field name="implementation">standard</field>
         </record>
         
-        <!-- Site Code Sequence (Optional - for auto-generation) -->
+        <!-- Project Code Sequence (Optional - for auto-generation) -->
         <record id="seq_site_code" model="ir.sequence">
-            <field name="name">Site Code Sequence</field>
+            <field name="name">Project Code Sequence</field>
             <field name="code">client.site</field>
+            <field name="prefix">PRJ-</field>
+            <field name="padding">4</field>
+            <field name="number_increment">1</field>
+            <field name="number_next">1</field>
+            <field name="implementation">standard</field>
+        </record>
+
+        <record id="seq_guard_site" model="ir.sequence">
+            <field name="name">Site Code Sequence</field>
+            <field name="code">guard.site</field>
             <field name="prefix">SITE-</field>
             <field name="padding">4</field>
             <field name="number_increment">1</field>
@@ -137,7 +147,29 @@
             <field name="number_next">1</field>
             <field name="implementation">standard</field>
         </record>
+
+        <!-- Guard Activity Report Sequence -->
+        <record id="seq_guard_activity_report" model="ir.sequence">
+            <field name="name">Guard Activity Report Sequence</field>
+            <field name="code">guard.activity.report</field>
+            <field name="prefix">GAR-</field>
+            <field name="padding">5</field>
+            <field name="number_increment">1</field>
+            <field name="number_next">1</field>
+            <field name="implementation">standard</field>
+        </record>
         
+        <!-- Project Training Session Sequence -->
+        <record id="seq_training_session" model="ir.sequence">
+            <field name="name">Project Training Session Sequence</field>
+            <field name="code">training.session</field>
+            <field name="prefix">TRN-</field>
+            <field name="padding">5</field>
+            <field name="number_increment">1</field>
+            <field name="number_next">1</field>
+            <field name="implementation">standard</field>
+        </record>
+
         <!-- Performance Review Sequence -->
         <record id="seq_guard_performance_review" model="ir.sequence">
             <field name="name">Performance Review Sequence</field>
@@ -199,6 +231,17 @@
             <field name="code">guard.biometric.verification</field>
             <field name="prefix">BIO-</field>
             <field name="padding">6</field>
+            <field name="number_increment">1</field>
+            <field name="number_next">1</field>
+            <field name="implementation">standard</field>
+        </record>
+
+        <!-- Zone Code Sequence -->
+        <record id="seq_site_zone" model="ir.sequence">
+            <field name="name">Zone Code Sequence</field>
+            <field name="code">site.zone</field>
+            <field name="prefix">ZONE-</field>
+            <field name="padding">4</field>
             <field name="number_increment">1</field>
             <field name="number_next">1</field>
             <field name="implementation">standard</field>

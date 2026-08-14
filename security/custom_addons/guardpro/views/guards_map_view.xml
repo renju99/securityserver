@@ -503,8 +503,12 @@
                     </div>
                     
                     <div class="map-controls">
-                        <h4><i class="fa fa-users"></i> Active Guards</h4>
+                        <h4><i class="fa fa-users"></i> Guard Locations</h4>
                         <div class="guard-count" id="guard-count">Loading...</div>
+                        <div class="map-legend" style="display:flex;gap:12px;margin:8px 0 12px;font-size:12px;color:#374151;">
+                            <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10b981;margin-right:4px;"></span>Live</span>
+                            <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;margin-right:4px;"></span>Last known</span>
+                        </div>
                         <div id="guards-list"></div>
                         <button class="refresh-button" onclick="guardMap.refreshLocations()">
                             <i class="fa fa-refresh"></i> Refresh Locations
@@ -544,9 +548,9 @@
                             </button>
                         </div>
                         
-                        <!-- Site Geofences -->
+                        <!-- Project Geofences -->
                         <div class="control-section">
-                            <h4><i class="fa fa-map-o"></i> Site Geofences</h4>
+                            <h4><i class="fa fa-map-o"></i> Project Geofences</h4>
                             <div style="margin-bottom: 10px;">
                                 <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                                     <input type="checkbox" id="show-geofences" checked="checked"/>
@@ -595,6 +599,69 @@
                     </div>
 
                     <div id="map"></div>
+
+                    <!-- Send message to guard (delivered to mobile app) -->
+                    <div id="gp-map-message-modal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(15,23,42,0.45);align-items:center;justify-content:center;padding:16px;">
+                        <div style="background:#fff;border-radius:14px;max-width:420px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.25);padding:18px 18px 14px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                                <h3 style="margin:0;font-size:16px;color:#0f172a;">
+                                    Message <span id="gp-map-msg-guard-name">Guard</span>
+                                </h3>
+                                <button type="button" onclick="guardMap.closeMessageModal()"
+                                        style="border:none;background:transparent;font-size:20px;line-height:1;cursor:pointer;color:#64748b;">&#215;</button>
+                            </div>
+                            <input type="hidden" id="gp-map-msg-guard-id" value=""/>
+                            <textarea id="gp-map-msg-content" rows="4" placeholder="Type a message for the guard’s app…"
+                                      style="width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:8px;padding:10px;font-size:14px;resize:vertical;"></textarea>
+                            <label style="display:flex;align-items:center;gap:8px;margin:10px 0;font-size:13px;color:#334155;cursor:pointer;">
+                                <input type="checkbox" id="gp-map-msg-urgent"/> Mark as urgent
+                            </label>
+                            <div id="gp-map-msg-status" style="min-height:18px;font-size:12px;margin-bottom:8px;"></div>
+                            <div style="display:flex;gap:8px;justify-content:flex-end;">
+                                <button type="button" onclick="guardMap.closeMessageModal()"
+                                        style="border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;">Cancel</button>
+                                <button type="button" id="gp-map-msg-send" onclick="guardMap.sendMessageToGuard()"
+                                        style="border:none;background:#1e3a5f;color:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600;">Send to App</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Panic alert popup (site-scoped) -->
+                    <div id="gp-map-panic-modal" style="display:none;position:fixed;inset:0;z-index:10050;background:rgba(127,29,29,0.55);align-items:center;justify-content:center;padding:16px;">
+                        <div style="background:#fff;border-radius:16px;max-width:460px;width:100%;box-shadow:0 25px 60px rgba(0,0,0,0.35);overflow:hidden;border:2px solid #dc2626;">
+                            <div style="background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;padding:16px 18px;">
+                                <div style="font-size:13px;font-weight:700;letter-spacing:0.06em;opacity:0.9;">EMERGENCY</div>
+                                <h3 style="margin:4px 0 0;font-size:22px;">PANIC ALERT</h3>
+                            </div>
+                            <div style="padding:18px;">
+                                <div style="font-size:15px;color:#0f172a;line-height:1.5;">
+                                    <div><strong>Guard:</strong> <span id="gp-map-panic-guard">—</span></div>
+                                    <div style="margin-top:6px;"><strong>Project:</strong> <span id="gp-map-panic-site">—</span></div>
+                                    <div style="margin-top:6px;"><strong>Incident:</strong> <span id="gp-map-panic-name">—</span></div>
+                                    <div style="margin-top:6px;color:#64748b;font-size:13px;"><span id="gp-map-panic-time">—</span></div>
+                                </div>
+                                <input type="hidden" id="gp-map-panic-id" value=""/>
+                                <input type="hidden" id="gp-map-panic-guard-id" value=""/>
+                                <input type="hidden" id="gp-map-panic-lat" value=""/>
+                                <input type="hidden" id="gp-map-panic-lng" value=""/>
+                                <input type="hidden" id="gp-map-panic-url" value=""/>
+                                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;">
+                                    <button type="button" onclick="guardMap.focusPanicOnMap()"
+                                            style="flex:1;min-width:120px;border:none;background:#1e3a5f;color:#fff;border-radius:8px;padding:10px 12px;cursor:pointer;font-weight:600;">
+                                        Show on Map
+                                    </button>
+                                    <button type="button" onclick="guardMap.openPanicIncident()"
+                                            style="flex:1;min-width:120px;border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:10px 12px;cursor:pointer;font-weight:600;">
+                                        Open Incident
+                                    </button>
+                                    <button type="button" onclick="guardMap.dismissPanicAlert()"
+                                            style="flex:1;min-width:120px;border:none;background:#dc2626;color:#fff;border-radius:8px;padding:10px 12px;cursor:pointer;font-weight:700;">
+                                        Acknowledge
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <script type="text/javascript">
@@ -605,6 +672,8 @@
                         markers: {},
                         infoWindows: {},
                         autoRefreshInterval: null,
+                        panicPollInterval: null,
+                        activePanicId: null,
                         pathPolyline: null,
                         pathMarkers: [],
                         pathTooltip: null,
@@ -621,6 +690,7 @@
                             this.loadGuardLocations();
                             this.loadGeofences();
                             this.setupAutoRefresh();
+                            this.setupPanicPolling();
                         },
                         
                         initMap: function() {
@@ -802,13 +872,11 @@
                                     lng: parseFloat(guard.longitude)
                                 };
                                 
-                                // Determine marker color based on last update time
-                                let markerColor = '#10b981'; // green - active (< 5 min)
-                                if (guard.time_since_update > 30) {
-                                    markerColor = '#ef4444'; // red - inactive (> 30 min)
-                                } else if (guard.time_since_update > 5) {
-                                    markerColor = '#f59e0b'; // yellow - stale (5-30 min)
-                                }
+                                // Live = green; last-known (not live) = red
+                                const isLive = guard.is_live === true || (
+                                    guard.is_live == null && guard.time_since_update != null && guard.time_since_update <= 5
+                                );
+                                const markerColor = isLive ? '#10b981' : '#ef4444';
                                 
                                 // Create custom marker icon
                                 const markerIcon = {
@@ -829,20 +897,33 @@
                                 });
                                 
                                 // Create info window
-                                const lastUpdateText = guard.time_since_update 
-                                    ? `${guard.time_since_update} min ago` 
-                                    : 'Just now';
+                                const lastUpdateText = guard.last_update_label
+                                    || (guard.time_since_update != null
+                                        ? `${guard.time_since_update} min ago`
+                                        : 'Just now');
+                                const liveLabel = isLive
+                                    ? '<span style="color:#059669;font-weight:600;">Live</span>'
+                                    : '<span style="color:#dc2626;font-weight:600;">Last known</span>';
                                 
                                 const infoContent = `
                                     <div style="padding: 10px; min-width: 200px;">
                                         <h3 style="margin: 0 0 10px 0;">${guard.name}</h3>
-                                        <p style="margin: 5px 0;"><strong>Badge:</strong> ${guard.badge_number}</p>
-                                        <p style="margin: 5px 0;"><strong>Site:</strong> ${guard.current_site}</p>
+                                        <p style="margin: 5px 0;"><strong>Badge:</strong> ${guard.badge_number || 'N/A'}</p>
+                                        <p style="margin: 5px 0;"><strong>Project:</strong> ${guard.current_site || 'Unassigned'}</p>
                                         <p style="margin: 5px 0;"><strong>Phone:</strong> ${guard.phone || 'N/A'}</p>
+                                        <p style="margin: 5px 0;"><strong>Status:</strong> ${liveLabel}</p>
                                         <p style="margin: 5px 0;"><strong>Last Update:</strong> ${lastUpdateText}</p>
-                                        <p style="margin: 10px 0 0 0;">
-                                            <a href="/web#id=${guard.id}&model=guard.profile&view_type=form" 
-                                               target="_blank" class="btn btn-primary btn-sm">
+                                        <p style="margin: 10px 0 0 0; display:flex; gap:8px; flex-wrap:wrap;">
+                                            <button type="button"
+                                                    class="gp-iw-send-msg"
+                                                    data-guard-id="${guard.id}"
+                                                    data-guard-name="${String(guard.name || '').replace(/"/g, '&quot;')}"
+                                                    style="background:#1e3a5f;color:#fff;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:12px;">
+                                                Send Message
+                                            </button>
+                                            <a href="/web#id=${guard.id}&amp;model=guard.profile&amp;view_type=form" 
+                                               target="_blank"
+                                               style="background:#e5e7eb;color:#111827;border-radius:6px;padding:6px 12px;text-decoration:none;font-size:12px;">
                                                View Profile
                                             </a>
                                         </p>
@@ -854,9 +935,22 @@
                                 });
                                 
                                 marker.addListener('click', () => {
-                                    // Close all other info windows
                                     Object.values(this.infoWindows).forEach(iw => iw.close());
                                     infoWindow.open(this.map, marker);
+                                });
+                                infoWindow.addListener('domready', () => {
+                                    const btn = document.querySelector('.gp-iw-send-msg[data-guard-id="' + guard.id + '"]');
+                                    if (btn && !btn._gpBound) {
+                                        btn._gpBound = true;
+                                        btn.addEventListener('click', (ev) => {
+                                            ev.preventDefault();
+                                            ev.stopPropagation();
+                                            this.openMessageModal(
+                                                parseInt(btn.getAttribute('data-guard-id'), 10),
+                                                btn.getAttribute('data-guard-name') || 'Guard'
+                                            );
+                                        });
+                                    }
                                 });
                                 
                                 this.markers[guard.id] = marker;
@@ -898,37 +992,61 @@
                             const countContainer = document.getElementById('guard-count');
                             
                             if (countContainer) {
-                                countContainer.textContent = `${locations.length} guard${locations.length !== 1 ? 's' : ''} active`;
+                                const liveCount = (locations || []).filter(g => g.is_live).length;
+                                countContainer.textContent = `${locations.length} guard${locations.length !== 1 ? 's' : ''} · ${liveCount} live`;
                             }
                             
                             if (!listContainer) return;
                             
                             if (!locations || locations.length === 0) {
-                                listContainer.innerHTML = '<p style="color: #999; font-size: 12px;">No active guards with location data</p>';
+                                listContainer.innerHTML = '<p style="color: #999; font-size: 12px;">No guards with location data</p>';
                                 return;
                             }
+
+                            // Most recently active first
+                            locations = locations.slice().sort((a, b) => {
+                                const aT = a.time_since_update;
+                                const bT = b.time_since_update;
+                                if (aT == null && bT == null) return String(a.name || '').localeCompare(String(b.name || ''));
+                                if (aT == null) return 1;
+                                if (bT == null) return -1;
+                                if (aT !== bT) return aT - bT;
+                                return String(a.name || '').localeCompare(String(b.name || ''));
+                            });
                             
                             let html = '';
                             locations.forEach((guard) => {
-                                let statusClass = 'status-active';
-                                if (guard.time_since_update > 30) {
-                                    statusClass = 'status-inactive';
-                                } else if (guard.time_since_update > 5) {
-                                    statusClass = 'status-stale';
-                                }
-                                
-                                const lastUpdateText = guard.time_since_update 
-                                    ? `${guard.time_since_update} min ago` 
-                                    : 'Just now';
+                                const isLive = guard.is_live === true || (
+                                    guard.is_live == null && guard.time_since_update != null && guard.time_since_update <= 5
+                                );
+                                const statusClass = isLive ? 'status-active' : 'status-inactive';
+                                const lastUpdateText = guard.last_update_label
+                                    || (guard.time_since_update != null
+                                        ? `${guard.time_since_update} min ago`
+                                        : 'Just now');
+                                const safeName = String(guard.name || 'Guard')
+                                    .replace(/&/g, '&amp;')
+                                    .replace(/</g, '&lt;')
+                                    .replace(/"/g, '&quot;');
                                 
                                 html += `
-                                    <div class="guard-info" onclick="guardMap.focusGuard(${guard.id})" style="cursor: pointer;">
-                                        <div>
+                                    <div class="guard-info" data-guard-id="${guard.id}" style="cursor: pointer;">
+                                        <div onclick="guardMap.focusGuard(${guard.id})">
                                             <span class="status-indicator ${statusClass}"></span>
-                                            <span class="guard-name">${guard.name}</span>
+                                            <span class="guard-name">${safeName}</span>
                                         </div>
-                                        <div class="guard-badge">Badge: ${guard.badge_number}</div>
-                                        <div class="guard-time">${lastUpdateText}</div>
+                                        <div class="guard-badge" onclick="guardMap.focusGuard(${guard.id})">Badge: ${guard.badge_number || 'N/A'}</div>
+                                        <div class="guard-time" style="color:${isLive ? '#059669' : '#dc2626'};" onclick="guardMap.focusGuard(${guard.id})">
+                                            ${isLive ? 'Live' : 'Last known'} · ${lastUpdateText}
+                                        </div>
+                                        <button type="button"
+                                                class="gp-map-msg-btn"
+                                                data-guard-id="${guard.id}"
+                                                data-guard-name="${safeName}"
+                                                onclick="event.stopPropagation(); guardMap.openMessageModal(${guard.id}, this.getAttribute('data-guard-name'));"
+                                                style="margin-top:8px;width:100%;background:#1e3a5f;color:#fff;border:none;border-radius:8px;padding:8px 10px;font-size:12px;font-weight:600;cursor:pointer;">
+                                            <i class="fa fa-comment"></i> Send Message
+                                        </button>
                                     </div>
                                 `;
                             });
@@ -949,10 +1067,255 @@
                                 infoWindow.open(this.map, marker);
                             }
                         },
+
+                        openMessageModal: function(guardId, guardName) {
+                            const modal = document.getElementById('gp-map-message-modal');
+                            if (!modal) return;
+                            document.getElementById('gp-map-msg-guard-id').value = guardId;
+                            document.getElementById('gp-map-msg-guard-name').textContent = guardName || 'Guard';
+                            document.getElementById('gp-map-msg-content').value = '';
+                            document.getElementById('gp-map-msg-urgent').checked = false;
+                            document.getElementById('gp-map-msg-status').textContent = '';
+                            document.getElementById('gp-map-msg-status').style.color = '';
+                            const sendBtn = document.getElementById('gp-map-msg-send');
+                            if (sendBtn) {
+                                sendBtn.disabled = false;
+                                sendBtn.textContent = 'Send to App';
+                            }
+                            modal.style.display = 'flex';
+                            setTimeout(function() {
+                                const ta = document.getElementById('gp-map-msg-content');
+                                if (ta) ta.focus();
+                            }, 50);
+                        },
+
+                        closeMessageModal: function() {
+                            const modal = document.getElementById('gp-map-message-modal');
+                            if (modal) modal.style.display = 'none';
+                        },
+
+                        sendMessageToGuard: function() {
+                            const guardId = parseInt(document.getElementById('gp-map-msg-guard-id').value, 10);
+                            const content = (document.getElementById('gp-map-msg-content').value || '').trim();
+                            const isUrgent = !!document.getElementById('gp-map-msg-urgent').checked;
+                            const statusEl = document.getElementById('gp-map-msg-status');
+                            const sendBtn = document.getElementById('gp-map-msg-send');
+                            if (!guardId) {
+                                statusEl.textContent = 'Missing guard.';
+                                statusEl.style.color = '#dc2626';
+                                return;
+                            }
+                            if (!content) {
+                                statusEl.textContent = 'Please enter a message.';
+                                statusEl.style.color = '#dc2626';
+                                return;
+                            }
+                            sendBtn.disabled = true;
+                            sendBtn.textContent = 'Sending…';
+                            statusEl.textContent = '';
+
+                            const payload = {
+                                jsonrpc: '2.0',
+                                method: 'call',
+                                params: {
+                                    guard_id: guardId,
+                                    content: content,
+                                    is_urgent: isUrgent,
+                                },
+                                id: Date.now(),
+                            };
+                            const csrfToken = document.querySelector('meta[name=csrf-token]')?.getAttribute('content')
+                                || document.querySelector('input[name=csrf_token]')?.value;
+
+                            const finish = (result) => {
+                                if (result && result.success) {
+                                    statusEl.style.color = '#059669';
+                                    statusEl.textContent = 'Sent — it will appear on the guard’s app.';
+                                    sendBtn.textContent = 'Sent';
+                                    setTimeout(() => this.closeMessageModal(), 1200);
+                                } else {
+                                    statusEl.style.color = '#dc2626';
+                                    statusEl.textContent = (result && result.error) || 'Failed to send message.';
+                                    sendBtn.disabled = false;
+                                    sendBtn.textContent = 'Send to App';
+                                }
+                            };
+
+                            if (typeof odoo !== 'undefined' && odoo.rpc) {
+                                odoo.rpc('/guardpro/guards/send-message', {
+                                    guard_id: guardId,
+                                    content: content,
+                                    is_urgent: isUrgent,
+                                }).then((response) => {
+                                    finish(response.result || response);
+                                }).catch((err) => {
+                                    console.error(err);
+                                    finish({ success: false, error: 'Network error while sending.' });
+                                });
+                            } else {
+                                fetch('/guardpro/guards/send-message', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'X-CSRFToken': csrfToken || '',
+                                    },
+                                    credentials: 'same-origin',
+                                    body: JSON.stringify(payload),
+                                })
+                                    .then((r) => r.json())
+                                    .then((response) => finish(response.result || response))
+                                    .catch((err) => {
+                                        console.error(err);
+                                        finish({ success: false, error: 'Network error while sending.' });
+                                    });
+                            }
+                        },
                         
                         refreshLocations: function() {
                             console.log('Refreshing locations...');
                             this.loadGuardLocations();
+                        },
+
+                        _panicSeenKey: 'gp_map_panic_seen',
+
+                        _getSeenPanicIds: function() {
+                            try {
+                                const raw = sessionStorage.getItem(this._panicSeenKey);
+                                const parsed = raw ? JSON.parse(raw) : [];
+                                return Array.isArray(parsed) ? parsed.map(String) : [];
+                            } catch (e) {
+                                return [];
+                            }
+                        },
+
+                        _markPanicSeen: function(id) {
+                            const seen = this._getSeenPanicIds();
+                            const key = String(id);
+                            if (seen.indexOf(key) === -1) {
+                                seen.push(key);
+                                // Keep list bounded
+                                sessionStorage.setItem(this._panicSeenKey, JSON.stringify(seen.slice(-100)));
+                            }
+                        },
+
+                        setupPanicPolling: function() {
+                            if (this.panicPollInterval) {
+                                clearInterval(this.panicPollInterval);
+                            }
+                            this.pollPanicAlerts();
+                            this.panicPollInterval = setInterval(() => {
+                                this.pollPanicAlerts();
+                            }, 5000);
+                        },
+
+                        pollPanicAlerts: function() {
+                            const handle = (result) => {
+                                if (!result || !result.success || !result.alerts || !result.alerts.length) {
+                                    return;
+                                }
+                                if (this.activePanicId) {
+                                    return; // already showing one
+                                }
+                                const seen = this._getSeenPanicIds();
+                                const next = result.alerts.find((a) => seen.indexOf(String(a.id)) === -1);
+                                if (next) {
+                                    this.showPanicAlert(next);
+                                }
+                            };
+
+                            if (typeof odoo !== 'undefined' && odoo.rpc) {
+                                odoo.rpc('/guardpro/guards/map/panic-alerts', { since_minutes: 30 })
+                                    .then((response) => handle(response.result || response))
+                                    .catch((err) => console.warn('Panic poll failed', err));
+                            } else {
+                                const csrfToken = document.querySelector('meta[name="csrf-token"]')
+                                    && document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                                fetch('/guardpro/guards/map/panic-alerts', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'X-CSRFToken': csrfToken || '',
+                                    },
+                                    credentials: 'same-origin',
+                                    body: JSON.stringify({
+                                        jsonrpc: '2.0',
+                                        method: 'call',
+                                        params: { since_minutes: 30 },
+                                        id: Date.now(),
+                                    }),
+                                })
+                                    .then((r) => r.json())
+                                    .then((response) => handle(response.result || response))
+                                    .catch((err) => console.warn('Panic poll failed', err));
+                            }
+                        },
+
+                        showPanicAlert: function(alert) {
+                            const modal = document.getElementById('gp-map-panic-modal');
+                            if (!modal || !alert) return;
+                            this.activePanicId = alert.id;
+                            document.getElementById('gp-map-panic-id').value = alert.id || '';
+                            document.getElementById('gp-map-panic-guard-id').value = alert.guard_id || '';
+                            document.getElementById('gp-map-panic-guard').textContent = alert.guard_name || 'Unknown guard';
+                            document.getElementById('gp-map-panic-site').textContent = alert.site_name || 'Unknown site';
+                            document.getElementById('gp-map-panic-name').textContent = alert.name || ('#' + alert.id);
+                            document.getElementById('gp-map-panic-time').textContent = alert.create_date
+                                ? ('Reported: ' + alert.create_date + ' UTC')
+                                : '';
+                            document.getElementById('gp-map-panic-lat').value = alert.latitude != null ? alert.latitude : '';
+                            document.getElementById('gp-map-panic-lng').value = alert.longitude != null ? alert.longitude : '';
+                            document.getElementById('gp-map-panic-url').value = alert.incident_url || '';
+                            modal.style.display = 'flex';
+
+                            if ('vibrate' in navigator) {
+                                navigator.vibrate([300, 120, 300, 120, 300]);
+                            }
+                            try {
+                                if (window.Notification && Notification.permission === 'granted') {
+                                    new Notification('PANIC ALERT', {
+                                        body: (alert.guard_name || 'Guard') + ' @ ' + (alert.site_name || 'site'),
+                                        requireInteraction: true,
+                                    });
+                                } else if (window.Notification && Notification.permission !== 'denied') {
+                                    Notification.requestPermission();
+                                }
+                            } catch (e) { /* ignore */ }
+                        },
+
+                        dismissPanicAlert: function() {
+                            const id = document.getElementById('gp-map-panic-id').value;
+                            if (id) {
+                                this._markPanicSeen(id);
+                            }
+                            this.activePanicId = null;
+                            const modal = document.getElementById('gp-map-panic-modal');
+                            if (modal) {
+                                modal.style.display = 'none';
+                            }
+                            // Pick up any queued alerts shortly
+                            setTimeout(() => this.pollPanicAlerts(), 400);
+                        },
+
+                        focusPanicOnMap: function() {
+                            const guardId = parseInt(document.getElementById('gp-map-panic-guard-id').value, 10);
+                            const lat = parseFloat(document.getElementById('gp-map-panic-lat').value);
+                            const lng = parseFloat(document.getElementById('gp-map-panic-lng').value);
+
+                            if (guardId && this.markers[guardId]) {
+                                this.focusGuard(guardId);
+                            } else if (this.map && !isNaN(lat) && !isNaN(lng)) {
+                                this.map.panTo({ lat: lat, lng: lng });
+                                this.map.setZoom(17);
+                            }
+                        },
+
+                        openPanicIncident: function() {
+                            const url = document.getElementById('gp-map-panic-url').value;
+                            if (url) {
+                                window.open(url, '_blank');
+                            }
                         },
                         
                         setupAutoRefresh: function() {
@@ -1196,7 +1559,7 @@
                         },
                         
                         loadGeofences: function() {
-                            console.log('Loading site geofences...');
+                            console.log('Loading project geofences...');
                             
                             if (typeof odoo !== 'undefined' && odoo.rpc) {
                                 odoo.rpc('/guardpro/sites/geofences', {})

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_incident_form_parent_list" model="ir.ui.view">
+        <field name="name">incident.form.parent.list</field>
+        <field name="model">incident.form.parent</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="category_id"/>
+                <field name="section_count"/>
+                <field name="field_count"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_incident_form_parent_form" model="ir.ui.view">
+        <field name="name">incident.form.parent.form</field>
+        <field name="model">incident.form.parent</field>
+        <field name="arch" type="xml">
+            <form string="Incident Form Parent">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Parent Category"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="category_id"/>
+                            <field name="section_count"/>
+                            <field name="field_count"/>
+                        </group>
+                    </group>
+                    <field name="description" placeholder="Description"/>
+                    <notebook>
+                        <page string="Form Sections" name="sections">
+                            <field name="section_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="field_ids" widget="many2many_tags"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_incident_form_section_form" model="ir.ui.view">
+        <field name="name">incident.form.section.form</field>
+        <field name="model">incident.form.section</field>
+        <field name="arch" type="xml">
+            <form string="Form Section">
+                <sheet>
+                    <group>
+                        <field name="parent_id"/>
+                        <field name="name"/>
+                        <field name="sequence"/>
+                    </group>
+                    <field name="field_ids">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="name"/>
+                            <field name="field_type"/>
+                            <field name="required"/>
+                            <field name="selection_options"/>
+                            <field name="odoo_field"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_incident_form_parent" model="ir.actions.act_window">
+        <field name="name">Incident Form Definitions</field>
+        <field name="res_model">incident.form.parent</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Parent Category → Form Section → Field / Type / Options
+            </p>
+            <p>
+                Definitions aligned to the Incident Report Formats and Fields master sheet.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_incident_form_parent"
+              name="Form Definitions"
+              parent="menu_incidents_submenu"
+              action="action_incident_form_parent"
+              sequence="25"
+              groups="group_guardpro_manager,group_guardpro_admin"/>
+</odoo>

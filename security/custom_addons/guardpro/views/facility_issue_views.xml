@@ -40,7 +40,7 @@
                     <filter name="filter_incident_date" string="Reported on" date="incident_datetime"/>
                     <filter name="filter_resolved_date" string="Resolved on" date="resolved_datetime"/>
                     <group expand="0" string="Group By">
-                        <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                        <filter string="Project" name="group_site" context="{'group_by': 'site_id'}"/>
                         <filter string="Checkpoint" name="group_checkpoint" context="{'group_by': 'checkpoint_id'}"/>
                         <filter string="Issue type" name="group_issue_type" context="{'group_by': 'facility_issue_type'}"/>
                         <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>

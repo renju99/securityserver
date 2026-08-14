@@ -284,7 +284,7 @@
                         
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <strong>Site:</strong><br/>
+                                <strong>Project:</strong><br/>
                                 <t t-esc="feedback.site_id.name"/>
                             </div>
                             <div class="col-md-6">

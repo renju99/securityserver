@@ -46,12 +46,12 @@
                                         <td><strong>Broadcast Type:</strong></td>
                                         <td>
                                             <span t-if="o.broadcast_type == 'all'">All Guards</span>
-                                            <span t-if="o.broadcast_type == 'by_site'">Guards by Site</span>
+                                            <span t-if="o.broadcast_type == 'by_site'">Guards by Project</span>
                                             <span t-if="o.broadcast_type == 'active_only'">Only Active Guards on Duty</span>
                                         </td>
                                     </tr>
                                     <tr t-if="o.site_id">
-                                        <td><strong>Specific Site:</strong></td>
+                                        <td><strong>Specific Project:</strong></td>
                                         <td t-field="o.site_id.name"/>
                                     </tr>
                                     <tr>
@@ -143,7 +143,7 @@
                                     <thead>
                                         <tr class="table-active">
                                             <th>Guard Name</th>
-                                            <th>Site</th>
+                                            <th>Project</th>
                                             <th>Acknowledged</th>
                                             <th>Acknowledgment Time</th>
                                             <th>Response Time</th>

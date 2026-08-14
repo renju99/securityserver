@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Guard Activity Report Form -->
+    <record id="view_guard_activity_report_form" model="ir.ui.view">
+        <field name="name">guard.activity.report.form</field>
+        <field name="model">guard.activity.report</field>
+        <field name="arch" type="xml">
+            <form string="Guard Activity Report">
+                <header>
+                    <button name="action_refresh_data" type="object" string="Refresh Data"
+                            class="btn-secondary"/>
+                    <button name="action_print_pdf" type="object" string="Print PDF"
+                            class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Report">
+                            <field name="guard_id"/>
+                            <field name="badge_number"/>
+                            <field name="site_id"/>
+                            <field name="client_id"/>
+                            <field name="report_date"/>
+                        </group>
+                        <group string="Summary">
+                            <field name="hours_worked"/>
+                            <field name="incident_count"/>
+                            <field name="critical_incidents"/>
+                            <field name="tours_completed"/>
+                            <field name="visitor_count"/>
+                            <field name="task_completed_count"/>
+                            <field name="task_count"/>
+                            <field name="package_count"/>
+                            <field name="lost_found_count"/>
+                            <field name="attendance_count"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Attendance" name="attendance">
+                            <field name="attendance_ids" readonly="1">
+                                <list>
+                                    <field name="checkin_time"/>
+                                    <field name="checkout_time"/>
+                                    <field name="hours_worked"/>
+                                    <field name="shift_id"/>
+                                    <field name="status"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Incidents" name="incidents">
+                            <field name="incident_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="title"/>
+                                    <field name="severity"/>
+                                    <field name="incident_datetime"/>
+                                    <field name="status"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Patrols" name="patrols">
+                            <field name="tour_log_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="tour_id"/>
+                                    <field name="start_time"/>
+                                    <field name="end_time"/>
+                                    <field name="status"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Visitors" name="visitors">
+                            <field name="visitor_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="checkin_time"/>
+                                    <field name="checkout_time"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Tasks" name="tasks">
+                            <field name="task_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="task_type"/>
+                                    <field name="priority"/>
+                                    <field name="due_date"/>
+                                    <field name="completed_date"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Packages" name="packages">
+                            <field name="package_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="package_type"/>
+                                    <field name="recipient_name"/>
+                                    <field name="received_date"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Lost &amp; Found" name="lost_found">
+                            <field name="lost_found_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="item_category"/>
+                                    <field name="location_found"/>
+                                    <field name="found_date"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="notes" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_guard_activity_report_list" model="ir.ui.view">
+        <field name="name">guard.activity.report.list</field>
+        <field name="model">guard.activity.report</field>
+        <field name="arch" type="xml">
+            <list string="Guard Activity Reports">
+                <field name="name"/>
+                <field name="report_date"/>
+                <field name="guard_id"/>
+                <field name="site_id"/>
+                <field name="hours_worked"/>
+                <field name="incident_count"/>
+                <field name="tours_completed"/>
+                <field name="task_completed_count"/>
+                <field name="visitor_count"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_guard_activity_report_search" model="ir.ui.view">
+        <field name="name">guard.activity.report.search</field>
+        <field name="model">guard.activity.report</field>
+        <field name="arch" type="xml">
+            <search string="Search Guard Activity Reports">
+                <field name="name"/>
+                <field name="guard_id"/>
+                <field name="site_id"/>
+                <field name="report_date"/>
+                <filter name="today" string="Today"
+                        domain="[('report_date', '=', context_today())]"/>
+                <separator/>
+                <group>
+                    <filter name="group_guard" string="Guard" context="{'group_by': 'guard_id'}"/>
+                    <filter name="group_site" string="Project" context="{'group_by': 'site_id'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'report_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_guard_activity_report" model="ir.actions.act_window">
+        <field name="name">Guard Activity Reports</field>
+        <field name="res_model">guard.activity.report</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_guard_activity_report_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a Guard Activity Report
+            </p>
+            <p>
+                Select a guard, site, and date to pull an end-of-day activity snapshot
+                (attendance, incidents, patrols, visitors, tasks, packages). Print as PDF when needed.
+                Guards do not submit or edit these reports.
+            </p>
+        </field>
+    </record>
+</odoo>

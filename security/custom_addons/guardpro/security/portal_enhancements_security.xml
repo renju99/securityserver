@@ -42,7 +42,7 @@
         <!-- Record Rules for Incident Status Updates     -->
         <!-- ============================================ -->
         
-        <!-- Client/Resident: View visible updates for their sites -->
+        <!-- Client/Resident: View visible updates for their projects -->
         <record id="incident_status_update_portal_rule" model="ir.rule">
             <field name="name">Incident Status Updates: Portal Users - Site Access</field>
             <field name="model_id" ref="model_incident_status_update"/>
@@ -57,11 +57,11 @@
             <field name="perm_unlink" eval="False"/>
         </record>
         
-        <!-- Manager/Supervisor: Full access to status updates -->
+        <!-- Manager/Supervisor: status updates at assigned projects only -->
         <record id="incident_status_update_manager_rule" model="ir.rule">
-            <field name="name">Incident Status Updates: Manager/Supervisor - Full Access</field>
+            <field name="name">Incident Status Updates: Manager/Supervisor - Assigned Projects</field>
             <field name="model_id" ref="model_incident_status_update"/>
-            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('guardpro.group_guardpro_manager')), (4, ref('guardpro.group_guardpro_supervisor'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
@@ -73,7 +73,7 @@
         <!-- Record Rules for Live Guard Locations        -->
         <!-- ============================================ -->
         
-        <!-- Client/Resident: View shared locations for their sites -->
+        <!-- Client/Resident: View shared locations for their projects -->
         <record id="guard_location_live_portal_rule" model="ir.rule">
             <field name="name">Guard Live Location: Portal Users - Site Access</field>
             <field name="model_id" ref="model_guard_location_live"/>
@@ -88,11 +88,11 @@
             <field name="perm_unlink" eval="False"/>
         </record>
         
-        <!-- Manager/Supervisor: Full access to live locations -->
+        <!-- Manager/Supervisor: live locations at assigned projects only -->
         <record id="guard_location_live_manager_rule" model="ir.rule">
-            <field name="name">Guard Live Location: Manager/Supervisor - Full Access</field>
+            <field name="name">Guard Live Location: Manager/Supervisor - Assigned Projects</field>
             <field name="model_id" ref="model_guard_location_live"/>
-            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('guardpro.group_guardpro_manager')), (4, ref('guardpro.group_guardpro_supervisor'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>
@@ -132,7 +132,7 @@
         <!-- Enhanced Incident Access for Portal          -->
         <!-- ============================================ -->
         
-        <!-- Portal (Non-Manager/Supervisor/Admin): View visible incidents for their sites -->
+        <!-- Portal (Non-Manager/Supervisor/Admin): View visible incidents for their projects -->
         <!-- Note: Managers, Supervisors, and Admins have their own rules in guardpro_record_rules.xml -->
         <!-- This rule applies to portal users who are NOT in manager/supervisor/admin groups -->
         <record id="incident_report_portal_enhanced_rule" model="ir.rule">

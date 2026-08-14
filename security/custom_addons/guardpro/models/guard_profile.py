@@ -83,6 +83,7 @@ class GuardProfile(models.Model):
     )
     status = fields.Selection([
         ('active', 'Active'),
+        ('on_shift', 'On Shift'),
         ('on_leave', 'On Leave'),
         ('suspended', 'Suspended'),
         ('terminated', 'Terminated')
@@ -201,9 +202,9 @@ class GuardProfile(models.Model):
     site_ids = fields.Many2many(
         'client.site',
         related='user_id.site_ids',
-        string='Assigned Sites',
+        string='Assigned Projects',
         readonly=True,
-        help='Sites assigned to this guard via their user account. '
+        help='Projects assigned to this guard via their user account. '
              'To modify site assignments, go to Settings → Users and edit the user record.'
     )
     availability = fields.Selection([
@@ -253,9 +254,9 @@ class GuardProfile(models.Model):
     )
     current_site_id = fields.Many2one(
         'client.site',
-        string='Current Site',
+        string='Current Project',
         ondelete='set null',
-        help='Site where guard is currently assigned'
+        help='Project where guard is currently assigned'
     )
     
     # Device Information
@@ -902,7 +903,7 @@ class GuardProfile(models.Model):
             _logger.warning('Failed to save location history for guard %s: %s', self.id, str(e))
 
     def _check_geofence(self):
-        """Check if guard is within assigned site geofence.
+        """Check if guard is within assigned project geofence.
         
         This method checks if the guard's current location is within
         the geofence of any active shifts' sites. It logs geofence
@@ -940,9 +941,19 @@ class GuardProfile(models.Model):
         for shift in shifts_by_site.values():
             site = shift.site_id
             
-            # Skip if geofencing is disabled
+            # Skip if geofencing is disabled or center never configured
             if not site.geofence_enabled:
                 _logger.debug('Geofencing disabled for site %s', site.name)
+                continue
+            if (
+                site.geofence_type == 'circle'
+                and hasattr(site, '_has_valid_geofence_center')
+                and not site._has_valid_geofence_center()
+            ):
+                _logger.debug(
+                    'Geofencing skipped for site %s (unconfigured 0,0 center)',
+                    site.name,
+                )
                 continue
             
             # Check if guard is within geofence
@@ -1027,7 +1038,7 @@ class GuardProfile(models.Model):
             messages.append("⚠ WARNING: No active shifts found for today")
             messages.append("   Geofence checking only applies to active shifts\n")
         
-        # Check all assigned sites (from current assignment or active shifts)
+        # Check all assigned projects (from current assignment or active shifts)
         sites_to_check = set()
         if self.current_site_id:
             sites_to_check.add(self.current_site_id)
@@ -1042,7 +1053,7 @@ class GuardProfile(models.Model):
         # Check each site
         for site in sites_to_check:
             messages.append(f"\n--- Checking Site: {site.name} ---")
-            messages.append(f"Site Location: ({site.latitude:.7f}, {site.longitude:.7f})")
+            messages.append(f"Project Location: ({site.latitude:.7f}, {site.longitude:.7f})")
             
             # Check if geofencing is enabled
             if not site.geofence_enabled:
@@ -1209,41 +1220,48 @@ class GuardProfile(models.Model):
     @api.model
     def update_guard_status(self):
         """Update guard status based on current shifts and availability.
-        
+
         Called by scheduled action every hour.
-        Updates guard status (active, on_shift, off_duty, etc.).
+        Sets employment/ops status: on_shift while a shift is in progress,
+        then back to active after the shift ends.
         """
         now = fields.Datetime.now()
-        
+
         # Find guards currently on shift
         active_shifts = self.env['guard.shift'].search([
             ('start_datetime', '<=', now),
             ('end_datetime', '>=', now),
-            ('status', '=', 'in_progress')
+            ('status', '=', 'in_progress'),
         ])
-        
-        guards_on_shift = active_shifts.mapped('guard_id')
-        
-        # Update guards on shift
-        if guards_on_shift:
-            guards_on_shift.filtered(lambda g: g.status != 'on_shift').write({
-                'status': 'on_shift'
-            })
-            _logger.debug('Updated %d guards to on_shift status', len(guards_on_shift))
-        
+
+        guards_on_shift = active_shifts.mapped('guard_id').filtered(
+            lambda g: g.status in ('active', 'on_shift')
+        )
+
+        # Update guards on shift (never overwrite leave/suspended/terminated)
+        to_on_shift = guards_on_shift.filtered(lambda g: g.status != 'on_shift')
+        if to_on_shift:
+            to_on_shift.write({'status': 'on_shift'})
+            _logger.debug('Updated %d guards to on_shift status', len(to_on_shift))
+
         # Update guards who just finished shifts
         recently_finished = self.env['guard.shift'].search([
             ('end_datetime', '>=', now - timedelta(hours=1)),
             ('end_datetime', '<=', now),
-            ('status', '=', 'completed')
+            ('status', '=', 'completed'),
         ]).mapped('guard_id')
-        
-        if recently_finished:
-            recently_finished.filtered(lambda g: g.status == 'on_shift').write({
-                'status': 'active'
-            })
-            _logger.debug('Updated %d guards to active status after shift end', len(recently_finished))
-        
+
+        to_active = recently_finished.filtered(lambda g: g.status == 'on_shift')
+        # Don't mark active if they still have another in-progress shift
+        if to_active and guards_on_shift:
+            to_active -= guards_on_shift
+        if to_active:
+            to_active.write({'status': 'active'})
+            _logger.debug(
+                'Updated %d guards to active status after shift end',
+                len(to_active),
+            )
+
         return True
 
 

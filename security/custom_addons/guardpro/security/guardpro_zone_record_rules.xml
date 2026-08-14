@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!--
+            Zone-restricted users (group_guardpro_zone_restricted) get an additional
+            AND rule: records must match assigned zones. Combined with existing
+            site-based rules in guardpro_record_rules.xml.
+        -->
+
+        <record id="rule_site_zone_restricted" model="ir.rule">
+            <field name="name">Zone Restricted: Assigned Zones Only</field>
+            <field name="model_id" ref="model_site_zone"/>
+            <field name="domain_force">[('id', 'in', user.zone_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_zone_restricted'))]"/>
+        </record>
+
+        <record id="rule_incident_zone_restricted" model="ir.rule">
+            <field name="name">Zone Restricted: Incidents in Assigned Zones</field>
+            <field name="model_id" ref="model_incident_report"/>
+            <field name="domain_force">[('zone_id', 'in', user.zone_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_zone_restricted'))]"/>
+        </record>
+
+        <record id="rule_security_tour_zone_restricted" model="ir.rule">
+            <field name="name">Zone Restricted: Tours in Assigned Zones</field>
+            <field name="model_id" ref="model_security_tour"/>
+            <field name="domain_force">[('zone_id', 'in', user.zone_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_zone_restricted'))]"/>
+        </record>
+
+        <record id="rule_tour_log_zone_restricted" model="ir.rule">
+            <field name="name">Zone Restricted: Tour Logs in Assigned Zones</field>
+            <field name="model_id" ref="model_tour_log"/>
+            <field name="domain_force">[('zone_id', 'in', user.zone_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_zone_restricted'))]"/>
+        </record>
+
+        <record id="rule_checkpoint_zone_restricted" model="ir.rule">
+            <field name="name">Zone Restricted: Checkpoints in Assigned Zones</field>
+            <field name="model_id" ref="model_checkpoint"/>
+            <field name="domain_force">[('zone_id', 'in', user.zone_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_zone_restricted'))]"/>
+        </record>
+
+        <record id="rule_guard_shift_zone_restricted" model="ir.rule">
+            <field name="name">Zone Restricted: Shifts in Assigned Zones</field>
+            <field name="model_id" ref="model_guard_shift"/>
+            <field name="domain_force">[('zone_id', 'in', user.zone_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_zone_restricted'))]"/>
+        </record>
+
+        <record id="rule_site_building_zone_restricted" model="ir.rule">
+            <field name="name">Zone Restricted: Buildings in Assigned Zones</field>
+            <field name="model_id" ref="model_site_building"/>
+            <field name="domain_force">['|', ('zone_id', 'in', user.zone_ids.ids), '&amp;', ('zone_id', '=', False), ('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_zone_restricted'))]"/>
+        </record>
+
+        <record id="rule_building_floor_zone_restricted" model="ir.rule">
+            <field name="name">Zone Restricted: Floors in Assigned Zones</field>
+            <field name="model_id" ref="model_building_floor"/>
+            <field name="domain_force">['|', ('zone_id', 'in', user.zone_ids.ids), '&amp;', ('zone_id', '=', False), ('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_zone_restricted'))]"/>
+        </record>
+
+        <record id="rule_floor_area_zone_restricted" model="ir.rule">
+            <field name="name">Zone Restricted: Areas in Assigned Zones</field>
+            <field name="model_id" ref="model_floor_area"/>
+            <field name="domain_force">['|', ('zone_id', 'in', user.zone_ids.ids), '&amp;', ('zone_id', '=', False), ('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_zone_restricted'))]"/>
+        </record>
+
+        <record id="rule_checkpoint_scan_zone_restricted" model="ir.rule">
+            <field name="name">Zone Restricted: Checkpoint Scans in Assigned Zones</field>
+            <field name="model_id" ref="model_checkpoint_scan"/>
+            <field name="domain_force">[('checkpoint_id.zone_id', 'in', user.zone_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_zone_restricted'))]"/>
+        </record>
+
+        <record id="rule_guard_task_zone_restricted" model="ir.rule">
+            <field name="name">Zone Restricted: Tasks in Assigned Zones</field>
+            <field name="model_id" ref="model_guard_task"/>
+            <field name="domain_force">[('zone_id', 'in', user.zone_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_zone_restricted'))]"/>
+        </record>
+
+        <record id="rule_visitor_zone_restricted" model="ir.rule">
+            <field name="name">Zone Restricted: Visitors in Assigned Zones</field>
+            <field name="model_id" ref="model_visitor_management"/>
+            <field name="domain_force">[('zone_id', 'in', user.zone_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_zone_restricted'))]"/>
+        </record>
+
+    </data>
+</odoo>

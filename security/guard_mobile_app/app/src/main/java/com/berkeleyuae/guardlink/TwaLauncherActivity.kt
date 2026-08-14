@@ -1,4 +1,4 @@
-package com.berkeleyuae.guardpro
+package com.berkeleyuae.guardlink
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -25,8 +25,15 @@ import android.nfc.tech.Ndef
 import org.json.JSONObject
 import android.provider.MediaStore
 import android.provider.Settings
+import android.graphics.Color
 import android.util.Log
+import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import android.webkit.*
+import android.widget.FrameLayout
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -34,6 +41,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.FileProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import java.io.File
@@ -42,7 +52,6 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import org.json.JSONObject
 
 class TwaLauncherActivity : AppCompatActivity() {
 
@@ -89,22 +98,31 @@ class TwaLauncherActivity : AppCompatActivity() {
     private var lastNativeTaskAssignmentId: String? = null
     @Volatile
     private var outboxNativeHttpInFlight = false
+    @Volatile
+    private var pttNativeHttpInFlight = false
+    @Volatile
+    private var lastNativePttMessageId: Int = 0
+    @Volatile
+    private var activityInForeground: Boolean = false
     private val outboxNativeIdsBuzzed = mutableSetOf<String>()
     private val pttNativeKickHandler = Handler(Looper.getMainLooper())
     private val pttNativeKickIntervalMs = 1000L
     private val pttNativeKickRunnable = object : Runnable {
         override fun run() {
             try {
-                if (::webView.isInitialized) {
-                    webView.evaluateJavascript(
-                        "(function(){ if(window.__gpCheckPttFromNative){ window.__gpCheckPttFromNative(); } })();",
-                        null
-                    )
-                }
-            } catch (e: Exception) {
-                Log.d(TAG_GUARDPRO_PTT, "PTT native kick failed: ${e.message}")
+                // Bus + native player handle live radio. Do not poke JS every
+                // second — that re-queued the same clip.
+            } catch (_: Exception) {
             }
             pttNativeKickHandler.postDelayed(this, pttNativeKickIntervalMs)
+        }
+    }
+    private val pttHttpPollHandler = Handler(Looper.getMainLooper())
+    private val pttHttpPollIntervalMs = 1500L
+    private val pttHttpPollRunnable = object : Runnable {
+        override fun run() {
+            pollPttViaSessionCookie()
+            pttHttpPollHandler.postDelayed(this, pttHttpPollIntervalMs)
         }
     }
 
@@ -158,6 +176,9 @@ class TwaLauncherActivity : AppCompatActivity() {
 
     private fun pendingMobileOutboxUrl(): String =
         "${apiOrigin()}/guardpro/api/mobile_outbox/pending?_=${System.currentTimeMillis()}"
+
+    private fun pendingPttUrl(): String =
+        "${apiOrigin()}/guardpro/api/push-to-talk/pending?_=${System.currentTimeMillis()}"
 
     /**
      * Is the ``AndroidBridge`` JavaScript interface currently attached?
@@ -220,7 +241,19 @@ class TwaLauncherActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // targetSdk 35/36: edge-to-edge is mandatory. Do not call
+        // Window.setStatusBarColor / setNavigationBarColor — those APIs
+        // are deprecated and flagged by Play Console. Bar colors come
+        // from inset fill views in setupWebView().
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
+        )
         super.onCreate(savedInstanceState)
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = true
+        }
 
         // Register the ActivityResultLauncher BEFORE the WebView is
         // attached - it must be registered during onCreate per the
@@ -252,14 +285,19 @@ class TwaLauncherActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        activityInForeground = true
+        PttPlaybackService.activityInForeground = true
         enableNfcForegroundDispatch()
         startNativeEmergencyBridgePolling()
         startNativePushToTalkPolling()
     }
 
     override fun onPause() {
+        activityInForeground = false
+        PttPlaybackService.activityInForeground = false
         super.onPause()
         disableNfcForegroundDispatch()
+        pollPttViaSessionCookie()
     }
 
     override fun onDestroy() {
@@ -278,12 +316,14 @@ class TwaLauncherActivity : AppCompatActivity() {
     }
 
     private fun startNativePushToTalkPolling() {
-        pttNativeKickHandler.removeCallbacks(pttNativeKickRunnable)
-        pttNativeKickHandler.post(pttNativeKickRunnable)
+        PttPlaybackService.twaPollerActive = true
+        pttHttpPollHandler.removeCallbacks(pttHttpPollRunnable)
+        pttHttpPollHandler.post(pttHttpPollRunnable)
     }
 
     private fun stopNativePushToTalkPolling() {
-        pttNativeKickHandler.removeCallbacks(pttNativeKickRunnable)
+        pttHttpPollHandler.removeCallbacks(pttHttpPollRunnable)
+        PttPlaybackService.twaPollerActive = false
     }
 
     /**
@@ -605,6 +645,75 @@ class TwaLauncherActivity : AppCompatActivity() {
         }.start()
     }
 
+    /**
+     * Native PTT poll for when the TWA is minimized. WebView Audio.play() is
+     * blocked in the background; [PttPlaybackService] plays the clip with ExoPlayer.
+     */
+    private fun pollPttViaSessionCookie() {
+        if (pttNativeHttpInFlight) return
+        if (PttPlaybackService.playbackBusy) return
+        pttNativeHttpInFlight = true
+        Thread {
+            var conn: HttpURLConnection? = null
+            try {
+                val cookie = cookieHeaderForApi()
+                if (cookie.isNullOrBlank()) {
+                    return@Thread
+                }
+                val url = URL(pendingPttUrl())
+                conn = (url.openConnection() as HttpURLConnection).apply {
+                    requestMethod = "GET"
+                    connectTimeout = 8000
+                    readTimeout = 8000
+                    instanceFollowRedirects = true
+                    setRequestProperty("Accept", "application/json")
+                    setRequestProperty("Cookie", cookie)
+                    setRequestProperty("Cache-Control", "no-cache")
+                    setRequestProperty("User-Agent", "GuardLink-App-v1.0")
+                }
+                val code = conn.responseCode
+                val body = try {
+                    conn.inputStream.bufferedReader().use { it.readText() }
+                } catch (_: Exception) {
+                    conn.errorStream?.bufferedReader()?.use { it.readText() }.orEmpty()
+                }
+                if (code !in 200..299) {
+                    Log.w(TAG_GUARDPRO_PTT, "pending HTTP $code body=${body.take(300)}")
+                    return@Thread
+                }
+                val obj = try {
+                    JSONObject(body)
+                } catch (e: Exception) {
+                    Log.w(TAG_GUARDPRO_PTT, "pending not JSON: ${e.message}")
+                    return@Thread
+                }
+                if (!obj.optBoolean("success", false)) return@Thread
+                val msg = obj.optJSONObject("message") ?: return@Thread
+                val messageId = msg.optInt("id", 0)
+                val audioUrl = msg.optString("audio_url", "")
+                if (messageId <= 0 || audioUrl.isBlank()) return@Thread
+                if (PttPlaybackService.wasPlayed(messageId)) return@Thread
+                val title = "GuardLink"
+                val bodyText = "Playing radio"
+                lastNativePttMessageId = messageId
+                Log.i(TAG_GUARDPRO_PTT, "native starting playback for message $messageId")
+                PttPlaybackService.start(
+                    applicationContext,
+                    messageId,
+                    audioUrl,
+                    cookie,
+                    title,
+                    bodyText,
+                )
+            } catch (e: Exception) {
+                Log.w(TAG_GUARDPRO_PTT, "native poll error: ${e.message}", e)
+            } finally {
+                conn?.disconnect()
+                pttNativeHttpInFlight = false
+            }
+        }.start()
+    }
+
     /** Stable integer notif id derived from the outbox row id. */
     private fun outboxNotifIdFor(rowId: String): Int {
         // Keep within int range; use modular arithmetic to avoid clashes
@@ -711,8 +820,73 @@ class TwaLauncherActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
-        webView = WebView(this)
-        setContentView(webView)
+        // Root holds a blue status-bar strip + white nav-bar strip so the
+        // WebView can sit strictly between system bars (required for
+        // targetSdk 36 edge-to-edge). Without this, header/nav are covered
+        // by the phone status icons and gesture/nav buttons.
+        val root = FrameLayout(this).apply {
+            setBackgroundColor(Color.WHITE)
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
+        val statusFill = View(this).apply {
+            setBackgroundColor(Color.parseColor("#1B365D"))
+        }
+        root.addView(
+            statusFill,
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                0
+            )
+        )
+        val navFill = View(this).apply {
+            setBackgroundColor(Color.WHITE)
+        }
+        root.addView(
+            navFill,
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                0,
+                Gravity.BOTTOM
+            )
+        )
+        webView = WebView(this).apply {
+            setBackgroundColor(Color.WHITE)
+        }
+        root.addView(
+            webView,
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        )
+        setContentView(root)
+
+        ViewCompat.setOnApplyWindowInsetsListener(root) { _, windowInsets ->
+            val bars = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or
+                    WindowInsetsCompat.Type.displayCutout()
+            )
+            statusFill.layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                bars.top
+            )
+            navFill.layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                bars.bottom,
+                Gravity.BOTTOM
+            )
+            val lp = webView.layoutParams as FrameLayout.LayoutParams
+            lp.setMargins(bars.left, bars.top, bars.right, bars.bottom)
+            webView.layoutParams = lp
+            // Native insets already reserve space — keep CSS safe-area at 0
+            // so the sticky header / bottom nav are not double-padded.
+            webView.post { injectSafeAreaCssVars(0, 0) }
+            WindowInsetsCompat.CONSUMED
+        }
+        ViewCompat.requestApplyInsets(root)
 
         CookieManager.getInstance().setAcceptCookie(true)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -746,6 +920,7 @@ class TwaLauncherActivity : AppCompatActivity() {
         settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
         
         settings.cacheMode = WebSettings.LOAD_DEFAULT
+        settings.mediaPlaybackRequiresUserGesture = false
         settings.userAgentString = settings.userAgentString + " GuardLink-App-v1.0"
         
         // Native-to-JS bridge.
@@ -887,6 +1062,9 @@ class TwaLauncherActivity : AppCompatActivity() {
                 // this is a belt-and-suspenders pass in case a redirect
                 // happened between onPageStarted and now.
                 ensureBridgeMatchesOrigin(url)
+                // Page scripts may reset safe-area vars; keep them at 0 —
+                // system bars are handled by the native WebView margins.
+                injectSafeAreaCssVars(0, 0)
 
                 // Keep the native LocationService authenticated with the
                 // freshest Odoo session cookie.
@@ -958,11 +1136,6 @@ class TwaLauncherActivity : AppCompatActivity() {
                 """.trimIndent()
                 
                 webView.evaluateJavascript(nfcPolyfill, null)
-            }
-            
-            override fun onReceivedSslError(view: WebView?, handler: android.webkit.SslErrorHandler?, error: android.net.http.SslError?) {
-                Log.w("WebViewSSL", "SSL Error: $error")
-                handler?.proceed() // Proceed for now (optional, safe if we trust our domain)
             }
 
             override fun onReceivedError(view: WebView?, request: android.webkit.WebResourceRequest?, error: android.webkit.WebResourceError?) {
@@ -1099,15 +1272,57 @@ class TwaLauncherActivity : AppCompatActivity() {
         }
 
         @JavascriptInterface
-        fun postPushToTalkNotification(jsonPayload: String) {
+        fun playPushToTalkAudio(messageId: String, audioUrl: String): Boolean {
             val activity = this@TwaLauncherActivity
-            try {
-                val obj = JSONObject(jsonPayload)
-                val title = obj.optString("title", "Push-to-Talk").take(200)
-                val message = obj.optString("message", "").take(4000)
-                activity.showPushToTalkNotification(title, message)
-            } catch (e: Exception) {
-                Log.e("AndroidBridge", "postPushToTalkNotification failed: ${e.message}", e)
+            val id = messageId.toIntOrNull() ?: return false
+            if (id <= 0 || audioUrl.isBlank()) return false
+            val cookie = activity.cookieHeaderForApi() ?: return false
+            val abs = if (audioUrl.startsWith("http")) {
+                audioUrl
+            } else {
+                "${activity.apiOrigin()}$audioUrl"
+            }
+            Log.i(TAG_GUARDPRO_PTT, "JS requested native PTT play for $id")
+            PttPlaybackService.start(
+                activity.applicationContext,
+                id,
+                abs,
+                cookie,
+                "GuardLink",
+                "Playing radio",
+            )
+            // Claim on the server immediately so /pending cannot start it again.
+            Thread {
+                try {
+                    val url = URL("${activity.apiOrigin()}/guardpro/api/push-to-talk/message/$id/mark-played-http")
+                    val conn = url.openConnection() as HttpURLConnection
+                    conn.requestMethod = "GET"
+                    conn.connectTimeout = 5000
+                    conn.readTimeout = 5000
+                    conn.setRequestProperty("Cookie", cookie)
+                    conn.setRequestProperty("User-Agent", "GuardLink-App-v1.0")
+                    conn.responseCode
+                    conn.disconnect()
+                } catch (_: Exception) {
+                }
+            }.start()
+            return true
+        }
+
+        @JavascriptInterface
+        fun postPushToTalkNotification(jsonPayload: String) {
+            // TETRA-style radio: do not post a ding/banner. Voice is played by
+            // PttPlaybackService (background) or WebView Audio (foreground).
+            Log.d(TAG_GUARDPRO_PTT, "PTT tray notification suppressed: $jsonPayload")
+        }
+
+        @JavascriptInterface
+        fun dismissPushToTalkNotification() {
+            val activity = this@TwaLauncherActivity
+            activity.runOnUiThread {
+                val nm =
+                    activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                nm.cancel(PUSH_TO_TALK_NOTIF_ID)
             }
         }
 
@@ -1441,21 +1656,21 @@ class TwaLauncherActivity : AppCompatActivity() {
 
     private fun ensurePushToTalkNotificationChannel(nm: NotificationManager) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        // Recreate silently — old channel with default ding caused ting loops.
+        val existing = nm.getNotificationChannel(PUSH_TO_TALK_CHANNEL_ID)
+        if (existing != null && existing.sound != null) {
+            nm.deleteNotificationChannel(PUSH_TO_TALK_CHANNEL_ID)
+        }
         if (nm.getNotificationChannel(PUSH_TO_TALK_CHANNEL_ID) != null) return
-        val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        val attrs = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_INSTANT)
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .build()
         val ch = NotificationChannel(
             PUSH_TO_TALK_CHANNEL_ID,
             "Push-to-Talk",
-            NotificationManager.IMPORTANCE_HIGH
+            NotificationManager.IMPORTANCE_LOW
         ).apply {
-            description = "Incoming push-to-talk voice messages."
-            enableVibration(true)
-            enableLights(true)
-            setSound(soundUri, attrs)
+            description = "Silent push-to-talk status (voice plays on speaker)."
+            enableVibration(false)
+            enableLights(false)
+            setSound(null, null)
             lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
         }
         nm.createNotificationChannel(ch)
@@ -1861,6 +2076,20 @@ class TwaLauncherActivity : AppCompatActivity() {
             ?: filesDir
         if (!dir.exists()) dir.mkdirs()
         return File.createTempFile("guardpro_${stamp}_", ".jpg", dir)
+    }
+
+    /**
+     * Push CSS custom properties used by the mobile header / bottom nav.
+     * When native WebView margins already clear the system bars, pass 0
+     * so web CSS does not add a second inset.
+     */
+    private fun injectSafeAreaCssVars(topPx: Int, bottomPx: Int) {
+        if (!::webView.isInitialized) return
+        webView.evaluateJavascript(
+            "document.documentElement.style.setProperty('--gp-safe-top','${topPx}px');" +
+                "document.documentElement.style.setProperty('--gp-safe-bottom','${bottomPx}px');",
+            null
+        )
     }
 
     private companion object {

@@ -297,7 +297,7 @@ class GuardEquipmentAssignmentHistory(models.Model):
     
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         ondelete='set null'
     )
     

@@ -613,8 +613,46 @@ window.guardproEidTriggerScan = function (ev, el) {
                     idType.value = 'emirates_id';
                     idType.dispatchEvent(new Event('change', { bubbles: true }));
                 }
-                alert('Fields updated from scan. Review and submit the form.');
-                closeAll();
+                var idField = reviewForm.querySelector('[data-field="id_number"]');
+                var idNumber = idField && idField.value ? String(idField.value).trim() : '';
+                function finishApply(msg) {
+                    alert(msg);
+                    closeAll();
+                }
+                if (!idNumber) {
+                    finishApply('Fields updated from scan. Review and submit the form.');
+                    return;
+                }
+                jsonRpc('/guardpro/api/visitor/lookup_by_id', { id_number: idNumber })
+                    .then(function (lookup) {
+                        if (lookup && lookup.success && lookup.found && lookup.fields) {
+                            var prior = lookup.fields;
+                            var keys = [
+                                'mobile_number', 'email', 'company',
+                                'host_name', 'host_phone', 'host_email',
+                                'host_community', 'host_unit_number',
+                                'occupation', 'employer_name', 'issuing_place',
+                            ];
+                            for (var k = 0; k < keys.length; k++) {
+                                var key = keys[k];
+                                if (!prior[key]) {
+                                    continue;
+                                }
+                                var el = formRoot.querySelector('[name="' + key + '"]');
+                                if (el && !(el.value || '').trim()) {
+                                    setFormField(formRoot, key, prior[key]);
+                                }
+                            }
+                            finishApply(
+                                'Fields updated from scan. Prior visit details were also loaded where available. Review and submit.'
+                            );
+                        } else {
+                            finishApply('Fields updated from scan. Review and submit the form.');
+                        }
+                    })
+                    .catch(function () {
+                        finishApply('Fields updated from scan. Review and submit the form.');
+                    });
             });
             actions.appendChild(btnApply);
             actions.appendChild(btnClose);

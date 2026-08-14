@@ -85,19 +85,19 @@
                             </group>
                         </group>
                         <notebook>
-                            <page string="Site Assignments">
+                            <page string="Project Assignments">
                                 <group>
-                                    <group string="Assigned Sites (Read-Only)" help="Sites assigned to this guard via their user account">
+                                    <group string="Assigned Projects (Read-Only)" help="Projects assigned to this guard via their user account">
                                         <field name="site_ids" widget="many2many_tags" readonly="1" options="{'color_field': 'color'}"/>
                                     </group>
                                 </group>
                                 <group>
                                     <div class="alert alert-info" role="alert">
-                                        <strong>How to Manage Site Assignments:</strong>
+                                        <strong>How to Manage Project Assignments:</strong>
                                         <ul>
-                                            <li><strong>Site assignments are managed through the User form:</strong> Go to <em>Settings → Users &amp; Companies → Users</em>, select this guard's user account, and edit the "Assigned Sites" field in the Access Rights tab.</li>
-                                            <li><strong>Why this field is read-only:</strong> Site assignments control what data the guard can access in the system. They must be managed centrally through user access controls for security and consistency.</li>
-                                            <li><strong>Guard users can only see data from their assigned sites</strong> - this includes shifts, incidents, checkpoints, and tours.</li>
+                                            <li><strong>Project assignments are managed through the User form:</strong> Go to <em>Settings → Users &amp; Companies → Users</em>, select this guard's user account, and edit the "Assigned Projects" field in the Access Rights tab.</li>
+                                            <li><strong>Why this field is read-only:</strong> Project assignments control what data the guard can access in the system. They must be managed centrally through user access controls for security and consistency.</li>
+                                            <li><strong>Guard users can only see data from their assigned projects</strong> - this includes shifts, incidents, checkpoints, and tours.</li>
                                         </ul>
                                     </div>
                                 </group>
@@ -165,7 +165,7 @@
                                         <field name="status" widget="badge"/>
                                     </div>
                                     <div t-if="record.current_site_id.raw_value">
-                                        Current Site: <field name="current_site_id"/>
+                                        Current Project: <field name="current_site_id"/>
                                     </div>
                                 </div>
                             </div>
@@ -191,7 +191,7 @@
                     <filter string="Suspended" name="suspended" domain="[('status', '=', 'suspended')]"/>
                     <group expand="0" string="Group By">
                         <filter name="group_status" string="Status" context="{'group_by': 'status'}"/>
-                        <filter name="group_site" string="Current Site" context="{'group_by': 'current_site_id'}"/>
+                        <filter name="group_site" string="Current Project" context="{'group_by': 'current_site_id'}"/>
                         <filter name="group_availability" string="Availability" context="{'group_by': 'availability'}"/>
                     </group>
                 </search>

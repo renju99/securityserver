@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Mobile API Controllers."""
 
-from odoo import http, fields
+from odoo import http, fields, _
 from odoo.http import request, Response
 from odoo.exceptions import UserError, AccessError, ValidationError
 import json
@@ -15,6 +15,12 @@ from datetime import datetime
 from ..common import validators
 from ..common.rate_limiter import rate_limit
 from ..common.video_optimizer import VideoOptimizer
+from ..common.image_optimizer import ImageOptimizer
+from ..common.upload_validation import (
+    MAX_FILES_PER_REQUEST,
+    UploadValidationError,
+    validate_json_media_payload,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -27,6 +33,31 @@ class MobileAPIController(http.Controller):
         if not request.env.user or request.env.user._is_public():
             return {'error': 'Authentication required'}, 401
         return None, None
+
+    def _current_guard(self):
+        """Return the authenticated user's guard profile (sudo) or empty recordset."""
+        return request.env['guard.profile'].sudo().search([
+            ('user_id', '=', request.env.user.id)
+        ], limit=1)
+
+    def _allowed_site_ids(self, guard=None):
+        """Site IDs the caller may access. ``None`` = admin unrestricted."""
+        user = request.env.user
+        if user.has_group('guardpro.group_guardpro_admin'):
+            return None
+        site_ids = set(user.site_ids.ids)
+        if guard and guard.site_ids:
+            site_ids |= set(guard.site_ids.ids)
+        return frozenset(site_ids)
+
+    def _site_allowed(self, site_id, guard=None):
+        """True when ``site_id`` is within the caller's assigned projects."""
+        if not site_id:
+            return False
+        allowed = self._allowed_site_ids(guard)
+        if allowed is None:
+            return True
+        return site_id in allowed
 
     def _is_video_payload(self, payload):
         """Detect whether JSON attachment payload contains a video."""
@@ -145,7 +176,7 @@ class MobileAPIController(http.Controller):
         # Log details of each shift found
         for shift in shifts:
             _logger.debug('[Guard Pro] Shift %d: %s at %s from %s to %s (status: %s)', 
-                         shift.id, shift.name, shift.site_id.name if shift.site_id else 'No Site',
+                         shift.id, shift.name, shift.site_id.name if shift.site_id else 'No Project',
                          shift.start_datetime, shift.end_datetime, shift.status)
         
         # Also log the search domain for debugging
@@ -165,7 +196,7 @@ class MobileAPIController(http.Controller):
         return {
             'shifts': [{
                 'id': s.id,
-                'site': s.site_id.name if s.site_id else 'No Site',
+                'site': s.site_id.name if s.site_id else 'No Project',
                 'start': convert_to_user_tz(s.start_datetime).isoformat() if s.start_datetime else None,
                 'end': convert_to_user_tz(s.end_datetime).isoformat() if s.end_datetime else None,
                 'status': s.status,
@@ -366,22 +397,20 @@ class MobileAPIController(http.Controller):
 
     @rate_limit(max_requests=100, window_seconds=60)  # Max 100 scans per minute (tours have many checkpoints)
     @http.route('/guardpro/api/checkpoint/scan', type='json', auth='user', methods=['POST'], csrf=False)
-    def scan_checkpoint(self, checkpoint_id, scan_data, latitude=None, longitude=None,
+    def scan_checkpoint(self, scan_data, checkpoint_id=None, latitude=None, longitude=None,
                         tour_log_id=None, photo=None, notes=None, videos=None):
-        """Scan a checkpoint."""
+        """Scan a checkpoint (by id or auto-resolve from tour + tag/QR data)."""
         _logger.info('[API Checkpoint Scan] Received scan request: checkpoint_id=%s, tour_log_id=%s, scan_data=%s (type: %s)',
                     checkpoint_id, tour_log_id, scan_data, type(scan_data).__name__)
-        
-        # Validate checkpoint_id
-        if not checkpoint_id:
-            _logger.error('[API Checkpoint Scan] Missing checkpoint_id')
-            return {'success': False, 'error': 'Checkpoint ID is required', 'message': 'Checkpoint ID is required'}
-        
-        try:
-            checkpoint_id = int(checkpoint_id)
-        except (ValueError, TypeError):
-            _logger.error('[API Checkpoint Scan] Invalid checkpoint_id: %s', checkpoint_id)
-            return {'success': False, 'error': 'Invalid checkpoint ID', 'message': 'Invalid checkpoint ID'}
+
+        if checkpoint_id is not None and checkpoint_id != '':
+            try:
+                checkpoint_id = int(checkpoint_id)
+            except (ValueError, TypeError):
+                _logger.error('[API Checkpoint Scan] Invalid checkpoint_id: %s', checkpoint_id)
+                return {'success': False, 'error': 'Invalid checkpoint ID', 'message': 'Invalid checkpoint ID'}
+        else:
+            checkpoint_id = None
         
         # Validate scan_data - ensure it's a string
         if scan_data is None:
@@ -409,18 +438,79 @@ class MobileAPIController(http.Controller):
             tour_log_id = None
 
         _logger.info('[API Checkpoint Scan] Processed tour_log_id: %s', tour_log_id)
-        
-        scan_data = scan_data.strip()
-        _logger.info('[API Checkpoint Scan] Processed scan_data: "%s" (length: %d)', scan_data, len(scan_data))
-        
+
         guard = request.env['guard.profile'].search([
             ('user_id', '=', request.env.user.id)
         ], limit=1)
-        
+
         if not guard:
             _logger.error('[Guard Pro API Checkpoint Scan] Guard profile not found for user: %s', request.env.user.name)
             return {'success': False, 'error': 'Guard profile not found', 'message': 'Guard profile not found'}
-        
+
+        # Authorize tour_log before resolve / attach (ownership IDOR guard)
+        if tour_log_id:
+            tour_log = request.env['tour.log'].sudo().browse(tour_log_id)
+            if not tour_log.exists():
+                return {
+                    'success': False,
+                    'error': 'tour_not_found',
+                    'message': _('Patrol not found.'),
+                }
+            if tour_log.guard_id.id != guard.id:
+                _logger.warning(
+                    '[API Checkpoint Scan] Rejected tour_log_id=%s for guard %s '
+                    '(owner=%s)',
+                    tour_log_id, guard.id, tour_log.guard_id.id,
+                )
+                return {
+                    'success': False,
+                    'error': 'unauthorized_tour',
+                    'message': _('This patrol does not belong to you.'),
+                }
+            if tour_log.status != 'in_progress':
+                return {
+                    'success': False,
+                    'error': 'tour_not_active',
+                    'message': _('No active patrol to record this scan.'),
+                }
+
+        if not checkpoint_id and tour_log_id:
+            tour_log = request.env['tour.log'].sudo().browse(tour_log_id)
+            if tour_log.exists() and tour_log.status == 'in_progress':
+                checkpoint = tour_log.resolve_checkpoint_by_scan_data(scan_data)
+                if checkpoint:
+                    checkpoint_id = checkpoint.id
+                    _logger.info(
+                        '[API Checkpoint Scan] Resolved checkpoint %s (%s) from scan data',
+                        checkpoint_id, checkpoint.name,
+                    )
+                else:
+                    return {
+                        'success': False,
+                        'error': 'checkpoint_not_on_tour',
+                        'message': _(
+                            'This tag is not on your current patrol. '
+                            'Check you are at the right checkpoint.'
+                        ),
+                    }
+            else:
+                return {
+                    'success': False,
+                    'error': 'tour_not_active',
+                    'message': _('No active patrol to record this scan.'),
+                }
+
+        if not checkpoint_id:
+            _logger.error('[API Checkpoint Scan] Missing checkpoint_id')
+            return {
+                'success': False,
+                'error': 'Checkpoint ID is required',
+                'message': _('Checkpoint ID is required'),
+            }
+
+        scan_data = scan_data.strip()
+        _logger.info('[API Checkpoint Scan] Processed scan_data: "%s" (length: %d)', scan_data, len(scan_data))
+
         _logger.info('[API Checkpoint Scan] Guard found: %s (ID: %s)', guard.name, guard.id)
         
         try:
@@ -613,19 +703,29 @@ class MobileAPIController(http.Controller):
 
     @http.route('/guardpro/api/tour/start', type='json', auth='user', methods=['POST'], csrf=False)
     def start_tour(self, tour_id, shift_id=None):
-        """Start a security tour."""
-        guard = request.env['guard.profile'].sudo().search([
-            ('user_id', '=', request.env.user.id)
-        ], limit=1)
-        
+        """Start a security tour (assigned-site tours only)."""
+        guard = self._current_guard()
+
         if not guard:
             return {'error': 'Guard profile not found'}
-        
+
         tour = request.env['security.tour'].sudo().browse(tour_id)
-        
+
         if not tour.exists():
             return {'error': 'Tour not found'}
-        
+
+        if not self._site_allowed(tour.site_id.id if tour.site_id else False, guard):
+            return {'error': 'Tour not found'}
+
+        if shift_id:
+            shift = request.env['guard.shift'].sudo().browse(int(shift_id))
+            if (
+                not shift.exists()
+                or shift.guard_id.id != guard.id
+                or not self._site_allowed(shift.site_id.id if shift.site_id else False, guard)
+            ):
+                return {'error': 'Invalid shift for this tour'}
+
         try:
             result = tour.start_tour(guard.id)
 
@@ -644,19 +744,9 @@ class MobileAPIController(http.Controller):
             if shift_id and tour_log.exists():
                 tour_log.write({'shift_id': shift_id})
 
-            if tour_log.exists() and not result.get('resumed'):
-                pending_tasks = request.env['guard.task'].sudo().search([
-                    ('assigned_to', '=', guard.id),
-                    ('site_id', '=', tour.site_id.id),
-                    ('state', 'in', ['assigned', 'in_progress']),
-                ])
-                if pending_tasks:
-                    tour_log.write({'task_ids': [(6, 0, pending_tasks.ids)]})
-                    _logger.info(
-                        'Linked %d pending tasks to tour log %d',
-                        len(pending_tasks),
-                        tour_log_id,
-                    )
+            # Do not auto-link all site tasks to the tour. Unrelated open tasks
+            # were blocking "Complete Tour" even when every checkpoint was scanned.
+            # Tasks stay linked only when explicitly attached to the tour log.
 
             if result.get('resumed'):
                 message = 'Continuing your patrol where you left off'
@@ -749,7 +839,21 @@ class MobileAPIController(http.Controller):
             else:
                 message = 'Tour completed successfully'
             
-            return {'success': True, 'message': message}
+            # Auto-create supervisor approval request for partial completions
+            if partial:
+                try:
+                    request.env['guard.approval.request'].sudo().create({
+                        'request_type': 'partial_tour',
+                        'guard_id': guard.id,
+                        'site_id': tour_log.site_id.id if tour_log.site_id else False,
+                        'reference_model': 'tour.log',
+                        'reference_id': tour_log_id,
+                        'guard_notes': reason or '',
+                    })
+                except Exception as ae:
+                    _logger.warning('Could not create approval request for partial tour: %s', ae)
+
+            return {'success': True, 'message': message, 'tour_log_id': tour_log_id}
         except Exception as e:
             _logger.error('Error completing tour: %s', str(e))
             return {'error': str(e)}
@@ -776,9 +880,10 @@ class MobileAPIController(http.Controller):
             # Get site_id - use provided value or auto-determine from active shift
             site_id = validated.get('site_id')
             
+            user = request.env.user
             if site_id:
                 # SECURITY FIX: Verify guard has access to specified site
-                if site_id not in request.env.user.site_ids.ids:
+                if site_id not in user.site_ids.ids:
                     _logger.warning(
                         'Unauthorized incident creation attempt: User %s (Guard %s) tried to create incident at site %s without access',
                         request.env.user.login, guard.name, site_id
@@ -787,6 +892,19 @@ class MobileAPIController(http.Controller):
                         'Access denied: You do not have access to this site',
                         'SITE_ACCESS_DENIED'
                     )
+                zone_id = validated.get('zone_id')
+                if zone_id and user.guardpro_has_zone_restrictions():
+                    zone = request.env['site.zone'].browse(zone_id)
+                    if zone_id not in user.zone_ids.ids:
+                        return validators.create_error_response(
+                            'Access denied: You do not have access to this zone',
+                            'ZONE_ACCESS_DENIED',
+                        )
+                    if zone.site_id.id != site_id:
+                        return validators.create_error_response(
+                            'Zone does not belong to the selected site',
+                            'ZONE_SITE_MISMATCH',
+                        )
             else:
                 # Auto-determine site from ACTIVE shift only (not most recent)
                 active_shift = request.env['guard.shift'].search([
@@ -809,10 +927,15 @@ class MobileAPIController(http.Controller):
                     )
             
             
+            zone_id = validated.get('zone_id')
+            if not zone_id and user.guardpro_has_zone_restrictions() and len(user.zone_ids) == 1:
+                zone_id = user.zone_ids[0].id
+
             # Prepare values
             vals = {
                 'guard_id': guard.id,
                 'site_id': site_id,
+                'zone_id': zone_id,
                 'shift_id': validated.get('shift_id'),
                 'title': validated['title'],
                 'description': validated['description'],
@@ -823,35 +946,62 @@ class MobileAPIController(http.Controller):
                 'location': validated['location'],
             }
             
-            # Handle uploaded media
+            # Handle uploaded media (type/size capped)
             media_payloads = []
             media_payloads.extend(kwargs.get('photos', []) or [])
             media_payloads.extend(kwargs.get('videos', []) or [])
+            media_payloads = [
+                p for p in media_payloads if p
+            ][:MAX_FILES_PER_REQUEST]
             if media_payloads:
                 photos = []
                 videos = []
                 for payload in media_payloads:
                     payload = payload or {}
-                    payload_name = payload.get('name', 'incident_media')
-                    payload_data = payload.get('data')
-                    if not payload_data:
+                    try:
+                        validated = validate_json_media_payload(
+                            payload, allow_video=True, allow_image=True
+                        )
+                    except UploadValidationError as exc:
+                        _logger.warning(
+                            '[API Incident] Rejected media upload: %s', exc
+                        )
                         continue
 
-                    mimetype = (
-                        payload.get('mimetype')
-                        or payload.get('content_type')
-                        or 'application/octet-stream'
-                    )
-                    is_video = self._is_video_payload(payload)
-                    attachment_data = payload_data
+                    payload_name = validated['filename']
+                    mimetype = validated['mimetype']
+                    is_video = validated['is_video']
+                    raw_bytes = validated['data']
 
                     if is_video:
                         attachment_data, compressed = VideoOptimizer.optimize_video(
-                            payload_data,
+                            raw_bytes,
                             filename=payload_name,
                         )
                         if compressed:
                             mimetype = 'video/mp4'
+                    else:
+                        try:
+                            attachment_data = ImageOptimizer.optimize_image(
+                                raw_bytes,
+                                max_dimension=1200,
+                                target_format='JPEG',
+                            )
+                            mimetype = 'image/jpeg'
+                            if payload_name and not payload_name.lower().endswith(
+                                ('.jpg', '.jpeg')
+                            ):
+                                base = (
+                                    payload_name.rsplit('.', 1)[0]
+                                    if '.' in payload_name
+                                    else payload_name
+                                )
+                                payload_name = '%s.jpg' % base
+                        except Exception as opt_err:
+                            _logger.debug(
+                                '[API Incident] Photo optimize skipped: %s', opt_err
+                            )
+                            attachment_data = base64.b64encode(raw_bytes).decode('ascii')
 
                     attachment = request.env['ir.attachment'].create({
                         'name': payload_name,
@@ -983,7 +1133,7 @@ class MobileAPIController(http.Controller):
             if not guard:
                 return {'error': 'Guard profile not found'}
             
-            # Get sites from user's assigned sites (synced from guard's shifts)
+            # Get sites from user's assigned projects (synced from guard's shifts)
             sites = request.env.user.site_ids
             
             site_list = []
@@ -995,14 +1145,63 @@ class MobileAPIController(http.Controller):
                     'city': site.city
                 })
             
+            zone_list = []
+            user = request.env.user
+            zones = user.zone_ids if user.zone_ids else request.env['site.zone'].search(
+                [('site_id', 'in', sites.ids)]
+            )
+            for zone in zones:
+                zone_list.append({
+                    'id': zone.id,
+                    'name': zone.name,
+                    'code': zone.code,
+                    'site_id': zone.site_id.id,
+                    'site_name': zone.site_id.name,
+                })
+
             return {
                 'success': True,
                 'sites': site_list,
-                'total_count': len(site_list)
+                'zones': zone_list,
+                'zone_restricted': user.guardpro_has_zone_restrictions(),
+                'total_count': len(site_list),
             }
             
         except Exception as e:
             _logger.error('Get accessible sites error: %s', str(e))
+            return {'error': str(e)}
+
+    @http.route('/guardpro/api/zones/accessible', type='json', auth='user', methods=['POST'], csrf=False)
+    def get_accessible_zones(self, site_id=None):
+        """Get zones accessible to the current user, optionally filtered by site."""
+        try:
+            user = request.env.user
+            if user.has_group('guardpro.group_guardpro_admin'):
+                domain = []
+            elif user.guardpro_has_zone_restrictions():
+                domain = [('id', 'in', user.zone_ids.ids)]
+            elif user.site_ids:
+                domain = [('site_id', 'in', user.site_ids.ids)]
+            else:
+                domain = [('id', '=', False)]
+            if site_id:
+                domain = domain + [('site_id', '=', int(site_id))]
+
+            zones = request.env['site.zone'].search(domain, order='site_id, name')
+            return {
+                'success': True,
+                'zones': [{
+                    'id': z.id,
+                    'name': z.name,
+                    'code': z.code,
+                    'site_id': z.site_id.id,
+                    'site_name': z.site_id.name,
+                } for z in zones],
+                'zone_restricted': user.guardpro_has_zone_restrictions(),
+                'total_count': len(zones),
+            }
+        except Exception as e:
+            _logger.error('Get accessible zones error: %s', str(e))
             return {'error': str(e)}
 
     @http.route('/guardpro/api/incident/categories', type='json', auth='user', methods=['POST'], csrf=False)
@@ -1010,7 +1209,8 @@ class MobileAPIController(http.Controller):
         """Get list of incident categories."""
         try:
             categories = request.env['incident.category'].search([
-                ('active', '=', True)
+                ('active', '=', True),
+                ('hide_from_guard_incidents', '=', False),
             ], order='sequence, name')
             
             category_list = []
@@ -1042,14 +1242,21 @@ class MobileAPIController(http.Controller):
             return {'error': 'Guard profile not found'}
         
         try:
-            # Build domain for incident search - show all incidents at guard's assigned sites
+            # Build domain for incident search (site or zone scoped)
             user = request.env.user
-            domain = [('site_id', 'in', user.site_ids.ids)]
+            if user.has_group('guardpro.group_guardpro_admin'):
+                domain = []
+            else:
+                domain = user.guardpro_zone_access_domain()
+                if not domain:
+                    domain = [('site_id', 'in', user.site_ids.ids)]
             
             # Filter by status if provided
             if status:
                 domain.append(('status', '=', status))
-            
+
+            domain = request.env['incident.report']._domain_security_incidents(domain)
+
             # Search for incidents
             incidents = request.env['incident.report'].search(
                 domain,
@@ -1070,7 +1277,7 @@ class MobileAPIController(http.Controller):
                     'status': incident.status,
                     'incident_datetime': incident.incident_datetime.isoformat() + 'Z' if incident.incident_datetime else None,
                     'reported_datetime': incident.reported_datetime.isoformat() + 'Z' if incident.reported_datetime else None,
-                    'site_name': incident.site_id.name if incident.site_id else 'Unknown Site',
+                    'site_name': incident.site_id.name if incident.site_id else 'Unknown Project',
                     'location': incident.location,
                     'latitude': incident.latitude,
                     'longitude': incident.longitude,
@@ -1126,7 +1333,7 @@ class MobileAPIController(http.Controller):
                 'status': incident.status,
                 'incident_datetime': incident.incident_datetime.isoformat() + 'Z' if incident.incident_datetime else None,
                 'reported_datetime': incident.reported_datetime.isoformat() + 'Z' if incident.reported_datetime else None,
-                'site_name': incident.site_id.name if incident.site_id else 'Unknown Site',
+                'site_name': incident.site_id.name if incident.site_id else 'Unknown Project',
                 'location': incident.location,
                 'latitude': incident.latitude,
                 'longitude': incident.longitude,
@@ -1145,6 +1352,22 @@ class MobileAPIController(http.Controller):
         }
 
     # --- Compliance audits (supervisor / manager / admin only; not guard portal) ---
+
+    def _incident_normalize_base64_data(self, payload_data):
+        """Normalize JSON attachment data to a base64 string (strip data-URI prefix)."""
+        if payload_data is None:
+            return None
+        if isinstance(payload_data, bytes):
+            try:
+                return payload_data.decode('ascii')
+            except Exception:
+                return base64.b64encode(payload_data).decode()
+        s = str(payload_data).strip()
+        if s.startswith('data:'):
+            comma = s.find(',')
+            if comma != -1:
+                s = s[comma + 1:].strip()
+        return s
 
     def _compliance_normalize_base64_data(self, payload_data):
         """Normalize JSON attachment data to a base64 string (strip data-URI prefix)."""
@@ -1220,27 +1443,43 @@ class MobileAPIController(http.Controller):
             return []
         ids = []
         Attachment = request.env['ir.attachment'].sudo()
-        for payload in photo_payloads:
+        for payload in list(photo_payloads)[:MAX_FILES_PER_REQUEST]:
             if not payload or not isinstance(payload, dict):
                 continue
-            if self._is_video_payload(payload):
+            try:
+                validated = validate_json_media_payload(
+                    payload, allow_video=False, allow_image=True
+                )
+            except UploadValidationError as exc:
                 _logger.warning(
-                    '[Compliance API] Skipping video payload on audit item %s (photos only)',
-                    item.id,
+                    '[Compliance API] Rejected photo on audit item %s: %s',
+                    item.id, exc,
                 )
                 continue
-            payload_name = payload.get('name') or 'audit_item_photo.jpg'
-            raw = self._compliance_normalize_base64_data(payload.get('data'))
-            if not raw:
-                continue
-            mimetype = (
-                payload.get('mimetype')
-                or payload.get('content_type')
-                or 'image/jpeg'
-            )
+            datas = base64.b64encode(validated['data']).decode('ascii')
+            mimetype = validated['mimetype'] or 'image/jpeg'
+            name = validated['filename'] or 'audit_item_photo.jpg'
+            try:
+                optimized = ImageOptimizer.optimize_image(
+                    datas, max_dimension=1200, target_format='JPEG'
+                )
+                if optimized:
+                    datas = (
+                        optimized.decode('ascii')
+                        if isinstance(optimized, bytes)
+                        else optimized
+                    )
+                    mimetype = 'image/jpeg'
+                    if not name.lower().endswith(('.jpg', '.jpeg')):
+                        base = name.rsplit('.', 1)[0] if '.' in name else name
+                        name = '%s.jpg' % base
+            except Exception as opt_err:
+                _logger.debug(
+                    '[Compliance API] Photo optimize skipped: %s', opt_err
+                )
             att = Attachment.create({
-                'name': payload_name,
-                'datas': raw,
+                'name': name,
+                'datas': datas,
                 'res_model': 'compliance.audit.item',
                 'res_id': item.id,
                 'mimetype': mimetype,
@@ -1738,19 +1977,24 @@ class MobileAPIController(http.Controller):
 
     @http.route('/guardpro/api/stats/dashboard', type='json', auth='user', methods=['POST'], csrf=False)
     def get_dashboard_stats(self, guard_id=None):
-        """Get dashboard statistics for guard."""
+        """Get dashboard statistics for the authenticated guard only."""
         try:
-            # Get guard profile
-            # Use sudo() to allow guards to access their own profile regardless of site assignment
-            if guard_id:
-                guard = request.env['guard.profile'].sudo().browse(guard_id)
-            else:
-                guard = request.env['guard.profile'].sudo().search([
-                    ('user_id', '=', request.env.user.id)
-                ], limit=1)
-            
+            # Always resolve to the caller's own guard profile.
+            # ``guard_id`` is accepted for backward compatibility but ignored
+            # unless it matches the current user (prevents cross-guard IDOR).
+            guard = self._current_guard()
+
             if not guard:
                 return {'error': 'Guard profile not found'}
+
+            if guard_id and int(guard_id) != guard.id:
+                if not request.env.user.has_group('guardpro.group_guardpro_admin'):
+                    return {'error': 'Guard profile not found'}
+                # Admins may request another guard's stats explicitly
+                other = request.env['guard.profile'].sudo().browse(int(guard_id))
+                if not other.exists():
+                    return {'error': 'Guard profile not found'}
+                guard = other
             
             from datetime import datetime, timedelta
             import pytz
@@ -1882,12 +2126,16 @@ class MobileAPIController(http.Controller):
 
     @http.route('/guardpro/api/checkpoints/site/<int:site_id>', type='json', auth='user', methods=['POST'], csrf=False)
     def get_site_checkpoints(self, site_id):
-        """Get all checkpoints for a site."""
-        checkpoints = request.env['checkpoint'].search([
+        """Get all checkpoints for a site (assigned projects only)."""
+        guard = self._current_guard()
+        if not self._site_allowed(site_id, guard):
+            return {'error': 'Project not found', 'checkpoints': []}
+
+        checkpoints = request.env['checkpoint'].sudo().search([
             ('site_id', '=', site_id),
             ('status', '=', 'active')
         ])
-        
+
         return {
             'checkpoints': [{
                 'id': cp.id,
@@ -1961,7 +2209,17 @@ class MobileAPIController(http.Controller):
         pending_ack = request.env['emergency.broadcast.acknowledgment'].sudo().search([
             ('user_id', '=', request.env.user.id),
             ('is_acknowledged', '=', False),
+            ('broadcast_id.state', '=', 'sent'),
         ], order='create_date desc', limit=1)
+
+        # Self-heal expired/draft leftovers so JSON clients never stay blocked.
+        stale = request.env['emergency.broadcast.acknowledgment'].sudo().search([
+            ('user_id', '=', request.env.user.id),
+            ('is_acknowledged', '=', False),
+            ('broadcast_id.state', '!=', 'sent'),
+        ], limit=100)
+        if stale:
+            stale.action_acknowledge()
 
         if not pending_ack:
             return {'emergency': False}
@@ -1980,17 +2238,10 @@ class MobileAPIController(http.Controller):
     @http.route('/guardpro/api/patrol_reminders/check', type='json', auth='user', methods=['POST'], csrf=False)
     def check_patrol_reminders(self):
         """Pending patrol reminder for the logged-in guard only (must acknowledge in app)."""
-        rem = request.env['tour.patrol.reminder'].get_pending_mobile_reminder(request.env.user)
-        if not rem:
+        payload = request.env['tour.patrol.reminder'].build_mobile_payload(request.env.user)
+        if not payload.get('patrol_reminder'):
             return {'patrol_reminder': False}
-        return {
-            'patrol_reminder': True,
-            'reminder_id': rem.id,
-            'tour_name': rem.tour_id.name or '',
-            'site_name': rem.shift_id.site_id.name if rem.shift_id.site_id else '',
-            'scheduled_start_iso': rem.scheduled_start.isoformat() if rem.scheduled_start else False,
-            'minutes_before': rem.reminder_type,
-        }
+        return payload
 
     @http.route(
         '/guardpro/api/patrol_reminders/pending',
@@ -2003,26 +2254,12 @@ class MobileAPIController(http.Controller):
     def get_pending_patrol_reminder(self, **kwargs):
         """Plain JSON endpoint for TWA/mobile reminder polling."""
         try:
-            rem = request.env['tour.patrol.reminder'].get_pending_mobile_reminder(request.env.user)
-            if not rem:
-                return request.make_json_response(
-                    {
-                        'success': True,
-                        'patrol_reminder': False,
-                    },
-                    headers=[('Cache-Control', 'no-store, no-cache, must-revalidate')],
-                )
-
+            payload = request.env['tour.patrol.reminder'].build_mobile_payload(
+                request.env.user
+            )
+            payload['success'] = True
             return request.make_json_response(
-                {
-                    'success': True,
-                    'patrol_reminder': True,
-                    'reminder_id': rem.id,
-                    'tour_name': rem.tour_id.name or '',
-                    'site_name': rem.shift_id.site_id.name if rem.shift_id.site_id else '',
-                    'scheduled_start_iso': rem.scheduled_start.isoformat() if rem.scheduled_start else False,
-                    'minutes_before': rem.reminder_type,
-                },
+                payload,
                 headers=[('Cache-Control', 'no-store, no-cache, must-revalidate')],
             )
         except Exception as e:
@@ -2044,27 +2281,19 @@ class MobileAPIController(http.Controller):
         website=True,
     )
     def acknowledge_patrol_reminder(self, **kwargs):
-        """Acknowledge a patrol reminder popup (JSON body: reminder_id)."""
+        """Acknowledge all currently due patrol reminders in one tap."""
         try:
             user = request.env.user
             data = json.loads(request.httprequest.data.decode('utf-8') or '{}')
             reminder_id = data.get('reminder_id')
-            if not reminder_id:
-                return request.make_json_response({
-                    'success': False,
-                    'error': 'reminder_id is required',
-                }, status=400)
-            reminder = request.env['tour.patrol.reminder'].search([
-                ('id', '=', int(reminder_id)),
-                ('user_id', '=', user.id),
-            ], limit=1)
-            if not reminder:
-                return request.make_json_response({
-                    'success': False,
-                    'error': 'Reminder not found or not authorized',
-                }, status=404)
-            reminder.action_acknowledge()
-            return request.make_json_response({'success': True})
+            acked = request.env['tour.patrol.reminder'].acknowledge_all_due_for_user(
+                user, reminder_id=reminder_id,
+            )
+            return request.make_json_response({
+                'success': True,
+                'acked_ids': acked.ids,
+                'acked_count': len(acked),
+            })
         except ValueError:
             return request.make_json_response({
                 'success': False,

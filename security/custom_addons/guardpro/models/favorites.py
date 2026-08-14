@@ -112,7 +112,7 @@ class GuardProfile(models.Model):
 
 
 class ClientSite(models.Model):
-    """Add favorite functionality to client site."""
+    """Add favorite functionality to client project."""
     
     _inherit = 'client.site'
     

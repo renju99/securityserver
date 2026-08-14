@@ -21,7 +21,7 @@ class MapDataExport(models.TransientModel):
     export_type = fields.Selection([
         ('current_locations', 'Current Guard Locations'),
         ('location_history', 'Location History'),
-        ('geofences', 'Site Geofences'),
+        ('geofences', 'Project Geofences'),
         ('patrol_routes', 'Patrol Routes')
     ], string='Export Type', required=True, default='current_locations')
     
@@ -154,8 +154,8 @@ class MapDataExport(models.TransientModel):
             ])
     
     def _export_geofences_csv(self, writer):
-        """Export site geofences to CSV."""
-        writer.writerow(['Site Name', 'Site Code', 'Client', 'Latitude', 'Longitude',
+        """Export project geofences to CSV."""
+        writer.writerow(['Project Name', 'Project Code', 'Client', 'Latitude', 'Longitude',
                         'Geofence Type', 'Radius (m)', 'Status'])
         
         domain = [('geofence_enabled', '=', True)]

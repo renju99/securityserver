@@ -1,16 +1,15 @@
-/** @odoo-module **/
-
 /**
  * Patrol reminder poller (PWA /guardpro/mobile/*)
- * Mirrors emergency polling: JSON check + blocking modal + acknowledge.
- * Waits if the emergency overlay is visible so alerts do not stack.
+ * Shows only when due (30 / 10 min window). One Acknowledge clears
+ * every currently due reminder for the guard.
  */
 (function () {
     "use strict";
 
-    const POLL_INTERVAL_MS = 2500;
+    const POLL_INTERVAL_MS = 5000;
     let pollingTimer = null;
     let activeReminderId = null;
+    let ackInFlight = false;
 
     function isGuardMobilePage() {
         return window.location.pathname.startsWith("/guardpro/mobile");
@@ -27,10 +26,21 @@
             credentials: "same-origin",
             headers: {
                 "Content-Type": "application/json",
+                Accept: "application/json",
             },
             body: JSON.stringify(payload || {}),
         });
-        return response.json();
+        const text = await response.text();
+        let data = null;
+        try {
+            data = text ? JSON.parse(text) : null;
+        } catch (_e) {
+            throw new Error("Invalid JSON");
+        }
+        if (!response.ok || (data && data.success === false)) {
+            throw new Error((data && data.error) || ("HTTP " + response.status));
+        }
+        return data || { success: true };
     }
 
     function notifyAndroidTwa(data) {
@@ -39,6 +49,9 @@
             if (!bridge || typeof bridge.postPatrolReminderNotification !== "function") {
                 return;
             }
+            var tours = Array.isArray(data.tour_names) && data.tour_names.length
+                ? data.tour_names.join(", ")
+                : data.tour_name || "";
             bridge.postPatrolReminderNotification(
                 JSON.stringify({
                     title:
@@ -46,8 +59,8 @@
                         String(data.minutes_before === "30" ? "30" : "10") +
                         " minutes",
                     message: [
-                        data.tour_name ? "Tour: " + data.tour_name : "",
-                        data.site_name ? "Site: " + data.site_name : "",
+                        tours ? "Tour(s): " + tours : "",
+                        data.site_name ? "Project: " + data.site_name : "",
                     ]
                         .filter(Boolean)
                         .join("\n"),
@@ -113,10 +126,27 @@
 
         activeReminderId = data.reminder_id || null;
         const mins = data.minutes_before === "30" ? "30" : "10";
-        titleEl.textContent = `Shift starts in ${mins} minutes`;
+        const count = data.count || 1;
+        titleEl.textContent =
+            count > 1
+                ? `Shift starts in ${mins} minutes (${count} tours)`
+                : `Shift starts in ${mins} minutes`;
+
         const lines = [];
-        if (data.tour_name) lines.push(`Tour: ${data.tour_name}`);
-        if (data.site_name) lines.push(`Site: ${data.site_name}`);
+        const tours = Array.isArray(data.tour_names) && data.tour_names.length
+            ? data.tour_names
+            : data.tour_name
+                ? [data.tour_name]
+                : [];
+        if (tours.length === 1) {
+            lines.push("Tour: " + tours[0]);
+        } else if (tours.length > 1) {
+            lines.push("Tours:");
+            tours.forEach(function (t) {
+                lines.push("• " + t);
+            });
+        }
+        if (data.site_name) lines.push("Project: " + data.site_name);
         messageEl.textContent = lines.join("\n") || "You have a scheduled patrol.";
         if (data.scheduled_start_iso) {
             dueEl.textContent = `Shift starts: ${new Date(data.scheduled_start_iso).toLocaleString()}`;
@@ -126,33 +156,34 @@
         overlay.style.display = "flex";
         notifyAndroidTwa(data);
 
+        ackBtn.disabled = false;
+        ackBtn.textContent = count > 1 ? "Acknowledge All" : "Acknowledge";
         ackBtn.onclick = async function () {
-            if (!activeReminderId) {
-                overlay.style.display = "none";
+            if (!activeReminderId || ackInFlight) {
+                if (!activeReminderId) overlay.style.display = "none";
                 return;
             }
+            ackInFlight = true;
             ackBtn.disabled = true;
             ackBtn.textContent = "Acknowledging...";
             try {
-                const result = await postJson("/guardpro/api/patrol_reminders/acknowledge", {
+                await postJson("/guardpro/api/patrol_reminders/acknowledge", {
                     reminder_id: activeReminderId,
                 });
-                if (result && result.success) {
-                    overlay.style.display = "none";
-                    activeReminderId = null;
-                    dismissAndroidTwaPatrol();
-                } else {
-                    ackBtn.disabled = false;
-                    ackBtn.textContent = "Acknowledge";
-                }
+                overlay.style.display = "none";
+                activeReminderId = null;
+                dismissAndroidTwaPatrol();
             } catch (_err) {
                 ackBtn.disabled = false;
-                ackBtn.textContent = "Acknowledge";
+                ackBtn.textContent = count > 1 ? "Acknowledge All" : "Acknowledge";
+            } finally {
+                ackInFlight = false;
             }
         };
     }
 
     async function pollPatrol() {
+        if (window.__gpSessionDead) return;
         if (emergencyOverlayVisible()) return;
         try {
             const response = await fetch(
@@ -164,13 +195,33 @@
                     cache: "no-store",
                 }
             );
+            const ct = (response.headers.get("content-type") || "").toLowerCase();
+            if (
+                response.status === 401 ||
+                response.status === 403 ||
+                response.redirected ||
+                ct.indexOf("json") === -1
+            ) {
+                window.__gpSessionDead = true;
+                return;
+            }
             const payload = await response.json();
             const data = payload && payload.success ? payload : null;
             if (data && data.patrol_reminder) {
-                if (activeReminderId && data.reminder_id && activeReminderId === data.reminder_id) return;
+                if (
+                    activeReminderId &&
+                    data.reminder_id &&
+                    activeReminderId === data.reminder_id &&
+                    document.getElementById("gp-patrol-overlay") &&
+                    document.getElementById("gp-patrol-overlay").style.display === "flex"
+                ) {
+                    return;
+                }
                 showPatrol(data);
             } else {
                 activeReminderId = null;
+                const overlay = document.getElementById("gp-patrol-overlay");
+                if (overlay) overlay.style.display = "none";
             }
         } catch (_err) {
             // Silent fail

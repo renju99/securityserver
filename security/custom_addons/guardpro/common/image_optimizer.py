@@ -190,6 +190,32 @@ class ImageOptimizer:
             _logger.error('Error validating image size: %s', str(e))
             return (False, 0)
 
+    @classmethod
+    def optimize_for_mobile(cls, image_data, max_dimension=1200):
+        """
+        Optimize an image for mobile uploads; returns raw JPEG bytes.
+
+        Used by PWA/multipart controllers that base64-encode the result themselves.
+        """
+        optimized_b64 = cls.optimize_image(
+            image_data,
+            max_dimension=max_dimension,
+            target_format='JPEG',
+        )
+        if not optimized_b64:
+            if isinstance(image_data, bytes):
+                return image_data
+            if isinstance(image_data, str):
+                return base64.b64decode(image_data)
+            return image_data
+        if isinstance(optimized_b64, bytes):
+            # Already raw or base64-as-bytes
+            try:
+                return base64.b64decode(optimized_b64)
+            except Exception:
+                return optimized_b64
+        return base64.b64decode(optimized_b64)
+
 
 
 

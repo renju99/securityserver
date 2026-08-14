@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="privacy_policy_template" name="GuardLink Privacy Policy">
+        <t t-call="web.layout">
+            <t t-set="title">Privacy Policy — GuardLink</t>
+            <t t-set="head">
+                <meta charset="UTF-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+                <meta name="description" content="Privacy Policy for the GuardLink mobile app and web platform operated by Berkeley UAE."/>
+                <style>
+                    body {
+                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                        line-height: 1.6;
+                        color: #1a202c;
+                        background: #f7fafc;
+                        margin: 0;
+                    }
+                    .privacy-wrap {
+                        max-width: 800px;
+                        margin: 0 auto;
+                        padding: 2rem 1.25rem 4rem;
+                    }
+                    .privacy-card {
+                        background: #fff;
+                        border: 1px solid #e2e8f0;
+                        border-radius: 8px;
+                        padding: 2rem 1.75rem;
+                    }
+                    h1 { font-size: 1.75rem; margin: 0 0 0.5rem; }
+                    h2 { font-size: 1.15rem; margin: 1.75rem 0 0.75rem; color: #1e3a5f; }
+                    p, li { font-size: 0.95rem; color: #2d3748; }
+                    .muted { color: #718096; font-size: 0.875rem; margin-bottom: 1.5rem; }
+                    ul { padding-left: 1.25rem; }
+                    a { color: #1e40af; }
+                    .highlight {
+                        background: #eff6ff;
+                        border-left: 4px solid #3b82f6;
+                        padding: 0.875rem 1rem;
+                        margin: 1rem 0;
+                    }
+                </style>
+            </t>
+
+            <div class="privacy-wrap">
+                <div class="privacy-card">
+                    <h1>Privacy Policy</h1>
+                    <p class="muted">
+                        Last updated: 7 August 2026<br/>
+                        Applies to: GuardLink web platform and the GuardLink Android / iOS mobile apps
+                        (including the Berkeley GuardLink app on Google Play).
+                    </p>
+
+                    <h2>1. Who we are</h2>
+                    <p>
+                        GuardLink is a security workforce operations platform used by Berkeley UAE
+                        (“we”, “us”, “our”) to manage guard attendance, patrols, incidents, visitors,
+                        and related site operations. This policy explains what personal and device
+                        data the GuardLink app and website collect, why we collect it, and how it is used.
+                    </p>
+                    <p>
+                        Contact for privacy requests:
+                        <a href="mailto:itsupport@berkeleyuae.com">itsupport@berkeleyuae.com</a>
+                    </p>
+
+                    <h2>2. Who this app is for</h2>
+                    <p>
+                        GuardLink is an enterprise / employment tool for authorized security guards,
+                        supervisors, and operations staff. Accounts are created by the employer
+                        (Berkeley UAE). Users do not self-register in the public app store listing sense;
+                        they sign in with credentials provided by their employer.
+                    </p>
+
+                    <h2>3. Location data (important)</h2>
+                    <div class="highlight">
+                        <p style="margin:0;">
+                            <strong>The GuardLink mobile app accesses and transmits location data.</strong>
+                            This includes approximate and precise GPS location while you are on duty,
+                            including in the background when location tracking is enabled for your shift,
+                            so supervisors can verify patrols, attendance, and site coverage.
+                        </p>
+                    </div>
+                    <p>Location data may include:</p>
+                    <ul>
+                        <li>Latitude and longitude</li>
+                        <li>Accuracy, speed, and heading (when available)</li>
+                        <li>Timestamps of location updates</li>
+                        <li>Geofence / site check-in context</li>
+                    </ul>
+                    <p>
+                        Location is collected for <strong>app functionality</strong> (patrol verification,
+                        attendance, safety, and operational oversight). It is sent to our servers at
+                        <strong>security.berkeleyuae.com</strong> over HTTPS. We do not sell location data
+                        to advertisers or use it for third-party advertising.
+                    </p>
+
+                    <h2>4. Device or other IDs</h2>
+                    <p>
+                        The mobile app may collect a device identifier (for example Android’s
+                        <code>ANDROID_ID</code> / hardware device ID) and send it with location and
+                        operational updates so we can associate telemetry with the correct device and
+                        account for security and accountability purposes.
+                    </p>
+
+                    <h2>5. Other data we collect</h2>
+                    <p>Depending on how you use GuardLink, we may also collect:</p>
+                    <ul>
+                        <li><strong>Account / personal info:</strong> name, email, user ID, and related employment profile data used to authenticate and assign you to sites and shifts</li>
+                        <li><strong>Photos and videos:</strong> images or video you attach to incidents, DARs, patrols, visitor records, or other reports</li>
+                        <li><strong>Audio:</strong> voice or sound recordings if you use features such as push-to-talk or media capture that record audio</li>
+                        <li><strong>User-generated operational content:</strong> incident reports, patrol notes, attendance events, NFC / checkpoint scans, tasks, and messages needed to run security operations</li>
+                        <li><strong>Technical data:</strong> app version, network/session cookies required to keep you signed in, and similar diagnostics needed for reliability</li>
+                    </ul>
+
+                    <h2>6. How we use data</h2>
+                    <ul>
+                        <li>Provide GuardLink features (login, attendance, patrols, incidents, visitors, alerts)</li>
+                        <li>Verify presence on site and support supervisor oversight</li>
+                        <li>Security, fraud prevention, and compliance with operational / contractual obligations</li>
+                        <li>Account management and workforce administration by authorized Berkeley UAE staff</li>
+                    </ul>
+                    <p>We do not use this data for third-party advertising or marketing networks.</p>
+
+                    <h2>7. Sharing</h2>
+                    <p>
+                        Data is processed on systems operated for Berkeley UAE (including hosting for
+                        <strong>security.berkeleyuae.com</strong>). Authorized supervisors, managers,
+                        and administrators may access operational records for assigned projects.
+                        Client portal users may see limited operational information for their contracted sites.
+                        We do not sell personal data. Service providers that host or transmit the platform
+                        (for example cloud hosting or email delivery) may process data only to provide those services.
+                    </p>
+
+                    <h2>8. Security</h2>
+                    <p>
+                        Data in transit is protected with HTTPS / TLS. Access is restricted by role-based
+                        permissions and site assignment. Passwords are stored using secure hashing.
+                    </p>
+
+                    <h2>9. Retention</h2>
+                    <p>
+                        We retain operational and account data for as long as needed for security operations,
+                        legal, and contractual purposes, or until an authorized deletion / anonymization
+                        request is completed under our privacy process.
+                    </p>
+
+                    <h2>10. Your choices and deletion requests</h2>
+                    <p>
+                        Because GuardLink accounts are employer-managed, you can request access, correction,
+                        or deletion of personal data by contacting
+                        <a href="mailto:itsupport@berkeleyuae.com">itsupport@berkeleyuae.com</a>
+                        or your Berkeley UAE administrator / HR contact. We will handle requests through
+                        our internal privacy process (subject to legal and operational retention requirements).
+                    </p>
+                    <p>
+                        You may deny or revoke location, camera, microphone, or notification permissions
+                        in your device settings; some GuardLink features will not work without them.
+                    </p>
+
+                    <h2>11. Children</h2>
+                    <p>
+                        GuardLink is not directed at children and is intended only for authorized adult
+                        workforce users.
+                    </p>
+
+                    <h2>12. Changes</h2>
+                    <p>
+                        We may update this policy from time to time. The “Last updated” date at the top
+                        will change when we do. Continued use of GuardLink after an update means the
+                        revised policy applies.
+                    </p>
+
+                    <h2>13. Contact</h2>
+                    <p>
+                        Privacy questions or data requests:<br/>
+                        Email: <a href="mailto:itsupport@berkeleyuae.com">itsupport@berkeleyuae.com</a><br/>
+                        Platform: <a href="https://security.berkeleyuae.com/">https://security.berkeleyuae.com/</a>
+                    </p>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

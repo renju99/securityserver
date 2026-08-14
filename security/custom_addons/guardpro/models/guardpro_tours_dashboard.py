@@ -549,7 +549,7 @@ class GuardLinkToursDashboard(models.Model):
             'columns': [
                 _('Tour #'),
                 _('Guard'),
-                _('Site'),
+                _('Project'),
                 _('Start Time'),
                 _('Duration (min)'),
                 _('Checkpoints'),
@@ -589,7 +589,7 @@ class GuardLinkToursDashboard(models.Model):
             'columns': [
                 _('Tour #'),
                 _('Guard'),
-                _('Site'),
+                _('Project'),
                 _('Start Time'),
                 _('Checkpoints'),
                 _('Progress %')
@@ -628,7 +628,7 @@ class GuardLinkToursDashboard(models.Model):
             'columns': [
                 _('Tour #'),
                 _('Guard'),
-                _('Site'),
+                _('Project'),
                 _('Start Time'),
                 _('Expected End'),
                 _('Status')
@@ -906,3 +906,40 @@ class GuardLinkToursDashboard(models.Model):
                 'tables': [],
                 'filters': {}
             }
+
+    @api.model
+    def action_print_tours_dashboard_pdf(self, filter_params=None):
+        """Build the PDF report action using current dashboard filters."""
+        filter_params = dict(filter_params or {})
+
+        dashboard = self.search([('user_id', '=', self.env.user.id)], limit=1)
+        if not dashboard:
+            dashboard = self.search([], limit=1)
+        if not dashboard:
+            dashboard = self.create({
+                'name': _('Tours Dashboard - %s') % self.env.user.name,
+                'user_id': self.env.user.id,
+            })
+
+        enriched = dict(filter_params)
+        site_ids = [
+            int(site_id) for site_id in (filter_params.get('site_ids') or [])
+            if site_id and str(site_id).lstrip('-').isdigit()
+        ]
+        guard_ids = [
+            int(guard_id) for guard_id in (filter_params.get('guard_ids') or [])
+            if guard_id and str(guard_id).lstrip('-').isdigit()
+        ]
+        if site_ids:
+            enriched['site_names'] = self.env['client.site'].browse(site_ids).mapped('name')
+        if guard_ids:
+            enriched['guard_names'] = self.env['guard.profile'].browse(guard_ids).mapped('name')
+
+        report = self.env.ref('guardpro.action_report_tours_dashboard')
+        action = report.report_action(dashboard.ids, data={'filters': enriched})
+        action['context'] = {
+            **action.get('context', {}),
+            'filter_params': enriched,
+            'filters': enriched,
+        }
+        return action

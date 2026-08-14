@@ -52,7 +52,7 @@ class GuardTaskTemplate(models.Model):
     
     site_id = fields.Many2one(
         'client.site',
-        string='Specific Site',
+        string='Specific Project',
         help='Leave empty for all sites'
     )
     
@@ -255,7 +255,7 @@ class GuardTaskSuggestion(models.Model):
     )
     current_site_id = fields.Many2one(
         'client.site',
-        string='Current Site'
+        string='Current Project'
     )
     
     def accept_suggestion(self):
@@ -319,14 +319,19 @@ class GuardTaskSuggestion(models.Model):
         
         suggestions = []
         
-        # Get applicable templates
+        # Get applicable templates (site-scoped + intentional globals)
         Template = self.env['guard.task.template']
-        templates = Template.search([
-            ('active', '=', True),
-            '|',
-            ('site_id', '=', False),
-            ('site_id', '=', guard.current_site_id.id if guard.current_site_id else False)
-        ])
+        allowed_sites = list(guard.user_id.site_ids.ids) if guard.user_id else []
+        if guard.user_id and guard.user_id.has_group('guardpro.group_guardpro_admin'):
+            template_domain = [('active', '=', True)]
+        else:
+            template_domain = [
+                ('active', '=', True),
+                '|',
+                ('site_id', '=', False),
+                ('site_id', 'in', allowed_sites),
+            ]
+        templates = Template.search(template_domain)
         
         for template in templates:
             # Check if already suggested recently

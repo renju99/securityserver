@@ -168,7 +168,7 @@ class CheckpointScan(models.Model):
             )
 
         issue_label = self._facility_issue_type_label(self.facility_issue_type)
-        site_name = self.site_id.name or _('Site')
+        site_name = self.site_id.name or _('Project')
         cp_name = self.checkpoint_id.name or _('Checkpoint')
         title = '[FACILITY] %s – %s – %s' % (issue_label, cp_name, site_name)
 
@@ -176,7 +176,7 @@ class CheckpointScan(models.Model):
         desc_lines = [
             '<p><strong>%s</strong></p>' % escape(self.issue_description or ''),
             '<p>%s: %s</p>' % (escape(_('Checkpoint')), escape(cp_name)),
-            '<p>%s: %s</p>' % (escape(_('Site')), escape(site_name)),
+            '<p>%s: %s</p>' % (escape(_('Project')), escape(site_name)),
             '<p>%s: %s</p>' % (escape(_('Tour log')), escape(tour_ref)),
             '<p>%s: %s</p>' % (
                 escape(_('Scan time')),
@@ -308,9 +308,15 @@ class IncidentReport(models.Model):
         readonly=True,
     )
     is_facility_patrol = fields.Boolean(
+        string='Patrol / Facility Issue',
         compute='_compute_is_facility_patrol',
         store=True,
         index=True,
+        help='Issues reported from patrol checkpoint scans — not security incidents.',
+    )
+    patrol_issue_short_title = fields.Char(
+        string='Patrol Issue Title',
+        compute='_compute_patrol_issue_short_title',
     )
 
     @api.depends('category_id', 'category_id.code', 'source')
@@ -320,6 +326,30 @@ class IncidentReport(models.Model):
                 record.source == 'patrol_checkpoint'
                 or (record.category_id.code == 'FACILITY')
             )
+
+    @api.depends('title', 'name')
+    def _compute_patrol_issue_short_title(self):
+        for record in self:
+            title = (record.title or record.name or '').strip()
+            if title.upper().startswith('[FACILITY]'):
+                title = title[10:].strip(' -–—')
+            record.patrol_issue_short_title = title or record.name
+
+    @api.model
+    def _domain_security_incidents(self, extra_domain=None):
+        """Exclude patrol checkpoint / facility maintenance issues."""
+        domain = [('is_facility_patrol', '=', False)]
+        if extra_domain:
+            domain = domain + list(extra_domain)
+        return domain
+
+    @api.model
+    def _domain_patrol_issues(self, extra_domain=None):
+        """Only issues raised from patrol checkpoint scans."""
+        domain = [('is_facility_patrol', '=', True)]
+        if extra_domain:
+            domain = domain + list(extra_domain)
+        return domain
 
     @api.model
     def _get_facility_patrol_category(self):

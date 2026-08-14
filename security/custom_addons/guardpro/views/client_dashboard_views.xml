@@ -15,7 +15,7 @@
                         <group>
                             <field name="client_id"/>
                             <field name="site_id" 
-                                   placeholder="All Sites" 
+                                   placeholder="All Projects" 
                                    domain="[('client_id', '=', client_id)]"
                                    context="{'default_client_id': client_id}"/>
                         </group>
@@ -80,7 +80,7 @@
         <field name="target">current</field>
     </record>
 
-    <!-- Add Dashboard Button to Client Site -->
+    <!-- Add Dashboard Button to Client Project -->
     <record id="view_client_site_form_dashboard" model="ir.ui.view">
         <field name="name">client.site.form.dashboard</field>
         <field name="model">client.site</field>

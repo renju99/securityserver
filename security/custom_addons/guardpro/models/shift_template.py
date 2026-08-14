@@ -25,7 +25,7 @@ class ShiftTemplate(models.Model):
     
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=True,
         ondelete='restrict',
     )
@@ -84,10 +84,14 @@ class ShiftTemplate(models.Model):
         help='Guards to assign to shifts generated from this template'
     )
     
-    tour_id = fields.Many2one(
+    tour_ids = fields.Many2many(
         'security.tour',
-        string='Assigned Tour',
-        domain="[('site_id', '=', site_id)]"
+        'shift_template_tour_rel',
+        'template_id',
+        'tour_id',
+        string='Assigned Tours',
+        domain="[('site_id', '=', site_id)]",
+        help='Tours to complete during shifts generated from this template',
     )
     
     special_instructions = fields.Text(
@@ -183,16 +187,19 @@ class ShiftTemplate(models.Model):
             end_date = start_date + timedelta(days=30)
         
         shifts_created = []
-        
+        shifts_updated = []
+        tour_ids = self.tour_ids.ids
+
         # Generate shifts for each guard
         for guard in guards:
             if ignore_recurrence:
                 # Generate for all days in range
                 current_date = start_date
                 while current_date <= end_date:
-                    shift = self._create_shift_for_date(current_date, guard)
-                    if shift:
-                        shifts_created.append(shift.id)
+                    self._register_shift_result(
+                        self._create_shift_for_date(
+                            current_date, guard, tour_ids=tour_ids),
+                        shifts_created, shifts_updated)
                     current_date += timedelta(days=1)
             else:
                 # Respect recurrence pattern, starting from start_date
@@ -200,9 +207,10 @@ class ShiftTemplate(models.Model):
                     # Daily: Create shifts for every day from start_date to end_date
                     current_date = start_date
                     while current_date <= end_date:
-                        shift = self._create_shift_for_date(current_date, guard)
-                        if shift:
-                            shifts_created.append(shift.id)
+                        self._register_shift_result(
+                            self._create_shift_for_date(
+                                current_date, guard, tour_ids=tour_ids),
+                            shifts_created, shifts_updated)
                         current_date += timedelta(days=1)
                 elif self.recurrence_type == 'weekly':
                     # Weekly: Create shifts every 7 days starting from start_date
@@ -210,9 +218,10 @@ class ShiftTemplate(models.Model):
                     if self._should_create_shift(start_date):
                         current_date = start_date
                         while current_date <= end_date:
-                            shift = self._create_shift_for_date(current_date, guard)
-                            if shift:
-                                shifts_created.append(shift.id)
+                            self._register_shift_result(
+                                self._create_shift_for_date(
+                                    current_date, guard, tour_ids=tour_ids),
+                                shifts_created, shifts_updated)
                             # Move to next week (7 days later)
                             current_date += timedelta(days=7)
                     else:
@@ -228,9 +237,10 @@ class ShiftTemplate(models.Model):
                         # Create shifts every 7 days from the first matching date
                         if found_first:
                             while current_date <= end_date:
-                                shift = self._create_shift_for_date(current_date, guard)
-                                if shift:
-                                    shifts_created.append(shift.id)
+                                self._register_shift_result(
+                                    self._create_shift_for_date(
+                                        current_date, guard, tour_ids=tour_ids),
+                                    shifts_created, shifts_updated)
                                 current_date += timedelta(days=7)
                 elif self.recurrence_type == 'monthly':
                     # Monthly: Create shifts on the same day of month, starting from start_date
@@ -241,9 +251,10 @@ class ShiftTemplate(models.Model):
                     while current_date <= end_date:
                         # Check if current date matches the day of month
                         if current_date.day == reference_day:
-                            shift = self._create_shift_for_date(current_date, guard)
-                            if shift:
-                                shifts_created.append(shift.id)
+                            self._register_shift_result(
+                                self._create_shift_for_date(
+                                    current_date, guard, tour_ids=tour_ids),
+                                shifts_created, shifts_updated)
                         
                         # Move to next month
                         # Calculate next month's date with same day
@@ -272,19 +283,40 @@ class ShiftTemplate(models.Model):
             guard_names = guards[0].name
         else:
             guard_names = _('%d guards') % len(guards)
-        
+
+        message_parts = []
+        if shifts_created:
+            message_parts.append(
+                _('%d shift(s) created') % len(shifts_created))
+        if shifts_updated:
+            message_parts.append(
+                _('%d existing shift(s) updated with template tours') % len(
+                    shifts_updated))
+        if not message_parts:
+            message_parts.append(
+                _('No shifts were created or updated for the selected date range.'))
+
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'title': _('Success'),
-                'message': _('%d shifts created from template "%s" for %s') % (
-                    len(shifts_created), self.name, guard_names
-                ),
+                'message': _('%s from template "%s" for %s') % (
+                    '; '.join(message_parts), self.name, guard_names),
                 'type': 'success',
                 'sticky': False,
             }
         }
+
+    def _register_shift_result(self, result, shifts_created, shifts_updated):
+        """Track created vs updated shifts from template generation."""
+        shift, created = result
+        if not shift:
+            return
+        if created:
+            shifts_created.append(shift.id)
+        else:
+            shifts_updated.append(shift.id)
     
     def _should_create_shift(self, date):
         """Check if shift should be created on given date."""
@@ -300,23 +332,27 @@ class ShiftTemplate(models.Model):
         
         return False
     
-    def _create_shift_for_date(self, current_date, guard=None):
+    def _create_shift_for_date(self, current_date, guard=None, tour_ids=None):
         """
-        Create a shift for the given date if it doesn't already exist.
-        
+        Create or update a shift for the given date.
+
         Args:
             current_date: Date to create shift for
-            guard: guard.profile record to assign (defaults to self.guard_id for backwards compatibility)
-            
+            guard: guard.profile record to assign
+            tour_ids: security.tour ids from the template (snapshot at generation time)
+
         Returns:
-            guard.shift record if created, False if already exists or creation failed
+            tuple (guard.shift|False, created_bool)
         """
         # Support backwards compatibility with single guard_id field
         if not guard:
             guard = self.guard_id
-        
+
         if not guard:
-            return False
+            return False, False
+
+        if tour_ids is None:
+            tour_ids = self.tour_ids.ids
         # Create datetime in user's timezone, then convert to UTC for storage
         # Use Odoo's datetime utilities to handle timezone properly
         user_tz = self.env.user.tz or 'UTC'
@@ -381,24 +417,25 @@ class ShiftTemplate(models.Model):
         ])
         
         if existing:
-            return False
-        
+            existing.write({'tour_ids': [(6, 0, tour_ids)]})
+            return existing, False
+
         # Calculate end datetime (already in UTC)
         end_datetime = shift_datetime + timedelta(hours=self.duration_hours)
-        
+
         shift = self.env['guard.shift'].create({
             'site_id': self.site_id.id,
             'guard_id': guard.id,
             'start_datetime': shift_datetime,
             'end_datetime': end_datetime,
             'shift_type': 'regular',  # Template-generated shifts are regular scheduled shifts
-            'tour_ids': [(6, 0, [self.tour_id.id])] if self.tour_id else False,
+            'tour_ids': [(6, 0, tour_ids)],
             'notes': self.special_instructions,
             'template_id': self.id,
             'status': 'scheduled'
         })
-        
-        return shift
+
+        return shift, True
     
     
     def action_generate_shifts_from_form(self):

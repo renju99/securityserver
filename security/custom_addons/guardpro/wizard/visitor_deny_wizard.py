@@ -42,14 +42,18 @@ class VisitorDenyWizard(models.TransientModel):
             'denied_reason': self.reason
         })
         
-        # Add to watchlist if requested
+        # Add to watchlist if requested (scoped to the visitor's site)
         if self.add_to_watchlist:
+            site_cmd = []
+            if self.visitor_id.site_id:
+                site_cmd = [(6, 0, [self.visitor_id.site_id.id])]
             self.env['visitor.watchlist'].create({
                 'name': self.visitor_id.name,
                 'id_number': self.visitor_id.id_number,
                 'reason': self.reason,
                 'category': self.watchlist_category,
-                'photo': self.visitor_id.visitor_photo
+                'photo': self.visitor_id.visitor_photo,
+                'site_ids': site_cmd,
             })
         
         return {'type': 'ir.actions.act_window_close'}

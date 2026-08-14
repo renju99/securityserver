@@ -39,7 +39,7 @@ class ClientFeedback(models.Model):
     # records (guards rotate, shifts close, residents move out).
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=True,
         tracking=True,
         ondelete='restrict'
@@ -51,7 +51,7 @@ class ClientFeedback(models.Model):
         string='Resident/Tenant',
         tracking=True,
         ondelete='set null',
-        help='Resident who submitted this feedback (for community sites)'
+        help='Resident who submitted this feedback (for community projects)'
     )
     
     feedback_source = fields.Selection([
@@ -214,6 +214,20 @@ class ClientFeedback(models.Model):
         if self.resident_id:
             self.site_id = self.resident_id.site_id
             self.client_id = self.resident_id.client_id
+
+    @api.constrains('guard_id', 'site_id')
+    def _check_guard_belongs_to_site(self):
+        """Reject feedback naming a guard who is not assigned to the site."""
+        for record in self:
+            if not record.guard_id or not record.site_id:
+                continue
+            if record.site_id.id not in record.guard_id.site_ids.ids:
+                raise ValidationError(_(
+                    'Guard "%(guard)s" is not assigned to site "%(site)s".'
+                ) % {
+                    'guard': record.guard_id.display_name,
+                    'site': record.site_id.display_name,
+                })
     
     @api.model_create_multi
     def create(self, vals_list):

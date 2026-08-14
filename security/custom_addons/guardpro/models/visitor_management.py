@@ -6,6 +6,7 @@ from odoo.tools import html_sanitize, email_normalize
 import uuid
 import qrcode
 import base64
+import re
 from io import BytesIO
 import logging
 from datetime import datetime
@@ -112,7 +113,7 @@ class VisitorManagement(models.Model):
     # Visit Details
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=False,
         tracking=True,
         index=True,
@@ -120,6 +121,14 @@ class VisitorManagement(models.Model):
         # if the site is later deleted (SET NULL rather than cascade).
         ondelete='set null',
         help='Site being visited'
+    )
+    zone_id = fields.Many2one(
+        'site.zone',
+        string='Zone',
+        domain="[('site_id', '=', site_id)]",
+        ondelete='set null',
+        tracking=True,
+        index=True,
     )
     visit_date = fields.Date(
         string='Visit Date',
@@ -169,6 +178,14 @@ class VisitorManagement(models.Model):
     )
     host_email = fields.Char(
         string='Host Email'
+    )
+    host_community = fields.Char(
+        string='Community',
+        help='Community of the host / person being visited'
+    )
+    host_unit_number = fields.Char(
+        string='Unit Number',
+        help='Unit / villa / apartment number of the host'
     )
     host_department = fields.Char(
         string='Department',
@@ -427,7 +444,11 @@ class VisitorManagement(models.Model):
                         str(e)
                     )
         
-        return super().create(vals_list)
+        records = super().create(vals_list)
+        for record in records:
+            if record.host_id and record.site_id:
+                record.host_id._sync_site_from_visit(record.site_id)
+        return records
     
     def write(self, vals):
         """Override write to sanitize inputs on update"""
@@ -480,7 +501,12 @@ class VisitorManagement(models.Model):
                     str(e)
                 )
         
-        return super().write(vals)
+        result = super().write(vals)
+        if 'host_id' in vals or 'site_id' in vals:
+            for record in self:
+                if record.host_id and record.site_id:
+                    record.host_id._sync_site_from_visit(record.site_id)
+        return result
 
     @api.onchange('host_id')
     def _onchange_host_id(self):
@@ -488,6 +514,126 @@ class VisitorManagement(models.Model):
         if self.host_id:
             self.host_name = self.host_id.display_name
             self.host_email = self.host_id.email
+
+    @api.model
+    def _normalize_visitor_id_number(self, id_number):
+        """Normalize ID for matching (strip spaces/dashes, uppercase)."""
+        if not id_number:
+            return ''
+        return re.sub(r'[\s\-]', '', str(id_number)).upper()
+
+    @api.model
+    def lookup_returning_visitor(self, id_number, exclude_id=None, site_ids=None):
+        """
+        Return field defaults from the most recent visit with the same ID.
+
+        Used by reception/security so returning visitors (matched by Emirates ID)
+        do not need their details retyped.
+
+        ``site_ids`` restricts the search to those sites. Pass an empty list to
+        force no results (fail closed). ``None`` means no site filter (admin /
+        intentionally unrestricted callers only).
+        """
+        norm = self._normalize_visitor_id_number(id_number)
+        if len(norm) < 5:
+            return {}
+
+        # Fail closed: empty site list → no cross-tenant PII
+        if site_ids is not None and not site_ids:
+            return {}
+
+        domain = [('id_number', '!=', False)]
+        if site_ids is not None:
+            domain.append(('site_id', 'in', list(site_ids)))
+        if exclude_id:
+            domain.append(('id', '!=', int(exclude_id)))
+
+        # Prefer exact match, then normalized match among recent candidates
+        prior = self.search(
+            domain + [('id_number', '=', str(id_number).strip())],
+            limit=1,
+            order='visit_date desc, id desc',
+        )
+        if not prior:
+            tail = norm[-12:] if len(norm) > 12 else norm
+            candidates = self.search(
+                domain + [('id_number', 'ilike', '%' + tail + '%')],
+                limit=40,
+                order='visit_date desc, id desc',
+            )
+            prior = candidates.filtered(
+                lambda v: self._normalize_visitor_id_number(v.id_number) == norm
+            )[:1]
+
+        if not prior:
+            return {}
+
+        visit = prior[0]
+        fields_to_copy = [
+            'name', 'name_arabic', 'nationality', 'date_of_birth', 'gender',
+            'mobile_number', 'email', 'company', 'occupation', 'employer_name',
+            'issuing_place', 'passport_number', 'visa_number', 'visitor_type',
+            'id_type', 'id_expiry_date', 'id_issue_date',
+            'host_id', 'host_name', 'host_phone', 'host_email',
+            'host_community', 'host_unit_number', 'host_department',
+        ]
+        data = {'prior_visit_id': visit.id}
+        for fname in fields_to_copy:
+            value = visit[fname]
+            if not value:
+                continue
+            if fname == 'host_id':
+                data[fname] = value.id
+            elif fname in ('date_of_birth', 'id_expiry_date', 'id_issue_date'):
+                data[fname] = fields.Date.to_string(value) if value else False
+            else:
+                data[fname] = value
+        return data
+
+    @api.onchange('id_number')
+    def _onchange_id_number_returning_visitor(self):
+        """Autofill contact/host details when a known Emirates ID is entered."""
+        if not self.id_number:
+            return
+        exclude_id = self._origin.id if self._origin else None
+        # Scope to this form's site, else the user's assigned projects (never global)
+        if self.site_id:
+            site_ids = [self.site_id.id]
+        elif self.env.user.has_group('guardpro.group_guardpro_admin'):
+            site_ids = None
+        else:
+            site_ids = self.env.user.site_ids.ids
+        data = self.lookup_returning_visitor(
+            self.id_number, exclude_id=exclude_id, site_ids=site_ids,
+        )
+        if not data:
+            return
+
+        filled = []
+        for fname, value in data.items():
+            if fname == 'prior_visit_id' or not value:
+                continue
+            current = self[fname]
+            if fname == 'host_id':
+                if current:
+                    continue
+                self.host_id = value
+            elif current:
+                continue
+            else:
+                self[fname] = value
+            filled.append(fname)
+
+        if filled:
+            return {
+                'warning': {
+                    'title': _('Returning visitor'),
+                    'message': _(
+                        'Details loaded from a previous visit for this ID. '
+                        'Please verify before saving.'
+                    ),
+                }
+            }
 
     @api.depends('qr_code')
     def _compute_qr_image(self):
@@ -561,19 +707,27 @@ class VisitorManagement(models.Model):
                     raise ValidationError(_('Temperature must be between 30-45°C'))
 
     def action_check_watchlist(self):
-        """Check visitor against watchlist"""
+        """Check visitor against watchlist (site-scoped, including creator's sites)."""
         self.ensure_one()
         
         if not self.id_number:
             raise UserError(_('Please enter visitor ID number before checking watchlist.'))
-        
-        # Search watchlist
-        watchlist_entry = self.env['visitor.watchlist'].search([
+
+        # Use sudo so empty-/cross-rule gaps never skip a real threat; then
+        # restrict to this visit's site (or company-wide entries with no sites).
+        Watchlist = self.env['visitor.watchlist'].sudo()
+        domain = [
+            ('active', '=', True),
             '|',
             ('id_number', '=', self.id_number),
             ('name', '=ilike', self.name),
-            ('active', '=', True)
-        ], limit=1)
+        ]
+        if self.site_id:
+            domain = [
+                '&',
+                '|', ('site_ids', 'in', [self.site_id.id]), ('site_ids', '=', False),
+            ] + domain
+        watchlist_entry = Watchlist.search(domain, limit=1)
         
         if watchlist_entry:
             self.write({
@@ -583,8 +737,6 @@ class VisitorManagement(models.Model):
                 'state': 'denied',
                 'denied_reason': _('Visitor found in watchlist: %s') % watchlist_entry.reason
             })
-            
-            # Planned activity intentionally disabled.
             
             _logger.warning(
                 'Watchlist hit for visitor %s (ID: %s)',
@@ -862,8 +1014,45 @@ class VisitorManagement(models.Model):
         return True
 
     @api.model
+    def _recipients_for_site_visitor_log(self, site):
+        """Resolve per-site mailbox for the daily visitor PII report.
+
+        Priority (first non-empty only — never fan-out to multiple roles):
+        1. site.site_email (comma/semicolon separated allowed)
+        2. site.manager_id.email
+        3. site.client_id.email
+        """
+        raw_parts = []
+        if site and site.site_email:
+            raw_parts.extend(re.split(r'[,;\s]+', site.site_email.strip()))
+        elif site and site.manager_id and site.manager_id.email:
+            raw_parts.append(site.manager_id.email)
+        elif site and site.client_id and site.client_id.email:
+            raw_parts.append(site.client_id.email)
+
+        emails = []
+        seen = set()
+        for part in raw_parts:
+            if not part:
+                continue
+            try:
+                normalized = email_normalize(part)
+            except Exception:
+                normalized = False
+            if not normalized or normalized in seen:
+                continue
+            seen.add(normalized)
+            emails.append(normalized)
+        return emails
+
+    @api.model
     def send_daily_visitor_log_email(self):
-        """Cron job: send daily visitor log summary at 6 PM Dubai time."""
+        """Cron: send daily visitor log at 18:00 Asia/Dubai — one email per site.
+
+        Each site only receives its own visitors' PII. Sites without a configured
+        recipient (site_email / manager / client) are skipped. Unassigned visitors
+        are never emailed.
+        """
         dubai_tz = pytz.timezone('Asia/Dubai')
         now_dubai = datetime.now(dubai_tz)
         today_dubai = now_dubai.date()
@@ -877,63 +1066,97 @@ class VisitorManagement(models.Model):
         if config.get_param(sent_key) == str(today_dubai):
             return True
 
-        visitors = self.search([('visit_date', '=', today_dubai)])
-        total = len(visitors)
-        checked_in = len(visitors.filtered(lambda v: v.state == 'checked_in'))
-        checked_out = len(visitors.filtered(lambda v: v.state == 'checked_out'))
-        denied = len(visitors.filtered(lambda v: v.state == 'denied'))
-        pre_registered = len(visitors.filtered(lambda v: v.state == 'pre_registered'))
+        visitors = self.search([
+            ('visit_date', '=', today_dubai),
+            ('site_id', '!=', False),
+        ])
+        unassigned = self.search_count([
+            ('visit_date', '=', today_dubai),
+            ('site_id', '=', False),
+        ])
+        if unassigned:
+            _logger.warning(
+                'Daily visitor log: skipped %s visitor(s) with no site_id (PII not emailed)',
+                unassigned,
+            )
 
-        by_site = {}
-        for visitor in visitors:
-            site_name = visitor.site_id.name if visitor.site_id else 'Unassigned Site'
-            by_site[site_name] = by_site.get(site_name, 0) + 1
-
-        rows = ''.join(
-            f'<tr><td style="padding:6px 10px;border:1px solid #ddd;">{site}</td>'
-            f'<td style="padding:6px 10px;border:1px solid #ddd;text-align:right;">{count}</td></tr>'
-            for site, count in sorted(by_site.items())
-        ) or '<tr><td style="padding:6px 10px;border:1px solid #ddd;" colspan="2">No visitor entries today.</td></tr>'
-
-        body_html = (
-            f'<div style="font-family:Arial,sans-serif;">'
-            f'<h3>Daily Visitor Log - {today_dubai}</h3>'
-            f'<p><strong>Total:</strong> {total}</p>'
-            f'<ul>'
-            f'<li>Checked In: {checked_in}</li>'
-            f'<li>Checked Out: {checked_out}</li>'
-            f'<li>Denied: {denied}</li>'
-            f'<li>Pre-Registered: {pre_registered}</li>'
-            f'</ul>'
-            f'<h4>Visitors by Site</h4>'
-            f'<table style="border-collapse:collapse;min-width:420px;">'
-            f'<thead><tr><th style="padding:6px 10px;border:1px solid #ddd;text-align:left;">Site</th>'
-            f'<th style="padding:6px 10px;border:1px solid #ddd;text-align:right;">Count</th></tr></thead>'
-            f'<tbody>{rows}</tbody></table>'
-            f'<p style="margin-top:16px;">A detailed Excel file is attached with full visitor records.</p>'
-            f'</div>'
-        )
-
-        xlsx_data = self._build_daily_visitor_log_xlsx(visitors, today_dubai, dubai_tz)
-
-        # Use a fixed, verified sender identity for SMTP providers like SendGrid.
         sender = 'noreply@berkeleyuae.com'
-        mail = self.env['mail.mail'].sudo().create({
-            'subject': f'Daily Visitor Log - {today_dubai}',
-            'email_from': sender,
-            'email_to': 'khristine@berkeleyuae.com',
-            'body_html': body_html,
-            'attachment_ids': [(0, 0, {
-                'name': f'visitor_log_{today_dubai}.xlsx',
-                'datas': base64.b64encode(xlsx_data),
-                'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            })],
-            'auto_delete': False,
-        })
-        mail.send()
+        sent_count = 0
+        skipped_sites = []
 
+        site_groups = {}
+        for visitor in visitors:
+            site_groups.setdefault(visitor.site_id.id, self.env['visitor.management'])
+            site_groups[visitor.site_id.id] |= visitor
+
+        for site_id, site_visitors in site_groups.items():
+            site = self.env['client.site'].browse(site_id)
+            recipients = self._recipients_for_site_visitor_log(site)
+            if not recipients:
+                skipped_sites.append(site.display_name or site_id)
+                continue
+
+            total = len(site_visitors)
+            checked_in = len(site_visitors.filtered(lambda v: v.state == 'checked_in'))
+            checked_out = len(site_visitors.filtered(lambda v: v.state == 'checked_out'))
+            denied = len(site_visitors.filtered(lambda v: v.state == 'denied'))
+            pre_registered = len(site_visitors.filtered(lambda v: v.state == 'pre_registered'))
+
+            body_html = (
+                f'<div style="font-family:Arial,sans-serif;">'
+                f'<h3>Daily Visitor Log - {site.name} - {today_dubai}</h3>'
+                f'<p>This report contains visitors for <strong>{site.name}</strong> only.</p>'
+                f'<p><strong>Total:</strong> {total}</p>'
+                f'<ul>'
+                f'<li>Checked In: {checked_in}</li>'
+                f'<li>Checked Out: {checked_out}</li>'
+                f'<li>Denied: {denied}</li>'
+                f'<li>Pre-Registered: {pre_registered}</li>'
+                f'</ul>'
+                f'<p style="margin-top:16px;">A detailed Excel file is attached with this site\'s visitor records.</p>'
+                f'</div>'
+            )
+
+            xlsx_data = self._build_daily_visitor_log_xlsx(
+                site_visitors, today_dubai, dubai_tz
+            )
+            site_slug = re.sub(r'[^\w\-]+', '_', site.code or site.name or 'site')[:40]
+            mail = self.env['mail.mail'].sudo().create({
+                'subject': f'Daily Visitor Log - {site.name} - {today_dubai}',
+                'email_from': sender,
+                'email_to': ','.join(recipients),
+                'body_html': body_html,
+                'attachment_ids': [(0, 0, {
+                    'name': f'visitor_log_{site_slug}_{today_dubai}.xlsx',
+                    'datas': base64.b64encode(xlsx_data),
+                    'mimetype': (
+                        'application/vnd.openxmlformats-officedocument'
+                        '.spreadsheetml.sheet'
+                    ),
+                })],
+                'auto_delete': False,
+            })
+            mail.send()
+            sent_count += 1
+            _logger.info(
+                'Daily visitor log emailed for site %s (%s) to %s (%s visitors)',
+                site.name, today_dubai, ','.join(recipients), total,
+            )
+
+        if skipped_sites:
+            _logger.warning(
+                'Daily visitor log: no recipient configured for site(s): %s '
+                '(set Project Email, Project Manager email, or Client email)',
+                ', '.join(str(s) for s in skipped_sites),
+            )
+
+        # Mark day complete even if some sites were skipped, to avoid retry loops
+        # that re-spam successfully delivered sites.
         config.set_param(sent_key, str(today_dubai))
-        _logger.info('Daily visitor log email sent for %s to khristine@berkeleyuae.com', today_dubai)
+        _logger.info(
+            'Daily visitor log run finished for %s: %s site email(s) sent, %s skipped',
+            today_dubai, sent_count, len(skipped_sites),
+        )
         return True
 
     @api.model
@@ -950,6 +1173,7 @@ class VisitorManagement(models.Model):
             'Visitor Name', 'Visitor Type', 'State', 'Visit Date',
             'Check-in (Dubai)', 'Check-out (Dubai)',
             'Site', 'Host Name', 'Host Email', 'Host Phone',
+            'Community', 'Unit Number',
             'Purpose', 'Purpose Details',
             'Company', 'Mobile Number', 'Email',
             'ID Type', 'ID Number', 'Badge Number',
@@ -991,6 +1215,8 @@ class VisitorManagement(models.Model):
                 visitor.host_name or '',
                 visitor.host_email or '',
                 visitor.host_phone or '',
+                visitor.host_community or '',
+                visitor.host_unit_number or '',
                 dict(visitor._fields['visit_purpose'].selection).get(visitor.visit_purpose, '') if visitor.visit_purpose else '',
                 visitor.purpose_details or '',
                 visitor.company or '',
@@ -1036,10 +1262,53 @@ class VisitorHost(models.Model):
     email = fields.Char(string='Email', required=True, index=True)
     active = fields.Boolean(default=True)
     display_name = fields.Char(string='Name', compute='_compute_display_name', store=True)
+    site_ids = fields.Many2many(
+        'client.site',
+        'visitor_host_site_rel',
+        'host_id',
+        'site_id',
+        string='Sites',
+        help='Sites where this host appears in visitor workflows. '
+             'Auto-assigned from the creator\'s sites or the visit site.',
+    )
 
     _sql_constraints = [
         ('visitor_host_email_unique', 'unique(email)', 'Host email must be unique.'),
     ]
+
+    @api.model
+    def _default_site_ids(self):
+        """Default sites for new hosts: caller's assigned projects."""
+        user = self.env.user
+        if user.site_ids:
+            return [(6, 0, user.site_ids.ids)]
+        return []
+
+    @api.model
+    def default_get(self, fields_list):
+        res = super().default_get(fields_list)
+        if 'site_ids' in fields_list and not res.get('site_ids'):
+            res['site_ids'] = self._default_site_ids()
+        return res
+
+    def _sync_site_from_visit(self, site):
+        """Ensure ``site`` is linked on this host (idempotent)."""
+        if not site:
+            return
+        for host in self:
+            if site not in host.site_ids:
+                host.sudo().write({'site_ids': [(4, site.id)]})
+
+    @api.constrains('site_ids')
+    def _check_host_site_ids(self):
+        for host in self:
+            if not host.site_ids and not self.env.user.has_group(
+                'guardpro.group_guardpro_admin'
+            ):
+                raise ValidationError(
+                    _('Please assign at least one site to host "%s".')
+                    % (host.display_name or host.email)
+                )
 
     @api.depends('first_name', 'last_name')
     def _compute_display_name(self):
@@ -1051,6 +1320,34 @@ class VisitorHost(models.Model):
         for vals in vals_list:
             if vals.get('email'):
                 vals['email'] = email_normalize(vals['email'])
+            if not vals.get('site_ids'):
+                defaults = self._default_site_ids()
+                if defaults:
+                    vals['site_ids'] = defaults
+                else:
+                    ctx_site = (
+                        self.env.context.get('default_site_id')
+                        or self.env.context.get('force_site_id')
+                    )
+                    if ctx_site:
+                        vals['site_ids'] = [(6, 0, [int(ctx_site)])]
+                    elif self.env.su or self.env.user.has_group(
+                        'guardpro.group_guardpro_admin'
+                    ):
+                        all_sites = self.env['client.site'].sudo().search([
+                            ('active', '=', True),
+                        ]).ids
+                        if all_sites:
+                            vals['site_ids'] = [(6, 0, all_sites)]
+                        else:
+                            raise UserError(_(
+                                'Cannot create a host: no active sites exist.'
+                            ))
+                    else:
+                        raise UserError(_(
+                            'Cannot create a host without sites. '
+                            'Ask an administrator to assign sites to your user.'
+                        ))
         return super().create(vals_list)
 
     def write(self, vals):
@@ -1138,6 +1435,74 @@ class VisitorWatchlist(models.Model):
         string='Photo',
         help='Photo for identification'
     )
+    site_ids = fields.Many2many(
+        'client.site',
+        'visitor_watchlist_site_rel',
+        'watchlist_id',
+        'site_id',
+        string='Sites',
+        help='Sites where this watchlist entry applies. '
+             'Auto-assigned from the visit site / creator sites on create.',
+    )
+
+    @api.model
+    def _default_site_ids(self):
+        user = self.env.user
+        if user.site_ids:
+            return [(6, 0, user.site_ids.ids)]
+        return []
+
+    @api.model
+    def default_get(self, fields_list):
+        res = super().default_get(fields_list)
+        if 'site_ids' in fields_list and not res.get('site_ids'):
+            res['site_ids'] = self._default_site_ids()
+        return res
+
+    @api.constrains('site_ids')
+    def _check_watchlist_site_ids(self):
+        for entry in self:
+            if not entry.site_ids and not self.env.user.has_group(
+                'guardpro.group_guardpro_admin'
+            ):
+                raise ValidationError(
+                    _('Please assign at least one site to watchlist entry "%s".')
+                    % entry.name
+                )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if not vals.get('site_ids'):
+                defaults = self._default_site_ids()
+                if defaults:
+                    vals['site_ids'] = defaults
+                else:
+                    ctx_site = (
+                        self.env.context.get('default_site_id')
+                        or self.env.context.get('force_site_id')
+                    )
+                    if ctx_site:
+                        vals['site_ids'] = [(6, 0, [int(ctx_site)])]
+                    else:
+                        all_sites = self.env['client.site'].sudo().search([
+                            ('active', '=', True),
+                        ]).ids
+                        if all_sites and (
+                            self.env.su
+                            or self.env.user.has_group('guardpro.group_guardpro_admin')
+                        ):
+                            vals['site_ids'] = [(6, 0, all_sites)]
+                        elif not all_sites:
+                            raise UserError(_(
+                                'Cannot create a watchlist entry: no active sites exist.'
+                            ))
+                        else:
+                            raise UserError(_(
+                                'Cannot create a watchlist entry without sites. '
+                                'Ask an administrator to assign sites to your user.'
+                            ))
+        return super().create(vals_list)
 
     @api.model
     def check_expired_entries(self):

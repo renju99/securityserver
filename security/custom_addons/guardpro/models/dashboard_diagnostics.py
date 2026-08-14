@@ -24,7 +24,7 @@ class ClientDashboard(models.Model):
         diagnostics.append("DASHBOARD DIAGNOSTICS REPORT")
         diagnostics.append("=" * 60)
         diagnostics.append(f"Client: {self.client_id.name if self.client_id else 'Not Set'}")
-        diagnostics.append(f"Site: {self.site_id.name if self.site_id else 'All Sites'}")
+        diagnostics.append(f"Site: {self.site_id.name if self.site_id else 'All Projects'}")
         diagnostics.append(f"Date Range: {self.date_from} to {self.date_to}")
         diagnostics.append("")
         

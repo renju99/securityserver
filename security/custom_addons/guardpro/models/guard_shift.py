@@ -38,13 +38,21 @@ class GuardShift(models.Model):
     )
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=True,
         tracking=True,
         index=True,
         ondelete='restrict'
     )
-    
+    zone_id = fields.Many2one(
+        'site.zone',
+        string='Zone',
+        domain="[('site_id', '=', site_id)]",
+        ondelete='set null',
+        tracking=True,
+        index=True,
+    )
+
     # Timing
     start_datetime = fields.Datetime(
         string='Start Date/Time',
@@ -896,43 +904,12 @@ class GuardShift(models.Model):
 
     def _push_shift_mobile_notification(self, kind, title, body_extra=None,
                                         priority='normal'):
-        """Shared helper used by create/write/action_confirm/action_cancel."""
-        self.ensure_one()
-        if not self.guard_id or not self.guard_id.user_id:
-            return
-        body_parts = []
-        if self.site_id:
-            body_parts.append(_('Site: %s') % self.site_id.name)
-        if self.start_datetime:
-            body_parts.append(_('Start: %s') % self.start_datetime)
-        if self.end_datetime:
-            body_parts.append(_('End: %s') % self.end_datetime)
-        if body_extra:
-            body_parts.append(body_extra)
-        self.env['guardpro.mobile.outbox'].sudo().push(
-            user=self.guard_id.user_id,
-            kind=kind,
-            title=title,
-            body='\n'.join(body_parts),
-            priority=priority,
-            res_model='guard.shift',
-            res_id=self.id,
-            deep_link='/guardpro/mobile/shifts',
-            dedup_key='shift:%s:%s' % (self.id, kind),
-        )
+        """No-op: shift acknowledgements on mobile are disabled."""
+        return
 
     def _send_shift_change_email(self):
-        """Fire a mobile outbox notification about the shift change."""
-        for shift in self:
-            if not shift.guard_id or not shift.guard_id.user_id:
-                continue
-            kind = 'shift_cancelled' if shift.status == 'cancelled' else 'shift_changed'
-            title = _('Shift cancelled') if kind == 'shift_cancelled' else _('Shift updated')
-            shift._push_shift_mobile_notification(
-                kind=kind,
-                title=title,
-                priority='high' if kind == 'shift_cancelled' else 'normal',
-            )
+        """No-op: shift change mobile push/email acknowledgements disabled."""
+        return
 
     def action_checkin(self, latitude=None, longitude=None, checkpoint_scan_id=None, photo=None,
                       biometric_type=None, biometric_data=None, device_id=None):
@@ -1042,11 +1019,11 @@ class GuardShift(models.Model):
                 ))
             if not self.site_id.check_guard_in_geofence(latitude, longitude):
                 raise ValidationError(_(
-                    'You are not within the site geofence!'
+                    'You are not within the project geofence!'
                 ))
         
-        # Update shift status on first shift start
-        if not self.attendance_ids:
+        # Update shift status on check-in (including late arrivals after no_show)
+        if self.status in ('scheduled', 'confirmed', 'no_show') or not self.attendance_ids:
             self.write({
                 'status': 'in_progress',
                 'checkin_time': now,
@@ -1132,7 +1109,7 @@ class GuardShift(models.Model):
                 ))
             if not self.site_id.check_guard_in_geofence(latitude, longitude):
                 raise ValidationError(_(
-                    'You are not within the site geofence!'
+                    'You are not within the project geofence!'
                 ))
         
         # Calculate hours for this shift end
@@ -1318,53 +1295,77 @@ class GuardShift(models.Model):
     
     @api.model
     def check_missed_checkins(self):
-        """Alert supervisors about guards who haven't started their shift.
-        
+        """Mark true no-shows after the shift window ends with no attendance.
+
         Called by scheduled action every 15 minutes.
+        Previously this stamped ``no_show`` 15 minutes after *start*, which
+        conflicted with late arrivals and PWA check-in paths that record hours
+        without clearing the status.
         """
-        from datetime import datetime, timedelta
-        
+        from datetime import timedelta
+
         now = fields.Datetime.now()
-        grace_period = timedelta(minutes=15)
-        
-        # Find shifts that should have started but no shift start
+        grace_period = timedelta(minutes=30)
+
+        # Only after shift end (+ grace), still scheduled/confirmed, no attendance
         missed_shifts = self.search([
-            ('start_datetime', '<', now - grace_period),
-            ('start_datetime', '>', now - timedelta(hours=4)),
-            ('status', '=', 'scheduled'),
-            ('attendance_count', '=', 0)
+            ('end_datetime', '<', now - grace_period),
+            ('end_datetime', '>', now - timedelta(days=2)),
+            ('status', 'in', ['scheduled', 'confirmed']),
+            ('attendance_count', '=', 0),
         ])
-        
+
         if missed_shifts:
-            _logger.warning('Found %d shifts with missed shift starts', len(missed_shifts))
-        
+            _logger.warning('Found %d shifts with missed check-ins (post end)', len(missed_shifts))
+
         for shift in missed_shifts:
             try:
-                # Create activity for supervisor
                 shift.activity_schedule(
                     'mail.mail_activity_data_urgent',
                     summary=_('Missed Shift Start'),
                     note=_(
-                        'Guard %s has not started their shift at %s. '
-                        'Shift was scheduled to start at %s.'
-                    ) % (shift.guard_id.name, shift.site_id.name, shift.start_datetime),
+                        'Guard %s did not check in for their shift at %s. '
+                        'Shift was scheduled %s – %s.'
+                    ) % (
+                        shift.guard_id.name,
+                        shift.site_id.name,
+                        shift.start_datetime,
+                        shift.end_datetime,
+                    ),
                     user_id=(
                         shift.site_id.manager_id.user_ids[:1].id
                         if shift.site_id.manager_id and shift.site_id.manager_id.user_ids
                         else self.env.user.id
                     )
                 )
-                
-                # Update shift status
+
                 shift.status = 'no_show'
-                
-                _logger.info('Created alert for missed shift start: shift %s, guard %s',
-                           shift.id, shift.guard_id.name)
-                           
+
+                _logger.info(
+                    'Marked no-show after shift end: shift %s, guard %s',
+                    shift.id, shift.guard_id.name,
+                )
+
             except Exception as e:
-                _logger.error('Error processing missed shift start for shift %s: %s',
-                            shift.id, str(e))
-        
+                _logger.error(
+                    'Error processing missed shift start for shift %s: %s',
+                    shift.id, str(e),
+                )
+
+        # Heal sticky no_show rows that later received attendance
+        sticky = self.search([
+            ('status', '=', 'no_show'),
+            ('attendance_count', '>', 0),
+        ], limit=200)
+        for shift in sticky:
+            open_atts = shift.attendance_ids.filtered(
+                lambda a: a.checkin_time and not a.checkout_time
+            )
+            if open_atts:
+                shift.status = 'in_progress'
+            else:
+                shift.status = 'completed'
+
         return True
     
     def init(self):

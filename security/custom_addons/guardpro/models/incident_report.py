@@ -43,11 +43,20 @@ class IncidentReport(models.Model):
     )
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=True,
         tracking=True,
         index=True,
         ondelete='restrict'
+    )
+    zone_id = fields.Many2one(
+        'site.zone',
+        string='Zone',
+        domain="[('site_id', '=', site_id)]",
+        ondelete='set null',
+        tracking=True,
+        index=True,
+        help='Operational zone for access control and reporting',
     )
     shift_id = fields.Many2one(
         'guard.shift',
@@ -77,6 +86,15 @@ class IncidentReport(models.Model):
         required=True,
         tracking=True,
         ondelete='restrict'
+    )
+    form_parent_id = fields.Many2one(
+        'incident.form.parent',
+        string='Parent Category',
+        tracking=True,
+        help='Excel-aligned parent form category (Parent Category → Form Section → Field).',
+    )
+    form_value_ids = fields.One2many(
+        'incident.form.value', 'incident_id', string='Form Field Values',
     )
     severity = fields.Selection([
         ('low', 'Low'),
@@ -125,6 +143,18 @@ class IncidentReport(models.Model):
     witnesses = fields.Text(
         string='Witnesses',
         help='Names and contact info of witnesses'
+    )
+    involved_community = fields.Char(
+        string='Community',
+        help='Community of the involved person (e.g. residential community name)'
+    )
+    involved_unit_number = fields.Char(
+        string='Unit Number',
+        help='Unit / villa / apartment number of the involved person'
+    )
+    involved_parking_slot = fields.Char(
+        string='Parking Slot Number',
+        help='Parking slot number (for parking violations)'
     )
     
     # Actions Taken
@@ -551,7 +581,10 @@ class IncidentReport(models.Model):
     violation_fine_amount = fields.Float(string='Fine Amount', digits=(10, 2))
     
     # Door Lock Form Specific Fields
-    door_lock_community_name = fields.Char(string='Community name as per salesforce')
+    door_lock_community_name = fields.Char(
+        string='Community Name',
+        help='Type the community name manually',
+    )
     door_lock_unit_number = fields.Char(string='Unit Number')
     door_lock_incident_type = fields.Selection([
         ('break', 'Break'),
@@ -836,17 +869,17 @@ class IncidentReport(models.Model):
             # Safety incidents
             record.is_safety_incident = category_code == 'SAFE'
             
-            # Statement incidents
-            record.is_statement_incident = category_code == 'STMT'
+            # Statement incidents (legacy STMT + live STATEMENT)
+            record.is_statement_incident = category_code in ('STMT', 'STATEMENT')
 
             # Fire Emergency incidents
             record.is_fire_emergency_incident = category_code == 'FIRE_EMG'
 
-            # Found Item incidents
-            record.is_found_item_incident = category_code == 'FOUND'
+            # Found Item incidents (legacy FOUND + live FOUND ITEM)
+            record.is_found_item_incident = category_code in ('FOUND', 'FOUND ITEM')
 
-            # Return Form incidents
-            record.is_return_form_incident = category_code == 'RETURN'
+            # Return Form incidents (legacy RETURN + live RETURN FORM)
+            record.is_return_form_incident = category_code in ('RETURN', 'RETURN FORM')
 
             # Community violation incidents
             record.is_community_violation_incident = category_code in [
@@ -854,6 +887,7 @@ class IncidentReport(models.Model):
                 'ANIMAL', 'DMG_REC', 'DMG_COM', 'DMG_SPT', 'DMG_POOL',
                 'DMG_PLNT', 'GARDEN', 'HOME_APP', 'EXT_MAJ', 'EXT_MIN',
                 'SIGNAGE', 'TERRACE', 'PEST', 'GARAGE', 'RETAIL',
+                'ACS', 'ABSCS', 'MIS-COMMON', 'VOSSP', 'VSSP',
             ]
 
             # Door Lock incidents
@@ -866,6 +900,8 @@ class IncidentReport(models.Model):
     def _check_dates(self):
         """Validate incident dates."""
         for record in self:
+            if not record.reported_datetime or not record.incident_datetime:
+                continue
             if record.reported_datetime < record.incident_datetime:
                 raise ValidationError(_(
                     'Reported date/time cannot be before incident date/time!'
@@ -873,12 +909,18 @@ class IncidentReport(models.Model):
 
     def action_submit(self):
         """Submit incident report for review."""
-        self.write({
-            'status': 'submitted',
-            'reported_datetime': fields.Datetime.now()
-        })
-        # Send notification to supervisor
-        self._send_incident_notification()
+        for record in self:
+            now = fields.Datetime.now()
+            # Never set reported earlier than the incident time (constraint).
+            reported = now
+            if record.incident_datetime and reported < record.incident_datetime:
+                reported = record.incident_datetime
+            record.write({
+                'status': 'submitted',
+                'reported_datetime': reported,
+            })
+            record._send_incident_notification()
+        return True
 
     def action_review(self):
         """Mark incident as under review."""
@@ -1204,8 +1246,11 @@ class IncidentReport(models.Model):
             'AUTH_VISIT': 'guardpro.action_report_incident_local_authority_visit',
             'SAFE': 'guardpro.action_report_incident_safety',
             'STMT': 'guardpro.action_report_incident_statement',
+            'STATEMENT': 'guardpro.action_report_incident_statement',
             'FOUND': 'guardpro.action_report_incident_found_item',
+            'FOUND ITEM': 'guardpro.action_report_incident_found_item',
             'RETURN': 'guardpro.action_report_incident_return_form',
+            'RETURN FORM': 'guardpro.action_report_incident_return_form',
             'VAND': 'guardpro.action_report_incident_community_violation',
             'SHORT_LET': 'guardpro.action_report_incident_community_violation',
             'ILL_STAFF': 'guardpro.action_report_incident_community_violation',
@@ -1701,7 +1746,7 @@ class IncidentReport(models.Model):
                 '<th>Incident</th>'
                 '<th>Title</th>'
                 '<th>Severity</th>'
-                '<th>Site</th>'
+                '<th>Project</th>'
                 '<th>Breach Time (min)</th>'
                 '<th>Status</th>'
                 '</tr>'
@@ -1831,6 +1876,12 @@ class IncidentCategory(models.Model):
     active = fields.Boolean(
         string='Active',
         default=True
+    )
+    hide_from_guard_incidents = fields.Boolean(
+        string='Hide from Guard Incident Reports',
+        default=False,
+        help='When set, guards cannot select this category when reporting incidents '
+             'in the mobile app. Used for patrol-only categories (e.g. facility issues).',
     )
     notification_emails = fields.Text(
         string='Submission Notification Emails',

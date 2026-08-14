@@ -493,7 +493,7 @@
                 <group expand="0" string="Group By">
                     <filter string="Audit Type" name="group_type" context="{'group_by': 'audit_type'}"/>
                     <filter string="Auditor" name="group_auditor" context="{'group_by': 'auditor_id'}"/>
-                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Project" name="group_site" context="{'group_by': 'site_id'}"/>
                     <filter string="Status" name="group_status" context="{'group_by': 'state'}"/>
                     <filter string="Rating" name="group_rating" context="{'group_by': 'rating'}"/>
                     <filter string="Audit Date" name="group_date" context="{'group_by': 'audit_date'}"/>

@@ -74,6 +74,14 @@
                                         <td><strong>Host:</strong></td>
                                         <td><span t-esc="o.host_name"/></td>
                                     </tr>
+                                    <tr t-if="o.host_community">
+                                        <td><strong>Community:</strong></td>
+                                        <td><span t-esc="o.host_community"/></td>
+                                    </tr>
+                                    <tr t-if="o.host_unit_number">
+                                        <td><strong>Unit Number:</strong></td>
+                                        <td><span t-esc="o.host_unit_number"/></td>
+                                    </tr>
                                     <tr>
                                         <td><strong>Department:</strong></td>
                                         <td><span t-esc="o.host_department"/></td>

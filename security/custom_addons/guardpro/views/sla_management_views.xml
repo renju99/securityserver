@@ -307,7 +307,7 @@
                 <group expand="0" string="Group By">
                     <filter string="SLA" name="group_sla" context="{'group_by': 'sla_id'}"/>
                     <filter string="KPI" name="group_kpi" context="{'group_by': 'kpi_id'}"/>
-                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Project" name="group_site" context="{'group_by': 'site_id'}"/>
                     <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
                     <filter string="Period Start" name="group_period" context="{'group_by': 'period_start'}"/>
                 </group>

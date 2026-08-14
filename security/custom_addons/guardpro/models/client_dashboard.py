@@ -23,7 +23,7 @@ class ClientDashboard(models.Model):
     
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         domain="[('client_id', '=', client_id)]"
     )
     
@@ -249,7 +249,7 @@ class ClientDashboard(models.Model):
 
 
 class ClientSite(models.Model):
-    """Extend client site with dashboard link."""
+    """Extend client project with dashboard link."""
     
     _inherit = 'client.site'
     

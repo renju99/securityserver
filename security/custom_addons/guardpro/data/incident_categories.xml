@@ -87,10 +87,122 @@
             <field name="color">7</field>
             <field name="description">Vehicle parked beyond permitted duration or in prohibited parking zones requiring FM or enforcement action.</field>
         </record>
+        <record id="incident_cat_double_parking" model="incident.category">
+            <field name="name">Double Parking</field>
+            <field name="code">DBL_PARK</field>
+            <field name="sequence">93</field>
+            <field name="color">7</field>
+            <field name="description">Vehicle parked alongside another parked vehicle, obstructing the lane or flow of traffic.</field>
+        </record>
+        <record id="incident_cat_blocking_access" model="incident.category">
+            <field name="name">Blocking Access</field>
+            <field name="code">BLK_ACCESS</field>
+            <field name="sequence">94</field>
+            <field name="color">7</field>
+            <field name="description">Vehicle blocking a driveway, gate, ramp, fire lane, emergency exit, or other access point.</field>
+        </record>
+        <record id="incident_cat_illegal_parking" model="incident.category">
+            <field name="name">Illegal Parking</field>
+            <field name="code">ILLEGAL_PARK</field>
+            <field name="sequence">95</field>
+            <field name="color">7</field>
+            <field name="description">Vehicle parked in a prohibited area or in breach of site parking regulations.</field>
+        </record>
+        <record id="incident_cat_visitor_parking_misuse" model="incident.category">
+            <field name="name">Visitor Parking Misuse</field>
+            <field name="code">VIS_PARK</field>
+            <field name="sequence">96</field>
+            <field name="color">7</field>
+            <field name="description">Visitor bay used incorrectly (e.g. by residents, staff, or beyond allowed duration).</field>
+        </record>
+        <record id="incident_cat_wrongful_parking" model="incident.category">
+            <field name="name">Wrongful Parking</field>
+            <field name="code">WRONG_PARK</field>
+            <field name="sequence">97</field>
+            <field name="color">7</field>
+            <field name="description">Vehicle parked incorrectly within a bay, across lines, or otherwise wrongfully positioned.</field>
+        </record>
+        <record id="incident_cat_undesignated_parking" model="incident.category">
+            <field name="name">Undesignated Parking</field>
+            <field name="code">UNDESIG_PARK</field>
+            <field name="sequence">98</field>
+            <field name="color">7</field>
+            <field name="description">Vehicle parked in an area not designated for parking.</field>
+        </record>
+        <record id="incident_cat_unauthorized_vehicle" model="incident.category">
+            <field name="name">Unauthorized Vehicle</field>
+            <field name="code">UNAUTH_VEH</field>
+            <field name="sequence">99</field>
+            <field name="color">7</field>
+            <field name="description">Vehicle on site without valid authorization, sticker, or visitor registration.</field>
+        </record>
+        <record id="incident_cat_pavement_parking" model="incident.category">
+            <field name="name">Parking on Pavement</field>
+            <field name="code">PAVEMENT_PARK</field>
+            <field name="sequence">100</field>
+            <field name="color">7</field>
+            <field name="description">Motor vehicle parked on pavement / sidewalk.</field>
+        </record>
+        <record id="incident_cat_disabled_parking" model="incident.category">
+            <field name="name">Disabled Parking Violation</field>
+            <field name="code">DISABLED_PARK</field>
+            <field name="sequence">101</field>
+            <field name="color">7</field>
+            <field name="description">Vehicle parked in a disabled / accessible bay without entitlement.</field>
+        </record>
+        <record id="incident_cat_fire_hydrant_parking" model="incident.category">
+            <field name="name">Parking in Front of Fire Hydrant</field>
+            <field name="code">FIRE_HYD_PARK</field>
+            <field name="sequence">102</field>
+            <field name="color">7</field>
+            <field name="description">Vehicle parked in front of a fire hydrant or fire service point.</field>
+        </record>
+        <record id="incident_cat_loading_zone_violation" model="incident.category">
+            <field name="name">Loading/Unloading Zone Violation</field>
+            <field name="code">LOAD_ZONE</field>
+            <field name="sequence">103</field>
+            <field name="color">7</field>
+            <field name="description">Not complying with loading and unloading in designated areas.</field>
+        </record>
+        <record id="incident_cat_pedestrian_crossing_stop" model="incident.category">
+            <field name="name">Stopping on Pedestrian Crossing</field>
+            <field name="code">PED_CROSS</field>
+            <field name="sequence">104</field>
+            <field name="color">7</field>
+            <field name="description">Vehicle stopped on a pedestrian crossing without justified reason.</field>
+        </record>
+        <record id="incident_cat_overnight_parking" model="incident.category">
+            <field name="name">Overnight Parking</field>
+            <field name="code">OVERNIGHT_PARK</field>
+            <field name="sequence">105</field>
+            <field name="color">7</field>
+            <field name="description">Vehicle left overnight in a restricted or retail parking area.</field>
+        </record>
+        <record id="incident_cat_retail_parking_violation" model="incident.category">
+            <field name="name">Retail Parking Violation</field>
+            <field name="code">RETAIL_PARK</field>
+            <field name="sequence">106</field>
+            <field name="color">7</field>
+            <field name="description">Retail parking rule breach (e.g. tailgating, unpaid exit, lost ticket).</field>
+        </record>
+        <record id="incident_cat_no_payment_exit" model="incident.category">
+            <field name="name">Exit Without Payment</field>
+            <field name="code">NO_PAY_EXIT</field>
+            <field name="sequence">107</field>
+            <field name="color">7</field>
+            <field name="description">Vehicle exited paid parking without completing payment.</field>
+        </record>
+        <record id="incident_cat_lost_parking_ticket" model="incident.category">
+            <field name="name">Lost Parking Ticket</field>
+            <field name="code">LOST_TICKET</field>
+            <field name="sequence">108</field>
+            <field name="color">7</field>
+            <field name="description">Driver reports a lost parking ticket requiring verification and settlement.</field>
+        </record>
         <record id="incident_cat_equipment_handover" model="incident.category">
             <field name="name">Equipment Handover</field>
             <field name="code">EQ_HO</field>
-            <field name="sequence">93</field>
+            <field name="sequence">110</field>
             <field name="color">5</field>
             <field name="description">Formal handover of security or operational equipment between shifts, teams, or contractors.</field>
         </record>
@@ -122,6 +234,7 @@
             <field name="code">FACILITY</field>
             <field name="sequence">105</field>
             <field name="color">3</field>
+            <field name="hide_from_guard_incidents" eval="True"/>
             <field name="description">Maintenance or facilities issue reported by a guard during a patrol checkpoint scan. Assign to facilities management for follow-up.</field>
             <field name="notification_emails">facilities@example.com</field>
             <field name="high_priority_notification_enabled" eval="True"/>

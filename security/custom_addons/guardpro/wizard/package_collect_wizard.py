@@ -6,6 +6,12 @@ from odoo.exceptions import UserError, ValidationError
 from markupsafe import Markup
 import logging
 
+from odoo.addons.guardpro.common.upload_validation import (
+    UploadValidationError,
+    decode_payload_to_bytes,
+    validate_media_bytes,
+)
+
 _logger = logging.getLogger(__name__)
 
 
@@ -249,6 +255,23 @@ class PackageCollectWizard(models.TransientModel):
         
         if not self.collector_name:
             raise UserError(_('Collector name is required.'))
+
+        for field_name in ('id_photo', 'collector_photo', 'condition_photo'):
+            value = self[field_name]
+            if not value:
+                continue
+            raw = decode_payload_to_bytes(value)
+            if not raw:
+                raise UserError(_('Invalid image for %s.') % field_name)
+            try:
+                validate_media_bytes(
+                    raw,
+                    filename='%s.jpg' % field_name,
+                    allow_video=False,
+                    allow_image=True,
+                )
+            except UploadValidationError as exc:
+                raise UserError(str(exc)) from exc
         
         # Prepare collection data
         collection_vals = {

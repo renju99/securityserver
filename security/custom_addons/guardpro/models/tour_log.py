@@ -50,10 +50,18 @@ class TourLog(models.Model):
     )
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=True,
         tracking=True,
         ondelete='restrict'
+    )
+    zone_id = fields.Many2one(
+        'site.zone',
+        string='Zone',
+        domain="[('site_id', '=', site_id)]",
+        ondelete='set null',
+        tracking=True,
+        index=True,
     )
     shift_id = fields.Many2one(
         'guard.shift',
@@ -295,6 +303,10 @@ class TourLog(models.Model):
                 vals['name'] = self.env['ir.sequence'].next_by_code(
                     'tour.log'
                 ) or _('New')
+            if not vals.get('zone_id') and vals.get('tour_id'):
+                tour = self.env['security.tour'].browse(vals['tour_id'])
+                if tour.zone_id:
+                    vals['zone_id'] = tour.zone_id.id
         records = super().create(vals_list)
         
         # Optimize attached photos
@@ -385,7 +397,7 @@ class TourLog(models.Model):
             verified_scans = record.scan_ids.filtered(
                 lambda s: s.status == 'verified'
             )
-            scanned = len(verified_scans)
+            scanned = len(verified_scans.mapped('checkpoint_id'))
             vals = {
                 'scanned_checkpoints': scanned
             }
@@ -511,15 +523,22 @@ class TourLog(models.Model):
             record.pending_task_ids = pending_tasks
             record.pending_task_count = len(pending_tasks)
 
-    @api.depends('pending_task_count', 'status')
+    @api.depends(
+        'pending_task_count', 'status',
+        'scanned_checkpoints', 'expected_checkpoints',
+    )
     def _compute_can_complete(self):
-        """Determine if tour can be completed based on task status."""
+        """Determine if tour can be completed (checkpoints + tasks)."""
         for record in self:
-            # Tour can be completed if there are no pending tasks
-            # or if tour is already completed/cancelled
+            if record.status in ['completed', 'incomplete', 'cancelled']:
+                record.can_complete = True
+                continue
+            checkpoints_done = (
+                record.expected_checkpoints <= 0
+                or record.scanned_checkpoints >= record.expected_checkpoints
+            )
             record.can_complete = (
-                record.pending_task_count == 0 or 
-                record.status in ['completed', 'incomplete', 'cancelled']
+                checkpoints_done and record.pending_task_count == 0
             )
 
     def action_complete(
@@ -580,6 +599,24 @@ class TourLog(models.Model):
             )
         
         self.write(values)
+
+    def resolve_checkpoint_by_scan_data(self, scan_data):
+        """Find a tour checkpoint matching NFC UID or QR payload (any order)."""
+        self.ensure_one()
+        if not scan_data or self.status != 'in_progress':
+            return self.env['checkpoint']
+        scan_value = str(scan_data).strip()
+        if not scan_value:
+            return self.env['checkpoint']
+        for checkpoint in self.tour_id.get_ordered_checkpoints():
+            scan_type = (checkpoint.scan_type or 'nfc').lower()
+            if scan_type in ('nfc', 'both') and checkpoint.nfc_tag_id:
+                if checkpoint._nfc_tags_match(checkpoint.nfc_tag_id, scan_value):
+                    return checkpoint
+            if scan_type in ('qr', 'both') and checkpoint.qr_code:
+                if scan_value == (checkpoint.qr_code or '').strip():
+                    return checkpoint
+        return self.env['checkpoint']
 
     def action_cancel(self):
         """Cancel the tour."""

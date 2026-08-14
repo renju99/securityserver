@@ -17,7 +17,7 @@ class RouteOptimizer(models.TransientModel):
 
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         required=True,
         help='Site for which to optimize the patrol route'
     )

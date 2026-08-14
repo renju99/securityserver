@@ -44,6 +44,7 @@
                                 <field name="name"/>
                                 <field name="code"/>
                                 <field name="site_id"/>
+                                <field name="zone_id"/>
                                 <field name="scan_type"/>
                             </group>
                             <group>

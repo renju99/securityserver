@@ -22,7 +22,7 @@ class SecurityTourCheckpointLine(models.Model):
     )
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         store=True,
         index=True,
         help='Site for filtering checkpoints (from tour or parent form context).',
@@ -47,6 +47,16 @@ class SecurityTourCheckpointLine(models.Model):
         readonly=True,
     )
     code = fields.Char(related='checkpoint_id.code', readonly=True)
+    nfc_tag_id = fields.Char(
+        related='checkpoint_id.nfc_tag_id',
+        string='NFC Tag ID',
+        readonly=False,
+    )
+    qr_code = fields.Char(
+        related='checkpoint_id.qr_code',
+        string='QR Code',
+        readonly=False,
+    )
     scan_type = fields.Selection(related='checkpoint_id.scan_type', readonly=True)
     requires_photo = fields.Boolean(related='checkpoint_id.requires_photo', readonly=True)
     requires_note = fields.Boolean(related='checkpoint_id.requires_note', readonly=True)

@@ -266,7 +266,7 @@
                     <filter string="Archived" name="inactive" domain="[('is_active', '=', False)]"/>
                     <group expand="0" string="Group By">
                         <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
-                        <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                        <filter string="Project" name="group_site" context="{'group_by': 'site_id'}"/>
                         <filter string="Camera Type" name="group_type" context="{'group_by': 'camera_type'}"/>
                         <filter string="Manufacturer" name="group_manufacturer" context="{'group_by': 'manufacturer'}"/>
                     </group>

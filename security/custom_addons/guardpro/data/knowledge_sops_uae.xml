@@ -9,7 +9,7 @@
             <field name="name">Main Gate Access Control Procedure</field>
             <field name="code">SOP-AC-001</field>
             <field name="objective">To ensure secure and efficient access control at main entry points while maintaining professional customer service standards and compliance with SIRA requirements.</field>
-            <field name="scope">Applies to all security guards manning main gates, reception areas, and primary access points at all client sites.</field>
+            <field name="scope">Applies to all security guards manning main gates, reception areas, and primary access points at all client projects.</field>
             <field name="is_sira_compliant" eval="True"/>
             <field name="sira_category">access_control</field>
             <field name="risk_level">high</field>
@@ -55,7 +55,7 @@
             <field name="sequence">30</field>
             <field name="name">Greeting &amp; Identification Request</field>
             <field name="description">&lt;ul&gt;
-&lt;li&gt;Greet visitor politely: "Good morning/afternoon, welcome to [Site Name]"&lt;/li&gt;
+&lt;li&gt;Greet visitor politely: "Good morning/afternoon, welcome to [Project Name]"&lt;/li&gt;
 &lt;li&gt;Request Emirates ID or valid identification&lt;/li&gt;
 &lt;li&gt;Ask for purpose of visit and contact person/company&lt;/li&gt;
 &lt;li&gt;Maintain eye contact and professional communication&lt;/li&gt;
@@ -169,7 +169,7 @@
             <field name="name">Security Patrol and Checkpoint Inspection</field>
             <field name="code">SOP-PT-001</field>
             <field name="objective">To conduct systematic security patrols ensuring all areas are secure, identifying potential threats, and maintaining visible security presence throughout the facility.</field>
-            <field name="scope">Applies to all guards conducting foot or mobile patrols at client sites.</field>
+            <field name="scope">Applies to all guards conducting foot or mobile patrols at client projects.</field>
             <field name="is_sira_compliant" eval="True"/>
             <field name="sira_category">patrol</field>
             <field name="risk_level">medium</field>
@@ -256,7 +256,7 @@
             <field name="name">Incident Response and Reporting Procedure</field>
             <field name="code">SOP-IR-001</field>
             <field name="objective">To provide immediate, effective, and appropriate response to security incidents while ensuring proper documentation and escalation according to SIRA standards.</field>
-            <field name="scope">Applies to all security personnel responding to incidents at any client site.</field>
+            <field name="scope">Applies to all security personnel responding to incidents at any client project.</field>
             <field name="is_sira_compliant" eval="True"/>
             <field name="sira_category">incident</field>
             <field name="risk_level">critical</field>

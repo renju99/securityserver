@@ -87,7 +87,7 @@
         <!-- Site Security Compliance Audit Template -->
         <record id="audit_template_site_security" model="compliance.audit.template">
             <field name="name">Site Security Compliance Audit</field>
-            <field name="description">Security compliance audit for client sites</field>
+            <field name="description">Security compliance audit for client projects</field>
             <field name="audit_type">security</field>
             <field name="frequency">quarterly</field>
             <field name="passing_score">85.0</field>

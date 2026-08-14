@@ -194,14 +194,14 @@ class GuardProfile(models.Model):
         """
         Check if guard has completed required training for a site.
         
-        :param site_id: ID of the client site
+        :param site_id: ID of the client project
         :return: dict with status and missing courses
         """
         self.ensure_one()
         site = self.env['client.site'].browse(site_id)
         
         if not site:
-            return {'status': 'error', 'message': 'Site not found'}
+            return {'status': 'error', 'message': 'Project not found'}
         
         # Get required courses for this site
         required_courses = self.env['slide.channel'].search([

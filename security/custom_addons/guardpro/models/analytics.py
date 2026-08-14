@@ -115,15 +115,15 @@ class GuardLinkductivityReport(models.Model):
 
 
 class SitePerformanceReport(models.Model):
-    """Site Performance and Coverage Analytics."""
+    """Project Performance and Coverage Analytics."""
     
     _name = 'guardpro.site.performance.report'
-    _description = 'Site Performance Analysis'
+    _description = 'Project Performance Analysis'
     _auto = False
     _order = 'date desc, site_id'
     
     # Dimensions
-    site_id = fields.Many2one('client.site', string='Site', readonly=True)
+    site_id = fields.Many2one('client.site', string='Project', readonly=True)
     client_id = fields.Many2one('res.partner', string='Client', readonly=True)
     date = fields.Date(string='Date', readonly=True)
     month = fields.Char(string='Month', readonly=True)
@@ -234,7 +234,7 @@ class IncidentTrendReport(models.Model):
         ('high', 'High'),
         ('critical', 'Critical')
     ], string='Severity', readonly=True)
-    site_id = fields.Many2one('client.site', string='Site', readonly=True)
+    site_id = fields.Many2one('client.site', string='Project', readonly=True)
     
     # Metrics
     incident_count = fields.Integer(string='Incident Count', readonly=True)
@@ -359,10 +359,10 @@ class GuardLinkDashboard(models.Model):
     # ============================================
     # SITE COVERAGE METRICS
     # ============================================
-    total_sites = fields.Integer(string='Total Sites', compute='_compute_kpis')
-    sites_covered_today = fields.Integer(string='Sites Covered Today', compute='_compute_kpis')
-    sites_coverage_rate = fields.Float(string='Sites Coverage Rate %', compute='_compute_kpis')
-    sites_needing_coverage = fields.Integer(string='Sites Needing Coverage', compute='_compute_kpis')
+    total_sites = fields.Integer(string='Total Projects', compute='_compute_kpis')
+    sites_covered_today = fields.Integer(string='Projects Covered Today', compute='_compute_kpis')
+    sites_coverage_rate = fields.Float(string='Projects Coverage Rate %', compute='_compute_kpis')
+    sites_needing_coverage = fields.Integer(string='Projects Needing Coverage', compute='_compute_kpis')
     
     # ============================================
     # INCIDENT MANAGEMENT METRICS
@@ -675,7 +675,7 @@ class GuardLinkDashboard(models.Model):
     # ============================================
     
     def action_view_guards_on_duty(self):
-        """Open guards currently on duty."""
+        """Open guards currently on duty (scoped to readable profiles)."""
         now = fields.Datetime.now()
         current_shifts = self.env['guard.shift'].search([
             ('start_datetime', '<=', now),
@@ -683,13 +683,15 @@ class GuardLinkDashboard(models.Model):
             ('status', 'in', ['confirmed', 'in_progress'])
         ])
         guard_ids = current_shifts.mapped('guard_id').ids
+        # Re-search so record rules drop profiles outside the user's sites
+        readable_ids = self.env['guard.profile'].search([('id', 'in', guard_ids)]).ids
         
         return {
             'name': _('Guards On Duty Now'),
             'type': 'ir.actions.act_window',
             'res_model': 'guard.profile',
             'view_mode': 'kanban,list,form',
-            'domain': [('id', 'in', guard_ids)],
+            'domain': [('id', 'in', readable_ids)],
             'context': {'create': False}
         }
     
@@ -701,7 +703,9 @@ class GuardLinkDashboard(models.Model):
             ('end_datetime', '>=', now),
             ('status', 'in', ['confirmed', 'in_progress'])
         ])
-        on_duty_ids = current_shifts.mapped('guard_id').ids
+        on_duty_ids = self.env['guard.profile'].search([
+            ('id', 'in', current_shifts.mapped('guard_id').ids)
+        ]).ids
         
         return {
             'name': _('Available Guards'),
@@ -832,7 +836,7 @@ class GuardLinkDashboard(models.Model):
     def action_view_site_performance(self):
         """Open site performance report."""
         return {
-            'name': _('Site Performance Report'),
+            'name': _('Project Performance Report'),
             'type': 'ir.actions.act_window',
             'res_model': 'guardpro.site.performance.report',
             'view_mode': 'graph,pivot,list',

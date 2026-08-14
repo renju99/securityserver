@@ -8,6 +8,10 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+# How long after the exact due moment a reminder may still surface.
+# Outside this window it is treated as missed / stale (never pile up).
+DUE_WINDOW_MINUTES = 8
+
 
 class TourPatrolReminder(models.Model):
     """One popup per (shift, tour, 30|10): timed from shift start, guard must acknowledge."""
@@ -75,14 +79,46 @@ class TourPatrolReminder(models.Model):
                     'acknowledged_date': now,
                 })
 
+    def _due_at(self):
+        """Exact moment this reminder should fire (shift start − N minutes)."""
+        self.ensure_one()
+        start = self.shift_id.start_datetime or self.scheduled_start
+        if not start or not self.reminder_type:
+            return False
+        try:
+            minutes = int(self.reminder_type)
+        except (TypeError, ValueError):
+            return False
+        return start - timedelta(minutes=minutes)
+
+    def is_due_now(self, now=None):
+        """True only inside the short window after the due moment."""
+        self.ensure_one()
+        now = now or fields.Datetime.now()
+        due_at = self._due_at()
+        if not due_at:
+            return False
+        window_end = due_at + timedelta(minutes=DUE_WINDOW_MINUTES)
+        return due_at <= now <= window_end
+
+    def is_past_due_window(self, now=None):
+        """True once the show-window has passed (missed / too late)."""
+        self.ensure_one()
+        now = now or fields.Datetime.now()
+        due_at = self._due_at()
+        if not due_at:
+            return True
+        return now > due_at + timedelta(minutes=DUE_WINDOW_MINUTES)
+
     @api.model
     def cron_create_from_shifts(self):
-        """Create pending reminders when shift start is ~30 or ~10 minutes away (per assigned tour)."""
+        """Create pending reminders only when the due moment is reached (±2 min)."""
         Shift = self.env['guard.shift'].sudo()
         now = fields.Datetime.now()
+        # Narrow creation window so rows appear only at firing time.
         for minutes_before, code in ((30, '30'), (10, '10')):
-            low = now + timedelta(minutes=minutes_before - 5)
-            high = now + timedelta(minutes=minutes_before + 5)
+            low = now + timedelta(minutes=minutes_before - 2)
+            high = now + timedelta(minutes=minutes_before + 2)
             shifts = Shift.search([
                 ('start_datetime', '>=', low),
                 ('start_datetime', '<=', high),
@@ -102,6 +138,8 @@ class TourPatrolReminder(models.Model):
                             code,
                             err,
                         )
+        # Auto-clear missed / obsolete backlog so it never floods mobile.
+        self._auto_ack_missed_and_stale()
         return True
 
     @api.model
@@ -150,11 +188,15 @@ class TourPatrolReminder(models.Model):
         ], limit=1))
 
     def is_stale_or_obsolete(self):
-        """Hide popup if shift started long ago or tour already in progress."""
+        """Hide / skip if past due window, shift dead, or tour already running."""
         self.ensure_one()
         now = fields.Datetime.now()
-        ref = self.shift_id.start_datetime or self.scheduled_start
-        if ref and ref < now - timedelta(hours=1):
+        shift = self.shift_id
+        if not shift:
+            return True
+        if shift.status in ('cancelled', 'no_show', 'completed'):
+            return True
+        if self.is_past_due_window(now):
             return True
         if self.env['tour.log'].sudo().search_count([
             ('guard_id', '=', self.guard_id.id),
@@ -166,14 +208,107 @@ class TourPatrolReminder(models.Model):
         return False
 
     @api.model
-    def get_pending_mobile_reminder(self, user):
-        """Next reminder for this user (own shift tours only)."""
+    def _auto_ack_missed_and_stale(self, user=None):
+        """Acknowledge reminders that are past their show window or obsolete."""
+        Reminder = self.sudo()
+        now = fields.Datetime.now()
+        # Only scan reminders whose shift start is old enough that the
+        # 30-min window has already closed (start < now - 22 min), or
+        # any for this user still unacked — capped for safety.
+        domain = [
+            ('is_acknowledged', '=', False),
+            '|',
+            ('scheduled_start', '<', now - timedelta(minutes=22)),
+            ('scheduled_start', '=', False),
+        ]
+        if user:
+            domain = [
+                ('is_acknowledged', '=', False),
+                ('user_id', '=', user.id),
+            ]
+        rows = Reminder.search(domain, limit=2000)
+        stale = Reminder.browse()
+        for rec in rows:
+            try:
+                if rec.is_stale_or_obsolete() or rec.is_past_due_window(now):
+                    stale |= rec
+            except Exception:
+                stale |= rec
+        if stale:
+            stale.action_acknowledge()
+            _logger.info(
+                'Patrol reminder auto-acked %s missed/stale row(s)',
+                len(stale),
+            )
+        return len(stale)
+
+    @api.model
+    def get_due_pending_reminders(self, user):
+        """All reminders for this user that are due right now (not early, not late)."""
+        self._auto_ack_missed_and_stale(user=user)
+        now = fields.Datetime.now()
+        # Only consider shifts that could still be in a due window:
+        # earliest: 10-min due = start-10, window+8 → start > now-18
+        # latest: 30-min due = start-30 → start < now+32
         reminders = self.sudo().search([
             ('user_id', '=', user.id),
             ('is_acknowledged', '=', False),
-        ], order='create_date asc, id asc', limit=50)
+            ('scheduled_start', '>=', now - timedelta(minutes=20)),
+            ('scheduled_start', '<=', now + timedelta(minutes=35)),
+        ], order='reminder_type desc, scheduled_start asc, id asc', limit=100)
+        due = self.browse()
         for rec in reminders:
             if rec.is_stale_or_obsolete():
                 continue
-            return rec
-        return self.browse()
+            if rec.is_due_now(now):
+                due |= rec
+        return due
+
+    @api.model
+    def get_pending_mobile_reminder(self, user):
+        """Primary due reminder for mobile (first of the due batch)."""
+        due = self.get_due_pending_reminders(user)
+        return due[:1] if due else self.browse()
+
+    @api.model
+    def acknowledge_all_due_for_user(self, user, reminder_id=None):
+        """Ack every currently due reminder for the user in one tap.
+
+        Also acks the requested id if present (belt-and-braces).
+        """
+        due = self.get_due_pending_reminders(user)
+        if reminder_id:
+            extra = self.sudo().search([
+                ('id', '=', int(reminder_id)),
+                ('user_id', '=', user.id),
+                ('is_acknowledged', '=', False),
+            ], limit=1)
+            due |= extra
+        if due:
+            due.action_acknowledge()
+        return due
+
+    @api.model
+    def build_mobile_payload(self, user):
+        """JSON fields for pending/check endpoints (one modal for all due)."""
+        due = self.get_due_pending_reminders(user)
+        if not due:
+            return {'patrol_reminder': False}
+        primary = due[0]
+        tour_names = []
+        for rec in due:
+            name = rec.tour_id.name or ''
+            if name and name not in tour_names:
+                tour_names.append(name)
+        return {
+            'patrol_reminder': True,
+            'reminder_id': primary.id,
+            'reminder_ids': due.ids,
+            'count': len(due),
+            'tour_name': tour_names[0] if tour_names else '',
+            'tour_names': tour_names,
+            'site_name': primary.shift_id.site_id.name if primary.shift_id.site_id else '',
+            'scheduled_start_iso': primary.scheduled_start.isoformat()
+            if primary.scheduled_start else False,
+            'minutes_before': primary.reminder_type,
+        }

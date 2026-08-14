@@ -96,7 +96,7 @@
                             domain="[('alert_datetime', '&gt;=', datetime.datetime.combine(context_today() - relativedelta(weeks=1), datetime.time(0,0,0)))]"/>
                     <group expand="0" string="Group By">
                         <filter string="Guard" name="group_by_guard" context="{'group_by': 'guard_id'}"/>
-                        <filter string="Site" name="group_by_site" context="{'group_by': 'site_id'}"/>
+                        <filter string="Project" name="group_by_site" context="{'group_by': 'site_id'}"/>
                         <filter string="Alert Type" name="group_by_type" context="{'group_by': 'alert_type'}"/>
                         <filter string="Status" name="group_by_status" context="{'group_by': 'status'}"/>
                         <filter string="Date" name="group_by_date" context="{'group_by': 'alert_datetime:day'}"/>

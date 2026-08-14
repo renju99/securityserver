@@ -63,8 +63,13 @@
                             <field name="site_id" options="{'no_create': True}"/>
                             <field name="visit_date"/>
                             <field name="visit_purpose"/>
-                            <field name="host_id" options="{'no_create': True}"/>
-                            <field name="host_name"/>
+                            <field name="host_id" string="Host (directory)"
+                                   options="{'no_create': True}"
+                                   placeholder="Select known host…"/>
+                            <field name="host_name" string="Host name"
+                                   invisible="host_id"
+                                   required="not host_id"
+                                   placeholder="Type host name if not in directory"/>
                             <field name="is_vip" invisible="1"/>
                             <field name="is_overdue_checkout" invisible="1"/>
                         </group>
@@ -84,7 +89,8 @@
                                             type="object" 
                                             class="btn-secondary read_emirates_id_btn mb-2" 
                                             invisible="id_type != 'emirates_id'"/>
-                                    <field name="id_number"/>
+                                    <field name="id_number"
+                                           placeholder="Enter or scan Emirates ID to autofill returning visitor"/>
                                     <field name="id_expiry_date"/>
                                     <field name="id_issue_date"/>
                                 </group>
@@ -112,8 +118,10 @@
                         <page string="Host Information">
                             <group>
                                 <group>
-                            <field name="host_phone"/>
+                                    <field name="host_phone"/>
                                     <field name="host_email"/>
+                                    <field name="host_community" placeholder="Community name..."/>
+                                    <field name="host_unit_number" placeholder="Unit / villa / apartment..."/>
                                     <field name="host_department"/>
                                 </group>
                                 <group>
@@ -212,14 +220,18 @@
         <field name="arch" type="xml">
             <list string="Visitors" multi_edit="1" sample="1">
                 <field name="name"/>
+                <field name="mobile_number" optional="show"/>
+                <field name="email" optional="show"/>
                 <field name="visitor_type"/>
                 <field name="site_id"/>
                 <field name="visit_date"/>
                 <field name="checkin_time" optional="show"/>
                 <field name="checkout_time" optional="hide"/>
-                <field name="host_id" optional="show"/>
-                <field name="host_name"/>
+                <field name="host_name" string="Host"/>
+                <field name="host_community" optional="hide"/>
+                <field name="host_unit_number" optional="hide"/>
                 <field name="visit_purpose" optional="hide"/>
+                <field name="id_number" optional="hide"/>
                 <field name="watchlist_hit" widget="boolean_toggle" optional="show"/>
                 <field name="state" widget="badge"
                        decoration-success="state == 'checked_out'"
@@ -337,7 +349,7 @@
                 <separator/>
                 <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
                 <group expand="0" string="Group By">
-                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Project" name="group_site" context="{'group_by': 'site_id'}"/>
                     <filter string="Visitor Type" name="group_type" context="{'group_by': 'visitor_type'}"/>
                     <filter string="Status" name="group_status" context="{'group_by': 'state'}"/>
                     <filter string="Visit Date" name="group_date" context="{'group_by': 'visit_date'}"/>
@@ -407,6 +419,7 @@
                             <field name="expiry_date"/>
                             <field name="active" widget="boolean_toggle"/>
                             <field name="added_by"/>
+                            <field name="site_ids" widget="many2many_tags" options="{'no_create': True}"/>
                         </group>
                     </group>
                     <group>
@@ -431,6 +444,7 @@
                 <field name="id_number"/>
                 <field name="category"/>
                 <field name="reason"/>
+                <field name="site_ids" widget="many2many_tags" optional="show"/>
                 <field name="added_date"/>
                 <field name="expiry_date" optional="show"/>
                 <field name="active" widget="boolean_toggle"/>
@@ -464,6 +478,7 @@
                 <field name="first_name"/>
                 <field name="last_name"/>
                 <field name="email"/>
+                <field name="site_ids" widget="many2many_tags" optional="show"/>
                 <field name="active" widget="boolean_toggle"/>
             </list>
         </field>
@@ -484,6 +499,7 @@
                         <group>
                             <field name="email"/>
                             <field name="active" widget="boolean_toggle"/>
+                            <field name="site_ids" widget="many2many_tags" options="{'no_create': True}"/>
                         </group>
                     </group>
                 </sheet>
@@ -500,8 +516,10 @@
                 <field name="first_name"/>
                 <field name="last_name"/>
                 <field name="email"/>
+                <field name="site_ids"/>
                 <filter string="Active" name="active" domain="[('active', '=', True)]"/>
                 <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
+                <filter string="No Projects" name="no_sites" domain="[('site_ids', '=', False)]"/>
             </search>
         </field>
     </record>

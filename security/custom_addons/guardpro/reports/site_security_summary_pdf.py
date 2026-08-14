@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Site Security Summary PDF Report Controller."""
+"""Project Security Summary PDF Report Controller."""
 
 from odoo import api, fields, models
 import datetime
@@ -7,13 +7,13 @@ import datetime
 
 class ReportSiteSecuritySummaryPdf(models.AbstractModel):
     """
-    Controller for Site Security Summary PDF Report.
+    Controller for Project Security Summary PDF Report.
     
     This class prepares comprehensive site security data for the report template.
     """
     
     _name = 'report.guardpro.report_site_security_summary_document'
-    _description = 'Site Security Summary Report'
+    _description = 'Project Security Summary Report'
 
     @api.model
     def _get_report_values(self, docids, data=None):
@@ -21,7 +21,7 @@ class ReportSiteSecuritySummaryPdf(models.AbstractModel):
         Prepare site security summary report data.
         
         Args:
-            docids: IDs of client site records
+            docids: IDs of client project records
             data: Additional data passed to report
             
         Returns:

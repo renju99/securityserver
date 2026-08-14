@@ -117,7 +117,7 @@
                                     <field name="guards_on_duty" string="Guards On Duty"/>
                                     <field name="active_shifts_today" string="Active Shifts"/>
                                     <field name="tours_in_progress" string="Tours In Progress"/>
-                                    <field name="sites_covered_today" string="Sites Covered"/>
+                                    <field name="sites_covered_today" string="Projects Covered"/>
                                 </group>
                                 
                                 <group string="📊 Today's Metrics" name="today_metrics">
@@ -132,14 +132,14 @@
                                 <group string="✅ Performance Today" name="performance_today">
                                     <field name="today_attendance_rate" widget="percentpie" string="Attendance Rate"/>
                                     <field name="today_tour_completion" widget="percentpie" string="Tour Completion"/>
-                                    <field name="sites_coverage_rate" widget="percentpie" string="Site Coverage"/>
+                                    <field name="sites_coverage_rate" widget="percentpie" string="Project Coverage"/>
                                 </group>
                                 
                                 <group string="⚠️ Alerts &amp; Issues" name="alerts">
                                     <field name="missed_shifts" string="Missed Shifts" decoration-warning="missed_shifts &gt; 0"/>
                                     <field name="total_incidents_today" string="Incidents Reported"/>
                                     <field name="high_priority_incidents" string="High Priority" decoration-danger="high_priority_incidents &gt; 0"/>
-                                    <field name="sites_needing_coverage" string="Sites Uncovered" decoration-warning="sites_needing_coverage &gt; 0"/>
+                                    <field name="sites_needing_coverage" string="Projects Uncovered" decoration-warning="sites_needing_coverage &gt; 0"/>
                                 </group>
                             </group>
                         </page>
@@ -176,11 +176,11 @@
                             </group>
                         </page>
                         
-                        <!-- Site Coverage -->
-                        <page string="Site Coverage" name="sites">
+                        <!-- Project Coverage -->
+                        <page string="Project Coverage" name="sites">
                             <group>
-                                <group string="Site Metrics" name="site_metrics">
-                                    <field name="total_sites" string="Total Sites"/>
+                                <group string="Project Metrics" name="site_metrics">
+                                    <field name="total_sites" string="Total Projects"/>
                                     <field name="sites_covered_today" string="Covered Today"/>
                                     <field name="sites_needing_coverage" string="Needing Coverage" decoration-warning="sites_needing_coverage &gt; 0"/>
                                     <field name="sites_coverage_rate" widget="progressbar" string="Coverage Rate"/>
@@ -296,7 +296,7 @@
                                     <div class="col-md-6 mb-3">
                                         <div class="card">
                                             <div class="card-body">
-                                                <h5 class="card-title"><i class="fa fa-map-marker-alt me-2" title="Location"></i>Site Performance</h5>
+                                                <h5 class="card-title"><i class="fa fa-map-marker-alt me-2" title="Location"></i>Project Performance</h5>
                                                 <p class="card-text">Monitor site coverage, incidents, and patrol completion.</p>
                                                 <button name="action_view_site_performance" type="object" class="btn btn-primary" string="View Report"/>
                                             </div>
@@ -448,7 +448,7 @@
         <field name="name">guardpro.site.performance.report.tree</field>
         <field name="model">guardpro.site.performance.report</field>
         <field name="arch" type="xml">
-            <list string="Site Performance" create="false" edit="false" delete="false">
+            <list string="Project Performance" create="false" edit="false" delete="false">
                 <field name="site_id"/>
                 <field name="client_id"/>
                 <field name="date"/>
@@ -468,7 +468,7 @@
         <field name="name">guardpro.site.performance.report.graph</field>
         <field name="model">guardpro.site.performance.report</field>
         <field name="arch" type="xml">
-            <graph string="Site Coverage Trends" type="bar" stacked="True">
+            <graph string="Project Coverage Trends" type="bar" stacked="True">
                 <field name="date" interval="week"/>
                 <field name="coverage_rate" type="measure"/>
             </graph>
@@ -480,7 +480,7 @@
         <field name="name">guardpro.site.performance.report.pivot</field>
         <field name="model">guardpro.site.performance.report</field>
         <field name="arch" type="xml">
-            <pivot string="Site Performance Analysis">
+            <pivot string="Project Performance Analysis">
                 <field name="site_id" type="row"/>
                 <field name="month" type="col"/>
                 <field name="total_incidents" type="measure"/>
@@ -495,7 +495,7 @@
         <field name="name">guardpro.site.performance.report.search</field>
         <field name="model">guardpro.site.performance.report</field>
         <field name="arch" type="xml">
-            <search string="Site Performance">
+            <search string="Project Performance">
                 <field name="site_id"/>
                 <field name="client_id"/>
                 <field name="date"/>
@@ -510,7 +510,7 @@
                 <filter string="High Incidents" name="high_incidents"
                         domain="[('total_incidents', '&gt;', 5)]"/>
                 <group expand="0" string="Group By">
-                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Project" name="group_site" context="{'group_by': 'site_id'}"/>
                     <filter string="Client" name="group_client" context="{'group_by': 'client_id'}"/>
                     <filter string="Month" name="group_month" context="{'group_by': 'month'}"/>
                 </group>
@@ -520,13 +520,13 @@
     
     <!-- Action -->
     <record id="action_site_performance_report" model="ir.actions.act_window">
-        <field name="name">Site Performance</field>
+        <field name="name">Project Performance</field>
         <field name="res_model">guardpro.site.performance.report</field>
         <field name="view_mode">graph,pivot,list</field>
         <field name="context">{'search_default_last_30_days': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Site performance analytics
+                Project performance analytics
             </p>
             <p>
                 Monitor site coverage, incidents, and patrol completion metrics.
@@ -609,7 +609,7 @@
                 <group expand="0" string="Group By">
                     <filter string="Category" name="group_category" context="{'group_by': 'category_id'}"/>
                     <filter string="Severity" name="group_severity" context="{'group_by': 'severity'}"/>
-                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Project" name="group_site" context="{'group_by': 'site_id'}"/>
                     <filter string="Month" name="group_month" context="{'group_by': 'month'}"/>
                 </group>
             </search>

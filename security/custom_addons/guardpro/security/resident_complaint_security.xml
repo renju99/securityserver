@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
+    <data noupdate="0">
         
         <!-- Resident Complaint Record Rules -->
         
@@ -18,9 +18,9 @@
         
         <!-- Client users can see complaints from their sites -->
         <record id="resident_complaint_client_rule" model="ir.rule">
-            <field name="name">Client: Complaints from Own Sites</field>
+            <field name="name">Client: Complaints from Own Projects</field>
             <field name="model_id" ref="model_resident_complaint"/>
-            <field name="domain_force">[('site_id.client_id', '=', user.partner_id.id)]</field>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_client_user'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
@@ -28,22 +28,28 @@
             <field name="perm_unlink" eval="False"/>
         </record>
         
-        <!-- Supervisors can see all complaints from assigned sites -->
+        <!-- Supervisors can see complaints from assigned projects -->
         <record id="resident_complaint_supervisor_rule" model="ir.rule">
-            <field name="name">Supervisor: All Complaints from Assigned Sites</field>
+            <field name="name">Supervisor: Complaints from Assigned Projects</field>
             <field name="model_id" ref="model_resident_complaint"/>
             <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
             <field name="groups" eval="[(4, ref('group_guardpro_supervisor'))]"/>
         </record>
         
-        <!-- Managers and Admins see all complaints -->
+        <!-- Managers: assigned projects only (admins keep unrestricted access below) -->
         <record id="resident_complaint_manager_rule" model="ir.rule">
-            <field name="name">Manager/Admin: All Complaints</field>
+            <field name="name">Manager: Complaints from Assigned Projects</field>
+            <field name="model_id" ref="model_resident_complaint"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+        </record>
+
+        <record id="resident_complaint_admin_rule" model="ir.rule">
+            <field name="name">Admin: All Complaints</field>
             <field name="model_id" ref="model_resident_complaint"/>
             <field name="domain_force">[(1, '=', 1)]</field>
-            <field name="groups" eval="[(4, ref('group_guardpro_manager')), (4, ref('group_guardpro_admin'))]"/>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
         </record>
         
     </data>
 </odoo>
-

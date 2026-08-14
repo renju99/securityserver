@@ -10,7 +10,7 @@ class PushToTalkChannelAllSites(models.Model):
     _inherit = 'push.to.talk.channel'
 
     all_sites_access = fields.Boolean(
-        string='All Sites',
+        string='All Projects',
         default=False,
         help='If enabled, members can use this channel regardless of their user site assignment '
              '(e.g. company-wide or emergency). Live audio and notifications go to all members. '

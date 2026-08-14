@@ -23,9 +23,9 @@
                                 </h4>
                             </div>
                             <div class="card-body">
-                                <!-- Site Selector -->
+                                <!-- Project Selector -->
                                 <div class="form-group mb-3">
-                                    <label for="siteSelector">Select Site:</label>
+                                    <label for="siteSelector">Select Project:</label>
                                     <select id="siteSelector" class="form-control">
                                         <t t-foreach="sites" t-as="site">
                                             <option t-att-value="site.id" t-att-selected="'selected' if site == default_site else None">
@@ -126,13 +126,16 @@
                             $list.empty();
                             
                             locations.forEach(function(loc) {
-                                var badgeClass = loc.is_on_duty ? 'badge-success' : 'badge-secondary';
+                                var isLive = loc.is_live === true;
+                                var badgeClass = isLive ? 'badge-success' : 'badge-danger';
+                                var statusText = isLive ? 'Live' : 'Last known';
                                 var batteryWarning = loc.battery_level &lt; 20 ? ' <i class="fa fa-battery-quarter text-warning"/>' : '';
                                 
                                 $list.append(
                                     '<div class="list-group-item">' +
                                     '<span class="badge ' + badgeClass + '">●</span> ' +
-                                    '<strong>' + loc.guard_name + '</strong>' +
+                                    '<strong>' + loc.guard_name + '</strong> ' +
+                                    '<small class="' + (isLive ? 'text-success' : 'text-danger') + '">' + statusText + '</small>' +
                                     batteryWarning +
                                     '<br/><small class="text-muted">' + loc.time_since_update + '</small>' +
                                     '</div>'
@@ -259,7 +262,7 @@
                                         <t t-esc="incident.incident_datetime"/>
                                     </div>
                                     <div class="col-md-6">
-                                        <strong>Site:</strong><br/>
+                                        <strong>Project:</strong><br/>
                                         <t t-esc="incident.site_id.name"/>
                                     </div>
                                 </div>
@@ -358,14 +361,14 @@
     </template>
     
     <!-- ========================================== -->
-    <!-- No Site Access Warning                     -->
+    <!-- No Project Access Warning                     -->
     <!-- ========================================== -->
     
-    <template id="portal_no_site_access" name="No Site Access">
+    <template id="portal_no_site_access" name="No Project Access">
         <t t-call="portal.portal_layout">
             <div class="container mt-5">
                 <div class="alert alert-warning text-center">
-                    <h4><i class="fa fa-exclamation-triangle"/> No Site Access</h4>
+                    <h4><i class="fa fa-exclamation-triangle"/> No Project Access</h4>
                     <p>You do not have access to any sites. Please contact your administrator.</p>
                 </div>
             </div>

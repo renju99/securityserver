@@ -1,5 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Zone Views -->
+    <record id="site_zone_tree_view" model="ir.ui.view">
+        <field name="name">site.zone.tree</field>
+        <field name="model">site.zone</field>
+        <field name="arch" type="xml">
+            <list string="Zones" decoration-muted="status != 'active'">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="site_id"/>
+                <field name="zone_type"/>
+                <field name="total_buildings"/>
+                <field name="total_checkpoints"/>
+                <field name="status"/>
+                <field name="active" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="site_zone_form_view" model="ir.ui.view">
+        <field name="name">site.zone.form</field>
+        <field name="model">site.zone</field>
+        <field name="arch" type="xml">
+            <form string="Zone">
+                <header>
+                    <field name="status" widget="statusbar" statusbar_visible="active,inactive"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Zone Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="site_id"/>
+                            <field name="zone_type"/>
+                            <field name="status"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="total_buildings" readonly="1"/>
+                            <field name="total_checkpoints" readonly="1"/>
+                        </group>
+                    </group>
+                    <field name="description" placeholder="Description of this zone..."/>
+                    <notebook>
+                        <page string="Buildings">
+                            <field name="building_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="building_type"/>
+                                    <field name="status"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Checkpoints">
+                            <field name="checkpoint_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="scan_type"/>
+                                    <field name="status"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_site_zones" model="ir.actions.act_window">
+        <field name="name">Zones</field>
+        <field name="res_model">site.zone</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'default_active': True}</field>
+    </record>
+
     <!-- Building Views -->
     <record id="site_building_tree_view" model="ir.ui.view">
         <field name="name">site.building.tree</field>
@@ -9,6 +90,7 @@
                 <field name="name"/>
                 <field name="code"/>
                 <field name="site_id"/>
+                <field name="zone_id"/>
                 <field name="building_type"/>
                 <field name="total_floors"/>
                 <field name="total_floors_count"/>
@@ -37,6 +119,7 @@
                         <group>
                             <field name="code"/>
                             <field name="site_id"/>
+                            <field name="zone_id"/>
                             <field name="building_type"/>
                             <field name="status"/>
                             <field name="active"/>

@@ -67,6 +67,17 @@ class GuardLinkController(http.Controller):
         
         return request.render('guardpro.guardpro_homepage_template', values)
 
+    @http.route(
+        ['/guardpro/privacy', '/guardpro/privacy-policy'],
+        type='http',
+        auth='public',
+        website=True,
+        sitemap=True,
+    )
+    def privacy_policy(self, **kwargs):
+        """Public Privacy Policy for Play Console / App Store disclosure."""
+        return request.render('guardpro.privacy_policy_template', {})
+
 
     @http.route('/guardpro/dashboard', type='http', auth='user', website=True)
     def dashboard(self, **kwargs):
@@ -203,66 +214,288 @@ function openDB() {
 
     @http.route('/guardpro/guards/locations', type='json', auth='user')
     def get_guard_locations(self, **kwargs):
-        """Get all active guards' current locations from location history for map display."""
+        """Get last known locations for all active guards for map display.
+
+        Live updates (within LIVE_MINUTES) are marked ``is_live=True``.
+        Older last-known positions are still returned so every guard with a
+        location remains visible (frontend renders non-live markers in red).
+        """
+        LIVE_MINUTES = 5
         try:
-            from datetime import datetime
-            
-            # Log user context
             user_sites = request.env.user.site_ids.ids
-            _logger.info('Live Map Request - User: %s, Assigned Sites: %s, Groups: %s', 
-                         request.env.user.name, user_sites, request.env.user.groups_id.mapped('name'))
-            
-            # Get all active guards (this search is already filtered by Odoo record rules for the user)
+            _logger.info(
+                'Live Map Request - User: %s, Assigned Projects: %s, Groups: %s',
+                request.env.user.name,
+                user_sites,
+                request.env.user.groups_id.mapped('name'),
+            )
+
             guards = request.env['guard.profile'].search([
                 ('status', '=', 'active')
             ])
-            
-            _logger.info('Found %d active guards visible to user %s', len(guards), request.env.user.name)
-            
+            _logger.info(
+                'Found %d active guards visible to user %s',
+                len(guards), request.env.user.name,
+            )
+
             locations = []
             GuardLocationHistory = request.env['guard.location.history']
-            
             from odoo import fields
             now_utc = fields.Datetime.now()
-            
+
             for guard in guards:
-                # Get the most recent location from location history (exclude archived)
-                # Using sudo() here because guards list is already securely filtered, 
-                # but location history record rules can be complex with many2many joins
                 last_location = GuardLocationHistory.sudo().search([
                     ('guard_id', '=', guard.id),
-                    ('is_archived', '=', False)
+                    ('is_archived', '=', False),
                 ], order='timestamp desc', limit=1)
-                
-                if last_location:
-                    # Calculate time since last update
-                    time_since_update = None
-                    if last_location.timestamp:
-                        delta = now_utc - last_location.timestamp
-                        time_since_update = int(delta.total_seconds() / 60)  # minutes
-                        _logger.debug('Guard %s: Last location at %s, Delta: %d mins', guard.name, last_location.timestamp, time_since_update)
-                    
-                    # Only include recent locations (within last 30 minutes)
-                    if time_since_update is not None and time_since_update <= 30:
-                        locations.append({
-                            'id': guard.id,
-                            'name': guard.name,
-                            'badge_number': guard.badge_number,
-                            'latitude': last_location.latitude,
-                            'longitude': last_location.longitude,
-                            'last_update': last_location.timestamp.isoformat() if last_location.timestamp else None,
-                            'time_since_update': time_since_update,
-                            'current_site': last_location.site_id.name if last_location.site_id else guard.current_site_id.name if guard.current_site_id else 'Unassigned',
-                            'current_site_id': last_location.site_id.id if last_location.site_id else guard.current_site_id.id if guard.current_site_id else None,
-                            'phone': guard.phone,
-                            'status': guard.status,
-                        })
-            
-            _logger.info('Returning %d guard locations for user %s', len(locations), request.env.user.name)
+
+                latitude = longitude = timestamp = None
+                site = False
+                if last_location and last_location.latitude and last_location.longitude:
+                    latitude = last_location.latitude
+                    longitude = last_location.longitude
+                    timestamp = last_location.timestamp
+                    site = last_location.site_id
+                elif guard.current_latitude and guard.current_longitude:
+                    # Fallback to profile snapshot when history is empty
+                    latitude = guard.current_latitude
+                    longitude = guard.current_longitude
+                    timestamp = guard.last_location_update
+                    site = guard.current_site_id
+
+                if not latitude or not longitude:
+                    continue
+
+                time_since_update = None
+                if timestamp:
+                    delta = now_utc - timestamp
+                    time_since_update = max(0, int(delta.total_seconds() / 60))
+
+                is_live = (
+                    time_since_update is not None
+                    and time_since_update <= LIVE_MINUTES
+                )
+
+                if time_since_update is None:
+                    last_update_label = 'Unknown'
+                elif time_since_update < 1:
+                    last_update_label = 'Just now'
+                elif time_since_update < 60:
+                    last_update_label = '%d min ago' % time_since_update
+                elif time_since_update < 1440:
+                    last_update_label = '%dh ago' % (time_since_update // 60)
+                else:
+                    last_update_label = '%dd ago' % (time_since_update // 1440)
+
+                locations.append({
+                    'id': guard.id,
+                    'name': guard.name,
+                    'badge_number': guard.badge_number,
+                    'latitude': latitude,
+                    'longitude': longitude,
+                    'last_update': timestamp.isoformat() if timestamp else None,
+                    'time_since_update': time_since_update,
+                    'last_update_label': last_update_label,
+                    'is_live': is_live,
+                    'current_site': (
+                        site.name if site
+                        else (guard.current_site_id.name if guard.current_site_id else 'Unassigned')
+                    ),
+                    'current_site_id': (
+                        site.id if site
+                        else (guard.current_site_id.id if guard.current_site_id else None)
+                    ),
+                    'phone': guard.phone,
+                    'status': guard.status,
+                })
+
+            # Most recently active first; unknown timestamps last
+            locations.sort(
+                key=lambda g: (
+                    g.get('time_since_update') is None,
+                    g.get('time_since_update') if g.get('time_since_update') is not None else 10**9,
+                    (g.get('name') or '').lower(),
+                )
+            )
+
+            _logger.info(
+                'Returning %d guard locations for user %s',
+                len(locations), request.env.user.name,
+            )
             return {'success': True, 'locations': locations}
         except Exception as e:
             _logger.error('Error fetching guard locations: %s', str(e))
             return {'success': False, 'error': str(e)}
+
+    @http.route('/guardpro/guards/send-message', type='json', auth='user')
+    def send_map_message_to_guard(self, guard_id=None, content='', is_urgent=False, **kwargs):
+        """Send a text message to a guard from the live map (shows on mobile app).
+
+        Supervisors / managers / admins use a Guard↔Supervisor conversation.
+        Guards messaging peers use Guard↔Guard when they share a site.
+        """
+        from datetime import datetime
+
+        content = (content or '').strip()
+        if not content:
+            return {'success': False, 'error': 'Message cannot be empty.'}
+        if not guard_id:
+            return {'success': False, 'error': 'Guard is required.'}
+
+        user = request.env.user
+        is_staff = (
+            user.has_group('guardpro.group_guardpro_supervisor')
+            or user.has_group('guardpro.group_guardpro_manager')
+            or user.has_group('guardpro.group_guardpro_admin')
+        )
+        sender_guard = request.env['guard.profile'].sudo().search([
+            ('user_id', '=', user.id),
+        ], limit=1)
+        if not is_staff and not sender_guard:
+            return {
+                'success': False,
+                'error': 'Only supervisors or guards can send map messages.',
+            }
+
+        # Resolve target with normal ACL first (site rules), then sudo for FKs
+        target = request.env['guard.profile'].browse(int(guard_id))
+        if not target.exists():
+            # Staff may see map via sudo location history; re-check with sudo + site filter
+            target = request.env['guard.profile'].sudo().browse(int(guard_id))
+            if not target.exists():
+                return {'success': False, 'error': 'Guard not found.'}
+            if not user.has_group('guardpro.group_guardpro_admin'):
+                allowed_sites = set(user.site_ids.ids)
+                if allowed_sites and not (allowed_sites & set(target.site_ids.ids)):
+                    return {
+                        'success': False,
+                        'error': 'You can only message guards at your assigned projects.',
+                    }
+
+        if not target.user_id:
+            return {
+                'success': False,
+                'error': 'This guard has no app login — cannot deliver a mobile message.',
+            }
+        if target.user_id.id == user.id:
+            return {'success': False, 'error': 'You cannot message yourself.'}
+
+        Conversation = request.env['guard.conversation'].sudo()
+        Message = request.env['guard.message'].sudo()
+
+        try:
+            if is_staff:
+                conversation = Conversation.search([
+                    ('conversation_type', '=', 'guard_supervisor'),
+                    ('guard_id', '=', target.id),
+                    ('supervisor_id', '=', user.id),
+                ], limit=1)
+                if not conversation:
+                    conversation = Conversation.create({
+                        'conversation_type': 'guard_supervisor',
+                        'guard_id': target.id,
+                        'supervisor_id': user.id,
+                        'is_active': True,
+                    })
+            else:
+                # Peer guard → guard (must share a site)
+                sender_sites = set(sender_guard.site_ids.ids)
+                target_sites = set(target.site_ids.ids)
+                if not sender_sites or not (sender_sites & target_sites):
+                    return {
+                        'success': False,
+                        'error': 'You can only message guards assigned to the same site(s).',
+                    }
+                conversation = Conversation.get_or_create_guard_conversation(
+                    sender_guard.id, target.id,
+                )
+
+            message = Message.create({
+                'conversation_id': conversation.id,
+                'sender_id': user.id,
+                'receiver_id': target.user_id.id,
+                'message_type': 'text',
+                'content': content,
+                'is_urgent': bool(is_urgent),
+                'created_at': datetime.now(),
+            })
+            try:
+                message.create_notification()
+            except Exception as notify_err:
+                _logger.warning(
+                    'Map message %s created but notification failed: %s',
+                    message.id, notify_err,
+                )
+
+            return {
+                'success': True,
+                'message_id': message.id,
+                'conversation_id': conversation.id,
+                'guard_name': target.name,
+            }
+        except Exception as e:
+            _logger.error('Error sending map message to guard %s: %s', guard_id, e)
+            return {'success': False, 'error': str(e)}
+
+    @http.route('/guardpro/guards/map/panic-alerts', type='json', auth='user')
+    def get_map_panic_alerts(self, since_minutes=30, **kwargs):
+        """Recent panic alerts for the live map, scoped to the user's sites.
+
+        Admins / system users see all sites. Other users only see panics for
+        sites in ``res.users.site_ids``. Used by the map page popup poller.
+        """
+        from datetime import timedelta
+        from odoo import fields
+
+        try:
+            user = request.env.user
+            is_admin = (
+                user.has_group('guardpro.group_guardpro_admin')
+                or user.has_group('base.group_system')
+            )
+            try:
+                window = max(1, min(int(since_minutes or 30), 180))
+            except (TypeError, ValueError):
+                window = 30
+
+            cutoff = fields.Datetime.now() - timedelta(minutes=window)
+            domain = [
+                ('title', 'ilike', 'PANIC'),
+                ('create_date', '>=', cutoff),
+            ]
+
+            if not is_admin:
+                allowed = user.site_ids.ids
+                if not allowed:
+                    return {'success': True, 'alerts': []}
+                domain.append(('site_id', 'in', allowed))
+
+            incidents = request.env['incident.report'].sudo().search(
+                domain, order='create_date desc', limit=20,
+            )
+
+            alerts = []
+            for inc in incidents:
+                alerts.append({
+                    'id': inc.id,
+                    'name': inc.name,
+                    'title': inc.title,
+                    'guard_id': inc.guard_id.id if inc.guard_id else None,
+                    'guard_name': inc.guard_id.name if inc.guard_id else 'Unknown guard',
+                    'site_id': inc.site_id.id if inc.site_id else None,
+                    'site_name': inc.site_id.name if inc.site_id else 'Unknown site',
+                    'latitude': inc.latitude or None,
+                    'longitude': inc.longitude or None,
+                    'create_date': fields.Datetime.to_string(inc.create_date) if inc.create_date else None,
+                    'severity': inc.severity,
+                    'status': inc.status,
+                    'incident_url': '/web#id=%s&model=incident.report&view_type=form' % inc.id,
+                })
+
+            return {'success': True, 'alerts': alerts}
+        except Exception as e:
+            _logger.error('Error fetching map panic alerts: %s', e)
+            return {'success': False, 'error': str(e), 'alerts': []}
 
     @http.route('/guardpro/guards/map', type='http', auth='user', website=True)
     def guards_map_view(self, **kwargs):
@@ -425,7 +658,7 @@ function openDB() {
             
             return {'success': True, 'geofences': geofences}
         except Exception as e:
-            _logger.error('Error fetching site geofences: %s', str(e))
+            _logger.error('Error fetching project geofences: %s', str(e))
             return {'success': False, 'error': str(e)}
 
     @http.route('/guardpro/route/map/<int:wizard_id>', type='http', auth='user', website=True)
@@ -561,8 +794,8 @@ function openDB() {
                 geofence_type: 'circle' or 'polygon'
                 geofence_radius: Radius in meters (for circle)
                 geofence_polygon: JSON string of polygon coordinates (for polygon)
-                latitude: Site latitude (optional, updates if provided)
-                longitude: Site longitude (optional, updates if provided)
+                latitude: Project latitude (optional, updates if provided)
+                longitude: Project longitude (optional, updates if provided)
         """
         try:
             # Get data from JSON request body (HTTP type)
@@ -579,7 +812,7 @@ function openDB() {
             
             site = request.env['client.site'].browse(site_id)
             if not site.exists():
-                error_response = {'success': False, 'error': 'Site not found'}
+                error_response = {'success': False, 'error': 'Project not found'}
                 return request.make_response(
                     json.dumps(error_response),
                     headers=[('Content-Type', 'application/json')],

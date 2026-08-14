@@ -436,7 +436,7 @@
                         
                         <div class="form-group">
                             <label for="site-selector">
-                                <i class="fa fa-building"></i> Select Site *
+                                <i class="fa fa-building"></i> Select Project *
                             </label>
                             <select id="site-selector">
                                 <option value="">-- Choose a site --</option>

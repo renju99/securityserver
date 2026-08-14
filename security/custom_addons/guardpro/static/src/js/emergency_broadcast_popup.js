@@ -95,14 +95,16 @@ class EmergencyBroadcastPopup extends Component {
         }
 
         try {
+            // Only still-sent broadcasts; expired test floods must not stack.
             const acknowledgments = await this.orm.searchRead(
                 "emergency.broadcast.acknowledgment",
                 [
                     ["user_id", "=", this.user.userId],
                     ["is_acknowledged", "=", false],
+                    ["broadcast_id.state", "=", "sent"],
                 ],
                 ["id", "broadcast_id"],
-                { limit: 100 }
+                { limit: 5, order: "id desc" }
             );
 
             if (acknowledgments && acknowledgments.length > 0) {
@@ -110,7 +112,7 @@ class EmergencyBroadcastPopup extends Component {
                 const broadcastIds = acknowledgments.map(ack => ack.broadcast_id[0]);
                 const broadcasts = await this.orm.searchRead(
                     "emergency.broadcast",
-                    [["id", "in", broadcastIds]],
+                    [["id", "in", broadcastIds], ["state", "=", "sent"]],
                     ["id", "title", "message", "priority", "sent_date"]
                 );
 

@@ -28,7 +28,7 @@ class ComplianceAudit(models.Model):
     )
 
     audit_type = fields.Selection([
-        ('site', 'Site Audit'),
+        ('site', 'Project Audit'),
         ('guard', 'Guard Performance Audit'),
         ('equipment', 'Equipment Audit'),
         ('training', 'Training Compliance'),
@@ -42,11 +42,11 @@ class ComplianceAudit(models.Model):
     # Audit Target
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         tracking=True,
         index=True,
         ondelete='cascade',
-        help='Site being audited'
+        help='Project being audited'
     )
     guard_id = fields.Many2one(
         'guard.profile',
@@ -839,7 +839,7 @@ class ComplianceAuditTemplate(models.Model):
         help='Name of the audit template'
     )
     audit_type = fields.Selection([
-        ('site', 'Site Audit'),
+        ('site', 'Project Audit'),
         ('guard', 'Guard Performance Audit'),
         ('equipment', 'Equipment Audit'),
         ('training', 'Training Compliance'),

@@ -10,7 +10,7 @@ class GuardMessageChannelAllSites(models.Model):
     _inherit = 'guard.message.channel'
 
     all_sites_access = fields.Boolean(
-        string='All Sites',
+        string='All Projects',
         default=False,
         help='If enabled, members can use this channel regardless of user site assignment '
              '(e.g. company-wide). Public discovery still requires matching rules below.'

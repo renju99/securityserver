@@ -1,0 +1,4763 @@
+[
+  {
+    "name": "Abandoned Bicycle",
+    "code": "ABND_BIKE",
+    "sequence": 10,
+    "sections": [
+      {
+        "name": "Bicycle Information",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Location",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Notice serial no",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Make",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Color",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Photo Attachments",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Clear picture of bicycle - right & left",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign-off",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Inspector's name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Abandoned Cars",
+    "code": "ABND_VEH",
+    "sequence": 20,
+    "sections": [
+      {
+        "name": "Vehicle Information",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Location",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Notice serial no",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Plate number source",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Traffic plate number code",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Plate number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Color",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Photo Attachments",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Clear picture of car front & back",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign-off",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Inspector's name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Access Card",
+    "code": "ACS_CARD",
+    "sequence": 30,
+    "sections": [
+      {
+        "name": "Personal Information",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Card is issued to:",
+            "field_type": "selection",
+            "selection_options": "Owner\nTenant\nNshama staff\nRetail staff\nDubai police\nReal estate agent\nFamily\nA person with POA (Power of attorney)",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Reason for issuing the card:",
+            "field_type": "selection",
+            "selection_options": "Damaged\nRenewal\nAdditional\nChange in access level\nNew\nReplacement\nLost/Stolen",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Please enter the cheque/D/TT Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Unit",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "First name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          },
+          {
+            "name": "Last name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 70,
+            "required": false
+          },
+          {
+            "name": "EID no",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 80,
+            "required": false
+          },
+          {
+            "name": "Gender",
+            "field_type": "selection",
+            "selection_options": "Male\nFemale",
+            "sequence": 90,
+            "required": false
+          },
+          {
+            "name": "Mobile no",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 100,
+            "required": false
+          },
+          {
+            "name": "Parking number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 110,
+            "required": false
+          },
+          {
+            "name": "Original EID front & back",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 120,
+            "required": false
+          },
+          {
+            "name": "Customer acknowledgement clause",
+            "field_type": "boolean",
+            "selection_options": "I hereby acknowledge that the information I have supplied is correct...",
+            "sequence": 130,
+            "required": false
+          },
+          {
+            "name": "Customer signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 140,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Access Card Details",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Type of access card issued",
+            "field_type": "selection",
+            "selection_options": "Parking access\nDoor access\nParking & Door access",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Number of Door access cards issued",
+            "field_type": "integer",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Number of Parking access cards issued",
+            "field_type": "integer",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Access card serial number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Picture of access card",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Security Officer Details",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Supervisor Approval",
+        "sequence": 40,
+        "fields": [
+          {
+            "name": "Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Access Related",
+    "code": "ACS_REL",
+    "sequence": 40,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Incident date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Incident time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Incident Location",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Incident Type",
+            "field_type": "selection",
+            "selection_options": "Opening of Locker / Safe\nOpening of Store / Office / Mock up Unit\nUnsecured apartment / Retail Unit / Townhouse\nUnsecured Unit\nContractor / Supplier Passed\nProperty Removal Notification\nWork Permit\nEviction from site\nBlacklisted Contractor\nUnauthorised Access",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Narrative Report",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign-off",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Security name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Accident",
+    "code": "ACCIDENT",
+    "sequence": 50,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Accident date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Accident time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Accident location",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Primary cause",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Type of Accident",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "No. of vehicles Involved",
+            "field_type": "integer",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          },
+          {
+            "name": "The Liable Party",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 70,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Liable Party Details",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Driver name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Mobile number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Age",
+            "field_type": "integer",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Gender",
+            "field_type": "selection",
+            "selection_options": "Male\nFemale",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Nationality",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Car registration front & back",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          },
+          {
+            "name": "Plate code & number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 70,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Affected Party Details",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Client name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Mobile number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Law Enforcement",
+        "sequence": 40,
+        "fields": [
+          {
+            "name": "Law enforcement notified",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Ambulance called",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "CCTV Related",
+        "sequence": 50,
+        "fields": [
+          {
+            "name": "CCTV footage review",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Incident description",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign-off",
+        "sequence": 60,
+        "fields": [
+          {
+            "name": "Security name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Asset Handover",
+    "code": "EQ_HO",
+    "sequence": 60,
+    "sections": [
+      {
+        "name": "Asset Information",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Asset Details",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Serial Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Picture 1,2,3",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Handed Over To",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Company Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Mobile Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Handed Over By",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Company Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Mobile Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Bomb Threat",
+    "code": "BOMB",
+    "sequence": 70,
+    "sections": [
+      {
+        "name": "Bomb Threat Checklist",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Incident Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Incident Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Time Caller Hung Up",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Phone Number of Caller",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Call Details",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Threat Assessment Questions",
+            "field_type": "text",
+            "selection_options": "Where is bomb, when it will go off, what does it look like, what kind makes it explode, did you place it, why, name, exact words",
+            "sequence": 10,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Caller Information",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Voice / Background Profile",
+            "field_type": "text",
+            "selection_options": "Gender, caller location, estimated age, voice familiar, background sounds, caller voice, threat language, other info",
+            "sequence": 10,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Local Authorities",
+        "sequence": 40,
+        "fields": [
+          {
+            "name": "Did you escalate this to Nshama Security Management?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Did you call the local authorities",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Did the local authorities report to the incident scene?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Local authority Details",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign-off",
+        "sequence": 50,
+        "fields": [
+          {
+            "name": "Narrative Report",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "CCTV Handover",
+    "code": "CCTV_HO",
+    "sequence": 80,
+    "sections": [
+      {
+        "name": "Request Particulars",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Full Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Mobile Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Position / Designation",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "If police officer, mark applicable",
+            "field_type": "selection",
+            "selection_options": "Officer\nConstable",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Justification",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Detailed justification (incl. issue)",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Footage Particulars",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Date of recording",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Time (From)",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Time (To)",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Applicable Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Local Authorities",
+        "sequence": 40,
+        "fields": [
+          {
+            "name": "Did you escalate with Nshama Security Management",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign-off",
+        "sequence": 50,
+        "fields": [
+          {
+            "name": "Narrative Report",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Security Officer Details Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Management Review",
+        "sequence": 60,
+        "fields": [
+          {
+            "name": "Nshama Security Management Review and Approval Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Community Violation",
+    "code": "COMM_VIO",
+    "sequence": 90,
+    "sections": [
+      {
+        "name": "Violation Report Info",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Community Name as per Salesforce",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Unit Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Type of Violation",
+            "field_type": "selection",
+            "selection_options": "Noise and nuisance activities\nAbuse of community staff\nHazardous activities\nViolation of Safety and Security policy\nDumping and Poor trash management\nVandalism\nShort term letting/Staff accommodation/Commercial activities\nIllegal household staff\nViolation of moving-in/out policy\nViolation of sales/leasing policy\nViolation of animal keeping rules\nDamage/Misuse of recreation areas (Eg: parks & playground)\nDamage/Misuse of other common areas\nDamage/Misuse of sports areas/Leisure facilities\nDamage/Misuse of swimming pools\nDamage/Misuse of Plants\nPoor maintenance of garden and landscape\nUnauthorized exterior attachments (major alterations)\nUnauthorized exterior attachments alterations (minor alterations)\nViolation of terms against signage use\nMisuse of terrace and balconies\nInadequate pest control\nMisuse of garage area",
+            "sequence": 50,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Violation Info",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Violation Picture",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Did you speak with the resident regarding the violation",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Did the resident agree to clear the violation?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Notes for the security guard to type, if any",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign-off",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Death / Fatality",
+    "code": "DEATH",
+    "sequence": 100,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Incident Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Incident Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Incident Location",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Narrative Report",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Picture 1,2,3",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Local Authorities",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Did you call the local authorities",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Did the local authorities report to the incident scene",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Local Authority Details",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign-off",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Door Lock",
+    "code": "DOOR_LOCK",
+    "sequence": 110,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Incident Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Incident Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Community name as per salesforce",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Unit Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Incident Type",
+            "field_type": "selection",
+            "selection_options": "Break\nReplacement\nNew",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Location of the lock",
+            "field_type": "selection",
+            "selection_options": "Main Entrance\nBedroom\nLiving room\nToilets\nBalcony\nMaid room\nStore room\nPump room\nRoof access\nGarden gate\nTerrace gate",
+            "sequence": 60,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Resident / Agency Info",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Resident Details / Real Estate Agency (Holiday Homes)",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "EID front/back",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Ejari/Title deed",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "DTCM Permit (Holiday Homes)",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Locksmith Details",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "EID front/back",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Work Permit",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Did the local authorities report to the incident scene?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign-off",
+        "sequence": 40,
+        "fields": [
+          {
+            "name": "Detailed Incident report",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Emergency",
+    "code": "FIRE_EMG",
+    "sequence": 120,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Incident Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Incident Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Incident Location",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Select the type of emergency",
+            "field_type": "selection",
+            "selection_options": "Fire Alarm\nFire Emergency\nFire Fighting Equipment\nPower Failure\nUtility Failure\nGas-Related\nWater Leakage\nFlooding\nInclement Weather\nEvacuation\nSecurity Alarm\nLift Entrapment\nEntrapment",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Law Enforcement",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Law Enforcement notified",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Arrival & Departure Time along with number plate",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "CCTV Related",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "CCTV review",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "If Yes, name of person who reviewed the footage",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "CCTV Footage handover",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Police Officer name & mobile number (If Yes)",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Report Info",
+        "sequence": 40,
+        "fields": [
+          {
+            "name": "Incident Description",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Picture",
+        "sequence": 50,
+        "fields": [
+          {
+            "name": "Picture 1,2,3",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign-off",
+        "sequence": 60,
+        "fields": [
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Enquiry",
+    "code": "ENQUIRY",
+    "sequence": 130,
+    "sections": [
+      {
+        "name": "Enquiry Particulars",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Enquirer Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Enquirer Home Address",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Mobile Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "When the item is Lost (Date)",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "When the item is Lost (Time)",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Item Full Description",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          },
+          {
+            "name": "EID Copy Front",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 70,
+            "required": false
+          },
+          {
+            "name": "EID Copy Back",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 80,
+            "required": false
+          },
+          {
+            "name": "Enquirer Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 90,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "CCTV Related",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "CCTV Footage review: Yes/No",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "If Yes (Reviewer name and mobile number)",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "CCTV Footage Handover: Yes/No",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Police Officer Name & mobile number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Item Details",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Category of Lost and Found items",
+            "field_type": "selection",
+            "selection_options": "Book/Stationary\nClothing and Accessories\nCurrency/Money\nDocuments\nElectronics\nEyewear\nHome furnishing/decoration\nJewellery\nKeys\nLuggage/Bags\nMedical\nMobile Phones\nMusical equipment\nNumber plates\nVehicles\nSpare parts\nTools\nCards\nIDs\nTicket\nPassport\nPersonal Accessories\nPets\nPlants\nSport equipment\nToys\nWallet\nWatches\nElectric scooter\nScooter",
+            "sequence": 10,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign off",
+        "sequence": 40,
+        "fields": [
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Found Item",
+    "code": "FOUND ITEM",
+    "sequence": 140,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Incident Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Incident Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Incident Location",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Narrative Report",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Type of Incident",
+            "field_type": "selection",
+            "selection_options": "Irrigation pipe leakage\nCleaning issue\nDrain blockage\nMaintenance request\nMaintenance report\nElevator - Escalator related\nGlass damage\nPest control\nDead animal removal\nOther",
+            "sequence": 50,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign-off",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Picture 1,2,3",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Found Date & Time",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "When the item Found (Date)",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "When the item Found (Time)",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Finder / Resident Details",
+        "sequence": 40,
+        "fields": [
+          {
+            "name": "Name of Person Who Found the Item",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Home Address",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Mobile Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Email Address",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Item Details",
+        "sequence": 50,
+        "fields": [
+          {
+            "name": "Category of Lost and Found items",
+            "field_type": "selection",
+            "selection_options": "Book/Stationary\nClothing and Accessories\nCurrency/Money\nDocuments\nElectronics\nEyewear\nHome furnishing/decoration\nJewellery\nKeys\nLuggage/Bags\nMedical\nMobile Phones\nMusical equipment\nNumber plates\nVehicles\nSpare parts\nTools\nCards\nIDs\nTicket\nPassport\nPersonal Accessories\nPets\nPlants\nSport equipment\nToys\nWallet\nWatches\nElectric scooter\nScooter",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Item(Found) - Full Description",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Picture / Attachments",
+        "sequence": 60,
+        "fields": [
+          {
+            "name": "Picture of Found Item (1)",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Picture of Found Item (2)",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Valid Identity Copy of the person who found the item",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Inspection & Signature",
+        "sequence": 70,
+        "fields": [
+          {
+            "name": "Did the security officer inspect the item in your presence",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Signature of the person who found the item",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Office Use Only",
+        "sequence": 80,
+        "fields": [
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Did you inform the supervisor?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Did you hand over the item to lost and found?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Gate Barrier Damage",
+    "code": "GATE_DMG",
+    "sequence": 150,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Incident Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Incident Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Incident Location",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Operational Details",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Narrative report",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Community name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Unit Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "The cause of damage:",
+            "field_type": "selection",
+            "selection_options": "Tailgating\nCard didn't work\nIntentional\nSystem Malfunction\nAccess by force\nExit by force\nOther",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Authorities Involved",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Were the local authorities involved?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "If local authorities reported did they issue a report?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Attachment copy of the report",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign-off",
+        "sequence": 40,
+        "fields": [
+          {
+            "name": "Picture 1,2,3",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "General Security Related",
+    "code": "GEN_SEC",
+    "sequence": 160,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Incident Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Incident Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Incident Location",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Narrative Report",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Incident Type",
+            "field_type": "selection",
+            "selection_options": "Negligence\nItem Unsecured\nItem Confiscated",
+            "sequence": 50,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign-off",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Picture 1,2,3",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Hazard Identification",
+    "code": "HAZARD",
+    "sequence": 170,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Incident Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Incident Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Incident Location",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Narrative Report",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Operational Field",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Type of Hazard",
+            "field_type": "selection",
+            "selection_options": "Blinking light\nCable touching wet surface\nDB box is unlocked\nExposed cable\nLack of spill kit\nOpen containers\nSpillage\nLoose bolts and nuts\nSharp edges\nSurfaces causing extreme heat\nImproper storage of chemicals\nImproper ventilation\nLack of chemical waste disposal container\nLack of container labeling\nLack of drip tray\nLack of proper signage\nPoor display of fire extinguisher\nSmoke detector failure\nBroken signage\nLack of inspection tag\nImproper signage\nExpired fire extinguisher\nLack of safety signage\nFire alarm failure\nBroken rides and equipment\nLack of fire alarm\nCracked surfaces\nLack of fire extinguisher\nExpired inspection tag\nLack of hose reel\nLack of smoke detectors\nNo water connection to the hose reel\nObstruction of fire extinguisher\nObstructed egress/exit\nLack of firefighting signage\nNo provision of proper PPE\nUsing damaged PPE\nLack of operator's certificate/license\nNo third-party inspection\nNot using the machinery and equipment for its intended use\nSafety guard dysfunction\nDamaged fire extinguisher\nDamaged hose reel\nLack of disabled access\nHazardous plants\nLack of proper signage\nLack of pest control signage\nLocked emergency exit\nLack of pesticide spraying signage\nObstructed access\nBroken emergency exit\nExceeding the speed limit\nGate not locked\nImproper pedestrian walkways/pathways\nLack of concave mirror\nLack of orange flashing sign\nLack of pedestrian crossing sign\nLack of slow down sign\nLack of speed monitoring indicator\nNot slowing down at the pedestrian crossing\nBroken water pipes\nNo falling objects signage\nNo middle or upper rails\nNo provision of lifting cage/basket\nNo provision of safety harness\nNo scaffolding outriggers\nNo toe boards\nNot barricading the area beneath the work\nNot using proper equipment/machinery\nAvoiding the speed hump\nImproper cable landing/connection\nLoose cable\nPoor cable management\nLiquid spills\nNo provision of wet floor signage\nSlippery surface/floor material\nTripping object\nWet floor",
+            "sequence": 10,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Action & Sign-off",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Picture",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Action Taken",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Injury Report",
+    "code": "INJURY",
+    "sequence": 180,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Incident Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Incident Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Incident Location",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Injured Person Details",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Involved Person",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "First Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Last Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Gender",
+            "field_type": "selection",
+            "selection_options": "Male\nFemale",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Age",
+            "field_type": "integer",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Mobile Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          },
+          {
+            "name": "Nationality",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 70,
+            "required": false
+          },
+          {
+            "name": "Area of residency in UAE",
+            "field_type": "selection",
+            "selection_options": "Dubai\nSharjah\nAbu Dhabi\nAjman\nUmm Al Quwain\nRas Al Khaimah\nFujairah",
+            "sequence": 80,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Injury Details",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Type of Injury",
+            "field_type": "selection",
+            "selection_options": "Minor\nModerate\nSerious\nSevere\nCritical",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Body Part Injured",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Mark Injury Location (Sketch)",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Was the patient conscious",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "First Aid Given",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Was the patient transported to the hospital",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 60,
+            "required": false
+          },
+          {
+            "name": "If transported mention the hospital name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 70,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Guardian Details",
+        "sequence": 40,
+        "fields": [
+          {
+            "name": "Is the injured person a minor?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Guardian full name, mobile number, type of relationship",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Witness Statement",
+        "sequence": 50,
+        "fields": [
+          {
+            "name": "Full Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Mobile Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Address",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Witness statement",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Witness Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Law Enforcement",
+        "sequence": 60,
+        "fields": [
+          {
+            "name": "Law Enforcement notified",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Arrival/departure time along with number plate",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "CCTV Related",
+        "sequence": 70,
+        "fields": [
+          {
+            "name": "CCTV Footage review: Yes/No",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "If Yes (Reviewer name and mobile number)",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "CCTV Footage Handover: Yes/No",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Police Officer Name & mobile number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign-off",
+        "sequence": 80,
+        "fields": [
+          {
+            "name": "Incident Description",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Item Missing - Company Asset",
+    "code": "MISS_ASSET",
+    "sequence": 190,
+    "sections": [
+      {
+        "name": "Enquiry Particulars",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Category of Lost and Found items",
+            "field_type": "selection",
+            "selection_options": "Book/Stationary\nClothing and Accessories\nCurrency/Money\nDocuments\nElectronics\nEyewear\nHome furnishing/decoration\nJewellery\nKeys\nLuggage/Bags\nMedical\nMobile Phones\nMusical equipment\nNumber plates\nVehicles\nSpare parts\nTools\nCards\nIDs\nTicket\nPassport\nPersonal Accessories\nPets\nPlants\nSport equipment\nToys\nWallet\nWatches\nElectric scooter\nScooter",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "When the item is lost (Date)",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "When the item is Lost (Time)",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Item Full Description",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "CCTV Related",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "CCTV Footage review: Yes/No",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "If Yes (Reviewer name and mobile number)",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "CCTV Footage Handover: Yes/No",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Police Officer Name & mobile number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Office Use Only",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Key & Lock Related",
+    "code": "KEY_LOCK",
+    "sequence": 200,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Incident Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Incident Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Incident type: Keys",
+            "field_type": "selection",
+            "selection_options": "Damaged\nLost\nSafe Related\nUser-Violations\nStolen\nCutting\nCutting without a permit\nNot Returned\nTaken off site without permission\nHandover",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Incident Location",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Narrative Report",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Involved Party Details",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Involved Party Details",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Narrative Report",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Authorities Info",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Did you call the local authorities?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Did the local authorities report to the incident scene?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign-off",
+        "sequence": 40,
+        "fields": [
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Lighter Crime",
+    "code": "LT_CRIME",
+    "sequence": 210,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Incident Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Incident Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Incident Location",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Narrative Report",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Incident Type",
+            "field_type": "selection",
+            "selection_options": "Alcohol-Related\nBegging\nSoliciting\nDistribution of Brochures\nDisturbance\nDishonesty\nDisclosure of Information\nEmployee Disciplinary-Incident\nSleeping on Duty\nBreach of Policy & Procedure",
+            "sequence": 50,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Involved Party Details",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Involved Party Details",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Narrative Report",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Picture 1,2,3",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Local Authorities",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Did you call the local authorities?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Did the local authorities report to the incident scene?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Local Authority Details",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign-off",
+        "sequence": 40,
+        "fields": [
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Local Authority",
+    "code": "AUTH_VISIT",
+    "sequence": 220,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Incident Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Incident Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Incident Location",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Narrative Report",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "What sort of local authorities reported to the community?",
+            "field_type": "selection",
+            "selection_options": "Police\nCID\nAmbulance\nDEWA\nDCD Dubai Civil Defense\nDubai Court\nPublic Prosecution\nDTCM Department of Tourism and Commerce Marketing\nDubai Municipality\nSIRA\nDED- Department of Economic Development\nRERA/Land Department",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Narrative Report (Duplicate label section)",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          },
+          {
+            "name": "Picture 1,2,3",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 70,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign-off",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Missing Persons",
+    "code": "MISS_PERS",
+    "sequence": 230,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Incident Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Incident Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Incident Location",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Missing Person Details",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "First Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Last Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Gender",
+            "field_type": "selection",
+            "selection_options": "Male\nFemale",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Age",
+            "field_type": "integer",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Skin Colour",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Eye Colour",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          },
+          {
+            "name": "Hair Color",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 70,
+            "required": false
+          },
+          {
+            "name": "Nationality",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 80,
+            "required": false
+          },
+          {
+            "name": "Height in ft(feet)",
+            "field_type": "integer",
+            "selection_options": "",
+            "sequence": 90,
+            "required": false
+          },
+          {
+            "name": "Area of residency in UAE",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 100,
+            "required": false
+          },
+          {
+            "name": "Last location where the missing person was seen?",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 110,
+            "required": false
+          },
+          {
+            "name": "Did you announce the above details to all security officers?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 120,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Found Section",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Is the missing person a minor?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Guardian full name, mobile number, type of relationship",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "EID front/back",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Signature of the guardian",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Law Enforcement",
+        "sequence": 40,
+        "fields": [
+          {
+            "name": "Law Enforcement notified?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Arrival/departure time and plate number",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "CCTV Related",
+        "sequence": 50,
+        "fields": [
+          {
+            "name": "CCTV Footage review: Yes/No",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "If Yes (Reviewer name and mobile number)",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "CCTV Footage Handover: Yes/No",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Police Officer Name & mobile number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign-off",
+        "sequence": 60,
+        "fields": [
+          {
+            "name": "Incident Description",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Move In (No Permit)",
+    "code": "MOVE_NP",
+    "sequence": 240,
+    "sections": [
+      {
+        "name": "Personal Information",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Type of Move In",
+            "field_type": "selection",
+            "selection_options": "Owner\nTenant\nHoliday",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Resident Full Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Contact Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Email Address",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Community Name as per Salesforce",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Unit Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          },
+          {
+            "name": "Move in Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 70,
+            "required": false
+          },
+          {
+            "name": "Move in Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 80,
+            "required": false
+          },
+          {
+            "name": "Number of Occupants",
+            "field_type": "integer",
+            "selection_options": "",
+            "sequence": 90,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Identification",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Original EID Front/Passport First Page - copy",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Original EID back/Passport VISA page",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Customer Acknowledgment Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Details of Security Officer",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Move In",
+    "code": "MOVE_IN",
+    "sequence": 250,
+    "sections": [
+      {
+        "name": "Personal Information",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Type of Move In",
+            "field_type": "selection",
+            "selection_options": "Owner\nTenant\nHoliday",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Resident Full Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Contact Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Email Address",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Community Name as per Salesforce",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Unit Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          },
+          {
+            "name": "Move-in Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 70,
+            "required": false
+          },
+          {
+            "name": "Move-in Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 80,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Documentation",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Move In Permit Picture",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Original EID Front",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Original EID Back",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Details of Security Officer",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Move Out",
+    "code": "MOVE_OUT",
+    "sequence": 260,
+    "sections": [
+      {
+        "name": "Customer Information",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Type of Move Out",
+            "field_type": "selection",
+            "selection_options": "Owner\nTenant\nHoliday",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Valid move-out permit check",
+            "field_type": "boolean",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Resident Full Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Contact Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Community Name as per Salesforce",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Unit Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          },
+          {
+            "name": "Move Out Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 70,
+            "required": false
+          },
+          {
+            "name": "Move Out Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 80,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Details of Security Officer",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Parking Violations",
+    "code": "PARK_VIO",
+    "sequence": 270,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Type of Parking Violation",
+            "field_type": "selection",
+            "selection_options": "Wrongful Parking\nLong Parked\nUndesignated Parking\nVehicle Unauthorized\nMotor Vehicle Parking on the pavements\nReckless Driving\nTailgating\nExceeding the maximum speed limit\nWrong overtaking\nDisabled parking violation\nStopping in the middle of the road without a justified reason\nParking in front of a fire hydrant\nNot complying of the loading and unloading in the designated areas\nStopping the vehicle on pedestrian crossing\nDriving the vehicle against the traffic direction\nTraining on driving without permission\nMaking U turn from undesignated areas",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Community Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Unit Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Location slot information",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Vehicle Information",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Does the vehicle have a plate number?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Vehicle Plate No.",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Registration",
+            "field_type": "selection",
+            "selection_options": "Dubai\nSharjah\nAbu Dhabi\nothers",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "If selected another, specify community",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Clear picture of the car (Front with plate number)",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Clear picture of the car (Back with plate number)",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Actions & Sign-off",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Did you speak with the customer regarding the violation?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Did the customer agree to clear the violation?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Violation reported to Dubai Police?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Dubai Police reported the incident scene?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Notes for the security guard to type, if any",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 70,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Personal Property Removal",
+    "code": "PROP_REM",
+    "sequence": 280,
+    "sections": [
+      {
+        "name": "Asset Information",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Community Name as per Salesforce",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Unit Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Asset Details",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Picture 1,2,3",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Hand Over By",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Company Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Mobile Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Handed Over To",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Mobile Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Photography",
+    "code": "PHOTO",
+    "sequence": 290,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Incident Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Incident Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Incident Location",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "On Site Verification",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Name of the filming company",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Type of shooting",
+            "field_type": "selection",
+            "selection_options": "Filming\nPhotography",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Purpose of Shooting",
+            "field_type": "selection",
+            "selection_options": "Personal\nCommercial",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Do they have a NOC from NSHAMA?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No (If answer was NO, filming stop clause triggers)",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Number of People Involved",
+            "field_type": "integer",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Mobile Number (Point of contact for the in-charge)",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Aerial filming section",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Was there any aerial filming such as the usage of a drone?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Sign-off",
+        "sequence": 40,
+        "fields": [
+          {
+            "name": "Incident Description",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Property Damage",
+    "code": "PROP_DMG",
+    "sequence": 300,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Incident Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Incident Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Incident Location",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Narrative report",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "List down on the damaged property",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Authorities & Sign-off",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Were local authorities involved?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "If the local authorities reported, did they issue a report?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No (Attach layout copy if yes)",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Picture 1,2,3",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Retail Parking Violation",
+    "code": "RETAIL_PARK",
+    "sequence": 310,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Community Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Unit Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Location entry remarks",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Vehicle Information",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Type of Violation",
+            "field_type": "selection",
+            "selection_options": "Tailgating\nExit No Payment\nOvernight Parking\nLost Ticket",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Entry Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Entry Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Exit Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Exit Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Does the vehicle have a plate number?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 60,
+            "required": false
+          },
+          {
+            "name": "Vehicle Plate No.",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 70,
+            "required": false
+          },
+          {
+            "name": "Registration",
+            "field_type": "selection",
+            "selection_options": "Dubai\nSharjah\nAbu Dhabi\nothers",
+            "sequence": 80,
+            "required": false
+          },
+          {
+            "name": "If selected another, specify community",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 90,
+            "required": false
+          },
+          {
+            "name": "Clear picture of the car (Front with plate number)",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 100,
+            "required": false
+          },
+          {
+            "name": "Clear picture of the car (Back with plate number)",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 110,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Actions & Sign-off",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Did you speak with the customer regarding the violation?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Did the customer agree to clear the violation?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Violation reported to Dubai Police?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Dubai Police reported the incident scene?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Notes for the security guard to type, if any",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 70,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Return Form",
+    "code": "RETURN FORM",
+    "sequence": 320,
+    "sections": [
+      {
+        "name": "Recipient Particulars",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Recipient Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Recipient Home Address",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Mobile Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Email Address",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Item-Full Description",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "EID Copy Front",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          },
+          {
+            "name": "EID Copy Back",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 70,
+            "required": false
+          },
+          {
+            "name": "Item Picture",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 80,
+            "required": false
+          },
+          {
+            "name": "Recipient Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 90,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "For Office Use only",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Category of Lost and Found items",
+            "field_type": "selection",
+            "selection_options": "Book/Stationary\nClothing and Accessories\nCurrency/Money\nDocuments\nElectronics\nEyewear\nHome furnishing/decoration\nJewellery\nKeys\nLuggage/Bags\nMedical\nMobile Phones\nMusical equipment\nNumber plates\nVehicles\nSpare parts\nTools\nCards\nIDs\nTicket\nPassport\nPersonal Accessories\nPets\nPlants\nSport equipment\nToys\nWallet\nWatches\nElectric scooter\nScooter",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Statement",
+    "code": "STATEMENT",
+    "sequence": 330,
+    "sections": [
+      {
+        "name": "Personal Information",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Full Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Mobile Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Nationality",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Gender",
+            "field_type": "selection",
+            "selection_options": "Male\nFemale",
+            "sequence": 60,
+            "required": false
+          },
+          {
+            "name": "EID Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 70,
+            "required": false
+          },
+          {
+            "name": "EID Expiry Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 80,
+            "required": false
+          },
+          {
+            "name": "EID Front",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 90,
+            "required": false
+          },
+          {
+            "name": "EID Back",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 100,
+            "required": false
+          },
+          {
+            "name": "Statement",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 110,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 120,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Security Officer Details",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Mobile Number",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Security Drill",
+    "code": "SEC_DRILL",
+    "sequence": 340,
+    "sections": [
+      {
+        "name": "Drill Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Start Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "End Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Type of Exercise",
+            "field_type": "selection",
+            "selection_options": "Tabletop\nExercise\nDrills",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Scenario Background",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Planned Scenario Chain of Events",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          },
+          {
+            "name": "Minimum Acceptable Level of Performance",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 70,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Performance Analysis",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Actual Scenario Chain of Events (Attach Pictures)",
+            "field_type": "media",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Gap analysis based on exercise debrief",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Gap analysis 1, 2, 3, 4",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Report Made By",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSite In charge\nSupervisor\nSecurity Officer",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Security System",
+    "code": "SEC_SYS",
+    "sequence": 350,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Incident Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Incident Time",
+            "field_type": "time",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Incident Location",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          },
+          {
+            "name": "Narrative Report",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 40,
+            "required": false
+          },
+          {
+            "name": "Incident Type",
+            "field_type": "selection",
+            "selection_options": "Access Control\nANPR\nCCTV\nCheckpoints\nEID Card Reader\nMobiles\nMonitor\nPC\nRadios(TETRA)\nRemote Control (Gates)\nUPS\nIDF",
+            "sequence": 50,
+            "required": false
+          },
+          {
+            "name": "Narrative report (Duplicate label section)",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 60,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Incident Report Made By",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Serious Crime",
+    "code": "SER_CRIME",
+    "sequence": 360,
+    "sections": [
+      {
+        "name": "Incident Details",
+        "sequence": 10,
+        "fields": [
+          {
+            "name": "Incident Date",
+            "field_type": "date",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Narrative Report",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Incident Type",
+            "field_type": "selection",
+            "selection_options": "Assault\nHarassment\nSexual Harassment\nOffensive Behaviour\nIndecent Exposure\nFighting\nFraud / Forgery\nBribery / Extortion\nTheft\nAllegation of Theft by Customer\nAllegation of Theft by Staff\nAllegation of Theft by Residence\nAllegation of Theft by Contractor\nSuspicious Activity\nSuspicious Telephone Calls\nTrespassing\nRobbery\nSuicide\nSubstance(drug) abuse",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Involved Party Details",
+        "sequence": 20,
+        "fields": [
+          {
+            "name": "Involved Party Details",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Narrative report (Duplicate validation tracking)",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 20,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Local Authorities Info",
+        "sequence": 30,
+        "fields": [
+          {
+            "name": "Did you call the local authorities?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Did the local authorities report to the incident scene?",
+            "field_type": "boolean",
+            "selection_options": "Yes, No",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Local Authority Details",
+            "field_type": "text",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      },
+      {
+        "name": "Incident Report Made By",
+        "sequence": 40,
+        "fields": [
+          {
+            "name": "Security Name",
+            "field_type": "char",
+            "selection_options": "",
+            "sequence": 10,
+            "required": false
+          },
+          {
+            "name": "Designation",
+            "field_type": "selection",
+            "selection_options": "Security Manager\nAssistant Security Manager\nSecurity Supervisor\nSecurity Officer",
+            "sequence": 20,
+            "required": false
+          },
+          {
+            "name": "Signature",
+            "field_type": "signature",
+            "selection_options": "",
+            "sequence": 30,
+            "required": false
+          }
+        ]
+      }
+    ]
+  }
+]

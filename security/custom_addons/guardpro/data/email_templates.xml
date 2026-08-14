@@ -111,7 +111,7 @@
                             <td style="padding: 8px; border: 1px solid #ddd;">${object.severity or ''}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Site</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Project</td>
                             <td style="padding: 8px; border: 1px solid #ddd;">${object.site_id.name or ''}</td>
                         </tr>
                         <tr>

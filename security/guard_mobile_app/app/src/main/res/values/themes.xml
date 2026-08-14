@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Transparent system bars: content draws edge-to-edge and is
+         inset in TwaLauncherActivity.setupWebView(). Do not set bar
+         colors from Java (setStatusBarColor / setNavigationBarColor
+         are deprecated on API 35+ and flagged by Play Console). -->
+    <style name="Theme.GuardLink" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

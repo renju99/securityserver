@@ -110,13 +110,11 @@ class GuardMapWidget extends Component {
                 lng: guard.longitude
             };
             
-            // Determine marker color based on last update time
-            let markerColor = '#10b981'; // green - active (< 5 min)
-            if (guard.time_since_update > 30) {
-                markerColor = '#ef4444'; // red - inactive (> 30 min)
-            } else if (guard.time_since_update > 5) {
-                markerColor = '#f59e0b'; // yellow - stale (5-30 min)
-            }
+            // Live = green; last-known (not live) = red
+            const isLive = guard.is_live === true || (
+                guard.is_live == null && guard.time_since_update != null && guard.time_since_update <= 5
+            );
+            const markerColor = isLive ? '#10b981' : '#ef4444';
             
             // Create custom marker icon
             const markerIcon = {
@@ -137,16 +135,21 @@ class GuardMapWidget extends Component {
             });
             
             // Create info window
-            const lastUpdateText = guard.time_since_update 
-                ? `${guard.time_since_update} min ago` 
-                : 'Just now';
+            const lastUpdateText = guard.last_update_label
+                || (guard.time_since_update != null
+                    ? `${guard.time_since_update} min ago`
+                    : 'Just now');
+            const liveLabel = isLive
+                ? '<span style="color:#059669;font-weight:600;">Live</span>'
+                : '<span style="color:#dc2626;font-weight:600;">Last known</span>';
             
             const infoContent = `
                 <div style="padding: 10px; min-width: 200px;">
                     <h3 style="margin: 0 0 10px 0;">${guard.name}</h3>
-                    <p style="margin: 5px 0;"><strong>Badge:</strong> ${guard.badge_number}</p>
-                    <p style="margin: 5px 0;"><strong>Site:</strong> ${guard.current_site}</p>
-                    <p style="margin: 5px 0;"><strong>Phone:</strong> ${guard.phone}</p>
+                    <p style="margin: 5px 0;"><strong>Badge:</strong> ${guard.badge_number || 'N/A'}</p>
+                    <p style="margin: 5px 0;"><strong>Project:</strong> ${guard.current_site || 'Unassigned'}</p>
+                    <p style="margin: 5px 0;"><strong>Phone:</strong> ${guard.phone || 'N/A'}</p>
+                    <p style="margin: 5px 0;"><strong>Status:</strong> ${liveLabel}</p>
                     <p style="margin: 5px 0;"><strong>Last Update:</strong> ${lastUpdateText}</p>
                     <p style="margin: 10px 0 0 0;">
                         <a href="/web#id=${guard.id}&model=guard.profile&view_type=form" 
@@ -239,20 +242,21 @@ class GuardMapWidget extends Component {
      * Get status class for guard
      */
     getStatusClass(guard) {
-        if (guard.time_since_update > 30) {
-            return 'status-inactive';
-        } else if (guard.time_since_update > 5) {
-            return 'status-stale';
-        }
-        return 'status-active';
+        const isLive = guard.is_live === true || (
+            guard.is_live == null && guard.time_since_update != null && guard.time_since_update <= 5
+        );
+        return isLive ? 'status-active' : 'status-inactive';
     }
 
     /**
      * Get last update text
      */
     getLastUpdateText(guard) {
-        return guard.time_since_update 
-            ? `${guard.time_since_update} min ago` 
+        if (guard.last_update_label) {
+            return guard.last_update_label;
+        }
+        return guard.time_since_update != null
+            ? `${guard.time_since_update} min ago`
             : 'Just now';
     }
 }

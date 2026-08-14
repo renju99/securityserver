@@ -41,7 +41,7 @@
                                         <td width="75%"><span t-field="doc.guard_id.name"/></td>
                                     </tr>
                                     <tr>
-                                        <td><strong>Site:</strong></td>
+                                        <td><strong>Project:</strong></td>
                                         <td><span t-field="doc.site_id.name"/></td>
                                     </tr>
                                     <tr>

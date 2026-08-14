@@ -76,7 +76,7 @@ class GuardLocationHistory(models.Model):
     # Context Data
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         index=True,
         ondelete='set null',
         help='Site the guard was assigned to at this time'

@@ -87,7 +87,7 @@ class IncidentStatusUpdate(models.Model):
     visible_to_residents = fields.Boolean(
         string='Visible to Residents',
         default=False,
-        help='Make this update visible to residents (for community sites)'
+        help='Make this update visible to residents (for community projects)'
     )
     
     # Notification

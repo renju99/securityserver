@@ -79,7 +79,7 @@
                                         <td t-field="o.shift_id.name"/>
                                     </tr>
                                     <tr>
-                                        <td><strong>Site:</strong></td>
+                                        <td><strong>Project:</strong></td>
                                         <td t-field="o.shift_id.site_id.name"/>
                                     </tr>
                                     <tr>
@@ -108,7 +108,7 @@
                                         <td t-field="o.compensation_shift_id.name"/>
                                     </tr>
                                     <tr>
-                                        <td><strong>Site:</strong></td>
+                                        <td><strong>Project:</strong></td>
                                         <td t-field="o.compensation_shift_id.site_id.name"/>
                                     </tr>
                                     <tr>

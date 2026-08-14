@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Client Site Model with Geofencing."""
+"""Client Project Model with Geofencing."""
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
@@ -11,22 +11,22 @@ _logger = logging.getLogger(__name__)
 
 
 class ClientSite(models.Model):
-    """Client Site with GPS coordinates and geofencing."""
+    """Client Project with GPS coordinates and geofencing."""
 
     _name = 'client.site'
-    _description = 'Client Site Location'
+    _description = 'Client Project'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'name'
 
     # Basic Information
     name = fields.Char(
-        string='Site Name',
+        string='Project Name',
         required=True,
         tracking=True,
         index=True
     )
     code = fields.Char(
-        string='Site Code',
+        string='Project Code',
         required=True,
         copy=False,
         tracking=True,
@@ -41,7 +41,7 @@ class ClientSite(models.Model):
     )
     manager_id = fields.Many2one(
         'res.partner',
-        string='Site Manager',
+        string='Project Manager',
         tracking=True,
         help='Site manager contact person'
     )
@@ -129,13 +129,17 @@ class ClientSite(models.Model):
     
     # Contact Information
     site_manager = fields.Char(
-        string='Site Manager Name'
+        string='Project Manager Name'
     )
     site_phone = fields.Char(
-        string='Site Phone'
+        string='Project Phone'
     )
     site_email = fields.Char(
-        string='Site Email'
+        string='Project Email',
+        help='Primary site contact. Also used as the recipient for the daily '
+             'visitor log (visitor PII for this site only). '
+             'Comma-separated addresses allowed. '
+             'Falls back to Project Manager / Client email if empty.'
     )
     emergency_contact = fields.Char(
         string='Emergency Contact'
@@ -148,7 +152,7 @@ class ClientSite(models.Model):
     active = fields.Boolean(
         string='Active',
         default=True,
-        help='Set to false to archive the site'
+        help='Set to false to archive the project'
     )
     status = fields.Selection([
         ('active', 'Active'),
@@ -166,7 +170,7 @@ class ClientSite(models.Model):
         ('residential', 'Residential Complex'),
         ('government', 'Government Facility'),
         ('other', 'Other')
-    ], string='Site Type', default='other', tracking=True,
+    ], string='Project Type', default='other', tracking=True,
        help='Type of facility or building')
     
     contract_start = fields.Date(
@@ -190,6 +194,21 @@ class ClientSite(models.Model):
     )
     
     # Location Hierarchy
+    project_site_ids = fields.One2many(
+        'guard.site',
+        'project_id',
+        string='Sites',
+        help='Physical sites belonging to this project',
+    )
+    site_count = fields.Integer(
+        string='Sites',
+        compute='_compute_site_count',
+    )
+    zone_ids = fields.One2many(
+        'site.zone',
+        'site_id',
+        string='Zones',
+    )
     building_ids = fields.One2many(
         'site.building',
         'site_id',
@@ -216,7 +235,7 @@ class ClientSite(models.Model):
     # Access Instructions
     access_instructions = fields.Text(
         string='Access Instructions',
-        help='How to access the site'
+        help='How to access the project'
     )
     parking_instructions = fields.Text(
         string='Parking Instructions'
@@ -244,12 +263,12 @@ class ClientSite(models.Model):
     
     # Attachments
     site_map = fields.Binary(
-        string='Site Map',
+        string='Project Map',
         attachment=True
     )
     site_photos = fields.Many2many(
         'ir.attachment',
-        string='Site Photos'
+        string='Project Photos'
     )
     
     # Notes
@@ -266,15 +285,19 @@ class ClientSite(models.Model):
     
     _sql_constraints = [
         ('code_unique', 'unique(code)',
-         'Site code must be unique!'),
+         'Project code must be unique!'),
     ]
 
     @api.depends('shift_ids', 'incident_ids')
     def _compute_statistics(self):
-        """Compute site statistics."""
+        """Compute project statistics."""
         for record in self:
             record.total_shifts = len(record.shift_ids)
             record.total_incidents = len(record.incident_ids)
+
+    def _compute_site_count(self):
+        for record in self:
+            record.site_count = len(record.project_site_ids)
 
     incident_ids = fields.One2many(
         'incident.report',
@@ -282,8 +305,20 @@ class ClientSite(models.Model):
         string='Incidents'
     )
 
+    def action_view_project_sites(self):
+        """Open sites belonging to this project."""
+        self.ensure_one()
+        return {
+            'name': _('Sites - %s') % self.name,
+            'type': 'ir.actions.act_window',
+            'res_model': 'guard.site',
+            'view_mode': 'list,form',
+            'domain': [('project_id', '=', self.id)],
+            'context': {'default_project_id': self.id},
+        }
+
     def _compute_active_guards(self):
-        """Count guards currently active at this site."""
+        """Count guards currently active at this project."""
         for record in self:
             record.active_guards = self.env['guard.profile'].search_count([
                 ('current_site_id', '=', record.id),
@@ -363,8 +398,8 @@ class ClientSite(models.Model):
         if n:
             names = ', '.join(self.mapped('display_name'))
             raise ValidationError(_(
-                'Cannot delete site(s) (%s): %s shift template(s) still reference them. '
-                'Archive the site (clear Active) to keep all existing data, '
+                'Cannot delete project(s) (%s): %s shift template(s) still reference them. '
+                'Archive the project (clear Active) to keep all existing data, '
                 'or delete or reassign those templates first.'
             ) % (names, n))
         return super().unlink()
@@ -428,7 +463,7 @@ class ClientSite(models.Model):
 
     def check_guard_in_geofence(self, latitude, longitude):
         """
-        Check if given coordinates are within site geofence.
+        Check if given coordinates are within project geofence.
         
         Args:
             latitude (float): Guard's latitude
@@ -441,11 +476,30 @@ class ClientSite(models.Model):
         
         if not self.geofence_enabled:
             return True
+
+        # Unconfigured center (0,0 / Null Island) would flag every real
+        # location as outside and flood geofence.alert / supervisor pipelines.
+        if self.geofence_type == 'circle' and not self._has_valid_geofence_center():
+            _logger.warning(
+                'Geofence skipped for site %s: circle center is unset (lat=%s lon=%s)',
+                self.name, self.latitude, self.longitude,
+            )
+            return True
             
         if self.geofence_type == 'circle':
             return self._check_circle_geofence(latitude, longitude)
         else:
             return self._check_polygon_geofence(latitude, longitude)
+
+    def _has_valid_geofence_center(self):
+        """True when circle geofence has a usable lat/lng (not 0,0 / empty)."""
+        self.ensure_one()
+        try:
+            lat = float(self.latitude or 0.0)
+            lng = float(self.longitude or 0.0)
+        except (TypeError, ValueError):
+            return False
+        return abs(lat) > 0.0001 or abs(lng) > 0.0001
 
     def _check_circle_geofence(self, lat, lng):
         """Check if point is within circular geofence."""

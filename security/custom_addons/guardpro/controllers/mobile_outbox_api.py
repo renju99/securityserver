@@ -30,13 +30,21 @@ class MobileOutboxController(http.Controller):
         """Return unacknowledged outbox rows for the current user."""
         try:
             user = request.env.user
-            rows = request.env['guardpro.mobile.outbox'].sudo().search(
+            Outbox = request.env['guardpro.mobile.outbox'].sudo()
+            # Clear any leftover shift ack backlog (feature disabled).
+            Outbox._discard_all_shift_notifications(user)
+
+            rows = Outbox.search(
                 [
                     ('user_id', '=', user.id),
                     ('acked', '=', False),
+                    ('kind', 'not in', [
+                        'shift_assigned', 'shift_changed',
+                        'shift_cancelled', 'shift_swap_decision',
+                    ]),
                 ],
                 order='priority desc, create_date asc, id asc',
-                limit=20,
+                limit=100,
             )
 
             # Priority order for the JS to decide whether to raise a

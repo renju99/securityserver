@@ -10,6 +10,11 @@ from datetime import timedelta
 
 from ..common.video_optimizer import VideoOptimizer
 from ..common.image_optimizer import ImageOptimizer
+from ..common.upload_validation import (
+    MAX_FILES_PER_REQUEST,
+    UploadValidationError,
+    validate_json_media_payload,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -48,7 +53,7 @@ class CheckpointScan(models.Model):
     )
     site_id = fields.Many2one(
         'client.site',
-        string='Site',
+        string='Project',
         related='checkpoint_id.site_id',
         store=True
     )
@@ -80,7 +85,10 @@ class CheckpointScan(models.Model):
         ('nfc', 'NFC'),
         ('qr', 'QR Code'),
         ('gps', 'GPS/Virtual'),
-        ('manual', 'Manual')
+        ('manual', 'Manual'),
+        ('walkaround', 'General Walkaround'),
+        ('virtual', 'Virtual (GPS)'),
+        ('both', 'NFC + QR'),
     ], string='Scan Type', required=True)
     
     scan_data = fields.Char(
@@ -300,6 +308,14 @@ class CheckpointScan(models.Model):
             
             _logger.info('[Checkpoint Scan] Creating scan for checkpoint: %s (ID: %s), Guard: %s, Tour Log ID: %s',
                         checkpoint.name, checkpoint.id, guard.name, vals.get('tour_log_id'))
+
+            # Defense in depth: never attach a scan to another guard's tour
+            if vals.get('tour_log_id') and vals.get('guard_id'):
+                tour_log = self.env['tour.log'].browse(vals['tour_log_id'])
+                if tour_log.exists() and tour_log.guard_id.id != vals['guard_id']:
+                    raise ValidationError(_(
+                        'Cannot attach checkpoint scan to another guard\'s patrol.'
+                    ))
             
             # Calculate distance if GPS coordinates provided
             if vals.get('latitude') and vals.get('longitude'):
@@ -378,6 +394,15 @@ class CheckpointScan(models.Model):
                 # For virtual checkpoints, scan_data is optional but can be logged
                 if scan_data:
                     _logger.info('[Checkpoint Scan] Scan data provided for virtual checkpoint: %s', scan_data)
+            elif scan_type == 'walkaround':
+                # No hardware/GPS validation — presence marked manually by the guard
+                vals.setdefault('scan_data', scan_data or 'walkaround')
+                vals['verification_method'] = 'manual'
+                vals['status'] = vals.get('status') or 'verified'
+                _logger.info(
+                    '[Checkpoint Scan] Walkaround checkpoint %s marked without validation',
+                    checkpoint.name,
+                )
             else:
                 _logger.warning('[Checkpoint Scan] Unknown scan_type "%s" for checkpoint %s', scan_type, checkpoint.name)
         
@@ -414,6 +439,14 @@ class CheckpointScan(models.Model):
         # Get new values that will be applied
         new_status = vals.get('status')
         new_tour_log_id = vals.get('tour_log_id')
+        if new_tour_log_id:
+            tour_log = self.env['tour.log'].browse(new_tour_log_id)
+            for record in self:
+                guard_id = vals.get('guard_id') or record.guard_id.id
+                if tour_log.exists() and tour_log.guard_id.id != guard_id:
+                    raise ValidationError(_(
+                        'Cannot attach checkpoint scan to another guard\'s patrol.'
+                    ))
         
         for record in self:
             old_status = record.status
@@ -575,7 +608,7 @@ class CheckpointScan(models.Model):
                     WITH tour_stats AS (
                         SELECT 
                             tour_log_id,
-                            COUNT(*) as scanned_count
+                            COUNT(DISTINCT checkpoint_id) as scanned_count
                         FROM checkpoint_scan
                         WHERE tour_log_id = ANY(%s) AND status = 'verified'
                         GROUP BY tour_log_id
@@ -690,23 +723,22 @@ class CheckpointScan(models.Model):
             return []
         ids = []
         Attachment = self.env['ir.attachment'].sudo()
-        for payload in videos_payloads:
+        for payload in list(videos_payloads)[:MAX_FILES_PER_REQUEST]:
             if not payload or not isinstance(payload, dict):
                 continue
-            if not self._is_video_payload_dict(payload):
+            try:
+                validated = validate_json_media_payload(
+                    payload, allow_video=True, allow_image=False
+                )
+            except UploadValidationError as exc:
+                _logger.warning('[Checkpoint Scan] Rejected video: %s', exc)
                 continue
-            payload_name = payload.get('name') or 'checkpoint_video'
-            payload_data = payload.get('data')
-            if not payload_data:
+            if not validated['is_video']:
                 continue
-            mimetype = (
-                payload.get('mimetype')
-                or payload.get('content_type')
-                or 'application/octet-stream'
-            )
-            attachment_data = payload_data
+            payload_name = validated['filename'] or 'checkpoint_video.mp4'
+            mimetype = validated['mimetype'] or 'video/mp4'
             optimized, compressed = VideoOptimizer.optimize_video(
-                attachment_data,
+                validated['data'],
                 filename=payload_name,
             )
             if compressed:
@@ -752,47 +784,36 @@ class CheckpointScan(models.Model):
             return []
         ids = []
         Attachment = self.env['ir.attachment'].sudo()
-        for payload in photo_payloads:
+        for payload in list(photo_payloads)[:MAX_FILES_PER_REQUEST]:
             if not payload or not isinstance(payload, dict):
                 continue
             if self._is_video_payload_dict(payload):
                 continue
-            payload_name = payload.get('name') or 'checkpoint_photo.jpg'
-            mimetype = (
-                payload.get('mimetype')
-                or payload.get('content_type')
-                or 'image/jpeg'
-            ).lower()
             try:
-                datas = self._normalize_upload_b64(payload.get('data'))
-            except ValidationError:
-                raise
+                validated = validate_json_media_payload(
+                    payload, allow_video=False, allow_image=True
+                )
+            except UploadValidationError as exc:
+                _logger.warning('[Checkpoint Scan] Rejected photo: %s', exc)
+                continue
+            payload_name = validated['filename'] or 'checkpoint_photo.jpg'
+            mimetype = validated['mimetype'] or 'image/jpeg'
+            datas = base64.b64encode(validated['data']).decode('ascii')
+            try:
+                optimized = ImageOptimizer.optimize_image(datas)
+                if optimized:
+                    if isinstance(optimized, bytes):
+                        optimized = optimized.decode('ascii')
+                    datas = optimized
+                    mimetype = 'image/jpeg'
+                    if not payload_name.lower().endswith(('.jpg', '.jpeg')):
+                        base = payload_name.rsplit('.', 1)[0] if '.' in payload_name else payload_name
+                        payload_name = f'{base}.jpg'
             except Exception as exc:
-                _logger.warning('[Checkpoint Scan] Skip photo %s: %s', payload_name, exc)
-                continue
-            if not datas:
-                continue
-            heic_like = (
-                'heic' in mimetype
-                or 'heif' in mimetype
-                or payload_name.lower().endswith(('.heic', '.heif'))
-            )
-            if not heic_like:
-                try:
-                    optimized = ImageOptimizer.optimize_image(datas)
-                    if optimized:
-                        if isinstance(optimized, bytes):
-                            optimized = optimized.decode('ascii')
-                        datas = optimized
-                        mimetype = 'image/jpeg'
-                        if not payload_name.lower().endswith(('.jpg', '.jpeg')):
-                            base = payload_name.rsplit('.', 1)[0] if '.' in payload_name else payload_name
-                            payload_name = f'{base}.jpg'
-                except Exception as exc:
-                    _logger.warning(
-                        '[Checkpoint Scan] Photo optimize skipped for %s: %s',
-                        payload_name, exc,
-                    )
+                _logger.warning(
+                    '[Checkpoint Scan] Photo optimize skipped for %s: %s',
+                    payload_name, exc,
+                )
             try:
                 att = Attachment.create({
                     'name': payload_name,
@@ -844,16 +865,43 @@ class CheckpointScan(models.Model):
                 'message': _('The checkpoint you are trying to scan does not exist.')
             }
 
-        # Validate tour_log_id if provided
+        # Validate tour_log_id if provided — must exist, be in progress, and
+        # belong to the scanning guard (blocks cross-guard tour IDOR).
         if tour_log_id:
             tour_log = self.env['tour.log'].browse(tour_log_id)
             if not tour_log.exists():
-                _logger.warning('[Checkpoint Scan API] Invalid tour_log_id: %s, ignoring', tour_log_id)
-                tour_log_id = None
-            elif tour_log.status not in ['in_progress']:
-                _logger.warning('[Checkpoint Scan API] Tour log %s is not in progress (status: %s), ignoring',
-                              tour_log_id, tour_log.status)
-                tour_log_id = None
+                _logger.warning(
+                    '[Checkpoint Scan API] Invalid tour_log_id: %s', tour_log_id
+                )
+                return {
+                    'success': False,
+                    'error': 'tour_not_found',
+                    'message': _('Patrol not found.'),
+                }
+            if tour_log.guard_id.id != guard_id:
+                _logger.warning(
+                    '[Checkpoint Scan API] Tour log %s belongs to guard %s, '
+                    'not scanning guard %s — rejecting',
+                    tour_log_id,
+                    tour_log.guard_id.id,
+                    guard_id,
+                )
+                return {
+                    'success': False,
+                    'error': 'unauthorized_tour',
+                    'message': _('This patrol does not belong to you.'),
+                }
+            if tour_log.status not in ('in_progress',):
+                _logger.warning(
+                    '[Checkpoint Scan API] Tour log %s is not in progress '
+                    '(status: %s)',
+                    tour_log_id, tour_log.status,
+                )
+                return {
+                    'success': False,
+                    'error': 'tour_not_active',
+                    'message': _('No active patrol to record this scan.'),
+                }
         
         # Get current shift if available
         shift = self.env['guard.shift'].search([

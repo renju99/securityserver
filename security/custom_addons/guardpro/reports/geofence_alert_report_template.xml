@@ -64,15 +64,15 @@
                             </tr>
                         </table>
                         
-                        <!-- Shift and Site Information -->
+                        <!-- Shift and Project Information -->
                         <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #d32f2f;">Shift &amp; Location Details</h2>
                         <table class="table table-sm table-bordered" style="margin-bottom: 30px;">
                             <tr>
-                                <th style="width: 30%; background-color: #f5f5f5;">Expected Site</th>
+                                <th style="width: 30%; background-color: #f5f5f5;">Expected Project</th>
                                 <td colspan="3"><strong><t t-esc="o.site_id.name if o.site_id else 'N/A'"/></strong></td>
                             </tr>
                             <tr>
-                                <th style="background-color: #f5f5f5;">Site Address</th>
+                                <th style="background-color: #f5f5f5;">Project Address</th>
                                 <td colspan="3">
                                     <t t-if="o.site_id">
                                         <t t-esc="o.site_id.street or ''"/>
@@ -110,7 +110,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th style="background-color: #f5f5f5;">Distance from Site</th>
+                                <th style="background-color: #f5f5f5;">Distance from Project</th>
                                 <td>
                                     <strong style="color: #d32f2f; font-size: 16px;">
                                         <t t-if="o.distance_from_site">

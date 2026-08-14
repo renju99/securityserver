@@ -458,7 +458,7 @@
                                 <strong style="color: #202124;">Applied Filters:</strong>
                                 <t t-if="filters.get('site_names')">
                                     <span style="margin-left: 10px;">
-                                        <i class="fa fa-building"/> <strong>Sites:</strong> <t t-esc="', '.join(filters['site_names'])"/>
+                                        <i class="fa fa-building"/> <strong>Projects:</strong> <t t-esc="', '.join(filters['site_names'])"/>
                                     </span>
                                 </t>
                                 <t t-if="filters.get('guard_ids')">
@@ -612,7 +612,7 @@
                                                     <th style="width: 8%; padding: 4px 6px; font-size: 9px;">Date</th>
                                                     <th style="width: 14%; padding: 4px 6px; font-size: 9px;">Guard Name</th>
                                                     <th style="width: 7%; padding: 4px 6px; font-size: 9px;">Badge</th>
-                                                    <th style="width: 11%; padding: 4px 6px; font-size: 9px;">Site</th>
+                                                    <th style="width: 11%; padding: 4px 6px; font-size: 9px;">Project</th>
                                                     <th style="width: 9%; padding: 4px 6px; font-size: 9px;">In Time</th>
                                                     <th style="width: 9%; padding: 4px 6px; font-size: 9px;">Out Time</th>
                                                     <th style="width: 7%; padding: 4px 6px; font-size: 9px;">Hrs</th>

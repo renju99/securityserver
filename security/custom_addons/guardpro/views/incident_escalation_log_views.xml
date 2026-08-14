@@ -202,7 +202,7 @@
                     <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
                     <filter string="Escalation Type" name="group_type" context="{'group_by': 'escalation_type'}"/>
                     <filter string="Escalation Level" name="group_level" context="{'group_by': 'escalation_level'}"/>
-                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Project" name="group_site" context="{'group_by': 'site_id'}"/>
                     <filter string="Incident Severity" name="group_severity" context="{'group_by': 'incident_severity'}"/>
                     <filter string="Escalation Date" name="group_date" context="{'group_by': 'escalation_datetime'}"/>
                 </group>

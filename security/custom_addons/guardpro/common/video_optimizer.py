@@ -19,7 +19,8 @@ class VideoOptimizer:
     TARGET_AUDIO_BITRATE = "96k"
     CRF = "28"
     PRESET = "veryfast"
-    MAX_SIZE_BYTES = 25 * 1024 * 1024  # Skip compression for smaller files.
+    # Compress when larger than this (phone clips are often 3–20 MB).
+    MAX_SIZE_BYTES = 2 * 1024 * 1024  # Skip only tiny clips under 2 MB.
 
     @classmethod
     def _ffmpeg_available(cls):

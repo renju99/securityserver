@@ -3,7 +3,7 @@
     
     <!-- Report Action Definition -->
     <record id="action_site_security_summary_report" model="ir.actions.report">
-        <field name="name">Site Security Summary</field>
+        <field name="name">Project Security Summary</field>
         <field name="model">client.site</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">guardpro.report_site_security_summary_document</field>
@@ -27,16 +27,16 @@
                                 <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Comprehensive Security Status Report</p>
                             </div>
                             <div class="col-4 text-right">
-                                <p style="margin: 5px 0;"><strong>Site:</strong> <t t-esc="o.name"/></p>
+                                <p style="margin: 5px 0;"><strong>Project:</strong> <t t-esc="o.name"/></p>
                                 <p style="margin: 5px 0;"><strong>Report Date:</strong> <t t-esc="get_current_date()"/></p>
                             </div>
                         </div>
                         
-                        <!-- Site Information -->
-                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #1976d2;">Site Information</h2>
+                        <!-- Project Information -->
+                        <h2 style="background-color: #f5f5f5; padding: 10px; border-left: 4px solid #1976d2;">Project Information</h2>
                         <table class="table table-sm table-bordered" style="margin-bottom: 30px;">
                             <tr>
-                                <th style="width: 30%; background-color: #f5f5f5;">Site Name</th>
+                                <th style="width: 30%; background-color: #f5f5f5;">Project Name</th>
                                 <td colspan="3"><strong><t t-esc="o.name"/></strong></td>
                             </tr>
                             <tr>
@@ -50,16 +50,16 @@
                             <tr>
                                 <th style="background-color: #f5f5f5;">Client</th>
                                 <td><t t-esc="o.client_id.name if o.client_id else 'N/A'"/></td>
-                                <th style="background-color: #f5f5f5;">Site Manager</th>
+                                <th style="background-color: #f5f5f5;">Project Manager</th>
                                 <td><t t-esc="o.manager_id.name if o.manager_id else 'N/A'"/></td>
                             </tr>
                             <tr>
-                                <th style="background-color: #f5f5f5;">Site Status</th>
+                                <th style="background-color: #f5f5f5;">Project Status</th>
                                 <td>
                                     <span t-att-style="'padding: 5px 15px; border-radius: 4px; font-weight: bold; color: white; background-color: %s;' % ('#4caf50' if o.active else '#999')"
                                           t-esc="'Active' if o.active else 'Inactive'"/>
                                 </td>
-                                <th style="background-color: #f5f5f5;">Site Type</th>
+                                <th style="background-color: #f5f5f5;">Project Type</th>
                                 <td><t t-esc="dict(o._fields['site_type'].selection).get(o.site_type) if o.site_type else 'Not Specified'"/></td>
                             </tr>
                         </table>

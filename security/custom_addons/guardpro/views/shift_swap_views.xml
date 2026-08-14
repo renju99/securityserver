@@ -199,7 +199,7 @@
                     <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
                     <filter string="Requesting Guard" name="group_requesting" context="{'group_by': 'requesting_guard_id'}"/>
                     <filter string="Target Guard" name="group_target" context="{'group_by': 'target_guard_id'}"/>
-                    <filter string="Site" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Project" name="group_site" context="{'group_by': 'site_id'}"/>
                     <filter string="Swap Date" name="group_date" context="{'group_by': 'swap_date:month'}"/>
                 </group>
             </search>

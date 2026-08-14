@@ -22,6 +22,7 @@ from . import guard_location_live
 from . import geofence_alert
 from . import client_site
 from . import location_hierarchy
+from . import guard_site
 from . import tenant_resident
 from . import resident_complaint
 from . import security_tour
@@ -45,6 +46,7 @@ from . import push_to_talk
 from . import push_to_talk_all_sites
 from . import task_suggestion
 from . import incident_report
+from . import incident_form_definition
 from . import incident_sla_policy
 from . import incident_escalation_log
 from . import incident_investigation
@@ -62,6 +64,7 @@ from . import package_management
 from . import key_management
 from . import compliance_audit
 from . import daily_activity_report
+from . import guard_activity_report
 from . import sla_management
 from . import sla_template
 from . import emergency_procedure
@@ -78,6 +81,7 @@ from . import facility_patrol_issue
 from . import webhook
 from . import client_feedback
 from . import training_course
+from . import training_session
 # eLearning integration (requires website_slides module)
 from . import slide_channel_inherit  # eLearning course extensions
 from . import guard_elearning  # Guard eLearning extensions
@@ -98,5 +102,7 @@ from . import audit_log  # Must be after models it inherits from
 from . import res_config_settings
 from . import performance_indexes  # Performance optimization indexes
 from . import mobile_outbox  # Unified TWA push notification outbox
+from . import guard_approval_request  # Supervisor approval requests
+from . import guard_site_link  # Physical site on operational records
 
 
