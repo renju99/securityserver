@@ -10,8 +10,8 @@ android {
         minSdkVersion 24
         targetSdkVersion 36
         // Release APK/AAB output: app/build/outputs/{apk,bundle}/release/
-        versionCode 45
-        versionName "1.2.33"
+        versionCode 47
+        versionName "1.2.35"
     }
 
     signingConfigs {

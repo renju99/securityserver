@@ -14,6 +14,10 @@ from . import api_v1
 from . import emergency_broadcast_api
 from . import task_assignment_api
 from . import mobile_outbox_api
+from . import mobile_auth_api
+from . import mobile_bearer_polls_api
+from . import mobile_bearer_actions_api
+from . import mobile_bearer_attendance_api
 from . import notification_api
 from . import documentation
 from . import pwa_controller

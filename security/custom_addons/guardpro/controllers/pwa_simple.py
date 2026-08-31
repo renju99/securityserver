@@ -1764,40 +1764,61 @@ class GuardLinkPWASimple(http.Controller):
         Incident = request.env['incident.report'].sudo()
         site_dom = self._mobile_site_domain('incident.report')
         reporter_domain = [('guard_id', '=', guard.id)] if guard else []
+
         open_incidents = Incident.search(
             Incident._domain_security_incidents(
                 reporter_domain + [
                     ('status', 'in', ['submitted', 'under_review', 'investigating']),
                 ] + site_dom
             ),
-            limit=50,
+            limit=20,
             order='incident_datetime desc',
         )
+
+        # Count total open for "X more" link without loading extra rows.
+        open_incidents_total = Incident.search_count(
+            Incident._domain_security_incidents(
+                reporter_domain + [
+                    ('status', 'in', ['submitted', 'under_review', 'investigating']),
+                ] + site_dom
+            )
+        )
+
         recent_incidents = Incident.search(
             Incident._domain_security_incidents(
                 reporter_domain + [
                     ('status', 'in', ['resolved', 'closed']),
                 ] + site_dom
             ),
-            limit=30,
+            limit=5,
             order='incident_datetime desc',
         )
+
+        recent_incidents_total = Incident.search_count(
+            Incident._domain_security_incidents(
+                reporter_domain + [
+                    ('status', 'in', ['resolved', 'closed']),
+                ] + site_dom
+            )
+        )
+
         open_patrol_issues = Incident.search(
             Incident._domain_patrol_issues(
                 reporter_domain + [
                     ('status', 'in', ['submitted', 'under_review', 'investigating']),
                 ] + site_dom
             ),
-            limit=50,
+            limit=15,
             order='incident_datetime desc',
         )
+
         recent_patrol_issues = Incident.search(
             Incident._domain_patrol_issues(
                 reporter_domain + [
                     ('status', 'in', ['resolved', 'closed']),
                 ] + site_dom
             ),
-            limit=10,
+            limit=3,
             order='incident_datetime desc',
         )
 
@@ -1805,10 +1826,15 @@ class GuardLinkPWASimple(http.Controller):
             ('hide_from_guard_incidents', '=', False),
         ], order='sequence, name')
 
-        form_parents = request.env['incident.form.parent'].sudo().search([
-            ('active', '=', True),
-        ], order='name, sequence')
-        
+        # form_parents are lazy-loaded via AJAX when the wizard opens —
+        # only send slim metadata (id/name/code/category) so the initial
+        # page render is fast. The full section/field HTML is fetched on demand.
+        form_parents_meta = request.env['incident.form.parent'].sudo().search_read(
+            [('active', '=', True)],
+            fields=['id', 'name', 'code', 'category_id'],
+            order='name, sequence',
+        )
+
         # Get current site
         current_site = None
         if guard:
@@ -1830,20 +1856,24 @@ class GuardLinkPWASimple(http.Controller):
             'user': request.env.user,
             'mobile_role': role,
             'open_incidents': open_incidents,
+            'open_incidents_total': open_incidents_total,
             'recent_incidents': recent_incidents,
+            'recent_incidents_total': recent_incidents_total,
             'open_patrol_issues': open_patrol_issues,
             'recent_patrol_issues': recent_patrol_issues,
             'categories': categories,
-            'form_parents': form_parents,
-            # Slim metadata only — full section/field HTML is server-rendered in the wizard
+            # form_parents ORM recordset kept for wizard_category_groups; not rendered directly
+            'form_parents': request.env['incident.form.parent'].sudo().browse(
+                [r['id'] for r in form_parents_meta]
+            ),
             'form_parents_json': json.dumps([
                 {
-                    'id': fp.id,
-                    'name': fp.name,
-                    'code': fp.code,
-                    'category_id': fp.category_id.id if fp.category_id else False,
+                    'id': r['id'],
+                    'name': r['name'],
+                    'code': r['code'],
+                    'category_id': r['category_id'][0] if r.get('category_id') else False,
                 }
-                for fp in form_parents
+                for r in form_parents_meta
             ]),
             'incident_categories_json': json.dumps([
                 {'id': c.id, 'n': c.name, 'code': c.code}

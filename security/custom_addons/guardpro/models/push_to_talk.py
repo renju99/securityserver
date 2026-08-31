@@ -459,15 +459,19 @@ class PushToTalkMessage(models.Model):
         return f'/guardpro/api/push-to-talk/message/{self.id}/audio'
 
     def _ptt_bus_send(self, notification_type, payload):
-        """Odoo 18 Community only has bus.bus._sendone (no _sendmany)."""
+        """Notify channel members. Prefer one _sendmany so 100+ radios are not delayed."""
         partner_ids = self._get_ptt_bus_recipient_partner_ids()
         if not partner_ids:
             return True
         bus = self.env['bus.bus']
         partners = self.env['res.partner'].browse(partner_ids).exists()
+        notifications = [(partner, notification_type, payload) for partner in partners]
         try:
-            for partner in partners:
-                bus._sendone(partner, notification_type, payload)
+            if hasattr(bus, '_sendmany'):
+                bus._sendmany(notifications)
+            else:
+                for partner, ntype, msg in notifications:
+                    bus._sendone(partner, ntype, msg)
         except Exception as e:
             _logger.error('Failed to broadcast %s: %s', notification_type, e)
         return True

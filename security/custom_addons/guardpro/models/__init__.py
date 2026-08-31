@@ -102,6 +102,7 @@ from . import audit_log  # Must be after models it inherits from
 from . import res_config_settings
 from . import performance_indexes  # Performance optimization indexes
 from . import mobile_outbox  # Unified TWA push notification outbox
+from . import mobile_auth_token  # Opaque access/refresh tokens for mobile clients
 from . import guard_approval_request  # Supervisor approval requests
 from . import guard_site_link  # Physical site on operational records
 

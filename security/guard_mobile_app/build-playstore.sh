@@ -77,9 +77,9 @@ Notes
 EOF
 
 cat > "$OUT_DIR/WHATS_NEW.txt" <<EOF
-• One press sends one radio clip (no double message)
-• Clip plays once on the speaker
-• Tiny/empty bursts are dropped
+• Radio plays once only — double-play root cause fixed
+• Instant delivery when app is open (bus)
+• Background delivery via native poll
 EOF
 
 echo ""

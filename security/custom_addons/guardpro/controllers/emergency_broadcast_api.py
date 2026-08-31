@@ -37,22 +37,6 @@ class EmergencyBroadcastAPIController(http.Controller):
                 limit=5,
             )
 
-            # Self-heal: any still-open ack pointing at expired/draft noise.
-            stale = request.env['emergency.broadcast.acknowledgment'].sudo().search(
-                [
-                    ('user_id', '=', user.id),
-                    ('is_acknowledged', '=', False),
-                    ('broadcast_id.state', '!=', 'sent'),
-                ],
-                limit=100,
-            )
-            if stale:
-                stale.action_acknowledge()
-                _logger.info(
-                    'Auto-acked %s stale emergency ack(s) for user %s',
-                    len(stale), user.login,
-                )
-
             broadcasts = []
             for ack in acknowledgments:
                 if not ack.broadcast_id or ack.broadcast_id.state != 'sent':

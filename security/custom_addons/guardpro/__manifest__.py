@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'GuardLink - Security Guard Management',
-    'version': '18.0.1.1.225',
+    'version': '18.0.1.1.228',
     'category': 'Services/Security',
     'summary': 'Win premium guard contracts with an Odoo-native suite for mobile patrols, SLA automation, client portals, and analytics.',
     'description': """

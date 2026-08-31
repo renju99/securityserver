@@ -693,3 +693,4 @@ access_training_session_manager,training.session.manager,model_training_session,
 access_training_session_admin,training.session.admin,model_training_session,group_guardpro_admin,1,1,1,1
 access_training_session_client,training.session.client,model_training_session,group_guardpro_client_user,1,0,0,0
 access_training_session_guard,training.session.guard,model_training_session,group_guardpro_guard_portal,1,0,0,0
+access_mobile_auth_token_admin,mobile.auth.token.admin,model_guardpro_mobile_auth_token,group_guardpro_admin,1,1,1,1

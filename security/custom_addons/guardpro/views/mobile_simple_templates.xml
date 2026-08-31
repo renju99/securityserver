@@ -6153,7 +6153,11 @@
                 <!-- Open Incidents -->
                 <div class="card mb-3 shadow-sm" data-gp-list-section="open">
                     <div class="card-header bg-warning text-dark">
-                        <h5 class="mb-0"><i class="fa fa-exclamation-circle me-2"/>Open Incidents</h5>
+                        <h5 class="mb-0"><i class="fa fa-exclamation-circle me-2"/>Open Incidents
+                            <t t-if="open_incidents_total and open_incidents_total > len(open_incidents)">
+                                <span class="badge bg-dark ms-2 fs-6"><t t-esc="open_incidents_total"/> total</span>
+                            </t>
+                        </h5>
                         <small class="d-block mt-1 opacity-75">Security &amp; operational reports</small>
                     </div>
                     <t t-if="open_incidents">
@@ -6209,13 +6213,29 @@
                             <p class="mb-0">No open incidents</p>
                         </div>
                     </t>
+                    <t t-if="open_incidents_total and open_incidents_total > len(open_incidents)">
+                        <div class="card-footer bg-white text-center py-2">
+                            <a href="/guardpro/mobile/incidents/all" class="small text-muted">
+                                <i class="fa fa-list me-1"/>View all <t t-esc="open_incidents_total"/> open incidents
+                            </a>
+                        </div>
+                    </t>
                 </div>
 
-                <!-- Recent Incidents -->
+                <!-- Recent Incidents (collapsed by default — tap header to expand) -->
                 <div class="card mb-3 shadow-sm" data-gp-list-section="recent">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0"><i class="fa fa-history me-2"/>Recent Incidents</h5>
+                    <div class="card-header bg-white" style="cursor:pointer;"
+                         onclick="(function(el){var b=el.closest('.card').querySelector('.gp-recent-body');if(b){var hidden=b.style.display==='none';b.style.display=hidden?'':'none';el.querySelector('.gp-collapse-icon').style.transform=hidden?'':'rotate(-90deg)';};})(this)">
+                        <h5 class="mb-0 d-flex justify-content-between align-items-center">
+                            <span><i class="fa fa-history me-2"/>Recent Incidents
+                                <t t-if="recent_incidents_total">
+                                    <span class="badge bg-secondary ms-2"><t t-esc="recent_incidents_total"/></span>
+                                </t>
+                            </span>
+                            <i class="fa fa-chevron-down gp-collapse-icon" style="transition:transform .2s;transform:rotate(-90deg);font-size:0.8em;color:#888;"/>
+                        </h5>
                     </div>
+                    <div class="gp-recent-body" style="display:none;">
                     <t t-if="recent_incidents">
                         <div class="list-group list-group-flush">
                             <t t-foreach="recent_incidents" t-as="incident">
@@ -6261,6 +6281,14 @@
                             <p class="mb-0">No recent incidents</p>
                         </div>
                     </t>
+                    <t t-if="recent_incidents_total and recent_incidents_total > len(recent_incidents)">
+                        <div class="card-footer bg-white text-center py-2">
+                            <a href="/guardpro/mobile/incidents/all" class="small text-muted">
+                                <i class="fa fa-list me-1"/>View all <t t-esc="recent_incidents_total"/> resolved incidents
+                            </a>
+                        </div>
+                    </t>
+                    </div><!-- /gp-recent-body -->
                 </div>
                 </div><!-- /data-gp-list-filter-root -->
             </div>

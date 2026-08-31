@@ -427,3 +427,5 @@ class GuardPerformanceBadgeIndexes(models.Model):
         except Exception as e:
             _logger.warning('Could not create indexes for guard.performance.badge (database may be locked): %s', str(e))
 
+
+

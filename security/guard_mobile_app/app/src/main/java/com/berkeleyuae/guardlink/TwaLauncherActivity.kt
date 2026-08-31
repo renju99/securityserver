@@ -118,20 +118,30 @@ class TwaLauncherActivity : AppCompatActivity() {
         }
     }
     private val pttHttpPollHandler = Handler(Looper.getMainLooper())
-    private val pttHttpPollIntervalMs = 1500L
+    private val pttPollBaseMs = 5_000L      // normal cadence
+    private val pttPollBackoffMs = 10_000L  // quiet cadence (nothing pending)
+    @Volatile private var pttNextPollMs = pttPollBaseMs
     private val pttHttpPollRunnable = object : Runnable {
         override fun run() {
-            pollPttViaSessionCookie()
-            pttHttpPollHandler.postDelayed(this, pttHttpPollIntervalMs)
+            val hadPending = pollPttViaSessionCookie()
+            // Back off when the server has nothing to deliver — snaps back to
+            // base interval immediately once a message arrives.
+            pttNextPollMs = if (hadPending) pttPollBaseMs else pttPollBackoffMs
+            pttHttpPollHandler.postDelayed(this, pttNextPollMs)
         }
     }
 
     /**
      * WebView throttles JS timers in the background (~30s). Native timers keep emergency
      * polling responsive while the TWA is open (foreground or background).
+     *
+     * Adaptive backoff: polls every 4 s when something was pending on the last
+     * cycle, otherwise backs off to 8 s to halve server load during quiet shifts.
      */
     private val emergencyWebPollHandler = Handler(Looper.getMainLooper())
-    private val emergencyWebPollIntervalMs = 4000L
+    private val emergencyPollBaseMs = 4_000L
+    private val emergencyPollBackoffMs = 8_000L
+    @Volatile private var lastEmergencyPollHadData = false
     private val emergencyWebPollRunnable = object : Runnable {
         override fun run() {
             try {
@@ -153,7 +163,8 @@ class TwaLauncherActivity : AppCompatActivity() {
             pollPatrolReminderViaSessionCookie()
             pollTaskAssignmentViaSessionCookie()
             pollMobileOutboxViaSessionCookie()
-            emergencyWebPollHandler.postDelayed(this, emergencyWebPollIntervalMs)
+            val nextMs = if (lastEmergencyPollHadData) emergencyPollBaseMs else emergencyPollBackoffMs
+            emergencyWebPollHandler.postDelayed(this, nextMs)
         }
     }
 
@@ -226,11 +237,15 @@ class TwaLauncherActivity : AppCompatActivity() {
         }
     }
 
+    @Volatile private var lastCookieFlushMs = 0L
+
     private fun cookieHeaderForApi(): String? {
-        try {
-            CookieManager.getInstance().flush()
-        } catch (_: Exception) {
-            /* ignore */
+        // flush() is a disk-write; throttle it to at most once per 30 s so it
+        // is not called on every 400 ms – 5 s poll tick.
+        val now = System.currentTimeMillis()
+        if (now - lastCookieFlushMs > 30_000L) {
+            try { CookieManager.getInstance().flush() } catch (_: Exception) { /* ignore */ }
+            lastCookieFlushMs = now
         }
         val cm = CookieManager.getInstance()
         var header = cm.getCookie(START_URL).orEmpty()
@@ -308,7 +323,11 @@ class TwaLauncherActivity : AppCompatActivity() {
 
     private fun startNativeEmergencyBridgePolling() {
         emergencyWebPollHandler.removeCallbacks(emergencyWebPollRunnable)
-        emergencyWebPollHandler.post(emergencyWebPollRunnable)
+        // Delay the first poll so the WebView has time to load and set a
+        // session cookie before we start firing background HTTP requests.
+        // Polls that arrive before a cookie is available are discarded
+        // anyway, but they still occupy an Odoo worker slot.
+        emergencyWebPollHandler.postDelayed(emergencyWebPollRunnable, 3_000L)
     }
 
     private fun stopNativeEmergencyBridgePolling() {
@@ -318,7 +337,9 @@ class TwaLauncherActivity : AppCompatActivity() {
     private fun startNativePushToTalkPolling() {
         PttPlaybackService.twaPollerActive = true
         pttHttpPollHandler.removeCallbacks(pttHttpPollRunnable)
-        pttHttpPollHandler.post(pttHttpPollRunnable)
+        // Stagger PTT polling start so it doesn't overlap the emergency-poll
+        // burst that fires at t=3 s after resume.
+        pttHttpPollHandler.postDelayed(pttHttpPollRunnable, 5_000L)
     }
 
     private fun stopNativePushToTalkPolling() {
@@ -379,6 +400,7 @@ class TwaLauncherActivity : AppCompatActivity() {
                 }
                 val rows = obj.optJSONArray("broadcasts")
                 val hasPending = rows != null && rows.length() > 0
+                lastEmergencyPollHadData = hasPending
                 if (hasPending) {
                     val row = rows?.optJSONObject(0) ?: return@Thread
                     val ackId = row.opt("ack_id")?.toString()
@@ -648,10 +670,16 @@ class TwaLauncherActivity : AppCompatActivity() {
     /**
      * Native PTT poll for when the TWA is minimized. WebView Audio.play() is
      * blocked in the background; [PttPlaybackService] plays the clip with ExoPlayer.
+     *
+     * Returns `true` when a pending message was found (used for adaptive backoff).
      */
-    private fun pollPttViaSessionCookie() {
-        if (pttNativeHttpInFlight) return
-        if (PttPlaybackService.playbackBusy) return
+    private fun pollPttViaSessionCookie(): Boolean {
+        // While the app is open the JS bus + AndroidBridge plays the clip.
+        // Running a native poll concurrently creates a second PttPlaybackService
+        // invocation for the same message — that is the double-play.
+        if (activityInForeground) return false
+        if (pttNativeHttpInFlight) return false
+        if (PttPlaybackService.playbackBusy) return false
         pttNativeHttpInFlight = true
         Thread {
             var conn: HttpURLConnection? = null

@@ -48,6 +48,25 @@ class LocationService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private lateinit var deviceId: String
     private var isTracking = false
+
+    // Single shared EncryptedSharedPreferences instance — MasterKeys.getOrCreate()
+    // involves AES key derivation and was being called on every PTT poll tick.
+    @Volatile private var _securePrefs: android.content.SharedPreferences? = null
+    private fun securePrefs(): android.content.SharedPreferences {
+        _securePrefs?.let { return it }
+        return synchronized(this) {
+            _securePrefs ?: try {
+                val alias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+                EncryptedSharedPreferences.create(
+                    "secure_prefs", alias, this,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                ).also { _securePrefs = it }
+            } catch (_: Exception) {
+                getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+            }
+        }
+    }
     private val pttPollHandler = Handler(Looper.getMainLooper())
     private val pttPollRunnable = object : Runnable {
         override fun run() {
@@ -411,39 +430,11 @@ class LocationService : Service() {
         }
     }
 
-    private fun readCachedSessionCookie(): String? {
-        return try {
-            val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-            val sp = EncryptedSharedPreferences.create(
-                "secure_prefs",
-                masterKeyAlias,
-                this,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            )
-            sp.getString("session_cookie", null)
-        } catch (_: Exception) {
-            getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-                .getString("session_cookie", null)
-        }
-    }
+    private fun readCachedSessionCookie(): String? =
+        securePrefs().getString("session_cookie", null)
 
-    private fun getAuthToken(): String? {
-        return try {
-            val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-            val sp = EncryptedSharedPreferences.create(
-                "secure_prefs",
-                masterKeyAlias,
-                this,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            )
-            sp.getString("auth_token", null)
-        } catch (_: Exception) {
-            getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-                .getString("auth_token", null)
-        }
-    }
+    private fun getAuthToken(): String? =
+        securePrefs().getString("auth_token", null)
 
     // -------------------------- Offline queue --------------------------
 
@@ -558,6 +549,6 @@ class LocationService : Service() {
         private const val QUEUE_KEY = "pending"
         private const val MAX_QUEUE = 500
         private const val WAKELOCK_TIMEOUT_MS = 30 * 60 * 1000L
-        private const val PTT_POLL_INTERVAL_MS = 1500L
+        private const val PTT_POLL_INTERVAL_MS = 5_000L
     }
 }

@@ -31,8 +31,6 @@ class MobileOutboxController(http.Controller):
         try:
             user = request.env.user
             Outbox = request.env['guardpro.mobile.outbox'].sudo()
-            # Clear any leftover shift ack backlog (feature disabled).
-            Outbox._discard_all_shift_notifications(user)
 
             rows = Outbox.search(
                 [

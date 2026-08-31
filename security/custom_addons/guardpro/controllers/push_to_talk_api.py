@@ -176,7 +176,11 @@ class PushToTalkAPI(http.Controller):
         website=True,
     )
     def get_pending_ptt_http(self, **kwargs):
-        """Newest unplayed incoming PTT so late devices jump to live, not a backlog."""
+        """Newest unplayed incoming PTT so late devices jump to live, not a backlog.
+
+        Uses a single SQL NOT-EXISTS query instead of a Python loop so it
+        stays O(1) regardless of message volume or number of concurrent guards.
+        """
         try:
             empty = json.dumps({'success': True, 'message': None})
             headers = [('Content-Type', 'application/json')]
@@ -185,27 +189,52 @@ class PushToTalkAPI(http.Controller):
             channels = self._ptt_channels_for_user()
             if not channels:
                 return request.make_response(empty, headers=headers)
+
             uid = request.env.user.id
-            recent = request.env['push.to.talk.message'].sudo().search([
-                ('channel_id', 'in', channels.ids),
-                ('is_streaming', '=', False),
-                ('audio_data', '!=', False),
-                ('file_size', '>', 4000),
-            ], order='id desc', limit=15)
-            pending = False
-            for msg in recent:
-                if self._ptt_is_mine(msg):
-                    continue
-                if uid not in msg.played_by_ids.ids:
-                    pending = msg
-                    break
-            if not pending:
+            guard = self._ptt_current_guard()
+            guard_id = guard.id if guard else None
+
+            # Single SQL pass: newest message in these channels that is:
+            #  • fully recorded (not streaming, has audio, big enough)
+            #  • not sent by this user / guard
+            #  • not already played by this user
+            # The partial index idx_ptt_message_pending covers this exactly.
+            # audio_data is stored in Odoo filestore (not a table column);
+            # file_size > 4000 already implies a valid recording was saved.
+            # M2M columns: push_to_talk_message_played_rel(message_id, user_id)
+            request.env.cr.execute("""
+                SELECT m.id,
+                       m.channel_id,
+                       m.sender_user_id,
+                       m.sender_guard_id
+                FROM   push_to_talk_message m
+                WHERE  m.channel_id = ANY(%s)
+                  AND  m.is_streaming = FALSE
+                  AND  m.file_size    > 4000
+                  AND  m.sender_user_id IS DISTINCT FROM %s
+                  AND  (%s IS NULL OR m.sender_guard_id IS DISTINCT FROM %s)
+                  AND  NOT EXISTS (
+                           SELECT 1
+                           FROM   push_to_talk_message_played_rel r
+                           WHERE  r.message_id = m.id
+                             AND  r.user_id    = %s
+                       )
+                ORDER  BY m.id DESC
+                LIMIT  1
+            """, [list(channels.ids), uid, guard_id, guard_id, uid])
+
+            row = request.env.cr.fetchone()
+            if not row:
                 return request.make_response(empty, headers=headers)
+
+            msg_id, channel_id, _sender_uid, _sender_gid = row
+            # Fetch only the two remaining fields we need for the response.
+            pending = request.env['push.to.talk.message'].sudo().browse(msg_id)
             payload = {
                 'success': True,
                 'message': {
                     'id': pending.id,
-                    'channel_id': pending.channel_id.id,
+                    'channel_id': channel_id,
                     'channel_name': pending.channel_id.name or '',
                     'sender_name': self._ptt_sender_name(pending),
                     'audio_url': pending.get_audio_url(),

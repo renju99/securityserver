@@ -1,8 +1,8 @@
 /**
  * Mobile Push-to-Talk Widget for Guard Mobile Interface
  * Simple, touch-optimized push-to-talk functionality
- *         Version: 2.25 - One press = one clip; Android native player only
- * Cache-bust: 2026-08-14-ptt-one-clip
+ *         Version: 2.27 - Foreground: bus only; background: poll only; no overlap
+ * Cache-bust: 2026-08-14-ptt-single-path
  */
 
 (function () {
@@ -1239,7 +1239,9 @@
 
         enqueuePlay(messageId, audioUrl) {
             if (!messageId || !audioUrl) return;
-            if (this.playedMessageIds.has(messageId) || this._nativeHandedIds.has(messageId) || this._playingMessageId === messageId) return;
+            if (this.playedMessageIds.has(messageId) || this._nativeHandedIds.has(messageId)) return;
+            if (this._playingMessageId === messageId) return;
+            if (this._playQueue.some(i => i.id === messageId)) return;
             // Radio sync: waiting backlog desyncs phones. Keep only the newest clip.
             this._playQueue = this._playQueue.filter((item) => item.id >= messageId);
             if (!this._playQueue.some((item) => item.id === messageId)) {
@@ -1281,9 +1283,14 @@
                 const pageHidden = typeof document !== 'undefined' && document.hidden;
                 const bridge = window.AndroidBridge;
                 const hasNative = bridge && typeof bridge.playPushToTalkAudio === 'function';
-                // Android: do not play here. PttPlaybackService (native poll)
-                // is the only speaker. JS + native together was the repeat.
                 if (hasNative) {
+                    const ok = bridge.playPushToTalkAudio(String(messageId), audioUrl);
+                    if (ok === false || ok === 'false' || ok === 0) return false;
+                    // Block every JS re-entry path for this ID immediately.
+                    this._nativeHandedIds.add(messageId);
+                    this.playedMessageIds.add(messageId);
+                    this.lastMessageId = Math.max(this.lastMessageId || 0, messageId);
+                    this._persistPttState();
                     this.hideOccupancy();
                     return true;
                 }
