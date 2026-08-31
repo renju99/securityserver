@@ -186,14 +186,14 @@ class GuardBiometricProcessor(models.AbstractModel):
             'tour_log_id': kwargs.get('tour_log_id'),
             'incident_id': kwargs.get('incident_id'),
         })
-        
-            return {
-                'success': True,
-                'verified': verified,
-                'confidence': best_confidence,
-                'verification_id': verification_log.id,
-                'template_id': matched_template.id if matched_template else False
-            }
+
+        return {
+            'success': True,
+            'verified': verified,
+            'confidence': best_confidence,
+            'verification_id': verification_log.id,
+            'template_id': matched_template.id if matched_template else False
+        }
     
     @api.model
     def verify_via_api(self, guard_id, biometric_type, captured_data, purpose, options=None):
