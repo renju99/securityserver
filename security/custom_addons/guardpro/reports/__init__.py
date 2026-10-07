@@ -17,7 +17,6 @@ from . import sla_management_report_pdf
 from . import guard_performance_report_pdf
 from . import guard_credential_report_pdf
 from . import guard_task_report_pdf
-from . import resident_complaint_report_pdf
 from . import equipment_report_pdf
 from . import guard_background_check_report_pdf
 from . import guard_drug_test_report_pdf

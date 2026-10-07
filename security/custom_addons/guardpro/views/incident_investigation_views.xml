@@ -301,7 +301,7 @@
     <record id="action_incident_investigation" model="ir.actions.act_window">
         <field name="name">Investigations</field>
         <field name="res_model">incident.investigation</field>
-        <field name="view_mode">kanban,list,form,pivot,graph</field>
+        <field name="view_mode">list,kanban,form,pivot,graph</field>
         <field name="context">{'search_default_active': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

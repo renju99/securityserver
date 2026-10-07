@@ -1369,7 +1369,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
                 'client_ids': filter_params.get('client_ids', []),
             }
             
-            # Get attendance data for biometric report
+            # Get attendance data for report
             _logger.info("Fetching attendance data with filter_params: %s", filter_params)
             attendance_data = self._get_attendance_report_data(filter_params)
             _logger.info("Attendance data fetched: %s records", len(attendance_data))
@@ -1410,7 +1410,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
             }
 
     def _get_attendance_report_data(self, filter_params=None):
-        """Get attendance data formatted for biometric report."""
+        """Get attendance data formatted for attendance report."""
         try:
             filter_params = filter_params or {}
             _logger.info("=== _get_attendance_report_data called ===")
@@ -1840,7 +1840,7 @@ class GuardLinkAnalyticsDashboard(models.Model):
             'type': 'ir.actions.act_window',
             'name': _('Package Analytics'),
             'res_model': 'package.management',
-            'view_mode': 'kanban,list,graph,pivot',
+            'view_mode': 'list,kanban,graph,pivot',
             'domain': [('received_date', '>=', fields.Date.today().replace(day=1))],
             'context': {
                 'search_default_group_by_state': 1,

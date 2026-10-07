@@ -146,24 +146,6 @@
                         <div class="row mt-4">
                             <div class="col-12">
                                 <table class="table table-sm">
-                                    <tr>
-                                        <td><strong>Watchlist Check:</strong></td>
-                                        <td>
-                                            <t t-if="o.watchlist_hit">
-                                                <span class="badge bg-danger">FLAGGED</span>
-                                            </t>
-                                            <t t-elif="o.watchlist_checked">
-                                                <span class="badge bg-success">Clear</span>
-                                            </t>
-                                            <t t-else="">
-                                                <span class="badge bg-warning">Not Checked</span>
-                                            </t>
-                                        </td>
-                                    </tr>
-                                    <tr t-if="o.watchlist_notes">
-                                        <td><strong>Watchlist Notes:</strong></td>
-                                        <td><span t-esc="o.watchlist_notes"/></td>
-                                    </tr>
                                     <tr t-if="o.notes">
                                         <td><strong>Notes:</strong></td>
                                         <td><span t-esc="o.notes"/></td>

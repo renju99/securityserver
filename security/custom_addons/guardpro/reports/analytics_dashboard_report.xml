@@ -597,13 +597,13 @@
                             </t>
                         </t>
 
-                        <!-- Guard Attendance Biometric Report Section -->
+                        <!-- Guard Attendance Report Section -->
                         <t t-set="attendance_list" t-value="report_data.get('attendance', []) if report_data else []"/>
                         <t t-if="attendance_list and len(attendance_list) > 0">
                             <div class="table-section">
                                 <div class="table-card">
                                     <div class="chart-header" style="background: #28a745; color: white; padding: 6px 12px; font-size: 12px;">
-                                        <i class="fa fa-user-check"/> Guard Attendance Biometric Report
+                                        <i class="fa fa-user-check"/> Guard Attendance Report
                                     </div>
                                     <div style="overflow-x: auto; padding: 8px;">
                                         <table class="data-table" style="font-size: 8px;">

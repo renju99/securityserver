@@ -574,17 +574,6 @@ class PackageManagement(models.Model):
         if not email:
             return Users
 
-        Resident = self.env.get('tenant.resident')
-        if Resident is not None and self.site_id:
-            candidates = Resident.sudo().search([
-                ('site_id', '=', self.site_id.id),
-                '|',
-                    ('user_id.login', '=ilike', email),
-                    ('partner_id.email', '=ilike', email),
-            ], limit=1)
-            if candidates and candidates.user_id:
-                return candidates.user_id
-
         user = Users.sudo().search([
             ('login', '=ilike', email),
             ('active', '=', True),

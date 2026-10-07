@@ -9,6 +9,8 @@
     "use strict";
 
     const POLL_INTERVAL_MS = 10000;
+    const BACKOFF_BASE_MS = 10000;
+    let pollErrorCount = 0;
     const SHIFT_KINDS = {
         shift_assigned: true,
         shift_changed: true,
@@ -340,7 +342,7 @@
     }
 
     async function pollOutbox() {
-        if (window.__gpSessionDead) return;
+        if (window.__gpSessionDead || document.hidden) return;
         if (emergencyOverlayVisible()) return;
         try {
             const response = await fetch(
@@ -363,13 +365,24 @@
                 return;
             }
             const payload = await response.json();
+            pollErrorCount = 0;
             const rows = payload && payload.success && Array.isArray(payload.notifications)
                 ? payload.notifications
                 : [];
             reconcile(rows);
         } catch (_err) {
-            /* keep silent; next tick retries */
+            pollErrorCount = Math.min(pollErrorCount + 1, 5);
         }
+    }
+
+    function scheduleNextPoll() {
+        clearTimeout(pollingTimer);
+        if (window.__gpSessionDead) return;
+        const base = document.hidden ? 60000 : BACKOFF_BASE_MS;
+        const delay = base * Math.pow(2, pollErrorCount);
+        pollingTimer = window.setTimeout(() => {
+            pollOutbox().finally(scheduleNextPoll);
+        }, delay);
     }
 
     function start() {
@@ -387,9 +400,13 @@
         pollOutbox();
         window.setTimeout(pollOutbox, 800);
         window.setTimeout(pollOutbox, 2200);
-        pollingTimer = window.setInterval(pollOutbox, POLL_INTERVAL_MS);
+        scheduleNextPoll();
         document.addEventListener("visibilitychange", () => {
-            if (!document.hidden) pollOutbox();
+            if (!document.hidden) {
+                pollErrorCount = 0;
+                pollOutbox();
+            }
+            scheduleNextPoll();
         });
         window.addEventListener("focus", pollOutbox);
     }

@@ -80,10 +80,6 @@
                                         <td><strong>Client:</strong></td>
                                         <td t-field="o.client_id.name"/>
                                     </tr>
-                                    <tr t-if="o.resident_id">
-                                        <td><strong>Resident:</strong></td>
-                                        <td t-field="o.resident_id.name"/>
-                                    </tr>
                                     <tr>
                                         <td><strong>Project:</strong></td>
                                         <td t-field="o.site_id.name"/>
@@ -210,7 +206,6 @@
                                 <div class="border-top pt-2">
                                     <p><strong>Submitted By:</strong></p>
                                     <p t-if="o.client_id" t-field="o.client_id.name"/>
-                                    <p t-if="o.resident_id" t-field="o.resident_id.name"/>
                                     <p>Date: <span t-field="o.feedback_date"/></p>
                                 </div>
                             </div>

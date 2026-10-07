@@ -690,7 +690,7 @@ class GuardLinkDashboard(models.Model):
             'name': _('Guards On Duty Now'),
             'type': 'ir.actions.act_window',
             'res_model': 'guard.profile',
-            'view_mode': 'kanban,list,form',
+            'view_mode': 'list,kanban,form',
             'domain': [('id', 'in', readable_ids)],
             'context': {'create': False}
         }
@@ -711,7 +711,7 @@ class GuardLinkDashboard(models.Model):
             'name': _('Available Guards'),
             'type': 'ir.actions.act_window',
             'res_model': 'guard.profile',
-            'view_mode': 'kanban,list,form',
+            'view_mode': 'list,kanban,form',
             'domain': [('status', '=', 'active'), ('id', 'not in', on_duty_ids)],
             'context': {'create': False}
         }
@@ -727,7 +727,7 @@ class GuardLinkDashboard(models.Model):
             'name': _('Active Shifts Today'),
             'type': 'ir.actions.act_window',
             'res_model': 'guard.shift',
-            'view_mode': 'calendar,list,form',
+            'view_mode': 'list,calendar,form',
             'domain': [
                 ('start_datetime', '>=', today_start),
                 ('start_datetime', '<', today_end),
@@ -748,7 +748,7 @@ class GuardLinkDashboard(models.Model):
             'name': _('Upcoming Shifts'),
             'type': 'ir.actions.act_window',
             'res_model': 'guard.shift',
-            'view_mode': 'calendar,list,form',
+            'view_mode': 'list,calendar,form',
             'domain': [
                 ('start_datetime', '>', now),
                 ('start_datetime', '<', today_end),

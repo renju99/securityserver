@@ -131,7 +131,7 @@
     <record id="action_knowledge_article" model="ir.actions.act_window">
         <field name="name">Knowledge Base</field>
         <field name="res_model">knowledge.article</field>
-        <field name="view_mode">kanban,list,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="context">{'search_default_is_published': 1}</field>
     </record>
 

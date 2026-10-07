@@ -2249,7 +2249,6 @@ class MobileAPIController(http.Controller):
         auth='user',
         methods=['GET'],
         csrf=False,
-        website=True,
     )
     def get_pending_patrol_reminder(self, **kwargs):
         """Plain JSON endpoint for TWA/mobile reminder polling."""
@@ -2278,7 +2277,6 @@ class MobileAPIController(http.Controller):
         auth='user',
         methods=['POST'],
         csrf=False,
-        website=True,
     )
     def acknowledge_patrol_reminder(self, **kwargs):
         """Acknowledge all currently due patrol reminders in one tap."""

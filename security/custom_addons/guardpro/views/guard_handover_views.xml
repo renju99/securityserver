@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_guard_handover_list" model="ir.ui.view">
+        <field name="name">guard.handover.list</field>
+        <field name="model">guard.handover</field>
+        <field name="arch" type="xml">
+            <list string="Shift Handovers"
+                  decoration-info="state == 'pending'"
+                  decoration-success="state == 'accepted'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="handover_datetime"/>
+                <field name="site_id"/>
+                <field name="post_location" optional="show"/>
+                <field name="from_guard_id"/>
+                <field name="to_guard_id"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'pending'"
+                       decoration-success="state == 'accepted'"
+                       decoration-warning="state == 'draft'"
+                       decoration-muted="state == 'cancelled'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_guard_handover_form" model="ir.ui.view">
+        <field name="name">guard.handover.form</field>
+        <field name="model">guard.handover</field>
+        <field name="arch" type="xml">
+            <form string="Shift Handover">
+                <header>
+                    <button name="action_submit" type="object" string="Submit for Takeover"
+                            class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_accept" type="object" string="Accept Takeover"
+                            class="oe_highlight" invisible="state != 'pending'"/>
+                    <button name="action_cancel" type="object" string="Cancel"
+                            invisible="state in ('accepted', 'cancelled')"/>
+                    <button name="action_reset_draft" type="object" string="Reset to Draft"
+                            invisible="state not in ('pending', 'cancelled')"
+                            groups="guardpro.group_guardpro_supervisor,guardpro.group_guardpro_manager,guardpro.group_guardpro_admin"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,pending,accepted"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Details">
+                            <field name="site_id" readonly="state != 'draft'"
+                                   options="{'no_create': True}"/>
+                            <field name="post_location" readonly="state != 'draft'"
+                                   placeholder="e.g. Main Gate, Control Room"/>
+                            <field name="handover_datetime" readonly="state != 'draft'"/>
+                            <field name="outgoing_shift_id" readonly="state != 'draft'"
+                                   options="{'no_create': True}"/>
+                        </group>
+                        <group string="Guards">
+                            <field name="from_guard_id" readonly="state != 'draft'"
+                                   options="{'no_create': True}"/>
+                            <field name="to_guard_id" readonly="state != 'draft'"
+                                   options="{'no_create': True}"/>
+                            <field name="submitted_at" readonly="1"/>
+                            <field name="accepted_at" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Handover Notes">
+                            <field name="notes" nolabel="1" readonly="state != 'draft'"
+                                   placeholder="What the incoming guard needs to know…"/>
+                        </group>
+                        <group string="Open Issues">
+                            <field name="open_issues" nolabel="1" readonly="state != 'draft'"
+                                   placeholder="Unresolved incidents or follow-ups…"/>
+                        </group>
+                    </group>
+                    <group string="Keys / Equipment">
+                        <field name="keys_equipment" nolabel="1" readonly="state != 'draft'"
+                               placeholder="Keys, radio, or other items handed over…"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_guard_handover_search" model="ir.ui.view">
+        <field name="name">guard.handover.search</field>
+        <field name="model">guard.handover</field>
+        <field name="arch" type="xml">
+            <search string="Shift Handovers">
+                <field name="name"/>
+                <field name="site_id"/>
+                <field name="post_location"/>
+                <field name="from_guard_id"/>
+                <field name="to_guard_id"/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Awaiting Takeover" name="pending" domain="[('state', '=', 'pending')]"/>
+                <filter string="Taken Over" name="accepted" domain="[('state', '=', 'accepted')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Project" name="group_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_guard_handover" model="ir.actions.act_window">
+        <field name="name">Shift Handovers</field>
+        <field name="res_model">guard.handover</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_pending': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Record a shift handover
+            </p>
+            <p>
+                Enter project, guards, and briefing notes, then submit for takeover.
+            </p>
+        </field>
+    </record>
+</odoo>

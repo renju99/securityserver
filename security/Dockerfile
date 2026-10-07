@@ -29,6 +29,11 @@ RUN pip3 install --break-system-packages "packaging>=21.0"
 COPY --chown=root:root custom_addons/guardpro/requirements.txt /tmp/guardpro-requirements.txt
 RUN pip3 install --break-system-packages -r /tmp/guardpro-requirements.txt && rm /tmp/guardpro-requirements.txt
 
+USER root
+# Overwrite the default logrotate config: daily rotation, keep 15 days, 500 MB cap per file.
+RUN printf '/var/lib/odoo/odoo.log {\n    daily\n    rotate 15\n    compress\n    delaycompress\n    missingok\n    notifempty\n    copytruncate\n    maxsize 500M\n    dateext\n    dateformat -%%Y%%m%%d\n}\n' \
+    > /etc/logrotate.d/odoo
+
 USER odoo
 
 # Copy the pull-and-start script into the image

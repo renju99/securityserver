@@ -5,6 +5,121 @@ import { _t } from "@web/core/l10n/translation";
 
 console.log("[EmiratesIDReader] V5.1 (Subprotocol + Sequence) initialized");
 
+/** Find a mounted Owl component by predicate (searches the whole app tree). */
+function findOwlComponent(node, predicate) {
+    if (!node) {
+        return null;
+    }
+    const comp = node.component;
+    if (comp && predicate(comp)) {
+        return comp;
+    }
+    for (const key in node.children) {
+        const found = findOwlComponent(node.children[key], predicate);
+        if (found) {
+            return found;
+        }
+    }
+    return null;
+}
+
+/** Update an Odoo image field by calling the ImageField component directly. */
+function updateOwlImageField(fieldName, info) {
+    const root = window.odoo && window.odoo.__WOWL_DEBUG__ && window.odoo.__WOWL_DEBUG__.root;
+    if (!root || !root.__owl__) {
+        return false;
+    }
+    const imageField = findOwlComponent(
+        root.__owl__,
+        (c) =>
+            c &&
+            c.constructor &&
+            c.constructor.name === "ImageField" &&
+            c.props &&
+            c.props.name === fieldName
+    );
+    if (!imageField) {
+        return false;
+    }
+    imageField.onFileUploaded(info);
+    return true;
+}
+
+/** Push a base64 image into an Odoo image/binary field. */
+function setVisitorImageField(fieldName, b64OrDataUrl) {
+    if (!b64OrDataUrl) {
+        return;
+    }
+    let b64 = String(b64OrDataUrl).trim();
+    let mime = "image/png";
+    const dataUrlMatch = b64.match(/^data:([a-zA-Z0-9+/._-]+);base64,(.*)$/);
+    if (dataUrlMatch) {
+        mime = dataUrlMatch[1];
+        b64 = dataUrlMatch[2];
+    }
+    b64 = b64.replace(/\s/g, "");
+    if (!b64) {
+        return;
+    }
+
+    let byteString;
+    try {
+        byteString = atob(b64);
+    } catch (e) {
+        console.error(`[EmiratesIDReader] Invalid base64 for ${fieldName}:`, e);
+        return;
+    }
+    const dataUrl = `data:${mime};base64,${b64}`;
+    const ext = mime === "image/png" ? "png" : mime === "image/gif" ? "gif" : "jpg";
+
+    try {
+        const owlOk = updateOwlImageField(fieldName, {
+            name: `${fieldName}.${ext}`,
+            size: byteString.length,
+            type: mime,
+            data: b64,
+            objectUrl: null,
+        });
+        if (owlOk) {
+            const img = document.querySelector(`img[name="${fieldName}"]`);
+            if (img) {
+                img.src = dataUrl;
+            }
+            console.log(`[EmiratesIDReader] Set ${fieldName} via Owl component`);
+            return;
+        }
+    } catch (e) {
+        console.warn(`[EmiratesIDReader] Owl image update failed for ${fieldName}:`, e);
+    }
+
+    const img = document.querySelector(`img[name="${fieldName}"]`);
+    if (img) {
+        img.src = dataUrl;
+    }
+    const root = img && (img.closest(".o_field_widget, .o_field_image") || img.closest("div"));
+    const input = root && root.querySelector('input[type="file"]');
+    if (!input) {
+        console.warn(`[EmiratesIDReader] File input not found for ${fieldName}`);
+        return;
+    }
+    try {
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        const blob = new Blob([ab], { type: mime });
+        const file = new File([blob], `${fieldName}.${ext}`, { type: mime });
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+        console.log(`[EmiratesIDReader] Set ${fieldName} via FileUploader input`);
+    } catch (e) {
+        console.error(`[EmiratesIDReader] Failed to set image field ${fieldName}:`, e);
+    }
+}
+
 const EmiratesIDReader = {
     HOSTNAMES: ["toolkitagent.emiratesid.ae", "toolkitagent.mohre.gov.ae"],
     PORTS: [9004, 9005, 9020],
@@ -246,6 +361,7 @@ const emiratesIDReaderService = {
                     'date_of_birth': nonMod.DateOfBirth || nonMod.dateOfBirth || data.DateOfBirth,
                     'gender': (nonMod.Gender || nonMod.gender || "").toLowerCase().includes('m') ? 'male' : 'female',
                     'name_arabic': nonMod.FullNameArabic || nonMod.fullNameArabic || data.FullNameArabic,
+                    'id_type': 'emirates_id',
                 };
 
                 console.log("[EmiratesIDReader] Populating fields:", mappings);
@@ -301,14 +417,7 @@ const emiratesIDReaderService = {
                 const photo = data.CardHolderPhoto || data.Photography || data.photography;
                 if (photo) {
                     console.log("[EmiratesIDReader] Updating ID photo...");
-                    const fieldName = 'id_photo';
-                    const img = document.querySelector(`[name="${fieldName}"] img`);
-                    if (img) img.src = `data:image/png;base64,${photo}`;
-
-                    const hiddenInput = document.querySelector(`[name="${fieldName}"] input[type="hidden"]`);
-                    if (hiddenInput) {
-                        hiddenInput.value = photo;
-                    }
+                    setVisitorImageField("id_photo", photo);
                 }
 
                 window.alert(_t("Identity data synchronized successfully!"));

@@ -18,7 +18,6 @@ from . import key_issue_wizard
 from . import email_template_tester
 from . import compliance_audit_create_wizard
 from . import sla_setup_wizard
-from . import cctv_viewer_wizard
 # OPTIONAL: Requires maintenance module
 # from . import guard_equipment_assignment_wizard
 # OPTIONAL: Requires project module

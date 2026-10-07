@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'GuardLink - Security Guard Management',
-    'version': '18.0.1.1.228',
+    'version': '18.0.1.1.267',
     'category': 'Services/Security',
     'summary': 'Win premium guard contracts with an Odoo-native suite for mobile patrols, SLA automation, client portals, and analytics.',
     'description': """
@@ -97,7 +97,6 @@ Support & Roadmap
         'security/guard_performance_security.xml',
         'security/credential_security.xml',
         'security/portal_enhancements_security.xml',
-        'security/resident_complaint_security.xml',
         'security/audit_log_security.xml',  # Audit log security (Oct 2025)
         'security/elearning_security.xml',  # eLearning record rules for guards
         # CSV file MUST be loaded AFTER all group definitions
@@ -167,6 +166,7 @@ Support & Roadmap
         'data/credential_cron.xml',
         'data/portal_enhancement_cron.xml',
         'data/sla_escalation_cron.xml',  # SLA-based escalation cron jobs
+        'data/incident_sla_policy_data.xml',  # Default incident response SLA policies
         'data/mobile_outbox_cron.xml',  # Unified mobile outbox purge
         'data/tour_manual_generation_server_actions.xml',
         # 'data/populate_quiz_data_action.xml',  # Populate test quiz question data - DISABLED (has syntax issue)
@@ -222,8 +222,6 @@ Support & Roadmap
         'views/geofence_alert_views.xml',
         'views/client_site_views.xml',
         'views/guard_site_views.xml',
-        'views/tenant_resident_views.xml',
-        'views/resident_complaint_views.xml',
         'views/security_tour_checkpoint_line_views.xml',
         'views/security_tour_views.xml',
         'views/checkpoint_map_creator.xml',
@@ -261,6 +259,7 @@ Support & Roadmap
         'views/guard_performance_views.xml',
         'views/equipment_views.xml',
         'views/equipment_handover_views.xml',
+        'views/guard_handover_views.xml',
         # OPTIONAL: Requires maintenance module
         # 'views/equipment_maintenance_views.xml',  # Native maintenance module extension
         # OPTIONAL: Requires project module
@@ -297,6 +296,7 @@ Support & Roadmap
         'reports/tour_log_report_template.xml',
         'reports/attendance_report_template.xml',
         'reports/daily_activity_report_template.xml',
+        'data/email_template_dar_attachment.xml',
         'reports/guard_activity_report_template.xml',
         'reports/visitor_management_report_template.xml',
         'reports/incident_statement_report_template.xml',
@@ -312,7 +312,6 @@ Support & Roadmap
         'reports/guard_performance_report_template.xml',
         'reports/guard_credential_report_template.xml',
         'reports/guard_task_report_template.xml',
-        'reports/resident_complaint_report_template.xml',
         'reports/equipment_report_template.xml',
         'reports/equipment_handover_report_template.xml',
         'reports/guard_background_check_report_template.xml',
@@ -375,12 +374,6 @@ Support & Roadmap
         # Location Hierarchy Views (MUST load before menus that reference actions)
         'views/location_hierarchy_views.xml',
 
-        # CCTV actions (menus reference guardpro.action_cctv_monitoring / action_cctv_camera)
-        'views/cctv_camera_views.xml',
-
-        # Biometric actions (menus reference action_guard_biometric_*)
-        'views/guard_biometric_views.xml',
-
         # Menus (data/ — Odoo 18 validates views/*.xml with a schema that rejects menuitem)
         'data/guardpro_menus.xml',
 
@@ -410,7 +403,6 @@ Support & Roadmap
     'external_dependencies': {
         'python': [
             'markdown',  # Documentation rendering
-            'cryptography>=41.0.0',  # Biometric encryption (Fernet, PBKDF2)
             'requests>=2.28.0',  # webhooks, API calls
             'pytesseract',  # Optional: Emirates ID camera OCR (requires tesseract-ocr system package)
         ],
@@ -476,6 +468,7 @@ Support & Roadmap
             'guardpro/static/src/js/mobile_patrol_reminder.js',
             'guardpro/static/src/js/mobile_task_assignment.js',
             'guardpro/static/src/js/mobile_outbox.js',
+            'guardpro/static/src/js/mobile_draft_autosave.js',
         ],
         'guardpro.assets_mobile_ptt': [
             'guardpro/static/src/css/push_to_talk.css',

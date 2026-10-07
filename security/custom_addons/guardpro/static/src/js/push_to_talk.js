@@ -38,6 +38,8 @@ export class PushToTalkWidget extends Component {
         this.pendingChunkQueue = [];
         this.streamStartPromise = null;
         this.pendingFinalChunk = false;
+        this._chunkIndex = 0;           // Monotonically increasing chunk sequence number
+        this._chunkUploadChain = Promise.resolve();
 
         // Set up cleanup on unmount
         onWillUnmount(() => {
@@ -52,12 +54,21 @@ export class PushToTalkWidget extends Component {
         onMounted(() => {
             this.loadChannels();
 
-            // Set up periodic message refresh
-            this.messageRefreshInterval = setInterval(() => {
-                if (this.state.currentChannel) {
-                    this.loadMessages(this.state.currentChannel.id);
+            // Set up periodic message refresh as a fallback only. The bus listener
+            // is the primary real-time path; polling is reduced to 10 s and paused
+            // when the tab is hidden to lower server load.
+            this._refreshIntervalMs = 10000;
+            this._scheduleMessageRefresh();
+            document.addEventListener("visibilitychange", () => {
+                if (document.hidden) {
+                    clearTimeout(this.messageRefreshInterval);
+                } else {
+                    if (this.state.currentChannel) {
+                        this.loadMessages(this.state.currentChannel.id);
+                    }
+                    this._scheduleMessageRefresh();
                 }
-            }, 3000); // Refresh every 3 seconds
+            });
 
             // Set up bus listener for real-time messages
             this.setupBusListener();
@@ -96,6 +107,16 @@ export class PushToTalkWidget extends Component {
             this.state.error = error.message || "Error selecting channel";
             console.error("Error selecting channel:", error);
         }
+    }
+
+    _scheduleMessageRefresh() {
+        clearTimeout(this.messageRefreshInterval);
+        this.messageRefreshInterval = setTimeout(() => {
+            if (this.state.currentChannel && !document.hidden) {
+                this.loadMessages(this.state.currentChannel.id);
+            }
+            this._scheduleMessageRefresh();
+        }, this._refreshIntervalMs);
     }
 
     async loadMessages(channelId, offset = 0) {
@@ -257,6 +278,8 @@ export class PushToTalkWidget extends Component {
             this.state.recordingDuration = 0;
             this.lastChunkSentTime = Date.now();
             this.streamId = 'str_' + Date.now();
+            this._chunkIndex = 0;
+            this._chunkUploadChain = Promise.resolve();
 
             // Initialize streaming on server
             this.streamingMessageId = null;
@@ -316,6 +339,7 @@ export class PushToTalkWidget extends Component {
             this.streamingMessageId = null;
             this.streamStartPromise = null;
             this.pendingFinalChunk = false;
+            this._chunkIndex = 0;
         } catch (error) {
             console.error("Error processing recording:", error);
         }
@@ -345,8 +369,8 @@ export class PushToTalkWidget extends Component {
         } catch (err) { }
     }
 
-    async sendStreamingChunk(isLast = false) {
-        if (this.audioChunks.length === 0 && !isLast) return;
+    sendStreamingChunk(isLast = false) {
+        if (this.audioChunks.length === 0 && !isLast) return Promise.resolve();
 
         // Queue until streaming message exists so quick press/release audio isn't dropped.
         if (!this.streamingMessageId) {
@@ -364,18 +388,18 @@ export class PushToTalkWidget extends Component {
             if (!this.streamStartPromise && this.streamId && this.state.currentChannel) {
                 this.streamStartPromise = this.startStreamingOnServer();
             }
-            return;
+            return Promise.resolve();
         }
 
         const chunksToSend = [...this.audioChunks];
         this.audioChunks = [];
         this.lastChunkSentTime = Date.now();
 
-        try {
-            if (chunksToSend.length === 0 && !isLast) return;
-            const audioBlob = new Blob(chunksToSend, { type: this.mediaRecorder?.mimeType || "audio/ogg" });
-            await this.postChunkBlob(audioBlob, isLast, this.state.recordingDuration);
-        } catch (err) { }
+        if (chunksToSend.length === 0 && !isLast) return Promise.resolve();
+        const audioBlob = new Blob(chunksToSend, { type: this.mediaRecorder?.mimeType || "audio/ogg" });
+        const task = this.postChunkBlob(audioBlob, isLast, this.state.recordingDuration).catch(() => {});
+        this._chunkUploadChain = this._chunkUploadChain.then(() => task, () => task);
+        return this._chunkUploadChain;
     }
 
     async postChunkBlob(audioBlob, isLast, durationSeconds) {
@@ -385,24 +409,53 @@ export class PushToTalkWidget extends Component {
             reader.onerror = reject;
             reader.readAsDataURL(audioBlob);
         });
-        await this.rpc("/guardpro/api/push-to-talk/stream/chunk", {
+
+        const chunkIndex = this._chunkIndex++;
+        const payload = {
             message_id: this.streamingMessageId,
             audio_chunk: base64Chunk,
             is_last: isLast,
-            duration_seconds: durationSeconds
-        });
+            duration_seconds: durationSeconds,
+            chunk_index: chunkIndex,
+        };
+
+        const maxRetries = 3;
+        let lastError;
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+            try {
+                await this.rpc("/guardpro/api/push-to-talk/stream/chunk", payload);
+                return;
+            } catch (err) {
+                lastError = err;
+                console.warn(`[PTT] chunk ${chunkIndex} upload attempt ${attempt + 1} failed:`, err);
+                if (attempt < maxRetries) {
+                    await new Promise(r => setTimeout(r, 500 * Math.pow(2, attempt)));
+                }
+            }
+        }
+        console.error(`[PTT] chunk ${chunkIndex} upload failed after ${maxRetries + 1} attempts:`, lastError);
+        this.notification.add(_t("Radio transmission unstable. Check network."), { type: "warning" });
+        throw lastError;
     }
 
-    async flushPendingChunks() {
-        if (!this.streamingMessageId) return;
-        while (this.pendingChunkQueue.length > 0) {
-            const item = this.pendingChunkQueue.shift();
-            await this.postChunkBlob(item.blob, item.isLast, item.duration);
-        }
-        if (this.pendingFinalChunk) {
-            this.pendingFinalChunk = false;
-            await this.postChunkBlob(new Blob([], { type: this.mediaRecorder?.mimeType || "audio/ogg" }), true, this.state.recordingDuration);
-        }
+    flushPendingChunks() {
+        if (!this.streamingMessageId) return Promise.resolve();
+        const drain = async () => {
+            while (this.pendingChunkQueue.length > 0) {
+                const item = this.pendingChunkQueue.shift();
+                await this.postChunkBlob(item.blob, item.isLast, item.duration);
+            }
+            if (this.pendingFinalChunk) {
+                this.pendingFinalChunk = false;
+                await this.postChunkBlob(
+                    new Blob([], { type: this.mediaRecorder?.mimeType || "audio/ogg" }),
+                    true,
+                    this.state.recordingDuration
+                );
+            }
+        };
+        this._chunkUploadChain = this._chunkUploadChain.then(drain, drain);
+        return this._chunkUploadChain;
     }
 
     async playMessage(messageId) {

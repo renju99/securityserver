@@ -68,6 +68,7 @@ class IncidentEscalationLog(models.Model):
         ('progressive_level_1', 'Progressive Escalation - Level 1'),
         ('progressive_level_2', 'Progressive Escalation - Level 2'),
         ('progressive_level_3', 'Progressive Escalation - Level 3'),
+        ('critical_auto_escalation', 'Critical Auto Escalation'),
         ('manual', 'Manual Escalation'),
         ('severity_increase', 'Severity Increased'),
         ('other', 'Other')

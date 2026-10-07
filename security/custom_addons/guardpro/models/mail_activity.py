@@ -22,8 +22,6 @@ class MailActivity(models.Model):
         'daily.activity.',
         'sla.',
         'lost.found',
-        'tenant.resident',
-        'resident.complaint',
         'emergency.',
         'equipment.',
         'client.site',

@@ -6,6 +6,7 @@
  */
 
 const CACHE_NAME = 'guardpro-cache-v2';
+const MOBILE_PAGES_CACHE_NAME = 'guardpro-mobile-pages-v2';
 const OFFLINE_QUEUE_NAME = 'guardpro-offline-queue';
 const DATA_CACHE_NAME = 'guardpro-data-cache-v2';
 
@@ -72,7 +73,7 @@ self.addEventListener('activate', (event) => {
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME && cacheName !== DATA_CACHE_NAME) {
+                    if (cacheName !== CACHE_NAME && cacheName !== DATA_CACHE_NAME && cacheName !== MOBILE_PAGES_CACHE_NAME) {
                         console.log('[ServiceWorker] Removing old cache:', cacheName);
                         return caches.delete(cacheName);
                     }
@@ -107,37 +108,93 @@ self.addEventListener('fetch', (event) => {
 });
 
 /**
+ * Build a stable cache key for a mobile page by dropping the cache-busting
+ * timestamp added after switching locations.
+ */
+function getMobilePageCacheKey(url) {
+    const u = new URL(url);
+    u.searchParams.delete('_');
+    return u.toString();
+}
+
+/**
  * Handle GET requests for static content
  */
 async function handleStaticRequest(request) {
+    const url = new URL(request.url);
+    const isMobilePage = url.pathname.startsWith('/guardpro/mobile');
+    const isNavigate = request.mode === 'navigate';
+
+    if (isNavigate && isMobilePage) {
+        return handleMobilePageRequest(request);
+    }
+
     try {
         // Network first, fall back to cache
         const networkResponse = await fetch(request);
-        
+
         // Cache successful responses
         if (networkResponse.ok) {
             const cache = await caches.open(CACHE_NAME);
             cache.put(request, networkResponse.clone());
         }
-        
+
         return networkResponse;
     } catch (error) {
         // Network failed, try cache
         const cachedResponse = await caches.match(request);
-        
+
         if (cachedResponse) {
             return cachedResponse;
         }
-        
+
         // Return offline page for navigation requests
-        if (request.mode === 'navigate') {
+        if (isNavigate) {
             const offlineCache = await caches.open(CACHE_NAME);
             const offlinePage = await offlineCache.match('/guardpro/pwa/');
             if (offlinePage) {
                 return offlinePage;
             }
         }
-        
+
+        throw error;
+    }
+}
+
+/**
+ * Handle mobile page navigations.
+ *
+ * - Pages are cached per URL (ignoring the cache-busting timestamp) so
+ *   navigating within the same location is fast.
+ * - When the user switches locations the client sends CLEAR_CACHE, so the
+ *   next mobile page load is always fresh.
+ */
+async function handleMobilePageRequest(request) {
+    const cacheKey = getMobilePageCacheKey(request.url);
+
+    try {
+        const networkResponse = await fetch(request);
+
+        if (networkResponse.ok) {
+            const cache = await caches.open(MOBILE_PAGES_CACHE_NAME);
+            cache.put(cacheKey, networkResponse.clone());
+        }
+
+        return networkResponse;
+    } catch (error) {
+        // Offline: fall back to the cached mobile page if available
+        const cachedResponse = await caches.match(cacheKey);
+        if (cachedResponse) {
+            console.log('[ServiceWorker] Serving mobile page from cache:', request.url);
+            return cachedResponse;
+        }
+
+        const offlineCache = await caches.open(CACHE_NAME);
+        const offlinePage = await offlineCache.match('/guardpro/pwa/');
+        if (offlinePage) {
+            return offlinePage;
+        }
+
         throw error;
     }
 }
@@ -405,6 +462,14 @@ self.addEventListener('message', (event) => {
                 return Promise.all(
                     cacheNames.map(cacheName => caches.delete(cacheName))
                 );
+            })
+        );
+    }
+
+    if (event.data && event.data.type === 'CLEAR_MOBILE_PAGES') {
+        event.waitUntil(
+            caches.delete(MOBILE_PAGES_CACHE_NAME).then(() => {
+                console.log('[ServiceWorker] Mobile page cache cleared');
             })
         );
     }

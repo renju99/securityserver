@@ -90,22 +90,151 @@ function setFormFieldIfEmpty(field, val) {
     setFormField(field, val);
 }
 
-function setIdPhotoFromB64(b64) {
-    if (!b64) {
-        return;
+/** Find a mounted Owl component by predicate (searches the whole app tree). */
+function findOwlComponent(node, predicate) {
+    if (!node) {
+        return null;
     }
-    const fieldName = "id_photo";
-    const img = document.querySelector(`[name="${fieldName}"] img`);
-    if (img) {
-        img.src = `data:image/jpeg;base64,${b64}`;
+    const comp = node.component;
+    if (comp && predicate(comp)) {
+        return comp;
     }
-    const hiddenInput = document.querySelector(
-        `[name="${fieldName}"] input[type="hidden"]`
+    for (const key in node.children) {
+        const found = findOwlComponent(node.children[key], predicate);
+        if (found) {
+            return found;
+        }
+    }
+    return null;
+}
+
+function findVisitorFormRecord() {
+    const root = window.odoo && window.odoo.__WOWL_DEBUG__ && window.odoo.__WOWL_DEBUG__.root;
+    if (!root || !root.__owl__) {
+        return null;
+    }
+    const formCtrl = findOwlComponent(
+        root.__owl__,
+        (c) =>
+            c &&
+            c.model &&
+            c.model.root &&
+            c.model.root.resModel === "visitor.management" &&
+            typeof c.model.root.update === "function"
     );
-    if (hiddenInput) {
-        hiddenInput.value = b64;
-        hiddenInput.dispatchEvent(new Event("input", { bubbles: true }));
-        hiddenInput.dispatchEvent(new Event("change", { bubbles: true }));
+    if (formCtrl) {
+        return formCtrl.model.root;
+    }
+    const fieldComp = findOwlComponent(
+        root.__owl__,
+        (c) =>
+            c &&
+            c.props &&
+            c.props.record &&
+            c.props.record.resModel === "visitor.management" &&
+            typeof c.props.record.update === "function"
+    );
+    return fieldComp ? fieldComp.props.record : null;
+}
+
+/** Push a base64 image into an Odoo image/binary field. */
+async function setImageFieldFromB64(fieldName, b64OrDataUrl) {
+    if (!b64OrDataUrl) {
+        return false;
+    }
+    let b64 = String(b64OrDataUrl).trim();
+    let mime = "image/jpeg";
+    const dataUrlMatch = b64.match(/^data:([a-zA-Z0-9+/._-]+);base64,(.*)$/);
+    if (dataUrlMatch) {
+        mime = dataUrlMatch[1];
+        b64 = dataUrlMatch[2];
+    }
+    b64 = b64.replace(/\s/g, "");
+    if (!b64) {
+        return false;
+    }
+
+    try {
+        atob(b64.slice(0, 32));
+    } catch (e) {
+        console.error(`[EID Camera] Invalid base64 for ${fieldName}:`, e);
+        return false;
+    }
+    const dataUrl = `data:${mime};base64,${b64}`;
+    const ext = mime === "image/png" ? "png" : mime === "image/gif" ? "gif" : "jpg";
+
+    try {
+        const record = findVisitorFormRecord();
+        if (record) {
+            await record.update({ [fieldName]: b64 });
+            const img = document.querySelector(`img[name="${fieldName}"]`);
+            if (img) {
+                img.src = dataUrl;
+            }
+            console.log(`[EID Camera] Set ${fieldName} via form record.update (${b64.length} chars)`);
+            return true;
+        }
+        console.warn("[EID Camera] visitor.management form record not found");
+    } catch (e) {
+        console.warn(`[EID Camera] record.update failed for ${fieldName}:`, e);
+    }
+
+    try {
+        const root = window.odoo && window.odoo.__WOWL_DEBUG__ && window.odoo.__WOWL_DEBUG__.root;
+        const imageField =
+            root &&
+            root.__owl__ &&
+            findOwlComponent(
+                root.__owl__,
+                (c) =>
+                    c &&
+                    c.props &&
+                    c.props.name === fieldName &&
+                    typeof c.onFileUploaded === "function"
+            );
+        if (imageField) {
+            await imageField.onFileUploaded({
+                name: `${fieldName}.${ext}`,
+                size: Math.floor((b64.length * 3) / 4),
+                type: mime,
+                data: b64,
+                objectUrl: null,
+            });
+            console.log(`[EID Camera] Set ${fieldName} via ImageField.onFileUploaded`);
+            return true;
+        }
+    } catch (e) {
+        console.warn(`[EID Camera] ImageField update failed for ${fieldName}:`, e);
+    }
+
+    const img = document.querySelector(`img[name="${fieldName}"]`);
+    if (img) {
+        img.src = dataUrl;
+    }
+    const widgetRoot = img && (img.closest(".o_field_widget, .o_field_image") || img.closest("div"));
+    const input = widgetRoot && widgetRoot.querySelector('input[type="file"]');
+    if (!input) {
+        console.warn(`[EID Camera] File input not found for ${fieldName}`);
+        return false;
+    }
+    try {
+        const byteString = atob(b64);
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        const blob = new Blob([ab], { type: mime });
+        const file = new File([blob], `${fieldName}.${ext}`, { type: mime });
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+        console.log(`[EID Camera] Set ${fieldName} via FileUploader input`);
+        return true;
+    } catch (e) {
+        console.error(`[EID Camera] Failed to set image field ${fieldName}:`, e);
+        return false;
     }
 }
 
@@ -357,6 +486,7 @@ function openScanWizard() {
             ["id_issue_date", _t("ID issue"), "date"],
             ["occupation", _t("Occupation"), "text"],
             ["employer_name", _t("Employer"), "text"],
+            ["company", _t("Company"), "text"],
             ["issuing_place", _t("Issuing place"), "text"],
         ];
 
@@ -397,8 +527,9 @@ function openScanWizard() {
                 setFormField(inp.dataset.field, inp.value);
             });
             if (frontDataUrl) {
-                setIdPhotoFromB64(dataUrlToRawB64(frontDataUrl));
+                await setImageFieldFromB64("id_photo", frontDataUrl);
             }
+            setFormField("id_type", "emirates_id");
             // Merge prior visit details (mobile/email/host) for returning visitors
             const idInput = reviewForm.querySelector('[data-field="id_number"]');
             const idNumber = idInput && idInput.value ? idInput.value.trim() : "";

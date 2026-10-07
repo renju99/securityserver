@@ -54,7 +54,7 @@
     <record id="action_user_favorite" model="ir.actions.act_window">
         <field name="name">My Favorites</field>
         <field name="res_model">user.favorite</field>
-        <field name="view_mode">kanban,list</field>
+        <field name="view_mode">list,kanban</field>
         <field name="domain">[('user_id', '=', uid)]</field>
         <field name="context">{'default_user_id': uid}</field>
         <field name="help" type="html">

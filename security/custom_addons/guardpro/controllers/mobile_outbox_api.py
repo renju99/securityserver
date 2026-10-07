@@ -24,7 +24,6 @@ class MobileOutboxController(http.Controller):
         auth='user',
         methods=['GET'],
         csrf=False,
-        website=True,
     )
     def pending(self, **kwargs):
         """Return unacknowledged outbox rows for the current user."""
@@ -85,7 +84,6 @@ class MobileOutboxController(http.Controller):
         auth='user',
         methods=['POST'],
         csrf=False,
-        website=True,
     )
     def ack(self, **kwargs):
         """Acknowledge one or many outbox rows."""
@@ -135,7 +133,6 @@ class MobileOutboxController(http.Controller):
         auth='user',
         methods=['POST'],
         csrf=False,
-        website=True,
     )
     def ack_all(self, **kwargs):
         """Acknowledge every pending row for the current user."""

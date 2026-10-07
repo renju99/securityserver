@@ -179,7 +179,7 @@
     <record id="action_compliance_corrective_action" model="ir.actions.act_window">
         <field name="name">Corrective Actions</field>
         <field name="res_model">compliance.corrective.action</field>
-        <field name="view_mode">kanban,list,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="context">{'search_default_my_actions': 1, 'search_default_open': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -531,7 +531,7 @@
     <record id="action_compliance_audit" model="ir.actions.act_window">
         <field name="name">Compliance Audits</field>
         <field name="res_model">compliance.audit</field>
-        <field name="view_mode">kanban,list,form,pivot,graph</field>
+        <field name="view_mode">list,kanban,form,pivot,graph</field>
         <field name="context">{'search_default_in_progress': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

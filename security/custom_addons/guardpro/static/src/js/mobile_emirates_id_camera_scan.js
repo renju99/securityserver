@@ -94,15 +94,63 @@ window.guardproEidTriggerScan = function (ev, el) {
         }
     }
 
-    function setIdPhotoHidden(formRoot, b64) {
-        if (!b64 || !formRoot) {
+    /** Set a base64 image on the visitor form — handles both public PWA and Odoo backend forms. */
+    function setImageFieldFromB64(formRoot, fieldName, b64OrDataUrl) {
+        if (!b64OrDataUrl || !formRoot) {
             return;
         }
-        var hidden = formRoot.querySelector('input[name="id_photo"]');
+        var b64 = String(b64OrDataUrl).trim();
+        var mime = 'image/jpeg';
+        var dataUrlMatch = b64.match(/^data:([a-zA-Z0-9+/._-]+);base64,(.*)$/);
+        if (dataUrlMatch) {
+            mime = dataUrlMatch[1];
+            b64 = dataUrlMatch[2];
+        }
+        b64 = b64.replace(/\s/g, '');
+        if (!b64) {
+            return;
+        }
+        var dataUrl = 'data:' + mime + ';base64,' + b64;
+
+        // Public PWA visitor form uses a hidden input + preview helper
+        var hidden = formRoot.querySelector('input[type="hidden"][name="' + fieldName + '"]');
         if (hidden) {
             hidden.value = b64;
             hidden.dispatchEvent(new Event('input', { bubbles: true }));
             hidden.dispatchEvent(new Event('change', { bubbles: true }));
+            if (window.guardproVisitorIdPhoto && window.guardproVisitorIdPhoto.showPreview) {
+                window.guardproVisitorIdPhoto.showPreview(dataUrl, b64);
+            }
+            return;
+        }
+
+        // Odoo backend ImageField path
+        var img = formRoot.querySelector('img[name="' + fieldName + '"]');
+        if (img) {
+            img.src = dataUrl;
+        }
+        var root = img && (img.closest('.o_field_widget, .o_field_image') || img.closest('div'));
+        var input = root && root.querySelector('input[type="file"]');
+        if (!input) {
+            console.warn('[GuardLink Mobile EID] File input not found for ' + fieldName);
+            return;
+        }
+        try {
+            var byteString = atob(b64);
+            var ab = new ArrayBuffer(byteString.length);
+            var ia = new Uint8Array(ab);
+            for (var i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            var blob = new Blob([ab], { type: mime });
+            var ext = mime === 'image/png' ? 'png' : mime === 'image/gif' ? 'gif' : 'jpg';
+            var file = new File([blob], fieldName + '.' + ext, { type: mime });
+            var dt = new DataTransfer();
+            dt.items.add(file);
+            input.files = dt.files;
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        } catch (e) {
+            console.error('[GuardLink Mobile EID] Failed to set image field ' + fieldName + ':', e);
         }
     }
 
@@ -556,6 +604,7 @@ window.guardproEidTriggerScan = function (ev, el) {
                 ['id_issue_date', 'ID issue', 'date'],
                 ['occupation', 'Occupation', 'text'],
                 ['employer_name', 'Employer', 'text'],
+                ['company', 'Company', 'text'],
                 ['issuing_place', 'Issuing place', 'text'],
             ];
 
@@ -606,7 +655,7 @@ window.guardproEidTriggerScan = function (ev, el) {
                     setFormField(formRoot, inp.dataset.field, inp.value);
                 }
                 if (frontPhotoDataUrl) {
-                    setIdPhotoHidden(formRoot, dataUrlToRawB64(frontPhotoDataUrl));
+                    setImageFieldFromB64(formRoot, 'id_photo', frontPhotoDataUrl);
                 }
                 var idType = formRoot.querySelector('[name="id_type"]');
                 if (idType) {

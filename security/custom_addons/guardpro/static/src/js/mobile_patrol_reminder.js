@@ -7,7 +7,9 @@
     "use strict";
 
     const POLL_INTERVAL_MS = 5000;
+    const BACKOFF_BASE_MS = 5000;
     let pollingTimer = null;
+    let pollErrorCount = 0;
     let activeReminderId = null;
     let ackInFlight = false;
 
@@ -183,7 +185,7 @@
     }
 
     async function pollPatrol() {
-        if (window.__gpSessionDead) return;
+        if (window.__gpSessionDead || document.hidden) return;
         if (emergencyOverlayVisible()) return;
         try {
             const response = await fetch(
@@ -206,6 +208,7 @@
                 return;
             }
             const payload = await response.json();
+            pollErrorCount = 0;
             const data = payload && payload.success ? payload : null;
             if (data && data.patrol_reminder) {
                 if (
@@ -224,8 +227,18 @@
                 if (overlay) overlay.style.display = "none";
             }
         } catch (_err) {
-            // Silent fail
+            pollErrorCount = Math.min(pollErrorCount + 1, 5);
         }
+    }
+
+    function scheduleNextPoll() {
+        clearTimeout(pollingTimer);
+        if (window.__gpSessionDead) return;
+        const base = document.hidden ? 60000 : BACKOFF_BASE_MS;
+        const delay = base * Math.pow(2, pollErrorCount);
+        pollingTimer = window.setTimeout(() => {
+            pollPatrol().finally(scheduleNextPoll);
+        }, delay);
     }
 
     function scheduleRapidRechecks() {
@@ -242,12 +255,14 @@
         window.__gpPollPatrolReminderFromNative = pollPatrol;
         pollPatrol();
         scheduleRapidRechecks();
-        pollingTimer = window.setInterval(pollPatrol, POLL_INTERVAL_MS);
+        scheduleNextPoll();
         document.addEventListener("visibilitychange", function () {
             if (!document.hidden) {
+                pollErrorCount = 0;
                 pollPatrol();
                 scheduleRapidRechecks();
             }
+            scheduleNextPoll();
         });
         window.addEventListener("focus", pollPatrol);
     }

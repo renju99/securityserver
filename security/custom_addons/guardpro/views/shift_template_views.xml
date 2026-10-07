@@ -5,15 +5,16 @@
         <field name="name">shift.template.list</field>
         <field name="model">shift.template</field>
         <field name="arch" type="xml">
-            <list string="Shift Templates" 
+            <list string="Shift Templates"
                   decoration-muted="not active">
                 <field name="name"/>
                 <field name="site_id"/>
                 <field name="guard_ids" widget="many2many_tags"/>
                 <field name="shift_type" widget="badge"/>
                 <field name="recurrence_type" widget="badge"/>
+                <field name="start_time" widget="float_time"/>
                 <field name="generated_shift_count"/>
-                <field name="last_generation_date"/>
+                <field name="last_generation_date" optional="hide"/>
                 <field name="active" widget="boolean_toggle"/>
             </list>
         </field>
@@ -25,48 +26,62 @@
         <field name="model">shift.template</field>
         <field name="arch" type="xml">
             <form string="Shift Template">
+                <header>
+                    <button name="action_open_generate_wizard"
+                            type="object"
+                            string="Generate Shifts"
+                            class="oe_highlight"
+                            invisible="not id"/>
+                    <button name="action_copy_template"
+                            type="object"
+                            string="Duplicate"
+                            invisible="not id"/>
+                </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_view_generated_shifts" 
-                                type="object" 
-                                class="oe_stat_button" 
+                        <button name="action_view_generated_shifts"
+                                type="object"
+                                class="oe_stat_button"
                                 icon="fa-calendar">
                             <field name="generated_shift_count" widget="statinfo" string="Shifts"/>
                         </button>
-                        <button name="action_generate_shifts_from_form" 
-                                type="object" 
-                                string="Generate Shifts" 
-                                class="oe_stat_button"
-                                icon="fa-calendar-plus-o"/>
                     </div>
-                    
+
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
-                    
+
                     <div class="oe_title">
                         <label for="name"/>
                         <h1>
-                            <field name="name" placeholder="e.g., Morning Security - Main Entrance"/>
+                            <field name="name" placeholder="e.g., Day Shift - Main Gate"/>
                         </h1>
                     </div>
-                    
+
+                    <group string="Quick setup">
+                        <div colspan="2" class="d-flex flex-wrap gap-2 mb-2">
+                            <button name="action_preset_day_mon_fri" type="object"
+                                    string="Day 08:00 Mon–Fri" class="btn btn-secondary"/>
+                            <button name="action_preset_night_mon_fri" type="object"
+                                    string="Night 20:00 Mon–Fri" class="btn btn-secondary"/>
+                            <button name="action_preset_daily_all" type="object"
+                                    string="Daily (every day)" class="btn btn-secondary"/>
+                        </div>
+                    </group>
+
                     <group>
-                        <group string="Basic Information">
+                        <group string="Who &amp; where">
                             <field name="site_id" options="{'no_create': True}"/>
                             <field name="guard_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="When">
                             <field name="shift_type"/>
                             <field name="start_time" widget="float_time"/>
                             <field name="duration_hours" widget="float_time"/>
-                            <field name="tour_ids" widget="many2many_tags"
-                                   domain="[('site_id', '=', site_id)]"
-                                   options="{'no_create': True}"/>
-                            <field name="active"/>
-                        </group>
-                        <group string="Recurrence Pattern">
                             <field name="recurrence_type" widget="radio"/>
-                            <field name="day_of_month" 
-                                   placeholder="Enter day (1-31)"
+                            <field name="day_of_month"
+                                   placeholder="1–31"
                                    invisible="recurrence_type != 'monthly'"/>
-                            <group string="Days of Week" invisible="recurrence_type != 'weekly'">
+                            <group string="Weekdays" invisible="recurrence_type != 'weekly'" colspan="2">
                                 <group>
                                     <field name="monday"/>
                                     <field name="tuesday"/>
@@ -81,26 +96,37 @@
                             </group>
                         </group>
                     </group>
-                    
-                    <group string="Generation Settings">
+
+                    <group string="Generate for period">
                         <group>
+                            <div colspan="2" class="d-flex flex-wrap gap-2 mb-2">
+                                <button name="action_preset_dates_this_week" type="object"
+                                        string="This week" class="btn btn-link"/>
+                                <button name="action_preset_dates_next_14" type="object"
+                                        string="Next 14 days" class="btn btn-link"/>
+                                <button name="action_preset_dates_next_month" type="object"
+                                        string="Next month" class="btn btn-link"/>
+                            </div>
                             <field name="generation_start_date"/>
                             <field name="generation_end_date"/>
+                            <field name="preview_date_count" string="Matching days"/>
+                            <field name="preview_shift_count" string="Shifts to create"/>
                             <field name="last_generation_date"/>
                         </group>
+                        <group string="Optional">
+                            <field name="tour_ids" widget="many2many_tags"
+                                   domain="[('site_id', '=', site_id)]"
+                                   options="{'no_create': True}"/>
+                            <field name="special_instructions"
+                                   placeholder="Notes for guards on these shifts…"/>
+                        </group>
                     </group>
-                    
-                    <group string="Instructions &amp; Notes">
-                        <field name="special_instructions" 
-                               placeholder="Enter special instructions or notes for this shift type..."
-                               nolabel="1"/>
-                    </group>
-                    
-                    <div class="alert alert-info" role="alert">
-                        <i class="fa fa-info-circle" title="Information" aria-label="Information"/> 
-                        The selected guards will be assigned to shifts generated from this template.
-                        Shifts will be created for each guard based on the recurrence pattern from the From Date to the To Date.
-                        Specify the date range and click "Generate Shifts" button to create shifts manually.
+
+                    <div class="alert alert-info" role="alert" invisible="not id">
+                        <i class="fa fa-info-circle" title="Information" aria-label="Information"/>
+                        Preview: <strong><field name="preview_shift_count"/></strong> shift(s)
+                        across <field name="preview_date_count"/> day(s).
+                        Click <em>Generate Shifts</em> to confirm the period and create them.
                     </div>
                 </sheet>
             </form>
@@ -164,7 +190,7 @@
                 <field name="site_id"/>
                 <field name="guard_ids"/>
                 <field name="shift_type"/>
-                
+
                 <filter string="Active" name="active" domain="[('active', '=', True)]"/>
                 <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
                 <separator/>
@@ -208,19 +234,9 @@
                 Create a Shift Template
             </p>
             <p>
-                Templates allow you to automatically generate recurring shifts.
-                Define the pattern once and let the system create shifts for you.
+                Pick a project and guards, use a quick preset (Day / Night Mon–Fri),
+                choose This week or Next 14 days, then Generate Shifts.
             </p>
         </field>
     </record>
-
-    <!-- Menu Item (now defined in guardpro_menus.xml) -->
-    <!--
-    <menuitem id="menu_shift_template" 
-              name="Shift Templates" 
-              parent="guardpro.menu_guardpro_operations" 
-              action="action_shift_template" 
-              sequence="15"/>
-    -->
-
 </odoo>

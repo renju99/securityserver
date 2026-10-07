@@ -247,7 +247,7 @@
     <record id="action_guard_elearning_courses" model="ir.actions.act_window">
         <field name="name">Guard eLearning Courses</field>
         <field name="res_model">slide.channel</field>
-        <field name="view_mode">kanban,list,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="domain">[('is_guard_training', '=', True)]</field>
         <field name="context">{'default_is_guard_training': True}</field>
         <field name="help" type="html">

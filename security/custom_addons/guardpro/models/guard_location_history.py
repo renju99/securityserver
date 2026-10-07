@@ -155,45 +155,46 @@ class GuardLocationHistory(models.Model):
     
     @api.model
     def cleanup_old_records(self):
-        """Archive location records older than retention period.
-        
-        Called by scheduled action daily at 2 AM.
-        Archives location history older than configured retention period (30 days).
-        Archived records are preserved but excluded from normal queries.
+        """Purge GPS location history older than the retention window.
+
+        Called by scheduled action daily. Default retention is 90 days
+        (``guardpro.location_history_retention``). Deletes in batches to
+        avoid long locks / memory spikes.
         """
-        from datetime import datetime, timedelta
-        
-        # Get retention period from system parameters (default: 30 days for archiving)
         retention_days = int(self.env['ir.config_parameter'].sudo().get_param(
-            'guardpro.location_history_retention', 30))
-        
+            'guardpro.location_history_retention', 90))
+        if retention_days < 7:
+            retention_days = 7  # safety floor
+
         cutoff_date = fields.Datetime.now() - timedelta(days=retention_days)
-        
-        # Find old records that are not already archived
-        old_records = self.search([
-            ('timestamp', '<', cutoff_date),
-            ('is_archived', '=', False)
-        ])
-        
-        record_count = len(old_records)
-        
-        if record_count > 0:
-            _logger.info(
-                'Archiving %d location history records older than %d days (before %s)',
-                record_count, retention_days, cutoff_date
+        batch_size = 5000
+        deleted_total = 0
+
+        while True:
+            old_records = self.search(
+                [('timestamp', '<', cutoff_date)],
+                limit=batch_size,
             )
-            
-            # Archive old records instead of deleting them
-            archive_date = fields.Datetime.now()
-            old_records.write({
-                'is_archived': True,
-                'archived_date': archive_date
-            })
-            
-            _logger.info('Successfully archived %d location history records', record_count)
+            if not old_records:
+                break
+            count = len(old_records)
+            old_records.unlink()
+            deleted_total += count
+            # Commit between batches so vacuum/other sessions can proceed
+            self.env.cr.commit()
+            _logger.info(
+                'GPS retention: deleted batch of %d (total %d) older than %d days (before %s)',
+                count, deleted_total, retention_days, cutoff_date,
+            )
+
+        if deleted_total:
+            _logger.info(
+                'GPS retention complete: purged %d rows older than %d days',
+                deleted_total, retention_days,
+            )
         else:
-            _logger.debug('No old location history records to archive')
-        
+            _logger.debug('GPS retention: nothing older than %d days', retention_days)
+
         return True
     
     @api.model

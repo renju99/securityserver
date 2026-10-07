@@ -20,6 +20,24 @@
             <t t-if="load_mobile_eid">
                 <t t-call-assets="guardpro.assets_mobile_eid" defer_load="True"/>
             </t>
+            <!-- Force a fresh load when a mobile page is restored from the
+                 browser back/forward cache (e.g. after switching locations). -->
+            <script type="text/javascript"><![CDATA[
+                window.addEventListener('pageshow', function(event) {
+                    if (event.persisted) {
+                        window.location.reload();
+                    }
+                });
+
+                // After switching locations the URL contains ?loc=... . Tell the
+                // service worker to clear cached mobile pages so the new location
+                // is never mixed with stale pages from the previous one.
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    if (new URLSearchParams(window.location.search).has('loc')) {
+                        navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_MOBILE_PAGES' });
+                    }
+                }
+            ]]></script>
         </xpath>
     </template>
 </odoo>

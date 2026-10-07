@@ -736,7 +736,7 @@ class IncidentInvestigation(models.Model):
             'type': 'ir.actions.act_window',
             'name': _('Evidence'),
             'res_model': 'incident.investigation.evidence',
-            'view_mode': 'kanban,list,form',
+            'view_mode': 'list,kanban,form',
             'domain': [('investigation_id', '=', self.id)],
             'context': {'default_investigation_id': self.id}
         }

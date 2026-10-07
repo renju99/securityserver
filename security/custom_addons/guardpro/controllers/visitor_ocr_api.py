@@ -133,3 +133,22 @@ class VisitorEmiratesIdOcrController(http.Controller):
         except Exception as e:
             _logger.exception("Visitor ID lookup failed")
             return {"success": False, "error": str(e)}
+
+    @http.route(
+        "/guardpro/api/visitor/eid_photo_trace",
+        type="json",
+        auth="user",
+        methods=["POST"],
+        csrf=False,
+    )
+    def eid_photo_trace(self, event=None, detail=None, id_number=None, photo_chars=None, **kwargs):
+        """Client-side Emirates ID photo diagnostics (logged server-side for ops)."""
+        _logger.warning(
+            "[VisitorPhoto] CLIENT event=%s id_number=%r photo_chars=%s detail=%s user=%s",
+            event,
+            id_number,
+            photo_chars,
+            detail,
+            request.env.user.login,
+        )
+        return {"ok": True}

@@ -1,108 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="1">
-        
-        <!-- ================================================================ -->
-        <!-- GUARDPRO SEQUENCE DEFINITIONS                                    -->
-        <!-- ================================================================ -->
-        
-        <!-- Incident Report Sequence -->
-        <record id="seq_incident_report" model="ir.sequence">
-            <field name="name">Incident Report Sequence</field>
-            <field name="code">incident.report</field>
-            <field name="prefix">INC-</field>
-            <field name="padding">5</field>
-            <field name="number_increment">1</field>
-            <field name="number_next">1</field>
-            <field name="implementation">standard</field>
-        </record>
-        
-        <!-- Tour Log Sequence -->
-        <record id="seq_tour_log" model="ir.sequence">
-            <field name="name">Tour Log Sequence</field>
-            <field name="code">tour.log</field>
-            <field name="prefix">TOUR-</field>
-            <field name="padding">5</field>
-            <field name="number_increment">1</field>
-            <field name="number_next">1</field>
-            <field name="implementation">standard</field>
-        </record>
-        
-        <!-- Guard Badge Number Sequence (Optional - for auto-generation) -->
-        <record id="seq_guard_badge" model="ir.sequence">
-            <field name="name">Guard Badge Number Sequence</field>
-            <field name="code">guard.badge</field>
-            <field name="prefix">GRD-</field>
-            <field name="padding">4</field>
-            <field name="number_increment">1</field>
-            <field name="number_next">1001</field>
-            <field name="implementation">standard</field>
-        </record>
-        
-        <!-- Project Code Sequence (Optional - for auto-generation) -->
-        <record id="seq_site_code" model="ir.sequence">
-            <field name="name">Project Code Sequence</field>
-            <field name="code">client.site</field>
-            <field name="prefix">PRJ-</field>
-            <field name="padding">4</field>
-            <field name="number_increment">1</field>
-            <field name="number_next">1</field>
-            <field name="implementation">standard</field>
-        </record>
 
-        <record id="seq_guard_site" model="ir.sequence">
-            <field name="name">Site Code Sequence</field>
-            <field name="code">guard.site</field>
-            <field name="prefix">SITE-</field>
-            <field name="padding">4</field>
-            <field name="number_increment">1</field>
-            <field name="number_next">1</field>
-            <field name="implementation">standard</field>
-        </record>
-        
-        <!-- Shift Swap Request Sequence -->
-        <record id="seq_shift_swap_request" model="ir.sequence">
-            <field name="name">Shift Swap Request Sequence</field>
-            <field name="code">shift.swap.request</field>
-            <field name="prefix">SWAP-</field>
-            <field name="padding">5</field>
-            <field name="number_increment">1</field>
-            <field name="number_next">1</field>
-            <field name="implementation">standard</field>
-        </record>
-        
-        <!-- Emergency Checklist Execution Sequence -->
-        <record id="seq_emergency_checklist_execution" model="ir.sequence">
-            <field name="name">Emergency Checklist Execution Sequence</field>
-            <field name="code">emergency.checklist.execution</field>
-            <field name="prefix">EMRG-</field>
-            <field name="padding">5</field>
-            <field name="number_increment">1</field>
-            <field name="number_next">1</field>
-            <field name="implementation">standard</field>
-        </record>
-        
-        <!-- Client Feedback Sequence -->
-        <record id="seq_client_feedback" model="ir.sequence">
-            <field name="name">Client Feedback Sequence</field>
-            <field name="code">client.feedback</field>
-            <field name="prefix">FB-</field>
-            <field name="padding">5</field>
-            <field name="number_increment">1</field>
-            <field name="number_next">1</field>
-            <field name="implementation">standard</field>
-        </record>
-        
-        <!-- Resident Complaint Sequence -->
-        <record id="seq_resident_complaint" model="ir.sequence">
-            <field name="name">Resident Complaint Sequence</field>
-            <field name="code">resident.complaint</field>
-            <field name="prefix">COMP-</field>
-            <field name="padding">5</field>
-            <field name="number_increment">1</field>
-            <field name="number_next">1</field>
-            <field name="implementation">standard</field>
-        </record>
+        <!-- Resident complaint sequence removed -->
+        <delete model="ir.sequence" id="seq_resident_complaint"/>
         
         <!-- Lost & Found Item Sequence -->
         <record id="seq_lost_found_item" model="ir.sequence">
@@ -224,17 +125,6 @@
             <field name="number_next">1</field>
             <field name="implementation">standard</field>
         </record>
-        
-        <!-- Biometric Verification Sequence -->
-        <record id="seq_guard_biometric_verification" model="ir.sequence">
-            <field name="name">Biometric Verification Sequence</field>
-            <field name="code">guard.biometric.verification</field>
-            <field name="prefix">BIO-</field>
-            <field name="padding">6</field>
-            <field name="number_increment">1</field>
-            <field name="number_next">1</field>
-            <field name="implementation">standard</field>
-        </record>
 
         <!-- Zone Code Sequence -->
         <record id="seq_site_zone" model="ir.sequence">
@@ -285,6 +175,17 @@
             <field name="name">Equipment Handover Sequence</field>
             <field name="code">equipment.handover</field>
             <field name="prefix">EQ-HO-</field>
+            <field name="padding">5</field>
+            <field name="number_increment">1</field>
+            <field name="number_next">1</field>
+            <field name="implementation">standard</field>
+        </record>
+
+        <!-- Guard shift handover / takeover -->
+        <record id="seq_guard_handover" model="ir.sequence">
+            <field name="name">Guard Shift Handover Sequence</field>
+            <field name="code">guard.handover</field>
+            <field name="prefix">SHO-</field>
             <field name="padding">5</field>
             <field name="number_increment">1</field>
             <field name="number_next">1</field>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- The DAR template and the original cron are noupdate, so use
+             function calls to apply the required configuration changes. -->
+        <function model="daily.activity.report" name="_configure_dar_email_template"/>
+        <function model="guard.shift" name="_configure_missed_tour_cron"/>
+    </data>
+</odoo>

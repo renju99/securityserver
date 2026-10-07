@@ -284,7 +284,7 @@
     <record id="action_emergency_checklist_execution" model="ir.actions.act_window">
         <field name="name">Emergency Checklist Executions</field>
         <field name="res_model">emergency.checklist.execution</field>
-        <field name="view_mode">kanban,list,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 No Emergency Procedures Executed Yet

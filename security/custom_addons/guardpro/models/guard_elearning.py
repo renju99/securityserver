@@ -134,7 +134,7 @@ class GuardProfile(models.Model):
             'name': _('Available Training Courses'),
             'type': 'ir.actions.act_window',
             'res_model': 'slide.channel',
-            'view_mode': 'kanban,list,form',
+            'view_mode': 'list,kanban,form',
             'domain': [('is_guard_training', '=', True)],
             'context': {'default_is_guard_training': True}
         }

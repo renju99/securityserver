@@ -270,7 +270,7 @@
     <record id="action_guard_task" model="ir.actions.act_window">
         <field name="name">Tasks &amp; Post Orders</field>
         <field name="res_model">guard.task</field>
-        <field name="view_mode">kanban,list,form,calendar,pivot,graph</field>
+        <field name="view_mode">list,kanban,form,calendar,pivot,graph</field>
         <field name="context">{'search_default_my_tasks': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

@@ -1,58 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Guard User Wizard Form View -->
+    <!-- Guard User Wizard Form View — only essentials -->
     <record id="view_guard_user_wizard_form" model="ir.ui.view">
         <field name="name">guard.user.wizard.form</field>
         <field name="model">guard.user.wizard</field>
         <field name="arch" type="xml">
             <form string="Create Guard User">
                 <group>
-                    <group string="Basic Information">
+                    <group string="Guard">
                         <field name="name" placeholder="e.g., John Doe"/>
-                        <field name="badge_number" placeholder="e.g., GUARD-001"/>
-                        <field name="email" placeholder="e.g., guard@example.com" widget="email"/>
-                        <field name="phone" placeholder="e.g., +1-555-1234" widget="phone"/>
-                        <field name="photo" widget="image" class="oe_avatar"/>
+                        <field name="email" placeholder="e.g., guard@berkeleyuae.com" widget="email"/>
+                        <field name="phone" placeholder="Optional" widget="phone"/>
                     </group>
-                    <group string="Employment Details">
-                        <field name="hire_date"/>
-                        <field name="status"/>
-                        <field name="availability"/>
-                    </group>
-                </group>
-
-                <group>
-                    <group string="Contact Information">
-                        <field name="address" placeholder="Full address"/>
-                        <field name="emergency_contact" placeholder="Name"/>
-                        <field name="emergency_phone" placeholder="Phone number" widget="phone"/>
-                    </group>
-                    <group string="Certifications &amp; Licenses">
-                        <field name="license_number" placeholder="License number"/>
-                        <field name="license_expiry"/>
-                        <field name="certifications" placeholder="List certifications here..."/>
-                    </group>
-                </group>
-
-                <group>
-                    <group string="Skills &amp; Qualifications">
-                        <field name="skill_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
-                        <field name="languages" placeholder="e.g., English, Spanish"/>
-                    </group>
-                    <group string="Portal Access">
+                    <group string="Access">
+                        <field name="site_ids" widget="many2many_tags"
+                               placeholder="Select project(s)…"
+                               options="{'no_create': True}"/>
+                        <field name="guard_site_ids" widget="many2many_tags"
+                               placeholder="Optional — all sites if empty"
+                               options="{'no_create': True}"
+                               invisible="not site_ids"/>
                         <field name="create_user"/>
                         <field name="send_invite" invisible="not create_user"/>
                     </group>
                 </group>
-
-                <group string="Optional HR Integration">
-                    <field name="link_to_employee"/>
-                    <field name="employee_id" invisible="not link_to_employee" 
-                           options="{'no_create': True}" 
-                           domain="[('user_id', '=', False)]"
-                           help="Link to existing HR employee (must not have a user account)"/>
+                <group string="Optional">
+                    <group>
+                        <field name="badge_number"
+                               placeholder="Leave empty to auto-generate"/>
+                        <field name="hire_date"/>
+                        <field name="status"/>
+                        <field name="availability"/>
+                    </group>
+                    <group>
+                        <field name="photo" widget="image" class="oe_avatar"/>
+                    </group>
                 </group>
-
                 <footer>
                     <button name="action_create_guard" string="Create Guard" type="object" class="btn-primary"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
@@ -69,6 +52,31 @@
         <field name="target">new</field>
     </record>
 
+    <!-- Create Guard button on Guard Portal Users list -->
+    <record id="view_guard_portal_users_list_create_btn" model="ir.ui.view">
+        <field name="name">res.users.guard.portal.list.create.btn</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="view_guard_portal_users_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="attributes">
+                <attribute name="create">0</attribute>
+            </xpath>
+            <xpath expr="//list" position="inside">
+                <header>
+                    <button name="%(action_guard_user_wizard)d"
+                            type="action"
+                            string="Create Guard"
+                            class="btn-primary"
+                            display="always"/>
+                    <button name="action_guard_set_password"
+                            type="object"
+                            string="Reset Password"
+                            display="always"/>
+                </header>
+            </xpath>
+        </field>
+    </record>
+
     <!-- Force update of user management actions -->
     <data noupdate="0">
         <!-- Action to view all users with guard portal access -->
@@ -78,6 +86,7 @@
             <field name="view_mode">list,form</field>
             <field name="domain" eval="[('groups_id', 'in', [ref('guardpro.group_guardpro_guard_portal')])]"/>
             <field name="context">{'search_default_active': 1}</field>
+            <field name="search_view_id" ref="view_guard_portal_users_search"/>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     No guard portal users found
@@ -88,6 +97,12 @@
                     Filter by group: "GuardLink / Guard (Portal Access)"
                 </p>
             </field>
+        </record>
+        <record id="action_guard_portal_users_view_list" model="ir.actions.act_window.view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">list</field>
+            <field name="view_id" ref="view_guard_portal_users_list"/>
+            <field name="act_window_id" ref="action_guard_portal_users"/>
         </record>
 
         <!-- Action to view all GuardLink system users -->

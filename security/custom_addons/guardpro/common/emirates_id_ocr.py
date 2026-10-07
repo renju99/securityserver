@@ -1534,6 +1534,7 @@ def extract_fields_from_ocr(front_text, back_text):
         "id_issue_date": fmt_date(id_issue) if id_issue else "",
         "occupation": occupation,
         "employer_name": employer_name,
+        "company": employer_name,
         "issuing_place": issuing_place,
         "passport_number": "",
         "visa_number": "",

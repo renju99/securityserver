@@ -10,6 +10,8 @@ import os
 import tempfile
 from datetime import timedelta, datetime
 
+from odoo.addons.guardpro.common import azure_audio_storage as _blob
+
 _logger = logging.getLogger(__name__)
 
 
@@ -337,7 +339,14 @@ class PushToTalkMessage(models.Model):
         string='Audio Filename',
         default='voice_message.ogg'
     )
-    
+
+    audio_blob_name = fields.Char(
+        string='Azure Blob Name',
+        index=True,
+        help='Set when audio is stored in Azure Blob Storage instead of the Odoo filestore. '
+             'Format: ptt/<message_id>/<stream_id>.<ext>',
+    )
+
     duration_seconds = fields.Float(
         string='Duration (seconds)',
         required=True,
@@ -372,7 +381,20 @@ class PushToTalkMessage(models.Model):
         string='Chunk Count',
         default=0
     )
-    
+
+    chunk_index = fields.Integer(
+        string='Next Expected Chunk Index',
+        default=0,
+        help='Monotonically increasing sequence number expected for the next chunk. '
+             'Used to detect lost or out-of-order chunks during live streaming.'
+    )
+
+    received_chunk_indices = fields.Char(
+        string='Received Chunk Indices',
+        default='',
+        help='Comma-separated list of chunk indices successfully written to disk.'
+    )
+
     is_urgent = fields.Boolean(
         string='Urgent',
         default=False,
@@ -453,9 +475,13 @@ class PushToTalkMessage(models.Model):
         return False
     
     def get_audio_url(self):
-        """Get URL to stream the audio file."""
+        """Get URL to stream the audio file.
+
+        When the audio lives in Azure Blob, the serve endpoint transparently
+        streams from there.  Clients always use the same URL pattern so
+        neither the Android app nor the JS widget need changes.
+        """
         self.ensure_one()
-        # Use the API endpoint for better control over content-type and streaming
         return f'/guardpro/api/push-to-talk/message/{self.id}/audio'
 
     def _ptt_bus_send(self, notification_type, payload):
@@ -519,11 +545,13 @@ class PushToTalkMessage(models.Model):
                     recipients.append(user.partner_id.id)
         return list(set(recipients))
 
-    def append_audio_chunk(self, chunk_data, replace=False):
+    def append_audio_chunk(self, chunk_data, chunk_index=None, replace=False):
         """Append a streaming chunk to a temporary file and broadcast occupancy.
 
-        ``replace=True`` overwrites the temp file (used for the final complete
-        MediaRecorder blob so players do not stop after the first cluster).
+        Each chunk is written to its own numbered temp file so missing or
+        out-of-order chunks can be detected at finalization. ``replace=True``
+        is kept for backward compatibility with clients that send the final
+        complete blob.
         """
         self.ensure_one()
         try:
@@ -535,43 +563,140 @@ class PushToTalkMessage(models.Model):
             else:
                 chunk_binary = chunk_data
 
-            temp_path = self._get_stream_temp_path()
+            if not chunk_binary:
+                _logger.warning('Empty PTT chunk received for message %s', self.id)
+                return False
+
+            expected_index = self.chunk_index
+            index = chunk_index if chunk_index is not None else expected_index
+
+            if index < expected_index:
+                _logger.warning(
+                    'Duplicate/out-of-order PTT chunk ignored: message=%s got=%s expected=%s',
+                    self.id, index, expected_index
+                )
+                # Still broadcast occupancy so the UI stays alive.
+                self._broadcast_chunk(chunk_index=index)
+                return True
+            if index > expected_index:
+                _logger.warning(
+                    'Missing PTT chunk(s) detected: message=%s got=%s expected=%s',
+                    self.id, index, expected_index
+                )
+
+            chunk_path = self._get_chunk_temp_path(index)
             mode = 'wb' if replace else 'ab'
-            with open(temp_path, mode) as tmp_file:
+            with open(chunk_path, mode) as tmp_file:
                 tmp_file.write(chunk_binary)
 
-            # Keep metadata updates minimal during streaming
+            received = set(self._parse_received_indices())
+            received.add(index)
+
+            next_expected = max(expected_index, index + 1)
             self.write({
                 'chunk_count': self.chunk_count + 1,
+                'chunk_index': next_expected,
+                'received_chunk_indices': ','.join(str(i) for i in sorted(received)),
             })
-            
-            # Broadcast chunk specifically
-            self._broadcast_chunk(chunk_data)
-            
+
+            # Broadcast occupancy only. MediaRecorder fragments are not playable.
+            self._broadcast_chunk(chunk_index=index)
+
             return True
         except Exception as e:
             _logger.error('Failed to append audio chunk: %s', str(e))
             return False
 
+    def _parse_received_indices(self):
+        """Return received chunk indices as a sorted list of ints."""
+        self.ensure_one()
+        if not self.received_chunk_indices:
+            return []
+        try:
+            return [int(x) for x in self.received_chunk_indices.split(',') if x]
+        except ValueError:
+            return []
+
+    def _get_chunk_temp_path(self, index):
+        """Path for an individual numbered chunk."""
+        self.ensure_one()
+        base = self._get_stream_temp_path()
+        return f'{base}.chunk_{int(index)}'
+
     def finalize_stream_audio(self):
-        """Finalize streaming data by moving accumulated temp bytes into Binary field."""
+        """Finalize streaming data.
+
+        Assembles numbered chunks in order, falls back to the legacy single
+        temp file, then uploads to Azure Blob or Odoo filestore.
+        """
         self.ensure_one()
         try:
-            temp_path = self._get_stream_temp_path()
-            if not os.path.exists(temp_path):
+            base_path = self._get_stream_temp_path()
+            indices = self._parse_received_indices()
+
+            if indices:
+                # Assemble numbered chunks in order.
+                audio_binary = bytearray()
+                missing = []
+                for i in range(max(indices) + 1):
+                    chunk_path = self._get_chunk_temp_path(i)
+                    if os.path.exists(chunk_path):
+                        with open(chunk_path, 'rb') as f:
+                            audio_binary.extend(f.read())
+                    else:
+                        missing.append(i)
+                if missing:
+                    _logger.warning(
+                        'PTT finalization missing chunks for message %s: %s',
+                        self.id, missing
+                    )
+                # Legacy fallback: if no numbered chunks were written, use the old path.
+                if not audio_binary and os.path.exists(base_path):
+                    with open(base_path, 'rb') as f:
+                        audio_binary = bytearray(f.read())
+            elif os.path.exists(base_path):
+                with open(base_path, 'rb') as f:
+                    audio_binary = bytearray(f.read())
+            else:
                 return False
 
-            with open(temp_path, 'rb') as tmp_file:
-                audio_binary = tmp_file.read()
+            if len(audio_binary) < 4000:
+                _logger.warning(
+                    'PTT finalization produced tiny audio for message %s (%d bytes); treating as aborted',
+                    self.id, len(audio_binary)
+                )
+                return False
 
-            # Match non-streaming uploads: Binary fields expect base64 payloads.
-            self.write({
-                'audio_data': base64.b64encode(audio_binary),
-                'file_size': len(audio_binary),
-            })
+            # Detect content-type from magic bytes
+            if audio_binary[:4] == b'\x1a\x45\xdf\xa3':
+                content_type = 'audio/webm'
+            elif audio_binary[:4] == b'OggS':
+                content_type = 'audio/ogg'
+            else:
+                content_type = 'audio/webm'
 
+            vals = {'file_size': len(audio_binary)}
+
+            # Attempt Azure Blob upload first
+            blob_name = _blob.upload_audio(
+                self.id, self.stream_id, bytes(audio_binary), content_type
+            )
+            if blob_name:
+                vals['audio_blob_name'] = blob_name
+            else:
+                # Fall back to Odoo filestore
+                vals['audio_data'] = base64.b64encode(bytes(audio_binary))
+
+            self.write(vals)
+
+            # Cleanup temp files
+            for i in indices:
+                try:
+                    os.remove(self._get_chunk_temp_path(i))
+                except Exception:
+                    pass
             try:
-                os.remove(temp_path)
+                os.remove(base_path)
             except Exception:
                 pass
 
@@ -601,7 +726,7 @@ class PushToTalkMessage(models.Model):
                 msg.finalize_stream_audio()
             except Exception as e:
                 _logger.warning('Stale PTT stream %s finalize failed: %s', msg.id, e)
-            if not msg.audio_data:
+            if not msg.audio_data and not msg.audio_blob_name:
                 closed_ids.append(msg.id)
                 msg.unlink()
                 continue
@@ -684,13 +809,62 @@ class PushToTalkMessage(models.Model):
             )
         return True
 
-    def _broadcast_chunk(self, chunk_data):
-        """Broadcast occupancy only. MediaRecorder fragments are not playable."""
+    @api.model
+    def cron_purge_old_audio(self):
+        """Delete PTT messages (and their ir.attachment audio) older than the retention window.
+
+        Retention is configured via ``guardpro.ptt_audio_retention_days``
+        (default 7).  Messages still in streaming state are never touched.
+        The batch size (default 200) avoids long-running transactions.
+        """
+        param = self.env['ir.config_parameter'].sudo().get_param(
+            'guardpro.ptt_audio_retention_days', '7'
+        )
+        try:
+            retention_days = max(int(param or 7), 1)
+        except (TypeError, ValueError):
+            retention_days = 7
+
+        cutoff = fields.Datetime.now() - timedelta(days=retention_days)
+        batch_size = 200
+        total_removed = 0
+
+        while True:
+            old_msgs = self.sudo().search([
+                ('is_streaming', '=', False),
+                ('created_at', '<', cutoff),
+            ], limit=batch_size, order='created_at asc')
+
+            if not old_msgs:
+                break
+
+            # Delete blobs from Azure before removing the DB records
+            for msg in old_msgs:
+                if msg.audio_blob_name:
+                    _blob.delete_audio(msg.audio_blob_name)
+
+            _logger.info(
+                'GuardLink PTT audio purge: deleting %d message(s) older than %d day(s)',
+                len(old_msgs), retention_days,
+            )
+            old_msgs.unlink()
+            total_removed += len(old_msgs)
+            self.env.cr.commit()
+
+        if total_removed:
+            _logger.info(
+                'GuardLink PTT audio purge: removed %d message(s) total (retention=%d days)',
+                total_removed, retention_days,
+            )
+        return True
+
+    def _broadcast_chunk(self, chunk_index=None):
+        """Broadcast channel occupancy while a live stream is in progress."""
         self.ensure_one()
         self._ptt_bus_send('push_to_talk_chunk', {
             'message_id': self.id,
             'stream_id': self.stream_id,
-            'chunk_index': self.chunk_count,
+            'chunk_index': chunk_index if chunk_index is not None else self.chunk_count,
             'sender_name': self.sender_display_name(),
             'channel_id': self.channel_id.id,
         })

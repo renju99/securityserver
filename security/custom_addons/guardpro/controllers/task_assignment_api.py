@@ -29,7 +29,6 @@ class TaskAssignmentAPIController(http.Controller):
         auth='user',
         methods=['GET'],
         csrf=False,
-        website=True,
     )
     def get_pending_task_assignments(self, **kwargs):
         """Return task assignments the current guard has not yet
@@ -110,7 +109,6 @@ class TaskAssignmentAPIController(http.Controller):
         auth='user',
         methods=['POST'],
         csrf=False,
-        website=True,
     )
     def acknowledge_task_assignment(self, **kwargs):
         """Mark a task assignment notification as seen by the guard."""

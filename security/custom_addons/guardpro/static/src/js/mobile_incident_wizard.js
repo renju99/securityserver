@@ -487,6 +487,132 @@
     if (input) input.click();
   }
 
+  function _getCsrfTokenFromElement(el) {
+    var form = el && el.closest ? el.closest('form') : null;
+    var input = form ? form.querySelector('input[name="csrf_token"]') : null;
+    return input ? input.value : '';
+  }
+
+  function _renderImagePreviews(input, container) {
+    container.innerHTML = '';
+    var files = input._gpSelectedFiles || [];
+    var dt = new DataTransfer();
+    files.forEach(function(file, idx) {
+      dt.items.add(file);
+      var name = (file.name || '').toLowerCase();
+      var isHeic = name.endsWith('.heic') || name.endsWith('.heif');
+      var isImage = (file.type && file.type.indexOf('image/') === 0) || isHeic;
+      if (!isImage) return;
+      if (isHeic && (!file.type || file.type.indexOf('image/') !== 0)) {
+        var note = document.createElement('div');
+        note.className = 'small text-warning w-100';
+        note.textContent = file.name + ' (HEIC) — preview may not show; photo will still upload.';
+        container.appendChild(note);
+      }
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position: relative; width: 80px; height: 80px;';
+
+        var img = document.createElement('img');
+        img.src = e.target.result;
+        img.style.cssText = 'width: 100%; height: 100%; object-fit: cover; border-radius: 5px; border: 2px solid #ddd;';
+
+        var del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'btn btn-danger btn-sm position-absolute top-0 end-0 m-1 p-0 rounded-circle d-flex align-items-center justify-content-center';
+        del.style.cssText = 'width: 22px; height: 22px; font-size: 14px; line-height: 1;';
+        del.textContent = '×';
+        del.title = 'Remove photo';
+        del.onclick = function() {
+          input._gpSelectedFiles.splice(idx, 1);
+          _renderImagePreviews(input, container);
+        };
+
+        wrapper.appendChild(img);
+        wrapper.appendChild(del);
+        container.appendChild(wrapper);
+      };
+      reader.readAsDataURL(file);
+    });
+    input.files = dt.files;
+  }
+
+  function previewIncidentImages(input) {
+    var container = document.getElementById('image-preview-container');
+    if (!container) return;
+    if (!input._gpSelectedFiles) input._gpSelectedFiles = [];
+    Array.from(input.files || []).forEach(function(file) {
+      input._gpSelectedFiles.push(file);
+    });
+    _renderImagePreviews(input, container);
+  }
+
+  function _renderVideoPreviews(input, container) {
+    container.innerHTML = '';
+    var files = input._gpSelectedVideos || [];
+    var dt = new DataTransfer();
+    files.forEach(function(file, idx) {
+      dt.items.add(file);
+      var wrapper = document.createElement('div');
+      wrapper.className = 'd-flex align-items-center gap-2 p-2 border rounded';
+      var name = document.createElement('span');
+      name.className = 'flex-grow-1 text-truncate small';
+      name.textContent = file.name;
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'btn btn-outline-danger btn-sm';
+      del.textContent = 'Remove';
+      del.onclick = function() {
+        input._gpSelectedVideos.splice(idx, 1);
+        _renderVideoPreviews(input, container);
+      };
+      wrapper.appendChild(name);
+      wrapper.appendChild(del);
+      container.appendChild(wrapper);
+    });
+    input.files = dt.files;
+  }
+
+  function previewIncidentVideos(input) {
+    var container = document.getElementById('video-preview-container');
+    if (!container) return;
+    if (!input._gpSelectedVideos) input._gpSelectedVideos = [];
+    Array.from(input.files || []).forEach(function(file) {
+      input._gpSelectedVideos.push(file);
+    });
+    _renderVideoPreviews(input, container);
+  }
+
+  function deleteIncidentAttachment(btn) {
+    var wrapper = btn.closest('.gp-existing-media');
+    if (!wrapper) return;
+    var attachmentId = wrapper.getAttribute('data-attachment-id');
+    var form = btn.closest('form');
+    var action = form ? form.getAttribute('action') : '';
+    var incidentIdMatch = action ? action.match(/\/incident\/([0-9]+)/) : null;
+    var incidentId = incidentIdMatch ? incidentIdMatch[1] : null;
+    var csrf = _getCsrfTokenFromElement(btn);
+    if (!incidentId || !attachmentId) return;
+    if (!confirm('Remove this file?')) return;
+    fetch('/guardpro/mobile/incident/' + incidentId + '/remove_attachment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'attachment_id=' + encodeURIComponent(attachmentId) + '&csrf_token=' + encodeURIComponent(csrf),
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data && data.success) {
+          wrapper.remove();
+        } else {
+          alert('Could not remove the file. Please try again.');
+        }
+      })
+      .catch(function() {
+        alert('Could not remove the file. Please try again.');
+      });
+  }
+
   window.GPIncidentMobile = {
     GP_TYPE_CATEGORY_CODES: GP_TYPE_CATEGORY_CODES,
     GP_TYPE_DEFAULT_CODE: GP_TYPE_DEFAULT_CODE,
@@ -503,6 +629,9 @@
     toggleDetailSectionsByCategory: toggleDetailSectionsByCategory,
     filterDetailCategoryDropdown: filterDetailCategoryDropdown,
     triggerPhotoInput: triggerPhotoInput,
+    previewIncidentImages: previewIncidentImages,
+    previewIncidentVideos: previewIncidentVideos,
+    deleteIncidentAttachment: deleteIncidentAttachment,
     inferWizardTypeFromTitle: inferWizardTypeFromTitle,
     filterCategoriesByNameHints: filterCategoriesByNameHints,
     renderCategoryOptions: renderCategoryOptions,

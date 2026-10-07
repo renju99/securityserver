@@ -238,7 +238,7 @@
     <record id="action_package_management" model="ir.actions.act_window">
         <field name="name">Package Management</field>
         <field name="res_model">package.management</field>
-        <field name="view_mode">kanban,list,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="context">{'search_default_received': 1, 'search_default_notified': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

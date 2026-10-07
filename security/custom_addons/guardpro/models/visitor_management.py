@@ -48,11 +48,11 @@ class VisitorManagement(models.Model):
         ('driving_license', 'Driving License'),
         ('labor_card', 'Labor Card'),
         ('other', 'Other')
-    ], string='ID Type', tracking=True)
+    ], string='ID Type', default='emirates_id', tracking=True)
     id_number = fields.Char(
         string='ID Number',
         tracking=True,
-        help='Identification number'
+        help='Emirates ID / Passport / other government ID number'
     )
     id_photo = fields.Binary(
         string='ID Photo/Scan',
@@ -162,9 +162,9 @@ class VisitorManagement(models.Model):
     # Host Information
     host_name = fields.Char(
         string='Host Name',
-        required=True,
+        required=False,
         tracking=True,
-        help='Name of the person being visited'
+        help='Name of the person being visited (required if host is not selected from directory)'
     )
     host_id = fields.Many2one(
         'visitor.host',
@@ -242,6 +242,7 @@ class VisitorManagement(models.Model):
     # Contact Information
     mobile_number = fields.Char(
         string='Mobile Number',
+        required=True,
         tracking=True
     )
     email = fields.Char(
@@ -299,22 +300,6 @@ class VisitorManagement(models.Model):
         help='Body temperature reading'
     )
 
-    # Watchlist Check
-    watchlist_checked = fields.Boolean(
-        string='Watchlist Checked',
-        default=False,
-        help='Visitor was checked against watchlist'
-    )
-    watchlist_hit = fields.Boolean(
-        string='Watchlist Hit',
-        default=False,
-        tracking=True,
-        help='Visitor found in watchlist'
-    )
-    watchlist_notes = fields.Text(
-        string='Watchlist Notes',
-        help='Details if visitor is on watchlist'
-    )
     denied_reason = fields.Text(
         string='Access Denial Reason',
         help='Reason for denying access'
@@ -407,9 +392,6 @@ class VisitorManagement(models.Model):
             if 'items_carried_out' in vals and vals['items_carried_out']:
                 vals['items_carried_out'] = html_sanitize(vals['items_carried_out'])
             
-            if 'watchlist_notes' in vals and vals['watchlist_notes']:
-                vals['watchlist_notes'] = html_sanitize(vals['watchlist_notes'])
-            
             if 'denied_reason' in vals and vals['denied_reason']:
                 vals['denied_reason'] = html_sanitize(vals['denied_reason'])
             
@@ -443,6 +425,23 @@ class VisitorManagement(models.Model):
                         vals.get('host_email'),
                         str(e)
                     )
+
+            # Track whether Emirates ID / form photo was included in create payload
+            photo_val = vals.get('id_photo')
+            if photo_val:
+                photo_len = len(photo_val) if isinstance(photo_val, (str, bytes)) else -1
+                _logger.info(
+                    '[VisitorPhoto] CREATE name=%r id_number=%r id_photo=YES chars=%s',
+                    vals.get('name'),
+                    vals.get('id_number'),
+                    photo_len,
+                )
+            else:
+                _logger.warning(
+                    '[VisitorPhoto] CREATE name=%r id_number=%r id_photo=MISSING',
+                    vals.get('name'),
+                    vals.get('id_number'),
+                )
         
         records = super().create(vals_list)
         for record in records:
@@ -452,6 +451,21 @@ class VisitorManagement(models.Model):
     
     def write(self, vals):
         """Override write to sanitize inputs on update"""
+        if 'id_photo' in vals:
+            photo_val = vals.get('id_photo')
+            if photo_val:
+                photo_len = len(photo_val) if isinstance(photo_val, (str, bytes)) else -1
+                _logger.info(
+                    '[VisitorPhoto] WRITE ids=%s id_photo=YES chars=%s',
+                    self.ids,
+                    photo_len,
+                )
+            else:
+                _logger.warning(
+                    '[VisitorPhoto] WRITE ids=%s id_photo=CLEARED/EMPTY',
+                    self.ids,
+                )
+
         # Sync host details from selected host directory entry.
         if vals.get('host_id'):
             host = self.env['visitor.host'].browse(vals['host_id'])
@@ -468,9 +482,6 @@ class VisitorManagement(models.Model):
         
         if 'items_carried_out' in vals and vals['items_carried_out']:
             vals['items_carried_out'] = html_sanitize(vals['items_carried_out'])
-        
-        if 'watchlist_notes' in vals and vals['watchlist_notes']:
-            vals['watchlist_notes'] = html_sanitize(vals['watchlist_notes'])
         
         if 'denied_reason' in vals and vals['denied_reason']:
             vals['denied_reason'] = html_sanitize(vals['denied_reason'])
@@ -706,55 +717,24 @@ class VisitorManagement(models.Model):
                 if not (30.0 <= record.temperature_reading <= 45.0):
                     raise ValidationError(_('Temperature must be between 30-45°C'))
 
-    def action_check_watchlist(self):
-        """Check visitor against watchlist (site-scoped, including creator's sites)."""
-        self.ensure_one()
-        
-        if not self.id_number:
-            raise UserError(_('Please enter visitor ID number before checking watchlist.'))
+    @api.constrains('host_id', 'host_name')
+    def _check_host_required(self):
+        for record in self:
+            if not record.host_id and not (record.host_name or '').strip():
+                raise ValidationError(_(
+                    'Enter the host: select from the host directory or type the host name.'
+                ))
 
-        # Use sudo so empty-/cross-rule gaps never skip a real threat; then
-        # restrict to this visit's site (or company-wide entries with no sites).
-        Watchlist = self.env['visitor.watchlist'].sudo()
-        domain = [
-            ('active', '=', True),
-            '|',
-            ('id_number', '=', self.id_number),
-            ('name', '=ilike', self.name),
-        ]
-        if self.site_id:
-            domain = [
-                '&',
-                '|', ('site_ids', 'in', [self.site_id.id]), ('site_ids', '=', False),
-            ] + domain
-        watchlist_entry = Watchlist.search(domain, limit=1)
-        
-        if watchlist_entry:
-            self.write({
-                'watchlist_checked': True,
-                'watchlist_hit': True,
-                'watchlist_notes': watchlist_entry.reason,
-                'state': 'denied',
-                'denied_reason': _('Visitor found in watchlist: %s') % watchlist_entry.reason
-            })
-            
-            _logger.warning(
-                'Watchlist hit for visitor %s (ID: %s)',
-                self.name, self.id_number
-            )
-        else:
-            self.write({
-                'watchlist_checked': True,
-                'watchlist_hit': False
-            })
-            _logger.info(
-                'Watchlist check passed for visitor %s (ID: %s)',
-                self.name, self.id_number
-            )
-        
-        return True
+    @api.constrains('id_number', 'id_type', 'state')
+    def _check_id_number_required(self):
+        for record in self:
+            if record.state in ('cancelled', 'expired', 'checked_out'):
+                continue
+            if not (record.id_number or '').strip():
+                raise ValidationError(_(
+                    'ID Number is required (Emirates ID / Passport / other government ID).'
+                ))
 
-    
     def action_checkin(self):
         """Check in visitor"""
         self.ensure_one()
@@ -893,18 +873,6 @@ class VisitorManagement(models.Model):
         if not email:
             return Users
 
-        # 1) Site-scoped resident portal user.
-        Resident = self.env.get('tenant.resident')
-        if Resident is not None and self.site_id:
-            candidates = Resident.sudo().search([
-                ('site_id', '=', self.site_id.id),
-                '|',
-                    ('user_id.login', '=ilike', email),
-                    ('partner_id.email', '=ilike', email),
-            ], limit=1)
-            if candidates and candidates.user_id:
-                return candidates.user_id
-
         # 2) Any active user with this login - covers building / site
         # managers who are hosts but aren't modelled as residents.
         user = Users.sudo().search([
@@ -974,9 +942,11 @@ class VisitorManagement(models.Model):
         }
 
     def action_read_emirates_id(self):
-        """
-        Placeholder for Emirates ID reading.
-        The actual logic is handled in JavaScript (emirates_id_reader.js)
+        """Placeholder for Emirates ID smart-card reading.
+
+        Click is intercepted by ``eid_reader_core_v7.js`` (class
+        ``read_emirates_id_btn``), which talks to the ICA EIDA Toolkit agent
+        over WebSocket and fills the visitor form fields.
         """
         return True
 
@@ -987,14 +957,23 @@ class VisitorManagement(models.Model):
 
     @api.model
     def check_overdue_visitors(self):
-        """Cron job: Check for overdue visitors"""
-        overdue_visitors = self.search([
+        """Cron job: Check for overdue visitors.
+
+        ``is_overdue_checkout`` is a non-stored compute that depends on wall-clock
+        time, so it cannot be used in ``search()``. Filter in Python instead.
+        """
+        now = fields.Datetime.now()
+        candidates = self.search([
             ('state', '=', 'checked_in'),
-            ('is_overdue_checkout', '=', True)
+            ('checkin_time', '!=', False),
+            ('expected_duration', '>', 0),
         ])
-        
+        overdue_visitors = candidates.filtered(
+            lambda v: fields.Datetime.add(v.checkin_time, hours=v.expected_duration) < now
+        )
+
         # Planned activities intentionally disabled for overdue visitors.
-        
+
         _logger.info('Found %d overdue visitors', len(overdue_visitors))
         return True
 
@@ -1179,7 +1158,7 @@ class VisitorManagement(models.Model):
             'ID Type', 'ID Number', 'Badge Number',
             'Vehicle Number', 'Nationality', 'Date of Birth', 'Gender',
             'ID Issue Date', 'ID Expiry Date',
-            'Pre-Registered', 'Walk-in', 'Watchlist Hit',
+            'Pre-Registered', 'Walk-in',
             'Denied Reason', 'Expected Duration (hrs)', 'Actual Duration (hrs)',
             'Created On (Dubai)'
         ]
@@ -1233,7 +1212,6 @@ class VisitorManagement(models.Model):
                 str(visitor.id_expiry_date or ''),
                 'Yes' if visitor.pre_registered else 'No',
                 'Yes' if getattr(visitor, 'walk_in', False) else 'No',
-                'Yes' if visitor.watchlist_hit else 'No',
                 visitor.denied_reason or '',
                 visitor.expected_duration or 0.0,
                 visitor.actual_duration or 0.0,
@@ -1374,148 +1352,3 @@ class VisitorHost(models.Model):
                     ('last_name', operator, name),
                     ('email', operator, name)] + args
         return self._search(args, limit=limit, order=order)
-
-
-class VisitorWatchlist(models.Model):
-    """Visitor Watchlist/Denied Access List"""
-    _name = 'visitor.watchlist'
-    _description = 'Visitor Watchlist/Denied Access List'
-    _order = 'added_date desc, name'
-
-    name = fields.Char(
-        string='Name',
-        required=True,
-        index=True,
-        help='Name of person on watchlist'
-    )
-    id_number = fields.Char(
-        string='ID Number',
-        index=True,
-        help='Identification number'
-    )
-    reason = fields.Text(
-        string='Reason for Listing',
-        required=True,
-        help='Reason for adding to watchlist'
-    )
-    category = fields.Selection([
-        ('security_threat', 'Security Threat'),
-        ('previous_incident', 'Previous Incident'),
-        ('legal_issue', 'Legal Issue'),
-        ('banned', 'Permanently Banned'),
-        ('temporary', 'Temporary Restriction'),
-        ('other', 'Other')
-    ], string='Category', default='other')
-    
-    active = fields.Boolean(
-        string='Active',
-        default=True,
-        help='Uncheck to remove from watchlist'
-    )
-    added_date = fields.Date(
-        string='Added Date',
-        default=fields.Date.today,
-        required=True
-    )
-    expiry_date = fields.Date(
-        string='Expiry Date',
-        help='Date when restriction expires (if applicable)'
-    )
-    added_by = fields.Many2one(
-        'res.users',
-        string='Added By',
-        default=lambda self: self.env.user,
-        readonly=True
-    )
-    notes = fields.Text(
-        string='Notes',
-        help='Additional information'
-    )
-    photo = fields.Image(
-        string='Photo',
-        help='Photo for identification'
-    )
-    site_ids = fields.Many2many(
-        'client.site',
-        'visitor_watchlist_site_rel',
-        'watchlist_id',
-        'site_id',
-        string='Sites',
-        help='Sites where this watchlist entry applies. '
-             'Auto-assigned from the visit site / creator sites on create.',
-    )
-
-    @api.model
-    def _default_site_ids(self):
-        user = self.env.user
-        if user.site_ids:
-            return [(6, 0, user.site_ids.ids)]
-        return []
-
-    @api.model
-    def default_get(self, fields_list):
-        res = super().default_get(fields_list)
-        if 'site_ids' in fields_list and not res.get('site_ids'):
-            res['site_ids'] = self._default_site_ids()
-        return res
-
-    @api.constrains('site_ids')
-    def _check_watchlist_site_ids(self):
-        for entry in self:
-            if not entry.site_ids and not self.env.user.has_group(
-                'guardpro.group_guardpro_admin'
-            ):
-                raise ValidationError(
-                    _('Please assign at least one site to watchlist entry "%s".')
-                    % entry.name
-                )
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        for vals in vals_list:
-            if not vals.get('site_ids'):
-                defaults = self._default_site_ids()
-                if defaults:
-                    vals['site_ids'] = defaults
-                else:
-                    ctx_site = (
-                        self.env.context.get('default_site_id')
-                        or self.env.context.get('force_site_id')
-                    )
-                    if ctx_site:
-                        vals['site_ids'] = [(6, 0, [int(ctx_site)])]
-                    else:
-                        all_sites = self.env['client.site'].sudo().search([
-                            ('active', '=', True),
-                        ]).ids
-                        if all_sites and (
-                            self.env.su
-                            or self.env.user.has_group('guardpro.group_guardpro_admin')
-                        ):
-                            vals['site_ids'] = [(6, 0, all_sites)]
-                        elif not all_sites:
-                            raise UserError(_(
-                                'Cannot create a watchlist entry: no active sites exist.'
-                            ))
-                        else:
-                            raise UserError(_(
-                                'Cannot create a watchlist entry without sites. '
-                                'Ask an administrator to assign sites to your user.'
-                            ))
-        return super().create(vals_list)
-
-    @api.model
-    def check_expired_entries(self):
-        """Cron job: Deactivate expired watchlist entries"""
-        today = fields.Date.today()
-        expired = self.search([
-            ('active', '=', True),
-            ('expiry_date', '<', today),
-            ('expiry_date', '!=', False)
-        ])
-        
-        expired.write({'active': False})
-        
-        _logger.info('Deactivated %d expired watchlist entries', len(expired))
-        return True
-

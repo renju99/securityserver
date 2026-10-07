@@ -18,16 +18,16 @@
             <field name="priority">5</field>
         </record>
 
-        <!-- Location History Archiving (30 days) -->
+        <!-- GPS Location History Retention (purge older than N days; default 90) -->
         <record id="cron_cleanup_location_history" model="ir.cron">
-            <field name="name">GuardLink: Archive Old Location History (30 days)</field>
+            <field name="name">GuardLink: Purge Old Location History (retention)</field>
             <field name="model_id" ref="model_guard_location_history"/>
             <field name="state">code</field>
             <field name="code">model.cleanup_old_records()</field>
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
             <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 02:00:00')"/>
-            <field name="active" eval="False"/>
+            <field name="active" eval="True"/>
             <field name="priority">10</field>
         </record>
 
@@ -58,13 +58,13 @@
 
         <!-- Check Overdue Tours -->
         <record id="cron_check_overdue_tours" model="ir.cron">
-            <field name="name">GuardLink: Check Overdue Tours</field>
-            <field name="model_id" ref="model_tour_log"/>
+            <field name="name">GuardLink: Check Missed Patrols</field>
+            <field name="model_id" ref="model_guard_shift"/>
             <field name="state">code</field>
-            <field name="code">model.check_overdue_tours()</field>
+            <field name="code">model.check_missed_tours()</field>
             <field name="interval_number">1</field>
             <field name="interval_type">hours</field>
-            <field name="active" eval="False"/>
+            <field name="active" eval="True"/>
             <field name="priority">5</field>
         </record>
 
@@ -142,6 +142,37 @@
             <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 03:30:00')"/>
             <field name="active" eval="True"/>
             <field name="priority">22</field>
+        </record>
+
+        <!-- Close stale PTT holds every 5 minutes so listeners are not stuck on occupancy.
+             A guard who loses signal or force-quits leaves is_streaming=True on the row;
+             without this cron the channel shows "occupied" until the daily cleanup. -->
+        <record id="cron_ptt_close_stale_streams" model="ir.cron">
+            <field name="name">GuardLink: Close stale PTT streams (every 5 min)</field>
+            <field name="model_id" ref="model_push_to_talk_message"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_close_stale_streams(max_minutes=2)</field>
+            <field name="interval_number">5</field>
+            <field name="interval_type">minutes</field>
+            <field name="active" eval="True"/>
+            <field name="priority">3</field>
+        </record>
+
+        <!-- Purge PTT audio older than N days from the Odoo filestore.
+             Default retention: 7 days (configurable via ir.config_parameter
+             guardpro.ptt_audio_retention_days).
+             Keeps voice evidence available for shift review windows while
+             preventing indefinite disk / filestore growth. -->
+        <record id="cron_ptt_audio_purge" model="ir.cron">
+            <field name="name">GuardLink: Purge old PTT audio (retention window)</field>
+            <field name="model_id" ref="model_push_to_talk_message"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_purge_old_audio()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 04:00:00')"/>
+            <field name="active" eval="True"/>
+            <field name="priority">24</field>
         </record>
 
         <!-- OPTIONAL: Equipment Calibration Due Check -->

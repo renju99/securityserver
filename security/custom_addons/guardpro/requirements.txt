@@ -28,6 +28,12 @@ pytesseract>=0.3.10
 
 # Biometric integration (optional - for enhanced facial recognition)
 # Note: face-recognition requires dlib which may need additional system dependencies
+# Azure Blob Storage — PTT audio offload to guardlink-audio container
+azure-storage-blob>=12.19.0
+
+# Greenlet-based DB patching for Odoo gevent/long-polling worker
+psycogreen>=1.0.2
+
 # These are installed and working. Uncomment if you want them in requirements.txt:
 # face-recognition>=1.3.0
 # opencv-python>=4.8.0,<4.10.0  # Compatible with numpy 1.26.4

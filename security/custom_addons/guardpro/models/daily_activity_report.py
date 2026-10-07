@@ -245,6 +245,25 @@ class DailyActivityReport(models.Model):
         help='Automatically send to client after approval'
     )
 
+    def _get_dar_recipient_emails(self):
+        """Return the best email address(es) for the DAR, in priority order."""
+        self.ensure_one()
+        site = self.site_id
+        if not site:
+            return ''
+        candidates = []
+        if site.dar_recipient_emails:
+            candidates.extend([e.strip() for e in site.dar_recipient_emails.split(',') if e.strip()])
+        if site.project_manager_email:
+            candidates.append(site.project_manager_email.strip())
+        if site.manager_id and site.manager_id.email:
+            candidates.append(site.manager_id.email.strip())
+        if site.site_email:
+            candidates.extend([e.strip() for e in site.site_email.split(',') if e.strip()])
+        if site.client_id and site.client_id.email:
+            candidates.append(site.client_id.email.strip())
+        return ', '.join(candidates)
+
     # Additional
     attachment_ids = fields.Many2many(
         'ir.attachment',
@@ -579,29 +598,21 @@ class DailyActivityReport(models.Model):
         }
 
     def action_send_to_client(self):
-        """Email PDF to client"""
+        """Email PDF to the configured project/client recipient."""
         self.ensure_one()
 
         if self.state not in ['approved', 'sent']:
             raise UserError(_('Only approved reports can be sent to clients.'))
 
-        if not self.client_email:
-            raise UserError(_('No client email configured for site %s.') % self.site_id.name)
+        recipients = self._get_dar_recipient_emails()
+        if not recipients:
+            raise UserError(_('No project manager or client email configured for site %s.') % self.site_id.name)
 
-        # Generate PDF report
-        pdf_report = self.env.ref('guardpro.action_daily_activity_report_pdf').sudo()._render_qweb_pdf([self.id])[0]
+        template = self.env.ref('guardpro.email_template_dar_to_client', raise_if_not_found=False)
+        if not template:
+            raise UserError(_('Daily Activity Report email template is missing.'))
 
-        # Create attachment
-        attachment = self.env['ir.attachment'].create({
-            'name': f'DAR_{self.site_id.name}_{self.report_date}.pdf',
-            'type': 'binary',
-            'datas': pdf_report,
-            'res_model': self._name,
-            'res_id': self.id,
-            'mimetype': 'application/pdf'
-        })
-
-        # Email notifications are disabled globally.
+        mail_id = template.send_mail(self.id, force_send=True)
 
         self.write({
             'sent_to_client': True,
@@ -615,7 +626,7 @@ class DailyActivityReport(models.Model):
                 user=submitter_user,
                 kind='dar_decision',
                 title=_('DAR sent to client: %s') % (self.name or ''),
-                body=_('Your DAR for %s on %s was sent to the client.') % (
+                body=_('Your DAR for %s on %s was sent to the recipient.') % (
                     self.site_id.name if self.site_id else '-',
                     self.report_date,
                 ),
@@ -625,14 +636,14 @@ class DailyActivityReport(models.Model):
                 dedup_key='dar_sent:%s' % self.id,
             )
 
-        _logger.info('DAR %s sent to client %s', self.name, self.client_email)
+        _logger.info('DAR %s sent to %s (mail %s)', self.name, recipients, mail_id)
 
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'title': _('Report Sent'),
-                'message': _('Daily Activity Report has been sent to %s') % self.client_email,
+                'message': _('Daily Activity Report has been sent to %s') % recipients,
                 'type': 'success',
                 'sticky': False,
             }
@@ -686,22 +697,39 @@ class DailyActivityReport(models.Model):
         return True
 
     @api.model
+    def _configure_dar_email_template(self):
+        """Ensure the DAR email template points to the configured recipients and attaches the PDF.
+
+        This is called from data because the template is marked noupdate.
+        """
+        template = self.env.ref('guardpro.email_template_dar_to_client', raise_if_not_found=False)
+        report = self.env.ref('guardpro.action_daily_activity_report_pdf', raise_if_not_found=False)
+        if template and report:
+            template.write({
+                'email_to': '{{ object._get_dar_recipient_emails() or object.site_id.client_id.email }}',
+                'report_template_ids': [(6, 0, [report.id])],
+            })
+
+    @api.model
     def auto_send_approved_reports(self):
-        """Cron: Auto-send approved reports to clients"""
+        """Cron: Auto-send approved reports to configured recipients"""
         reports_to_send = self.search([
             ('state', '=', 'approved'),
             ('sent_to_client', '=', False),
             ('auto_send', '=', True),
-            ('client_email', '!=', False)
         ])
 
+        sent_count = 0
         for report in reports_to_send:
+            if not report._get_dar_recipient_emails():
+                continue
             try:
                 report.action_send_to_client()
+                sent_count += 1
             except Exception as e:
                 _logger.error('Failed to auto-send DAR %s: %s', report.name, str(e))
 
-        _logger.info('Auto-sent %d DARs to clients', len(reports_to_send))
+        _logger.info('Auto-sent %d DARs to recipients', sent_count)
         return True
 
 

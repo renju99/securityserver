@@ -93,7 +93,7 @@ class ShiftAssignmentWizard(models.TransientModel):
             'name': _('Created Shifts'),
             'type': 'ir.actions.act_window',
             'res_model': 'guard.shift',
-            'view_mode': 'calendar,list,form',
+            'view_mode': 'list,calendar,form',
             'domain': [('id', 'in', shifts.ids)],
         }
 

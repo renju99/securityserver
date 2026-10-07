@@ -186,6 +186,9 @@
                         <t t-elif="request.params.get('error') == 'visitor_register_missing_mobile'">
                             <i class="fa fa-exclamation-circle me-2"/>Please enter the visitor mobile number.
                         </t>
+                        <t t-elif="request.params.get('error') == 'visitor_register_missing_id'">
+                            <i class="fa fa-exclamation-circle me-2"/>Please enter the Emirates ID / Passport number.
+                        </t>
                         <t t-elif="request.params.get('error') == 'visitor_register_no_site'">
                             <i class="fa fa-exclamation-circle me-2"/>No site could be determined. Check in to a shift or contact your supervisor.
                         </t>
@@ -727,6 +730,16 @@
                     transition: width 0.4s;
                 }
 
+                /* ── Pending incidents banner ── */
+                .gp-incidents-banner {
+                    background: #dc3545;
+                    color: #fff;
+                    border-radius: 10px;
+                    padding: 0.75rem 1rem;
+                    font-size: 0.875rem;
+                }
+                .gp-incidents-banner:hover { opacity: 0.92; }
+
                 /* ── Quick tiles ── */
                 .gp-quick-tile {
                     background: #fff;
@@ -767,6 +780,27 @@
                 .gp-badge-active  { background: #d4edda; color: #155724; }
                 .gp-badge-warning { background: #fff3cd; color: #856404; }
                 .gp-badge-danger  { background: #f8d7da; color: #721c24; }
+
+                /* ── Secondary tools section ── */
+                .gp-secondary-section .gp-secondary-toggle {
+                    background: transparent;
+                    border: none;
+                    padding: 0.5rem 0.25rem;
+                    color: #495057;
+                    font-size: 0.9375rem;
+                    font-weight: 600;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                }
+                .gp-secondary-section .gp-toggle-icon {
+                    transition: transform 0.2s;
+                    font-size: 0.85rem;
+                    color: #6c757d;
+                }
+                .gp-secondary-section .gp-secondary-toggle[aria-expanded="true"] .gp-toggle-icon {
+                    transform: rotate(180deg);
+                }
 
                 /* ── PTT + Panic row ── */
                 .gp-ptt-btn {
@@ -1166,7 +1200,7 @@
                     </div>
                 </div>
 
-                <!-- PRIMARY ACTION: Check In / Check Out -->
+                <!-- PRIMARY ACTION: Start Shift / End Shift -->
                 <div class="mb-3">
                     <t t-if="not is_checked_in">
                         <form action="/guardpro/mobile/checkin" method="post" onsubmit="return typeof getLocationAndSubmit !== 'undefined' ? getLocationAndSubmit(this, event) : true;">
@@ -1174,7 +1208,7 @@
                             <input type="hidden" name="latitude" id="checkin-lat"/>
                             <input type="hidden" name="longitude" id="checkin-lng"/>
                             <button type="submit" class="btn btn-success gp-primary-action-btn w-100">
-                                <i class="fa fa-sign-in-alt me-2"/>Check In to Start Shift
+                                <i class="fa fa-sign-in-alt me-2"/>Start Shift
                             </button>
                         </form>
                     </t>
@@ -1187,17 +1221,31 @@
                                     <span class="text-muted small">since <t t-esc="format_datetime_tz(active_attendance, active_attendance.checkin_time, '%H:%M')"/></span>
                                 </t>
                             </div>
-                            <form action="/guardpro/mobile/checkout" method="post" onsubmit="return typeof getLocationAndSubmit !== 'undefined' ? getLocationAndSubmit(this, event) : true;" class="d-inline">
-                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                <input type="hidden" name="latitude" id="checkout-lat"/>
-                                <input type="hidden" name="longitude" id="checkout-lng"/>
-                                <button type="submit" class="btn btn-sm btn-outline-secondary gp-checkout-btn">
-                                    <i class="fa fa-sign-out-alt me-1"/>Check Out
-                                </button>
-                            </form>
                         </div>
+                        <form action="/guardpro/mobile/checkout" method="post" onsubmit="return typeof getLocationAndSubmit !== 'undefined' ? getLocationAndSubmit(this, event) : true;">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <input type="hidden" name="latitude" id="checkout-lat"/>
+                            <input type="hidden" name="longitude" id="checkout-lng"/>
+                            <button type="submit" class="btn btn-warning gp-primary-action-btn w-100">
+                                <i class="fa fa-sign-out-alt me-2"/>End Shift
+                            </button>
+                        </form>
                     </t>
                 </div>
+
+                <!-- Pending incidents banner -->
+                <t t-if="open_incidents_count">
+                    <a href="/guardpro/mobile/incidents" class="gp-incidents-banner d-block text-decoration-none mb-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="fa fa-exclamation-triangle fa-lg flex-shrink-0"/>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold"><t t-esc="open_incidents_count"/> Pending Incident<t t-if="open_incidents_count > 1">s</t></div>
+                                <div class="small opacity-75">Tap to view and update</div>
+                            </div>
+                            <i class="fa fa-chevron-right flex-shrink-0 opacity-50"/>
+                        </div>
+                    </a>
+                </t>
 
                 <!-- Active patrol banner (shown only when a tour is in progress) -->
                 <t t-if="active_tour_log">
@@ -1218,17 +1266,8 @@
                     </a>
                 </t>
 
-                <!-- Quick links grid (3×2) with live badges -->
+                <!-- Everyday tools — immediately visible -->
                 <div class="row g-2 mb-3">
-                    <div class="col-4">
-                        <a href="/guardpro/mobile/shifts" class="gp-quick-tile text-decoration-none d-block">
-                            <div class="gp-quick-tile-icon text-primary"><i class="fa fa-calendar"/></div>
-                            <div class="gp-quick-tile-label">Shifts</div>
-                            <div class="gp-quick-tile-sub">
-                                <t t-esc="len(shifts_today)"/> today
-                            </div>
-                        </a>
-                    </div>
                     <div class="col-4">
                         <a href="/guardpro/mobile/tours" class="gp-quick-tile text-decoration-none d-block">
                             <div class="gp-quick-tile-icon text-success"><i class="fa fa-map-signs"/></div>
@@ -1242,15 +1281,17 @@
                         </a>
                     </div>
                     <div class="col-4">
-                        <a href="/guardpro/mobile/tasks" class="gp-quick-tile text-decoration-none d-block">
-                            <div class="gp-quick-tile-icon text-info"><i class="fa fa-tasks"/></div>
-                            <div class="gp-quick-tile-label">Tasks</div>
-                            <div class="gp-quick-tile-sub">
-                                <t t-if="active_tasks">
-                                    <span t-attf-class="gp-badge-count {{len(active_tasks) > 0 and 'gp-badge-warning' or ''}}"><t t-esc="len(active_tasks)"/> open</span>
-                                </t>
-                                <t t-else="">None open</t>
-                            </div>
+                        <a href="/guardpro/mobile/reports" class="gp-quick-tile text-decoration-none d-block">
+                            <div class="gp-quick-tile-icon text-primary"><i class="fa fa-folder-open"/></div>
+                            <div class="gp-quick-tile-label">Reports</div>
+                            <div class="gp-quick-tile-sub">Hub</div>
+                        </a>
+                    </div>
+                    <div class="col-4">
+                        <a href="/guardpro/mobile/logbooks" class="gp-quick-tile text-decoration-none d-block">
+                            <div class="gp-quick-tile-icon text-info"><i class="fa fa-book"/></div>
+                            <div class="gp-quick-tile-label">Logbooks</div>
+                            <div class="gp-quick-tile-sub">Daily log</div>
                         </a>
                     </div>
                     <div class="col-4">
@@ -1266,90 +1307,123 @@
                         </a>
                     </div>
                     <div class="col-4">
-                        <a href="/guardpro/mobile/keys-packages" class="gp-quick-tile text-decoration-none d-block">
-                            <div class="gp-quick-tile-icon" style="color:#F57F17;"><i class="fa fa-key"/></div>
-                            <div class="gp-quick-tile-label">Keys</div>
+                        <a href="/guardpro/mobile/tasks" class="gp-quick-tile text-decoration-none d-block">
+                            <div class="gp-quick-tile-icon" style="color:#00ACC1;"><i class="fa fa-tasks"/></div>
+                            <div class="gp-quick-tile-label">Tasks</div>
                             <div class="gp-quick-tile-sub">
-                                <t t-if="keys_pending_count or packages_pending_count">
-                                    <span class="gp-badge-count gp-badge-warning">
-                                        <t t-esc="keys_pending_count + packages_pending_count"/> open
-                                    </span>
+                                <t t-if="active_tasks">
+                                    <span t-attf-class="gp-badge-count {{len(active_tasks) > 0 and 'gp-badge-warning' or ''}}"><t t-esc="len(active_tasks)"/> open</span>
                                 </t>
-                                <t t-else="">&amp; Packages</t>
+                                <t t-else="">None open</t>
                             </div>
                         </a>
                     </div>
                     <div class="col-4">
-                        <a href="/guardpro/mobile/visitors" class="gp-quick-tile text-decoration-none d-block">
-                            <div class="gp-quick-tile-icon text-primary"><i class="fa fa-users"/></div>
-                            <div class="gp-quick-tile-label">Visitors</div>
+                        <a href="/guardpro/mobile/shifts" class="gp-quick-tile text-decoration-none d-block">
+                            <div class="gp-quick-tile-icon" style="color:#5E35B1;"><i class="fa fa-calendar"/></div>
+                            <div class="gp-quick-tile-label">Shifts</div>
                             <div class="gp-quick-tile-sub">
-                                <t t-if="checked_in_visitors_count">
-                                    <span class="gp-badge-count"><t t-esc="checked_in_visitors_count"/> in</span>
-                                </t>
-                                <t t-else="">None in</t>
+                                <t t-esc="len(shifts_today)"/> today
                             </div>
                         </a>
                     </div>
-                    <!-- Shift Summary wide tile -->
-                    <div class="col-12">
-                        <a href="/guardpro/mobile/shift-summary" class="gp-quick-tile gp-quick-tile-wide text-decoration-none d-block">
-                            <div class="d-flex align-items-center gap-3">
-                                <i class="fa fa-clipboard fa-lg flex-shrink-0" style="color:#4527A0;"/>
-                                <div>
-                                    <div class="gp-quick-tile-label mb-0">Shift Summary</div>
-                                    <div class="gp-quick-tile-sub">End-of-shift report &amp; handover</div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <!-- Community Violation wide tile -->
-                    <div class="col-12">
-                        <a href="/guardpro/mobile/community-violation" class="gp-quick-tile gp-quick-tile-wide text-decoration-none d-block">
-                            <div class="d-flex align-items-center gap-3">
-                                <i class="fa fa-home fa-lg flex-shrink-0" style="color:#6a1b9a;"/>
-                                <div>
-                                    <div class="gp-quick-tile-label mb-0">Community Violation</div>
-                                    <div class="gp-quick-tile-sub">Report residential / community rule breaches</div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <!-- Lost & Found wide tile — always visible -->
-                    <div class="col-12">
-                        <a href="/guardpro/mobile/lost-found" class="gp-quick-tile gp-quick-tile-wide text-decoration-none d-block">
-                            <div class="d-flex align-items-center gap-3">
-                                <i class="fa fa-inbox fa-lg flex-shrink-0" style="color:#20c997;"/>
-                                <div>
-                                    <div class="gp-quick-tile-label mb-0">Lost &amp; Found</div>
-                                    <div class="gp-quick-tile-sub">
-                                        <t t-if="lost_found_today_count">
-                                            <span class="gp-badge-count"><t t-esc="lost_found_today_count"/> logged today</span>
-                                        </t>
-                                        <t t-else="">Log found items</t>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <t t-if="show_compliance_audits">
-                        <div class="col-12">
-                            <a href="/guardpro/mobile/compliance" class="gp-quick-tile gp-quick-tile-wide text-decoration-none d-block">
-                                <div class="d-flex align-items-center gap-3">
-                                    <i class="fa fa-clipboard fa-lg text-secondary flex-shrink-0"/>
-                                    <div>
-                                        <div class="gp-quick-tile-label mb-0">Compliance Audits</div>
-                                        <div class="gp-quick-tile-sub">
-                                            <t t-if="compliance_open_count">
-                                                <span class="gp-badge-count gp-badge-warning"><t t-esc="compliance_open_count"/> open</span>
-                                            </t>
-                                            <t t-else="">None open</t>
+                </div>
+
+                <!-- More tools — secondary, collapsible row -->
+                <div class="gp-secondary-section mb-3">
+                    <button type="button" class="gp-secondary-toggle w-100 text-start" data-bs-toggle="collapse" data-bs-target="#secondaryTools" aria-expanded="false" aria-controls="secondaryTools">
+                        <span>More tools</span>
+                        <i class="fa fa-chevron-down gp-toggle-icon"/>
+                    </button>
+                    <div id="secondaryTools" class="collapse">
+                        <div class="row g-2 pt-2">
+                            <!-- Shift Summary wide tile -->
+                            <div class="col-12">
+                                <a href="/guardpro/mobile/shift-summary" class="gp-quick-tile gp-quick-tile-wide text-decoration-none d-block">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <i class="fa fa-clipboard fa-lg flex-shrink-0" style="color:#4527A0;"/>
+                                        <div>
+                                            <div class="gp-quick-tile-label mb-0">Shift Summary</div>
+                                            <div class="gp-quick-tile-sub">End-of-shift report &amp; handover</div>
                                         </div>
                                     </div>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="/guardpro/mobile/visitors" class="gp-quick-tile text-decoration-none d-block">
+                                    <div class="gp-quick-tile-icon text-primary"><i class="fa fa-users"/></div>
+                                    <div class="gp-quick-tile-label">Visitors</div>
+                                    <div class="gp-quick-tile-sub">
+                                        <t t-if="checked_in_visitors_count">
+                                            <span class="gp-badge-count"><t t-esc="checked_in_visitors_count"/> in</span>
+                                        </t>
+                                        <t t-else="">None in</t>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="/guardpro/mobile/keys-packages" class="gp-quick-tile text-decoration-none d-block">
+                                    <div class="gp-quick-tile-icon" style="color:#F57F17;"><i class="fa fa-key"/></div>
+                                    <div class="gp-quick-tile-label">Keys</div>
+                                    <div class="gp-quick-tile-sub">
+                                        <t t-if="keys_pending_count or packages_pending_count">
+                                            <span class="gp-badge-count gp-badge-warning">
+                                                <t t-esc="keys_pending_count + packages_pending_count"/> open
+                                            </span>
+                                        </t>
+                                        <t t-else="">&amp; Packages</t>
+                                    </div>
+                                </a>
+                            </div>
+                            <!-- Community Violation wide tile -->
+                            <div class="col-12">
+                                <a href="/guardpro/mobile/community-violation" class="gp-quick-tile gp-quick-tile-wide text-decoration-none d-block">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <i class="fa fa-home fa-lg flex-shrink-0" style="color:#6a1b9a;"/>
+                                        <div>
+                                            <div class="gp-quick-tile-label mb-0">Community Violation</div>
+                                            <div class="gp-quick-tile-sub">Report residential / community rule breaches</div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <!-- Lost & Found wide tile — always visible -->
+                            <div class="col-12">
+                                <a href="/guardpro/mobile/lost-found" class="gp-quick-tile gp-quick-tile-wide text-decoration-none d-block">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <i class="fa fa-inbox fa-lg flex-shrink-0" style="color:#20c997;"/>
+                                        <div>
+                                            <div class="gp-quick-tile-label mb-0">Lost &amp; Found</div>
+                                            <div class="gp-quick-tile-sub">
+                                                <t t-if="lost_found_today_count">
+                                                    <span class="gp-badge-count"><t t-esc="lost_found_today_count"/> logged today</span>
+                                                </t>
+                                                <t t-else="">Log found items</t>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <t t-if="show_compliance_audits">
+                                <div class="col-12">
+                                    <a href="/guardpro/mobile/compliance" class="gp-quick-tile gp-quick-tile-wide text-decoration-none d-block">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <i class="fa fa-clipboard fa-lg text-secondary flex-shrink-0"/>
+                                            <div>
+                                                <div class="gp-quick-tile-label mb-0">Compliance Audits</div>
+                                                <div class="gp-quick-tile-sub">
+                                                    <t t-if="compliance_open_count">
+                                                        <span class="gp-badge-count gp-badge-warning"><t t-esc="compliance_open_count"/> open</span>
+                                                    </t>
+                                                    <t t-else="">None open</t>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
                                 </div>
-                            </a>
+                            </t>
                         </div>
-                    </t>
+                    </div>
                 </div>
 
                 <!-- Secondary row: PTT + Panic (side by side, smaller) -->
@@ -1766,6 +1840,119 @@
                     panicHoldStartTime = null;
                 };
             ]]></script>
+        </t>
+    </template>
+
+    <!-- Logbooks / Daily Activity Reports (mobile) -->
+    <template id="mobile_logbooks" name="GuardLink Mobile Logbooks">
+        <t t-call="guardpro.mobile_base">
+            <div class="container-fluid p-3">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <a href="/guardpro/mobile" class="btn btn-sm btn-outline-secondary">
+                        <i class="fa fa-arrow-left"/>
+                    </a>
+                    <h5 class="mb-0 fw-bold">Logbooks</h5>
+                </div>
+                <p class="text-muted small mb-3">Daily Activity Reports for your projects.</p>
+
+                <t t-if="error">
+                    <div class="alert alert-danger"><t t-esc="error"/></div>
+                </t>
+                <t t-if="success">
+                    <div class="alert alert-success"><t t-esc="success"/></div>
+                </t>
+
+                <t t-if="not reports">
+                    <div class="text-center text-muted py-5">
+                        <i class="fa fa-clipboard-list fa-3x mb-3"/>
+                        <p>No logbooks found for your projects.</p>
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="list-group shadow-sm">
+                        <t t-foreach="reports" t-as="report">
+                            <a t-att-href="'/web#id=%s&amp;model=daily.activity.report&amp;view_type=form' % report.id"
+                               target="_blank"
+                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-semibold"><t t-esc="report.name"/></div>
+                                    <div class="small text-muted">
+                                        <t t-esc="report.site_id.name"/> · <t t-esc="report.report_date"/>
+                                    </div>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">
+                                    <i class="fa fa-exclamation-circle me-1"/><t t-esc="report.incident_count or 0"/>
+                                </span>
+                            </a>
+                        </t>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <!-- Reports Hub (mobile) -->
+    <template id="mobile_reports_hub" name="GuardLink Mobile Reports Hub">
+        <t t-call="guardpro.mobile_base">
+            <div class="container-fluid p-3">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <a href="/guardpro/mobile" class="btn btn-sm btn-outline-secondary">
+                        <i class="fa fa-arrow-left"/>
+                    </a>
+                    <h5 class="mb-0 fw-bold">Reports</h5>
+                </div>
+                <p class="text-muted small mb-3">Quick access to common guard reports.</p>
+
+                <div class="row g-2">
+                    <div class="col-6">
+                        <a href="/guardpro/mobile/shift-summary" class="gp-quick-tile text-decoration-none d-block h-100">
+                            <div class="gp-quick-tile-icon" style="color:#4527A0;"><i class="fa fa-clipboard"/></div>
+                            <div class="gp-quick-tile-label">Shift Summary</div>
+                            <div class="gp-quick-tile-sub">End-of-shift report</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="/guardpro/mobile/incidents" class="gp-quick-tile text-decoration-none d-block h-100">
+                            <div class="gp-quick-tile-icon text-warning"><i class="fa fa-exclamation-triangle"/></div>
+                            <div class="gp-quick-tile-label">Incidents</div>
+                            <div class="gp-quick-tile-sub">
+                                <t t-if="open_incidents_count">
+                                    <span class="gp-badge-count gp-badge-danger"><t t-esc="open_incidents_count"/> open</span>
+                                </t>
+                                <t t-else="">None open</t>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="/guardpro/mobile/tours" class="gp-quick-tile text-decoration-none d-block h-100">
+                            <div class="gp-quick-tile-icon text-success"><i class="fa fa-map-signs"/></div>
+                            <div class="gp-quick-tile-label">Tours</div>
+                            <div class="gp-quick-tile-sub">Patrol history</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="/guardpro/mobile/logbooks" class="gp-quick-tile text-decoration-none d-block h-100">
+                            <div class="gp-quick-tile-icon text-info"><i class="fa fa-book"/></div>
+                            <div class="gp-quick-tile-label">Logbooks</div>
+                            <div class="gp-quick-tile-sub">Daily reports</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="/guardpro/mobile/lost-found" class="gp-quick-tile text-decoration-none d-block h-100">
+                            <div class="gp-quick-tile-icon" style="color:#20c997;"><i class="fa fa-inbox"/></div>
+                            <div class="gp-quick-tile-label">Lost &amp; Found</div>
+                            <div class="gp-quick-tile-sub">Item log</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="/guardpro/mobile/visitors" class="gp-quick-tile text-decoration-none d-block h-100">
+                            <div class="gp-quick-tile-icon text-primary"><i class="fa fa-users"/></div>
+                            <div class="gp-quick-tile-label">Visitors</div>
+                            <div class="gp-quick-tile-sub">Check-in log</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </t>
     </template>
 
@@ -4403,13 +4590,14 @@
                 </div>
                 <div class="mb-3">
                     <h4 class="mb-1">Register visitor</h4>
-                    <p class="text-muted small mb-0">Pre-register a visitor. Scan Emirates ID to fill fields automatically, or take a photo of the ID document.</p>
+                    <p class="text-muted small mb-0">UAE desk essentials only. Scan Emirates ID to autofill name and ID number.</p>
                 </div>
                 <t t-if="resolved_site_name">
                     <p class="small text-muted mb-3"><i class="fa fa-map-marker-alt me-1"/><strong>Project:</strong> <t t-esc="resolved_site_name"/></p>
                 </t>
 
-                <form id="guardpro-mobile-visitor-form" action="/guardpro/mobile/visitors/register" method="post">
+                <form id="guardpro-mobile-visitor-form" action="/guardpro/mobile/visitors/register" method="post"
+                      data-autosave="true" data-autosave-sync="true">
                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                     <input type="hidden" name="id_photo" id="guardpro-id-photo-b64" value=""/>
                     <input type="file" id="guardpro-id-photo-input" accept="image/*" capture="environment" style="display:none;"/>
@@ -4442,13 +4630,13 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Visitor name *</label>
-                        <input type="text" class="form-control" name="name" required="required" placeholder="Full name"/>
+                        <label class="form-label">Visitor name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="name" required="required" placeholder="Full name as on ID"/>
                     </div>
                     <div class="row g-2 mb-3">
                         <div class="col-6">
                             <label class="form-label">Visitor type</label>
-                            <select class="form-select" name="visitor_type">
+                            <select class="form-select" name="visitor_type" id="gp-visitor-type">
                                 <option value="visitor" selected="selected">Visitor</option>
                                 <option value="contractor">Contractor</option>
                                 <option value="vendor">Vendor</option>
@@ -4470,94 +4658,42 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">ID number</label>
-                        <input type="text" class="form-control" name="id_number" placeholder="Emirates ID / document number"/>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label">Nationality</label>
-                            <input type="text" class="form-control" name="nationality"/>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label">Gender</label>
-                            <select class="form-select" name="gender">
-                                <option value="" selected="selected">—</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label">Date of birth</label>
-                            <input type="date" class="form-control" name="date_of_birth"/>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label">Visit date</label>
-                            <input type="date" class="form-control" name="visit_date"/>
-                        </div>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label">ID issue</label>
-                            <input type="date" class="form-control" name="id_issue_date"/>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label">ID expiry</label>
-                            <input type="date" class="form-control" name="id_expiry_date"/>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Occupation</label>
-                        <input type="text" class="form-control" name="occupation"/>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Employer (from ID)</label>
-                        <input type="text" class="form-control" name="employer_name" placeholder="As on Emirates ID back"/>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Issuing place (from ID)</label>
-                        <input type="text" class="form-control" name="issuing_place" placeholder="e.g. Dubai"/>
+                        <label class="form-label">ID number <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="id_number" required="required" placeholder="Emirates ID / Passport number"/>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Mobile <span class="text-danger">*</span></label>
-                        <input type="tel" class="form-control" name="mobile_number" required="required" placeholder="e.g. 0501234567"/>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-control" name="email"/>
+                        <input type="tel" class="form-control" name="mobile_number" required="required" placeholder="+971…"/>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Company</label>
-                        <input type="text" class="form-control" name="company"/>
+                        <input type="text" class="form-control" name="company" placeholder="Company / organization"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nationality</label>
+                        <input type="text" class="form-control" name="nationality" placeholder="Optional"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Visit date</label>
+                        <input type="date" class="form-control" name="visit_date"/>
                     </div>
                     <hr class="my-3"/>
                     <div class="mb-3">
-                        <label class="form-label">Host name *</label>
+                        <label class="form-label">Host name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="host_name" required="required" placeholder="Person being visited"/>
                     </div>
                     <div class="row g-2 mb-3">
                         <div class="col-6">
-                            <label class="form-label">Host phone</label>
-                            <input type="text" class="form-control" name="host_phone"/>
+                            <label class="form-label">Unit</label>
+                            <input type="text" class="form-control" name="host_unit_number" placeholder="Unit / villa"/>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label">Host email</label>
-                            <input type="email" class="form-control" name="host_email"/>
-                        </div>
-                    </div>
-                    <div class="row g-2 mb-3">
                         <div class="col-6">
                             <label class="form-label">Community</label>
-                            <input type="text" class="form-control" name="host_community" placeholder="Community name"/>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label">Unit Number</label>
-                            <input type="text" class="form-control" name="host_unit_number" placeholder="Unit / villa / apartment"/>
+                            <input type="text" class="form-control" name="host_community" placeholder="Optional"/>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Visit purpose *</label>
+                        <label class="form-label">Visit purpose <span class="text-danger">*</span></label>
                         <select class="form-select" name="visit_purpose" required="required">
                             <option value="">— Select —</option>
                             <option value="meeting">Meeting</option>
@@ -4572,18 +4708,80 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Purpose details</label>
-                        <textarea class="form-control" name="purpose_details" rows="2"></textarea>
+                        <label class="form-label">Vehicle plate</label>
+                        <input type="text" class="form-control" name="vehicle_number" placeholder="Optional"/>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Vehicle number</label>
-                        <input type="text" class="form-control" name="vehicle_number"/>
-                    </div>
+                    <details class="mb-3">
+                        <summary class="small text-muted" style="cursor:pointer;">More details (optional)</summary>
+                        <div class="mt-2">
+                            <div class="mb-2">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" name="email"/>
+                            </div>
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <label class="form-label">Gender</label>
+                                    <select class="form-select" name="gender">
+                                        <option value="" selected="selected">—</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Date of birth</label>
+                                    <input type="date" class="form-control" name="date_of_birth"/>
+                                </div>
+                            </div>
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <label class="form-label">ID issue</label>
+                                    <input type="date" class="form-control" name="id_issue_date"/>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">ID expiry</label>
+                                    <input type="date" class="form-control" name="id_expiry_date"/>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Host phone</label>
+                                <input type="text" class="form-control" name="host_phone"/>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Purpose details</label>
+                                <textarea class="form-control" name="purpose_details" rows="2"></textarea>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Name (Arabic)</label>
+                                <input type="text" class="form-control" name="name_arabic"/>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Occupation</label>
+                                <input type="text" class="form-control" name="occupation"/>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Employer</label>
+                                <input type="text" class="form-control" name="employer_name"/>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Issuing place</label>
+                                <input type="text" class="form-control" name="issuing_place"/>
+                            </div>
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <label class="form-label">Passport number</label>
+                                    <input type="text" class="form-control" name="passport_number"/>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Visa number</label>
+                                    <input type="text" class="form-control" name="visa_number"/>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
                     <button type="submit" class="btn btn-primary w-100 btn-lg">
                         <i class="fa fa-save me-2"/>Save visitor
                     </button>
                 </form>
-
                 <script type="text/javascript"><![CDATA[
                 window.guardproVisitorIdPhoto = (function () {
                     function showPreview(dataUrl, b64) {
@@ -4949,7 +5147,8 @@
 
                         <!-- Step 2: Details (inside submit form so all fields post reliably) -->
                         <form id="incidentReportForm" action="/guardpro/mobile/incident/create" method="post"
-                              enctype="multipart/form-data" onsubmit="return gpIncidentWizard.submitForm(this, event)">
+                              enctype="multipart/form-data" onsubmit="return gpIncidentWizard.submitForm(this, event)"
+                              data-autosave="true">
                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                             <input type="hidden" name="latitude" id="incident-lat"/>
                             <input type="hidden" name="longitude" id="incident-lng"/>
@@ -5281,7 +5480,7 @@
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold"><i class="fa fa-camera me-1"/>Photos (optional)</label>
                                     <input type="file" class="form-control d-none" id="incident_images" name="incident_images"
-                                           accept="image/*" capture="environment" multiple="multiple" onchange="previewIncidentImages(this)"/>
+                                           accept="image/*" capture="environment" multiple="multiple" onchange="GPIncidentMobile.previewIncidentImages(this)"/>
                                     <div class="d-flex gap-2 flex-wrap">
                                         <button type="button" class="btn btn-outline-primary" onclick="GPIncidentMobile.triggerPhotoInput('incident_images')">
                                             <i class="fa fa-camera me-1"/>Take Photo
@@ -5294,7 +5493,8 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold"><i class="fa fa-video-camera me-1"/>Videos (optional)</label>
-                                    <input type="file" class="form-control" id="incident_videos" name="incident_videos" accept="video/*" multiple="multiple"/>
+                                    <input type="file" class="form-control" id="incident_videos" name="incident_videos" accept="video/*" multiple="multiple" onchange="GPIncidentMobile.previewIncidentVideos(this)"/>
+                                    <div id="video-preview-container" class="mt-2 d-flex flex-column gap-2"></div>
                                 </div>
                                 <t t-if="current_site">
                                     <div class="small text-muted mb-3"><i class="fa fa-map-marker-alt me-1"/>Project: <t t-esc="current_site.name"/></div>
@@ -5636,6 +5836,39 @@
                         }
                         return true;
                     }
+                    function validateExcelFormFields() {
+                        var host = document.getElementById('gp-excel-form-sections');
+                        if (!host) return true;
+                        var fields = host.querySelectorAll('[data-required="1"]');
+                        var firstInvalid = null;
+                        var valid = true;
+                        fields.forEach(function(field) {
+                            var val = '';
+                            if (field.type === 'checkbox') {
+                                val = field.checked ? 'on' : '';
+                            } else if (field.type === 'file') {
+                                val = field.files && field.files.length ? 'yes' : '';
+                            } else {
+                                val = (field.value || '').trim();
+                            }
+                            if (!val) {
+                                valid = false;
+                                field.classList.add('is-invalid');
+                                if (!firstInvalid) firstInvalid = field;
+                            } else {
+                                field.classList.remove('is-invalid');
+                            }
+                        });
+                        if (!valid && firstInvalid) {
+                            firstInvalid.focus();
+                            if (firstInvalid.scrollIntoView) {
+                                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                            alert('Please fill in all required fields marked with *.');
+                        }
+                        return valid;
+                    }
+
                     function validateTypeAndCategoryFields() {
                         var type = _type || window._gpWizardType || '';
                         var typeRequired = {
@@ -5719,36 +5952,39 @@
                                 '<div class="card-header text-white py-2" style="background:#1B365D;"><strong>' +
                                 escHtml(sec.name) + '</strong></div><div class="card-body">';
                             (sec.fields || []).forEach(function (fld) {
-                                var req = fld.required ? ' <span class="text-danger">*</span>' : '';
+                                var isReq = !!fld.required;
+                                var req = isReq ? ' <span class="text-danger">*</span>' : '';
+                                var reqAttr = isReq ? ' data-required="1" required' : '';
                                 var nameAttr = 'form_field_' + fld.id;
                                 var hint = fld.hint || '';
                                 html += '<div class="mb-3"><label class="form-label fw-semibold">' +
                                     escHtml(fld.name) + req + '</label>';
                                 if (fld.field_type === 'text') {
                                     html += '<textarea class="form-control" name="' + nameAttr + '" rows="4"' +
+                                        reqAttr +
                                         (hint ? ' placeholder="' + escHtml(hint) + '"' : '') + '></textarea>';
                                     if (hint) html += '<small class="text-muted d-block mt-1">' + escHtml(hint) + '</small>';
                                 } else if (fld.field_type === 'boolean') {
-                                    html += '<select class="form-select" name="' + nameAttr + '">' +
+                                    html += '<select class="form-select" name="' + nameAttr + '"' + reqAttr + '>' +
                                         '<option value="">Select…</option>' +
                                         '<option value="Yes">Yes</option>' +
                                         '<option value="No">No</option></select>';
                                 } else if (fld.field_type === 'selection') {
-                                    html += '<select class="form-select" name="' + nameAttr + '"><option value="">Select…</option>';
+                                    html += '<select class="form-select" name="' + nameAttr + '"' + reqAttr + '><option value="">Select…</option>';
                                     (fld.options || []).forEach(function (opt) {
                                         html += '<option value="' + escHtml(opt) + '">' + escHtml(opt) + '</option>';
                                     });
                                     html += '</select>';
                                 } else if (fld.field_type === 'date') {
-                                    html += '<input type="date" class="form-control" name="' + nameAttr + '"/>';
+                                    html += '<input type="date" class="form-control" name="' + nameAttr + '"' + reqAttr + '/>';
                                 } else if (fld.field_type === 'time') {
-                                    html += '<input type="time" class="form-control" name="' + nameAttr + '"/>';
+                                    html += '<input type="time" class="form-control" name="' + nameAttr + '"' + reqAttr + '/>';
                                 } else if (fld.field_type === 'integer') {
-                                    html += '<input type="number" class="form-control" name="' + nameAttr + '"/>';
+                                    html += '<input type="number" class="form-control" name="' + nameAttr + '"' + reqAttr + '/>';
                                 } else if (fld.field_type === 'signature') {
                                     html += '<canvas id="gp-excel-sig-' + fld.id + '" class="gp-excel-sig-canvas"' +
                                         ' style="width:100%;height:140px;border:1px solid #ccc;border-radius:4px;background:#fff;touch-action:none;"></canvas>' +
-                                        '<input type="hidden" name="' + nameAttr + '" id="gp-excel-sig-input-' + fld.id + '"/>' +
+                                        '<input type="hidden" name="' + nameAttr + '" id="gp-excel-sig-input-' + fld.id + '"' + reqAttr + '/>' +
                                         '<button type="button" class="btn btn-sm btn-outline-secondary mt-1" ' +
                                         'onclick="clearSignatureCanvas(&quot;gp-excel-sig-' + fld.id +
                                         '&quot;,&quot;gp-excel-sig-input-' + fld.id + '&quot;)">Clear</button>';
@@ -5762,7 +5998,7 @@
                                     var isCommunity = String(fld.name || '').toLowerCase().indexOf('community name') !== -1;
                                     var ph = hint || (isCommunity ? 'Type community name…' : '');
                                     html += '<input type="' + (isPhone ? 'tel' : 'text') + '" class="form-control" name="' +
-                                        nameAttr + '"' + (ph ? ' placeholder="' + escHtml(ph) + '"' : '') +
+                                        nameAttr + '"' + reqAttr + (ph ? ' placeholder="' + escHtml(ph) + '"' : '') +
                                         (isSecName ? ' data-autofill="guard_name"' : '') + '/>';
                                 }
                                 html += '</div>';
@@ -5939,6 +6175,9 @@
                             return;
                         }
                         if (!validateTypeAndCategoryFields()) {
+                            return;
+                        }
+                        if (!validateExcelFormFields()) {
                             return;
                         }
                         var wizardTypeHidden = document.getElementById('gp-inc-wizard-type');
@@ -6297,45 +6536,7 @@
                 // getLocationAndSubmit is provided by mobile_navigation.js (file-safe submit).
                 // Do not redefine it here — form.submit() drops multipart file uploads on mobile WebView.
 
-                function previewIncidentImages(input) {
-                    const previewContainer = document.getElementById('image-preview-container');
-                    if (!previewContainer) {
-                        return;
-                    }
-                    previewContainer.innerHTML = '';
-
-                    if (!input.files || !input.files.length) {
-                        return;
-                    }
-
-                    Array.from(input.files).forEach(function(file) {
-                        const name = (file.name || '').toLowerCase();
-                        const isHeic = name.endsWith('.heic') || name.endsWith('.heif');
-                        const isImage = (file.type && file.type.indexOf('image/') === 0) || isHeic;
-                        if (!isImage) {
-                            return;
-                        }
-                        if (isHeic && (!file.type || file.type.indexOf('image/') !== 0)) {
-                            const note = document.createElement('div');
-                            note.className = 'small text-warning w-100';
-                            note.textContent = file.name + ' (HEIC) — preview may not show; photo will still upload.';
-                            previewContainer.appendChild(note);
-                        }
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            const imgWrapper = document.createElement('div');
-                            imgWrapper.style.cssText = 'position: relative; width: 80px; height: 80px;';
-
-                            const img = document.createElement('img');
-                            img.src = e.target.result;
-                            img.style.cssText = 'width: 100%; height: 100%; object-fit: cover; border-radius: 5px; border: 2px solid #ddd;';
-
-                            imgWrapper.appendChild(img);
-                            previewContainer.appendChild(imgWrapper);
-                        };
-                        reader.readAsDataURL(file);
-                    });
-                }
+                // Image/video previews and attachment deletion are handled by mobile_incident_wizard.js.
                 
                 function applyIncidentTemplate(templateType) {
                     var templates = {
@@ -6881,9 +7082,12 @@
                                     <label class="form-label">Current Photos</label>
                                     <div class="d-flex flex-wrap gap-2">
                                         <t t-foreach="incident.photo_ids" t-as="photo">
-                                            <div class="position-relative">
-                                                <img t-att-src="'/web/image/ir.attachment/%s/datas' % photo.id" 
+                                            <div class="position-relative gp-existing-media" t-attf-data-attachment-id="{{ photo.id }}">
+                                                <img t-att-src="'/web/image/ir.attachment/%s/datas' % photo.id"
                                                      style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px; border: 2px solid #ddd;"/>
+                                                <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 p-0 rounded-circle d-flex align-items-center justify-content-center"
+                                                        style="width: 22px; height: 22px; font-size: 14px; line-height: 1;"
+                                                        onclick="GPIncidentMobile.deleteIncidentAttachment(this)" title="Remove photo">×</button>
                                             </div>
                                         </t>
                                     </div>
@@ -6894,8 +7098,13 @@
                                     <label class="form-label">Current Videos</label>
                                     <div class="d-flex flex-column gap-2">
                                         <t t-foreach="incident.video_ids" t-as="vid">
-                                            <video controls="controls" class="w-100" style="max-height: 240px; border-radius: 6px; background: #000;"
-                                                   t-att-src="'/web/content/ir.attachment/%s/datas' % vid.id"/>
+                                            <div class="position-relative gp-existing-media" t-attf-data-attachment-id="{{ vid.id }}">
+                                                <video controls="controls" class="w-100" style="max-height: 240px; border-radius: 6px; background: #000;"
+                                                       t-att-src="'/web/content/ir.attachment/%s/datas' % vid.id"/>
+                                                <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 p-0 rounded-circle d-flex align-items-center justify-content-center"
+                                                        style="width: 22px; height: 22px; font-size: 14px; line-height: 1;"
+                                                        onclick="GPIncidentMobile.deleteIncidentAttachment(this)" title="Remove video">×</button>
+                                            </div>
                                         </t>
                                     </div>
                                 </div>
@@ -6903,7 +7112,7 @@
                             <div class="mb-3">
                                 <label for="incident_images" class="form-label">Add More Photos</label>
                                 <input type="file" class="form-control d-none" id="incident_images" name="incident_images"
-                                       accept="image/*" capture="environment" multiple="multiple" onchange="previewIncidentImages(this)"/>
+                                       accept="image/*" capture="environment" multiple="multiple" onchange="GPIncidentMobile.previewIncidentImages(this)"/>
                                 <div class="d-flex gap-2 flex-wrap mb-2">
                                     <button type="button" class="btn btn-outline-primary btn-sm" onclick="GPIncidentMobile.triggerPhotoInput('incident_images')">
                                         <i class="fa fa-camera me-1"/>Take Photo
@@ -6917,7 +7126,8 @@
                             </div>
                             <div class="mb-3">
                                 <label for="incident_videos" class="form-label">Add More Videos</label>
-                                <input type="file" class="form-control" id="incident_videos" name="incident_videos" accept="video/*" multiple="multiple"/>
+                                <input type="file" class="form-control" id="incident_videos" name="incident_videos" accept="video/*" multiple="multiple" onchange="GPIncidentMobile.previewIncidentVideos(this)"/>
+                                <div id="video-preview-container" class="mt-2 d-flex flex-column gap-2"></div>
                                 <small class="form-text text-muted">Optional; separate from photos</small>
                             </div>
                         </div>
@@ -7135,33 +7345,7 @@
                     setupSignatureCanvas('return-recipient-signature-canvas-edit', 'return-recipient-signature-input-edit');
                 });
                 
-                // Image preview function
-                function previewIncidentImages(input) {
-                    const previewContainer = document.getElementById('image-preview-container');
-                    if (!previewContainer) return;
-                    
-                    previewContainer.innerHTML = '';
-                    
-                    if (input.files) {
-                        Array.from(input.files).forEach((file, index) => {
-                            if (file.type.startsWith('image/')) {
-                                const reader = new FileReader();
-                                reader.onload = function(e) {
-                                    const imgWrapper = document.createElement('div');
-                                    imgWrapper.style.cssText = 'position: relative; width: 80px; height: 80px;';
-                                    
-                                    const img = document.createElement('img');
-                                    img.src = e.target.result;
-                                    img.style.cssText = 'width: 100%; height: 100%; object-fit: cover; border-radius: 5px; border: 2px solid #ddd;';
-                                    
-                                    imgWrapper.appendChild(img);
-                                    previewContainer.appendChild(imgWrapper);
-                                };
-                                reader.readAsDataURL(file);
-                            }
-                        });
-                    }
-                }
+                // Image/video previews and attachment deletion are handled by mobile_incident_wizard.js.
                 
                 // Location capture function
                 function getLocationAndSubmit(form, event) {
@@ -8057,7 +8241,8 @@
                                 </div>
                             </t>
                             <t t-if="can_edit">
-                                <form t-attf-action="/guardpro/mobile/compliance/item/{{item.id}}/save" method="post" enctype="multipart/form-data">
+                                <form t-attf-action="/guardpro/mobile/compliance/item/{{item.id}}/save" method="post" enctype="multipart/form-data"
+                                      data-autosave="true" data-autosave-sync="true">
                                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                     <div class="mb-2">
                                         <label class="form-label small mb-0">Result</label>
@@ -10647,11 +10832,6 @@
                                                 · <i class="fa fa-sign-out me-1"/>Out:
                                                 <t t-esc="format_datetime_tz(v, v.checkout_time, '%b %d, %H:%M')"/>
                                             </t>
-                                            <t t-if="v.watchlist_hit">
-                                                <span class="badge bg-danger ms-2" style="font-size:0.65rem;">
-                                                    <i class="fa fa-exclamation-triangle me-1"/>Watchlist
-                                                </span>
-                                            </t>
                                         </div>
                                     </div>
                                     <t t-if="v.state == 'checked_in'">
@@ -10665,12 +10845,6 @@
                                         </form>
                                     </t>
                                 </div>
-                                <t t-if="v.watchlist_hit and v.watchlist_notes">
-                                    <div class="alert alert-danger py-1 px-2 mt-2 mb-0 small">
-                                        <i class="fa fa-exclamation-triangle me-1"/>
-                                        <strong>Alert:</strong> <t t-esc="v.watchlist_notes"/>
-                                    </div>
-                                </t>
                             </div>
                         </t>
                     </div>
@@ -10869,7 +11043,7 @@
                             </div>
                         </div>
                         <form id="gp-handover-form" action="/guardpro/mobile/equipment/handover"
-                              method="post">
+                              method="post" data-autosave="true" data-autosave-sync="true">
                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                             <input type="hidden" name="equipment_id" id="gp-handover-eq-id"/>
 
@@ -11077,7 +11251,8 @@
                                 <button type="button" class="btn-close btn-sm" onclick="gpKP.closeIssueKey()"/>
                             </div>
                         </div>
-                        <form action="/guardpro/mobile/keys-packages/key/issue" method="post">
+                        <form action="/guardpro/mobile/keys-packages/key/issue" method="post"
+                              data-autosave="true" data-autosave-sync="true">
                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Key <span class="text-danger">*</span></label>
@@ -11121,7 +11296,8 @@
                                 <button type="button" class="btn-close btn-sm" onclick="gpKP.closeLogPackage()"/>
                             </div>
                         </div>
-                        <form action="/guardpro/mobile/keys-packages/package/log" method="post" enctype="multipart/form-data">
+                        <form action="/guardpro/mobile/keys-packages/package/log" method="post" enctype="multipart/form-data"
+                              data-autosave="true" data-autosave-sync="true">
                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Recipient name <span class="text-danger">*</span></label>
@@ -11513,7 +11689,8 @@
                         <div id="gp-lf-step-2" class="gp-step-body" style="display:none;">
                             <div class="gp-selected-type-badge mb-3" id="gp-lf-cat-badge"/>
                             <form id="gp-lf-form" action="/guardpro/mobile/lost-found/log"
-                                  method="post" enctype="multipart/form-data">
+                                  method="post" enctype="multipart/form-data"
+                                  data-autosave="true" data-autosave-sync="true">
                                 <input type="hidden" name="csrf_token"
                                        t-att-value="request.csrf_token()"/>
                                 <input type="hidden" name="item_category" id="gp-lf-cat-input"/>
@@ -12260,7 +12437,8 @@
                     <i class="fa fa-pencil me-1"/>Handover Note
                 </div>
                 <div class="card border-0 shadow-sm mb-3 p-3" style="border-radius:12px;">
-                    <form action="/guardpro/mobile/shift-summary/handover-note" method="post">
+                    <form action="/guardpro/mobile/shift-summary/handover-note" method="post"
+                          data-autosave="true" data-autosave-sync="true">
                         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                         <input type="hidden" name="shift_id" t-att-value="shift.id if shift else ''"/>
                         <textarea class="form-control border-0 p-0" name="handover_note"

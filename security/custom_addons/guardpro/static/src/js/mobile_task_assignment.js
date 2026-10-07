@@ -15,7 +15,9 @@
     "use strict";
 
     const POLL_INTERVAL_MS = 8000;
+    const BACKOFF_BASE_MS = 8000;
     let pollingTimer = null;
+    let pollErrorCount = 0;
     let activeTaskId = null;
 
     function isGuardMobilePage() {
@@ -192,7 +194,7 @@
     }
 
     async function pollTaskAssignments() {
-        if (window.__gpSessionDead) return;
+        if (window.__gpSessionDead || document.hidden) return;
         if (emergencyOverlayVisible()) return;
         try {
             const response = await fetch(
@@ -215,6 +217,7 @@
                 return;
             }
             const payload = await response.json();
+            pollErrorCount = 0;
             const list =
                 payload && payload.success && Array.isArray(payload.tasks)
                     ? payload.tasks
@@ -232,8 +235,18 @@
                 dismissAndroidTwaTask();
             }
         } catch (_err) {
-            // Keep UI stable; next poll retries.
+            pollErrorCount = Math.min(pollErrorCount + 1, 5);
         }
+    }
+
+    function scheduleNextPoll() {
+        clearTimeout(pollingTimer);
+        if (window.__gpSessionDead) return;
+        const base = document.hidden ? 60000 : BACKOFF_BASE_MS;
+        const delay = base * Math.pow(2, pollErrorCount);
+        pollingTimer = window.setTimeout(() => {
+            pollTaskAssignments().finally(scheduleNextPoll);
+        }, delay);
     }
 
     function scheduleRapidRechecks() {
@@ -252,12 +265,14 @@
         window.__gpPollTaskAssignmentFromNative = pollTaskAssignments;
         pollTaskAssignments();
         scheduleRapidRechecks();
-        pollingTimer = window.setInterval(pollTaskAssignments, POLL_INTERVAL_MS);
+        scheduleNextPoll();
         document.addEventListener("visibilitychange", function () {
             if (!document.hidden) {
+                pollErrorCount = 0;
                 pollTaskAssignments();
                 scheduleRapidRechecks();
             }
+            scheduleNextPoll();
         });
         window.addEventListener("focus", pollTaskAssignments);
         window.addEventListener("pageshow", function (ev) {

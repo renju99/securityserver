@@ -112,14 +112,7 @@ class ClientPortalEnhanced(CustomerPortal):
                 values['shift_count'] = request.env['guard.shift'].search_count(site_domain)
             
             if 'feedback_count' in counters:
-                # Check if user is a resident
-                resident = request.env['tenant.resident'].search([('user_id', '=', user.id)], limit=1)
-                if resident:
-                    values['feedback_count'] = request.env['client.feedback'].search_count([
-                        ('resident_id', '=', resident.id)
-                    ])
-                else:
-                    values['feedback_count'] = request.env['client.feedback'].search_count(site_domain)
+                values['feedback_count'] = request.env['client.feedback'].search_count(site_domain)
         
         return values
     
@@ -373,13 +366,8 @@ class ClientPortalEnhanced(CustomerPortal):
         
         Feedback = request.env['client.feedback']
         
-        # Check if user is a resident
-        resident = request.env['tenant.resident'].search([('user_id', '=', user.id)], limit=1)
-        
-        if resident:
-            domain = [('resident_id', '=', resident.id)]
-        elif user.site_ids:
-            domain = [('site_id', 'in', user.site_ids.ids), ('resident_id', '=', False)]
+        if user.site_ids:
+            domain = [('site_id', 'in', user.site_ids.ids)]
         else:
             domain = []
         
@@ -399,8 +387,8 @@ class ClientPortalEnhanced(CustomerPortal):
             'page_name': 'feedback',
             'feedbacks': feedbacks,
             'pager': pager,
-            'is_resident': bool(resident),
-            'resident': resident,
+            'is_resident': False,
+            'resident': False,
         }
         
         return request.render('guardpro.portal_my_feedback', values)
@@ -410,16 +398,7 @@ class ClientPortalEnhanced(CustomerPortal):
         """Display feedback submission form."""
         user = request.env.user
         
-        # Check if user is a resident
-        resident = request.env['tenant.resident'].search([('user_id', '=', user.id)], limit=1)
-        
-        # Get available guards for this site
-        if resident:
-            site = resident.site_id
-            guards = request.env['guard.profile'].search([
-                ('site_id', '=', site.id)
-            ])
-        elif user.site_ids:
+        if user.site_ids:
             site = user.site_ids[0]
             guards = request.env['guard.profile'].search([
                 ('site_id', 'in', user.site_ids.ids)
@@ -438,8 +417,8 @@ class ClientPortalEnhanced(CustomerPortal):
             'guards': guards,
             'shifts': shifts,
             'site': site,
-            'is_resident': bool(resident),
-            'resident': resident,
+            'is_resident': False,
+            'resident': False,
         }
         
         return request.render('guardpro.portal_feedback_form', values)
@@ -449,29 +428,20 @@ class ClientPortalEnhanced(CustomerPortal):
         """Submit feedback (assigned projects / overlapping guards only)."""
         user = request.env.user
 
-        # Check if user is a resident
-        resident = request.env['tenant.resident'].search([('user_id', '=', user.id)], limit=1)
-
         # Validate required fields
         if not post.get('guard_id') or not post.get('overall_rating') or not post.get('comments'):
             return request.redirect('/my/feedback/new?error=missing_fields')
 
         allowed = self._portal_allowed_site_ids(user)
-        if allowed is not None and not allowed and not resident:
+        if allowed is not None and not allowed:
             return request.redirect('/my/feedback/new?error=no_site')
 
-        # Residents are limited to their community site; others to assigned projects
-        if resident and resident.site_id:
-            site_id = resident.site_id.id
-        else:
-            site_id = self._portal_resolve_site_id(post.get('site_id'), user)
-            if not site_id and allowed:
-                # Fall back to first assigned site only when form omitted site
-                # but never accept an unvalidated posted foreign site
-                if not post.get('site_id') and len(allowed) == 1:
-                    site_id = next(iter(allowed))
-            if not site_id:
-                return request.redirect('/my/feedback/new?error=invalid_site')
+        site_id = self._portal_resolve_site_id(post.get('site_id'), user)
+        if not site_id and allowed:
+            if not post.get('site_id') and len(allowed) == 1:
+                site_id = next(iter(allowed))
+        if not site_id:
+            return request.redirect('/my/feedback/new?error=invalid_site')
 
         allowed_for_guard = [site_id] if site_id else list(allowed or [])
         if not self._portal_guard_allowed_for_sites(post.get('guard_id'), allowed_for_guard, user):
@@ -496,11 +466,7 @@ class ClientPortalEnhanced(CustomerPortal):
             'request_different_guard': bool(post.get('request_different_guard')),
         }
 
-        if resident:
-            vals['resident_id'] = resident.id
-            vals['client_id'] = resident.client_id.id
-        else:
-            vals['client_id'] = site.client_id.id
+        vals['client_id'] = site.client_id.id
 
         if post.get('shift_id'):
             try:

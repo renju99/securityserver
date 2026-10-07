@@ -190,6 +190,7 @@ class SLAKPI(models.Model):
         ('task_completion', 'Task Completion Rate'),
         ('equipment_uptime', 'Equipment Uptime'),
         ('training_compliance', 'Training Compliance'),
+        ('audit_score', 'Audit Compliance Score'),
         ('custom', 'Custom KPI')
     ], string='KPI Type', required=True)
 
@@ -509,6 +510,12 @@ class SLAPerformance(models.Model):
     @api.model
     def _calculate_kpi_value(self, kpi, start_date, end_date, sites):
         """Calculate actual KPI value for the period"""
+        if not sites:
+            # No sites on the SLA → measure across all active projects
+            sites = self.env['client.site'].search([('active', '=', True)])
+            if not sites:
+                return 0.0
+
         start_dt = fields.Datetime.to_datetime(start_date)
         end_dt = fields.Datetime.to_datetime(end_date) + timedelta(days=1)
 
@@ -518,27 +525,26 @@ class SLAPerformance(models.Model):
                 ('site_id', 'in', sites.ids),
                 ('incident_datetime', '>=', start_dt),
                 ('incident_datetime', '<', end_dt),
-                ('response_time', '>', 0)
+                ('response_time_minutes', '>', 0)
             ])
             if incidents:
-                # Assuming response_time field exists (may need to add)
-                avg_response = sum(incidents.mapped('response_time')) / len(incidents)
+                avg_response = sum(incidents.mapped('response_time_minutes')) / len(incidents)
                 return avg_response
             return 0.0
 
         elif kpi.kpi_type == 'incident_closure':
-            # Average closure time in hours
+            # Average closure time in hours (review_datetime used as closure stamp)
             incidents = self.env['incident.report'].search([
                 ('site_id', 'in', sites.ids),
                 ('incident_datetime', '>=', start_dt),
                 ('incident_datetime', '<', end_dt),
-                ('status', '=', 'closed'),
-                ('closed_date', '!=', False)
+                ('status', 'in', ['resolved', 'closed']),
+                ('review_datetime', '!=', False)
             ])
             if incidents:
                 total_hours = 0
                 for inc in incidents:
-                    delta = inc.closed_date - inc.incident_datetime
+                    delta = inc.review_datetime - inc.incident_datetime
                     total_hours += delta.total_seconds() / 3600
                 return total_hours / len(incidents)
             return 0.0
@@ -563,7 +569,7 @@ class SLAPerformance(models.Model):
                 ('checkin_time', '<', end_dt)
             ])
             if attendance:
-                on_time = len(attendance.filtered(lambda a: not a.late))
+                on_time = len(attendance.filtered(lambda a: not a.is_late))
                 return (on_time / len(attendance)) * 100
             return 0.0
 

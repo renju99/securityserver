@@ -1112,7 +1112,7 @@ class IncidentReport(models.Model):
                         raise_if_not_found=False,
                     )
                     if report:
-                        pdf_content, _content_type = report._render_qweb_pdf(incident.ids)
+                        pdf_content, _content_type = report._render_qweb_pdf(report, incident.ids)
                         attachment = Attachment.create({
                             'name': '%s.pdf' % (incident.name or 'incident_report'),
                             'type': 'binary',
@@ -1315,6 +1315,11 @@ class IncidentReport(models.Model):
             ('sla_policy_id', '!=', False),
             ('first_response_datetime', '=', False)  # Not yet responded
         ])
+
+        # Stored sla_status/sla_breach freeze at write time; force refresh with current clock
+        if open_incidents:
+            open_incidents.invalidate_recordset(['sla_status', 'sla_breach'])
+            open_incidents.mapped('sla_status')
         
         escalations_created = 0
         warnings_sent = 0
@@ -1384,6 +1389,9 @@ class IncidentReport(models.Model):
                             'escalated': True,
                             'sla_breach_time': breach_time
                         })
+                        # Refresh stored SLA status after breach
+                        incident.invalidate_recordset(['sla_status', 'sla_breach'])
+                        incident.mapped('sla_status')
                         
                         # Create escalation log
                         incident._create_escalation_log(
@@ -1428,12 +1436,17 @@ class IncidentReport(models.Model):
         """
         now = fields.Datetime.now()
         
-        # Find incidents with SLA breaches
+        # Use deadline (not stored sla_breach) — stored flag does not age with time
         breached_incidents = self.search([
-            ('sla_breach', '=', True),
-            ('status', 'not in', ['resolved', 'closed']),
-            ('sla_policy_id', '!=', False)
+            ('status', 'not in', ['resolved', 'closed', 'cancelled']),
+            ('sla_policy_id', '!=', False),
+            ('first_response_datetime', '=', False),
+            ('sla_response_deadline', '!=', False),
+            ('sla_response_deadline', '<', now),
         ])
+        if breached_incidents:
+            breached_incidents.invalidate_recordset(['sla_status', 'sla_breach'])
+            breached_incidents.mapped('sla_status')
         
         progressive_escalations = 0
         
@@ -1448,12 +1461,15 @@ class IncidentReport(models.Model):
                 
                 # Calculate breach time
                 breach_time = time_since_incident - policy.response_time_target
-                
-                # Check for level 3 escalation (management)
-                if (breach_time >= policy.level_3_escalation_time and
-                    not incident.escalation_log_ids.filtered(
-                        lambda e: e.escalation_type == 'progressive_level_3'
-                    )):
+
+                # Never create a lower progressive level after a higher one already exists
+                # (old incidents jump straight to the highest applicable level).
+                logs = incident.escalation_log_ids
+                has_l3 = bool(logs.filtered(lambda e: e.escalation_type == 'progressive_level_3'))
+                has_l2 = bool(logs.filtered(lambda e: e.escalation_type == 'progressive_level_2'))
+                has_l1 = bool(logs.filtered(lambda e: e.escalation_type == 'progressive_level_1'))
+
+                if breach_time >= policy.level_3_escalation_time and not has_l3:
                     incident._create_escalation_log(
                         escalation_type='progressive_level_3',
                         escalation_level=3,
@@ -1472,12 +1488,9 @@ class IncidentReport(models.Model):
                         user_ids=policy.escalation_level_3_user_ids
                     )
                     progressive_escalations += 1
-                
-                # Check for level 2 escalation
-                elif (breach_time >= policy.level_2_escalation_time and
-                      not incident.escalation_log_ids.filtered(
-                          lambda e: e.escalation_type == 'progressive_level_2'
-                      )):
+
+                elif (breach_time >= policy.level_2_escalation_time
+                      and not has_l2 and not has_l3):
                     incident._create_escalation_log(
                         escalation_type='progressive_level_2',
                         escalation_level=2,
@@ -1495,12 +1508,9 @@ class IncidentReport(models.Model):
                         user_ids=policy.escalation_level_2_user_ids
                     )
                     progressive_escalations += 1
-                
-                # Check for level 1 escalation
-                elif (breach_time >= policy.level_1_escalation_time and
-                      not incident.escalation_log_ids.filtered(
-                          lambda e: e.escalation_type == 'progressive_level_1'
-                      )):
+
+                elif (breach_time >= policy.level_1_escalation_time
+                      and not has_l1 and not has_l2 and not has_l3):
                     incident._create_escalation_log(
                         escalation_type='progressive_level_1',
                         escalation_level=1,
@@ -1682,12 +1692,21 @@ class IncidentReport(models.Model):
         yesterday_start = fields.Datetime.to_datetime(yesterday)
         yesterday_end = yesterday_start + timedelta(days=1)
         
-        # Find SLA breaches from yesterday
+        # Find SLA breaches from yesterday (deadline-based; stored sla_breach can be stale)
         breached_incidents = self.search([
-            ('sla_breach', '=', True),
+            ('sla_policy_id', '!=', False),
             ('incident_datetime', '>=', yesterday_start),
-            ('incident_datetime', '<', yesterday_end)
+            ('incident_datetime', '<', yesterday_end),
+            '|',
+            ('sla_breach', '=', True),
+            '&',
+            ('first_response_datetime', '=', False),
+            ('sla_response_deadline', '<', yesterday_end),
         ])
+        if breached_incidents:
+            breached_incidents.invalidate_recordset(['sla_status', 'sla_breach'])
+            breached_incidents.mapped('sla_status')
+            breached_incidents = breached_incidents.filtered('sla_breach')
         
         if not breached_incidents:
             _logger.info('No SLA breaches to report for %s', yesterday)

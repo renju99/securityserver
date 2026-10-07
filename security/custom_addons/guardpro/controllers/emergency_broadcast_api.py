@@ -18,7 +18,6 @@ class EmergencyBroadcastAPIController(http.Controller):
         auth='user',
         methods=['GET'],
         csrf=False,
-        website=True,
     )
     def get_pending_broadcasts(self, **kwargs):
         """Get all pending (unacknowledged) emergency broadcasts for the current user."""
@@ -74,7 +73,6 @@ class EmergencyBroadcastAPIController(http.Controller):
         auth='user',
         methods=['POST'],
         csrf=False,
-        website=True,
     )
     def acknowledge_broadcast(self, **kwargs):
         """Acknowledge an emergency broadcast."""

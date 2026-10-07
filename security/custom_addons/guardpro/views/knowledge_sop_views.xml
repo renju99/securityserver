@@ -240,7 +240,7 @@
     <record id="action_knowledge_sop" model="ir.actions.act_window">
         <field name="name">Standard Operating Procedures</field>
         <field name="res_model">knowledge.sop</field>
-        <field name="view_mode">kanban,list,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="context">{'search_default_state_approved': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

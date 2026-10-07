@@ -234,7 +234,7 @@
     <record id="action_guard_equipment" model="ir.actions.act_window">
         <field name="name">Guard Equipment</field>
         <field name="res_model">maintenance.equipment</field>
-        <field name="view_mode">kanban,list,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="domain">[('is_guard_equipment', '=', True)]</field>
         <field name="context">{'default_is_guard_equipment': True}</field>
         <field name="help" type="html">

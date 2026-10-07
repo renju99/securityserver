@@ -3,6 +3,7 @@
 
 from . import website_fix  # Fix for REQUEST_URI KeyError in website module
 from . import ir_http  # Permissions-Policy for mobile PWA (camera)
+from . import ir_attachment_azure  # Route media attachments to Azure Blob Storage
 from . import ir_rule
 from . import photo_attachment_mixin  # Mixin for photo attachments
 from . import mail_activity  # Suppress noisy activity assignment emails
@@ -23,8 +24,6 @@ from . import geofence_alert
 from . import client_site
 from . import location_hierarchy
 from . import guard_site
-from . import tenant_resident
-from . import resident_complaint
 from . import security_tour
 from . import security_tour_checkpoint_line
 from . import checkpoint
@@ -39,9 +38,6 @@ from . import shift_template
 from . import guard_task
 from . import guard_message
 from . import guard_message_channel_all_sites
-from . import guard_biometric_template
-from . import guard_biometric_verification
-from . import guard_biometric_device
 from . import push_to_talk
 from . import push_to_talk_all_sites
 from . import task_suggestion
@@ -70,10 +66,10 @@ from . import sla_template
 from . import emergency_procedure
 from . import emergency_broadcast
 from . import guard_attendance
+from . import guard_handover
 from . import equipment
 # OPTIONAL: Requires maintenance module
 # from . import equipment_maintenance  # Equipment using native maintenance module
-from . import cctv_camera  # CCTV Camera management
 from . import tour_log
 from . import tour_patrol_reminder
 from . import checkpoint_scan

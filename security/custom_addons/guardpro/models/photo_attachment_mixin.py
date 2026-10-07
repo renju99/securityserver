@@ -129,7 +129,7 @@ class PhotoAttachmentMixin(models.AbstractModel):
             'name': 'Photos',
             'type': 'ir.actions.act_window',
             'res_model': 'ir.attachment',
-            'view_mode': 'kanban,tree,form',
+            'view_mode': 'list,kanban,form',
             'domain': [('id', 'in', self.photo_ids.ids)],
             'context': {
                 'default_res_model': self._name,

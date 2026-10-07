@@ -53,14 +53,16 @@ class GuardProfile(models.Model):
     )
     badge_number = fields.Char(
         string='Badge Number',
-        required=True,
+        required=False,
         copy=False,
         tracking=True,
-        index=True
+        index=True,
+        default=lambda self: self.env['ir.sequence'].next_by_code('guard.badge'),
+        help='Auto-generated if left empty (sequence: GRD-####).',
     )
     phone = fields.Char(
         string='Phone Number',
-        required=True,
+        required=False,
         tracking=True
     )
     email = fields.Char(
@@ -519,7 +521,11 @@ class GuardProfile(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        """Override create to ensure email is set for eLearning access."""
+        """Override create to auto-assign badge numbers and ensure eLearning email."""
+        seq = self.env['ir.sequence']
+        for vals in vals_list:
+            if not vals.get('badge_number'):
+                vals['badge_number'] = seq.next_by_code('guard.badge') or False
         # Create records - context flags from caller will be respected automatically
         records = super(GuardProfile, self).create(vals_list)
         
@@ -618,7 +624,7 @@ class GuardProfile(models.Model):
             'name': _('Shifts - %s') % self.name,
             'type': 'ir.actions.act_window',
             'res_model': 'guard.shift',
-            'view_mode': 'calendar,list,form',
+            'view_mode': 'list,calendar,form',
             'domain': [('guard_id', '=', self.id)],
             'context': {'default_guard_id': self.id}
         }

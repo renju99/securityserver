@@ -62,9 +62,6 @@ class GuardAttendance(models.Model):
         ('nfc', 'NFC'),
         ('qr', 'QR Code'),
         ('gps', 'GPS'),
-        ('biometric', 'Biometric'),
-        ('biometric_fingerprint', 'Biometric - Fingerprint'),
-        ('biometric_facial', 'Biometric - Facial'),
     ], string='Shift Start Method', default='mobile_app')
     checkin_device = fields.Char(
         string='Shift Start Device'
@@ -89,9 +86,6 @@ class GuardAttendance(models.Model):
         ('nfc', 'NFC'),
         ('qr', 'QR Code'),
         ('gps', 'GPS'),
-        ('biometric', 'Biometric'),
-        ('biometric_fingerprint', 'Biometric - Fingerprint'),
-        ('biometric_facial', 'Biometric - Facial'),
     ], string='Shift End Method', default='mobile_app')
     checkout_device = fields.Char(
         string='Shift End Device'
@@ -136,23 +130,6 @@ class GuardAttendance(models.Model):
         string='Shift End Verified',
         default=False,
         help='GPS location verified within geofence'
-    )
-    
-    # Biometric verification
-    checkin_biometric_verified = fields.Boolean(
-        string='Biometric Verified (Check-in)',
-        default=False,
-        help='Biometric verification completed for check-in'
-    )
-    checkout_biometric_verified = fields.Boolean(
-        string='Biometric Verified (Check-out)',
-        default=False,
-        help='Biometric verification completed for check-out'
-    )
-    biometric_verification_id = fields.Many2one(
-        'guard.biometric.verification',
-        string='Biometric Verification',
-        help='Related biometric verification record'
     )
     
     # Late/Early

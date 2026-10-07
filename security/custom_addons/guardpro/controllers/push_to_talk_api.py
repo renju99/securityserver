@@ -9,6 +9,8 @@ import base64
 import json
 from datetime import datetime, timedelta
 
+from odoo.addons.guardpro.common import azure_audio_storage as _blob
+
 _logger = logging.getLogger(__name__)
 
 
@@ -173,7 +175,6 @@ class PushToTalkAPI(http.Controller):
         auth='user',
         methods=['GET'],
         csrf=False,
-        website=True,
     )
     def get_pending_ptt_http(self, **kwargs):
         """Newest unplayed incoming PTT so late devices jump to live, not a backlog.
@@ -255,7 +256,6 @@ class PushToTalkAPI(http.Controller):
         auth='user',
         methods=['POST', 'GET'],
         csrf=False,
-        website=True,
     )
     def mark_message_played_http(self, message_id, **kwargs):
         """HTTP mark-played for the native Android player (session cookie)."""
@@ -436,11 +436,14 @@ class PushToTalkAPI(http.Controller):
                     'is_played': request.env.user.id in msg.sudo().played_by_ids.ids
                 })
 
+            total = request.env['push.to.talk.message'].sudo().search_count(
+                [('channel_id', '=', channel_id)]
+            )
             return {
                 'success': True,
                 'messages': messages_list,
-                'total': len(channel.voice_message_ids),
-                'has_more': (offset + limit) < len(channel.voice_message_ids)
+                'total': total,
+                'has_more': (offset + limit) < total,
             }
 
         except Exception as e:
@@ -491,21 +494,43 @@ class PushToTalkAPI(http.Controller):
             # Calculate file size
             file_size = len(audio_binary)
 
-            # Create message using sudo() to allow guards to create messages on their assigned channels
-            # This is safe because we've already verified the guard has access to the channel
-            Message = request.env['push.to.talk.message']
-            message = Message.sudo().create({
+            # Determine content-type for one-shot upload
+            if audio_binary[:4] == b'\x1a\x45\xdf\xa3':
+                one_shot_ct = 'audio/webm'
+                one_shot_ext = 'webm'
+            else:
+                one_shot_ct = 'audio/ogg'
+                one_shot_ext = 'ogg'
+
+            msg_vals = {
                 'channel_id': channel.id,
                 **self._ptt_sender_vals(),
-                'audio_data': base64.b64encode(audio_binary),
-                'audio_filename': f'voice_message_{datetime.now().strftime("%Y%m%d_%H%M%S")}.ogg',
+                'audio_filename': f'voice_message_{datetime.now().strftime("%Y%m%d_%H%M%S")}.{one_shot_ext}',
                 'duration_seconds': duration_seconds,
                 'file_size': file_size,
                 'is_urgent': is_urgent,
                 'location_latitude': latitude,
                 'location_longitude': longitude,
-                'created_at': datetime.now()
-            })
+                'created_at': datetime.now(),
+            }
+
+            # Try Azure Blob first for one-shot uploads
+            blob_name = _blob.upload_audio(0, None, audio_binary, one_shot_ct)
+            if blob_name:
+                msg_vals['audio_blob_name'] = blob_name
+            else:
+                msg_vals['audio_data'] = base64.b64encode(audio_binary)
+
+            Message = request.env['push.to.talk.message']
+            message = Message.sudo().create(msg_vals)
+
+            # Correct blob name now that we have the message ID
+            if blob_name and message.id:
+                correct_name = _blob.blob_name_for_message(message.id, None, one_shot_ext)
+                if correct_name != blob_name:
+                    _blob.upload_audio(message.id, None, audio_binary, one_shot_ct)
+                    _blob.delete_audio(blob_name)
+                    message.sudo().write({'audio_blob_name': correct_name})
 
             # Broadcast notification to channel members
             message.action_broadcast_notification()
@@ -578,7 +603,8 @@ class PushToTalkAPI(http.Controller):
             return {'success': False, 'error': str(e)}
 
     @http.route('/guardpro/api/push-to-talk/stream/chunk', type='json', auth='user', methods=['POST'], csrf=False)
-    def stream_chunk(self, message_id, audio_chunk, is_last=False, duration_seconds=0, replace=False, **kwargs):
+    def stream_chunk(self, message_id, audio_chunk, is_last=False, duration_seconds=0, replace=False,
+                     chunk_index=None, **kwargs):
         """Receive a chunk of audio for an active stream."""
         try:
             message = request.env['push.to.talk.message'].sudo().browse(message_id)
@@ -590,7 +616,11 @@ class PushToTalkAPI(http.Controller):
 
             if audio_chunk:
                 # Last blob is the complete recording — replace, do not concat clusters.
-                message.append_audio_chunk(audio_chunk, replace=bool(replace or is_last))
+                message.append_audio_chunk(
+                    audio_chunk,
+                    chunk_index=chunk_index,
+                    replace=bool(replace or is_last)
+                )
 
             if is_last:
                 has_audio = message.finalize_stream_audio()
@@ -611,7 +641,23 @@ class PushToTalkAPI(http.Controller):
             _logger.error('Error in stream chunk: %s', str(e))
             return {'success': False, 'error': str(e)}
 
-    @http.route('/guardpro/api/push-to-talk/message/<int:message_id>/audio', type='http', auth='user', methods=['GET'], csrf=False, website=True)
+    @http.route('/guardpro/api/push-to-talk/health', type='json', auth='user', methods=['POST', 'GET'], csrf=False)
+    def ptt_health(self, **kwargs):
+        """Lightweight connectivity and permission check for PTT clients."""
+        try:
+            can_talk = self._ptt_can_talk()
+            channels = self._ptt_channels_for_user() if can_talk else self.env['push.to.talk.channel']
+            return {
+                'success': True,
+                'can_talk': can_talk,
+                'channel_count': len(channels),
+                'timestamp': datetime.now().isoformat(),
+            }
+        except Exception as e:
+            _logger.error('PTT health check failed: %s', str(e))
+            return {'success': False, 'error': str(e)}
+
+    @http.route('/guardpro/api/push-to-talk/message/<int:message_id>/audio', type='http', auth='user', methods=['GET'], csrf=False)
     def get_audio_file(self, message_id, **kwargs):
         """Serve audio file for a message with proper content-type headers."""
         try:
@@ -626,10 +672,11 @@ class PushToTalkAPI(http.Controller):
                     '[Push-to-Talk] User %s denied audio access to channel %s',
                     request.env.user.name, message.channel_id.id)
                 return request.make_response('Access denied', status=403)
-            
-            # Get audio data — 202 while the sender still holds PTT so clients
-            # wait instead of treating it as a missing file (404 retry storm).
-            if message.is_streaming or not message.audio_data:
+
+            # 202 while the sender still holds PTT — clients wait instead of
+            # generating a 404 retry storm.
+            has_audio = bool(message.audio_blob_name or message.audio_data)
+            if message.is_streaming or not has_audio:
                 _logger.debug(
                     '[Push-to-Talk] Message %s audio not ready (streaming=%s)',
                     message_id, message.is_streaming,
@@ -639,19 +686,35 @@ class PushToTalkAPI(http.Controller):
                     headers=[('Retry-After', '1')],
                     status=202,
                 )
-            
-            # Binary field values may be raw audio bytes or a base64 payload depending
-            # on how the record was created (streaming vs direct upload).
-            payload = message.audio_data
-            if isinstance(payload, str):
-                payload = payload.encode()
-            payload = bytes(payload or b'')
-            if payload[:4] == b'\x1a\x45\xdf\xa3' or payload[:4] in (b'OggS', b'RIFF', b'fLaC', b'ID3\x03'):
-                audio_binary = payload
-            else:
-                audio_binary = base64.b64decode(payload)
 
-            content_type = 'audio/ogg'
+            # --- Resolve audio bytes + content_type ---
+            audio_binary = None
+            content_type = 'audio/webm'
+
+            if message.audio_blob_name:
+                # Primary path: stream from Azure Blob Storage
+                audio_binary, blob_ct = _blob.download_audio(message.audio_blob_name)
+                if audio_binary is None:
+                    _logger.error(
+                        '[Push-to-Talk] Blob download failed for message %s blob %s',
+                        message_id, message.audio_blob_name,
+                    )
+                    return request.make_response('Audio temporarily unavailable', status=503)
+                if blob_ct:
+                    content_type = blob_ct
+
+            if audio_binary is None:
+                # Fallback path: Odoo filestore Binary field
+                payload = message.audio_data
+                if isinstance(payload, str):
+                    payload = payload.encode()
+                payload = bytes(payload or b'')
+                if payload[:4] == b'\x1a\x45\xdf\xa3' or payload[:4] in (b'OggS', b'RIFF', b'fLaC', b'ID3\x03'):
+                    audio_binary = payload
+                else:
+                    audio_binary = base64.b64decode(payload)
+
+            # Refine content-type from magic bytes / filename
             if audio_binary[:4] == b'\x1a\x45\xdf\xa3':
                 content_type = 'audio/webm'
             elif audio_binary[:4] == b'OggS':
@@ -666,40 +729,37 @@ class PushToTalkAPI(http.Controller):
                 elif message.audio_filename.endswith('.ogg') or message.audio_filename.endswith('.opus'):
                     content_type = 'audio/ogg'
             
-            # Set headers for streaming
-            headers = [
+            total_size = len(audio_binary)
+            base_headers = [
                 ('Content-Type', content_type),
-                ('Content-Length', str(len(audio_binary))),
                 ('Accept-Ranges', 'bytes'),
                 ('Cache-Control', 'public, max-age=3600'),
             ]
-            
+
             # Handle range requests for seeking
             range_header = request.httprequest.headers.get('Range')
             if range_header:
-                # Parse range header (e.g., "bytes=0-1023")
                 try:
                     range_match = range_header.replace('bytes=', '').split('-')
                     start = int(range_match[0]) if range_match[0] else 0
-                    end = int(range_match[1]) if range_match[1] and range_match[1] else len(audio_binary) - 1
-                    
-                    if start < 0 or end >= len(audio_binary) or start > end:
+                    end = int(range_match[1]) if len(range_match) > 1 and range_match[1] else total_size - 1
+
+                    if start < 0 or end >= total_size or start > end:
                         return request.make_response('Range Not Satisfiable', status=416)
-                    
-                    audio_chunk = audio_binary[start:end+1]
-                    content_length = len(audio_chunk)
-                    
-                    headers.append(('Content-Range', f'bytes {start}-{end}/{len(audio_binary)}'))
-                    headers.append(('Content-Length', str(content_length)))
-                    
+
+                    audio_chunk = audio_binary[start:end + 1]
+                    range_headers = base_headers + [
+                        ('Content-Length', str(len(audio_chunk))),
+                        ('Content-Range', f'bytes {start}-{end}/{total_size}'),
+                    ]
                     _logger.debug('[Push-to-Talk] Serving audio range %s-%s for message %s', start, end, message_id)
-                    return request.make_response(audio_chunk, headers=headers, status=206)  # 206 Partial Content
+                    return request.make_response(audio_chunk, headers=range_headers, status=206)
                 except (ValueError, IndexError):
-                    # Invalid range, serve full file
-                    pass
-            
-            _logger.debug('[Push-to-Talk] Serving full audio file for message %s, size: %s bytes', message_id, len(audio_binary))
-            return request.make_response(audio_binary, headers=headers)
+                    pass  # Invalid range — fall through to full response
+
+            full_headers = base_headers + [('Content-Length', str(total_size))]
+            _logger.debug('[Push-to-Talk] Serving full audio file for message %s, size: %s bytes', message_id, total_size)
+            return request.make_response(audio_binary, headers=full_headers)
             
         except Exception as e:
             _logger.error('[Push-to-Talk] Error serving audio file for message %s: %s', message_id, str(e))

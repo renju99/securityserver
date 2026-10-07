@@ -432,6 +432,30 @@
             <field name="description">Breach of retail or F&amp;B lease or license conditions affecting the development or other tenants.</field>
         </record>
 
+        <record id="incident_cat_noise_nuisance" model="incident.category">
+            <field name="name">Noise and Nuisance Activities</field>
+            <field name="code">NOISE</field>
+            <field name="sequence">350</field>
+            <field name="color">8</field>
+            <field name="description">Excessive noise, disruptive gatherings, or other nuisance activities violating community rules or quiet-hours policies.</field>
+        </record>
+
+        <record id="incident_cat_hazardous_activities" model="incident.category">
+            <field name="name">Hazardous Activities</field>
+            <field name="code">HAZARDOUS</field>
+            <field name="sequence">360</field>
+            <field name="color">8</field>
+            <field name="description">Dangerous activities that create safety or fire hazards (unauthorized welding, open flames, unsafe storage, etc.).</field>
+        </record>
+
+        <record id="incident_cat_dumping_trash" model="incident.category">
+            <field name="name">Dumping and Poor Trash Management</field>
+            <field name="code">TRASH</field>
+            <field name="sequence">370</field>
+            <field name="color">8</field>
+            <field name="description">Illegal dumping, leaving garbage in common areas, or failure to follow waste disposal and collection schedules.</field>
+        </record>
+
         <record id="incident_cat_other" model="incident.category">
             <field name="name">Other</field>
             <field name="code">OTHER</field>

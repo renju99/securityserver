@@ -202,7 +202,7 @@
     <record id="action_guard_shift_plan" model="ir.actions.act_window">
         <field name="name">Shift Planning</field>
         <field name="res_model">guard.shift.plan</field>
-        <field name="view_mode">calendar,list,form,pivot,graph</field>
+        <field name="view_mode">list,calendar,form,pivot,graph</field>
         <field name="search_view_id" ref="view_guard_shift_plan_search"/>
         <field name="context">{
             'search_default_upcoming': 1

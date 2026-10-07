@@ -283,16 +283,66 @@ class EmergencyBroadcastAcknowledgment(models.Model):
     def action_acknowledge(self):
         """Mark the broadcast as acknowledged by the user."""
         for record in self:
-            if not record.is_acknowledged:
-                record.write({
-                    'is_acknowledged': True,
-                    'acknowledged_date': fields.Datetime.now()
-                })
-                _logger.info(
-                    'Emergency broadcast %s acknowledged by %s',
-                    record.broadcast_id.title,
-                    record.user_id.name
-                )
+            if record.is_acknowledged:
+                continue
+            record.write({
+                'is_acknowledged': True,
+                'acknowledged_date': fields.Datetime.now()
+            })
+            _logger.info(
+                'Emergency broadcast %s acknowledged by %s',
+                record.broadcast_id.title,
+                record.user_id.name
+            )
+            record._notify_sender_of_acknowledgment()
+
+    def _notify_sender_of_acknowledgment(self):
+        """Notify the broadcast sender and log the acknowledgment."""
+        self.ensure_one()
+        broadcast = self.broadcast_id
+        sender = broadcast.sent_by
+        if not sender or not sender.partner_id:
+            return
+
+        ack_time = self.acknowledged_date or fields.Datetime.now()
+        ack_time_display = fields.Datetime.context_timestamp(
+            self.env.user, ack_time
+        ).strftime('%Y-%m-%d %H:%M:%S')
+
+        body = _(
+            'Emergency broadcast "%(title)s" was acknowledged by %(user)s '
+            '(Guard: %(guard)s) at %(time)s.'
+        ) % {
+            'title': broadcast.title,
+            'user': self.user_id.name,
+            'guard': self.guard_id.name,
+            'time': ack_time_display,
+        }
+
+        # Log on the broadcast chatter so it is tracked and followers are notified.
+        broadcast.message_post(
+            body=body,
+            partner_ids=[sender.partner_id.id],
+            subtype_xmlid='mail.mt_comment',
+        )
+
+        # Send an immediate Odoo bus notification to the sender if they are online.
+        try:
+            self.env['bus.bus']._sendone(
+                sender.partner_id,
+                'simple_notification',
+                {
+                    'type': 'success',
+                    'title': _('Emergency Broadcast Acknowledged'),
+                    'message': body,
+                    'sticky': True,
+                }
+            )
+        except Exception as e:
+            _logger.error(
+                'Failed to send acknowledgment notification for broadcast %s: %s',
+                broadcast.id, str(e)
+            )
 
     def get_pending_broadcasts(self, user_id):
         """Get pending unacknowledged broadcasts still in 'sent' state.

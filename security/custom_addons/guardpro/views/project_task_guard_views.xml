@@ -237,7 +237,7 @@
     <record id="action_guard_task_project" model="ir.actions.act_window">
         <field name="name">Guard Tasks</field>
         <field name="res_model">project.task</field>
-        <field name="view_mode">kanban,list,form,calendar,pivot,graph</field>
+        <field name="view_mode">list,kanban,form,calendar,pivot,graph</field>
         <field name="domain">[('is_guard_task', '=', True)]</field>
         <field name="context">{
             'default_is_guard_task': True,

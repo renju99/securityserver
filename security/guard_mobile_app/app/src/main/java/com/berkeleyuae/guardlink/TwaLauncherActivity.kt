@@ -256,6 +256,10 @@ class TwaLauncherActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // While this activity process is alive, native polls run here — not in
+        // LocationService (avoids duplicate /pending hits during login).
+        PttPlaybackService.twaPollerActive = true
+
         // targetSdk 35/36: edge-to-edge is mandatory. Do not call
         // Window.setStatusBarColor / setNavigationBarColor — those APIs
         // are deprecated and flagged by Play Console. Bar colors come
@@ -318,6 +322,7 @@ class TwaLauncherActivity : AppCompatActivity() {
     override fun onDestroy() {
         stopNativeEmergencyBridgePolling()
         stopNativePushToTalkPolling()
+        PttPlaybackService.twaPollerActive = false
         super.onDestroy()
     }
 
@@ -335,7 +340,6 @@ class TwaLauncherActivity : AppCompatActivity() {
     }
 
     private fun startNativePushToTalkPolling() {
-        PttPlaybackService.twaPollerActive = true
         pttHttpPollHandler.removeCallbacks(pttHttpPollRunnable)
         // Stagger PTT polling start so it doesn't overlap the emergency-poll
         // burst that fires at t=3 s after resume.
@@ -344,7 +348,6 @@ class TwaLauncherActivity : AppCompatActivity() {
 
     private fun stopNativePushToTalkPolling() {
         pttHttpPollHandler.removeCallbacks(pttHttpPollRunnable)
-        PttPlaybackService.twaPollerActive = false
     }
 
     /**
@@ -740,6 +743,8 @@ class TwaLauncherActivity : AppCompatActivity() {
                 pttNativeHttpInFlight = false
             }
         }.start()
+        // Async poll — unknown until callback; keep quiet cadence by default.
+        return false
     }
 
     /** Stable integer notif id derived from the outbox row id. */

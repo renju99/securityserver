@@ -130,7 +130,13 @@ class GuardShift(models.Model):
         default=False,
         help='Whether shift reminder notification has been sent'
     )
-    
+
+    missed_tour_alert_sent = fields.Boolean(
+        string='Missed Tour Alert Sent',
+        default=False,
+        help='Set when the missed patrol alert email has been sent for this shift'
+    )
+
     # Shift Start/Shift End
     checkin_time = fields.Datetime(
         string='Shift Start Time',
@@ -912,7 +918,7 @@ class GuardShift(models.Model):
         return
 
     def action_checkin(self, latitude=None, longitude=None, checkpoint_scan_id=None, photo=None,
-                      biometric_type=None, biometric_data=None, device_id=None):
+                      device_id=None):
         """
         Start shift for guard.
         Supports multiple shift starts during a shift.
@@ -948,28 +954,6 @@ class GuardShift(models.Model):
             ) % (self.total_hours_worked, self.duration))
         
         now = fields.Datetime.now()
-        
-        # BIOMETRIC VERIFICATION (if required and provided)
-        if biometric_type and biometric_data:
-            # Verify biometric
-            processor = self.env['guard.biometric.processor']
-            verification_result = processor.verify_biometric(
-                guard_id=self.guard_id.id,
-                biometric_type=biometric_type,
-                captured_data=biometric_data,
-                verification_purpose='checkin',
-                device_id=device_id,
-                device_type='mobile',
-                latitude=latitude,
-                longitude=longitude,
-                shift_id=self.id
-            )
-            
-            if not verification_result.get('verified'):
-                raise ValidationError(_(
-                    'Biometric verification failed! '
-                    'Confidence: %.1f%%. Please try again.'
-                ) % (verification_result.get('confidence', 0) * 100))
         
         # SECURITY: Physical verification requirement (GPS spoofing prevention)
         if self.site_id.require_physical_verification:
@@ -1049,7 +1033,7 @@ class GuardShift(models.Model):
         }
 
     def action_checkout(self, latitude=None, longitude=None, complete_shift=False,
-                       biometric_type=None, biometric_data=None, device_id=None):
+                       device_id=None):
         """
         End shift for guard.
         Supports multiple shift ends during a shift.
@@ -1078,28 +1062,6 @@ class GuardShift(models.Model):
             active_attendance = active_attendance[0]
         
         now = fields.Datetime.now()
-        
-        # BIOMETRIC VERIFICATION (if required and provided)
-        if biometric_type and biometric_data:
-            # Verify biometric
-            processor = self.env['guard.biometric.processor']
-            verification_result = processor.verify_biometric(
-                guard_id=self.guard_id.id,
-                biometric_type=biometric_type,
-                captured_data=biometric_data,
-                verification_purpose='checkout',
-                device_id=device_id,
-                device_type='mobile',
-                latitude=latitude,
-                longitude=longitude,
-                shift_id=self.id
-            )
-            
-            if not verification_result.get('verified'):
-                raise ValidationError(_(
-                    'Biometric verification failed! '
-                    'Confidence: %.1f%%. Please try again.'
-                ) % (verification_result.get('confidence', 0) * 100))
         
         # Verify geofence if enabled
         if self.site_id.geofence_enabled:
@@ -1367,7 +1329,106 @@ class GuardShift(models.Model):
                 shift.status = 'completed'
 
         return True
-    
+
+    def _get_missed_tours(self):
+        """Return assigned tours with no in-progress or completed log on this shift."""
+        self.ensure_one()
+        if not self.tour_ids:
+            return self.env['security.tour']
+        logged_tours = self.tour_log_ids.filtered(
+            lambda log: log.status in ('in_progress', 'completed')
+        ).mapped('tour_id')
+        return self.tour_ids - logged_tours
+
+    def _get_missed_tour_alert_recipients(self):
+        """Return comma-separated alert recipients for missed patrols."""
+        self.ensure_one()
+        if self.site_id:
+            return self.site_id._get_project_manager_emails()
+        return ''
+
+    @api.model
+    def _configure_missed_tour_cron(self):
+        """Point the overdue-tours cron at the missed-patrol check and activate it."""
+        cron = self.env.ref('guardpro.cron_check_overdue_tours', raise_if_not_found=False)
+        if not cron:
+            return
+        model = self.env['ir.model']._get('guard.shift')
+        cron.write({
+            'name': 'GuardPro: Check Missed Patrols',
+            'model_id': model.id,
+            'code': 'model.check_missed_tours()',
+            'active': True,
+        })
+
+    @api.model
+    def check_missed_tours(self):
+        """Detect shifts whose assigned tours were never started/completed and alert PMs.
+
+        Called by scheduled action. A missed patrol means the shift window has
+        ended (plus a short grace period) but no tour log exists in progress or
+        completed for an assigned tour.
+        """
+        from datetime import timedelta
+
+        now = fields.Datetime.now()
+        grace = timedelta(minutes=15)
+        lookback = timedelta(days=2)
+
+        missed_shifts = self.search([
+            ('end_datetime', '!=', False),
+            ('end_datetime', '<', now - grace),
+            ('end_datetime', '>', now - lookback),
+            ('status', 'not in', ['cancelled', 'no_show']),
+            ('tour_ids', '!=', False),
+            ('missed_tour_alert_sent', '=', False),
+        ])
+
+        template = self.env.ref(
+            'guardpro.email_template_missed_tour_alert',
+            raise_if_not_found=False
+        )
+
+        for shift in missed_shifts:
+            try:
+                missing_tours = shift._get_missed_tours()
+                if not missing_tours:
+                    continue
+
+                recipients = shift._get_missed_tour_alert_recipients()
+                if not recipients:
+                    _logger.warning(
+                        'No alert recipients configured for missed tours on shift %s',
+                        shift.id
+                    )
+                    continue
+
+                if template:
+                    template.send_mail(shift.id, force_send=True)
+
+                shift.missed_tour_alert_sent = True
+
+                shift.message_post(
+                    body=Markup(
+                        '<p><strong>Missed Patrol Alert Sent</strong></p>'
+                        '<p>Alert sent for the following scheduled tour(s) that were not completed:</p>'
+                        '<ul>%s</ul>'
+                    ) % ''.join('<li>%s</li>' % tour.name for tour in missing_tours),
+                    subject=_('Missed Patrol Alert'),
+                    message_type='notification',
+                    subtype_xmlid='mail.mt_comment'
+                )
+
+                _logger.info(
+                    'Sent missed tour alert for shift %s (tours: %s)',
+                    shift.id,
+                    ', '.join(missing_tours.mapped('name'))
+                )
+            except Exception as e:
+                _logger.error('Error processing missed tours for shift %s: %s', shift.id, str(e))
+
+        return True
+
     def init(self):
         """Create database indexes for performance optimization."""
         # Composite index for guard schedule queries

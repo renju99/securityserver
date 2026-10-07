@@ -9,7 +9,6 @@ from . import push_to_talk_api
 from . import smart_features_api
 from . import guard_portal
 from . import client_portal
-from . import portal_resident
 from . import api_v1
 from . import emergency_broadcast_api
 from . import task_assignment_api

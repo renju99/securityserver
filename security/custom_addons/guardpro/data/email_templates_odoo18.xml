@@ -1,103 +1,174 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
-    <!-- Applied via post-migration when ir.model.data is noupdate (legacy ${} templates). -->
-    <data noupdate="1">
-        <function model="mail.template" name="_guardpro_migrate_odoo18_inline_templates"/>
-    </data>
     <data noupdate="0">
+        <!-- Incident Submitted (category-driven) -->
         <record id="incident_category_submit_email_template" model="mail.template">
-            <field name="subject">Incident Submitted: {{ object.name }} - {{ object.title }}</field>
-            <field name="email_from">{{ user.email_formatted }}</field>
-            <field name="body_html" type="html">
-                <div style="font-family: Arial, sans-serif; padding: 20px;">
-                    <h2 style="color: #1f4e78; margin: 0 0 12px 0;">Incident Submitted</h2>
-                    <p style="margin: 0 0 16px 0;">
-                        A new incident has been submitted and requires review.
-                    </p>
-                    <table style="width: 100%; border-collapse: collapse; margin: 12px 0 18px 0;">
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 32%;">Incident Number</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.name }}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Title</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.title }}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Category</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.category_id.name ||| '' }}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Severity</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.severity ||| '' }}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Project</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.site_id.name ||| '' }}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Reported By</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.guard_id.name ||| '' }}</td>
-                        </tr>
-                    </table>
-                    <p style="margin: 0;">
-                        Incident details are attached as PDF when enabled on the category configuration.
-                    </p>
-                </div>
-            </field>
-        </record>
+            <field name="name">Incident Submitted - Category Notification</field>
+            <field name="model_id" ref="model_incident_report"/>
+            <field name="subject">Incident Submitted: {{ object.name }} - {{ object.title }}</field><field name="email_from">{{ user.email_formatted }}</field><field name="report_template_ids" eval="[(4, ref('action_report_incident'))]"/>
+            <field name="body_html" type="char">&lt;div style="background-color: #f4f6f8; padding: 24px 12px; font-family: Arial, Helvetica, sans-serif;"&gt;
+    &lt;table align="center" width="600" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-collapse: collapse;"&gt;
+        &lt;tr&gt;
+            &lt;td style="background: linear-gradient(135deg, #1a237e 0%, #283593 100%); padding: 28px 32px; text-align: center;"&gt;
+                &lt;h1 style="color: #ffffff; margin: 0; font-size: 24px;"&gt;GuardLink&lt;/h1&gt;
+                &lt;p style="color: #ffffff; margin: 6px 0 0; font-size: 14px;"&gt;Incident Notification&lt;/p&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td style="padding: 32px 32px 20px;"&gt;
+                &lt;h2 style="color: #1a237e; margin: 0 0 10px; font-size: 22px;"&gt;Incident Submitted&lt;/h2&gt;
+                &lt;p style="color: #555555; margin: 0; font-size: 15px; line-height: 1.6;"&gt;
+                    A new incident has been submitted and requires review. A PDF report is attached to this email.
+                &lt;/p&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td style="padding: 0 32px 24px;"&gt;
+                &lt;table width="100%" style="border-collapse: collapse; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;"&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 12px 16px; background-color: #f5f7fa; width: 35%; font-weight: 600; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;Incident Number&lt;/td&gt;
+                        &lt;td style="padding: 12px 16px; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;&lt;t t-out="object.name or ''"/&gt;&lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 12px 16px; background-color: #f5f7fa; font-weight: 600; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;Title&lt;/td&gt;
+                        &lt;td style="padding: 12px 16px; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;&lt;t t-out="object.title or ''"/&gt;&lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 12px 16px; background-color: #f5f7fa; font-weight: 600; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;Category&lt;/td&gt;
+                        &lt;td style="padding: 12px 16px; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;&lt;t t-out="object.category_id.name or ''"/&gt;&lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 12px 16px; background-color: #f5f7fa; font-weight: 600; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;Severity&lt;/td&gt;
+                        &lt;td style="padding: 12px 16px; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;
+                            &lt;t t-if="object.severity"&gt;
+                                &lt;span t-attf-style="display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase; background-color: {{ {'critical':'#d32f2f','high':'#f57c00','medium':'#fbc02d','low':'#388e3c'}.get(object.severity, '#757575') }}; color: #ffffff;"&gt;
+                                    &lt;t t-out="object.severity.upper()"/&gt;
+                                &lt;/span&gt;
+                            &lt;/t&gt;
+                            &lt;t t-else=""/&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 12px 16px; background-color: #f5f7fa; font-weight: 600; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;Project&lt;/td&gt;
+                        &lt;td style="padding: 12px 16px; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;&lt;t t-out="object.site_id.name or ''"/&gt;&lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 12px 16px; background-color: #f5f7fa; font-weight: 600; color: #333333; font-size: 14px;"&gt;Reported By&lt;/td&gt;
+                        &lt;td style="padding: 12px 16px; color: #333333; font-size: 14px;"&gt;&lt;t t-out="object.guard_id.name or ''"/&gt;&lt;/td&gt;
+                    &lt;/tr&gt;
+                &lt;/table&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td style="padding: 0 32px 28px;"&gt;
+                &lt;h3 style="color: #1a237e; margin: 0 0 10px; font-size: 16px;"&gt;Description&lt;/h3&gt;
+                &lt;div style="padding: 16px; background-color: #f8f9fa; border-left: 4px solid #1a237e; border-radius: 6px; color: #444444; font-size: 14px; line-height: 1.6;"&gt;
+                    &lt;t t-out="object.description or 'No description provided.'"/&gt;
+                &lt;/div&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td style="padding: 0 32px 32px; text-align: center;"&gt;
+                &lt;a t-attf-href="/guardpro/mobile/incident/{{ object.id }}" style="display: inline-block; padding: 14px 32px; background-color: #1a237e; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;"&gt;View Incident&lt;/a&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td style="background-color: #f4f6f8; padding: 20px 32px; text-align: center; border-top: 1px solid #e0e0e0;"&gt;
+                &lt;p style="margin: 0; color: #777777; font-size: 12px; line-height: 1.5;"&gt;
+                    This is an automated notification from GuardLink.&lt;br/&gt;Please do not reply directly to this email.
+                &lt;/p&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/div&gt;</field></record>
 
+        <!-- New Incident Report notification -->
         <record id="incident_notification_email" model="mail.template">
-            <field name="subject">New Incident Report: {{ object.name }} - {{ object.title }}</field>
-            <field name="email_from">{{ user.email_formatted }}</field>
-            <field name="email_to">{{ object.site_id.site_email or object.site_id.client_id.email }}</field>
-            <field name="body_html" type="html">
-                <div style="font-family: Arial, sans-serif; padding: 20px;">
-                    <h2 style="color: #d32f2f;">Incident Report Notification</h2>
-                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; width: 30%;">Incident Number:</td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">{{ object.name }}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Title:</td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">{{ object.title }}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Severity:</td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">{{ object.severity ||| '' }}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Category:</td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">{{ object.category_id.name ||| '' }}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Site:</td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">{{ object.site_id.name ||| '' }}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Reporting Guard:</td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">{{ object.guard_id.name ||| '' }}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Date/Time:</td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">{{ format_datetime(object.incident_datetime, dt_format='medium') }}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Location:</td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">{{ object.location ||| 'N/A' }}</td>
-                        </tr>
-                    </table>
-                    <h3>Description:</h3>
-                    <div style="padding: 15px; background: #f5f5f5; border-radius: 5px; margin: 20px 0;">
-                        {{ object.description }}
-                    </div>
-                    <div style="margin-top: 30px; padding: 15px; background: #e3f2fd; border-radius: 5px;">
-                        <p><strong>This is an automated notification from GuardLink.</strong></p>
-                        <p>Please review the incident in the system for full details and take appropriate action.</p>
-                    </div>
-                </div>
-            </field>
-        </record>
+            <field name="name">Incident Report Notification</field>
+            <field name="model_id" ref="model_incident_report"/>
+            <field name="subject">New Incident Report: {{ object.name }} - {{ object.title }}</field><field name="email_from">{{ user.email_formatted }}</field><field name="email_to">{{ object.site_id.site_email or object.site_id.client_id.email }}</field><field name="report_template_ids" eval="[(4, ref('action_report_incident'))]"/>
+            <field name="body_html" type="char">&lt;div style="background-color: #f4f6f8; padding: 24px 12px; font-family: Arial, Helvetica, sans-serif;"&gt;
+    &lt;table align="center" width="600" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-collapse: collapse;"&gt;
+        &lt;tr&gt;
+            &lt;td style="background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); padding: 28px 32px; text-align: center;"&gt;
+                &lt;h1 style="color: #ffffff; margin: 0; font-size: 24px;"&gt;GuardLink&lt;/h1&gt;
+                &lt;p style="color: #ffffff; margin: 6px 0 0; font-size: 14px;"&gt;Incident Alert&lt;/p&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td style="padding: 32px 32px 20px;"&gt;
+                &lt;h2 style="color: #d32f2f; margin: 0 0 10px; font-size: 22px;"&gt;New Incident Report&lt;/h2&gt;
+                &lt;p style="color: #555555; margin: 0; font-size: 15px; line-height: 1.6;"&gt;
+                    A new incident has been reported and requires your attention.
+                &lt;/p&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td style="padding: 0 32px 24px;"&gt;
+                &lt;table width="100%" style="border-collapse: collapse; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;"&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 12px 16px; background-color: #fff3f3; width: 35%; font-weight: 600; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;Incident Number&lt;/td&gt;
+                        &lt;td style="padding: 12px 16px; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;&lt;t t-out="object.name or ''"/&gt;&lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 12px 16px; background-color: #fff3f3; font-weight: 600; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;Title&lt;/td&gt;
+                        &lt;td style="padding: 12px 16px; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;&lt;t t-out="object.title or ''"/&gt;&lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 12px 16px; background-color: #fff3f3; font-weight: 600; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;Severity&lt;/td&gt;
+                        &lt;td style="padding: 12px 16px; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;
+                            &lt;t t-if="object.severity"&gt;
+                                &lt;span t-attf-style="display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase; background-color: {{ {'critical':'#d32f2f','high':'#f57c00','medium':'#fbc02d','low':'#388e3c'}.get(object.severity, '#757575') }}; color: #ffffff;"&gt;
+                                    &lt;t t-out="object.severity.upper()"/&gt;
+                                &lt;/span&gt;
+                            &lt;/t&gt;
+                            &lt;t t-else=""/&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 12px 16px; background-color: #fff3f3; font-weight: 600; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;Category&lt;/td&gt;
+                        &lt;td style="padding: 12px 16px; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;&lt;t t-out="object.category_id.name or ''"/&gt;&lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 12px 16px; background-color: #fff3f3; font-weight: 600; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;Site&lt;/td&gt;
+                        &lt;td style="padding: 12px 16px; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;&lt;t t-out="object.site_id.name or ''"/&gt;&lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 12px 16px; background-color: #fff3f3; font-weight: 600; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;Reporting Guard&lt;/td&gt;
+                        &lt;td style="padding: 12px 16px; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;&lt;t t-out="object.guard_id.name or ''"/&gt;&lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 12px 16px; background-color: #fff3f3; font-weight: 600; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;Date / Time&lt;/td&gt;
+                        &lt;td style="padding: 12px 16px; color: #333333; font-size: 14px; border-bottom: 1px solid #e0e0e0;"&gt;&lt;t t-out="format_datetime(object.incident_datetime, dt_format='medium') if object.incident_datetime else ''"/&gt;&lt;/td&gt;
+                    &lt;/tr&gt;
+                    &lt;tr&gt;
+                        &lt;td style="padding: 12px 16px; background-color: #fff3f3; font-weight: 600; color: #333333; font-size: 14px;"&gt;Location&lt;/td&gt;
+                        &lt;td style="padding: 12px 16px; color: #333333; font-size: 14px;"&gt;&lt;t t-out="object.location or 'N/A'"/&gt;&lt;/td&gt;
+                    &lt;/tr&gt;
+                &lt;/table&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td style="padding: 0 32px 28px;"&gt;
+                &lt;h3 style="color: #d32f2f; margin: 0 0 10px; font-size: 16px;"&gt;Description&lt;/h3&gt;
+                &lt;div style="padding: 16px; background-color: #fff8f8; border-left: 4px solid #d32f2f; border-radius: 6px; color: #444444; font-size: 14px; line-height: 1.6;"&gt;
+                    &lt;t t-out="object.description or 'No description provided.'"/&gt;
+                &lt;/div&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td style="padding: 0 32px 32px; text-align: center;"&gt;
+                &lt;a t-attf-href="/guardpro/mobile/incident/{{ object.id }}" style="display: inline-block; padding: 14px 32px; background-color: #d32f2f; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;"&gt;View Incident&lt;/a&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td style="background-color: #f4f6f8; padding: 20px 32px; text-align: center; border-top: 1px solid #e0e0e0;"&gt;
+                &lt;p style="margin: 0; color: #777777; font-size: 12px; line-height: 1.5;"&gt;
+                    This is an automated notification from GuardLink.&lt;br/&gt;Please do not reply directly to this email.
+                &lt;/p&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/div&gt;</field></record>
     </data>
 </odoo>

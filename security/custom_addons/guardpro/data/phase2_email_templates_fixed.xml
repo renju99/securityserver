@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
     <data noupdate="1">
         <!-- ============================================ -->
@@ -9,89 +9,75 @@
         <record id="email_template_geofence_violation_alert" model="mail.template">
             <field name="name">Geofence Violation Alert</field>
             <field name="model_id" ref="model_geofence_alert"/>
-            <field name="subject">🚨 URGENT: Geofence Violation - ${object.guard_id.name or ''} - ${object.site_id.name or ''}</field>
-            <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
-            <field name="email_to">${(object.shift_id.supervisor_id.email if object.shift_id and object.shift_id.supervisor_id else object.site_id.manager_id.email if object.site_id and object.site_id.manager_id else '')|safe}</field>
-            <field name="body_html" type="html">
-                <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto;">
-                    <div style="background-color: #d32f2f; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
-                        <h1 style="margin: 0;">🚨 GEOFENCE VIOLATION ALERT</h1>
-                        <p style="margin: 10px 0 0 0;">Immediate Action Required</p>
-                    </div>
+            <field name="subject">🚨 URGENT: Geofence Violation - {{ object.guard_id.name or '' }} - {{ object.site_id.name or '' }}</field><field name="email_from">{{ user.email_formatted }}</field><field name="email_to">{{ user.email or '' }}</field><field name="body_html" type="char">&lt;div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto;"&gt;
+                    &lt;div style="background-color: #d32f2f; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;"&gt;
+                        &lt;h1 style="margin: 0;"&gt;🚨 GEOFENCE VIOLATION ALERT&lt;/h1&gt;
+                        &lt;p style="margin: 10px 0 0 0;"&gt;Immediate Action Required&lt;/p&gt;
+                    &lt;/div&gt;
                     
-                    <div style="background-color: #ffffff; padding: 20px; border: 1px solid #ddd;">
-                        <p><strong>Supervisor,</strong></p>
-                        <p>This is an automated alert to notify you of a location compliance violation that requires your immediate attention.</p>
+                    &lt;div style="background-color: #ffffff; padding: 20px; border: 1px solid #ddd;"&gt;
+                        &lt;p&gt;&lt;strong&gt;Supervisor,&lt;/strong&gt;&lt;/p&gt;
+                        &lt;p&gt;This is an automated alert to notify you of a location compliance violation that requires your immediate attention.&lt;/p&gt;
                         
-                        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-                            <tr>
-                                <th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;">Guard Name</th>
-                                <td style="padding: 10px; border: 1px solid #ddd;"><strong>${object.guard_id.name or 'N/A'}</strong></td>
-                            </tr>
-                            <tr>
-                                <th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;">Guard Phone</th>
-                                <td style="padding: 10px; border: 1px solid #ddd;">${object.guard_id.phone or object.guard_id.user_id.phone or 'N/A'}</td>
-                            </tr>
-                            <tr>
-                                <th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;">Alert Type</th>
-                                <td style="padding: 10px; border: 1px solid #ddd; color: #d32f2f; font-weight: bold;">
-                                    ${dict(object._fields['alert_type'].selection).get(object.alert_type, 'N/A')}
-                                </td>
-                            </tr>
-                            <tr>
-                                <th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;">Expected Project</th>
-                                <td style="padding: 10px; border: 1px solid #ddd;">${object.site_id.name if object.site_id else 'N/A'}</td>
-                            </tr>
-                            <tr>
-                                <th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;">Alert Time</th>
-                                <td style="padding: 10px; border: 1px solid #ddd;">${format_datetime(object.alert_datetime, dt_format='medium', tz='UTC') if object.alert_datetime else 'N/A'}</td>
-                            </tr>
-                            <tr>
-                                <th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;">Distance from Project</th>
-                                <td style="padding: 10px; border: 1px solid #ddd;">
-                                    <strong style="color: #d32f2f;">
-                                        % if object.distance_from_site:
-                                            ${'{:.2f}'.format(object.distance_from_site)} km
-                                        % else:
+                        &lt;table style="width: 100%; border-collapse: collapse; margin: 20px 0;"&gt;
+                            &lt;tr&gt;
+                                &lt;th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;"&gt;Guard Name&lt;/th&gt;
+                                &lt;td style="padding: 10px; border: 1px solid #ddd;"&gt;&lt;strong&gt;&lt;t t-out="object.guard_id.name or 'N/A'"/&gt;&lt;/strong&gt;&lt;/td&gt;
+                            &lt;/tr&gt;
+                            &lt;tr&gt;
+                                &lt;th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;"&gt;Guard Phone&lt;/th&gt;
+                                &lt;td style="padding: 10px; border: 1px solid #ddd;"&gt;&lt;t t-out="object.guard_id.phone or object.guard_id.user_id.phone or 'N/A'"/&gt;&lt;/td&gt;
+                            &lt;/tr&gt;
+                            &lt;tr&gt;
+                                &lt;th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;"&gt;Alert Type&lt;/th&gt;
+                                &lt;td style="padding: 10px; border: 1px solid #ddd; color: #d32f2f; font-weight: bold;"&gt;
+                                    &lt;t t-out="dict(object._fields['alert_type'].selection).get(object.alert_type, 'N/A')"/&gt;
+                                &lt;/td&gt;
+                            &lt;/tr&gt;
+                            &lt;tr&gt;
+                                &lt;th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;"&gt;Expected Site&lt;/th&gt;
+                                &lt;td style="padding: 10px; border: 1px solid #ddd;"&gt;&lt;t t-out="object.site_id.name if object.site_id else 'N/A'"/&gt;&lt;/td&gt;
+                            &lt;/tr&gt;
+                            &lt;tr&gt;
+                                &lt;th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;"&gt;Alert Time&lt;/th&gt;
+                                &lt;td style="padding: 10px; border: 1px solid #ddd;"&gt;&lt;t t-out="format_datetime(object.alert_datetime, dt_format='medium', tz='UTC') if object.alert_datetime else 'N/A'"/&gt;&lt;/td&gt;
+                            &lt;/tr&gt;
+                            &lt;tr&gt;
+                                &lt;th style="background-color: #f5f5f5; padding: 10px; text-align: left; border: 1px solid #ddd;"&gt;Distance from Site&lt;/th&gt;
+                                &lt;td style="padding: 10px; border: 1px solid #ddd;"&gt;
+                                    &lt;strong style="color: #d32f2f;"&gt;
+                                        &lt;t t-if="object.distance_from_site"&gt;
+                                            &lt;t t-out="round(object.distance_from_site or 0, 2)"/&gt; km
+                                        &lt;/t&gt;
+                                        &lt;t t-else=""&gt;
                                             N/A
-                                        % endif
-                                    </strong>
-                                </td>
-                            </tr>
-                        </table>
+                                        &lt;/t&gt;
+                                    &lt;/strong&gt;
+                                &lt;/td&gt;
+                            &lt;/tr&gt;
+                        &lt;/table&gt;
                         
-                        <h3 style="color: #d32f2f;">Required Actions:</h3>
-                        <ol style="line-height: 1.8;">
-                            <li><strong>Contact the guard immediately</strong> to verify their location and situation</li>
-                            <li><strong>Document the explanation</strong> for the violation in the system</li>
-                            <li><strong>Update alert status</strong> once the situation is resolved</li>
-                            <li><strong>Report to management</strong> if this is a serious violation or safety concern</li>
-                        </ol>
+                        &lt;h3 style="color: #d32f2f;"&gt;Required Actions:&lt;/h3&gt;
+                        &lt;ol style="line-height: 1.8;"&gt;
+                            &lt;li&gt;&lt;strong&gt;Contact the guard immediately&lt;/strong&gt; to verify their location and situation&lt;/li&gt;
+                            &lt;li&gt;&lt;strong&gt;Document the explanation&lt;/strong&gt; for the violation in the system&lt;/li&gt;
+                            &lt;li&gt;&lt;strong&gt;Update alert status&lt;/strong&gt; once the situation is resolved&lt;/li&gt;
+                            &lt;li&gt;&lt;strong&gt;Report to management&lt;/strong&gt; if this is a serious violation or safety concern&lt;/li&gt;
+                        &lt;/ol&gt;
                         
-                        <div style="text-align: center; margin: 20px 0;">
-                            <a href="${object.get_portal_url() if hasattr(object, 'get_portal_url') else '#'}" 
-                               style="display: inline-block; padding: 12px 30px; background-color: #d32f2f; color: white; text-decoration: none; border-radius: 4px;">
+                        &lt;div style="text-align: center; margin: 20px 0;"&gt;
+                            &lt;a href="%24%7Bobject.get_portal_url()%20if%20hasattr(object,%20'get_portal_url')%20else%20'#'%7D" style="display: inline-block; padding: 12px 30px; background-color: #d32f2f; color: white; text-decoration: none; border-radius: 4px;"&gt;
                                 View Alert Details
-                            </a>
-                        </div>
-                    </div>
+                            &lt;/a&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
                     
-                    <div style="background-color: #f5f5f5; padding: 15px; text-align: center; border-radius: 0 0 5px 5px;">
-                        <p style="margin: 0; font-size: 12px; color: #777;">GuardLink Security Management System</p>
-                        <p style="margin: 5px 0 0 0; font-size: 11px; color: #999;">Automated Geofence Monitoring Alert</p>
-                    </div>
-                </div>
-            </field>
-        </record>
+                    &lt;div style="background-color: #f5f5f5; padding: 15px; text-align: center; border-radius: 0 0 5px 5px;"&gt;
+                        &lt;p style="margin: 0; font-size: 12px; color: #777;"&gt;GuardPro Security Management System&lt;/p&gt;
+                        &lt;p style="margin: 5px 0 0 0; font-size: 11px; color: #999;"&gt;Automated Geofence Monitoring Alert&lt;/p&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            </field></record>
         
     </data>
 </odoo>
-
-
-
-
-
-
-
-
-

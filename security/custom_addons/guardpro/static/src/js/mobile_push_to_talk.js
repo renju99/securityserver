@@ -54,6 +54,7 @@
             this.streamStartPromise = null;
             this.pendingFinalChunk = false;
             this._chunkUploadChain = Promise.resolve();
+            this._chunkIndex = 0;
             this._checkMessagesInFlight = false;
             this._usingTouch = false;
             this._ignoreMouseUntil = 0;
@@ -62,6 +63,9 @@
             this._playBusy = false;
             this._txBanner = null;
             this._playingMessageId = null;
+            this._pollIntervalMs = 5000;
+            this._pollErrorCount = 0;
+            this._pollPaused = false;
 
             this.init();
         }
@@ -776,6 +780,7 @@
                 this.pendingChunkQueue = [];
                 this.pendingFinalChunk = false;
                 this._chunkUploadChain = Promise.resolve();
+                this._chunkIndex = 0;
                 this.streamStartPromise = this.startStreamingOnServer();
 
                 // If the guard already released during mic warmup, stop now.
@@ -975,6 +980,8 @@
         }
 
         async postChunkBlob(audioBlob, isLast, durationSeconds, replace = false) {
+            const chunkIndex = this._chunkIndex++;
+
             // Serialize uploads so Android WebView does not flood parallel POSTs.
             const run = async () => {
                 const reader = new FileReader();
@@ -984,33 +991,51 @@
                     reader.readAsDataURL(audioBlob);
                 });
 
-                const response = await fetch('/guardpro/api/push-to-talk/stream/chunk', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        jsonrpc: '2.0',
-                        method: 'call',
-                        params: {
-                            message_id: this.streamingMessageId,
-                            audio_chunk: base64Chunk,
-                            is_last: isLast,
-                            duration_seconds: durationSeconds,
-                            replace: !!replace
+                const payload = {
+                    jsonrpc: '2.0',
+                    method: 'call',
+                    params: {
+                        message_id: this.streamingMessageId,
+                        audio_chunk: base64Chunk,
+                        is_last: isLast,
+                        duration_seconds: durationSeconds,
+                        replace: !!replace,
+                        chunk_index: chunkIndex,
+                    }
+                };
+
+                const maxRetries = 3;
+                let lastError;
+                for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                    try {
+                        const response = await fetch('/guardpro/api/push-to-talk/stream/chunk', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            const text = await response.text();
+                            throw new Error(`Chunk upload failed (${response.status}): ${text.substring(0, 120)}`);
                         }
-                    })
-                });
 
-                if (!response.ok) {
-                    const text = await response.text();
-                    throw new Error(`Chunk upload failed (${response.status}): ${text.substring(0, 120)}`);
+                        const result = await response.json();
+                        const data = result.result || result;
+                        if (data && data.success === false) {
+                            throw new Error(data.error || 'Chunk upload rejected');
+                        }
+                        return;
+                    } catch (err) {
+                        lastError = err;
+                        console.warn(`[Push-to-Talk] chunk ${chunkIndex} upload attempt ${attempt + 1} failed:`, err);
+                        if (attempt < maxRetries) {
+                            await new Promise(r => setTimeout(r, 500 * Math.pow(2, attempt)));
+                        }
+                    }
                 }
-
-                const result = await response.json();
-                const data = result.result || result;
-                if (data && data.success === false) {
-                    throw new Error(data.error || 'Chunk upload rejected');
-                }
+                console.error(`[Push-to-Talk] chunk ${chunkIndex} upload failed after ${maxRetries + 1} attempts:`, lastError);
+                throw lastError;
             };
 
             this._chunkUploadChain = this._chunkUploadChain.then(run, run);
@@ -1018,7 +1043,13 @@
         }
 
         async flushPendingChunks() {
-            if (!this.streamingMessageId) return;
+            if (!this.streamingMessageId) {
+                if (this.pendingChunkQueue.length > 0 || this.pendingFinalChunk) {
+                    this.showNotification('Transmission failed — network error. Please transmit again.', 'error');
+                    if (navigator.vibrate) navigator.vibrate([100, 60, 100]);
+                }
+                return;
+            }
             while (this.pendingChunkQueue.length > 0) {
                 const item = this.pendingChunkQueue.shift();
                 await this.postChunkBlob(item.blob, item.isLast, item.duration, !!item.replace || !!item.isLast);
@@ -1093,13 +1124,37 @@
                 });
             }
 
-            // Slow safety net only. Native kick + 800ms poll caused repeats.
+            // Safety net poll. Back off on errors and slow down when the page is hidden
+            // to reduce battery use and server load.
             if (!this._pollTimer) {
-                this._pollTimer = setInterval(async () => {
-                    if (this.currentChannel && !this.isRecording && !this._pressActive && !this._starting) {
-                        await this.checkNewMessages();
+                const tick = async () => {
+                    if (this._pollPaused || !this.currentChannel || this.isRecording || this._pressActive || this._starting) {
+                        return;
                     }
-                }, 8000);
+                    try {
+                        await this.checkNewMessages();
+                        this._pollErrorCount = 0;
+                    } catch (_err) {
+                        this._pollErrorCount = Math.min((this._pollErrorCount || 0) + 1, 5);
+                    }
+                };
+                const schedule = () => {
+                    clearTimeout(this._pollTimer);
+                    const base = document.hidden ? 30000 : this._pollIntervalMs || 5000;
+                    const delay = base * Math.pow(2, this._pollErrorCount || 0);
+                    this._pollTimer = setTimeout(() => {
+                        tick().finally(schedule);
+                    }, delay);
+                };
+                document.addEventListener('visibilitychange', () => {
+                    this._pollPaused = !!document.hidden;
+                    if (!document.hidden) {
+                        this._pollErrorCount = 0;
+                        this.checkNewMessages().catch(() => { });
+                    }
+                    schedule();
+                });
+                schedule();
             }
         }
 

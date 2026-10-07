@@ -6,7 +6,7 @@
             <field name="subject">Shift Swap Request from ${object.requesting_guard_id.name or ''} - ${object.shift_id.site_id.name or ''}</field>
             <field name="email_from">${(object.company_id.email or user.email or '')|safe}</field>
             <field name="email_to">${(object.target_guard_id.user_id.email if object.target_guard_id and object.target_guard_id.user_id else object.target_guard_id.email if object.target_guard_id else '')|safe}</field>
-            <field name="body_html" type="html">
+            <field name="body_html" type="char">
 
 
 &lt;html&gt;

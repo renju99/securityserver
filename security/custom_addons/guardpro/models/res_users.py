@@ -2,7 +2,7 @@
 """User Extension for Site and Zone Based Access Control."""
 
 from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 from odoo.http import request
 import logging
 
@@ -50,6 +50,36 @@ class ResUsers(models.Model):
         string='Guard Profile',
         help='Guard profile associated with this user',
     )
+    guard_badge_number = fields.Char(
+        string='Badge Number',
+        compute='_compute_guard_badge_number',
+        store=True,
+        index=True,
+        help='Badge number from the linked Guard Profile',
+    )
+
+    @api.depends('guard_profile_id', 'guard_profile_id.badge_number')
+    def _compute_guard_badge_number(self):
+        for user in self:
+            profile = user.guard_profile_id[:1]
+            user.guard_badge_number = profile.badge_number if profile else False
+
+    def action_guard_set_password(self):
+        """Open the standard Change Password wizard for selected portal guards."""
+        if not self:
+            raise UserError(_('Select one or more guards first.'))
+        return {
+            'name': _('Reset Password'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'change.password.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'active_model': 'res.users',
+                'active_ids': self.ids,
+                'dialog_size': 'medium',
+            },
+        }
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -71,43 +101,6 @@ class ResUsers(models.Model):
                 user._sync_zone_access_group()
         return result
 
-    @api.constrains('groups_id')
-    def _check_client_user_not_for_residents(self):
-        """Client User implies Internal User — never on residents/tenants."""
-        client_group = self.env.ref(
-            'guardpro.group_guardpro_client_user', raise_if_not_found=False
-        )
-        resident_group = self.env.ref(
-            'guardpro.group_guardpro_resident_user', raise_if_not_found=False
-        )
-        if not client_group:
-            return
-        Resident = self.env['tenant.resident'].sudo()
-        for user in self:
-            if not user.active:
-                continue
-            if getattr(user, 'share', None) and not (client_group in user.groups_id):
-                continue
-            try:
-                if user._is_public():
-                    continue
-            except Exception:
-                pass
-            has_client = client_group in user.groups_id
-            if not has_client:
-                continue
-            if resident_group and resident_group in user.groups_id:
-                raise ValidationError(_(
-                    'User "%s" cannot have both Client User (internal/backend) '
-                    'and Resident/Tenant User (portal). Residents must use only '
-                    'Resident/Tenant User.'
-                ) % user.display_name)
-            if Resident.search_count([('user_id', '=', user.id)], limit=1):
-                raise ValidationError(_(
-                    'User "%s" is linked to a resident/tenant record and must '
-                    'not be assigned Client User (Internal User). Use '
-                    'Resident/Tenant User for portal access instead.'
-                ) % user.display_name)
 
     @api.constrains('zone_ids', 'site_ids', 'guard_site_ids')
     def _check_zone_site_consistency(self):

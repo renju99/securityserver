@@ -929,6 +929,7 @@ class GuardLinkPWASimple(http.Controller):
                 methods=['GET', 'POST'], website=True, csrf=False)
     def mobile_select_site(self, location=None, next=None, **kwargs):
         """Switch the mobile working site for this session."""
+        import time
         user = request.env.user
         options = user.guardpro_mobile_locations()
         if location and any(opt['key'] == location for opt in options):
@@ -937,7 +938,11 @@ class GuardLinkPWASimple(http.Controller):
         if nxt.startswith('/guardpro/mobile/select_site'):
             nxt = '/guardpro/mobile'
         sep = '&' if '?' in nxt else '?'
-        return request.redirect('%s%sloc=%s' % (nxt, sep, location or ''))
+        # Add a cache-busting timestamp so the browser/service worker always
+        # fetches the destination page fresh after switching locations.
+        return request.redirect(
+            '%s%sloc=%s&_=%s' % (nxt, sep, location or '', int(time.time() * 1000))
+        )
 
     @http.route('/guardpro/mobile', type='http', auth='user', website=True)
     def mobile_dashboard(self, **kwargs):
@@ -1056,6 +1061,11 @@ class GuardLinkPWASimple(http.Controller):
             'packages_pending_count': packages_pending_count,
             'format_datetime_tz': self._format_datetime_tz,
         })
+
+    @http.route('/guardpro/api/csrf', type='json', auth='user', methods=['GET'])
+    def mobile_csrf_token(self, **kwargs):
+        """Return a fresh CSRF token for offline form-submission replay."""
+        return {'csrf_token': request.csrf_token()}
 
     @http.route('/guardpro/mobile/checkin', type='http', auth='user', methods=['POST'], csrf=True)
     def mobile_checkin(self, latitude=None, longitude=None, **kwargs):
@@ -1216,10 +1226,13 @@ class GuardLinkPWASimple(http.Controller):
         host_name = (post.get('host_name') or '').strip()
         visit_purpose = (post.get('visit_purpose') or '').strip()
         mobile_number = (post.get('mobile_number') or '').strip()
+        id_number = (post.get('id_number') or '').strip()
         if not name or not host_name or not visit_purpose:
             return request.redirect('/guardpro/mobile/visitors/register?error=visitor_register_missing_fields')
         if not mobile_number:
             return request.redirect('/guardpro/mobile/visitors/register?error=visitor_register_missing_mobile')
+        if not id_number:
+            return request.redirect('/guardpro/mobile/visitors/register?error=visitor_register_missing_id')
         site_id = self._resolve_guard_operation_site_id(guard)
         if not site_id:
             return request.redirect('/guardpro/mobile/visitors/register?error=visitor_register_no_site')
@@ -1235,6 +1248,7 @@ class GuardLinkPWASimple(http.Controller):
             'name': name,
             'visitor_type': _strip_or_false('visitor_type') or 'visitor',
             'id_type': _strip_or_false('id_type') or 'emirates_id',
+            'id_number': id_number,
             'visit_date': _strip_or_false('visit_date') or fields.Date.today(),
             'host_name': host_name,
             'visit_purpose': visit_purpose,
@@ -1246,8 +1260,9 @@ class GuardLinkPWASimple(http.Controller):
         }
         self._mobile_stamp_site(vals)
         optional_char = [
-            'id_number', 'nationality', 'occupation', 'employer_name', 'issuing_place',
-            'email', 'company',
+            'nationality', 'occupation', 'employer_name', 'issuing_place',
+            'email', 'company', 'name_arabic',
+            'passport_number', 'visa_number',
             'purpose_details', 'host_phone', 'host_email',
             'host_community', 'host_unit_number', 'vehicle_number',
         ]
@@ -2477,6 +2492,47 @@ class GuardLinkPWASimple(http.Controller):
             _logger.error("[Mobile Incident Update] Incident update error for incident %s: %s", incident_id, str(e), exc_info=True)
             return request.redirect(f'/guardpro/mobile/incident/{incident_id}?error=update_failed')
 
+    @http.route('/guardpro/mobile/incident/<int:incident_id>/remove_attachment', type='http', auth='user', methods=['POST'], csrf=True)
+    def mobile_incident_remove_attachment(self, incident_id, attachment_id=None, **kwargs):
+        """Remove an existing photo/video attachment from an incident before submitting."""
+        guard = self._get_guard_from_user()
+        if not guard:
+            return request.make_json_response({'success': False, 'error': 'no_guard'})
+
+        try:
+            attachment_id = int(attachment_id or kwargs.get('attachment_id', 0))
+        except (ValueError, TypeError):
+            return request.make_json_response({'success': False, 'error': 'invalid_attachment'})
+
+        incident = request.env['incident.report'].search([
+            ('id', '=', incident_id),
+            ('guard_id', '=', guard.id),
+        ], limit=1)
+        if not incident:
+            return request.make_json_response({'success': False, 'error': 'incident_not_found'})
+
+        attachment = request.env['ir.attachment'].sudo().browse(attachment_id)
+        if not attachment.exists():
+            return request.make_json_response({'success': False, 'error': 'attachment_not_found'})
+
+        if attachment_id not in incident.photo_ids.ids and attachment_id not in incident.video_ids.ids:
+            return request.make_json_response({'success': False, 'error': 'attachment_not_linked'})
+
+        try:
+            # Remove from both relations (it can only be in one) and delete the file.
+            incident.write({
+                'photo_ids': [(3, attachment_id)],
+                'video_ids': [(3, attachment_id)],
+            })
+            attachment.unlink()
+            return request.make_json_response({'success': True})
+        except Exception as e:
+            _logger.error(
+                '[Mobile Incident Remove Attachment] Failed to remove attachment %s from incident %s: %s',
+                attachment_id, incident_id, str(e), exc_info=True
+            )
+            return request.make_json_response({'success': False, 'error': 'unlink_failed'})
+
     @http.route('/guardpro/mobile/tour/checkpoint/<int:checkpoint_id>', type='http', auth='user', methods=['POST'], csrf=True)
     def mobile_tour_checkpoint(self, checkpoint_id, latitude=None, longitude=None, notes=None, **kwargs):
         """Record checkpoint visit during tour."""
@@ -3418,8 +3474,24 @@ class GuardLinkPWASimple(http.Controller):
         """Minimal service worker for offline support."""
         sw_content = """
 // GuardLink Mobile - Minimal Service Worker (Odoo 18)
-const CACHE_VERSION = 'v2.0.31';
+const CACHE_VERSION = 'v2.0.32';
 const CACHE_NAME = 'guardpro-mobile-' + CACHE_VERSION;
+
+// Pages that must never be served from cache (site switcher, exports, POSTs)
+function isUncacheablePage(request, url) {
+    if (request.method !== 'GET') return true;
+    if (url.indexOf('/guardpro/mobile/select_site') !== -1) return true;
+    if (url.indexOf('/guardpro/mobile/visitors/export') !== -1) return true;
+    return false;
+}
+
+function isMobilePage(request, url) {
+    return request.mode === 'navigate' || url.indexOf('/guardpro/mobile') !== -1;
+}
+
+function isStaticAsset(url) {
+        return /[.](js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot|ico|webp)([?#].*)?$/.test(url);
+}
 
 // Install event
 self.addEventListener('install', (event) => {
@@ -3445,35 +3517,84 @@ self.addEventListener('activate', (event) => {
     return self.clients.claim();
 });
 
-// Fetch event - Network first, then cache (skip file downloads)
+async function cacheResponse(cache, request, response) {
+    if (response && response.status === 200 && response.type === 'basic') {
+        try {
+            await cache.put(request, response.clone());
+        } catch (_e) {
+            // Ignore cache write errors (e.g. opaque responses)
+        }
+    }
+}
+
+// Fetch event - cache-first for static assets, network-first with fast cache fallback for mobile pages
 self.addEventListener('fetch', (event) => {
-    const url = event.request.url || '';
-    if (url.indexOf('/guardpro/mobile/visitors/export') !== -1) {
+    const request = event.request;
+    const url = request.url || '';
+
+    if (isUncacheablePage(request, url)) {
         return;
     }
-    // Never cache HTML app pages — site switcher must always hit the server
-    if (event.request.mode === 'navigate' || url.indexOf('/guardpro/mobile') !== -1) {
-        event.respondWith(fetch(event.request));
-        return;
-    }
-    event.respondWith(
-        fetch(event.request)
-            .then((response) => {
-                // Clone and cache good responses
-                if (response && response.status === 200) {
-                    const responseClone = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseClone);
+
+    // Mobile HTML pages: race network vs cache. If the network is slow,
+    // return a cached shell immediately so navigation feels instant; the
+    // network response updates the cache in the background for next time.
+    if (isMobilePage(request, url)) {
+        event.respondWith(
+            caches.open(CACHE_NAME).then((cache) => {
+                const network = fetch(request).then((response) => {
+                    cacheResponse(cache, request, response);
+                    return response;
+                }).catch(() => null);
+
+                // Return cache immediately if we have one, while refreshing in background
+                return cache.match(request).then((cached) => {
+                    if (cached) {
+                        // Refresh silently; ignore errors
+                        network.catch(() => {});
+                        return cached;
+                    }
+                    // No cached shell yet: wait for network (with a safety timeout)
+                    const timeout = new Promise((resolve) => setTimeout(resolve, 8000));
+                    return Promise.race([network, timeout]).then((response) => {
+                        return response || network;
                     });
-                }
-                return response;
-            })
-            .catch(() => {
-                // Fallback to cache on network error
-                return caches.match(event.request).then((response) => {
-                    return response || new Response('Offline', { status: 503 });
                 });
             })
+        );
+        return;
+    }
+
+    // Static assets: cache first, then network, to eliminate JS/CSS load latency
+    if (isStaticAsset(url)) {
+        event.respondWith(
+            caches.open(CACHE_NAME).then((cache) => {
+                return cache.match(request).then((cached) => {
+                    const network = fetch(request).then((response) => {
+                        cacheResponse(cache, request, response);
+                        return response;
+                    }).catch(() => cached);
+                    return cached || network;
+                });
+            })
+        );
+        return;
+    }
+
+    // Default: network first, cache as fallback
+    event.respondWith(
+        caches.open(CACHE_NAME).then((cache) => {
+            return fetch(request)
+                .then((response) => {
+                    cacheResponse(cache, request, response);
+                    return response;
+                })
+                .catch(() => {
+                    return cache.match(request).then((cached) => {
+                        return cached || new Response('Offline', { status: 503 });
+                    });
+                });
+        })
     );
 });
 """
@@ -3975,4 +4096,60 @@ self.addEventListener('fetch', (event) => {
             return request.redirect(
                 f'/guardpro/mobile/knowledge/article/{article_id}?error=ack_failed'
             )
+
+    # ── Mobile Reports & Logbooks Hub ─────────────────────────────────────────
+
+    @http.route('/guardpro/mobile/logbooks', type='http', auth='user', website=True)
+    def mobile_logbooks(self, **kwargs):
+        """Mobile list of Daily Activity Reports (logbooks) for the guard's sites."""
+        guard = self._get_guard_from_user()
+        if not guard:
+            return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
+
+        site_ids = guard.site_ids.ids
+        if not site_ids:
+            return self._mobile_render('guardpro.mobile_logbooks', {
+                'guard': guard,
+                'reports': [],
+                'site': None,
+                'error': kwargs.get('error'),
+                'success': kwargs.get('success'),
+            })
+
+        domain = [('site_id', 'in', site_ids)]
+        reports = request.env['daily.activity.report'].sudo().search(
+            domain, limit=30, order='report_date desc, id desc'
+        )
+
+        return self._mobile_render('guardpro.mobile_logbooks', {
+            'guard': guard,
+            'reports': reports,
+            'site': guard.site_ids[:1],
+            'error': kwargs.get('error'),
+            'success': kwargs.get('success'),
+            'format_datetime_tz': self._format_datetime_tz,
+        })
+
+    @http.route('/guardpro/mobile/reports', type='http', auth='user', website=True)
+    def mobile_reports_hub(self, **kwargs):
+        """Mobile reports hub: one-tap access to common guard reports."""
+        guard = self._get_guard_from_user()
+        if not guard:
+            return request.render('guardpro.mobile_no_guard', self._mobile_no_guard_render_vals())
+
+        site_id, site = self._mobile_visitor_site(guard)
+        open_incidents_count = request.env['incident.report'].sudo().search_count(
+            request.env['incident.report']._domain_security_incidents([
+                ('guard_id', '=', guard.id),
+                ('status', 'in', ['submitted', 'under_review', 'investigating']),
+            ] + self._mobile_site_domain('incident.report'))
+        )
+
+        return self._mobile_render('guardpro.mobile_reports_hub', {
+            'guard': guard,
+            'site': site,
+            'open_incidents_count': open_incidents_count,
+            'error': kwargs.get('error'),
+            'success': kwargs.get('success'),
+        })
 

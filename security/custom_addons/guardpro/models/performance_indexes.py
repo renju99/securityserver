@@ -272,7 +272,7 @@ class VisitorManagementPerformance(models.Model):
                 ON visitor_management(name);
             """)
             
-            # Index for ID number lookups (watchlist checks)
+            # Index for ID number lookups
             self.env.cr.execute("""
                 CREATE INDEX IF NOT EXISTS idx_visitor_id_number 
                 ON visitor_management(id_number) 
@@ -291,13 +291,6 @@ class VisitorManagementPerformance(models.Model):
                 CREATE INDEX IF NOT EXISTS idx_visitor_active 
                 ON visitor_management(site_id, checkin_time DESC) 
                 WHERE checkout_time IS NULL;
-            """)
-            
-            # Index for watchlist hits
-            self.env.cr.execute("""
-                CREATE INDEX IF NOT EXISTS idx_visitor_watchlist 
-                ON visitor_management(watchlist_hit, visit_date DESC) 
-                WHERE watchlist_hit = TRUE;
             """)
         except Exception as e:
             _logger.warning('Could not create indexes for visitor.management (database may be locked): %s', str(e))

@@ -141,6 +141,12 @@ class ClientSite(models.Model):
              'Comma-separated addresses allowed. '
              'Falls back to Project Manager / Client email if empty.'
     )
+    project_manager_email = fields.Char(
+        string='Project Manager Email',
+        help='Email address used for end-of-day daily activity reports and '
+             'missed patrol alerts for this project. Falls back to the '
+             'Project Manager partner email or client email if empty.'
+    )
     emergency_contact = fields.Char(
         string='Emergency Contact'
     )
@@ -172,6 +178,13 @@ class ClientSite(models.Model):
         ('other', 'Other')
     ], string='Project Type', default='other', tracking=True,
        help='Type of facility or building')
+
+    is_community = fields.Boolean(
+        string='Community / Residential',
+        default=False,
+        help='Mark if this project is a residential community (no resident directory).',
+    )
+
     
     contract_start = fields.Date(
         string='Contract Start Date',
@@ -411,7 +424,7 @@ class ClientSite(models.Model):
             'name': _('Shifts - %s') % self.name,
             'type': 'ir.actions.act_window',
             'res_model': 'guard.shift',
-            'view_mode': 'calendar,list,form',
+            'view_mode': 'list,calendar,form',
             'domain': [('site_id', '=', self.id)],
             'context': {'default_site_id': self.id}
         }
@@ -451,6 +464,27 @@ class ClientSite(models.Model):
             'domain': [('site_id', '=', self.id)],
             'context': {'default_site_id': self.id}
         }
+
+    def _get_project_manager_emails(self):
+        """Return a comma-separated list of alert recipients for this project.
+
+        Priority:
+            1. Project Manager Email field
+            2. Project Manager partner email
+            3. Project Email
+            4. Client email
+        """
+        self.ensure_one()
+        emails = []
+        if self.project_manager_email:
+            emails += [e.strip() for e in self.project_manager_email.split(',') if e.strip()]
+        if self.manager_id and self.manager_id.email:
+            emails.append(self.manager_id.email.strip())
+        if self.site_email:
+            emails += [e.strip() for e in self.site_email.split(',') if e.strip()]
+        if self.client_id and self.client_id.email:
+            emails.append(self.client_id.email.strip())
+        return ', '.join(dict.fromkeys(emails))
 
     def action_open_geofence_map(self):
         """Open geofencing map page for this site."""

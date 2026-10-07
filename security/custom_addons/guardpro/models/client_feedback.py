@@ -45,19 +45,11 @@ class ClientFeedback(models.Model):
         ondelete='restrict'
     )
     
-    # Resident/Tenant Support
-    resident_id = fields.Many2one(
-        'tenant.resident',
-        string='Resident/Tenant',
-        tracking=True,
-        ondelete='set null',
-        help='Resident who submitted this feedback (for community projects)'
-    )
     
     feedback_source = fields.Selection([
         ('client', 'Client/Management'),
         ('resident', 'Resident/Tenant')
-    ], string='Feedback Source', compute='_compute_feedback_source', store=True)
+    ], string='Feedback Source', default='client')
     
     guard_id = fields.Many2one(
         'guard.profile',
@@ -199,21 +191,7 @@ class ClientFeedback(models.Model):
         help='Make this feedback visible to other residents (anonymized)'
     )
     
-    @api.depends('resident_id', 'client_id')
-    def _compute_feedback_source(self):
-        """Compute feedback source."""
-        for record in self:
-            if record.resident_id:
-                record.feedback_source = 'resident'
-            else:
-                record.feedback_source = 'client'
     
-    @api.onchange('resident_id')
-    def _onchange_resident_id(self):
-        """Auto-fill site and client from resident."""
-        if self.resident_id:
-            self.site_id = self.resident_id.site_id
-            self.client_id = self.resident_id.client_id
 
     @api.constrains('guard_id', 'site_id')
     def _check_guard_belongs_to_site(self):

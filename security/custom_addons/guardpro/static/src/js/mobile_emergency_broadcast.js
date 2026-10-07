@@ -8,9 +8,11 @@
 (function () {
     "use strict";
 
-    /** Foreground poll; WebView may throttle this to ~30s when app is in background. */
-    const POLL_INTERVAL_MS = 5000;
+    /** Foreground poll interval. Slowed to 8 s and paused when hidden to reduce load. */
+    const POLL_INTERVAL_MS = 8000;
+    const BACKOFF_BASE_MS = 8000;
     let pollingTimer = null;
+    let pollErrorCount = 0;
     let activeAckId = null;
 
     function isGuardMobilePage() {
@@ -165,7 +167,7 @@
 
     async function pollEmergency() {
         try {
-            if (window.__gpSessionDead) return;
+            if (window.__gpSessionDead || document.hidden) return;
             const url =
                 "/guardpro/api/emergency_broadcasts/pending?_=" +
                 String(Date.now());
@@ -188,6 +190,7 @@
                 return;
             }
             const payload = await response.json();
+            pollErrorCount = 0;
             const list =
                 payload && payload.success && Array.isArray(payload.broadcasts)
                     ? payload.broadcasts
@@ -211,8 +214,18 @@
                 if (overlay) overlay.style.display = "none";
             }
         } catch (_err) {
-            /* keep UI stable; next poll retries */
+            pollErrorCount = Math.min(pollErrorCount + 1, 5);
         }
+    }
+
+    function scheduleNextPoll() {
+        clearTimeout(pollingTimer);
+        if (window.__gpSessionDead) return;
+        const base = document.hidden ? 60000 : BACKOFF_BASE_MS;
+        const delay = base * Math.pow(2, pollErrorCount);
+        pollingTimer = window.setTimeout(() => {
+            pollEmergency().finally(scheduleNextPoll);
+        }, delay);
     }
 
     function scheduleRapidRechecks() {
@@ -230,12 +243,14 @@
         window.__gpPollEmergencyFromNative = pollEmergency;
         pollEmergency();
         scheduleRapidRechecks();
-        pollingTimer = window.setInterval(pollEmergency, POLL_INTERVAL_MS);
+        scheduleNextPoll();
         document.addEventListener("visibilitychange", function () {
             if (!document.hidden) {
+                pollErrorCount = 0;
                 pollEmergency();
                 scheduleRapidRechecks();
             }
+            scheduleNextPoll();
         });
         window.addEventListener("focus", pollEmergency);
         window.addEventListener("pageshow", function (ev) {

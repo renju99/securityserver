@@ -678,6 +678,47 @@
 
 
         <!-- ================================================================ -->
+        <!-- GUARD.HANDOVER RECORD RULES                                       -->
+        <!-- ================================================================ -->
+
+        <record id="rule_guard_handover_admin" model="ir.rule">
+            <field name="name">Administrator: All Shift Handovers</field>
+            <field name="model_id" ref="model_guard_handover"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
+        </record>
+
+        <record id="rule_guard_handover_manager" model="ir.rule">
+            <field name="name">Manager: Shift Handovers at Assigned Projects</field>
+            <field name="model_id" ref="model_guard_handover"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_manager'))]"/>
+        </record>
+
+        <record id="rule_guard_handover_supervisor" model="ir.rule">
+            <field name="name">Supervisor: Shift Handovers at Assigned Projects</field>
+            <field name="model_id" ref="model_guard_handover"/>
+            <field name="domain_force">[('site_id', 'in', user.site_ids.ids)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_supervisor'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="rule_guard_handover_guard_portal" model="ir.rule">
+            <field name="name">Guard Portal: Shift Handovers Involving Me</field>
+            <field name="model_id" ref="model_guard_handover"/>
+            <field name="domain_force">['|', ('from_guard_id.user_id', '=', user.id), ('to_guard_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <!-- ================================================================ -->
         <!-- EQUIPMENT.MAINTENANCE.LOG RECORD RULES                            -->
         <!-- ================================================================ -->
         
@@ -767,41 +808,7 @@
         </record>
 
 
-        <!-- ================================================================ -->
-        <!-- VISITOR.WATCHLIST RECORD RULES                                    -->
-        <!-- ================================================================ -->
-        
-        <!-- Admin: all watchlist entries -->
-        <record id="rule_visitor_watchlist_admin" model="ir.rule">
-            <field name="name">Administrator: All Visitor Watchlist</field>
-            <field name="model_id" ref="model_visitor_watchlist"/>
-            <field name="domain_force">[(1, '=', 1)]</field>
-            <field name="groups" eval="[(4, ref('group_guardpro_admin'))]"/>
-        </record>
-
-        <!-- Non-admin: entries assigned to overlapping sites -->
-        <record id="rule_visitor_watchlist_assigned_sites" model="ir.rule">
-            <field name="name">Non-Admin: Visitor Watchlist at Assigned Projects</field>
-            <field name="model_id" ref="model_visitor_watchlist"/>
-            <field name="domain_force">[('site_ids', 'in', user.site_ids.ids)]</field>
-            <field name="groups" eval="[(4, ref('group_guardpro_guard_portal')), (4, ref('group_guardpro_client_user')), (4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager')), (4, ref('group_guardpro_reception'))]"/>
-            <field name="perm_read" eval="True"/>
-            <field name="perm_write" eval="False"/>
-            <field name="perm_create" eval="False"/>
-            <field name="perm_unlink" eval="False"/>
-        </record>
-
-        <!-- Supervisor/Manager write on assigned-site watchlist -->
-        <record id="rule_visitor_watchlist_manager_write" model="ir.rule">
-            <field name="name">Supervisor/Manager: Manage Watchlist at Assigned Projects</field>
-            <field name="model_id" ref="model_visitor_watchlist"/>
-            <field name="domain_force">[('site_ids', 'in', user.site_ids.ids)]</field>
-            <field name="groups" eval="[(4, ref('group_guardpro_supervisor')), (4, ref('group_guardpro_manager'))]"/>
-            <field name="perm_read" eval="True"/>
-            <field name="perm_write" eval="True"/>
-            <field name="perm_create" eval="True"/>
-            <field name="perm_unlink" eval="True"/>
-        </record>
+        <!-- Visitor watchlist feature removed (xmlids cleaned when present) -->
 
 
         <!-- ================================================================ -->

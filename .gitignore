@@ -17,9 +17,12 @@
 .env.prod
 # GitHub PAT / machine-only secrets (never commit)
 .env.github.local
+# Azure blob storage credentials (never commit)
+.env.storage
 # Android release signing (never commit secrets)
 attendance/mobile/build.json
 attendance/mobile/platforms/android/release-signing.properties
+local.properties
 .DS_Store
 
 # Programming Specific & IDEs

@@ -11,22 +11,7 @@
               web_icon="guardpro,static/description/icon.png"
               groups="base.group_no_one"/>
 
-    <!-- ================================================================
-         CCTV MONITORING - Live Camera Viewing
-         ================================================================ -->
-    <menuitem id="menu_guardpro_cctv"
-              name="CCTV Monitoring"
-              parent="menu_guardpro_tracking"
-              sequence="5"
-              action="guardpro.action_cctv_monitoring"
-              groups="group_guardpro_client_user,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
-
-    <menuitem id="menu_cctv_manage_cameras"
-              name="Manage Cameras"
-              parent="menu_guardpro_cctv"
-              action="guardpro.action_cctv_camera"
-              sequence="20"
-              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+    <!-- CCTV Monitoring removed -->
 
     <!-- ================================================================
          1. DASHBOARD - Quick Overview & Real-Time Status
@@ -115,6 +100,13 @@
               action="action_shift_template"
               sequence="30"
               groups="group_guardpro_manager,group_guardpro_admin"/>
+
+    <menuitem id="menu_guard_handover"
+              name="Shift Handovers"
+              parent="menu_operations_scheduling"
+              action="action_guard_handover"
+              sequence="25"
+              groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- OPTIONAL: HR-Based Attendance (requires hr_attendance module) -->
     <!--
@@ -228,12 +220,7 @@
               sequence="10"
               groups="group_guardpro_guard_portal,group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
-    <menuitem id="menu_visitor_watchlist"
-              name="Watchlist"
-              parent="menu_guardpro_site_management"
-              action="action_visitor_watchlist"
-              sequence="15"
-              groups="group_guardpro_reception,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+    <!-- Watchlist removed (menu xmlid already gone) -->
 
     <menuitem id="menu_visitor_hosts"
               name="Host Information"
@@ -256,24 +243,16 @@
               sequence="40"
               groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
-    <menuitem id="menu_residents_tenants_root"
-              name="Residents &amp; Tenants"
-              parent="menu_guardpro_site_management"
-              sequence="60"/>
+    <!-- Residents & Tenants / Resident Complaints removed (menus already gone; clean leftover actions/rules) -->
+    <delete model="ir.actions.act_window" id="tenant_resident_action"/>
+    <delete model="ir.actions.act_window" id="action_resident_complaint"/>
+    <delete model="ir.rule" id="resident_complaint_resident_rule"/>
+    <delete model="ir.rule" id="resident_complaint_client_rule"/>
+    <delete model="ir.rule" id="resident_complaint_supervisor_rule"/>
+    <delete model="ir.rule" id="resident_complaint_manager_rule"/>
+    <delete model="ir.rule" id="resident_complaint_admin_rule"/>
+    <delete model="ir.actions.report" id="action_report_resident_complaint"/>
 
-    <menuitem id="tenant_resident_menu"
-              name="Residents/Tenants"
-              parent="menu_residents_tenants_root"
-              action="tenant_resident_action"
-              sequence="10"
-              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
-
-    <menuitem id="menu_resident_complaint"
-              name="Resident Complaints"
-              parent="menu_residents_tenants_root"
-              action="action_resident_complaint"
-              sequence="20"
-              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
     <!-- ================================================================
          4. INCIDENTS & EMERGENCY - Critical Events
@@ -821,35 +800,8 @@
               sequence="40"
               groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
 
-    <!-- ================================================================
-         BIOMETRIC - Identity Verification System
-         ================================================================ -->
-    <menuitem id="menu_guardpro_biometric"
-              name="Biometric Verification"
-              parent="menu_guardpro_operations"
-              sequence="96"
-              groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
-
-    <menuitem id="menu_guard_biometric_templates"
-              name="Biometric Templates"
-              parent="menu_guardpro_biometric"
-              action="action_guard_biometric_template"
-              sequence="10"
-              groups="group_guardpro_guard_portal,group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
-
-    <menuitem id="menu_guard_biometric_verifications"
-              name="Verification History"
-              parent="menu_guardpro_biometric"
-              action="action_guard_biometric_verification"
-              sequence="20"
-              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
-
-    <menuitem id="menu_guard_biometric_devices"
-              name="Devices"
-              parent="menu_guardpro_biometric"
-              action="action_guard_biometric_device"
-              sequence="30"
-              groups="group_guardpro_supervisor,group_guardpro_manager,group_guardpro_admin"/>
+    <!-- Biometric feature removed (menus already gone) -->
+    <!-- CCTV Monitoring removed (menus cleaned in migration 250) -->
 
     <!-- ================================================================
          10. CONFIGURATION - Settings & Administration
