@@ -4,11 +4,15 @@
 # Migrates existing Odoo ir.attachment files from local filestore to
 # Azure Blob Storage (guardlink-media container).
 #
+# Blob naming matches runtime (ir_attachment_azure._blob_name):
+#   azure:attachments/{checksum[:2]}/{checksum}
+# where store_fname is already Odoo's content-addressed path.
+#
 # Only migrates eligible files:
-#   - mimetype: image/*, video/*, audio/*
-#   - file size ≥ 50 KB
+#   - mimetype: image/*, video/*, audio/*  OR  file_size ≥ 50 KB
 #   - res_model NOT in (ir.ui.view, ir.ui.menu, ir.module.module)
 #   - store_fname does NOT already start with "azure:"
+#   - store_fname matches Odoo filestore pattern: ab/abcdef...
 #
 # Updates ir_attachment.store_fname in the DB after each successful upload.
 # Safe to re-run: already-migrated files are skipped.
@@ -49,7 +53,7 @@ SKIPPED=0
 FAILED=0
 BYTES_MOVED=0
 
-# Fetch eligible attachment records
+# Fetch eligible attachment records (align with ir_attachment_azure._file_write)
 QUERY="
 COPY (
   SELECT
@@ -65,14 +69,15 @@ COPY (
     a.store_fname IS NOT NULL
     AND a.store_fname != ''
     AND a.store_fname NOT LIKE 'azure:%'
+    AND a.store_fname ~ '^[a-f0-9]{2}/[a-f0-9]+$'
     AND a.file_size >= 51200
     AND (
       a.mimetype LIKE 'image/%'
       OR a.mimetype LIKE 'video/%'
       OR a.mimetype LIKE 'audio/%'
-      OR a.file_size >= 512000
+      OR a.file_size >= 51200
     )
-    AND a.res_model NOT IN ('ir.ui.view', 'ir.ui.menu', 'ir.module.module')
+    AND COALESCE(a.res_model, '') NOT IN ('ir.ui.view', 'ir.ui.menu', 'ir.module.module')
   ORDER BY a.file_size DESC
 ) TO STDOUT WITH CSV HEADER;
 "
@@ -85,8 +90,8 @@ TOTAL=$(( $(wc -l < "$CSV_FILE") - 1 ))
 echo "Found $TOTAL eligible attachments to migrate."
 echo ""
 
-# Process each record
-tail -n +2 "$CSV_FILE" | while IFS=',' read -r att_id store_fname res_model res_id att_name mimetype file_size; do
+# Avoid pipe-subshell so counters persist (process substitution).
+while IFS=',' read -r att_id store_fname res_model res_id att_name mimetype file_size; do
     # Strip surrounding quotes from CSV fields
     att_id="${att_id//\"/}"
     store_fname="${store_fname//\"/}"
@@ -96,26 +101,33 @@ tail -n +2 "$CSV_FILE" | while IFS=',' read -r att_id store_fname res_model res_
     mimetype="${mimetype//\"/}"
     file_size="${file_size//\"/}"
 
-    if [[ -z "$store_fname" || -z "$att_id" ]]; then
+    # Strict validation — never interpolate untrusted values into SQL.
+    if [[ ! "$att_id" =~ ^[0-9]+$ ]]; then
+        echo "[SKIP] invalid attachment id: $att_id"
+        SKIPPED=$((SKIPPED+1))
         continue
     fi
+    if [[ ! "$store_fname" =~ ^[a-f0-9]{2}/[a-f0-9]+$ ]]; then
+        echo "[SKIP] id=$att_id — unexpected store_fname format: $store_fname"
+        SKIPPED=$((SKIPPED+1))
+        continue
+    fi
+    if [[ ! "$file_size" =~ ^[0-9]+$ ]]; then
+        file_size=0
+    fi
 
-    # Build local filestore path
     LOCAL_PATH="$FILESTORE_ROOT/$store_fname"
 
-    # Check file exists in container
     if ! docker exec "$ODOO_CONTAINER" test -f "$LOCAL_PATH" 2>/dev/null; then
         echo "[SKIP] id=$att_id '$att_name' — filestore file not found: $store_fname"
         SKIPPED=$((SKIPPED+1))
         continue
     fi
 
-    # Build blob name
-    MODEL_SLUG="${res_model//./_}"
-    SAFE_NAME="${att_name//\//_}"
-    BLOB_NAME="attachments/${MODEL_SLUG}/${res_id}/${att_id}_${SAFE_NAME}"
+    # Match runtime content-addressed naming (attachments/{checksum[:2]}/{checksum}).
+    BLOB_NAME="attachments/${store_fname}"
+    AZURE_STORE_FNAME="azure:${BLOB_NAME}"
 
-    # Check if already in blob
     EXISTS=$(az storage blob exists \
         --account-name "$AZURE_STORAGE_ACCOUNT" \
         --account-key "$AZURE_STORAGE_KEY" \
@@ -126,9 +138,12 @@ tail -n +2 "$CSV_FILE" | while IFS=',' read -r att_id store_fname res_model res_
     if [[ "$EXISTS" == "true" ]]; then
         echo "[SKIP] id=$att_id '$att_name' already in blob"
         if [[ "$DRY_RUN" == "false" ]]; then
-            # Ensure DB is updated even if blob exists from a previous partial run
             docker exec "$DB_CONTAINER" psql -U odoo -d security \
-                -c "UPDATE ir_attachment SET store_fname='azure:$BLOB_NAME' WHERE id=$att_id AND store_fname='$store_fname';" \
+                -v ON_ERROR_STOP=1 \
+                -v att_id="$att_id" \
+                -v new_fname="$AZURE_STORE_FNAME" \
+                -v old_fname="$store_fname" \
+                -c "UPDATE ir_attachment SET store_fname = :'new_fname' WHERE id = :'att_id'::integer AND store_fname = :'old_fname';" \
                 >/dev/null 2>&1 || true
         fi
         SKIPPED=$((SKIPPED+1))
@@ -143,7 +158,6 @@ tail -n +2 "$CSV_FILE" | while IFS=',' read -r att_id store_fname res_model res_
         continue
     fi
 
-    # Copy file out of the container to a temp location azureuser can read
     TMPFILE=$(mktemp /tmp/att_upload.XXXXXX)
     if ! docker cp "$ODOO_CONTAINER:$LOCAL_PATH" "$TMPFILE" 2>/dev/null; then
         echo "  [ERROR] Cannot copy file from container" >&2
@@ -152,23 +166,24 @@ tail -n +2 "$CSV_FILE" | while IFS=',' read -r att_id store_fname res_model res_
         continue
     fi
 
-    # Upload to Azure Blob
     if az storage blob upload \
         --account-name "$AZURE_STORAGE_ACCOUNT" \
         --account-key "$AZURE_STORAGE_KEY" \
         --container-name "$CONTAINER" \
         --name "$BLOB_NAME" \
         --file "$TMPFILE" \
-        --content-type "$mimetype" \
+        --content-type "${mimetype:-application/octet-stream}" \
         --overwrite false \
         --output none 2>/dev/null; then
 
-        # Update DB store_fname
         docker exec "$DB_CONTAINER" psql -U odoo -d security \
-            -c "UPDATE ir_attachment SET store_fname='azure:$BLOB_NAME' WHERE id=$att_id AND store_fname='$store_fname';" \
+            -v ON_ERROR_STOP=1 \
+            -v att_id="$att_id" \
+            -v new_fname="$AZURE_STORE_FNAME" \
+            -v old_fname="$store_fname" \
+            -c "UPDATE ir_attachment SET store_fname = :'new_fname' WHERE id = :'att_id'::integer AND store_fname = :'old_fname';" \
             >/dev/null 2>&1
 
-        # Remove local filestore copy
         docker exec "$ODOO_CONTAINER" rm -f "$LOCAL_PATH" 2>/dev/null || true
 
         MIGRATED=$((MIGRATED+1))
@@ -179,7 +194,7 @@ tail -n +2 "$CSV_FILE" | while IFS=',' read -r att_id store_fname res_model res_
         FAILED=$((FAILED+1))
     fi
     rm -f "$TMPFILE"
-done
+done < <(tail -n +2 "$CSV_FILE")
 
 echo ""
 echo "=== Migration complete ==="

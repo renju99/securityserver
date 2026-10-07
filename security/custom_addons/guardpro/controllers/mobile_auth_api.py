@@ -7,6 +7,8 @@ import logging
 from odoo import http
 from odoo.http import request
 
+from ..common.rate_limiter import RateLimiter
+
 _logger = logging.getLogger(__name__)
 
 
@@ -19,6 +21,35 @@ class GuardLinkMobileAuthAPI(http.Controller):
             headers=[('Content-Type', 'application/json')],
             status=status,
         )
+
+    def _client_rate_key(self, login=None):
+        """Build a rate-limit key from remote IP (+ optional login)."""
+        remote = (
+            request.httprequest.environ.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip()
+            or request.httprequest.remote_addr
+            or 'unknown'
+        )
+        if login:
+            return 'mobile_auth:%s:%s' % (remote, login.lower())
+        return 'mobile_auth:%s' % remote
+
+    def _check_auth_rate_limit(self, endpoint, login=None, max_requests=10, window_seconds=60):
+        """IP(+login)-based rate limit for unauthenticated auth endpoints."""
+        key_user = self._client_rate_key(login)
+        allowed, retry_after, message = RateLimiter.check_rate_limit(
+            key_user, endpoint, max_requests=max_requests, window_seconds=window_seconds
+        )
+        if not allowed:
+            return self._json_response(
+                {
+                    'success': False,
+                    'error': message,
+                    'error_code': 'RATE_LIMIT_EXCEEDED',
+                    'retry_after': retry_after,
+                },
+                status=429,
+            )
+        return None
 
     def _authenticate_login(self, login, password):
         """Authenticate against current DB and return uid or False."""
@@ -75,6 +106,13 @@ class GuardLinkMobileAuthAPI(http.Controller):
                 status=400,
             )
 
+        # Throttle credential stuffing: 5 attempts / minute per IP+login.
+        limited = self._check_auth_rate_limit(
+            'mobile_login', login=login, max_requests=5, window_seconds=60
+        )
+        if limited:
+            return limited
+
         uid = self._authenticate_login(login, password)
         if not uid:
             return self._json_response({'success': False, 'error': 'Invalid credentials'}, status=401)
@@ -122,19 +160,19 @@ class GuardLinkMobileAuthAPI(http.Controller):
         if not refresh_token:
             return self._json_response({'success': False, 'error': 'refresh_token is required'}, status=400)
 
-        token_model = request.env['guardpro.mobile.auth.token']
-        refresh_row = token_model._validate_raw_token(refresh_token, token_kind='refresh')
-        if not refresh_row:
-            return self._json_response({'success': False, 'error': 'Invalid or expired refresh token'}, status=401)
-
-        user = refresh_row.user_id
-        # Revoke entire old session and issue a fresh pair (rotating refresh token).
-        token_model._revoke_session(refresh_row.session_uuid)
-        token_pair = token_model._issue_pair(
-            user,
-            device_id=refresh_row.device_id,
-            device_name=refresh_row.device_name,
+        limited = self._check_auth_rate_limit(
+            'mobile_refresh', max_requests=30, window_seconds=60
         )
+        if limited:
+            return limited
+
+        token_model = request.env['guardpro.mobile.auth.token']
+        token_pair = token_model._rotate_refresh_token(refresh_token)
+        if not token_pair:
+            return self._json_response(
+                {'success': False, 'error': 'Invalid or expired refresh token'},
+                status=401,
+            )
         return self._json_response({
             'success': True,
             'access_token': token_pair['access_token'],

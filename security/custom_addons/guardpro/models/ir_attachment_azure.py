@@ -206,13 +206,17 @@ class IrAttachmentAzure(models.Model):
         client, container = _get_blob_client()
         if client is None:
             _logger.error('GuardLink attach: cannot read blob %s — SDK not configured', blob_name)
-            return b''
+            raise FileNotFoundError(
+                'Azure Blob storage is not configured; cannot read %s' % blob_name
+            )
         try:
             data = client.get_blob_client(container=container, blob=blob_name).download_blob().readall()
             return bytes(data)
         except Exception as exc:
             _logger.error('GuardLink attach: blob read failed for %s: %s', blob_name, exc)
-            return b''
+            raise FileNotFoundError(
+                'Azure Blob read failed for %s: %s' % (blob_name, exc)
+            ) from exc
 
     def _file_delete(self, fname):
         """Delete from Azure Blob when store_fname starts with 'azure:'."""

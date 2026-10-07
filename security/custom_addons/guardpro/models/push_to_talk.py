@@ -589,8 +589,25 @@ class PushToTalkMessage(models.Model):
             with open(chunk_path, mode) as tmp_file:
                 tmp_file.write(chunk_binary)
 
-            received = set(self._parse_received_indices())
-            received.add(index)
+            # Final/replace blob is a complete recording — drop prior fragment
+            # files so finalize_stream_audio does not concatenate and corrupt audio.
+            if replace:
+                for old_i in self._parse_received_indices():
+                    if old_i == index:
+                        continue
+                    old_path = self._get_chunk_temp_path(old_i)
+                    try:
+                        if os.path.exists(old_path):
+                            os.remove(old_path)
+                    except OSError as err:
+                        _logger.warning(
+                            'Failed to remove superseded PTT chunk %s for message %s: %s',
+                            old_i, self.id, err,
+                        )
+                received = {index}
+            else:
+                received = set(self._parse_received_indices())
+                received.add(index)
 
             next_expected = max(expected_index, index + 1)
             self.write({

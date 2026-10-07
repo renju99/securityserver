@@ -258,7 +258,19 @@ class PushToTalkAPI(http.Controller):
         csrf=False,
     )
     def mark_message_played_http(self, message_id, **kwargs):
-        """HTTP mark-played for the native Android player (session cookie)."""
+        """HTTP mark-played for the native Android player (session cookie).
+
+        GET is kept for current GuardLink Android builds, but rejected unless
+        the User-Agent identifies the native app — blocks CSRF via <img>/<a>.
+        """
+        if request.httprequest.method == 'GET':
+            ua = request.httprequest.headers.get('User-Agent', '')
+            if 'GuardLink-App' not in ua:
+                return request.make_response(
+                    json.dumps({'success': False, 'error': 'Method not allowed'}),
+                    headers=[('Content-Type', 'application/json')],
+                    status=405,
+                )
         result = self.mark_message_played(message_id)
         return request.make_response(
             json.dumps(result),
@@ -416,7 +428,11 @@ class PushToTalkAPI(http.Controller):
 
             messages_list = []
             for msg in messages:
-                ready = bool(msg.audio_data) and not msg.is_streaming
+                # Prefer blob/size flags — reading audio_data Binary loads full payload.
+                ready = (
+                    not msg.is_streaming
+                    and bool(msg.audio_blob_name or msg.file_size or msg.audio_data)
+                )
                 messages_list.append({
                     'id': msg.id,
                     'sender_guard_id': msg.sender_guard_id.id if msg.sender_guard_id else None,
@@ -646,7 +662,11 @@ class PushToTalkAPI(http.Controller):
         """Lightweight connectivity and permission check for PTT clients."""
         try:
             can_talk = self._ptt_can_talk()
-            channels = self._ptt_channels_for_user() if can_talk else self.env['push.to.talk.channel']
+            channels = (
+                self._ptt_channels_for_user()
+                if can_talk
+                else request.env['push.to.talk.channel']
+            )
             return {
                 'success': True,
                 'can_talk': can_talk,
@@ -800,6 +820,12 @@ class PushToTalkAPI(http.Controller):
                 if not channel.exists() or not self._ptt_user_can_use_channel(channel):
                     return {'success': False, 'error': 'Access denied'}
                 domain.append(('channel_id', '=', channel_id))
+            else:
+                # Never leak talkers from channels the caller cannot access.
+                allowed = self._ptt_channels_for_user()
+                if not allowed:
+                    return {'success': True, 'guards': [], 'total': 0}
+                domain.append(('channel_id', 'in', allowed.ids))
 
             messages = request.env['push.to.talk.message'].sudo().search(domain)
             seen = set()

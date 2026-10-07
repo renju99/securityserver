@@ -124,10 +124,31 @@ class GuardHandover(models.Model):
                     'Handing over and taking over guards must be different.'
                 ))
 
+    def _current_guard(self):
+        """Return the guard.profile for the current user, if any."""
+        return self.env['guard.profile'].search(
+            [('user_id', '=', self.env.user.id)], limit=1
+        )
+
+    def _is_handover_manager(self):
+        """Supervisors/admins may act on any handover."""
+        user = self.env.user
+        return (
+            user.has_group('base.group_system')
+            or user.has_group('guardpro.group_guardpro_manager')
+            or user.has_group('guardpro.group_guardpro_supervisor')
+        )
+
     def action_submit(self):
+        guard = self._current_guard()
         for rec in self:
             if rec.state != 'draft':
                 raise UserError(_('Only draft handovers can be submitted.'))
+            if (
+                not self._is_handover_manager()
+                and (not guard or guard.id != rec.from_guard_id.id)
+            ):
+                raise UserError(_('Only the outgoing guard can submit this handover.'))
             rec.write({
                 'state': 'pending',
                 'submitted_at': fields.Datetime.now(),
@@ -138,9 +159,15 @@ class GuardHandover(models.Model):
         return True
 
     def action_accept(self):
+        guard = self._current_guard()
         for rec in self:
             if rec.state != 'pending':
                 raise UserError(_('Only handovers awaiting takeover can be accepted.'))
+            if (
+                not self._is_handover_manager()
+                and (not guard or guard.id != rec.to_guard_id.id)
+            ):
+                raise UserError(_('Only the incoming guard can accept this handover.'))
             rec.write({
                 'state': 'accepted',
                 'accepted_at': fields.Datetime.now(),
@@ -151,14 +178,22 @@ class GuardHandover(models.Model):
         return True
 
     def action_cancel(self):
+        guard = self._current_guard()
         for rec in self:
             if rec.state in ('accepted', 'cancelled'):
                 raise UserError(_('This handover can no longer be cancelled.'))
+            if (
+                not self._is_handover_manager()
+                and (not guard or guard.id not in (rec.from_guard_id.id, rec.to_guard_id.id))
+            ):
+                raise UserError(_('You are not allowed to cancel this handover.'))
             rec.write({'state': 'cancelled'})
         return True
 
     def action_reset_draft(self):
         for rec in self:
+            if not self._is_handover_manager():
+                raise UserError(_('Only supervisors can reset a handover to draft.'))
             if rec.state not in ('cancelled', 'pending'):
                 raise UserError(_('Only pending or cancelled handovers can be reset.'))
             rec.write({

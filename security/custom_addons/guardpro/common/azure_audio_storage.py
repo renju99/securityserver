@@ -88,7 +88,12 @@ def download_audio(blob_name):
     try:
         blob = client.get_blob_client(container=_CONTAINER, blob=blob_name)
         data = blob.download_blob()
-        content_type = data.properties.get('content_settings', {}).get('content_type', 'audio/webm')
+        # BlobProperties is not a dict — use attribute access.
+        props = getattr(data, 'properties', None)
+        content_settings = getattr(props, 'content_settings', None) if props else None
+        content_type = (
+            getattr(content_settings, 'content_type', None) if content_settings else None
+        ) or 'audio/webm'
         return data.readall(), content_type
     except Exception as exc:
         _logger.error('GuardLink PTT: blob download failed for %s: %s', blob_name, exc)

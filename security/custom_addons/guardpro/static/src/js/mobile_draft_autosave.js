@@ -122,7 +122,8 @@
     function isExcludedField(field) {
         if (!field.name) return true;
         const type = (field.type || "").toLowerCase();
-        if (type === "password" || type === "file" || type === "submit" || type === "reset" || type === "button" || type === "image") return true;
+        // Files are handled separately in collectFieldValues (offline evidence).
+        if (type === "password" || type === "submit" || type === "reset" || type === "button" || type === "image") return true;
         if (field.name === "csrf_token") return true;
         if (field.disabled) return true;
         return false;
@@ -133,20 +134,9 @@
         const files = [];
         const fields = Array.from(form.querySelectorAll("input, textarea, select"));
         for (const field of fields) {
-            if (isExcludedField(field)) continue;
             const type = (field.type || "").toLowerCase();
-            if (field.tagName === "SELECT" && field.multiple) {
-                values[field.name] = Array.from(field.selectedOptions).map((o) => o.value);
-            } else if (type === "checkbox" || type === "radio") {
-                if (field.checked) {
-                    if (values[field.name]) {
-                        if (!Array.isArray(values[field.name])) values[field.name] = [values[field.name]];
-                        values[field.name].push(field.value);
-                    } else {
-                        values[field.name] = field.value;
-                    }
-                }
-            } else if (type === "file") {
+            if (type === "file") {
+                if (!field.name || field.disabled) continue;
                 // Store files as Blobs for later replay
                 for (let i = 0; i < field.files.length; i++) {
                     const file = field.files[i];
@@ -157,6 +147,20 @@
                         type: file.type,
                         buffer: buffer
                     });
+                }
+                continue;
+            }
+            if (isExcludedField(field)) continue;
+            if (field.tagName === "SELECT" && field.multiple) {
+                values[field.name] = Array.from(field.selectedOptions).map((o) => o.value);
+            } else if (type === "checkbox" || type === "radio") {
+                if (field.checked) {
+                    if (values[field.name]) {
+                        if (!Array.isArray(values[field.name])) values[field.name] = [values[field.name]];
+                        values[field.name].push(field.value);
+                    } else {
+                        values[field.name] = field.value;
+                    }
                 }
             } else {
                 values[field.name] = field.value;
